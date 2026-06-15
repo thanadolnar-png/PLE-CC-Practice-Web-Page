@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>คลังเคสข้อสอบ OSPE | RxCU 84-85</title>
+  <link rel="stylesheet" href="style.css">
+  
+  <style>
+    /* แบนเนอร์แสดงสถานะของ API ย่อย */
+    .api-banner {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      width: 100%;
+      text-align: center;
+      font-family: var(--font-title);
+    }
+    .api-banner.connected {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      border-bottom: 1px solid var(--success);
+    }
+    .api-banner.offline {
+      background-color: rgba(249, 115, 22, 0.15);
+      color: var(--warning);
+      border-bottom: 1px solid var(--warning);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- API Connection Status Banner -->
+  <div id="api-status-banner" class="api-banner">
+    <span class="banner-icon">🌐</span>
+    <span class="banner-text">กำลังตรวจสอบสถานะการเชื่อมต่อ...</span>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="main-nav">
+    <div class="container">
+      <a href="index.html" class="logo" id="nav-logo">
+        <div class="logo-icon">🥼</div>
+        <span>RxCU OSPE Hub</span>
+      </a>
+      <ul class="nav-links" id="nav-menu">
+        <li><a href="index.html" class="nav-link" id="nav-home">หน้าแรก</a></li>
+        <li><a href="case-library.html" class="nav-link active" id="nav-library">คลังเคสสอบ</a></li>
+        <li><a href="exam-simulation.html" class="nav-link" id="nav-sim">ระบบซ้อมสอบ 16 สถานี</a></li>
+        <li>
+          <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Dark/Light Mode" title="เปลี่ยนโหมดสี">
+            <!-- Icon filled dynamically by JS -->
+          </button>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <header style="background-color: var(--surface); border-bottom: 1px solid var(--border); padding: 2.5rem 0; margin-bottom: 2rem;">
+    <div class="container">
+      <h1 style="font-size: 2rem; margin-bottom: 0.5rem; font-family: var(--font-title);" id="library-title">คลังเคสข้อสอบวิชาชีพ (OSPE Cases)</h1>
+      <p style="color: var(--text-secondary);" id="library-subtitle">ค้นหา ติ๊ก Checklist และอ่านเฉลยเคสจาก Google Docs ทั้งหมดแยกตามหมวดหมู่</p>
+    </div>
+  </header>
+
+  <!-- Global Loader -->
+  <div id="global-loader" class="loader-container">
+    <div class="loader-spinner"></div>
+    <p style="font-family: var(--font-title); font-weight: 500; color: var(--text-secondary);">กำลังดาวน์โหลดคลังเคสสอบ...</p>
+  </div>
+
+  <!-- Main Content Area -->
+  <main class="main-section" style="padding-top: 0;" id="library-content">
+    <div class="container">
+      
+      <!-- Filter Bar -->
+      <section class="filter-bar" id="filters-section">
+        <!-- Search bar -->
+        <div class="search-input-wrapper">
+          <svg class="search-icon-svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input type="text" id="search-case" class="search-input" placeholder="ค้นหาด้วยชื่อเคส, ตัวยา, ชื่อโรค..." aria-label="Search cases">
+        </div>
+        
+        <!-- Select filters -->
+        <div class="filter-selects">
+          <!-- Category Filter -->
+          <select id="filter-category" class="select-filter" aria-label="Filter by category">
+            <option value="All">ทุกหมวด (All Category)</option>
+            <option value="Clinic">Clinic (คลินิก)</option>
+            <option value="Product (ผลิต)">Product (ผลิต)</option>
+            <option value="SAP (สังคมฯ)">SAP (สังคมศาสตร์)</option>
+          </select>
+          
+          <!-- Course Group Filter -->
+          <select id="filter-course-group" class="select-filter" aria-label="Filter by course group">
+            <option value="All">ทุกกลุ่มวิชา (All Course Groups)</option>
+            <!-- Filled dynamically by JS -->
+          </select>
+          
+          <!-- Difficulty Filter -->
+          <select id="filter-difficulty" class="select-filter" aria-label="Filter by difficulty">
+            <option value="All">ทุกระดับความยาก</option>
+            <option value="1">ระดับ 1 (ง่าย)</option>
+            <option value="2">ระดับ 2 (ปานกลาง)</option>
+            <option value="3">ระดับ 3 (ท้าทาย)</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Case Cards Grid -->
+      <section class="case-grid" id="case-list-container">
+        <!-- Rendered dynamically by JS -->
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" id="main-footer">
+    <div class="container">
+      <p>© 2026 คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม ปีการศึกษา 2569 | ฝ่ายวิชาการ RxCU 84 & 85</p>
+    </div>
+  </footer>
+
+  <script src="case-data-offline.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // ดึง URL Parameter ถ้าต้องการฟิลเตอร์หมวดมาจากหน้าแรก
+    document.addEventListener('DOMContentLoaded', () => {
+      const catParam = getUrlParam('cat');
+      if (catParam) {
+        const selectCat = document.getElementById('filter-category');
+        if (selectCat) {
+          selectCat.value = catParam;
+          AppState.activeFilters.category = catParam;
+          // รอการโหลดข้อมูลเคสผ่าน app.js และทำการฟิลเตอร์
+          setTimeout(() => {
+            applyFilters();
+            renderCaseList();
+          }, 350);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

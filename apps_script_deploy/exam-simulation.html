@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU 84-85</title>
+  
+  <!-- Inlined style.css content -->
+  <style>
+    <?!= HtmlService.createHtmlOutputFromFile('style.css').getContent(); ?>
+    
+    .setup-screen { display: block; }
+    .exam-screen { display: none; }
+    .results-screen { display: none; }
+    
+    .exam-header-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.75rem;
+    }
+    .current-station-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: var(--font-title);
+    }
+    
+    .station-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: white;
+      font-family: var(--font-title);
+    }
+    .station-badge.clinic { background-color: var(--clinic); }
+    .station-badge.product { background-color: var(--product); }
+    .station-badge.sap { background-color: var(--sap); }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="main-nav">
+    <div class="container">
+      <a href="<?= webAppUrl ?>" class="logo" id="nav-logo">
+        <div class="logo-icon">🥼</div>
+        <span>RxCU OSPE Hub</span>
+      </a>
+      <ul class="nav-links" id="nav-menu">
+        <li><a href="<?= webAppUrl ?>" class="nav-link" id="nav-home">หน้าแรก</a></li>
+        <li><a href="<?= webAppUrl ?>?page=case-library" class="nav-link" id="nav-library">คลังเคสสอบ</a></li>
+        <li><a href="<?= webAppUrl ?>?page=exam-simulation" class="nav-link active" id="nav-sim">ระบบซ้อมสอบ 16 สถานี</a></li>
+        <li>
+          <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Dark/Light Mode" title="เปลี่ยนโหมดสี">
+            <!-- Icon filled dynamically by JS -->
+          </button>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Global Loader -->
+  <div id="global-loader" class="loader-container" style="display: none;">
+    <div class="loader-spinner"></div>
+    <p style="font-family: var(--font-title); font-weight: 500; color: var(--text-secondary);">กำลังจัดเตรียมสุ่มสถานีสอบ...</p>
+  </div>
+
+  <!-- Main Container -->
+  <main class="main-section" style="padding: 2rem 0;">
+    <div class="container">
+      
+      <!-- 1. SETUP SCREEN -->
+      <section class="setup-screen" id="exam-setup-view">
+        <div class="setup-panel card">
+          <div class="card-icon" style="background-color: var(--primary-light); color: var(--primary); margin: 0 auto 1.5rem auto;">🎯</div>
+          <h2 style="text-align: center; margin-bottom: 0.5rem; font-family: var(--font-title);">ตั้งค่าจำลองสอบ OSPE 16 สถานี</h2>
+          <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">
+            กำหนดสัดส่วนสถานีตามสภาวิชาชีพ (เกณฑ์ผ่าน 80% ต่อสถานี) สุ่มข้อสอบจากฐานข้อมูลสด
+          </p>
+          
+          <form id="setup-form" onsubmit="event.preventDefault(); startExamSimulation();">
+            
+            <div class="form-group">
+              <label class="form-label" for="stations-count">จำนวนสถานีสอบทั้งหมด</label>
+              <select id="stations-count" class="select-filter" style="width: 100%;" onchange="adjustProportions(this.value)">
+                <option value="16">16 สถานี (มาตรฐานสภาเภสัชกรรม)</option>
+                <option value="10">10 สถานี (แบบย่อ)</option>
+                <option value="5">5 สถานี (ซ้อมด่วน)</option>
+                <option value="3">3 สถานี (ซ้อมเฉพาะแบบทดสอบ)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">สัดส่วนหมวดวิชา (Proportions)</label>
+              <div class="slider-group">
+                <div class="slider-row">
+                  <span style="color: var(--clinic);">Clinic</span>
+                  <input type="range" id="slider-clinic" min="0" max="16" value="8" oninput="updateSlidersFrom('clinic')">
+                  <span class="slider-val" id="val-clinic">8</span>
+                </div>
+                <div class="slider-row">
+                  <span style="color: var(--product);">Product</span>
+                  <input type="range" id="slider-product" min="0" max="16" value="6" oninput="updateSlidersFrom('product')">
+                  <span class="slider-val" id="val-product">6</span>
+                </div>
+                <div class="slider-row">
+                  <span style="color: var(--sap);">SAP</span>
+                  <input type="range" id="slider-sap" min="0" max="16" value="2" oninput="updateSlidersFrom('sap')">
+                  <span class="slider-val" id="val-sap">2</span>
+                </div>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; text-align: center;" id="proportion-sum-text">
+                สัดส่วนที่แนะนำ: Clinic 8 : Product 6 : SAP 2 (รวม 16 สถานี)
+              </p>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+              🎲 สุ่มสถานีและเริ่มสอบทันที
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- 2. EXAM RUNNING SCREEN -->
+      <section class="exam-screen" id="exam-running-view">
+        <div class="exam-layout">
+          
+          <div class="exam-content-pane">
+            <div class="exam-header-meta">
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span class="station-badge" id="exam-station-badge">STATION 1</span>
+                <span class="current-station-title" id="exam-case-title">โหลดเคส...</span>
+              </div>
+              <span id="exam-case-id" style="font-family: var(--font-mono); font-weight: 700; color: var(--text-muted);">OSPE-CL001</span>
+            </div>
+
+            <h3 class="viewer-section-title" style="margin-top: 0;">โจทย์ / สถานการณ์ (Scenario)</h3>
+            <div id="exam-scenario-content" style="margin-bottom: 2rem;"></div>
+
+            <h3 class="viewer-section-title">ข้อมูลผู้ป่วย (Patient Info)</h3>
+            <div id="exam-patient-content"></div>
+          </div>
+
+          <div class="exam-sidebar-pane">
+            <div class="timer-card">
+              <div class="timer-display" id="exam-timer">04:00</div>
+              <div class="timer-controls">
+                <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" id="timer-toggle-btn" onclick="toggleTimer()">⏸️ พักตัวจับเวลา</button>
+                <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="resetTimer()">🔄 เริ่มต้นใหม่</button>
+              </div>
+            </div>
+
+            <div class="progress-card" style="margin-bottom: 0; padding: 1rem;">
+              <div class="progress-header" style="font-size: 0.85rem; margin-bottom: 0.5rem;">
+                <span>คะแนนสถานีปัจจุบัน</span>
+                <span id="exam-pct">0%</span>
+              </div>
+              <div class="progress-bar-bg" style="height: 8px; margin-bottom: 0.5rem;">
+                <div id="exam-bar-fill" class="progress-bar-fill"></div>
+              </div>
+              <div style="font-size: 0.8rem; display: flex; justify-content: space-between;">
+                <span>คะแนน: <strong id="exam-score">0 / 0</strong></span>
+                <span>เกณฑ์ผ่าน 80%</span>
+              </div>
+            </div>
+
+            <div class="minimap-card">
+              <h4 class="minimap-title" id="minimap-progress-title">แผนที่สถานี (0/16)</h4>
+              <div class="minimap-grid" id="exam-minimap-grid"></div>
+            </div>
+
+            <div class="exam-nav" style="margin-top: 0; padding-top: 0.5rem; border-top: none;">
+              <button class="btn btn-secondary" onclick="prevStation()" id="btn-prev-station">← ก่อนหน้า</button>
+              <button class="btn btn-primary btn-clinic" onclick="nextStation()" id="btn-next-station">ถัดไป →</button>
+            </div>
+            
+            <button class="btn btn-danger" style="width: 100%; font-size: 0.9rem; padding: 0.5rem;" onclick="finishExamSimulation()">
+              🏁 ส่งกระดาษคำตอบ / สิ้นสุดการสอบ
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. RESULTS ANALYSIS SCREEN -->
+      <section class="results-screen" id="exam-results-view">
+        <div class="results-card card">
+          <h2 style="text-align: center; margin-bottom: 1.5rem; font-family: var(--font-title);">รายงานสรุปผลการซ้อมสอบ OSPE</h2>
+          
+          <div class="results-score-display">
+            <div class="results-score-circle">
+              <span class="results-score-num" id="results-score-val">0/0</span>
+              <span class="results-score-pct" id="results-score-pct">0%</span>
+            </div>
+            <div class="results-status" id="results-status-text">FAILED</div>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;" id="results-summary-desc">
+              ผ่านการประเมิน 0 จาก 16 สถานี (เกณฑ์ผ่านแต่ละสถานีต้องได้ >= 80%)
+            </p>
+          </div>
+
+          <h3 class="viewer-section-title" style="border-left-color: var(--primary);">สรุปผลคะแนนรายสถานี</h3>
+          <div class="table-responsive">
+            <table class="breakdown-table">
+              <thead>
+                <tr>
+                  <th>สถานี</th>
+                  <th>ชื่อเคส</th>
+                  <th>หมวดวิชา</th>
+                  <th>คะแนนที่ได้</th>
+                  <th>ร้อยละ (%)</th>
+                  <th>ผลประเมิน</th>
+                </tr>
+              </thead>
+              <tbody id="results-stations-tbody"></tbody>
+            </table>
+          </div>
+
+          <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button class="btn btn-primary" style="flex: 1;" onclick="restartSetup()">
+              🔄 ทำการซ้อมสอบใหม่อีกครั้ง
+            </button>
+            <a href="<?= webAppUrl ?>" class="btn btn-secondary" style="flex: 1; text-align: center;">
+              🏠 กลับหน้าแรก Hub
+            </a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" id="main-footer">
+    <div class="container">
+      <p>© 2026 คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม ปีการศึกษา 2569 | ฝ่ายวิชาการ RxCU 84 & 85</p>
+    </div>
+  </footer>
+
+  <!-- Inlined scripts -->
+  <script>
+    <?!= HtmlService.createHtmlOutputFromFile('case-data-offline.js').getContent(); ?>
+    
+    const currentApiUrl = "<?= webAppUrl ?>";
+    const API_URL_KEY = 'ple_cc_api_url';
+    
+    <?!= HtmlService.createHtmlOutputFromFile('app.js').getContent(); ?>
+    
+    // Inject the inline simulation logic (written in previous exam-simulation.html)
+    // but modified to link correctly inside Google Apps Script Web App
+  </script>
+  
+  <script>
+    // Copy the simulation controller scripts
+    const SimState = {
+      totalStations: 16,
+      clinic: 8,
+      product: 6,
+      sap: 2,
+      stations: [],
+      currentIdx: 0,
+      studentScores: {},
+      timerValue: 240,
+      timerInterval: null,
+      timerRunning: false
+    };
+
+    function adjustProportions(totalVal) {
+      const total = parseInt(totalVal);
+      SimState.totalStations = total;
+      let clinic = 8, product = 6, sap = 2;
+      if (total === 10) {
+        clinic = 5; product = 4; sap = 1;
+      } else if (total === 5) {
+        clinic = 3; product = 1; sap = 1;
+      } else if (total === 3) {
+        clinic = 1; product = 1; sap = 1;
+      }
+      document.getElementById('slider-clinic').value = clinic;
+      document.getElementById('slider-product').value = product;
+      document.getElementById('slider-sap').value = sap;
+      document.getElementById('val-clinic').textContent = clinic;
+      document.getElementById('val-product').textContent = product;
+      document.getElementById('val-sap').textContent = sap;
+      updateSlidersMax(total);
+      updateProportionSumText();
+    }
+
+    function updateSlidersMax(max) {
+      ['clinic', 'product', 'sap'].forEach(id => {
+        document.getElementById(`slider-${id}`).max = max;
+      });
+    }
+
+    function updateSlidersFrom(changedSource) {
+      const total = SimState.totalStations;
+      let clinic = parseInt(document.getElementById('slider-clinic').value);
+      let product = parseInt(document.getElementById('slider-product').value);
+      let sap = parseInt(document.getElementById('slider-sap').value);
+      
+      let sum = clinic + product + sap;
+      if (sum !== total) {
+        if (changedSource === 'clinic') {
+          const remainder = total - clinic;
+          if (remainder >= 0) {
+            product = Math.round(remainder * 0.75);
+            sap = remainder - product;
+          } else { clinic = total; product = 0; sap = 0; }
+        } else if (changedSource === 'product') {
+          const remainder = total - product;
+          if (remainder >= 0) {
+            clinic = Math.round(remainder * 0.8);
+            sap = remainder - clinic;
+          } else { product = total; clinic = 0; sap = 0; }
+        } else {
+          const remainder = total - sap;
+          if (remainder >= 0) {
+            clinic = Math.round(remainder * 0.55);
+            product = remainder - clinic;
+          } else { sap = total; clinic = 0; product = 0; }
+        }
+      }
+
+      document.getElementById('slider-clinic').value = clinic;
+      document.getElementById('slider-product').value = product;
+      document.getElementById('slider-sap').value = sap;
+      document.getElementById('val-clinic').textContent = clinic;
+      document.getElementById('val-product').textContent = product;
+      document.getElementById('val-sap').textContent = sap;
+      updateProportionSumText();
+    }
+
+    function updateProportionSumText() {
+      const clinic = document.getElementById('slider-clinic').value;
+      const product = document.getElementById('slider-product').value;
+      const sap = document.getElementById('slider-sap').value;
+      document.getElementById('proportion-sum-text').textContent = 
+        `สัดส่วนจำลอง: Clinic ${clinic} : Product ${product} : SAP ${sap} (รวม ${SimState.totalStations} สถานี)`;
+    }
+
+    async function startExamSimulation() {
+      showGlobalLoader(true);
+      const clinic = parseInt(document.getElementById('slider-clinic').value);
+      const product = parseInt(document.getElementById('slider-product').value);
+      const sap = parseInt(document.getElementById('slider-sap').value);
+      let examSet = null;
+      
+      if (currentApiUrl) {
+        try {
+          const res = await fetch(`${currentApiUrl}?action=getExamSet&totalStations=${SimState.totalStations}&clinicCount=${clinic}&productCount=${product}&sapCount=${sap}`);
+          const result = await res.json();
+          if (result.success && result.data && result.data.stations) {
+            examSet = result.data.stations;
+          }
+        } catch (e) {
+          console.warn('API สุ่มสอบล้มเหลว ใช้ตัวออฟไลน์:', e);
+        }
+      }
+      
+      if (!examSet) {
+        examSet = generateLocalExamSet(clinic, product, sap);
+      }
+      
+      SimState.stations = [];
+      for (let i = 0; i < examSet.length; i++) {
+        const st = examSet[i];
+        let matchedCase = AppState.cases.find(c => c.caseId === st.caseId);
+        
+        if (currentApiUrl && (!matchedCase || !matchedCase.checklist)) {
+          try {
+            const res = await fetch(`${currentApiUrl}?action=getCase&id=${st.caseId}`);
+            const result = await res.json();
+            if (result.success && result.data) { matchedCase = result.data; }
+          } catch (e) { console.error(st.caseId, e); }
+        }
+        
+        if (!matchedCase) {
+          matchedCase = AppState.cases.find(c => c.caseId === st.caseId) || AppState.cases[0];
+        }
+        
+        SimState.stations.push({
+          stationNumber: st.stationNumber,
+          case: matchedCase
+        });
+      }
+      
+      SimState.currentIdx = 0;
+      SimState.studentScores = {};
+      SimState.stations.forEach(st => {
+        SimState.studentScores[st.stationNumber] = [];
+      });
+      
+      showGlobalLoader(false);
+      document.getElementById('exam-setup-view').style.display = 'none';
+      document.getElementById('exam-running-view').style.display = 'block';
+      
+      renderStation(0);
+      startTimer();
+    }
+
+    function generateLocalExamSet(clinic, product, sap) {
+      const list = AppState.cases;
+      const pool = {
+        Clinic: shuffle(list.filter(c => c.category === 'Clinic')),
+        Product: shuffle(list.filter(c => c.category === 'Product')),
+        SAP: shuffle(list.filter(c => c.category === 'SAP'))
+      };
+      const getFromPool = (cat, count) => {
+        let items = pool[cat].slice(0, count);
+        let idx = 0;
+        while (items.length < count && pool[cat].length > 0) {
+          items.push(pool[cat][idx % pool[cat].length]);
+          idx++;
+        }
+        return items;
+      };
+      const selected = [
+        ...getFromPool('Clinic', clinic),
+        ...getFromPool('Product', product),
+        ...getFromPool('SAP', sap)
+      ];
+      const shuffled = shuffle(selected);
+      return shuffled.map((c, idx) => ({
+        stationNumber: idx + 1,
+        caseId: c.caseId,
+        title: c.title,
+        category: c.category
+      }));
+    }
+
+    function shuffle(arr) {
+      const array = [...arr];
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function startTimer() {
+      if (SimState.timerInterval) clearInterval(SimState.timerInterval);
+      SimState.timerValue = 240;
+      SimState.timerRunning = true;
+      document.getElementById('timer-toggle-btn').textContent = '⏸️ พักตัวจับเวลา';
+      updateTimerDisplay();
+      SimState.timerInterval = setInterval(() => {
+        if (!SimState.timerRunning) return;
+        SimState.timerValue--;
+        updateTimerDisplay();
+        if (SimState.timerValue <= 0) {
+          clearInterval(SimState.timerInterval);
+          alert('หมดเวลาสถานีปัจจุบัน! ขยับไปสถานีถัดไปอัตโนมัติ');
+          if (SimState.currentIdx < SimState.stations.length - 1) { nextStation(); } 
+          else { finishExamSimulation(); }
+        }
+      }, 1000);
+    }
+
+    function toggleTimer() {
+      SimState.timerRunning = !SimState.timerRunning;
+      document.getElementById('timer-toggle-btn').textContent = SimState.timerRunning ? '⏸️ พักตัวจับเวลา' : '▶️ เล่นตัวจับเวลาต่อ';
+    }
+
+    function resetTimer() {
+      SimState.timerValue = 240;
+      updateTimerDisplay();
+    }
+
+    function updateTimerDisplay() {
+      const minutes = Math.floor(SimState.timerValue / 60);
+      const seconds = SimState.timerValue % 60;
+      const displayStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      const timerEl = document.getElementById('exam-timer');
+      timerEl.textContent = displayStr;
+      timerEl.className = 'timer-display';
+      if (SimState.timerValue < 10) { timerEl.classList.add('danger'); } 
+      else if (SimState.timerValue < 60) { timerEl.classList.add('warn'); }
+    }
+
+    function renderStation(idx) {
+      SimState.currentIdx = idx;
+      const st = SimState.stations[idx];
+      const c = st.case;
+      
+      document.getElementById('exam-station-badge').textContent = `STATION ${st.stationNumber}`;
+      document.getElementById('exam-case-title').textContent = c.title;
+      document.getElementById('exam-case-id').textContent = c.caseId;
+      document.getElementById('exam-scenario-content').innerHTML = c.contentHtml || `<p>${c.scenario}</p>`;
+      document.getElementById('exam-patient-content').innerHTML = c.patientInfoHtml || '<p>ไม่มีตารางข้อมูลผู้ป่วย</p>';
+      
+      const badge = document.getElementById('exam-station-badge');
+      badge.className = 'station-badge ' + c.category.toLowerCase();
+      
+      renderExamChecklist(st.stationNumber, c);
+      renderMiniMap();
+      
+      document.getElementById('btn-prev-station').disabled = idx === 0;
+      const nextBtn = document.getElementById('btn-next-station');
+      if (idx === SimState.stations.length - 1) {
+        nextBtn.textContent = 'สิ้นสุดการสอบ 🏁';
+        nextBtn.className = 'btn btn-primary btn-danger';
+        nextBtn.onclick = finishExamSimulation;
+      } else {
+        nextBtn.textContent = 'ถัดไป →';
+        nextBtn.className = 'btn btn-primary btn-' + SimState.stations[idx+1].case.category.toLowerCase();
+        nextBtn.onclick = nextStation;
+      }
+      startTimer();
+    }
+
+    function renderExamChecklist(stationNum, c) {
+      const container = document.getElementById('exam-checklist-container') || document.querySelector('.exam-sidebar-pane .checklist-container');
+      container.innerHTML = '';
+      if (!c.checklist || c.checklist.length === 0) {
+        container.innerHTML = '<p class="empty-state">ไม่มีรายการ Checklist ในเอกสารนี้</p>';
+        return;
+      }
+      const checkedList = SimState.studentScores[stationNum] || [];
+      const groups = {};
+      c.checklist.forEach(item => {
+        const groupName = item.group || 'ทั่วไป';
+        if (!groups[groupName]) groups[groupName] = [];
+        groups[groupName].push(item);
+      });
+      
+      Object.keys(groups).forEach(groupName => {
+        const grpHdr = document.createElement('div');
+        grpHdr.className = 'checklist-group-title';
+        grpHdr.style.fontSize = '0.9rem';
+        grpHdr.textContent = `กลุ่ม: ${groupName}`;
+        container.appendChild(grpHdr);
+        
+        groups[groupName].forEach(item => {
+          const isChecked = checkedList.includes(item.id);
+          const el = document.createElement('div');
+          el.className = `checklist-item ${isChecked ? 'checked' : ''}`;
+          el.setAttribute('data-id', item.id);
+          el.setAttribute('data-score', item.score);
+          el.style.padding = '0.5rem 0.75rem';
+          el.style.gap = '0.5rem';
+          el.addEventListener('click', () => { toggleExamChecklistItem(stationNum, item.id, item.score); });
+          el.innerHTML = `
+            <div class="checkbox-custom" style="width:1.1rem; height:1.1rem;"></div>
+            <span class="checklist-item-score" style="font-size:0.75rem;">(${item.score} คะแนน)</span>
+            <span class="checklist-item-text" style="font-size:0.85rem;">${escapeHtml(item.text)}</span>
+          `;
+          container.appendChild(el);
+        });
+      });
+      updateExamProgressUI(stationNum, c);
+    }
+
+    function toggleExamChecklistItem(stationNum, itemId, itemScore) {
+      if (!SimState.studentScores[stationNum]) { SimState.studentScores[stationNum] = []; }
+      const index = SimState.studentScores[stationNum].indexOf(itemId);
+      if (index > -1) { SimState.studentScores[stationNum].splice(index, 1); } 
+      else { SimState.studentScores[stationNum].push(itemId); }
+      
+      const items = document.querySelectorAll('.checklist-item');
+      items.forEach(el => {
+        const id = el.getAttribute('data-id');
+        if (id === itemId) {
+          if (SimState.studentScores[stationNum].includes(itemId)) { el.classList.add('checked'); } 
+          else { el.classList.remove('checked'); }
+        }
+      });
+      
+      const currentCase = SimState.stations[SimState.currentIdx].case;
+      updateExamProgressUI(stationNum, currentCase);
+      renderMiniMap();
+    }
+
+    function updateExamProgressUI(stationNum, c) {
+      const checked = SimState.studentScores[stationNum] || [];
+      let score = 0, total = 0;
+      c.checklist.forEach(item => {
+        total += item.score;
+        if (checked.includes(item.id)) { score += item.score; }
+      });
+      document.getElementById('exam-score').textContent = `${score} / ${total}`;
+      if (total > 0) {
+        const pct = Math.round((score / total) * 100);
+        document.getElementById('exam-pct').textContent = `${pct}%`;
+        const fill = document.getElementById('exam-bar-fill');
+        fill.style.width = `${pct}%`;
+        if (pct >= 80) { fill.classList.add('pass'); } 
+        else { fill.classList.remove('pass'); }
+      }
+    }
+
+    function renderMiniMap() {
+      const grid = document.getElementById('exam-minimap-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      let completedCount = 0;
+      
+      SimState.stations.forEach((st, idx) => {
+        const cell = document.createElement('div');
+        cell.className = 'minimap-cell';
+        if (idx === SimState.currentIdx) { cell.classList.add('active'); }
+        const checked = SimState.studentScores[st.stationNumber] || [];
+        if (checked.length > 0) {
+          cell.classList.add('completed');
+          completedCount++;
+        }
+        cell.addEventListener('click', () => {
+          if (confirm(`ย้ายสถานีไปยังสถานีที่ ${st.stationNumber} หรือไม่?`)) { renderStation(idx); }
+        });
+        const dot = document.createElement('span');
+        dot.className = 'minimap-dot ' + st.case.category.toLowerCase();
+        cell.appendChild(dot);
+        const label = document.createElement('span');
+        label.textContent = st.stationNumber;
+        cell.appendChild(label);
+        grid.appendChild(cell);
+      });
+      document.getElementById('minimap-progress-title').textContent = 
+        `แผนที่สถานี (${completedCount}/${SimState.stations.length} ทำไปแล้ว)`;
+    }
+
+    function nextStation() {
+      if (SimState.currentIdx < SimState.stations.length - 1) { renderStation(SimState.currentIdx + 1); } 
+      else { finishExamSimulation(); }
+    }
+
+    function prevStation() {
+      if (SimState.currentIdx > 0) { renderStation(SimState.currentIdx - 1); }
+    }
+
+    function finishExamSimulation() {
+      if (SimState.timerInterval) clearInterval(SimState.timerInterval);
+      if (!confirm('คุณยืนยันที่จะส่งกระดาษคำตอบ และสิ้นสุดการจำลองสอบหรือไม่?')) {
+        startTimer();
+        return;
+      }
+      showGlobalLoader(true);
+      let totalStudentScore = 0, totalMaxScore = 0, stationsPassedCount = 0;
+      const tbody = document.getElementById('results-stations-tbody');
+      tbody.innerHTML = '';
+      
+      SimState.stations.forEach(st => {
+        const c = st.case;
+        const checked = SimState.studentScores[st.stationNumber] || [];
+        let stStudentScore = 0, stMaxScore = 0;
+        
+        c.checklist.forEach(item => {
+          stMaxScore += item.score;
+          if (checked.includes(item.id)) { stStudentScore += item.score; }
+        });
+        
+        totalStudentScore += stStudentScore;
+        totalMaxScore += stMaxScore;
+        const pct = stMaxScore > 0 ? Math.round((stStudentScore / stMaxScore) * 100) : 0;
+        const isPassed = pct >= 80;
+        if (isPassed) stationsPassedCount++;
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-family:var(--font-mono); font-weight:700;">${st.stationNumber}</td>
+          <td style="font-weight:600;"><a href="<?= webAppUrl ?>?page=case-viewer&id=${c.caseId}" target="_blank" style="color:var(--primary); text-decoration:underline;">${c.title}</a></td>
+          <td><span class="badge badge-${c.category.toLowerCase()}">${c.category}</span></td>
+          <td style="font-family:var(--font-mono);">${stStudentScore} / ${stMaxScore}</td>
+          <td style="font-family:var(--font-mono); font-weight:700; color:${isPassed ? 'var(--success)' : 'var(--danger)'};">${pct}%</td>
+          <td style="font-weight:700; color:${isPassed ? 'var(--success)' : 'var(--danger)'};">${isPassed ? '✓ ผ่าน (Pass)' : '✗ ตก (Fail)'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      
+      const totalPct = totalMaxScore > 0 ? Math.round((totalStudentScore / totalMaxScore) * 100) : 0;
+      document.getElementById('results-score-val').textContent = `${totalStudentScore} / ${totalMaxScore}`;
+      document.getElementById('results-score-pct').textContent = `${totalPct}%`;
+      const statusText = document.getElementById('results-status-text');
+      if (stationsPassedCount === SimState.stations.length) {
+        statusText.textContent = 'PASSED (ผ่านทุกสถานี) 🎉';
+        statusText.className = 'results-status passed';
+      } else {
+        statusText.textContent = 'FAILED (ยังไม่ผ่านเกณฑ์) ⚠️';
+        statusText.className = 'results-status failed';
+      }
+      document.getElementById('results-summary-desc').textContent = 
+        `ผ่านการประเมินวิชาชีพสอบผ่าน ${stationsPassedCount} จากทั้งหมด ${SimState.stations.length} สถานี (เกณฑ์ผ่านต่อสถานีคือต้องได้คะแนน 80% ขึ้นไป)`;
+      showGlobalLoader(false);
+      document.getElementById('exam-running-view').style.display = 'none';
+      document.getElementById('exam-results-view').style.display = 'block';
+    }
+
+    function restartSetup() {
+      document.getElementById('exam-results-view').style.display = 'none';
+      document.getElementById('exam-setup-view').style.display = 'block';
+    }
+  </script>
+</body>
+</html>

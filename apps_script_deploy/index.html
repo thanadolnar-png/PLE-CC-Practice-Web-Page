@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLE-CC2 OSPE Practice Hub | RxCU 84-85</title>
+  
+  <!-- Inlined style.css content -->
+  <style>
+    <?!= HtmlService.createHtmlOutputFromFile('style.css').getContent(); ?>
+    
+    /* สไตล์เฉพาะตัวสำหรับแบนเนอร์และพื้นที่ตั้งค่า API */
+    .api-banner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      width: 100%;
+      text-align: center;
+      font-family: var(--font-title);
+      background-color: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      border-bottom: 1px solid var(--success);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- API Connection Status Banner -->
+  <div id="api-status-banner" class="api-banner">
+    <span class="banner-icon">🌐</span>
+    <span class="banner-text">ระบบกำลังทำงานแบบ Online บน Google Apps Script Cloud</span>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="main-nav">
+    <div class="container">
+      <a href="<?= webAppUrl ?>" class="logo" id="nav-logo">
+        <div class="logo-icon">🥼</div>
+        <span>RxCU OSPE Hub</span>
+      </a>
+      <ul class="nav-links" id="nav-menu">
+        <li><a href="<?= webAppUrl ?>" class="nav-link active" id="nav-home">หน้าแรก</a></li>
+        <li><a href="<?= webAppUrl ?>?page=case-library" class="nav-link" id="nav-library">คลังเคสสอบ</a></li>
+        <li><a href="<?= webAppUrl ?>?page=exam-simulation" class="nav-link" id="nav-sim">ระบบซ้อมสอบ 16 สถานี</a></li>
+        <li>
+          <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Dark/Light Mode" title="เปลี่ยนโหมดสี">
+            <!-- Icon filled dynamically by JS -->
+          </button>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero" id="home-hero">
+    <div class="container">
+      <h1 class="hero-gradient-text">PLE-CC2 OSPE Practice Hub</h1>
+      <p class="hero-subtitle">ระบบจำลองฝึกทักษะวิชาชีพการซักประวัติ จ่ายยา คำแนะนำยา และตั้งตำรับ (OSPE) สำหรับการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม RxCU 84 และ 85</p>
+      
+      <!-- Stats Dashboard -->
+      <div class="stats-grid" id="stats-dashboard">
+        <div class="stat-card clinic-stat" id="stat-card-clinic">
+          <span class="stat-num" id="stat-clinic">0</span>
+          <span class="stat-label">เคส Clinic (คลินิก)</span>
+        </div>
+        <div class="stat-card product-stat" id="stat-card-product">
+          <span class="stat-num" id="stat-product">0</span>
+          <span class="stat-label">เคส Product (ผลิต)</span>
+        </div>
+        <div class="stat-card sap-stat" id="stat-card-sap">
+          <span class="stat-num" id="stat-sap">0</span>
+          <span class="stat-label">เคส SAP (สังคมฯ)</span>
+        </div>
+        <div class="stat-card total-stat" id="stat-card-total">
+          <span class="stat-num" id="stat-total">0</span>
+          <span class="stat-label">เคสรวมในระบบทั้งหมด</span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 1rem; justify-content: center;">
+        <a href="<?= webAppUrl ?>?page=exam-simulation" class="btn btn-primary" id="btn-start-sim">🎯 เริ่มต้นจำลองการสอบจริง</a>
+        <a href="<?= webAppUrl ?>?page=case-library" class="btn btn-secondary" id="btn-goto-library">📚 เปิดดูคลังเคสทั้งหมด</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Global Loader -->
+  <div id="global-loader" class="loader-container" style="display: none;">
+    <div class="loader-spinner"></div>
+    <p style="font-family: var(--font-title); font-weight: 500; color: var(--text-secondary);">กำลังดาวน์โหลดข้อมูลระบบ...</p>
+  </div>
+
+  <!-- Category Selection Section -->
+  <main class="main-section" id="category-section">
+    <div class="container">
+      <h2 style="text-align: center; font-size: 2rem; margin-bottom: 1rem; font-family: var(--font-title);">
+        ฝึกฝนตามหมวดหมู่ทักษะหลัก
+      </h2>
+      <p style="text-align: center; color: var(--text-secondary); max-width: 600px; margin: 0 auto 3rem auto;">
+        เลือกหัวข้อการทำทบทวนบทเรียนตามหลักสูตรสภาเภสัชกรรม (PLE-CC2) เพื่อเจาะลึกเฉพาะหมวด
+      </p>
+
+      <div class="grid-cards">
+        <!-- Clinic Card -->
+        <article class="card card-clinic" id="card-category-clinic">
+          <div class="card-icon">🏥</div>
+          <h3 class="card-title">หมวดคลินิก (Clinic)</h3>
+          <p class="card-desc">ทบทวนการซักประวัติผู้ป่วย การวิเคราะห์และแก้ไขปัญหาจากการใช้ยา (DTP) การให้คำแนะนำการใช้ยากลุ่มเสี่ยง (Warfarin, Insulin, Inhalers) และการประเมินติดตามค่าทางแล็บ</p>
+          <a href="<?= webAppUrl ?>?page=case-library&cat=Clinic" class="btn btn-secondary btn-clinic" style="color: white; margin-top: auto;" id="btn-cat-clinic">ฝึกหมวดคลินิก →</a>
+        </article>
+
+        <!-- Product Card -->
+        <article class="card card-product" id="card-category-product">
+          <div class="card-icon">🧪</div>
+          <h3 class="card-title">หมวดผลิตภัณฑ์ (Product)</h3>
+          <p class="card-desc">ฝึกฝนทักษะการคำนวณตำรับยาและขนาดยา การเตรียมยาเฉพาะราย (Compounding) เช่น ยาน้ำ ยาขี้ผึ้ง ครีม หรือยาปราศจากเชื้อ (Sterile) รวมถึงการเขียนฉลากยาอย่างถูกต้อง</p>
+          <a href="<?= webAppUrl ?>?page=case-library&cat=Product" class="btn btn-secondary btn-product" style="color: white; margin-top: auto;" id="btn-cat-product">ฝึกหมวดผลิต →</a>
+        </article>
+
+        <!-- SAP Card -->
+        <article class="card card-sap" id="card-category-sap">
+          <div class="card-icon">⚖️</div>
+          <h3 class="card-title">หมวดสังคมศาสตร์ (SAP)</h3>
+          <p class="card-desc">ทบทวนความรู้ด้านกฎหมายยา ยาเสพติด วัตถุออกฤทธิ์ทางจิตประสาท จรรยาบรรณวิชาชีพ ทักษะการวิเคราะห์ข้อมูลสาธารณสุข และเศรษฐศาสตร์สาธารณสุขเบื้องต้น</p>
+          <a href="<?= webAppUrl ?>?page=case-library&cat=SAP" class="btn btn-secondary btn-sap" style="color: white; margin-top: auto;" id="btn-cat-sap">ฝึกหมวดกฎหมาย/สังคม →</a>
+        </article>
+      </div>
+
+      <!-- Quick Resources Links Grid -->
+      <section style="margin-top: 5rem;">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; font-family: var(--font-title);">
+          🔗 ลิงก์ทรัพยากรการสอบวิชาชีพ (Google Sheets & Drive)
+        </h2>
+        <div class="grid-cards" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+          
+          <a href="https://docs.google.com/spreadsheets/d/1Fuakz3nCXa7klgQznrtGUNVRvNp_g9BJRfWNHD0awxI/edit" target="_blank" class="card" style="padding: 1.25rem; flex-direction: row; align-items: center; gap: 1rem;" id="link-google-sheet-hub">
+            <span style="font-size: 2rem;">📊</span>
+            <div>
+              <h4 style="font-family: var(--font-title); font-weight: 700;">Google Sheet Hub</h4>
+              <p style="font-size: 0.8rem; color: var(--text-secondary);">จัดการข้อมูลเคส & ตารางงานหลัก</p>
+            </div>
+          </a>
+
+          <a href="https://docs.google.com/document/d/1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g/edit" target="_blank" class="card" style="padding: 1.25rem; flex-direction: row; align-items: center; gap: 1rem;" id="link-sample-doc">
+            <span style="font-size: 2rem;">📝</span>
+            <div>
+              <h4 style="font-family: var(--font-title); font-weight: 700;">ตัวอย่างเคส OSPE ใน Docs</h4>
+              <p style="font-size: 0.8rem; color: var(--text-secondary);">Template สำหรับเขียนเคส v2.0</p>
+            </div>
+          </a>
+          
+          <a href="https://docs.google.com/spreadsheets/d/1Fuakz3nCXa7klgQznrtGUNVRvNp_g9BJRfWNHD0awxI/edit#gid=0" target="_blank" class="card" style="padding: 1.25rem; flex-direction: row; align-items: center; gap: 1rem;" id="link-past-exam-drive">
+            <span style="font-size: 2rem;">📁</span>
+            <div>
+              <h4 style="font-family: var(--font-title); font-weight: 700;">คลังข้อสอบสภาวิชาชีพ</h4>
+              <p style="font-size: 0.8rem; color: var(--text-secondary);">โฟลเดอร์ไฟล์รวมข้อสอบเก่าทั้งหมด</p>
+            </div>
+          </a>
+
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" id="main-footer">
+    <div class="container">
+      <p>© 2026 คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม ปีการศึกษา 2569 | ฝ่ายวิชาการ RxCU 84 & 85</p>
+    </div>
+  </footer>
+
+  <!-- Offline backup & main scripts inlined -->
+  <script>
+    <?!= HtmlService.createHtmlOutputFromFile('case-data-offline.js').getContent(); ?>
+    
+    // Inject the App Script Web App URL dynamically as our active API endpoint!
+    const currentApiUrl = "<?= webAppUrl ?>";
+    const API_URL_KEY = 'ple_cc_api_url';
+    
+    <?!= HtmlService.createHtmlOutputFromFile('app.js').getContent(); ?>
+  </script>
+</body>
+</html>

@@ -1,0 +1,286 @@
+/**
+ * PLE-CC2 OSPE Practice System — Main Application Logic
+ * File: app.js.html
+ */
+const AppState = {
+  theme: localStorage.getItem('theme') || 'light',
+  cases: [],
+  filteredCases: [],
+  currentCase: null,
+  activeFilters: {
+    category: 'All',
+    courseGroup: 'All',
+    difficulty: 'All',
+    search: ''
+  },
+  checklistProgress: {}
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  loadChecklistProgress();
+  loadCasesData();
+  detectCurrentPage();
+});
+
+function initTheme() {
+  document.documentElement.setAttribute('data-theme', AppState.theme);
+  const themeBtn = document.getElementById('theme-toggle');
+  if (themeBtn) {
+    updateThemeButtonIcon(themeBtn);
+    themeBtn.addEventListener('click', toggleTheme);
+  }
+}
+
+function toggleTheme() {
+  AppState.theme = AppState.theme === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', AppState.theme);
+  localStorage.setItem('theme', AppState.theme);
+  const themeBtn = document.getElementById('theme-toggle');
+  if (themeBtn) updateThemeButtonIcon(themeBtn);
+}
+
+function updateThemeButtonIcon(btn) {
+  btn.innerHTML = AppState.theme === 'light' 
+    ? `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"></path></svg>`
+    : `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m0 13.5V21M4.22 4.22l1.59 1.59m12.38 12.38l1.59 1.59M21 12h-2.25m-13.5 0H3m2.28 6.06l1.59-1.59m12.38-12.38l1.59-1.59M12 7.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z"></path></svg>`;
+}
+
+async function loadCasesData() {
+  showGlobalLoader(true);
+  
+  if (currentApiUrl) {
+    try {
+      const response = await fetch(`${currentApiUrl}?action=getCaseList`);
+      const result = await response.json();
+      
+      if (result.success && result.data && result.data.cases) {
+        AppState.cases = result.data.cases;
+        showApiStatusBanner(true, 'ระบบเชื่อมต่อ Google Apps Script Online สำเร็จ');
+        onCasesLoaded();
+        return;
+      }
+    } catch (e) {
+      console.warn('API Connection failed, using offline backup:', e);
+      showApiStatusBanner(false, 'Offline Mode — ดึงข้อมูลจากฐานข้อมูลสำรอง');
+    }
+  } else {
+    showApiStatusBanner(false, 'Offline Mode — ดึงข้อมูลจากฐานข้อมูลสำรอง');
+  }
+  
+  if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+    AppState.cases = OFFLINE_DATA.cases;
+  } else {
+    AppState.cases = [];
+  }
+  
+  onCasesLoaded();
+}
+
+function onCasesLoaded() {
+  showGlobalLoader(false);
+  updateStatsDashboard();
+  applyFilters();
+  
+  if (document.getElementById('case-list-container')) {
+    renderCaseList();
+    renderFilterSelectOptions();
+  }
+}
+
+function showGlobalLoader(show) {
+  const loader = document.getElementById('global-loader');
+  if (loader) {
+    loader.style.display = show ? 'flex' : 'none';
+  }
+}
+
+function showApiStatusBanner(isConnected, message) {
+  const banner = document.getElementById('api-status-banner');
+  if (banner) {
+    banner.style.display = 'flex';
+    banner.className = isConnected ? 'api-banner connected' : 'api-banner offline';
+    banner.querySelector('.banner-text').textContent = message;
+  }
+}
+
+function updateStatsDashboard() {
+  const clinicNum = document.getElementById('stat-clinic');
+  const productNum = document.getElementById('stat-product');
+  const sapNum = document.getElementById('stat-sap');
+  const totalNum = document.getElementById('stat-total');
+  
+  if (!totalNum) return;
+  
+  let clinic = 0, product = 0, sap = 0;
+  AppState.cases.forEach(c => {
+    if (c.category === 'Clinic') clinic++;
+    else if (c.category === 'Product') product++;
+    else if (c.category === 'SAP') sap++;
+  });
+  
+  if (clinicNum) clinicNum.textContent = clinic;
+  if (productNum) productNum.textContent = product;
+  if (sapNum) sapNum.textContent = sap;
+  totalNum.textContent = AppState.cases.length;
+}
+
+function applyFilters() {
+  let list = [...AppState.cases];
+  const { category, courseGroup, difficulty, search } = AppState.activeFilters;
+  
+  if (category && category !== 'All') {
+    list = list.filter(c => c.category === category);
+  }
+  if (courseGroup && courseGroup !== 'All') {
+    list = list.filter(c => c.courseGroup === courseGroup);
+  }
+  if (difficulty && difficulty !== 'All') {
+    list = list.filter(c => String(c.difficulty) === String(difficulty));
+  }
+  if (search) {
+    const q = search.toLowerCase();
+    list = list.filter(c => 
+      c.title.toLowerCase().includes(q) ||
+      c.caseId.toLowerCase().includes(q) ||
+      (c.disease && c.disease.toLowerCase().includes(q))
+    );
+  }
+  AppState.filteredCases = list;
+}
+
+function renderFilterSelectOptions() {
+  const selectGroup = document.getElementById('filter-course-group');
+  if (!selectGroup) return;
+  
+  const groups = new Set();
+  AppState.cases.forEach(c => {
+    if (c.courseGroup) groups.add(c.courseGroup);
+  });
+  
+  selectGroup.innerHTML = '<option value="All">ทุกกลุ่มวิชา (All Course Groups)</option>';
+  groups.forEach(g => {
+    const opt = document.createElement('option');
+    opt.value = g;
+    opt.textContent = g;
+    selectGroup.appendChild(opt);
+  });
+}
+
+function loadChecklistProgress() {
+  const saved = localStorage.getItem('ospe_checklist_progress');
+  if (saved) {
+    try {
+      AppState.checklistProgress = JSON.parse(saved);
+    } catch (e) {
+      AppState.checklistProgress = {};
+    }
+  }
+}
+
+function saveChecklistProgress() {
+  localStorage.setItem('ospe_checklist_progress', JSON.stringify(AppState.checklistProgress));
+}
+
+function handleChecklistItemClick(caseId, itemId, itemScore) {
+  if (!AppState.checklistProgress[caseId]) {
+    AppState.checklistProgress[caseId] = [];
+  }
+  const index = AppState.checklistProgress[caseId].indexOf(itemId);
+  if (index > -1) {
+    AppState.checklistProgress[caseId].splice(index, 1);
+  } else {
+    AppState.checklistProgress[caseId].push(itemId);
+  }
+  saveChecklistProgress();
+  updateChecklistUI(caseId);
+}
+
+function updateChecklistUI(caseId) {
+  const checkedItems = AppState.checklistProgress[caseId] || [];
+  const items = document.querySelectorAll('.checklist-item');
+  let currentScore = 0;
+  let totalScore = 0;
+  
+  items.forEach(el => {
+    const itemId = el.getAttribute('data-id');
+    const score = parseInt(el.getAttribute('data-score')) || 1;
+    totalScore += score;
+    
+    if (checkedItems.includes(itemId)) {
+      el.classList.add('checked');
+      currentScore += score;
+    } else {
+      el.classList.remove('checked');
+    }
+  });
+  
+  const scoreDisplay = document.getElementById('score-display');
+  const pctDisplay = document.getElementById('percentage-display');
+  const fillBar = document.getElementById('progress-bar-fill');
+  
+  if (scoreDisplay) scoreDisplay.textContent = `${currentScore} / ${totalScore}`;
+  
+  if (totalScore > 0) {
+    const pct = Math.round((currentScore / totalScore) * 100);
+    if (pctDisplay) pctDisplay.textContent = `${pct}%`;
+    if (fillBar) {
+      fillBar.style.width = `${pct}%`;
+      if (pct >= 80) { fillBar.classList.add('pass'); } 
+      else { fillBar.classList.remove('pass'); }
+    }
+  }
+}
+
+function detectCurrentPage() {
+  if (document.getElementById('case-list-container')) {
+    const searchInput = document.getElementById('search-case');
+    const selectCat = document.getElementById('filter-category');
+    const selectGroup = document.getElementById('filter-course-group');
+    const selectDiff = document.getElementById('filter-difficulty');
+    
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        AppState.activeFilters.search = e.target.value;
+        applyFilters();
+        renderCaseList();
+      });
+    }
+    if (selectCat) {
+      selectCat.addEventListener('change', (e) => {
+        AppState.activeFilters.category = e.target.value;
+        applyFilters();
+        renderCaseList();
+      });
+    }
+    if (selectGroup) {
+      selectGroup.addEventListener('change', (e) => {
+        AppState.activeFilters.courseGroup = e.target.value;
+        applyFilters();
+        renderCaseList();
+      });
+    }
+    if (selectDiff) {
+      selectDiff.addEventListener('change', (e) => {
+        AppState.activeFilters.difficulty = e.target.value;
+        applyFilters();
+        renderCaseList();
+      });
+    }
+  }
+}
+
+function getUrlParam(name) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(name);
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
