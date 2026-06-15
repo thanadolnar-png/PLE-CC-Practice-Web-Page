@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th" data-theme="light">
 <head>
   <meta charset="UTF-8">
@@ -362,9 +362,14 @@
         }
       }
       
-      // 2. ถ้าดึง API ไม่สำเร็จหรือไม่มี ลิงก์ ให้สลับมาใช้ออฟไลน์
+      // 2. ถ้าดึง API ไม่สำเร็จ ให้ดึงจาก Offline Database (ซึ่งมี checklist ครบ) แทนที่จะดึงจาก AppState.cases ซึ่งไม่มี checklist
       if (!matchedCase) {
-        matchedCase = AppState.cases.find(c => c.caseId === activeCaseId);
+        if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+          matchedCase = OFFLINE_DATA.cases.find(c => c.caseId === activeCaseId);
+        }
+        if (!matchedCase) {
+          matchedCase = AppState.cases.find(c => c.caseId === activeCaseId);
+        }
       }
       
       if (!matchedCase) {
