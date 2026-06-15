@@ -410,7 +410,7 @@ function getCaseContentFromDoc(docId, targetCaseId) {
           currentSection = 'SCENARIO';
         } else if (cleanText.includes('ข้อมูลผู้ป่วย')) {
           currentSection = 'PATIENT_INFO';
-        } else if (cleanText.includes('Checklist') || cleanText.includes('ประเมิน') || cleanText.includes('เกณฑ์')) {
+        } else if (cleanText.includes('Checklist') || cleanText.toLowerCase().includes('checklist') || cleanText.includes('\u0e17\u0e31\u0e01\u0e29\u0e30') || cleanText.includes('\u0e23\u0e32\u0e22\u0e01\u0e32\u0e23') || cleanText.includes('\u0e40\u0e01\u0e13\u0e11') || cleanText.includes('\u0e1b\u0e23\u0e30\u0e40\u0e21\u0e34\u0e19') || cleanText.includes('\u0e2a\u0e21\u0e23\u0e23\u0e16\u0e19\u0e30')) {
           currentSection = 'CHECKLIST';
         } else if (cleanText.includes('หมายเหตุ') || cleanText.includes('เฉลย') || cleanText.includes('ข้อมูลผู้ตรวจ')) {
           currentSection = 'NOTE';
@@ -466,9 +466,9 @@ function getCaseContentFromDoc(docId, targetCaseId) {
           text = child.asListItem().getText().trim();
         }
         
-        const isChecklistItem = text.startsWith('[ ]') || text.startsWith('[x]') || text.startsWith('☐') || text.startsWith('☑') || text.startsWith('-');
+        const isChecklistItem = type === DocumentApp.ElementType.LIST_ITEM || text.startsWith('[ ]') || text.startsWith('[x]') || text.startsWith('\u2610') || text.startsWith('\u2611') || text.startsWith('\u2705') || text.startsWith('\u2714') || text.startsWith('\u25cb') || text.startsWith('-') || text.startsWith('*') || /^\\d+\\./.test(text);
         if (isChecklistItem && text.length > 3) {
-          let cleanText = text.replace(/^([-☐☑]|\[\s*\]|\[x\])\s*/, '').trim();
+          let cleanText = text.replace(/^([-*\u2022\u2710\u2705\u2714\u2610\u2611]|\[\s*\]|\[x\]|\d+\.)\s*/, '').trim();
           const scoreMatch = cleanText.match(/^\((\d+(\.\d+)?)\)\s*(.*)$/);
           let score = 1;
           let itemText = cleanText;
@@ -582,7 +582,7 @@ function parseTableTemplateToCaseData(table, targetCaseId) {
           return;
         }
         
-        const isChecklistItem = cleanLine.startsWith('[ ]') || cleanLine.startsWith('[x]') || cleanLine.startsWith('☐') || cleanLine.startsWith('☑') || cleanLine.startsWith('-');
+         const isChecklistItem = cleanLine.startsWith('[ ]') || cleanLine.startsWith('[x]') || cleanLine.startsWith('\u2610') || cleanLine.startsWith('\u2611') || cleanLine.startsWith('\u2705') || cleanLine.startsWith('\u2714') || cleanLine.startsWith('-') || cleanLine.startsWith('*') || /^\\d+\\./.test(cleanLine);
         if (isChecklistItem && cleanLine.length > 3) {
           let itemTextRaw = cleanLine.replace(/^([-☐☑]|\[\s*\]|\[x\])\s*/, '').trim();
           const scoreMatch = itemTextRaw.match(/^\((\d+(\.\d+)?)\)\s*(.*)$/);
