@@ -576,20 +576,20 @@
         document.getElementById('viewer-timer-btn').textContent = '▶️ เริ่มจับเวลา';
       } 
       else if (role === 'examiner') {
-        // ผู้ตรวจ/คนไข้: เห็น Checklist, เฉลย (กางออกทันที), และตัวจับเวลา
+        // ตรวจ/ผู้ประเมิน: แสดง Checklist, ข้อความการแสดง, และปุ่มจับเวลา
         chkSection.style.display = 'block';
         noticeSection.style.display = 'none';
         progressCard.style.display = 'block';
         timerCard.style.display = 'block';
         docTabs.style.display = 'flex';
         
-        // กางเฉลยออกทันทีให้ผู้ตรวจอ่านบทบาทคนไข้จำลองได้เลย
+        // ทางเลือกแสดงแผนการตรวจผู้ประเมิน
         noteArea.classList.add('show');
-        if (toggleNoteBtn) toggleNoteBtn.textContent = '🔒 ซ่อนเฉลย / ข้อมูลผู้ตรวจ';
+        if (toggleNoteBtn) toggleNoteBtn.textContent = '🙈 ซ่อนเฉลย / ข้อมูลผู้ตรวจ';
         
         resetViewerTimer();
-        // ผู้ประเมินให้เวลาเดินทันที
-        startViewerTimer();
+        // ไม่ต้องเริ่มจับเวลาโดยอัตโนมัติ ให้ผู้ประเมินกดเริ่มเอง
+        document.getElementById('viewer-timer-btn').textContent = '⏱️ เริ่มจับเวลา';
       }
     }
 
