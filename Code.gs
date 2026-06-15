@@ -398,8 +398,8 @@ function getCaseContentFromDoc(docId, targetCaseId) {
       if (!recording) continue;
       
       // ตรวจสอบหัวข้อหลักย่อย
-      if (heading === DocumentApp.ParagraphHeading.HEADING_1 || 
-          heading === DocumentApp.ParagraphHeading.HEADING_2 || 
+      if (heading === DocumentApp.ParagraphHeading.HEADING1 || 
+          heading === DocumentApp.ParagraphHeading.HEADING2 || 
           text.startsWith('## ') || 
           text.startsWith('# ')) {
         
@@ -422,8 +422,8 @@ function getCaseContentFromDoc(docId, targetCaseId) {
       
       // ตรวจสอบกลุ่ม Checklist
       if (currentSection === 'CHECKLIST' && 
-          (heading === DocumentApp.ParagraphHeading.HEADING_3 || 
-           heading === DocumentApp.ParagraphHeading.HEADING_4 || 
+          (heading === DocumentApp.ParagraphHeading.HEADING3 || 
+           heading === DocumentApp.ParagraphHeading.HEADING4 || 
            text.startsWith('###') || 
            text.startsWith('**กลุ่ม:'))) {
         
@@ -939,9 +939,9 @@ function updateDocsWithSampleContent() {
     const body = doc.getBody();
     body.clear();
     
-    body.appendParagraph('[OSPE-CL001] Warfarin Counseling — AF ใหม่').setHeading(DocumentApp.ParagraphHeading.HEADING_1);
+    body.appendParagraph('[OSPE-CL001] Warfarin Counseling — AF ใหม่').setHeading(DocumentApp.ParagraphHeading.HEADING1);
     
-    body.appendParagraph('ข้อมูลเคส').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('ข้อมูลเคส').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     body.appendParagraph('- หมวด: Clinic');
     body.appendParagraph('- OSPE Main Group: การบริบาลทางเภสัชกรรม (Pharmaceutical Care)');
     body.appendParagraph('- Station/Sub-topic: Anticoagulation Counseling');
@@ -951,10 +951,10 @@ function updateDocsWithSampleContent() {
     body.appendParagraph('- ผู้เขียน: Lin');
     body.appendParagraph('- วันที่: 15/06/2026');
     
-    body.appendParagraph('โจทย์').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('โจทย์').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     body.appendParagraph('ผู้ป่วยชายไทยอายุ 65 ปี ได้รับการวินิจฉัยว่าเป็น Non-valvular Atrial Fibrillation และได้รับยา Warfarin 3 mg วันละ 1 ครั้ง เป็นครั้งแรก ให้ท่านทำการประเมินความปลอดภัย ให้คำปรึกษาและแนะนำการปฏิบัติตัวเกี่ยวกับการใช้ยา Warfarin แก่ผู้ป่วยอย่างครบถ้วน (เวลาปฏิบัติการ 4 นาที)');
     
-    body.appendParagraph('ข้อมูลผู้ป่วย').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('ข้อมูลผู้ป่วย').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     const tableData = [
       ['หัวข้อ', 'ข้อมูล'],
       ['ชื่อ-สกุล', 'นายสมนึก รักดี'],
@@ -965,28 +965,28 @@ function updateDocsWithSampleContent() {
     ];
     body.appendTable(tableData);
     
-    body.appendParagraph('Checklist').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
-    body.appendParagraph('## (กลุ่ม: การซักประวัติและการประเมินความปลอดภัย)').setHeading(DocumentApp.ParagraphHeading.HEADING_3);
+    body.appendParagraph('Checklist').setHeading(DocumentApp.ParagraphHeading.HEADING2);
+    body.appendParagraph('## (กลุ่ม: การซักประวัติและการประเมินความปลอดภัย)').setHeading(DocumentApp.ParagraphHeading.HEADING3);
     body.appendListItem('☐ (2) ซักประวัติการแพ้ยา ประวัติโรคประจำตัว และการใช้ยาร่วม (โดยเฉพาะสมุนไพร/อาหารเสริม)');
     body.appendListItem('☐ (1) แจ้งเป้าหมายการรักษาและการออกฤทธิ์ของยา Warfarin (เพื่อป้องกันภาวะลิ่มเลือดอุดตันและหลอดเลือดสมอง)');
     body.appendListItem('☐ (2) อธิบายวิธีรับประทานยาอย่างถูกต้อง (ทานเวลาเดียวกันทุกวัน โดยปกติแนะนำตอนเย็น 18:00 น. ก่อนหรือหลังอาหารก็ได้)');
     body.appendListItem('☐ (1) แนะนำการปฏิบัติเมื่อลืมกินยา (หากไม่เกิน 12 ชั่วโมงให้ทานทันที หากเกิน 12 ชั่วโมงให้ข้ามไปทานมื้อถัดไป ห้ามเพิ่มขนาดยาเป็น 2 เท่า)');
     
-    body.appendParagraph('## (กลุ่ม: การจัดการความเสี่ยงและคำแนะนำเพิ่ม)').setHeading(DocumentApp.ParagraphHeading.HEADING_3);
+    body.appendParagraph('## (กลุ่ม: การจัดการความเสี่ยงและคำแนะนำเพิ่ม)').setHeading(DocumentApp.ParagraphHeading.HEADING3);
     body.appendListItem('☐ (2) แนะนำอาการข้างเคียงรุนแรงที่ต้องพบแพทย์ทันที (เลือดออกผิดปกติ เช่น จุดจ้ำเลือดตามตัว ปัสสาวะ/อุจจาระมีสีเข้มหรือมีเลือดปน เลือดกำเดาไหลไม่หยุด)');
     body.appendListItem('☐ (2) แนะนำเรื่องอาหารที่มีวิตามินเคสูง (ผักใบเขียว เช่น ผักคะน้า ผักโขม) ว่าให้รับประทานในปริมาณที่สม่ำเสมอทุกวัน ไม่ลดหรือเพิ่มปริมาณอย่างเฉียบพลัน');
     body.appendListItem('☐ (1) แนะนำการหลีกเลี่ยงพฤติกรรมเสี่ยงที่ทำให้เกิดบาดแผลและเลือดออก เช่น การใช้แปรงสีฟันขนอ่อนนุ่ม ใช้เครื่องโกนหนวดไฟฟ้า');
     
-    body.appendParagraph('หมายเหตุ / เฉลย').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('หมายเหตุ / เฉลย').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     body.appendParagraph('- Warfarin มีความเสี่ยงต่อปฏิกิริยาระหว่างยา (Drug Interactions) สูงมาก เช่น ยา NSAIDs, ยาฆ่าเชื้อฆ่าราบางกลุ่ม หรืออาหารเสริมจำพวก แปะก๊วย โสม น้ำมันปลา');
     body.appendParagraph('- ต้องประเมินค่า INR อย่างสม่ำเสมอตามแพทย์นัด (Target INR มักอยู่ที่ 2.0 - 3.0 สำหรับ Non-valvular AF)');
     body.appendParagraph('- เน้นย้ำการพกบัตรผู้ใช้ยา Warfarin ติดตัวไว้เสมอ');
     
     // ── เพิ่มเคส CL002 ต่อท้ายใน Doc เดิม ──
     body.appendHorizontalRule();
-    body.appendParagraph('[OSPE-CL002] Warfarin Counseling — AF เปลี่ยนมาจาก NOAC').setHeading(DocumentApp.ParagraphHeading.HEADING_1);
+    body.appendParagraph('[OSPE-CL002] Warfarin Counseling — AF เปลี่ยนมาจาก NOAC').setHeading(DocumentApp.ParagraphHeading.HEADING1);
     
-    body.appendParagraph('ข้อมูลเคส').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('ข้อมูลเคส').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     body.appendParagraph('- หมวด: Clinic');
     body.appendParagraph('- OSPE Main Group: การบริบาลทางเภสัชกรรม (Pharmaceutical Care)');
     body.appendParagraph('- Station/Sub-topic: Anticoagulation Counseling — Drug Switching');
@@ -996,10 +996,10 @@ function updateDocsWithSampleContent() {
     body.appendParagraph('- ผู้เขียน: Lin');
     body.appendParagraph('- วันที่: 15/06/2026');
     
-    body.appendParagraph('โจทย์').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('โจทย์').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     body.appendParagraph('ผู้ป่วยหญิงไทย อายุ 72 ปี มีโรคประจำตัว Non-valvular Atrial Fibrillation และ CKD Stage 3 เคยได้รับ Dabigatran 110 mg วันละ 2 ครั้ง มา 2 ปี แต่ขณะนี้แพทย์ตัดสินใจเปลี่ยนยาต้านการแข็งตัวของเลือดมาเป็น Warfarin เนื่องจากค่า eGFR ลดลงต่อเนื่อง ให้ท่านทำการให้คำปรึกษาผู้ป่วยเรื่องการเปลี่ยนยา ความแตกต่างระหว่างยา 2 ชนิด และข้อควรปฏิบัติสำหรับยา Warfarin ที่เริ่มใช้ใหม่ (เวลาปฏิบัติการ 4 นาที)');
     
-    body.appendParagraph('ข้อมูลผู้ป่วย').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('ข้อมูลผู้ป่วย').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     const tableData2 = [
       ['หัวข้อ', 'ข้อมูล'],
       ['ชื่อ-สกุล', 'นางสุดา มานะชัย'],
@@ -1013,20 +1013,20 @@ function updateDocsWithSampleContent() {
     ];
     body.appendTable(tableData2);
     
-    body.appendParagraph('Checklist').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
-    body.appendParagraph('## (กลุ่ม: การซักประวัติและประเมินความเข้าใจเดิม)').setHeading(DocumentApp.ParagraphHeading.HEADING_3);
+    body.appendParagraph('Checklist').setHeading(DocumentApp.ParagraphHeading.HEADING2);
+    body.appendParagraph('## (กลุ่ม: การซักประวัติและประเมินความเข้าใจเดิม)').setHeading(DocumentApp.ParagraphHeading.HEADING3);
     body.appendListItem('☐ (1) ซักประวัติการใช้ยา Dabigatran และประเมินความสม่ำเสมอในการรับประทานยา');
     body.appendListItem('☐ (2) อธิบายเหตุผลที่ต้องเปลี่ยนยา (ไตเสื่อมลง eGFR < 30 ทำให้ Dabigatran สะสมในร่างกาย เสี่ยงเลือดออกรุนแรง)');
     body.appendListItem('☐ (1) อธิบายความแตกต่างระหว่าง Dabigatran (ขนาดยาคงที่) กับ Warfarin (ต้องติดตาม INR อย่างสม่ำเสมอ)');
     
-    body.appendParagraph('## (กลุ่ม: การให้คำแนะนำ Warfarin)').setHeading(DocumentApp.ParagraphHeading.HEADING_3);
+    body.appendParagraph('## (กลุ่ม: การให้คำแนะนำ Warfarin)').setHeading(DocumentApp.ParagraphHeading.HEADING3);
     body.appendListItem('☐ (2) อธิบายวิธีรับประทานยา Warfarin 2mg วันละครั้ง เวลาเดียวกันทุกวัน');
     body.appendListItem('☐ (2) เน้นความสำคัญของการตรวจ INR อย่างสม่ำเสมอ บอกเป้าหมาย Target INR = 2.0-3.0');
     body.appendListItem('☐ (2) แนะนำอาการผิดปกติที่ต้องรีบพบแพทย์ทันที (เลือดออกผิดปกติ, ฉี่มีเลือดปน, อุจจาระดำ)');
     body.appendListItem('☐ (1) แนะนำเรื่องอาหารวิตามินเค (ผักใบเขียว) ให้กินสม่ำเสมอ ไม่เพิ่ม-ลดกระทันหัน');
     body.appendListItem('☐ (1) เน้นห้ามซื้อยาแก้ปวด NSAIDs/Aspirin เองเพราะเพิ่มความเสี่ยงเลือดออก');
     
-    body.appendParagraph('หมายเหตุ / เฉลย').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('หมายเหตุ / เฉลย').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     body.appendParagraph('- ข้อบ่งชี้การเปลี่ยนยา: Dabigatran ห้ามใช้เมื่อ CrCl < 30 mL/min เพราะยาถูกขับออกทางไตกว่า 80% หากไตเสื่อม ยาสะสมและเพิ่มความเสี่ยงเลือดออกรุนแรง');
     body.appendParagraph('- การเปลี่ยนยา (Switching): หยุด Dabigatran ตอนเย็น เริ่ม Warfarin วันรุ่งขึ้น และต้องตรวจ INR ซ้ำภายใน 5-7 วัน');
     body.appendParagraph('- Drug interactions สำคัญ: Furosemide + Warfarin อาจเพิ่มฤทธิ์ Warfarin เล็กน้อย ต้องติดตาม INR อย่างใกล้ชิดในช่วงแรก');
@@ -1043,9 +1043,9 @@ function updateDocsWithSampleContent() {
     const body = doc.getBody();
     body.clear();
     
-    body.appendParagraph('[OSPE-PD001] Compounding — Cold Cream & Labeling').setHeading(DocumentApp.ParagraphHeading.HEADING_1);
+    body.appendParagraph('[OSPE-PD001] Compounding — Cold Cream & Labeling').setHeading(DocumentApp.ParagraphHeading.HEADING1);
     
-    body.appendParagraph('ข้อมูลเคส').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('ข้อมูลเคส').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     body.appendParagraph('- หมวด: Product');
     body.appendParagraph('- OSPE Main Group: การเตรียมยาเฉพาะราย (Compounding)');
     body.appendParagraph('- Station/Sub-topic: Cold Cream Preparation & Labeling');
@@ -1055,10 +1055,10 @@ function updateDocsWithSampleContent() {
     body.appendParagraph('- ผู้เขียน: Fon');
     body.appendParagraph('- วันที่: 15/06/2026');
     
-    body.appendParagraph('โจทย์').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('โจทย์').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     body.appendParagraph('ท่านได้รับใบสั่งยาจากแพทย์ให้เตรียมตำรับ Cold Cream ปริมาณ 30 กรัม สำหรับผู้ป่วยเด็กโรคผิวหนังแห้ง (Atopic Dermatitis) โดยให้คำนวณสูตรตำรับ ชั่งตวงสารผสมเนื้อครีม และเขียนฉลากยาควบคุมพิเศษให้ครบถ้วนถูกต้องตามหลักวิชาชีพเภสัชกรรม (เวลาปฏิบัติการ 4 นาที)');
     
-    body.appendParagraph('ข้อมูลผู้ป่วย').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('ข้อมูลผู้ป่วย').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     const tableData = [
       ['หัวข้อ', 'ข้อมูล'],
       ['ชื่อ-สกุล', 'เด็กชายปัญญา ดีเลิศ'],
@@ -1069,19 +1069,19 @@ function updateDocsWithSampleContent() {
     ];
     body.appendTable(tableData);
     
-    body.appendParagraph('Checklist').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
-    body.appendParagraph('## (กลุ่ม: การคำนวณและตั้งตำรับ)').setHeading(DocumentApp.ParagraphHeading.HEADING_3);
+    body.appendParagraph('Checklist').setHeading(DocumentApp.ParagraphHeading.HEADING2);
+    body.appendParagraph('## (กลุ่ม: การคำนวณและตั้งตำรับ)').setHeading(DocumentApp.ParagraphHeading.HEADING3);
     body.appendListItem('☐ (2) คำนวณปริมาณสารสำคัญในสูตร Cold Cream 30 กรัม ได้ถูกต้อง (Mineral oil 15g, Beeswax 3.6g, Borax 0.24g, Water 7.56g)');
     body.appendListItem('☐ (1) ชั่งน้ำหนักบีกเกอร์และสารเคมีแต่ละชนิดด้วยเครื่องชั่ง 2 ตำแหน่งอย่างถูกต้อง');
     body.appendListItem('☐ (2) อธิบายขั้นตอนการผสมเฟสน้ำ (Aqueous phase) และเฟสน้ำมัน (Oily phase) ที่อุณหภูมิ 70 องศาเซลเซียส');
     body.appendListItem('☐ (1) คนผสมให้เข้ากันจนได้เนื้อครีมขาวเนียนสม่ำเสมอ');
     
-    body.appendParagraph('## (กลุ่ม: การเขียนฉลากและจ่ายยา)').setHeading(DocumentApp.ParagraphHeading.HEADING_3);
+    body.appendParagraph('## (กลุ่ม: การเขียนฉลากและจ่ายยา)').setHeading(DocumentApp.ParagraphHeading.HEADING3);
     body.appendListItem('☐ (2) เขียนฉลากยาได้ถูกต้องครบถ้วน (ชื่อผู้ป่วย, วิธีใช้: ทาบริเวณผิวแห้งวันละ 2 ครั้ง, วันผลิต, วันหมดอายุ 14 วัน)');
     body.appendListItem('☐ (1) ติดฉลากแดง "ยาใช้ภายนอก ห้ามรับประทาน"');
     body.appendListItem('☐ (1) ส่งมอบยาพร้อมให้คำแนะนำการเก็บรักษายาที่อุณหภูมิห้อง หลีกเลี่ยงแสงแดด');
     
-    body.appendParagraph('หมายเหตุ / เฉลย').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('หมายเหตุ / เฉลย').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     body.appendParagraph('- สูตรมาตรฐาน Cold Cream (100g): Mineral oil 50g, Beeswax 12g, Spermaceti 12g, Sodium borate (Borax) 0.8g, Purified water 25.2g.');
     body.appendParagraph('- สำหรับ 30g: Mineral oil 15g, Beeswax 3.6g, Spermaceti 3.6g (หรือใช้วัตถุดิบอื่นทดแทน), Borax 0.24g, Water 7.56g.');
     body.appendParagraph('- การเก็บรักษา: ห้ามแช่แข็ง เก็บในภาชนะปิดสนิทป้องกันแสงแดดและความร้อนเพื่อป้องกันการแยกเฟส');
@@ -1097,9 +1097,9 @@ function updateDocsWithSampleContent() {
     const body = doc.getBody();
     body.clear();
     
-    body.appendParagraph('[OSPE-SP001] Pharmacy Law — ยาควบคุมพิเศษ').setHeading(DocumentApp.ParagraphHeading.HEADING_1);
+    body.appendParagraph('[OSPE-SP001] Pharmacy Law — ยาควบคุมพิเศษ').setHeading(DocumentApp.ParagraphHeading.HEADING1);
     
-    body.appendParagraph('ข้อมูลเคส').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('ข้อมูลเคส').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     body.appendParagraph('- หมวด: SAP');
     body.appendParagraph('- OSPE Main Group: ความรู้เกี่ยวกับกฎหมายยา');
     body.appendParagraph('- Station/Sub-topic: Prescription Validation & Special Controlled Drugs');
@@ -1109,10 +1109,10 @@ function updateDocsWithSampleContent() {
     body.appendParagraph('- ผู้เขียน: Irene');
     body.appendParagraph('- วันที่: 15/06/2026');
     
-    body.appendParagraph('โจทย์').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('โจทย์').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     body.appendParagraph('ผู้ป่วยนำใบสั่งยาจากคลินิกเอกชนมาขอซื้อยา Lorazepam 2 mg ในร้านยาของท่าน ให้ท่านทำการตรวจสอบความถูกต้องทางกฎหมายของใบสั่งยา วิเคราะห์ประเภทของยาทางกฎหมาย และปฏิบัติตนตามข้อกำหนดของสำนักงานคณะกรรมการอาหารและยา (อย.) อย่างถูกต้อง (เวลาปฏิบัติการ 4 นาที)');
     
-    body.appendParagraph('ข้อมูลผู้ป่วย').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('ข้อมูลผู้ป่วย').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     const tableData = [
       ['หัวข้อ', 'ข้อมูล'],
       ['ชื่อ-สกุล', 'นางสาวสมศรี มีสุข'],
@@ -1123,18 +1123,18 @@ function updateDocsWithSampleContent() {
     ];
     body.appendTable(tableData);
     
-    body.appendParagraph('Checklist').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
-    body.appendParagraph('## (กลุ่ม: ความรู้กฎหมายและการควบคุม)').setHeading(DocumentApp.ParagraphHeading.HEADING_3);
+    body.appendParagraph('Checklist').setHeading(DocumentApp.ParagraphHeading.HEADING2);
+    body.appendParagraph('## (กลุ่ม: ความรู้กฎหมายและการควบคุม)').setHeading(DocumentApp.ParagraphHeading.HEADING3);
     body.appendListItem('☐ (2) ระบุประเภททางกฎหมายของ Lorazepam ได้ถูกต้องว่าเป็น "วัตถุออกฤทธิ์ต่อจิตและประสาทประเภท 4"');
     body.appendListItem('☐ (2) ตรวจสอบใบสั่งยาและแจ้งผู้ป่วยว่า "ร้านขายยาแผนปัจจุบัน (ข.ย.1) ไม่สามารถจ่ายวัตถุออกฤทธิ์ประเภท 4 ตามใบสั่งยาแพทย์จากคลินิกได้"');
     body.appendListItem('☐ (2) แนะนำให้ผู้ป่วยไปรับยาที่โรงพยาบาลหรือสถานพยาบาลที่ได้รับอนุญาตครอบครองวัตถุออกฤทธิ์โดยตรง');
     body.appendListItem('☐ (1) อธิบายข้อกฎหมายที่ห้ามร้านขายยาทั่วไปจำหน่ายวัตถุออกฤทธิ์ประเภท 2 และ 4');
     
-    body.appendParagraph('## (กลุ่ม: ทักษะจรรยาบรรณวิชาชีพ)').setHeading(DocumentApp.ParagraphHeading.HEADING_3);
+    body.appendParagraph('## (กลุ่ม: ทักษะจรรยาบรรณวิชาชีพ)').setHeading(DocumentApp.ParagraphHeading.HEADING3);
     body.appendListItem('☐ (2) ปฏิเสธการขายยาอย่างสุภาพและแสดงความใส่ใจต่ออาการนอนไม่หลับของผู้ป่วย');
     body.appendListItem('☐ (1) บันทึกข้อมูลการให้คำแนะนำทางกฎหมายลงในแบบฟอร์มบันทึกการให้คำปรึกษาของร้านยา');
     
-    body.appendParagraph('หมายเหตุ / เฉลย').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('หมายเหตุ / เฉลย').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     body.appendParagraph('- วัตถุออกฤทธิ์ต่อจิตและประสาทประเภท 4 (เช่น Diazepam, Lorazepam, Alprazolam) ห้ามจำหน่ายในร้านขายยาทั่วไป ยกเว้นการจ่ายในสถานพยาบาลของรัฐหรือเอกชนที่มีใบอนุญาตเฉพาะ');
     body.appendParagraph('- การฝ่าฝืนขายวัตถุออกฤทธิ์ประเภท 4 ในร้านยามีโทษจำคุกและปรับตาม พ.ร.บ. วัตถุที่ออกฤทธิ์ต่อจิตและประสาท');
     body.appendParagraph('- ให้คำแนะนำผู้ป่วยเสริมด้านสุขวิทยาการนอน (Sleep Hygiene) เช่น หลีกเลี่ยงคาเฟอีนก่อนนอน งดเล่นมือถือ และเข้านอนเป็นเวลา');
@@ -1197,16 +1197,16 @@ function onFormSubmit(e) {
     const docId = newDoc.getId();
     const body = newDoc.getBody();
     
-    body.appendParagraph(`[${caseId}] ${title}`).setHeading(DocumentApp.ParagraphHeading.HEADING_1);
+    body.appendParagraph(`[${caseId}] ${title}`).setHeading(DocumentApp.ParagraphHeading.HEADING1);
     
-    body.appendParagraph('ข้อมูลเคส').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('ข้อมูลเคส').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     body.appendParagraph(`- หมวด: ${category}`);
     body.appendParagraph(`- Course Group: ${courseGroup}`);
     body.appendParagraph(`- โรค/หัวข้อ: ${disease}`);
     body.appendParagraph(`- ผู้เขียน: สตาฟเตรียมสอบ`);
     body.appendParagraph(`- วันที่: ${new Date().toLocaleDateString('th-TH')}`);
     
-    body.appendParagraph('โจทย์').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('โจทย์').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     body.appendParagraph(scenario);
     
     // แทรกรูปภาพจากลิงก์ที่อัปโหลดผ่าน Form (หากมี)
@@ -1219,7 +1219,7 @@ function onFormSubmit(e) {
           if (fileIdMatch) {
             const fileId = fileIdMatch[1];
             const imgBlob = DriveApp.getFileById(fileId).getBlob();
-            body.appendParagraph('รูปภาพประกอบข้อสอบ:').setHeading(DocumentApp.ParagraphHeading.HEADING_3);
+            body.appendParagraph('รูปภาพประกอบข้อสอบ:').setHeading(DocumentApp.ParagraphHeading.HEADING3);
             body.appendImage(imgBlob);
           }
         } catch (imgError) {
@@ -1228,8 +1228,8 @@ function onFormSubmit(e) {
       });
     }
     
-    body.appendParagraph('Checklist').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
-    body.appendParagraph('## (กลุ่ม: การประเมินผล)').setHeading(DocumentApp.ParagraphHeading.HEADING_3);
+    body.appendParagraph('Checklist').setHeading(DocumentApp.ParagraphHeading.HEADING2);
+    body.appendParagraph('## (กลุ่ม: การประเมินผล)').setHeading(DocumentApp.ParagraphHeading.HEADING3);
     const checklistLines = checklistRaw.split('\n');
     checklistLines.forEach(line => {
       if (line.trim()) {
@@ -1238,7 +1238,7 @@ function onFormSubmit(e) {
       }
     });
     
-    body.appendParagraph('หมายเหตุ / เฉลย').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('หมายเหตุ / เฉลย').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     body.appendParagraph(note);
     
     newDoc.saveAndClose();
