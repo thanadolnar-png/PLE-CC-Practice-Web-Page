@@ -1,4 +1,4 @@
-﻿/**
+/**
  * PLE-CC2 OSPE Practice System — Google Apps Script Backend (v3.0)
  * File: Code.gs
  * ========================================================
@@ -422,10 +422,12 @@ function getCaseContentFromDoc(docId, targetCaseId) {
       
       // ตรวจสอบกลุ่ม Checklist
       if (currentSection === 'CHECKLIST' && 
-          (heading === DocumentApp.ParagraphHeading.HEADING3 || 
+          (heading === DocumentApp.ParagraphHeading.HEADING2 ||
+           heading === DocumentApp.ParagraphHeading.HEADING3 || 
            heading === DocumentApp.ParagraphHeading.HEADING4 || 
            text.startsWith('###') || 
-           text.startsWith('**กลุ่ม:'))) {
+           text.startsWith('**กลุ่ม:') ||
+           text.startsWith('(กลุ่ม:'))) {
         
         const groupMatch = text.match(/\(กลุ่ม:\s*([^)]+)\)/) || text.match(/กลุ่ม:\s*([^*]+)/);
         if (groupMatch) {
