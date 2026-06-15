@@ -271,6 +271,7 @@
             </p>
           </div>
 
+          <!-- Checklist section (no-print) -->
           <div id="checklist-and-notes-section" class="no-print">
             <!-- Checklist Group -->
             <h3 class="viewer-section-title" style="margin-top: 0; border-left-color: var(--success);">
@@ -280,26 +281,26 @@
             <div class="checklist-container" id="checklist-items-container">
               <!-- Filled dynamically by JS -->
             </div>
+          </div>
 
-            <!-- Note / Answer Toggle -->
-            <div class="note-container">
-              <button class="btn btn-secondary" style="width: 100%;" id="toggle-note-btn" onclick="toggleNote()">
-                🔑 เปิดแสดงเฉลย / ข้อมูลผู้ตรวจ
-              </button>
-              <div class="note-content" id="note-content-area">
-                <!-- Note content filled dynamically by JS -->
-              </div>
+          <!-- Note / Answer Section (always visible when printing, toggleable on web screen) -->
+          <div class="note-container print-page-break" id="case-note-section">
+            <button class="btn btn-secondary no-print" style="width: 100%;" id="toggle-note-btn" onclick="toggleNote()">
+              🔑 เปิดแสดงเฉลย / ข้อมูลผู้ตรวจ
+            </button>
+            <div class="note-content" id="note-content-area">
+              <!-- Note content filled dynamically by JS -->
             </div>
+          </div>
 
-            <!-- Print / Action buttons -->
-            <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem;" id="viewer-action-buttons">
-              <button class="btn btn-secondary" style="flex: 1;" onclick="window.print()">
-                🖨️ พิมพ์หน้านี้ / เซฟ PDF
-              </button>
-              <button class="btn btn-danger" style="flex: 1;" onclick="resetChecklistProgress()">
-                🔄 รีเซ็ตการติ๊ก
-              </button>
-            </div>
+          <!-- Action buttons (no-print) -->
+          <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem;" id="viewer-action-buttons" class="no-print">
+            <button class="btn btn-secondary" style="flex: 1;" onclick="window.print()">
+              🖨️ พิมพ์หน้านี้ / เซฟ PDF
+            </button>
+            <button class="btn btn-danger" style="flex: 1;" onclick="resetChecklistProgress()">
+              🔄 รีเซ็ตการติ๊ก
+            </button>
           </div>
 
         </section>
