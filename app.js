@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PLE-CC2 OSPE Practice System — Main Application Logic
  * File: app.js
  * ====================================================
@@ -19,7 +19,7 @@ const AppState = {
   currentCase: null,
   activeFilters: {
     category: 'All',
-    courseGroup: 'All',
+    mainGroup: 'All',
     difficulty: 'All',
     search: ''
   },
@@ -182,14 +182,14 @@ function updateStatsDashboard() {
 // ──────────────────────────────────────────────────────────────
 function applyFilters() {
   let list = [...AppState.cases];
-  const { category, courseGroup, difficulty, search } = AppState.activeFilters;
+  const { category, mainGroup, difficulty, search } = AppState.activeFilters;
   
   if (category && category !== 'All') {
     list = list.filter(c => c.category === category);
   }
   
-  if (courseGroup && courseGroup !== 'All') {
-    list = list.filter(c => c.courseGroup === courseGroup);
+  if (mainGroup && mainGroup !== 'All') {
+    list = list.filter(c => c.mainGroup === mainGroup);
   }
   
   if (difficulty && difficulty !== 'All') {
@@ -215,11 +215,11 @@ function renderFilterSelectOptions() {
   // ดึงกลุ่มวิชาที่ไม่ซ้ำกัน
   const groups = new Set();
   AppState.cases.forEach(c => {
-    if (c.courseGroup) groups.add(c.courseGroup);
+    if (c.mainGroup) groups.add(c.mainGroup);
   });
   
   // เคลียร์ยกเว้นอันแรก
-  selectGroup.innerHTML = '<option value="All">ทุกกลุ่มวิชา (All Course Groups)</option>';
+  selectGroup.innerHTML = '<option value="All">ทุก OSPE Main Group</option>';
   
   groups.forEach(g => {
     const opt = document.createElement('option');
@@ -270,7 +270,7 @@ function renderCaseList() {
       </div>
       <h3 class="case-card-title">${c.title}</h3>
       <div style="margin-bottom: 0.5rem;">
-        <span class="case-card-tag">${c.courseGroup || 'ทั่วไป'}</span>
+        <span class="case-card-tag">${c.mainGroup || ""}${c.subTopic ? " · " + c.subTopic : ""}</span>
       </div>
       <div class="case-card-meta">
         <span class="difficulty-stars">${stars}</span>
@@ -393,7 +393,7 @@ function detectCurrentPage() {
     
     if (selectGroup) {
       selectGroup.addEventListener('change', (e) => {
-        AppState.activeFilters.courseGroup = e.target.value;
+        AppState.activeFilters.mainGroup = e.target.value;
         applyFilters();
         renderCaseList();
       });

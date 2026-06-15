@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PLE-CC2 OSPE Practice System — Google Apps Script Backend (v3.0)
  * File: Code.gs
  * ========================================================
@@ -18,7 +18,7 @@ const CONFIG = {
   spreadsheetId: '1Fuakz3nCXa7klgQznrtGUNVRvNp_g9BJRfWNHD0awxI',
   sheets: {
     caseLibrary: 'CaseLibrary',
-    courseGroups: 'CourseGroups',
+    mainGroups: 'MainGroups',
     settings: 'Settings',
     lobbyRooms: 'LobbyRooms'
   },
@@ -38,7 +38,7 @@ const DEFAULT_CASES = [
     caseId: 'OSPE-CL001',
     title: 'Warfarin Counseling — AF ใหม่',
     category: 'Clinic',
-    courseGroup: 'Anticoagulation',
+    mainGroup: 'Anticoagulation',
     disease: 'Atrial Fibrillation, Warfarin',
     difficulty: 3,
     docId: '1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g',
@@ -50,7 +50,7 @@ const DEFAULT_CASES = [
     caseId: 'OSPE-CL002',
     title: 'Warfarin Counseling — AF เปลี่ยนมาจาก NOAC',
     category: 'Clinic',
-    courseGroup: 'Anticoagulation',
+    mainGroup: 'Anticoagulation',
     disease: 'Atrial Fibrillation, Warfarin, Drug Switching',
     difficulty: 4,
     docId: '1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g',
@@ -65,7 +65,7 @@ const DEFAULT_CASES = [
     caseId: 'OSPE-PD001',
     title: 'Compounding — Cold Cream & Labeling',
     category: 'Product',
-    courseGroup: 'Compounding - Topical',
+    mainGroup: 'Compounding - Topical',
     disease: 'Dry Skin, Cold Cream',
     difficulty: 2,
     docId: '1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw',
@@ -77,7 +77,7 @@ const DEFAULT_CASES = [
     caseId: 'OSPE-PD002',
     title: 'Compounding — Oral Suspension & Labeling',
     category: 'Product',
-    courseGroup: 'Compounding - Liquid',
+    mainGroup: 'Compounding - Liquid',
     disease: 'Pediatric Fever, Paracetamol Suspension',
     difficulty: 3,
     docId: '1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw',
@@ -92,7 +92,7 @@ const DEFAULT_CASES = [
     caseId: 'OSPE-SP001',
     title: 'Pharmacy Law — ยาควบคุมพิเศษ',
     category: 'SAP',
-    courseGroup: 'Pharmacy Law',
+    mainGroup: 'Pharmacy Law',
     disease: 'Special Controlled Drugs Regulation',
     difficulty: 2,
     docId: '1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg',
@@ -104,7 +104,7 @@ const DEFAULT_CASES = [
     caseId: 'OSPE-SP002',
     title: 'Pharmacy Law — ยาเสพติดให้โทษประเภท 3',
     category: 'SAP',
-    courseGroup: 'Pharmacy Law',
+    mainGroup: 'Pharmacy Law',
     disease: 'Narcotic Drug, Codeine Prescription',
     difficulty: 3,
     docId: '1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg',
@@ -243,7 +243,7 @@ function getCaseList(params = {}) {
     if (sheet) {
       const data = sheet.getDataRange().getValues();
       if (data.length > 1) {
-        const headers = ['caseId', 'title', 'category', 'courseGroup', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive'];
+        const headers = ['caseId', 'title', 'category', 'mainGroup', 'subTopic', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive'];
         const rows = data.length > 2 ? data.slice(2) : [];
         
         cases = rows.map(row => {
@@ -269,8 +269,8 @@ function getCaseList(params = {}) {
   if (params.category && params.category !== 'All') {
     cases = cases.filter(c => c.category === params.category);
   }
-  if (params.courseGroup && params.courseGroup !== 'All') {
-    cases = cases.filter(c => c.courseGroup === params.courseGroup);
+  if (params.mainGroup && params.mainGroup !== 'All') {
+    cases = cases.filter(c => c.mainGroup === params.mainGroup);
   }
   if (params.difficulty && params.difficulty !== 'All') {
     cases = cases.filter(c => String(c.difficulty) === String(params.difficulty));
@@ -707,7 +707,7 @@ function getCourseGroups(category = 'All') {
   let groups = [];
   try {
     const ss = getSpreadsheet();
-    const sheet = ss.getSheetByName(CONFIG.sheets.courseGroups);
+    const sheet = ss.getSheetByName(CONFIG.sheets.mainGroups);
     if (sheet) {
       const data = sheet.getDataRange().getValues();
       if (data.length > 2) {
@@ -826,7 +826,7 @@ function generateExamSet(params = {}) {
       caseId: c.caseId,
       title: c.title,
       category: c.category,
-      courseGroup: c.courseGroup,
+      mainGroup: c.mainGroup,
       docId: c.docId
     };
   });
@@ -857,12 +857,12 @@ function setupSheets() {
   let sheetLib = ss.getSheetByName(CONFIG.sheets.caseLibrary);
   if (!sheetLib) {
     sheetLib = ss.insertSheet(CONFIG.sheets.caseLibrary);
-    const headers = ['caseId', 'title', 'category', 'courseGroup', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive'];
+    const headers = ['caseId', 'title', 'category', 'mainGroup', 'subTopic', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive'];
     sheetLib.appendRow(headers);
     
     // ใส่ 3 เคสมาตรฐาน
     DEFAULT_CASES.forEach(c => {
-      sheetLib.appendRow([c.caseId, c.title, c.category, c.courseGroup, c.disease, c.difficulty, c.docId, c.author, c.createdDate, c.isActive]);
+      sheetLib.appendRow([c.caseId, c.title, c.category, c.mainGroup, c.subTopic || '', c.disease, c.difficulty, c.docId, c.author, c.createdDate, c.isActive]);
     });
     results.push('สร้างชีท CaseLibrary และเพิ่ม 3 เคสมาตรฐานเรียบร้อย');
   } else {
@@ -870,9 +870,9 @@ function setupSheets() {
   }
   
   // 2. ตาราง CourseGroups
-  let sheetGroups = ss.getSheetByName(CONFIG.sheets.courseGroups);
+  let sheetGroups = ss.getSheetByName(CONFIG.sheets.mainGroups);
   if (!sheetGroups) {
-    sheetGroups = ss.insertSheet(CONFIG.sheets.courseGroups);
+    sheetGroups = ss.insertSheet(CONFIG.sheets.mainGroups);
     sheetGroups.appendRow(['name', 'category', 'description']);
     
     // รายชื่อ 15 Course Groups
@@ -1174,7 +1174,7 @@ function onFormSubmit(e) {
     // แมปข้อมูลคำถามของฟอร์ม (ปรับเปลี่ยนชื่อหัวข้อคำถามให้ตรงกับฟอร์มจริงของคุณ)
     const title = data['ชื่อเคส'] || data['Title'] || 'เคสสอบใหม่';
     const category = data['หมวดวิชา'] || data['Category'] || 'Clinic';
-    const courseGroup = data['กลุ่มวิชา'] || data['Course Group'] || 'ทั่วไป';
+    const mainGroup = data['กลุ่มวิชา'] || data['Course Group'] || 'ทั่วไป';
     const disease = data['โรค/ยา/หัวข้อหลัก'] || data['Disease'] || '';
     const scenario = data['โจทย์/สถานการณ์'] || data['Scenario'] || '';
     const checklistRaw = data['รายการ Checklist'] || data['Checklist'] || '';
@@ -1201,7 +1201,7 @@ function onFormSubmit(e) {
     
     body.appendParagraph('ข้อมูลเคส').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     body.appendParagraph(`- หมวด: ${category}`);
-    body.appendParagraph(`- Course Group: ${courseGroup}`);
+    body.appendParagraph(`- Course Group: ${mainGroup}`);
     body.appendParagraph(`- โรค/หัวข้อ: ${disease}`);
     body.appendParagraph(`- ผู้เขียน: สตาฟเตรียมสอบ`);
     body.appendParagraph(`- วันที่: ${new Date().toLocaleDateString('th-TH')}`);
@@ -1248,7 +1248,7 @@ function onFormSubmit(e) {
       caseId,
       title,
       category,
-      courseGroup,
+      mainGroup,
       disease,
       2, // ระดับกลางดีฟอลต์
       docId,
@@ -1557,14 +1557,14 @@ function syncCaseLibraryFromDocs() {
   let sheetLib = ss.getSheetByName(CONFIG.sheets.caseLibrary);
   if (!sheetLib) {
     sheetLib = ss.insertSheet(CONFIG.sheets.caseLibrary);
-    const headers = ['caseId', 'title', 'category', 'courseGroup', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive'];
+    const headers = ['caseId', 'title', 'category', 'mainGroup', 'subTopic', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive'];
     sheetLib.appendRow(headers);
   }
   
   // โหลดรายการเดิมที่มีอยู่ใน Sheet
   const existingCasesMap = {};
   const data = sheetLib.getDataRange().getValues();
-  const headers = ['caseId', 'title', 'category', 'courseGroup', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive'];
+  const headers = ['caseId', 'title', 'category', 'mainGroup', 'subTopic', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive'];
   const rows = data.length > 2 ? data.slice(2) : []; // อ่านข้อมูลจากแถว 3 เป็นต้นไป
   rows.forEach(row => {
     const caseId = row[0];
@@ -1602,7 +1602,8 @@ function syncCaseLibraryFromDocs() {
       caseId: c.caseId,
       title: c.title || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].title : ''),
       category: c.category || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].category : ''),
-      courseGroup: c.courseGroup || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].courseGroup : ''),
+      mainGroup: c.mainGroup || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].mainGroup : ''),
+      subTopic: c.subTopic || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].subTopic : ''),
       disease: c.disease || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].disease : ''),
       difficulty: c.difficulty || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].difficulty : 2),
       docId: c.docId || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].docId : ''),
@@ -1631,7 +1632,8 @@ function syncCaseLibraryFromDocs() {
       c.caseId,
       c.title,
       c.category,
-      c.courseGroup,
+      c.mainGroup,
+      c.subTopic || '',
       c.disease,
       c.difficulty,
       c.docId,
@@ -1669,7 +1671,8 @@ function scanDocForCases(docId) {
           let caseId = '';
           let title = '';
           let category = '';
-          let courseGroup = '';
+          let mainGroup = '';
+          let subTopic = '';
           let disease = '';
           let difficulty = 2;
           let author = '';
@@ -1692,8 +1695,8 @@ function scanDocForCases(docId) {
               title = valText;
             } else if (keyText.includes('หมวด') || keyText.includes('category')) {
               category = valText;
-            } else if (keyText.includes('ospe main group') || keyText.includes('กลุ่มวิชา') || keyText.includes('course group') || keyText.includes('coursegroup')) {
-              courseGroup = valText;
+            } else if (keyText.includes('ospe main group') || keyText.includes('กลุ่มวิชา') || keyText.includes('course group') || keyText.includes('mainGroup')) {
+              mainGroup = valText;
             } else if (keyText.includes('โรค/หัวข้อ') || keyText.includes('โรค') || keyText.includes('disease')) {
               disease = valText;
             } else if (keyText.includes('ระดับ') || keyText.includes('difficulty')) {
@@ -1711,7 +1714,8 @@ function scanDocForCases(docId) {
               caseId: caseId,
               title: title || 'Untitled Case',
               category: category || '',
-              courseGroup: courseGroup || '',
+              mainGroup: mainGroup || '',
+              subTopic: subTopic || '',
               disease: disease || '',
               difficulty: difficulty,
               docId: docId,
@@ -1733,7 +1737,8 @@ function scanDocForCases(docId) {
           const caseId = caseIdMatch[1].toUpperCase();
           let title = caseIdMatch[2].replace(/^[-—\s]+/, '').trim();
           let category = '';
-          let courseGroup = '';
+          let mainGroup = '';
+          let subTopic = '';
           let disease = '';
           let difficulty = 2;
           let author = '';
@@ -1759,7 +1764,7 @@ function scanDocForCases(docId) {
                 break;
               }
               
-              const metaMatch = nextText.match(/^[-*\sข้อมูลเคส]*\s*(หมวด|category|ospe main group|กลุ่มวิชา|course group|coursegroup|โรค\/หัวข้อ|โรค|disease|ระดับ|difficulty|ผู้เขียน|author|วันที่|date)\s*:\s*(.*)$/i);
+              const metaMatch = nextText.match(/^[-*\sข้อมูลเคส]*\s*(หมวด|category|ospe main group|กลุ่มวิชา|course group|mainGroup|โรค\/หัวข้อ|โรค|disease|ระดับ|difficulty|ผู้เขียน|author|วันที่|date)\s*:\s*(.*)$/i);
               if (metaMatch) {
                 const key = metaMatch[1].toLowerCase();
                 const val = metaMatch[2].trim();
@@ -1767,7 +1772,7 @@ function scanDocForCases(docId) {
                 if (key.includes('หมวด') || key.includes('category')) {
                   category = val;
                 } else if (key.includes('group') || key.includes('กลุ่มวิชา') || key.includes('course')) {
-                  courseGroup = val;
+                  mainGroup = val;
                 } else if (key.includes('โรค') || key.includes('disease')) {
                   disease = val;
                 } else if (key.includes('ระดับ') || key.includes('difficulty')) {
@@ -1787,7 +1792,8 @@ function scanDocForCases(docId) {
             caseId: caseId,
             title: title || 'Untitled Case',
             category: category || '',
-            courseGroup: courseGroup || '',
+            mainGroup: mainGroup || '',
+            subTopic: subTopic || '',
             disease: disease || '',
             difficulty: difficulty,
             docId: docId,

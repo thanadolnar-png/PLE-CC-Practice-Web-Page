@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th" data-theme="light">
 <head>
   <meta charset="UTF-8">
@@ -108,7 +108,7 @@
         background-color: white;
         color: black;
       }
-      .navbar, .viewer-tabs, .doc-iframe-wrapper, #api-status-banner, .btn, .progress-card, .theme-toggle-btn, .role-selector-container, .share-buttons-container, #viewer-timer-card {
+      .navbar, .viewer-tabs, .doc-iframe-wrapper, #api-status-banner, .btn, .progress-card, .theme-toggle-btn, .role-selector-container, #viewer-timer-card {
         display: none !important;
       }
       .viewer-grid {
@@ -183,11 +183,11 @@
         <button class="role-btn" id="role-btn-examiner" onclick="setViewerRole('examiner')">🔎 เป็นคนตรวจ/คนไข้ (Examiner)</button>
       </div>
 
-      <!-- Share links for Multiplayer practicing (no-print) -->
-      <div class="share-buttons-container no-print">
-        <button class="btn btn-secondary btn-share" id="share-examinee-btn" onclick="copyShareLink('examinee')">🔗 ก๊อปปี้ลิงก์สำหรับเพื่อนสอบ</button>
-        <button class="btn btn-secondary btn-share" id="share-examiner-btn" onclick="copyShareLink('examiner')">🔗 ก๊อปปี้ลิงก์สำหรับผู้ประเมิน</button>
-      </div>
+
+
+
+
+
 
       <!-- Viewer Grid Split Layout -->
       <div class="viewer-grid">
@@ -387,7 +387,7 @@
       const tagsContainer = document.getElementById('case-meta-tags');
       tagsContainer.innerHTML = `
         <span class="badge badge-${c.category.toLowerCase()}">${c.category}</span>
-        <span class="case-card-tag" style="background-color: var(--primary-light); color: var(--primary);">${c.courseGroup || 'ทั่วไป'}</span>
+        <span class="case-card-tag" style="background-color: var(--primary-light); color: var(--primary);">${c.mainGroup || ""}${c.subTopic ? " · " + c.subTopic : ""}</span>
         <span class="case-card-tag">โรค/หัวข้อ: ${c.disease || 'ความรู้หลัก'}</span>
         <span class="case-card-tag">ระดับ: ${c.difficulty || '1'}</span>
         <span class="case-card-tag">ผู้เขียน: ${c.author || 'ไม่ระบุ'}</span>
@@ -584,15 +584,15 @@
       }
     }
 
-    // ฟังก์ชันแชร์ลิงก์ด่วน
-    function copyShareLink(role) {
-      const shareUrl = `${window.location.origin}${window.location.pathname}?id=${activeCaseId}&mode=${role}`;
-      navigator.clipboard.writeText(shareUrl).then(() => {
-        alert(`ก๊อปปี้ลิงก์สำหรับบทบาท "${role === 'examinee' ? 'ผู้เข้าสอบ' : 'ผู้ประเมิน'}" ไปยังคลิปบอร์ดแล้ว! ส่งต่อให้เพื่อนกดเปิดหน้าจอเพื่อซ้อมคู่กันได้เลยครับ`);
-      }).catch(err => {
-        console.error('คัดลอกลิงก์ล้มเหลว:', err);
-      });
-    }
+
+
+
+
+
+
+
+
+
 
     // ──────────────────────────────────────────────────────────
     // 4-Minute Timer Logic for Viewer
