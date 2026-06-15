@@ -397,11 +397,13 @@ function getCaseContentFromDoc(docId, targetCaseId) {
       
       if (!recording) continue;
       
-      // ตรวจสอบหัวข้อหลักย่อย
-      if (heading === DocumentApp.ParagraphHeading.HEADING1 || 
-          heading === DocumentApp.ParagraphHeading.HEADING2 || 
-          text.startsWith('## ') || 
-          text.startsWith('# ')) {
+      // ตรวจสอบหัวข้อหลักย่อย (ต้องไม่ใช่การระบุกลุ่มย่อยของ Checklist เช่น (กลุ่ม: ...))
+      if ((heading === DocumentApp.ParagraphHeading.HEADING1 || 
+           heading === DocumentApp.ParagraphHeading.HEADING2 || 
+           text.startsWith('## ') || 
+           text.startsWith('# ')) &&
+          !text.startsWith('(กลุ่ม:') &&
+          !text.startsWith('**กลุ่ม:')) {
         
         const cleanText = text.replace(/^#+\s*/, '').trim();
         if (cleanText.includes('ข้อมูลเคส')) {
