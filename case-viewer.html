@@ -459,11 +459,10 @@
         <table class="print-checklist-table">
           <thead>
             <tr>
-              <th style="width: 25%;">กลุ่มความก้าวหน้า</th>
-              <th style="width: 50%;">รายละเอียดการปฏิบัติงาน</th>
-              <th style="width: 10%;" class="print-center-cell">คะแนนเต็ม</th>
-              <th style="width: 7%;" class="print-center-cell">ผ่าน</th>
-              <th style="width: 8%;" class="print-center-cell">ไม่ผ่าน</th>
+              <th style="width: 25%;">กลุ่ม</th>
+              <th style="width: 55%;">รายละเอียดการปฏิบัติงาน</th>
+              <th style="width: 10%;" class="print-center-cell">คะแนน</th>
+              <th style="width: 10%;" class="print-center-cell">ผลประเมิน</th>
             </tr>
           </thead>
           <tbody>
@@ -496,14 +495,13 @@
           
           container.appendChild(el);
           
-          // แถวตารางพิมพ์
+          // ตารางพิมพ์
           printTableHtml += `
             <tr>
               ${idx === 0 ? `<td rowspan="${groups[groupName].length}" style="font-weight: 600; vertical-align: middle;">${escapeHtml(groupName)}</td>` : ''}
               <td>${escapeHtml(item.text)}</td>
               <td class="print-center-cell">${item.score}</td>
               <td class="print-center-cell">[ ${isChecked ? '✓' : ' '} ]</td>
-              <td class="print-center-cell">[ ${!isChecked ? '✓' : ' '} ]</td>
             </tr>
           `;
         });
