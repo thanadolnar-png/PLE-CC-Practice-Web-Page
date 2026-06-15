@@ -1230,3 +1230,108 @@ a {
   background-color: var(--surface);
 }
 
+/* --- Examiner Full-Width Layout (Toggled via JS) --- */
+.viewer-grid.examiner-layout #left-pane,
+.exam-layout.examiner-layout #exam-left-pane {
+  display: none !important;
+}
+
+.viewer-grid.examiner-layout #right-pane,
+.exam-layout.examiner-layout .exam-sidebar-pane {
+  flex: 0 0 100% !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+.viewer-grid.examiner-layout .checklist-container,
+.exam-layout.examiner-layout #exam-checklist-container,
+.exam-layout.examiner-layout .checklist-container {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)) !important;
+  gap: 1rem !important;
+}
+
+.viewer-grid.examiner-layout .checklist-group-title,
+.exam-layout.examiner-layout .checklist-group-title {
+  grid-column: 1 / -1 !important;
+  margin-top: 1rem !important;
+  border-left: 4px solid var(--primary);
+  padding-left: 0.5rem;
+}
+
+/* --- Print-Only & No-Print Helpers --- */
+.print-only-block {
+  display: none;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .print-only-block {
+    display: block !important;
+  }
+  
+  body {
+    background-color: white !important;
+    color: black !important;
+    font-size: 11pt !important;
+  }
+  
+  .container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .viewer-grid, .exam-layout {
+    display: block !important;
+  }
+
+  .viewer-pane, .exam-content-pane, .exam-sidebar-pane {
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 0 2rem 0 !important;
+  }
+
+  /* Printable Checklist Table Design */
+  table.print-checklist-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-top: 1.5rem !important;
+    margin-bottom: 2rem !important;
+    page-break-inside: auto;
+  }
+
+  table.print-checklist-table tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  table.print-checklist-table th, table.print-checklist-table td {
+    border: 1px solid #000000 !important;
+    padding: 0.6rem 0.8rem !important;
+    text-align: left !important;
+    color: black !important;
+  }
+
+  table.print-checklist-table th {
+    background-color: #f1f5f9 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    font-weight: 700 !important;
+    text-align: center !important;
+  }
+
+  .print-center-cell {
+    text-align: center !important;
+  }
+
+  .print-page-break {
+    page-break-before: always !important;
+  }
+}
+
+

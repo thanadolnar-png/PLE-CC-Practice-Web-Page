@@ -132,7 +132,7 @@
 <body>
 
   <!-- Navbar -->
-  <nav class="navbar" id="main-nav">
+  <nav class="navbar no-print" id="main-nav">
     <div class="container">
       <a href="index.html" class="logo" id="nav-logo">
         <div class="logo-icon">🥼</div>
@@ -422,7 +422,7 @@
       document.getElementById('case-viewer-app').style.display = 'block';
     }
 
-    function renderChecklist(c) {
+        function renderChecklist(c) {
       const container = document.getElementById('checklist-items-container');
       const printContainer = document.getElementById('print-checklist-list');
       container.innerHTML = '';
@@ -443,6 +443,21 @@
       
       const checkedList = AppState.checklistProgress[c.caseId] || [];
       
+      // สร้างตารางประเมินผลทางการสำหรับพิมพ์ (@media print)
+      let printTableHtml = `
+        <table class="print-checklist-table">
+          <thead>
+            <tr>
+              <th style="width: 25%;">กลุ่มความก้าวหน้า</th>
+              <th style="width: 50%;">รายละเอียดการปฏิบัติงาน</th>
+              <th style="width: 10%;" class="print-center-cell">คะแนนเต็ม</th>
+              <th style="width: 7%;" class="print-center-cell">ผ่าน</th>
+              <th style="width: 8%;" class="print-center-cell">ไม่ผ่าน</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      
       // แสดงผล
       Object.keys(groups).forEach(groupName => {
         // 1. หัวข้อกลุ่ม
@@ -451,15 +466,8 @@
         grpHdr.textContent = `กลุ่ม: ${groupName}`;
         container.appendChild(grpHdr);
         
-        if (printContainer) {
-          const printHdr = document.createElement('h4');
-          printHdr.style.marginTop = '1rem';
-          printHdr.textContent = `กลุ่ม: ${groupName}`;
-          printContainer.appendChild(printHdr);
-        }
-        
         // 2. รายการในกลุ่ม
-        groups[groupName].forEach(item => {
+        groups[groupName].forEach((item, idx) => {
           const isChecked = checkedList.includes(item.id);
           const el = document.createElement('div');
           el.className = `checklist-item ${isChecked ? 'checked' : ''}`;
@@ -477,14 +485,27 @@
           
           container.appendChild(el);
           
-          if (printContainer) {
-            const printEl = document.createElement('p');
-            printEl.style.margin = '0.35rem 0';
-            printEl.textContent = `[ ${isChecked ? '✓' : ' '} ] (${item.score} คะแนน) ${item.text}`;
-            printContainer.appendChild(printEl);
-          }
+          // แถวตารางพิมพ์
+          printTableHtml += `
+            <tr>
+              ${idx === 0 ? `<td rowspan="${groups[groupName].length}" style="font-weight: 600; vertical-align: middle;">${escapeHtml(groupName)}</td>` : ''}
+              <td>${escapeHtml(item.text)}</td>
+              <td class="print-center-cell">${item.score}</td>
+              <td class="print-center-cell">[ ${isChecked ? '✓' : ' '} ]</td>
+              <td class="print-center-cell">[ ${!isChecked ? '✓' : ' '} ]</td>
+            </tr>
+          `;
         });
       });
+      
+      printTableHtml += `
+          </tbody>
+        </table>
+      `;
+      
+      if (printContainer) {
+        printContainer.innerHTML = printTableHtml;
+      }
       
       // อัปเดต UI Progress bar ตอนเริ่มต้น
       updateChecklistUI(c.caseId);
@@ -505,9 +526,19 @@
       const docTabs = document.getElementById('doc-tabs-bar');
       const noteArea = document.getElementById('note-content-area');
       const toggleNoteBtn = document.getElementById('toggle-note-btn');
+      const leftPane = document.getElementById('left-pane');
+      const rightPane = document.getElementById('right-pane');
+      const grid = document.querySelector('.viewer-grid');
 
       // เคลียร์/หยุด ตัวจับเวลาเก่าก่อน
       stopViewerTimer();
+
+      // จัดการการขยายหน้า Checklist เต็มจอ (Full-width)
+      if (role === 'examiner') {
+        grid.classList.add('examiner-layout');
+      } else {
+        grid.classList.remove('examiner-layout');
+      }
 
       if (role === 'solo') {
         chkSection.style.display = 'block';
@@ -530,7 +561,8 @@
         switchViewerTab('content');      // บังคับแสดงหน้าโจทย์
         
         resetViewerTimer();
-        startViewerTimer(); // เริ่มจับเวลากดทันทีสำหรับคนทำสอบ
+        // ไม่เล่นอัตโนมัติตามแผนใหม่: ค้างที่ 04:00 และเปลี่ยนข้อความปุ่ม
+        document.getElementById('viewer-timer-btn').textContent = '▶️ เริ่มจับเวลา';
       } 
       else if (role === 'examiner') {
         // ผู้ตรวจ/คนไข้: เห็น Checklist, เฉลย (กางออกทันที), และตัวจับเวลา
@@ -545,6 +577,7 @@
         if (toggleNoteBtn) toggleNoteBtn.textContent = '🔒 ซ่อนเฉลย / ข้อมูลผู้ตรวจ';
         
         resetViewerTimer();
+        // ผู้ประเมินให้เวลาเดินทันที
         startViewerTimer();
       }
     }
@@ -584,8 +617,13 @@
     }
 
     function toggleViewerTimer() {
-      viewerTimerRunning = !viewerTimerRunning;
-      document.getElementById('viewer-timer-btn').textContent = viewerTimerRunning ? '⏸️ พักการจับเวลา' : '▶️ เล่นตัวจับเวลาต่อ';
+      if (!viewerTimerRunning && viewerTimerInterval === null) {
+        // ถ้าค้างไว้ที่ 04:00 (ยังไม่เคยสตาร์ท)
+        startViewerTimer();
+      } else {
+        viewerTimerRunning = !viewerTimerRunning;
+        document.getElementById('viewer-timer-btn').textContent = viewerTimerRunning ? '⏸️ พักการจับเวลา' : '▶️ เล่นตัวจับเวลาต่อ';
+      }
     }
 
     function stopViewerTimer() {

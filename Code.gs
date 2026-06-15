@@ -19,7 +19,8 @@ const CONFIG = {
   sheets: {
     caseLibrary: 'CaseLibrary',
     courseGroups: 'CourseGroups',
-    settings: 'Settings'
+    settings: 'Settings',
+    lobbyRooms: 'LobbyRooms'
   },
   defaultExamRatio: {
     clinic: 8,
@@ -118,6 +119,18 @@ function doGet(e) {
           
         case 'setupDocs':
           return buildResponse(updateDocsWithSampleContent());
+          
+        case 'createRoom':
+          return buildResponse(createRoom(e.parameter));
+          
+        case 'joinRoom':
+          return buildResponse(joinRoom(e.parameter));
+          
+        case 'getRoomStatus':
+          return buildResponse(getRoomStatus(e.parameter.roomId));
+          
+        case 'updateRoomStatus':
+          return buildResponse(updateRoomStatus(e.parameter.roomId, e.parameter));
           
         default:
           return buildResponse({ error: 'Invalid action parameter' }, 400);
@@ -246,7 +259,7 @@ function getCase(caseId) {
   // ดึงข้อมูล HTML และ Checklist จาก Google Doc
   if (matchedCase.docId) {
     try {
-      const docData = getCaseContentFromDoc(matchedCase.docId);
+      const docData = getCaseContentFromDoc(matchedCase.docId, caseId);
       matchedCase.contentHtml = docData.contentHtml;
       matchedCase.content = docData.contentHtml; // รองรับตัวแปรเก่า
       matchedCase.checklist = docData.checklist;
@@ -274,7 +287,7 @@ function getCase(caseId) {
  * 3. Google Docs Parser (ดึงข้อความ & รูปภาพภาพประกอบ)
  * ──────────────────────────────────────────────────────────────
  */
-function getCaseContentFromDoc(docId) {
+function getCaseContentFromDoc(docId, targetCaseId) {
   const doc = DocumentApp.openById(docId);
   const body = doc.getBody();
   
@@ -287,19 +300,59 @@ function getCaseContentFromDoc(docId) {
   const checklist = [];
   let currentGroup = 'ทั่วไป';
   
+  let recording = false;
+  let hasFoundCase = false;
+  
   const numChildren = body.getNumChildren();
   
   for (let i = 0; i < numChildren; i++) {
     const child = body.getChild(i);
     const type = child.getType();
     
-    // 1. ตรวจสอบ Heading เพื่อเปลี่ยน Section
+    // 1. ตรวจสอบว่าตารางแม่แบบเขียนเคสหรือไม่ (Table Template)
+    if (type === DocumentApp.ElementType.TABLE) {
+      const table = child.asTable();
+      const isTemplate = checkTableTemplate(table, targetCaseId);
+      if (isTemplate) {
+        return parseTableTemplateToCaseData(table, targetCaseId);
+      }
+      
+      // ถ้าเป็นตารางทั่วไปที่อยู่ในส่วน ข้อมูลผู้ป่วย หรือ เฉลย
+      if (recording) {
+        if (currentSection === 'PATIENT_INFO') {
+          patientInfoHtml += parseTableToHtml(table);
+        } else if (currentSection === 'NOTE') {
+          noteHtml += parseTableToHtml(table);
+        }
+      }
+      continue;
+    }
+    
+    // 2. ตรวจสอบย่อหน้าหัวข้อต่างๆ
     if (type === DocumentApp.ElementType.PARAGRAPH) {
       const p = child.asParagraph();
       const text = p.getText().trim();
       const heading = p.getHeading();
       
-      // ตรวจสอบ H1 หรือ H2 หรือข้อความที่ขึ้นต้นด้วย # สำหรับสลับ Section
+      // ค้นหาการประกาศเคสใหม่ในแบบข้อเขียน เช่น # [OSPE-CL001] หรือ [OSPE-CL001]
+      const caseIdMatch = text.match(/^#+\s*\[(OSPE-[A-Z0-9]+)\]/) || text.match(/^\[(OSPE-[A-Z0-9]+)\]/);
+      if (caseIdMatch) {
+        const foundCaseId = caseIdMatch[1];
+        if (foundCaseId === targetCaseId) {
+          recording = true;
+          hasFoundCase = true;
+          currentSection = 'METADATA';
+          continue;
+        } else if (recording) {
+          // เจอเคสถัดไปแล้ว สั่งตัดการบันทึก (Multi-case support)
+          recording = false;
+          break;
+        }
+      }
+      
+      if (!recording) continue;
+      
+      // ตรวจสอบหัวข้อหลักย่อย
       if (heading === DocumentApp.ParagraphHeading.HEADING_1 || 
           heading === DocumentApp.ParagraphHeading.HEADING_2 || 
           text.startsWith('## ') || 
@@ -322,7 +375,7 @@ function getCaseContentFromDoc(docId) {
         continue;
       }
       
-      // ตรวจสอบ H3 หรือกลุ่มใน Checklist
+      // ตรวจสอบกลุ่ม Checklist
       if (currentSection === 'CHECKLIST' && 
           (heading === DocumentApp.ParagraphHeading.HEADING_3 || 
            heading === DocumentApp.ParagraphHeading.HEADING_4 || 
@@ -339,7 +392,9 @@ function getCaseContentFromDoc(docId) {
       }
     }
     
-    // 2. ประมวลผลข้อมูลตาม Section ปัจจุบัน
+    if (!recording) continue;
+    
+    // 3. สะสมข้อมูลข้อความจากย่อหน้า
     if (currentSection === 'SCENARIO') {
       if (type === DocumentApp.ElementType.PARAGRAPH) {
         const paragraphHtml = parseParagraphToHtml(child.asParagraph());
@@ -350,9 +405,7 @@ function getCaseContentFromDoc(docId) {
       }
     } 
     else if (currentSection === 'PATIENT_INFO') {
-      if (type === DocumentApp.ElementType.TABLE) {
-        patientInfoHtml += parseTableToHtml(child.asTable());
-      } else if (type === DocumentApp.ElementType.PARAGRAPH) {
+      if (type === DocumentApp.ElementType.PARAGRAPH) {
         const paragraphHtml = parseParagraphToHtml(child.asParagraph());
         if (paragraphHtml) {
           patientInfoHtml += paragraphHtml;
@@ -368,25 +421,19 @@ function getCaseContentFromDoc(docId) {
           text = child.asListItem().getText().trim();
         }
         
-        // เช็คว่าเป็นเกณฑ์ Checklist หรือไม่ (ขึ้นต้นด้วย [ ], [x], ☐, ☑, -)
         const isChecklistItem = text.startsWith('[ ]') || text.startsWith('[x]') || text.startsWith('☐') || text.startsWith('☑') || text.startsWith('-');
-        
         if (isChecklistItem && text.length > 3) {
           let cleanText = text.replace(/^([-☐☑]|\[\s*\]|\[x\])\s*/, '').trim();
-          
-          // ค้นหาคะแนนในวงเล็บ เช่น (2) แนะนำยาลดความดัน -> score = 2, text = แนะนำยาลดความดัน
-          const scoreMatch = cleanText.match(/^\((\d+)\)\s*(.*)$/);
+          const scoreMatch = cleanText.match(/^\((\d+(\.\d+)?)\)\s*(.*)$/);
           let score = 1;
           let itemText = cleanText;
           
           if (scoreMatch) {
-            score = parseInt(scoreMatch[1]);
-            itemText = scoreMatch[2].trim();
+            score = parseFloat(scoreMatch[1]);
+            itemText = scoreMatch[3].trim();
           }
           
-          // ใช้ simpleHash แทน CryptoJS เพื่อป้องกันไลบรารีขาดหาย
           const itemId = 'chk_' + simpleHash(itemText).substring(0, 10);
-          
           checklist.push({
             id: itemId,
             text: itemText,
@@ -406,8 +453,6 @@ function getCaseContentFromDoc(docId) {
       } else if (type === DocumentApp.ElementType.LIST_ITEM) {
         const liHtml = parseParagraphToHtml(child.asParagraph());
         noteHtml += `<li>${liHtml}</li>`;
-      } else if (type === DocumentApp.ElementType.TABLE) {
-        noteHtml += parseTableToHtml(child.asTable());
       }
     }
   }
@@ -419,6 +464,132 @@ function getCaseContentFromDoc(docId) {
     checklist: checklist,
     noteHtml: noteHtml
   };
+}
+
+function checkTableTemplate(table, targetCaseId) {
+  try {
+    const numRows = table.getNumRows();
+    if (numRows < 4) return false;
+    
+    // ค้นหาหัวข้อรหัสเคสในคอลัมน์แรกเพื่อสกัด ID
+    for (let r = 0; r < Math.min(numRows, 4); r++) {
+      const row = table.getRow(r);
+      if (row.getNumCells() < 2) continue;
+      
+      const keyText = row.getCell(0).getText().trim().toLowerCase();
+      const valText = row.getCell(1).getText().trim();
+      
+      // ถ้าร้องขอ caseId เจาะจง ให้เช็คตรงกัน
+      if (targetCaseId) {
+        if ((keyText.includes('รหัสเคส') || keyText.includes('case id') || keyText.includes('caseid')) && valText.includes(targetCaseId)) {
+          return true;
+        }
+      } else {
+        // ถ้าใช้หาทั่วไปใน Doc scan
+        if (keyText.includes('รหัสเคส') || keyText.includes('case id') || keyText.includes('caseid')) {
+          return true;
+        }
+      }
+    }
+  } catch(e) {
+    Logger.log('Error checking table template: ' + e.toString());
+  }
+  return false;
+}
+
+function parseTableTemplateToCaseData(table, targetCaseId) {
+  let scenario = '';
+  let patientInfoHtml = '';
+  let noteHtml = '';
+  let contentHtml = '';
+  const checklist = [];
+  
+  const numRows = table.getNumRows();
+  
+  for (let r = 0; r < numRows; r++) {
+    const row = table.getRow(r);
+    if (row.getNumCells() < 2) continue;
+    
+    const keyCell = row.getCell(0);
+    const valCell = row.getCell(1);
+    const keyText = keyCell.getText().trim().toLowerCase();
+    
+    if (keyText.includes('โจทย์') || keyText.includes('scenario') || keyText.includes('สถานการณ์')) {
+      contentHtml = parseCellToHtml(valCell);
+      scenario = valCell.getText().trim();
+    }
+    else if (keyText.includes('ข้อมูลผู้ป่วย') || keyText.includes('patient info')) {
+      patientInfoHtml = parseCellToHtml(valCell);
+    }
+    else if (keyText.includes('checklist') || keyText.includes('เกณฑ์ประเมิน')) {
+      const text = valCell.getText();
+      const lines = text.split('\n');
+      let currentGroup = 'ทั่วไป';
+      
+      lines.forEach(line => {
+        const cleanLine = line.trim();
+        if (!cleanLine) return;
+        
+        // ค้นหาการประกาศกลุ่มย่อย เช่น (กลุ่ม: การซักประวัติ)
+        const groupMatch = cleanLine.match(/\(กลุ่ม:\s*([^)]+)\)/) || cleanLine.match(/กลุ่ม:\s*(.*)$/);
+        if (groupMatch && (cleanLine.includes('กลุ่ม:') || cleanLine.startsWith('##'))) {
+          currentGroup = groupMatch[1].trim();
+          return;
+        }
+        
+        const isChecklistItem = cleanLine.startsWith('[ ]') || cleanLine.startsWith('[x]') || cleanLine.startsWith('☐') || cleanLine.startsWith('☑') || cleanLine.startsWith('-');
+        if (isChecklistItem && cleanLine.length > 3) {
+          let itemTextRaw = cleanLine.replace(/^([-☐☑]|\[\s*\]|\[x\])\s*/, '').trim();
+          const scoreMatch = itemTextRaw.match(/^\((\d+(\.\d+)?)\)\s*(.*)$/);
+          let score = 1;
+          let itemText = itemTextRaw;
+          
+          if (scoreMatch) {
+            score = parseFloat(scoreMatch[1]);
+            itemText = scoreMatch[3].trim();
+          }
+          
+          const itemId = 'chk_' + simpleHash(itemText).substring(0, 10);
+          checklist.push({
+            id: itemId,
+            text: itemText,
+            score: score,
+            group: currentGroup,
+            checked: false
+          });
+        }
+      });
+    }
+    else if (keyText.includes('เฉลย') || keyText.includes('หมายเหตุ') || keyText.includes('notes') || keyText.includes('ข้อมูลผู้ตรวจ')) {
+      noteHtml = parseCellToHtml(valCell);
+    }
+  }
+  
+  return {
+    scenario: scenario,
+    patientInfoHtml: patientInfoHtml,
+    contentHtml: contentHtml,
+    checklist: checklist,
+    noteHtml: noteHtml
+  };
+}
+
+function parseCellToHtml(cell) {
+  let html = '';
+  const numChildren = cell.getNumChildren();
+  for (let i = 0; i < numChildren; i++) {
+    const child = cell.getChild(i);
+    const type = child.getType();
+    
+    if (type === DocumentApp.ElementType.PARAGRAPH) {
+      html += parseParagraphToHtml(child.asParagraph());
+    } else if (type === DocumentApp.ElementType.TABLE) {
+      html += parseTableToHtml(child.asTable());
+    } else if (type === DocumentApp.ElementType.LIST_ITEM) {
+      html += `<li>${parseParagraphToHtml(child.asParagraph())}</li>`;
+    }
+  }
+  return html;
 }
 
 /**
@@ -682,6 +853,16 @@ function setupSheets() {
     results.push('สร้างชีท CourseGroups และลงทะเบียน 15 กลุ่มวิชาเรียบร้อย');
   } else {
     results.push('ชีท CourseGroups มีอยู่แล้ว');
+  }
+  
+  // 3. ตาราง LobbyRooms
+  let sheetLobby = ss.getSheetByName(CONFIG.sheets.lobbyRooms);
+  if (!sheetLobby) {
+    sheetLobby = ss.insertSheet(CONFIG.sheets.lobbyRooms);
+    sheetLobby.appendRow(['roomId', 'caseId', 'hostRole', 'examineeName', 'examinerName', 'timerValue', 'timerRunning', 'checklistProgress', 'status', 'lastUpdated']);
+    results.push('สร้างชีท LobbyRooms และลงทะเบียนเรียบร้อย');
+  } else {
+    results.push('ชีท LobbyRooms มีอยู่แล้ว');
   }
   
   // จัด Format แบนเนอร์กลับสู่หน้าแรก (ตามเกณฑ์ข้อกำหนด GEMINI.md ข้อ 3.5)
@@ -1010,3 +1191,464 @@ function simpleHash(str) {
   }
   return Math.abs(hash).toString(16);
 }
+
+/**
+ * ──────────────────────────────────────────────────────────────
+ * 11. Multiplayer Lobby Room Functions
+ * ──────────────────────────────────────────────────────────────
+ */
+function createRoom(params) {
+  const ss = getSpreadsheet();
+  let sheet = ss.getSheetByName(CONFIG.sheets.lobbyRooms);
+  if (!sheet) {
+    sheet = ss.insertSheet(CONFIG.sheets.lobbyRooms);
+    sheet.appendRow(['roomId', 'caseId', 'hostRole', 'examineeName', 'examinerName', 'timerValue', 'timerRunning', 'checklistProgress', 'status', 'lastUpdated']);
+  }
+  
+  const roomId = params.roomId || String(Math.floor(1000 + Math.random() * 9000));
+  const caseId = params.caseId || '';
+  const hostRole = params.hostRole || 'examiner';
+  const playerName = params.playerName || 'Host';
+  
+  const examineeName = hostRole === 'examinee' ? playerName : '';
+  const examinerName = hostRole === 'examiner' ? playerName : '';
+  const timestamp = new Date().toISOString();
+  
+  const data = sheet.getDataRange().getValues();
+  let foundRowIdx = -1;
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(roomId)) {
+      foundRowIdx = i + 1;
+      break;
+    }
+  }
+  
+  if (foundRowIdx > -1) {
+    sheet.getRange(foundRowIdx, 2, 1, 9).setValues([[caseId, hostRole, examineeName, examinerName, 240, 'FALSE', '', 'setup', timestamp]]);
+  } else {
+    sheet.appendRow([roomId, caseId, hostRole, examineeName, examinerName, 240, 'FALSE', '', 'setup', timestamp]);
+  }
+  
+  return { roomId: roomId, status: 'created', role: hostRole };
+}
+
+function joinRoom(params) {
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName(CONFIG.sheets.lobbyRooms);
+  if (!sheet) throw new Error('LobbyRooms sheet not initialized');
+  
+  const roomId = params.roomId;
+  const role = params.role; 
+  const playerName = params.playerName || 'Player';
+  
+  const data = sheet.getDataRange().getValues();
+  let foundRowIdx = -1;
+  let roomData = null;
+  
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(roomId)) {
+      foundRowIdx = i + 1;
+      roomData = data[i];
+      break;
+    }
+  }
+  
+  if (foundRowIdx === -1) {
+    throw new Error('Room not found: ' + roomId);
+  }
+  
+  let caseId = roomData[1];
+  let hostRole = roomData[2];
+  let examineeName = roomData[3];
+  let examinerName = roomData[4];
+  
+  if (role === 'examinee') {
+    examineeName = playerName;
+  } else {
+    examinerName = playerName;
+  }
+  
+  const timestamp = new Date().toISOString();
+  sheet.getRange(foundRowIdx, 4, 1, 2).setValues([[examineeName, examinerName]]);
+  sheet.getRange(foundRowIdx, 10).setValue(timestamp);
+  
+  return { roomId: roomId, status: 'joined', caseId: caseId };
+}
+
+function getRoomStatus(roomId) {
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName(CONFIG.sheets.lobbyRooms);
+  if (!sheet) return { error: 'Lobby sheet not found' };
+  
+  const data = sheet.getDataRange().getValues();
+  let room = null;
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(roomId)) {
+      room = {
+        roomId: String(data[i][0]),
+        caseId: data[i][1],
+        hostRole: data[i][2],
+        examineeName: data[i][3],
+        examinerName: data[i][4],
+        timerValue: parseInt(data[i][5]) || 0,
+        timerRunning: String(data[i][6]) === 'TRUE',
+        checklistProgress: data[i][7] ? String(data[i][7]).split(',') : [],
+        status: data[i][8],
+        lastUpdated: data[i][9]
+      };
+      break;
+    }
+  }
+  
+  if (!room) {
+    return { success: false, error: 'Room not found' };
+  }
+  
+  if (room.caseId) {
+    try {
+      const caseDetail = getCase(room.caseId);
+      room.caseDetail = caseDetail;
+    } catch (e) {
+      room.caseDetail = null;
+    }
+  }
+  
+  return room;
+}
+
+function updateRoomStatus(roomId, params) {
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName(CONFIG.sheets.lobbyRooms);
+  if (!sheet) throw new Error('Lobby sheet not found');
+  
+  const data = sheet.getDataRange().getValues();
+  let foundRowIdx = -1;
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(roomId)) {
+      foundRowIdx = i + 1;
+      break;
+    }
+  }
+  
+  if (foundRowIdx === -1) {
+    throw new Error('Room not found');
+  }
+  
+  const timestamp = new Date().toISOString();
+  
+  if (params.caseId !== undefined) {
+    sheet.getRange(foundRowIdx, 2).setValue(params.caseId);
+  }
+  if (params.timerValue !== undefined) {
+    sheet.getRange(foundRowIdx, 6).setValue(params.timerValue);
+  }
+  if (params.timerRunning !== undefined) {
+    sheet.getRange(foundRowIdx, 7).setValue(params.timerRunning.toUpperCase());
+  }
+  if (params.checklistProgress !== undefined) {
+    sheet.getRange(foundRowIdx, 8).setValue(params.checklistProgress);
+  }
+  if (params.status !== undefined) {
+    sheet.getRange(foundRowIdx, 9).setValue(params.status);
+  }
+  
+  sheet.getRange(foundRowIdx, 10).setValue(timestamp);
+  
+  return { success: true };
+}
+
+/**
+ * ──────────────────────────────────────────────────────────────
+ * 12. Google Sheets UI Custom Menu Triggers
+ * ──────────────────────────────────────────────────────────────
+ */
+function onOpen() {
+  try {
+    const ui = SpreadsheetApp.getUi();
+    ui.createMenu('🥼 RxCU OSPE System')
+        .addItem('🛠️ Setup Sheets & Lobby (สร้างตารางหลัก)', 'menuSetupSheets')
+        .addItem('🔄 Sync Case Library from Docs (ดึงเคสจาก Docs เข้าคลัง)', 'menuSyncCaseLibrary')
+        .addItem('📝 Populate Sample Docs (สร้างเคสตัวอย่าง)', 'menuSetupDocs')
+        .addItem('🏠 Decorate Banners (จัดแต่งแบนเนอร์กลับหน้าแรก)', 'menuDecorateBanners')
+        .addToUi();
+  } catch (e) {
+    Logger.log('Cannot build UI in non-spreadsheet context: ' + e.toString());
+  }
+}
+
+function menuSetupSheets() {
+  const res = setupSheets();
+  SpreadsheetApp.getUi().alert('สำเร็จ!\n' + res.message + '\n\nรายละเอียด:\n' + res.details.join('\n'));
+}
+
+function menuSyncCaseLibrary() {
+  const res = syncCaseLibraryFromDocs();
+  SpreadsheetApp.getUi().alert('สำเร็จ!\n' + res.message + '\n\nรายละเอียด:\n' + res.details.join('\n'));
+}
+
+function menuSetupDocs() {
+  const res = updateDocsWithSampleContent();
+  SpreadsheetApp.getUi().alert('สำเร็จ!\n' + res.message + '\n\nรายละเอียด:\n' + res.details.join('\n'));
+}
+
+function menuDecorateBanners() {
+  const ss = getSpreadsheet();
+  decorateHomeBanners(ss);
+  SpreadsheetApp.getUi().alert('สำเร็จ! ตกแต่งและจัด Format แบนเนอร์กลับสู่หน้าแรกเรียบร้อยตามเกณฑ์');
+}
+
+/**
+ * ──────────────────────────────────────────────────────────────
+ * 13. Sync Case Library from Google Docs (ดึงสแกนเคสจาก Docs ทั้ง 3 ตัว)
+ * ──────────────────────────────────────────────────────────────
+ */
+function syncCaseLibraryFromDocs() {
+  const ss = getSpreadsheet();
+  let sheetLib = ss.getSheetByName(CONFIG.sheets.caseLibrary);
+  if (!sheetLib) {
+    sheetLib = ss.insertSheet(CONFIG.sheets.caseLibrary);
+    const headers = ['caseId', 'title', 'category', 'courseGroup', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive'];
+    sheetLib.appendRow(headers);
+  }
+  
+  // โหลดรายการเดิมที่มีอยู่ใน Sheet
+  const existingCasesMap = {};
+  const data = sheetLib.getDataRange().getValues();
+  const headers = data[0];
+  const rows = data.slice(1);
+  rows.forEach(row => {
+    const caseId = row[0];
+    if (caseId) {
+      const item = {};
+      headers.forEach((h, idx) => {
+        item[h] = row[idx];
+      });
+      existingCasesMap[caseId] = item;
+    }
+  });
+  
+  // รายการเอกสารต้นทางและหมวดค่าเริ่มต้น
+  const sourceDocs = [
+    { docId: '1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g', defaultCat: 'Clinic' },
+    { docId: '1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw', defaultCat: 'Product' },
+    { docId: '1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg', defaultCat: 'SAP' }
+  ];
+  
+  const scannedCases = [];
+  const reportDetails = [];
+  
+  sourceDocs.forEach(source => {
+    const docCases = scanDocForCases(source.docId);
+    docCases.forEach(c => {
+      if (!c.category) c.category = source.defaultCat;
+      scannedCases.push(c);
+    });
+    reportDetails.push(`เอกสาร [${source.defaultCat}] (ID: ${source.docId.substring(0, 6)}...): พบทั้งหมด ${docCases.length} เคส`);
+  });
+  
+  // อัปเดตข้อมูลที่แสกนได้เข้า Map
+  scannedCases.forEach(c => {
+    existingCasesMap[c.caseId] = {
+      caseId: c.caseId,
+      title: c.title || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].title : ''),
+      category: c.category || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].category : ''),
+      courseGroup: c.courseGroup || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].courseGroup : ''),
+      disease: c.disease || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].disease : ''),
+      difficulty: c.difficulty || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].difficulty : 2),
+      docId: c.docId || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].docId : ''),
+      author: c.author || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].author : ''),
+      createdDate: c.createdDate || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].createdDate : ''),
+      isActive: (existingCasesMap[c.caseId] && existingCasesMap[c.caseId].isActive !== undefined) ? existingCasesMap[c.caseId].isActive : 'TRUE'
+    };
+  });
+  
+  // เคลียร์ชีทใต้ส่วนหัว
+  if (sheetLib.getLastRow() > 1) {
+    sheetLib.getRange(2, 1, sheetLib.getLastRow() - 1, sheetLib.getLastColumn()).clearContent();
+  }
+  
+  // เรียงลำดับ รหัสเคส
+  const sortedCaseIds = Object.keys(existingCasesMap).sort();
+  
+  // เขียนข้อมูลกลับคืนลง Sheet
+  sortedCaseIds.forEach(caseId => {
+    const c = existingCasesMap[caseId];
+    sheetLib.appendRow([
+      c.caseId,
+      c.title,
+      c.category,
+      c.courseGroup,
+      c.disease,
+      c.difficulty,
+      c.docId,
+      c.author,
+      c.createdDate,
+      c.isActive
+    ]);
+  });
+  
+  // จัด Format แบนเนอร์กลับสู่หน้าแรกอีกครั้ง
+  decorateHomeBanners(ss);
+  
+  return {
+    message: `ซิงก์ข้อมูลคลังเคสสำเร็จ! อัปเดตในตาราง CaseLibrary เรียบร้อย รวมทั้งสิ้น ${sortedCaseIds.length} เคส`,
+    details: reportDetails
+  };
+}
+
+function scanDocForCases(docId) {
+  const cases = [];
+  try {
+    const doc = DocumentApp.openById(docId);
+    const body = doc.getBody();
+    const numChildren = body.getNumChildren();
+    
+    for (let i = 0; i < numChildren; i++) {
+      const child = body.getChild(i);
+      const type = child.getType();
+      
+      // Case 1: ตารางแม่แบบ (Table Template)
+      if (type === DocumentApp.ElementType.TABLE) {
+        const table = child.asTable();
+        const numRows = table.getNumRows();
+        if (numRows >= 4) {
+          let caseId = '';
+          let title = '';
+          let category = '';
+          let courseGroup = '';
+          let disease = '';
+          let difficulty = 2;
+          let author = '';
+          let createdDate = '';
+          let isTableCase = false;
+          
+          for (let r = 0; r < numRows; r++) {
+            const row = table.getRow(r);
+            if (row.getNumCells() < 2) continue;
+            const keyText = row.getCell(0).getText().trim().toLowerCase();
+            const valText = row.getCell(1).getText().trim();
+            
+            if (keyText.includes('รหัสเคส') || keyText.includes('case id') || keyText.includes('caseid')) {
+              const match = valText.match(/OSPE-[A-Z0-9]+/i);
+              if (match) {
+                caseId = match[0].toUpperCase();
+                isTableCase = true;
+              }
+            } else if (keyText.includes('ชื่อเคส') || keyText.includes('หัวข้อ') || keyText.includes('title')) {
+              title = valText;
+            } else if (keyText.includes('หมวด') || keyText.includes('category')) {
+              category = valText;
+            } else if (keyText.includes('ospe main group') || keyText.includes('กลุ่มวิชา') || keyText.includes('course group') || keyText.includes('coursegroup')) {
+              courseGroup = valText;
+            } else if (keyText.includes('โรค/หัวข้อ') || keyText.includes('โรค') || keyText.includes('disease')) {
+              disease = valText;
+            } else if (keyText.includes('ระดับ') || keyText.includes('difficulty')) {
+              const diffMatch = valText.match(/\d+/);
+              difficulty = diffMatch ? parseInt(diffMatch[0]) : 2;
+            } else if (keyText.includes('ผู้เขียน') || keyText.includes('author')) {
+              author = valText;
+            } else if (keyText.includes('วันที่') || keyText.includes('date')) {
+              createdDate = valText;
+            }
+          }
+          
+          if (isTableCase && caseId) {
+            cases.push({
+              caseId: caseId,
+              title: title || 'Untitled Case',
+              category: category || '',
+              courseGroup: courseGroup || '',
+              disease: disease || '',
+              difficulty: difficulty,
+              docId: docId,
+              author: author || 'Unknown',
+              createdDate: createdDate || new Date().toLocaleDateString('th-TH'),
+              isActive: 'TRUE'
+            });
+          }
+        }
+      }
+      
+      // Case 2: รูปแบบข้อความธรรมดา (Heading/Paragraph Case)
+      if (type === DocumentApp.ElementType.PARAGRAPH) {
+        const p = child.asParagraph();
+        const text = p.getText().trim();
+        const caseIdMatch = text.match(/^#+\s*\[(OSPE-[A-Z0-9]+)\]\s*(.*)$/) || text.match(/^\[(OSPE-[A-Z0-9]+)\]\s*(.*)$/);
+        
+        if (caseIdMatch) {
+          const caseId = caseIdMatch[1].toUpperCase();
+          let title = caseIdMatch[2].replace(/^[-—\s]+/, '').trim();
+          let category = '';
+          let courseGroup = '';
+          let disease = '';
+          let difficulty = 2;
+          let author = '';
+          let createdDate = '';
+          
+          let j = i + 1;
+          while (j < numChildren) {
+            const nextChild = body.getChild(j);
+            const nextType = nextChild.getType();
+            
+            if (nextType === DocumentApp.ElementType.TABLE) {
+              const nextTable = nextChild.asTable();
+              if (checkTableTemplate(nextTable, "")) {
+                break;
+              }
+            }
+            if (nextType === DocumentApp.ElementType.PARAGRAPH || nextType === DocumentApp.ElementType.LIST_ITEM) {
+              const nextText = (nextType === DocumentApp.ElementType.PARAGRAPH) ? 
+                                nextChild.asParagraph().getText().trim() : 
+                                nextChild.asListItem().getText().trim();
+              
+              if (nextText.match(/^#+\s*\[OSPE-[A-Z0-9]+\]/) || nextText.match(/^\[OSPE-[A-Z0-9]+\]/)) {
+                break;
+              }
+              
+              const metaMatch = nextText.match(/^[-*\sข้อมูลเคส]*\s*(หมวด|category|ospe main group|กลุ่มวิชา|course group|coursegroup|โรค\/หัวข้อ|โรค|disease|ระดับ|difficulty|ผู้เขียน|author|วันที่|date)\s*:\s*(.*)$/i);
+              if (metaMatch) {
+                const key = metaMatch[1].toLowerCase();
+                const val = metaMatch[2].trim();
+                
+                if (key.includes('หมวด') || key.includes('category')) {
+                  category = val;
+                } else if (key.includes('group') || key.includes('กลุ่มวิชา') || key.includes('course')) {
+                  courseGroup = val;
+                } else if (key.includes('โรค') || key.includes('disease')) {
+                  disease = val;
+                } else if (key.includes('ระดับ') || key.includes('difficulty')) {
+                  const diffMatch = val.match(/\d+/);
+                  difficulty = diffMatch ? parseInt(diffMatch[0]) : 2;
+                } else if (key.includes('ผู้เขียน') || key.includes('author')) {
+                  author = val;
+                } else if (key.includes('วันที่') || key.includes('date')) {
+                  createdDate = val;
+                }
+              }
+            }
+            j++;
+          }
+          
+          cases.push({
+            caseId: caseId,
+            title: title || 'Untitled Case',
+            category: category || '',
+            courseGroup: courseGroup || '',
+            disease: disease || '',
+            difficulty: difficulty,
+            docId: docId,
+            author: author || '',
+            createdDate: createdDate || new Date().toLocaleDateString('th-TH'),
+            isActive: 'TRUE'
+          });
+          
+          i = j - 1;
+        }
+      }
+    }
+  } catch (e) {
+    Logger.log('Error scanning Doc ID ' + docId + ': ' + e.toString());
+  }
+  return cases;
+}
+
