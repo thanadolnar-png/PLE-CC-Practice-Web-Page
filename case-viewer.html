@@ -26,12 +26,89 @@
     .print-only {
       display: none;
     }
+
+    /* Role Selector UI */
+    .role-selector-container {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      background: var(--surface);
+      padding: 0.4rem;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+    }
+    .role-btn {
+      flex: 1;
+      padding: 0.65rem 1rem;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: var(--font-title);
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: var(--radius-md);
+      transition: all 0.2s;
+      text-align: center;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+    }
+    .role-btn:hover {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+    }
+    .role-btn.active {
+      background: var(--primary);
+      color: white !important;
+      box-shadow: var(--shadow-sm);
+    }
+    .share-buttons-container {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .btn-share {
+      flex: 1;
+      font-size: 0.8rem;
+      padding: 0.5rem 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      font-weight: 600;
+    }
+
+    /* Timer card inside case viewer */
+    .viewer-timer-display {
+      font-size: 3.5rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: var(--success);
+      margin-bottom: 0.5rem;
+      letter-spacing: -1px;
+      transition: color 0.3s;
+    }
+    .viewer-timer-display.warn {
+      color: var(--warning);
+    }
+    .viewer-timer-display.danger {
+      color: var(--danger);
+      animation: pulse 1s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.05); }
+    }
+
     @media print {
       body {
         background-color: white;
         color: black;
       }
-      .navbar, .viewer-tabs, .doc-iframe-wrapper, #api-status-banner, .btn, .progress-card, .theme-toggle-btn {
+      .navbar, .viewer-tabs, .doc-iframe-wrapper, #api-status-banner, .btn, .progress-card, .theme-toggle-btn, .role-selector-container, .share-buttons-container, #viewer-timer-card {
         display: none !important;
       }
       .viewer-grid {
@@ -99,6 +176,19 @@
         </div>
       </header>
 
+      <!-- Role / Practice Mode Selector -->
+      <div class="role-selector-container" id="mode-selector">
+        <button class="role-btn active" id="role-btn-solo" onclick="setViewerRole('solo')">👤 ฝึกคนเดียว (Solo)</button>
+        <button class="role-btn" id="role-btn-examinee" onclick="setViewerRole('examinee')">✍️ เป็นคนสอบ (Examinee)</button>
+        <button class="role-btn" id="role-btn-examiner" onclick="setViewerRole('examiner')">🔎 เป็นคนตรวจ/คนไข้ (Examiner)</button>
+      </div>
+
+      <!-- Share links for Multiplayer practicing -->
+      <div class="share-buttons-container">
+        <button class="btn btn-secondary btn-share" id="share-examinee-btn" onclick="copyShareLink('examinee')">🔗 ก๊อปปี้ลิงก์สำหรับเพื่อนสอบ</button>
+        <button class="btn btn-secondary btn-share" id="share-examiner-btn" onclick="copyShareLink('examiner')">🔗 ก๊อปปี้ลิงก์สำหรับผู้ประเมิน</button>
+      </div>
+
       <!-- Viewer Grid Split Layout -->
       <div class="viewer-grid">
         
@@ -106,7 +196,7 @@
         <section class="viewer-pane" id="left-pane">
           
           <!-- Tabs selection -->
-          <div class="viewer-tabs">
+          <div class="viewer-tabs" id="doc-tabs-bar">
             <button class="viewer-tab-btn active" id="tab-btn-content" onclick="switchViewerTab('content')">📖 โจทย์และข้อมูลผู้ป่วย</button>
             <button class="viewer-tab-btn" id="tab-btn-doc" onclick="switchViewerTab('doc')">📄 เอกสาร Google Doc ต้นฉบับ</button>
           </div>
@@ -114,12 +204,12 @@
           <!-- Tab Content 1: Case Detail HTML -->
           <div id="view-tab-content-area" class="view-tab-content active">
             
-            <h3 class="viewer-section-title">สถานการณ์ (Scenario)</h3>
+            <h3 class="viewer-section-title" id="scenario-section-title">สถานการณ์ (Scenario)</h3>
             <div id="case-scenario-content">
               <!-- Filled dynamically by JS -->
             </div>
 
-            <h3 class="viewer-section-title">ข้อมูลผู้ป่วย (Patient Info)</h3>
+            <h3 class="viewer-section-title" id="patient-section-title">ข้อมูลผู้ป่วย (Patient Info)</h3>
             <div id="case-patient-content">
               <!-- Table or list filled dynamically by JS -->
             </div>
@@ -147,8 +237,18 @@
         <!-- Right Pane: Score Progress & Interactive Checklist -->
         <section class="viewer-pane" id="right-pane" style="min-height: auto;">
           
+          <!-- Timer Card (For Examinee and Examiner/SP Roles) -->
+          <div id="viewer-timer-card" style="display: none; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.5rem; text-align: center;">
+            <div id="viewer-timer-label" style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 0.25rem;">ตัวจับเวลาสถานีปฏิบัติการ</div>
+            <div class="viewer-timer-display" id="viewer-timer">04:00</div>
+            <div style="display: flex; gap: 0.5rem; justify-content: center;">
+              <button class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;" id="viewer-timer-btn" onclick="toggleViewerTimer()">⏸️ พักการจับเวลา</button>
+              <button class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;" onclick="resetViewerTimer()">🔄 เริ่มต้นใหม่</button>
+            </div>
+          </div>
+
           <!-- Score Tracker Progress Card -->
-          <div class="progress-card">
+          <div class="progress-card" id="viewer-progress-card">
             <div class="progress-header">
               <span>คะแนนสะสมความก้าวหน้า</span>
               <span id="percentage-display">0%</span>
@@ -162,33 +262,44 @@
             </div>
           </div>
 
-          <!-- Checklist Group -->
-          <h3 class="viewer-section-title" style="margin-top: 0; border-left-color: var(--success);">
-            รายการทักษะประเมิน (Checklist)
-          </h3>
-          
-          <div class="checklist-container" id="checklist-items-container">
-            <!-- Filled dynamically by JS -->
+          <!-- Examinee Overlay Notice -->
+          <div id="examinee-overlay-notice" style="display: none; text-align: center; padding: 2rem 1.5rem; border: 1px dashed var(--border); border-radius: var(--radius-lg); background: var(--surface); color: var(--text-secondary);">
+            <span style="font-size: 2.5rem; display: block; margin-bottom: 1rem;">✍️</span>
+            <h4 style="font-family: var(--font-title); font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">คุณเปิดในฐานะ "ผู้สอบ"</h4>
+            <p style="font-size: 0.85rem; line-height: 1.5;">
+              เกณฑ์ Checklist และเฉลยถูกซ่อนไว้สำหรับให้เพื่อนเป็นผู้ติ๊กคะแนนผ่านลิงก์ประเมิน
+            </p>
           </div>
 
-          <!-- Note / Answer Toggle -->
-          <div class="note-container">
-            <button class="btn btn-secondary" style="width: 100%;" id="toggle-note-btn" onclick="toggleNote()">
-              🔑 เปิดแสดงเฉลย / ข้อมูลผู้ตรวจ
-            </button>
-            <div class="note-content" id="note-content-area">
-              <!-- Note content filled dynamically by JS -->
+          <div id="checklist-and-notes-section">
+            <!-- Checklist Group -->
+            <h3 class="viewer-section-title" style="margin-top: 0; border-left-color: var(--success);">
+              รายการทักษะประเมิน (Checklist)
+            </h3>
+            
+            <div class="checklist-container" id="checklist-items-container">
+              <!-- Filled dynamically by JS -->
             </div>
-          </div>
 
-          <!-- Print / Action buttons -->
-          <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem;">
-            <button class="btn btn-secondary" style="flex: 1;" onclick="window.print()">
-              🖨️ พิมพ์หน้านี้ / เซฟ PDF
-            </button>
-            <button class="btn btn-danger" style="flex: 1;" onclick="resetChecklistProgress()">
-              🔄 รีเซ็ตการติ๊ก
-            </button>
+            <!-- Note / Answer Toggle -->
+            <div class="note-container">
+              <button class="btn btn-secondary" style="width: 100%;" id="toggle-note-btn" onclick="toggleNote()">
+                🔑 เปิดแสดงเฉลย / ข้อมูลผู้ตรวจ
+              </button>
+              <div class="note-content" id="note-content-area">
+                <!-- Note content filled dynamically by JS -->
+              </div>
+            </div>
+
+            <!-- Print / Action buttons -->
+            <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem;" id="viewer-action-buttons">
+              <button class="btn btn-secondary" style="flex: 1;" onclick="window.print()">
+                🖨️ พิมพ์หน้านี้ / เซฟ PDF
+              </button>
+              <button class="btn btn-danger" style="flex: 1;" onclick="resetChecklistProgress()">
+                🔄 รีเซ็ตการติ๊ก
+              </button>
+            </div>
           </div>
 
         </section>
@@ -209,10 +320,21 @@
   <script src="app.js"></script>
   <script>
     let activeCaseId = getUrlParam('id');
+    let currentRole = 'solo'; // solo, examinee, examiner
+
+    // ตัวแปรจับเวลาสำหรับหน้ารายละเอียดเคสเดี่ยว
+    let viewerTimerVal = 240;
+    let viewerTimerInterval = null;
+    let viewerTimerRunning = false;
 
     document.addEventListener('DOMContentLoaded', () => {
-      // ดักเคสไอดีถ้าโหลดหน้านี้
       if (activeCaseId) {
+        // ดึงบทบาทจาก URL ถ้ามี (mode หรือ role)
+        const modeParam = getUrlParam('mode') || getUrlParam('role');
+        if (modeParam && ['solo', 'examinee', 'examiner'].includes(modeParam)) {
+          currentRole = modeParam;
+        }
+        
         setTimeout(loadCaseDetail, 400); // ดีเลย์สั้นๆ ให้ระบบดาวน์โหลดฐานข้อมูลเสร็จก่อน
       } else {
         alert('กรุณาระบุรหัสเคสสอบ');
@@ -252,6 +374,7 @@
       
       AppState.currentCase = matchedCase;
       renderCaseDetail(matchedCase);
+      setViewerRole(currentRole); // ตั้งบทบาทและเปิดแสดงตามที่เซ็ต
       showGlobalLoader(false);
     }
 
@@ -263,7 +386,7 @@
       tagsContainer.innerHTML = `
         <span class="badge badge-${c.category.toLowerCase()}">${c.category}</span>
         <span class="case-card-tag" style="background-color: var(--primary-light); color: var(--primary);">${c.courseGroup || 'ทั่วไป'}</span>
-        <span class="case-card-tag">กลุ่ม: ${c.mainGroup || 'ทักษะหลัก'}</span>
+        <span class="case-card-tag">โรค/หัวข้อ: ${c.disease || 'ความรู้หลัก'}</span>
         <span class="case-card-tag">ระดับ: ${c.difficulty || '1'}</span>
         <span class="case-card-tag">ผู้เขียน: ${c.author || 'ไม่ระบุ'}</span>
       `;
@@ -365,6 +488,136 @@
       
       // อัปเดต UI Progress bar ตอนเริ่มต้น
       updateChecklistUI(c.caseId);
+    }
+
+    // ฟังก์ชันจัดการบทบาทการซ้อมสอบ (Solo / Examinee / Examiner)
+    function setViewerRole(role) {
+      currentRole = role;
+      
+      // อัปเดตปุ่ม Active ใน UI
+      document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(`role-btn-${role}`).classList.add('active');
+
+      const chkSection = document.getElementById('checklist-and-notes-section');
+      const noticeSection = document.getElementById('examinee-overlay-notice');
+      const progressCard = document.getElementById('viewer-progress-card');
+      const timerCard = document.getElementById('viewer-timer-card');
+      const docTabs = document.getElementById('doc-tabs-bar');
+      const noteArea = document.getElementById('note-content-area');
+      const toggleNoteBtn = document.getElementById('toggle-note-btn');
+
+      // เคลียร์/หยุด ตัวจับเวลาเก่าก่อน
+      stopViewerTimer();
+
+      if (role === 'solo') {
+        chkSection.style.display = 'block';
+        noticeSection.style.display = 'none';
+        progressCard.style.display = 'block';
+        timerCard.style.display = 'none';
+        docTabs.style.display = 'flex';
+        
+        // ซ่อนเฉลยตามดีฟอลต์ของโซโล่
+        noteArea.classList.remove('show');
+        if (toggleNoteBtn) toggleNoteBtn.textContent = '🔑 เปิดแสดงเฉลย / ข้อมูลผู้ตรวจ';
+      } 
+      else if (role === 'examinee') {
+        // ผู้เข้าสอบ: ซ่อนเฉลยและเกณฑ์ประเมินทั้งหมด เห็นเฉพาะโจทย์และปุ่มจับเวลา
+        chkSection.style.display = 'none';
+        noticeSection.style.display = 'block';
+        progressCard.style.display = 'none';
+        timerCard.style.display = 'block';
+        docTabs.style.display = 'none'; // ซ่อนแท็บเอกสารกันเปิดดูเฉลย
+        switchViewerTab('content');      // บังคับแสดงหน้าโจทย์
+        
+        resetViewerTimer();
+        startViewerTimer(); // เริ่มจับเวลากดทันทีสำหรับคนทำสอบ
+      } 
+      else if (role === 'examiner') {
+        // ผู้ตรวจ/คนไข้: เห็น Checklist, เฉลย (กางออกทันที), และตัวจับเวลา
+        chkSection.style.display = 'block';
+        noticeSection.style.display = 'none';
+        progressCard.style.display = 'block';
+        timerCard.style.display = 'block';
+        docTabs.style.display = 'flex';
+        
+        // กางเฉลยออกทันทีให้ผู้ตรวจอ่านบทบาทคนไข้จำลองได้เลย
+        noteArea.classList.add('show');
+        if (toggleNoteBtn) toggleNoteBtn.textContent = '🔒 ซ่อนเฉลย / ข้อมูลผู้ตรวจ';
+        
+        resetViewerTimer();
+        startViewerTimer();
+      }
+    }
+
+    // ฟังก์ชันแชร์ลิงก์ด่วน
+    function copyShareLink(role) {
+      const shareUrl = `${window.location.origin}${window.location.pathname}?id=${activeCaseId}&mode=${role}`;
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        alert(`ก๊อปปี้ลิงก์สำหรับบทบาท "${role === 'examinee' ? 'ผู้เข้าสอบ' : 'ผู้ประเมิน'}" ไปยังคลิปบอร์ดแล้ว! ส่งต่อให้เพื่อนกดเปิดหน้าจอเพื่อซ้อมคู่กันได้เลยครับ`);
+      }).catch(err => {
+        console.error('คัดลอกลิงก์ล้มเหลว:', err);
+      });
+    }
+
+    // ──────────────────────────────────────────────────────────
+    // 4-Minute Timer Logic for Viewer
+    // ──────────────────────────────────────────────────────────
+    function startViewerTimer() {
+      if (viewerTimerInterval) clearInterval(viewerTimerInterval);
+      viewerTimerRunning = true;
+      document.getElementById('viewer-timer-btn').textContent = '⏸️ พักการจับเวลา';
+      
+      updateViewerTimerDisplay();
+      
+      viewerTimerInterval = setInterval(() => {
+        if (!viewerTimerRunning) return;
+        
+        viewerTimerVal--;
+        updateViewerTimerDisplay();
+        
+        if (viewerTimerVal <= 0) {
+          clearInterval(viewerTimerInterval);
+          viewerTimerRunning = false;
+          alert('หมดเวลาสำหรับสถานีนี้แล้ว! (ครบกำหนด 4 นาที)');
+        }
+      }, 1000);
+    }
+
+    function toggleViewerTimer() {
+      viewerTimerRunning = !viewerTimerRunning;
+      document.getElementById('viewer-timer-btn').textContent = viewerTimerRunning ? '⏸️ พักการจับเวลา' : '▶️ เล่นตัวจับเวลาต่อ';
+    }
+
+    function stopViewerTimer() {
+      if (viewerTimerInterval) {
+        clearInterval(viewerTimerInterval);
+        viewerTimerInterval = null;
+      }
+      viewerTimerRunning = false;
+    }
+
+    function resetViewerTimer() {
+      viewerTimerVal = 240; // 4 นาที
+      updateViewerTimerDisplay();
+    }
+
+    function updateViewerTimerDisplay() {
+      const min = Math.floor(viewerTimerVal / 60);
+      const sec = viewerTimerVal % 60;
+      const display = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+      
+      const timerEl = document.getElementById('viewer-timer');
+      if (timerEl) {
+        timerEl.textContent = display;
+        
+        // จัดการระดับความสำคัญตามสี
+        timerEl.className = 'viewer-timer-display';
+        if (viewerTimerVal < 10) {
+          timerEl.classList.add('danger');
+        } else if (viewerTimerVal < 60) {
+          timerEl.classList.add('warn');
+        }
+      }
     }
 
     function switchViewerTab(tab) {

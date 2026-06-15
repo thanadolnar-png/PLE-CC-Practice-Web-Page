@@ -1,17 +1,16 @@
 /**
- * PLE-CC2 OSPE Practice System — Google Apps Script Backend
+ * PLE-CC2 OSPE Practice System — Google Apps Script Backend (v3.0)
  * File: Code.gs
  * ========================================================
  * ติดตั้งใน script.google.com ของบัญชีที่มีสิทธิ์เข้าถึง Sheet และ Docs
  * เชื่อมกับ Sheet ID: 1Fuakz3nCXa7klgQznrtGUNVRvNp_g9BJRfWNHD0awxI
  * 
- * วิธีการใช้:
- * 1. วางโค้ดนี้ทั้งหมดลงใน Google Apps Script Editor
- * 2. กดปุ่ม Save และคลิก Deploy -> New Deployment -> Web App
- * 3. ตั้งค่า:
- *    - Execute as: Me (your-email@gmail.com)
- *    - Who has access: Anyone (เพื่อให้เว็บไซต์ดึงข้อมูลได้โดยไม่ต้องผ่าน Auth ซ้ำซ้อน)
- * 4. คัดลอก URL ของ Web App ไปใส่ในตัวแปร CONFIG.apiUrl ของเว็บไซต์
+ * ความสามารถเวอร์ชัน 3.0:
+ * 1. ดึงภาพ Inline ใน Google Docs และแปลงเป็น Base64 Data URI อัตโนมัติ
+ * 2. ค้นหาแบบสลักรหัสเคสมาตรฐาน (OSPE-CL001, OSPE-PD001, OSPE-SP001)
+ * 3. ระบบสำรองข้อมูลกรณีไม่มี Sheet (DEFAULT_CASES Fallback)
+ * 4. ระบบรองรับการตั้งค่าบิลด์เนื้อหา Docs ตัวอย่าง (setupDocs)
+ * 5. ฟังก์ชันรองรับ Google Form onFormSubmit ดึงรูปภาพประกอบเคสเข้า Doc
  */
 
 // คอนฟิกหลักของระบบ
@@ -28,6 +27,46 @@ const CONFIG = {
     sap: 2
   }
 };
+
+// ฐานข้อมูลเคสเริ่มต้น (Fallback กรณี Sheet ว่างเปล่าหรือไม่ถูกสร้าง)
+const DEFAULT_CASES = [
+  {
+    caseId: 'OSPE-CL001',
+    title: 'Warfarin Counseling — AF ใหม่',
+    category: 'Clinic',
+    courseGroup: 'Anticoagulation',
+    disease: 'Atrial Fibrillation, Warfarin',
+    difficulty: 3,
+    docId: '1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g',
+    author: 'Lin',
+    createdDate: '15/06/2026',
+    isActive: 'TRUE'
+  },
+  {
+    caseId: 'OSPE-PD001',
+    title: 'Compounding — Cold Cream & Labeling',
+    category: 'Product',
+    courseGroup: 'Compounding - Topical',
+    disease: 'Dry Skin, Cold Cream',
+    difficulty: 2,
+    docId: '1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw',
+    author: 'Fon',
+    createdDate: '15/06/2026',
+    isActive: 'TRUE'
+  },
+  {
+    caseId: 'OSPE-SP001',
+    title: 'Pharmacy Law — ยาควบคุมพิเศษ',
+    category: 'SAP',
+    courseGroup: 'Pharmacy Law',
+    disease: 'Special Controlled Drugs Regulation',
+    difficulty: 2,
+    docId: '1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg',
+    author: 'Irene',
+    createdDate: '15/06/2026',
+    isActive: 'TRUE'
+  }
+];
 
 /**
  * ──────────────────────────────────────────────────────────────
@@ -77,6 +116,9 @@ function doGet(e) {
         case 'setupSheets':
           return buildResponse(setupSheets());
           
+        case 'setupDocs':
+          return buildResponse(updateDocsWithSampleContent());
+          
         default:
           return buildResponse({ error: 'Invalid action parameter' }, 400);
       }
@@ -121,7 +163,11 @@ function getSpreadsheet() {
   if (!CONFIG.spreadsheetId) {
     return SpreadsheetApp.getActiveSpreadsheet();
   }
-  return SpreadsheetApp.openById(CONFIG.spreadsheetId);
+  try {
+    return SpreadsheetApp.openById(CONFIG.spreadsheetId);
+  } catch (e) {
+    return SpreadsheetApp.getActiveSpreadsheet();
+  }
 }
 
 /**
@@ -130,26 +176,36 @@ function getSpreadsheet() {
  * ──────────────────────────────────────────────────────────────
  */
 function getCaseList(params = {}) {
-  const ss = getSpreadsheet();
-  const sheet = ss.getSheetByName(CONFIG.sheets.caseLibrary);
-  if (!sheet) {
-    return { count: 0, cases: [], warning: 'Sheet CaseLibrary not found. Run setupSheets action first.' };
+  let cases = [];
+  let loadedFromSheet = false;
+  
+  try {
+    const ss = getSpreadsheet();
+    const sheet = ss.getSheetByName(CONFIG.sheets.caseLibrary);
+    if (sheet) {
+      const data = sheet.getDataRange().getValues();
+      if (data.length > 1) {
+        const headers = data[0];
+        const rows = data.slice(1);
+        
+        cases = rows.map(row => {
+          const item = {};
+          headers.forEach((header, index) => {
+            item[header] = row[index];
+          });
+          return item;
+        }).filter(c => c.caseId && c.isActive !== false && c.isActive !== 'FALSE' && String(c.isActive).toUpperCase() !== 'FALSE');
+        loadedFromSheet = true;
+      }
+    }
+  } catch (e) {
+    Logger.log('ไม่สามารถเข้าถึงสเปรดชีทได้ ใช้โหมดข้อมูลออฟไลน์: ' + e.toString());
   }
   
-  const data = sheet.getDataRange().getValues();
-  if (data.length <= 1) return { count: 0, cases: [] };
-  
-  const headers = data[0];
-  const rows = data.slice(1);
-  
-  // แปลงเป็น Object
-  let cases = rows.map(row => {
-    const item = {};
-    headers.forEach((header, index) => {
-      item[header] = row[index];
-    });
-    return item;
-  }).filter(c => c.caseId && c.isActive !== false && c.isActive !== 'FALSE');
+  // หากเข้าถึงชีทไม่ได้ หรือชีทว่างเปล่า ให้ใช้ข้อมูลเคสดีฟอลต์ (DEFAULT_CASES)
+  if (cases.length === 0) {
+    cases = [...DEFAULT_CASES];
+  }
   
   // กรองข้อมูลตาม Parameters
   if (params.category && params.category !== 'All') {
@@ -172,7 +228,8 @@ function getCaseList(params = {}) {
   
   return {
     count: cases.length,
-    cases: cases
+    cases: cases,
+    source: loadedFromSheet ? 'Google Sheets' : 'Hardcoded Defaults'
   };
 }
 
@@ -190,19 +247,22 @@ function getCase(caseId) {
   if (matchedCase.docId) {
     try {
       const docData = getCaseContentFromDoc(matchedCase.docId);
-      matchedCase.content = docData.contentHtml;
+      matchedCase.contentHtml = docData.contentHtml;
+      matchedCase.content = docData.contentHtml; // รองรับตัวแปรเก่า
       matchedCase.checklist = docData.checklist;
-      matchedCase.note = docData.noteHtml;
-      matchedCase.patientInfo = docData.patientInfoHtml;
+      matchedCase.noteHtml = docData.noteHtml;
+      matchedCase.note = docData.noteHtml;       // รองรับตัวแปรเก่า
+      matchedCase.patientInfoHtml = docData.patientInfoHtml;
       matchedCase.scenario = docData.scenario;
     } catch (e) {
-      matchedCase.content = `<p style="color: red;">ไม่สามารถโหลดเนื้อหาจาก Google Doc ได้: ${e.toString()}</p>`;
+      Logger.log('Error parsing Doc ' + matchedCase.docId + ': ' + e.toString());
+      matchedCase.contentHtml = `<p style="color: red;">ไม่สามารถโหลดเนื้อหาจาก Google Doc ได้: ${e.toString()}</p>`;
       matchedCase.checklist = [];
-      matchedCase.note = '';
+      matchedCase.noteHtml = '<p>ไม่มีคำอธิบายเพิ่มเติม</p>';
       matchedCase.error = e.toString();
     }
   } else {
-    matchedCase.content = '<p>ไม่มีลิงก์เอกสาร Google Doc กำหนดไว้</p>';
+    matchedCase.contentHtml = '<p>ไม่มีลิงก์เอกสาร Google Doc กำหนดไว้</p>';
     matchedCase.checklist = [];
   }
   
@@ -211,7 +271,7 @@ function getCase(caseId) {
 
 /**
  * ──────────────────────────────────────────────────────────────
- * 3. Google Docs Parser (Core Engine)
+ * 3. Google Docs Parser (ดึงข้อความ & รูปภาพภาพประกอบ)
  * ──────────────────────────────────────────────────────────────
  */
 function getCaseContentFromDoc(docId) {
@@ -233,26 +293,28 @@ function getCaseContentFromDoc(docId) {
     const child = body.getChild(i);
     const type = child.getType();
     
-    // 1. ตรวจสอบ Heading
+    // 1. ตรวจสอบ Heading เพื่อเปลี่ยน Section
     if (type === DocumentApp.ElementType.PARAGRAPH) {
-      const text = child.asParagraph().getText().trim();
-      const heading = child.asParagraph().getHeading();
+      const p = child.asParagraph();
+      const text = p.getText().trim();
+      const heading = p.getHeading();
       
-      // ตรวจสอบ H1 หรือ H2 สำหรับแยกส่วน
+      // ตรวจสอบ H1 หรือ H2 หรือข้อความที่ขึ้นต้นด้วย # สำหรับสลับ Section
       if (heading === DocumentApp.ParagraphHeading.HEADING_1 || 
+          heading === DocumentApp.ParagraphHeading.HEADING_2 || 
           text.startsWith('## ') || 
           text.startsWith('# ')) {
         
         const cleanText = text.replace(/^#+\s*/, '').trim();
         if (cleanText.includes('ข้อมูลเคส')) {
           currentSection = 'METADATA';
-        } else if (cleanText.includes('โจทย์')) {
+        } else if (cleanText.includes('โจทย์') || cleanText.includes('สถานการณ์')) {
           currentSection = 'SCENARIO';
         } else if (cleanText.includes('ข้อมูลผู้ป่วย')) {
           currentSection = 'PATIENT_INFO';
-        } else if (cleanText.includes('Checklist')) {
+        } else if (cleanText.includes('Checklist') || cleanText.includes('ประเมิน') || cleanText.includes('เกณฑ์')) {
           currentSection = 'CHECKLIST';
-        } else if (cleanText.includes('หมายเหตุ') || cleanText.includes('เฉลย')) {
+        } else if (cleanText.includes('หมายเหตุ') || cleanText.includes('เฉลย') || cleanText.includes('ข้อมูลผู้ตรวจ')) {
           currentSection = 'NOTE';
         } else {
           currentSection = 'OTHER';
@@ -262,12 +324,11 @@ function getCaseContentFromDoc(docId) {
       
       // ตรวจสอบ H3 หรือกลุ่มใน Checklist
       if (currentSection === 'CHECKLIST' && 
-          (heading === DocumentApp.ParagraphHeading.HEADING_2 || 
-           heading === DocumentApp.ParagraphHeading.HEADING_3 || 
+          (heading === DocumentApp.ParagraphHeading.HEADING_3 || 
+           heading === DocumentApp.ParagraphHeading.HEADING_4 || 
            text.startsWith('###') || 
            text.startsWith('**กลุ่ม:'))) {
         
-        // ดึงชื่อกลุ่มย่อย เช่น ### (กลุ่ม: การให้คำแนะนำยา) -> การให้คำแนะนำยา
         const groupMatch = text.match(/\(กลุ่ม:\s*([^)]+)\)/) || text.match(/กลุ่ม:\s*([^*]+)/);
         if (groupMatch) {
           currentGroup = groupMatch[1].trim();
@@ -281,10 +342,10 @@ function getCaseContentFromDoc(docId) {
     // 2. ประมวลผลข้อมูลตาม Section ปัจจุบัน
     if (currentSection === 'SCENARIO') {
       if (type === DocumentApp.ElementType.PARAGRAPH) {
-        const pText = child.asParagraph().getText().trim();
-        if (pText) {
-          scenario += pText + '\n';
-          contentHtml += `<p class="scenario-text">${escapeHtml(pText)}</p>`;
+        const paragraphHtml = parseParagraphToHtml(child.asParagraph());
+        if (paragraphHtml) {
+          contentHtml += paragraphHtml;
+          scenario += child.asParagraph().getText().trim() + '\n';
         }
       }
     } 
@@ -292,9 +353,9 @@ function getCaseContentFromDoc(docId) {
       if (type === DocumentApp.ElementType.TABLE) {
         patientInfoHtml += parseTableToHtml(child.asTable());
       } else if (type === DocumentApp.ElementType.PARAGRAPH) {
-        const pText = child.asParagraph().getText().trim();
-        if (pText) {
-          patientInfoHtml += `<p>${escapeHtml(pText)}</p>`;
+        const paragraphHtml = parseParagraphToHtml(child.asParagraph());
+        if (paragraphHtml) {
+          patientInfoHtml += paragraphHtml;
         }
       }
     } 
@@ -307,15 +368,13 @@ function getCaseContentFromDoc(docId) {
           text = child.asListItem().getText().trim();
         }
         
-        // เช็คว่าเป็นบรรทัด Checklist หรือไม่
-        // รองรับ: [ ] (2) ข้อความ หรือ ☐ (1) ข้อความ
+        // เช็คว่าเป็นเกณฑ์ Checklist หรือไม่ (ขึ้นต้นด้วย [ ], [x], ☐, ☑, -)
         const isChecklistItem = text.startsWith('[ ]') || text.startsWith('[x]') || text.startsWith('☐') || text.startsWith('☑') || text.startsWith('-');
         
         if (isChecklistItem && text.length > 3) {
-          // คลีนตัวหน้าออก เช่น [ ] (2) แนะนำ... -> (2) แนะนำ...
           let cleanText = text.replace(/^([-☐☑]|\[\s*\]|\[x\])\s*/, '').trim();
           
-          // หาคะแนนจากในวงเล็บ เช่น (2) แนะนำ... -> score = 2, text = แนะนำ...
+          // ค้นหาคะแนนในวงเล็บ เช่น (2) แนะนำยาลดความดัน -> score = 2, text = แนะนำยาลดความดัน
           const scoreMatch = cleanText.match(/^\((\d+)\)\s*(.*)$/);
           let score = 1;
           let itemText = cleanText;
@@ -325,8 +384,11 @@ function getCaseContentFromDoc(docId) {
             itemText = scoreMatch[2].trim();
           }
           
+          // ใช้ simpleHash แทน CryptoJS เพื่อป้องกันไลบรารีขาดหาย
+          const itemId = 'chk_' + simpleHash(itemText).substring(0, 10);
+          
           checklist.push({
-            id: 'chk_' + CryptoJS.MD5(itemText).toString().substring(0, 10),
+            id: itemId,
             text: itemText,
             score: score,
             group: currentGroup,
@@ -337,13 +399,13 @@ function getCaseContentFromDoc(docId) {
     } 
     else if (currentSection === 'NOTE') {
       if (type === DocumentApp.ElementType.PARAGRAPH) {
-        const pText = child.asParagraph().getText().trim();
-        if (pText) {
-          noteHtml += `<p>${escapeHtml(pText)}</p>`;
+        const paragraphHtml = parseParagraphToHtml(child.asParagraph());
+        if (paragraphHtml) {
+          noteHtml += paragraphHtml;
         }
       } else if (type === DocumentApp.ElementType.LIST_ITEM) {
-        const liText = child.asListItem().getText().trim();
-        noteHtml += `<li>${escapeHtml(liText)}</li>`;
+        const liHtml = parseParagraphToHtml(child.asParagraph());
+        noteHtml += `<li>${liHtml}</li>`;
       } else if (type === DocumentApp.ElementType.TABLE) {
         noteHtml += parseTableToHtml(child.asTable());
       }
@@ -360,7 +422,44 @@ function getCaseContentFromDoc(docId) {
 }
 
 /**
- * ฟังก์ชันย่อยแปลง Table ใน Doc เป็น HTML
+ * ฟังก์ชันย่อยแปลงย่อย่อหน้าใน Doc เป็น HTML (รองรับการแปลงรูปภาพฝังในตัวอักษร)
+ */
+function parseParagraphToHtml(paragraph) {
+  let html = '';
+  const numChildren = paragraph.getNumChildren();
+  
+  if (numChildren === 0) {
+    return '';
+  }
+  
+  for (let i = 0; i < numChildren; i++) {
+    const child = paragraph.getChild(i);
+    const type = child.getType();
+    
+    if (type === DocumentApp.ElementType.TEXT) {
+      const text = child.asText().getText();
+      html += escapeHtml(text);
+    } else if (type === DocumentApp.ElementType.INLINE_IMAGE) {
+      try {
+        const image = child.asInlineImage();
+        const blob = image.getBlob();
+        const bytes = blob.getBytes();
+        const base64 = Utilities.base64Encode(bytes);
+        const mimeType = blob.getContentType() || 'image/png';
+        html += `<div class="case-image-wrapper" style="text-align: center; margin: 12px 0;">
+          <img src="data:${mimeType};base64,${base64}" class="case-image" style="max-width:100%; height:auto; border-radius:8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);" alt="รูปภาพประกอบเคส" />
+        </div>`;
+      } catch (e) {
+        html += `<span class="image-error" style="color: red; font-size: 0.8rem;">[ไม่สามารถแสดงรูปภาพได้: ${e.toString()}]</span>`;
+      }
+    }
+  }
+  
+  return html ? `<p>${html}</p>` : '';
+}
+
+/**
+ * ฟังก์ชันแปลงตารางใน Doc เป็น HTML
  */
 function parseTableToHtml(table) {
   let html = '<div class="table-responsive"><table class="table-patient-info">';
@@ -379,7 +478,6 @@ function parseTableToHtml(table) {
     }
     html += '</tr>';
   }
-  
   html += '</table></div>';
   return html;
 }
@@ -389,60 +487,69 @@ function parseTableToHtml(table) {
  * 4. Course Groups & Stats
  * ──────────────────────────────────────────────────────────────
  */
-function getCourseGroups(category = null) {
-  const ss = getSpreadsheet();
-  const sheet = ss.getSheetByName(CONFIG.sheets.courseGroups);
-  if (!sheet) {
-    return { count: 0, groups: [], warning: 'Sheet CourseGroups not found.' };
+function getCourseGroups(category = 'All') {
+  let groups = [];
+  try {
+    const ss = getSpreadsheet();
+    const sheet = ss.getSheetByName(CONFIG.sheets.courseGroups);
+    if (sheet) {
+      const data = sheet.getDataRange().getValues();
+      if (data.length > 1) {
+        const headers = data[0];
+        const rows = data.slice(1);
+        groups = rows.map(row => {
+          const item = {};
+          headers.forEach((header, index) => {
+            item[header] = row[index];
+          });
+          return item;
+        });
+      }
+    }
+  } catch (e) {
+    Logger.log('Error getting course groups: ' + e.toString());
   }
   
-  const data = sheet.getDataRange().getValues();
-  if (data.length <= 1) return { count: 0, groups: [] };
-  
-  const headers = data[0];
-  const rows = data.slice(1);
-  
-  let groups = rows.map(row => {
-    return {
-      name: row[0],
-      category: row[1],
-      description: row[2] || ''
-    };
-  }).filter(g => g.name);
+  if (groups.length === 0) {
+    // ใช้ 15 กลุ่มวิชามาตรฐานตามแผน
+    groups = [
+      { name: 'Pharmacy Counseling', category: 'Clinic', description: 'การให้คำแนะนำความทั่วไป' },
+      { name: 'Anticoagulation', category: 'Clinic', description: 'การจัดการยาละลายลิ่มเลือด' },
+      { name: 'Diabetes Mellitus', category: 'Clinic', description: 'การแนะนำเข็มอินซูลินและยาเบาหวาน' },
+      { name: 'Asthma & COPD', category: 'Clinic', description: 'การแนะนำอุปกรณ์พ่นยาโรคปอด' },
+      { name: 'Hypertension', category: 'Clinic', description: 'การประเมินยาลดความดันโลหิต' },
+      { name: 'Dyslipidemia', category: 'Clinic', description: 'การติดตามโรคไขมันอุดตันในเส้นเลือด' },
+      { name: 'Drug Information', category: 'Clinic', description: 'การบริการข้อมูลทางยา' },
+      { name: 'Compounding - Oral', category: 'Product', description: 'การเตรียมยาน้ำ/ยาผงเตรียมเฉพาะราย' },
+      { name: 'Compounding - Topical', category: 'Product', description: 'การเตรียมยาทาผิวครีม/ขี้ผึ้งเฉพาะราย' },
+      { name: 'Compounding - Sterile', category: 'Product', description: 'การเตรียมยาฉีดปราศจากเชื้อ/TPN' },
+      { name: 'Labeling & Dispensing', category: 'Product', description: 'ทักษะจ่ายยาและอ่านใบสั่งยา' },
+      { name: 'QA/QC', category: 'Product', description: 'การประเมินตรวจสอบมาตรฐานผลิตยา' },
+      { name: 'Pharmacy Law', category: 'SAP', description: 'ข้อกฎหมายยาและจรรยาบรรณวิชาชีพ' },
+      { name: 'Research Methodology', category: 'SAP', description: 'สถิติระบาดวิทยาและการวิเคราะห์ข้อมูลวิจัย' },
+      { name: 'Health Economics', category: 'SAP', description: 'หลักประเมินทางเศรษฐศาสตร์สาธารณสุข' }
+    ];
+  }
   
   if (category && category !== 'All') {
     groups = groups.filter(g => g.category === category);
   }
   
-  return {
-    count: groups.length,
-    groups: groups
-  };
+  return groups;
 }
 
 function getSystemStats() {
-  const list = getCaseList();
-  const groups = getCourseGroups();
+  const listResult = getCaseList();
+  const cases = listResult.cases;
   
   const stats = {
-    totalCases: list.count,
-    byCategory: { Clinic: 0, Product: 0, SAP: 0 },
-    byCourseGroup: {}
+    total: cases.length,
+    clinic: cases.filter(c => c.category === 'Clinic').length,
+    product: cases.filter(c => c.category === 'Product').length,
+    sap: cases.filter(c => c.category === 'SAP').length
   };
   
-  list.cases.forEach(c => {
-    if (stats.byCategory[c.category] !== undefined) {
-      stats.byCategory[c.category]++;
-    }
-    if (c.courseGroup) {
-      stats.byCourseGroup[c.courseGroup] = (stats.byCourseGroup[c.courseGroup] || 0) + 1;
-    }
-  });
-  
-  return {
-    stats: stats,
-    courseGroups: groups.groups
-  };
+  return stats;
 }
 
 /**
@@ -450,53 +557,54 @@ function getSystemStats() {
  * 5. Exam Simulation Engine
  * ──────────────────────────────────────────────────────────────
  */
-function generateExamSet(options = {}) {
-  const total = parseInt(options.totalStations) || 16;
-  let clinicCount = parseInt(options.clinicCount) || CONFIG.defaultExamRatio.clinic;
-  let productCount = parseInt(options.productCount) || CONFIG.defaultExamRatio.product;
-  let sapCount = parseInt(options.sapCount) || CONFIG.defaultExamRatio.sap;
+function generateExamSet(params = {}) {
+  const total = parseInt(params.totalStations || 16);
+  const clinicCount = parseInt(params.clinicCount || 8);
+  const productCount = parseInt(params.productCount || 6);
+  const sapCount = parseInt(params.sapCount || 2);
   
-  // ปรับสัดส่วนตามสัดส่วนรวมถ้าไม่ได้ระบุค่าสลัด
-  const sum = clinicCount + productCount + sapCount;
-  if (sum !== total) {
-    clinicCount = Math.round((clinicCount / sum) * total);
-    productCount = Math.round((productCount / sum) * total);
-    sapCount = total - clinicCount - productCount;
-  }
+  const listResult = getCaseList();
+  const cases = listResult.cases;
   
-  const allCases = getCaseList().cases;
-  
-  // ดึงเคสแยกตามหมวด
   const pool = {
-    Clinic: shuffleArray(allCases.filter(c => c.category === 'Clinic')),
-    Product: shuffleArray(allCases.filter(c => c.category === 'Product')),
-    SAP: shuffleArray(allCases.filter(c => c.category === 'SAP'))
+    Clinic: shuffleArray(cases.filter(c => c.category === 'Clinic')),
+    Product: shuffleArray(cases.filter(c => c.category === 'Product')),
+    SAP: shuffleArray(cases.filter(c => c.category === 'SAP'))
   };
   
-  const selectedStations = [];
+  const selected = [];
   const warnings = [];
   
-  // ดึงตามเป้าหมาย
-  const selectFromPool = (category, count) => {
-    let picked = pool[category].slice(0, count);
-    if (picked.length < count) {
-      warnings.push(`จำนวนเคสหมวด ${category} มีไม่เพียงพอ (ต้องการ ${count} พบ ${picked.length})`);
+  const selectFromPool = (cat, count) => {
+    const p = pool[cat];
+    let added = 0;
+    for (let i = 0; i < count; i++) {
+      if (p[i]) {
+        selected.push(p[i]);
+        added++;
+      }
     }
-    return picked;
+    
+    // หากเคสไม่พอให้ดึงวนลูป
+    if (added < count && p.length > 0) {
+      warnings.push(`เคสในหมวด ${cat} มีไม่เพียงพอต่อสัดส่วนที่ระบุ ได้ทำการวนซ้ำเคสเดิม`);
+      let idx = 0;
+      while (added < count) {
+        selected.push(p[idx % p.length]);
+        added++;
+        idx++;
+      }
+    }
   };
   
-  const clinicSelected = selectFromPool('Clinic', clinicCount);
-  const productSelected = selectFromPool('Product', productCount);
-  const sapSelected = selectFromPool('SAP', sapCount);
+  selectFromPool('Clinic', clinicCount);
+  selectFromPool('Product', productCount);
+  selectFromPool('SAP', sapCount);
   
-  // รวมเคส
-  let combined = [...clinicSelected, ...productSelected, ...sapSelected];
+  // สุ่มตำแหน่งสถานีใหม่ก่อนส่งกลับ
+  const shuffledStations = shuffleArray(selected);
   
-  // ใส่สถานีสุ่ม
-  combined = shuffleArray(combined);
-  
-  // ตั้งค่าเลขสถานี (1-16)
-  const stations = combined.map((c, idx) => {
+  const stations = shuffledStations.map((c, idx) => {
     return {
       stationNumber: idx + 1,
       caseId: c.caseId,
@@ -508,21 +616,21 @@ function generateExamSet(options = {}) {
   });
   
   return {
-    examId: 'EXAM_' + new Date().getTime() + '_' + Math.floor(Math.random() * 1000),
+    examId: 'EXAM_' + new Date().getTime(),
     stations: stations,
     warnings: warnings,
     config: {
-      total: stations.length,
-      clinic: clinicSelected.length,
-      product: productSelected.length,
-      sap: sapSelected.length
+      total: total,
+      clinic: clinicCount,
+      product: productCount,
+      sap: sapCount
     }
   };
 }
 
 /**
  * ──────────────────────────────────────────────────────────────
- * 6. Setup Sheets (สร้าง Database จำลองใน Sheet เปล่า)
+ * 6. Setup Sheets (สร้างแท็บโครงสร้างชีทหลักตาม GEMINI.md)
  * ──────────────────────────────────────────────────────────────
  */
 function setupSheets() {
@@ -536,9 +644,11 @@ function setupSheets() {
     const headers = ['caseId', 'title', 'category', 'courseGroup', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive'];
     sheetLib.appendRow(headers);
     
-    // ใส่ตัวอย่างเคส
-    sheetLib.appendRow(['OSPE-CL001', 'Warfarin Counseling — AF ใหม่', 'Clinic', 'Anticoagulation', 'Atrial Fibrillation, Warfarin', 3, '1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g', 'Lin', '15/06/2026', 'TRUE']);
-    results.push('สร้างชีท CaseLibrary และเพิ่มเคสตัวอย่างแรกเรียบร้อย');
+    // ใส่ 3 เคสมาตรฐาน
+    DEFAULT_CASES.forEach(c => {
+      sheetLib.appendRow([c.caseId, c.title, c.category, c.courseGroup, c.disease, c.difficulty, c.docId, c.author, c.createdDate, c.isActive]);
+    });
+    results.push('สร้างชีท CaseLibrary และเพิ่ม 3 เคสมาตรฐานเรียบร้อย');
   } else {
     results.push('ชีท CaseLibrary มีอยู่แล้ว');
   }
@@ -549,9 +659,9 @@ function setupSheets() {
     sheetGroups = ss.insertSheet(CONFIG.sheets.courseGroups);
     sheetGroups.appendRow(['name', 'category', 'description']);
     
-    // รายชื่อ 15 Course Groups เริ่มต้น
+    // รายชื่อ 15 Course Groups
     const initialGroups = [
-      ['Pharmacy Counseling', 'Clinic', 'การซักประวัติและให้คำแนะนำยาความรู้ทั่วไป'],
+      ['Pharmacy Counseling', 'Clinic', 'การให้คำแนะนำความทั่วไป'],
       ['Anticoagulation', 'Clinic', 'การจัดการและประเมินระบบยาละลายลิ่มเลือด'],
       ['Diabetes Mellitus', 'Clinic', 'การประเมินและการแนะนำยาเบาหวานและเข็มอินซูลิน'],
       ['Asthma & COPD', 'Clinic', 'การให้คำแนะนำอุปกรณ์พ่นยาโรคหืดและปอดอุดกั้นเรื้อรัง'],
@@ -569,7 +679,7 @@ function setupSheets() {
     ];
     
     initialGroups.forEach(g => sheetGroups.appendRow(g));
-    results.push('สร้างชีท CourseGroups และลงทะเบียน 15 กลุ่มเบื้องต้นเรียบร้อย');
+    results.push('สร้างชีท CourseGroups และลงทะเบียน 15 กลุ่มวิชาเรียบร้อย');
   } else {
     results.push('ชีท CourseGroups มีอยู่แล้ว');
   }
@@ -578,13 +688,254 @@ function setupSheets() {
   decorateHomeBanners(ss);
   
   return {
-    message: 'Setup Completed Successfully!',
+    message: 'Setup Sheets Completed Successfully!',
     details: results
   };
 }
 
 /**
- * ตกแต่งปุ่มกลับหน้าแรกในทุกแผ่นงานย่อยยกเว้น Home Page ตามกฎ GEMINI.md
+ * ──────────────────────────────────────────────────────────────
+ * 7. Setup Sample Docs (บิลด์โครงสร้างลง Google Docs เปล่าทั้ง 3 ตัว)
+ * ──────────────────────────────────────────────────────────────
+ */
+function updateDocsWithSampleContent() {
+  const docIds = {
+    Product: '1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw',
+    SAP: '1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg'
+  };
+  
+  const results = [];
+  
+  // 1. เคส Product
+  try {
+    const doc = DocumentApp.openById(docIds.Product);
+    const body = doc.getBody();
+    body.clear();
+    
+    body.appendParagraph('[OSPE-PD001] Compounding — Cold Cream & Labeling').setHeading(DocumentApp.ParagraphHeading.HEADING_1);
+    
+    body.appendParagraph('ข้อมูลเคส').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('- หมวด: Product');
+    body.appendParagraph('- OSPE Main Group: การเตรียมยาเฉพาะราย (Compounding)');
+    body.appendParagraph('- Station/Sub-topic: Cold Cream Preparation & Labeling');
+    body.appendParagraph('- Course Group: Compounding - Topical');
+    body.appendParagraph('- โรค/หัวข้อ: Dry Skin, Cold Cream');
+    body.appendParagraph('- ระดับ: 2');
+    body.appendParagraph('- ผู้เขียน: Fon');
+    body.appendParagraph('- วันที่: 15/06/2026');
+    
+    body.appendParagraph('โจทย์').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('ท่านได้รับใบสั่งยาจากแพทย์ให้เตรียมตำรับ Cold Cream ปริมาณ 30 กรัม สำหรับผู้ป่วยเด็กโรคผิวหนังแห้ง (Atopic Dermatitis) โดยให้คำนวณสูตรตำรับ ชั่งตวงสารผสมเนื้อครีม และเขียนฉลากยาควบคุมพิเศษให้ครบถ้วนถูกต้องตามหลักวิชาชีพเภสัชกรรม (เวลาปฏิบัติการ 4 นาที)');
+    
+    body.appendParagraph('ข้อมูลผู้ป่วย').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    const tableData = [
+      ['หัวข้อ', 'ข้อมูล'],
+      ['ชื่อ-สกุล', 'เด็กชายปัญญา ดีเลิศ'],
+      ['อายุ', '5 ปี'],
+      ['โรคประจำตัว', 'Atopic Dermatitis (ผิวหนังอักเสบภูมิแพ้)'],
+      ['ใบสั่งยา', 'Cold Cream 30 g apply to dry areas BID'],
+      ['ประวัติแพ้ยา', 'NKDA (ไม่มีประวัติแพ้ยา)']
+    ];
+    body.appendTable(tableData);
+    
+    body.appendParagraph('Checklist').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('## (กลุ่ม: การคำนวณและตั้งตำรับ)').setHeading(DocumentApp.ParagraphHeading.HEADING_3);
+    body.appendListItem('☐ (2) คำนวณปริมาณสารสำคัญในสูตร Cold Cream 30 กรัม ได้ถูกต้อง (Mineral oil 15g, Beeswax 3.6g, Borax 0.24g, Water 7.56g)');
+    body.appendListItem('☐ (1) ชั่งน้ำหนักบีกเกอร์และสารเคมีแต่ละชนิดด้วยเครื่องชั่ง 2 ตำแหน่งอย่างถูกต้อง');
+    body.appendListItem('☐ (2) อธิบายขั้นตอนการผสมเฟสน้ำ (Aqueous phase) และเฟสน้ำมัน (Oily phase) ที่อุณหภูมิ 70 องศาเซลเซียส');
+    body.appendListItem('☐ (1) คนผสมให้เข้ากันจนได้เนื้อครีมขาวเนียนสม่ำเสมอ');
+    
+    body.appendParagraph('## (กลุ่ม: การเขียนฉลากและจ่ายยา)').setHeading(DocumentApp.ParagraphHeading.HEADING_3);
+    body.appendListItem('☐ (2) เขียนฉลากยาได้ถูกต้องครบถ้วน (ชื่อผู้ป่วย, วิธีใช้: ทาบริเวณผิวแห้งวันละ 2 ครั้ง, วันผลิต, วันหมดอายุ 14 วัน)');
+    body.appendListItem('☐ (1) ติดฉลากแดง "ยาใช้ภายนอก ห้ามรับประทาน"');
+    body.appendListItem('☐ (1) ส่งมอบยาพร้อมให้คำแนะนำการเก็บรักษายาที่อุณหภูมิห้อง หลีกเลี่ยงแสงแดด');
+    
+    body.appendParagraph('หมายเหตุ / เฉลย').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('- สูตรมาตรฐาน Cold Cream (100g): Mineral oil 50g, Beeswax 12g, Spermaceti 12g, Sodium borate (Borax) 0.8g, Purified water 25.2g.');
+    body.appendParagraph('- สำหรับ 30g: Mineral oil 15g, Beeswax 3.6g, Spermaceti 3.6g (หรือใช้วัตถุดิบอื่นทดแทน), Borax 0.24g, Water 7.56g.');
+    body.appendParagraph('- การเก็บรักษา: ห้ามแช่แข็ง เก็บในภาชนะปิดสนิทป้องกันแสงแดดและความร้อนเพื่อป้องกันการแยกเฟส');
+    
+    results.push('เขียนข้อมูลเคส Product เรียบร้อย');
+  } catch (e) {
+    results.push('บิลด์เคส Product ล้มเหลว: ' + e.toString());
+  }
+  
+  // 2. เคส SAP
+  try {
+    const doc = DocumentApp.openById(docIds.SAP);
+    const body = doc.getBody();
+    body.clear();
+    
+    body.appendParagraph('[OSPE-SP001] Pharmacy Law — ยาควบคุมพิเศษ').setHeading(DocumentApp.ParagraphHeading.HEADING_1);
+    
+    body.appendParagraph('ข้อมูลเคส').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('- หมวด: SAP');
+    body.appendParagraph('- OSPE Main Group: ความรู้เกี่ยวกับกฎหมายยา');
+    body.appendParagraph('- Station/Sub-topic: Prescription Validation & Special Controlled Drugs');
+    body.appendParagraph('- Course Group: Pharmacy Law');
+    body.appendParagraph('- โรค/หัวข้อ: Special Controlled Drugs Regulation');
+    body.appendParagraph('- ระดับ: 2');
+    body.appendParagraph('- ผู้เขียน: Irene');
+    body.appendParagraph('- วันที่: 15/06/2026');
+    
+    body.appendParagraph('โจทย์').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('ผู้ป่วยนำใบสั่งยาจากคลินิกเอกชนมาขอซื้อยา Lorazepam 2 mg ในร้านยาของท่าน ให้ท่านทำการตรวจสอบความถูกต้องทางกฎหมายของใบสั่งยา วิเคราะห์ประเภทของยาทางกฎหมาย และปฏิบัติตนตามข้อกำหนดของสำนักงานคณะกรรมการอาหารและยา (อย.) อย่างถูกต้อง (เวลาปฏิบัติการ 4 นาที)');
+    
+    body.appendParagraph('ข้อมูลผู้ป่วย').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    const tableData = [
+      ['หัวข้อ', 'ข้อมูล'],
+      ['ชื่อ-สกุล', 'นางสาวสมศรี มีสุข'],
+      ['อายุ', '45 ปี'],
+      ['โรคประจำตัว', 'Insomnia (นอนไม่หลับ)'],
+      ['ใบสั่งยา', 'Lorazepam 2 mg (15 tablets) Take 1 tablet before bedtime'],
+      ['ประวัติแพ้ยา', 'NKDA (ไม่มีประวัติแพ้ยา)']
+    ];
+    body.appendTable(tableData);
+    
+    body.appendParagraph('Checklist').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('## (กลุ่ม: ความรู้กฎหมายและการควบคุม)').setHeading(DocumentApp.ParagraphHeading.HEADING_3);
+    body.appendListItem('☐ (2) ระบุประเภททางกฎหมายของ Lorazepam ได้ถูกต้องว่าเป็น "วัตถุออกฤทธิ์ต่อจิตและประสาทประเภท 4"');
+    body.appendListItem('☐ (2) ตรวจสอบใบสั่งยาและแจ้งผู้ป่วยว่า "ร้านขายยาแผนปัจจุบัน (ข.ย.1) ไม่สามารถจ่ายวัตถุออกฤทธิ์ประเภท 4 ตามใบสั่งยาแพทย์จากคลินิกได้"');
+    body.appendListItem('☐ (2) แนะนำให้ผู้ป่วยไปรับยาที่โรงพยาบาลหรือสถานพยาบาลที่ได้รับอนุญาตครอบครองวัตถุออกฤทธิ์โดยตรง');
+    body.appendListItem('☐ (1) อธิบายข้อกฎหมายที่ห้ามร้านขายยาทั่วไปจำหน่ายวัตถุออกฤทธิ์ประเภท 2 และ 4');
+    
+    body.appendParagraph('## (กลุ่ม: ทักษะจรรยาบรรณวิชาชีพ)').setHeading(DocumentApp.ParagraphHeading.HEADING_3);
+    body.appendListItem('☐ (2) ปฏิเสธการขายยาอย่างสุภาพและแสดงความใส่ใจต่ออาการนอนไม่หลับของผู้ป่วย');
+    body.appendListItem('☐ (1) บันทึกข้อมูลการให้คำแนะนำทางกฎหมายลงในแบบฟอร์มบันทึกการให้คำปรึกษาของร้านยา');
+    
+    body.appendParagraph('หมายเหตุ / เฉลย').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('- วัตถุออกฤทธิ์ต่อจิตและประสาทประเภท 4 (เช่น Diazepam, Lorazepam, Alprazolam) ห้ามจำหน่ายในร้านขายยาทั่วไป ยกเว้นการจ่ายในสถานพยาบาลของรัฐหรือเอกชนที่มีใบอนุญาตเฉพาะ');
+    body.appendParagraph('- การฝ่าฝืนขายวัตถุออกฤทธิ์ประเภท 4 ในร้านยามีโทษจำคุกและปรับตาม พ.ร.บ. วัตถุที่ออกฤทธิ์ต่อจิตและประสาท');
+    body.appendParagraph('- ให้คำแนะนำผู้ป่วยเสริมด้านสุขวิทยาการนอน (Sleep Hygiene) เช่น หลีกเลี่ยงคาเฟอีนก่อนนอน งดเล่นมือถือ และเข้านอนเป็นเวลา');
+    
+    results.push('เขียนข้อมูลเคส SAP เรียบร้อย');
+  } catch (e) {
+    results.push('บิลด์เคส SAP ล้มเหลว: ' + e.toString());
+  }
+  
+  return {
+    message: 'Google Docs Population Run Completed!',
+    details: results
+  };
+}
+
+/**
+ * ──────────────────────────────────────────────────────────────
+ * 8. Google Form Automatic Case Registration Trigger (onFormSubmit)
+ * ──────────────────────────────────────────────────────────────
+ */
+function onFormSubmit(e) {
+  try {
+    const ss = getSpreadsheet();
+    const sheet = ss.getSheetByName(CONFIG.sheets.caseLibrary);
+    if (!sheet) return;
+    
+    // ดึงค่าคำตอบล่าสุด
+    const responseRange = e.range;
+    const responseValues = responseRange.getValues()[0];
+    const sheetHeaders = responseRange.getSheet().getDataRange().getValues()[0];
+    
+    const data = {};
+    sheetHeaders.forEach((hdr, idx) => {
+      data[hdr.trim()] = responseValues[idx];
+    });
+    
+    // แมปข้อมูลคำถามของฟอร์ม (ปรับเปลี่ยนชื่อหัวข้อคำถามให้ตรงกับฟอร์มจริงของคุณ)
+    const title = data['ชื่อเคส'] || data['Title'] || 'เคสสอบใหม่';
+    const category = data['หมวดวิชา'] || data['Category'] || 'Clinic';
+    const courseGroup = data['กลุ่มวิชา'] || data['Course Group'] || 'ทั่วไป';
+    const disease = data['โรค/ยา/หัวข้อหลัก'] || data['Disease'] || '';
+    const scenario = data['โจทย์/สถานการณ์'] || data['Scenario'] || '';
+    const checklistRaw = data['รายการ Checklist'] || data['Checklist'] || '';
+    const note = data['เฉลย/หมายเหตุสำหรับผู้ตรวจ'] || data['Notes'] || '';
+    const imageUrls = data['แนบรูปภาพภาพประกอบเคส (ถ้ามี)'] || data['Images'] || '';
+    
+    // 1. สร้างรหัสเคสอัตโนมัติ (OSPE-CLxxx)
+    const categoryCode = category === 'Clinic' ? 'CL' : (category === 'Product' ? 'PD' : 'SP');
+    const existingRows = sheet.getDataRange().getValues();
+    let seq = 1;
+    existingRows.forEach(row => {
+      if (row[0] && String(row[0]).startsWith('OSPE-' + categoryCode)) {
+        seq++;
+      }
+    });
+    const caseId = `OSPE-${categoryCode}${String(seq).padStart(3, '0')}`;
+    
+    // 2. สร้างไฟล์ Google Doc ใหม่
+    const newDoc = DocumentApp.create(caseId + ' ' + title);
+    const docId = newDoc.getId();
+    const body = newDoc.getBody();
+    
+    body.appendParagraph(`[${caseId}] ${title}`).setHeading(DocumentApp.ParagraphHeading.HEADING_1);
+    
+    body.appendParagraph('ข้อมูลเคส').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph(`- หมวด: ${category}`);
+    body.appendParagraph(`- Course Group: ${courseGroup}`);
+    body.appendParagraph(`- โรค/หัวข้อ: ${disease}`);
+    body.appendParagraph(`- ผู้เขียน: สตาฟเตรียมสอบ`);
+    body.appendParagraph(`- วันที่: ${new Date().toLocaleDateString('th-TH')}`);
+    
+    body.appendParagraph('โจทย์').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph(scenario);
+    
+    // แทรกรูปภาพจากลิงก์ที่อัปโหลดผ่าน Form (หากมี)
+    if (imageUrls) {
+      const urls = imageUrls.split(',').map(u => u.trim());
+      urls.forEach(url => {
+        try {
+          // สกัดเอา ID ของไฟล์รูปภาพใน Drive จาก URL
+          const fileIdMatch = url.match(/id=([^&]+)/) || url.match(/\/d\/([^/]+)/);
+          if (fileIdMatch) {
+            const fileId = fileIdMatch[1];
+            const imgBlob = DriveApp.getFileById(fileId).getBlob();
+            body.appendParagraph('รูปภาพประกอบข้อสอบ:').setHeading(DocumentApp.ParagraphHeading.HEADING_3);
+            body.appendImage(imgBlob);
+          }
+        } catch (imgError) {
+          Logger.log('ไม่สามารถดาวน์โหลดหรือแทรกภาพได้: ' + imgError.toString());
+        }
+      });
+    }
+    
+    body.appendParagraph('Checklist').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('## (กลุ่ม: การประเมินผล)').setHeading(DocumentApp.ParagraphHeading.HEADING_3);
+    const checklistLines = checklistRaw.split('\n');
+    checklistLines.forEach(line => {
+      if (line.trim()) {
+        const cleanLine = line.trim().startsWith('☐') || line.trim().startsWith('-') ? line.trim() : '☐ ' + line.trim();
+        body.appendListItem(cleanLine);
+      }
+    });
+    
+    body.appendParagraph('หมายเหตุ / เฉลย').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph(note);
+    
+    newDoc.saveAndClose();
+    
+    // 3. แนบข้อมูลเข้าไปในชีท CaseLibrary
+    sheet.appendRow([
+      caseId,
+      title,
+      category,
+      courseGroup,
+      disease,
+      2, // ระดับกลางดีฟอลต์
+      docId,
+      'Google Form',
+      new Date().toLocaleDateString('th-TH'),
+      'TRUE'
+    ]);
+    
+    Logger.log(`จดทะเบียนเคสใหม่สำเร็จ: ${caseId}`);
+  } catch (error) {
+    Logger.log('เกิดข้อผิดพลาดในการรับข้อมูลฟอร์ม: ' + error.toString());
+  }
+}
+
+/**
+ * ──────────────────────────────────────────────────────────────
+ * 9. ตกแต่งปุ่มกลับหน้าแรกย่อย ตามกฎ GEMINI.md
+ * ──────────────────────────────────────────────────────────────
  */
 function decorateHomeBanners(ss) {
   const sheets = ss.getSheets();
@@ -628,7 +979,7 @@ function decorateHomeBanners(ss) {
 
 /**
  * ──────────────────────────────────────────────────────────────
- * 7. Helpers
+ * 10. Helpers & แฮชทดแทน CryptoJS
  * ──────────────────────────────────────────────────────────────
  */
 function shuffleArray(arr) {
@@ -650,20 +1001,12 @@ function escapeHtml(text) {
     .replace(/'/g, '&#039;');
 }
 
-/**
- * MD5 implementation in Apps Script using Utilities (Crypto)
- */
-const CryptoJS = {
-  MD5: function(string) {
-    const signature = Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, string, Utilities.Charset.UTF_8);
-    let hexString = '';
-    for (let i = 0; i < signature.length; i++) {
-      let byteVal = signature[i];
-      if (byteVal < 0) byteVal += 256;
-      let byteString = byteVal.toString(16);
-      if (byteString.length == 1) byteString = '0' + byteString;
-      hexString += byteString;
-    }
-    return hexString;
+function simpleHash(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // แปลงเป็น 32bit integer
   }
-};
+  return Math.abs(hash).toString(16);
+}

@@ -37,6 +37,21 @@
     .station-badge.clinic { background-color: var(--clinic); }
     .station-badge.product { background-color: var(--product); }
     .station-badge.sap { background-color: var(--sap); }
+
+    .exam-note-content-area {
+      display: none;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-top: none;
+      background: var(--surface);
+      border-radius: 0 0 var(--radius-md) var(--radius-md);
+      font-size: 0.85rem;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+    .exam-note-content-area.show {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -101,19 +116,19 @@
               <div class="slider-group">
                 
                 <div class="slider-row">
-                  <span style="color: var(--clinic);">Clinic</span>
+                  <span style="color: var(--clinic); font-weight: bold;">Clinic</span>
                   <input type="range" id="slider-clinic" min="0" max="16" value="8" oninput="updateSlidersFrom('clinic')">
                   <span class="slider-val" id="val-clinic">8</span>
                 </div>
 
                 <div class="slider-row">
-                  <span style="color: var(--product);">Product</span>
+                  <span style="color: var(--product); font-weight: bold;">Product</span>
                   <input type="range" id="slider-product" min="0" max="16" value="6" oninput="updateSlidersFrom('product')">
                   <span class="slider-val" id="val-product">6</span>
                 </div>
 
                 <div class="slider-row">
-                  <span style="color: var(--sap);">SAP</span>
+                  <span style="color: var(--sap); font-weight: bold;">SAP</span>
                   <input type="range" id="slider-sap" min="0" max="16" value="2" oninput="updateSlidersFrom('sap')">
                   <span class="slider-val" id="val-sap">2</span>
                 </div>
@@ -124,7 +139,17 @@
               </p>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+            <!-- Role Selection -->
+            <div class="form-group" style="margin-top: 1.5rem;">
+              <label class="form-label" for="sim-role-select">บทบาทในการจำลองสอบ</label>
+              <select id="sim-role-select" class="select-filter" style="width: 100%;">
+                <option value="solo">👤 ฝึกซ้อมคนเดียว (Solo Mode — เห็นทั้งโจทย์และ Checklist)</option>
+                <option value="examinee">✍️ ฉันเป็นผู้เข้าสอบ (Examinee — เห็นเฉพาะโจทย์และนาฬิกาจับเวลา)</option>
+                <option value="examiner">🔎 ฉันเป็นผู้ประเมิน/คนไข้ (Examiner/SP — เห็น Checklist และเฉลย)</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;">
               🎲 สุ่มสถานีและเริ่มสอบทันที
             </button>
 
@@ -139,7 +164,7 @@
         <div class="exam-layout">
           
           <!-- Left Content Pane: Case info -->
-          <div class="exam-content-pane">
+          <div class="exam-content-pane" id="exam-left-pane">
             <div class="exam-header-meta">
               <div style="display: flex; align-items: center; gap: 0.75rem;">
                 <span class="station-badge" id="exam-station-badge">STATION 1</span>
@@ -153,7 +178,7 @@
               <!-- Scenario text dynamically generated -->
             </div>
 
-            <h3 class="viewer-section-title">ข้อมูลผู้ป่วย (Patient Info)</h3>
+            <h3 class="viewer-section-title" id="exam-patient-title">ข้อมูลผู้ป่วย (Patient Info)</h3>
             <div id="exam-patient-content">
               <!-- Table dynamically generated -->
             </div>
@@ -164,6 +189,7 @@
             
             <!-- Digital Timer Card -->
             <div class="timer-card">
+              <div id="exam-timer-label" style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-align: center; text-transform: uppercase; margin-bottom: 0.25rem;">ตัวจับเวลาสถานีสอบ</div>
               <div class="timer-display" id="exam-timer">04:00</div>
               <div class="timer-controls">
                 <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" id="timer-toggle-btn" onclick="toggleTimer()">⏸️ พักตัวจับเวลา</button>
@@ -172,7 +198,7 @@
             </div>
 
             <!-- Score Progress Card -->
-            <div class="progress-card" style="margin-bottom: 0; padding: 1rem;">
+            <div class="progress-card" id="exam-progress-card" style="margin-bottom: 1rem; padding: 1rem;">
               <div class="progress-header" style="font-size: 0.85rem; margin-bottom: 0.5rem;">
                 <span>คะแนนสถานีปัจจุบัน</span>
                 <span id="exam-pct">0%</span>
@@ -186,6 +212,28 @@
               </div>
             </div>
 
+            <!-- Examinee Notice Card -->
+            <div id="exam-examinee-notice" style="display: none; padding: 1.5rem; text-align: center; border: 1px dashed var(--border); border-radius: var(--radius-lg); background: var(--surface); color: var(--text-secondary); margin-bottom: 1.5rem;">
+              <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">✍️</span>
+              <h4 style="font-family: var(--font-title); font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; font-size: 0.9rem;">คุณกำลังเข้าสอบ</h4>
+              <p style="font-size: 0.8rem; line-height: 1.4;">เกณฑ์ Checklist และเฉลยถูกซ่อนไว้ ให้ผู้ประเมินซักถามและให้คะแนน</p>
+            </div>
+
+            <!-- Examiner Notes Container -->
+            <div class="note-container" id="exam-note-container" style="display: none; margin-bottom: 1.5rem;">
+              <button class="btn btn-secondary" style="width: 100%; font-size: 0.85rem; padding: 0.5rem;" id="exam-toggle-note-btn" onclick="toggleExamNote()">
+                🔑 แสดงเฉลย / บทบาทผู้ป่วยจำลอง
+              </button>
+              <div class="exam-note-content-area" id="exam-note-content-area">
+                <!-- Filled dynamically by JS -->
+              </div>
+            </div>
+
+            <!-- Checklist container -->
+            <div class="checklist-container" id="exam-checklist-container" style="margin-bottom: 1.5rem; max-height: 300px; overflow-y: auto;">
+              <!-- Checklist items populated dynamically -->
+            </div>
+
             <!-- Mini Map stations layout -->
             <div class="minimap-card">
               <h4 class="minimap-title" id="minimap-progress-title">แผนที่สถานี (0/16)</h4>
@@ -195,12 +243,12 @@
             </div>
 
             <!-- Exam Navigation Buttons -->
-            <div class="exam-nav" style="margin-top: 0; padding-top: 0.5rem; border-top: none;">
+            <div class="exam-nav" style="margin-top: 1rem; padding-top: 0.75rem;">
               <button class="btn btn-secondary" onclick="prevStation()" id="btn-prev-station">← ก่อนหน้า</button>
               <button class="btn btn-primary btn-clinic" onclick="nextStation()" id="btn-next-station">ถัดไป →</button>
             </div>
             
-            <button class="btn btn-danger" style="width: 100%; font-size: 0.9rem; padding: 0.5rem;" onclick="finishExamSimulation()">
+            <button class="btn btn-danger" style="width: 100%; font-size: 0.9rem; padding: 0.65rem; margin-top: 0.5rem;" onclick="finishExamSimulation()">
               🏁 ส่งกระดาษคำตอบ / สิ้นสุดการสอบ
             </button>
 
@@ -282,6 +330,7 @@
       clinic: 8,
       product: 6,
       sap: 2,
+      role: 'solo', // solo, examinee, examiner
       stations: [], // เคสของแต่ละสถานี
       currentIdx: 0,
       studentScores: {}, // { stationNumber: [checked_item_ids] }
@@ -334,7 +383,6 @@
       let sum = clinic + product + sap;
       if (sum !== total) {
         if (changedSource === 'clinic') {
-          // ปรับ product & sap ตามสัดส่วน
           const remainder = total - clinic;
           if (remainder >= 0) {
             product = Math.round(remainder * 0.75);
@@ -388,6 +436,7 @@
       const clinic = parseInt(document.getElementById('slider-clinic').value);
       const product = parseInt(document.getElementById('slider-product').value);
       const sap = parseInt(document.getElementById('slider-sap').value);
+      SimState.role = document.getElementById('sim-role-select').value;
       
       let examSet = null;
       
@@ -471,11 +520,9 @@
         SAP: shuffle(list.filter(c => c.category === 'SAP'))
       };
       
-      // ถ้าหมวดไหนไม่มี ให้สุ่มดึงหมวดอื่นทดแทน
       const getFromPool = (cat, count) => {
         let items = pool[cat].slice(0, count);
         let idx = 0;
-        // ป้องกันสระว่าง: ดึงซ้ำได้หากข้อมูลน้อย
         while (items.length < count && pool[cat].length > 0) {
           items.push(pool[cat][idx % pool[cat].length]);
           idx++;
@@ -489,7 +536,6 @@
         ...getFromPool('SAP', sap)
       ];
       
-      // สุ่มลำดับก่อนลงสถานี
       const shuffled = shuffle(selected);
       
       return shuffled.map((c, idx) => ({
@@ -530,7 +576,6 @@
         if (SimState.timerValue <= 0) {
           clearInterval(SimState.timerInterval);
           alert('หมดเวลาสถานีปัจจุบัน! ระบบจะขยับไปยังสถานีถัดไปอัตโนมัติ');
-          // เลื่อนสถานีอัตโนมัติ
           if (SimState.currentIdx < SimState.stations.length - 1) {
             nextStation();
           } else {
@@ -558,7 +603,6 @@
       const timerEl = document.getElementById('exam-timer');
       timerEl.textContent = displayStr;
       
-      // เปลี่ยนสีตามช่วงเวลา
       timerEl.className = 'timer-display';
       if (SimState.timerValue < 10) {
         timerEl.classList.add('danger');
@@ -586,8 +630,41 @@
       const badge = document.getElementById('exam-station-badge');
       badge.className = 'station-badge ' + c.category.toLowerCase();
       
-      // โหลดการแสดงผล Checklist ในแถบขวา (Interactive checklist)
-      renderExamChecklist(st.stationNumber, c);
+      // ควบคุมการแสดงผลตามบทบาท
+      const progressCard = document.getElementById('exam-progress-card');
+      const noticeCard = document.getElementById('exam-examinee-notice');
+      const chkContainer = document.getElementById('exam-checklist-container') || document.querySelector('.checklist-container');
+      const noteContainer = document.getElementById('exam-note-container');
+      
+      if (SimState.role === 'solo') {
+        progressCard.style.display = 'block';
+        noticeCard.style.display = 'none';
+        chkContainer.style.display = 'block';
+        noteContainer.style.display = 'none';
+        
+        renderExamChecklist(st.stationNumber, c);
+      } 
+      else if (SimState.role === 'examinee') {
+        // ซ่อนเกณฑ์ Checklist ทั้งหมด
+        progressCard.style.display = 'none';
+        noticeCard.style.display = 'block';
+        chkContainer.style.display = 'none';
+        noteContainer.style.display = 'none';
+      } 
+      else if (SimState.role === 'examiner') {
+        // ผู้ตรวจ: เห็น Checklist, แสดงเฉลยทันที
+        progressCard.style.display = 'block';
+        noticeCard.style.display = 'none';
+        chkContainer.style.display = 'block';
+        noteContainer.style.display = 'block';
+        
+        // แสดงเนื้อหาหมายเหตุคนไข้จำลอง
+        document.getElementById('exam-note-content-area').innerHTML = c.noteHtml || c.note || '<p>ไม่มีเฉลย/รายละเอียดเพิ่มเติม</p>';
+        document.getElementById('exam-note-content-area').classList.add('show');
+        document.getElementById('exam-toggle-note-btn').textContent = '🔒 ซ่อนบทบาทคนไข้จำลอง / เฉลย';
+        
+        renderExamChecklist(st.stationNumber, c);
+      }
       
       // โหลดแผนที่สถานีด้านล่าง
       renderMiniMap();
@@ -606,24 +683,11 @@
         nextBtn.onclick = nextStation;
       }
       
-      // รีเซ็ตตัวจับเวลาใหม่เมื่อเปลี่ยนสถานี
       startTimer();
     }
 
     function renderExamChecklist(stationNum, c) {
-      // ใช้ container เดิมของ right pane ใน exam mode
-      const container = document.querySelector('.exam-sidebar-pane .checklist-container');
-      if (!container) {
-        // หากไม่มีกล่อง สร้างไว้รองรับ
-        const wrapper = document.createElement('div');
-        wrapper.className = 'checklist-container';
-        wrapper.id = 'exam-checklist-container';
-        // แทรกไว้ก่อนหน้าปุ่มนำทาง
-        const nav = document.querySelector('.exam-nav');
-        nav.parentNode.insertBefore(wrapper, nav);
-      }
-      
-      const chkContainer = document.getElementById('exam-checklist-container') || container;
+      const chkContainer = document.getElementById('exam-checklist-container') || document.querySelector('.exam-sidebar-pane .checklist-container');
       chkContainer.innerHTML = '';
       
       if (!c.checklist || c.checklist.length === 0) {
@@ -655,7 +719,6 @@
           el.setAttribute('data-id', item.id);
           el.setAttribute('data-score', item.score);
           
-          // ตกแต่งบ๊อกขนาดเล็กในโมเดลสอบย่อย
           el.style.padding = '0.5rem 0.75rem';
           el.style.gap = '0.5rem';
           
@@ -747,41 +810,45 @@
           cell.classList.add('active');
         }
         
-        // ตรวจสอบว่าติ๊กข้อสอบไปบ้างแล้วหรือยัง
+        // ตรวจสอบว่ามีข้อมูลคะแนน
         const checked = SimState.studentScores[st.stationNumber] || [];
         if (checked.length > 0) {
-          cell.classList.add('completed');
+          cell.classList.add('done');
           completedCount++;
         }
         
-        cell.addEventListener('click', () => {
-          if (confirm(`ย้ายสถานีไปยังสถานีที่ ${st.stationNumber} หรือไม่?`)) {
+        cell.textContent = st.stationNumber;
+        
+        // ใน Examinee Mode ห้ามกดเปลี่ยนห้องเอง
+        if (SimState.role !== 'examinee') {
+          cell.style.cursor = 'pointer';
+          cell.addEventListener('click', () => {
             renderStation(idx);
-          }
-        });
-        
-        // จุดบอกหมวดสีมุมบน
-        const dot = document.createElement('span');
-        dot.className = 'minimap-dot ' + st.case.category.toLowerCase();
-        cell.appendChild(dot);
-        
-        // ข้อความ
-        const label = document.createElement('span');
-        label.textContent = st.stationNumber;
-        cell.appendChild(label);
+          });
+        }
         
         grid.appendChild(cell);
       });
       
       document.getElementById('minimap-progress-title').textContent = 
-        `แผนที่สถานี (${completedCount}/${SimState.stations.length} ทำไปแล้ว)`;
+        `ความคืบหน้าสถานี (${completedCount}/${SimState.totalStations})`;
+    }
+
+    function toggleExamNote() {
+      const area = document.getElementById('exam-note-content-area');
+      const btn = document.getElementById('exam-toggle-note-btn');
+      if (area.classList.contains('show')) {
+        area.classList.remove('show');
+        btn.textContent = '🔑 แสดงเฉลย / บทบาทผู้ป่วยจำลอง';
+      } else {
+        area.classList.add('show');
+        btn.textContent = '🔒 ซ่อนบทบาทคนไข้จำลอง / เฉลย';
+      }
     }
 
     function nextStation() {
       if (SimState.currentIdx < SimState.stations.length - 1) {
         renderStation(SimState.currentIdx + 1);
-      } else {
-        finishExamSimulation();
       }
     }
 
@@ -791,23 +858,14 @@
       }
     }
 
-    // ──────────────────────────────────────────────────────────
-    // Exam Simulation Results Analysis & Render
-    // ──────────────────────────────────────────────────────────
+    // สิ้นสุดและคำนวณผลการสอบ
     function finishExamSimulation() {
       if (SimState.timerInterval) clearInterval(SimState.timerInterval);
-      
-      if (!confirm('คุณยืนยันที่จะส่งกระดาษคำตอบ และสิ้นสุดการจำลองสอบหรือไม่?')) {
-        startTimer(); // เล่นต่อ
-        return;
-      }
-      
       showGlobalLoader(true);
       
-      // คำนวณคะแนนสะสมทั้งหมด
-      let totalStudentScore = 0;
+      let passedStations = 0;
       let totalMaxScore = 0;
-      let stationsPassedCount = 0;
+      let totalEarnedScore = 0;
       
       const tbody = document.getElementById('results-stations-tbody');
       tbody.innerHTML = '';
@@ -816,56 +874,48 @@
         const c = st.case;
         const checked = SimState.studentScores[st.stationNumber] || [];
         
-        let stStudentScore = 0;
-        let stMaxScore = 0;
+        let earned = 0;
+        let max = 0;
         
         c.checklist.forEach(item => {
-          stMaxScore += item.score;
+          max += item.score;
           if (checked.includes(item.id)) {
-            stStudentScore += item.score;
+            earned += item.score;
           }
         });
         
-        totalStudentScore += stStudentScore;
-        totalMaxScore += stMaxScore;
+        totalMaxScore += max;
+        totalEarnedScore += earned;
         
-        const pct = stMaxScore > 0 ? Math.round((stStudentScore / stMaxScore) * 100) : 0;
+        const pct = max > 0 ? Math.round((earned / max) * 100) : 0;
         const isPassed = pct >= 80;
-        if (isPassed) stationsPassedCount++;
+        if (isPassed) passedStations++;
         
-        // เพิ่มแถวในตารางสรุปผล
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td style="font-family:var(--font-mono); font-weight:700;">${st.stationNumber}</td>
-          <td style="font-weight:600;"><a href="case-viewer.html?id=${c.caseId}" target="_blank" style="color:var(--primary); text-decoration:underline;">${c.title}</a></td>
+          <td>สถานี ${st.stationNumber}</td>
+          <td><a href="case-viewer.html?id=${c.caseId}" target="_blank" style="color:var(--primary); font-weight:700;">${c.title}</a></td>
           <td><span class="badge badge-${c.category.toLowerCase()}">${c.category}</span></td>
-          <td style="font-family:var(--font-mono);">${stStudentScore} / ${stMaxScore}</td>
-          <td style="font-family:var(--font-mono); font-weight:700; color:${isPassed ? 'var(--success)' : 'var(--danger)'};">${pct}%</td>
-          <td style="font-weight:700; color:${isPassed ? 'var(--success)' : 'var(--danger)'};">${isPassed ? '✓ ผ่าน (Pass)' : '✗ ตก (Fail)'}</td>
+          <td>${earned} / ${max}</td>
+          <td>${pct}%</td>
+          <td><strong style="color: ${isPassed ? 'var(--success)' : 'var(--danger)'};">${isPassed ? 'ผ่าน' : 'ตก'}</strong></td>
         `;
         tbody.appendChild(tr);
       });
       
-      // แสดงผลคะแนนเฉลี่ยรวม
-      const totalPct = totalMaxScore > 0 ? Math.round((totalStudentScore / totalMaxScore) * 100) : 0;
-      document.getElementById('results-score-val').textContent = `${totalStudentScore} / ${totalMaxScore}`;
+      // แสดงรายงานสรุปผล
+      document.getElementById('results-score-val').textContent = `${totalEarnedScore}/${totalMaxScore}`;
+      const totalPct = totalMaxScore > 0 ? Math.round((totalEarnedScore / totalMaxScore) * 100) : 0;
       document.getElementById('results-score-pct').textContent = `${totalPct}%`;
       
       const statusText = document.getElementById('results-status-text');
-      if (stationsPassedCount === SimState.stations.length) {
-        statusText.textContent = 'PASSED (ผ่านทุกสถานี) 🎉';
-        statusText.className = 'results-status passed';
-      } else {
-        statusText.textContent = 'FAILED (ยังไม่ผ่านเกณฑ์) ⚠️';
-        statusText.className = 'results-status failed';
-      }
+      statusText.textContent = passedStations === SimState.totalStations ? 'PASSED (ผ่านการประเมิน)' : 'FAILED (ไม่ผ่านเกณฑ์)';
+      statusText.style.color = passedStations === SimState.totalStations ? 'var(--success)' : 'var(--danger)';
       
       document.getElementById('results-summary-desc').textContent = 
-        `ผ่านการประเมินวิชาชีพสอบผ่าน ${stationsPassedCount} จากทั้งหมด ${SimState.stations.length} สถานี (เกณฑ์ผ่านต่อสถานีคือต้องได้คะแนน 80% ขึ้นไป)`;
+        `ผ่านการประเมินวิชาชีพทั้งหมด ${passedStations} จาก ${SimState.totalStations} สถานีสอบ (ผ่านเมื่อสอบได้คะแนนตั้งแต่ร้อยละ 80 ขึ้นไปต่อสถานี)`;
       
       showGlobalLoader(false);
-      
-      // สลับหน้าจอผลลัพธ์
       document.getElementById('exam-running-view').style.display = 'none';
       document.getElementById('exam-results-view').style.display = 'block';
     }

@@ -1203,3 +1203,30 @@ a {
     justify-content: center;
   }
 }
+
+/* Base64 Images & Case Media Formatting */
+.case-image-wrapper {
+  margin: 1.5rem 0;
+  text-align: center;
+  width: 100%;
+}
+.case-image {
+  max-width: 100% !important;
+  height: auto !important;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  transition: transform 0.2s;
+}
+.case-image:hover {
+  transform: scale(1.02);
+}
+
+/* Table styling for patient info in dark mode */
+[data-theme="dark"] .table-patient-info th {
+  background-color: var(--bg-secondary);
+}
+[data-theme="dark"] .table-patient-info td {
+  background-color: var(--surface);
+}
+
