@@ -362,12 +362,16 @@
         }
       }
       
-      // 2. ถ้าดึง API ไม่สำเร็จ ให้ดึงจาก Offline Database (ซึ่งมี checklist ครบ) แทนที่จะดึงจาก AppState.cases ซึ่งไม่มี checklist
-      if (!matchedCase) {
+      // 2. ถ้าดึง API ไม่สำเร็จ หรือดึงสำเร็จแต่ไม่มี Checklist ให้ใช้ข้อมูลจาก Offline Database
+      const hasChecklist = matchedCase && matchedCase.checklist && matchedCase.checklist.length > 0;
+      if (!hasChecklist) {
+        let offlineCase = null;
         if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
-          matchedCase = OFFLINE_DATA.cases.find(c => c.caseId === activeCaseId);
+          offlineCase = OFFLINE_DATA.cases.find(c => c.caseId === activeCaseId);
         }
-        if (!matchedCase) {
+        if (offlineCase && offlineCase.checklist && offlineCase.checklist.length > 0) {
+          matchedCase = offlineCase;
+        } else if (!matchedCase) {
           matchedCase = AppState.cases.find(c => c.caseId === activeCaseId);
         }
       }
