@@ -94,7 +94,8 @@ async function loadCasesData() {
   // 1. ลองดึงข้อมูลผ่าน API
   if (currentApiUrl) {
     try {
-      const response = await fetch(`${currentApiUrl}?action=getCaseList`);
+      const cacheBuster = new Date().getTime();
+      const response = await fetch(`${currentApiUrl}?action=getCaseList&_cb=${cacheBuster}`);
       const result = await response.json();
       
       if (result.success && result.data && result.data.cases) {

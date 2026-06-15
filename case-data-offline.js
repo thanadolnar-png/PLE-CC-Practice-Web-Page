@@ -1,13 +1,18 @@
 /**
- * PLE-CC2 OSPE Practice System — Offline Case Database (v3.0)
+ * PLE-CC2 OSPE Practice System — Offline Case Database (v3.1)
  * File: case-data-offline.js
  * ===================================================
  * ฐานข้อมูลสำรองสำหรับใช้งานเว็บไซต์แบบ Offline
  * หรือใช้ทดสอบก่อนตั้งค่า Google Apps Script Web App
+ *
+ * v3.1 — เพิ่มเคสทดสอบ: 9 เคส (3 ต่อหมวด: Clinic / Product / SAP)
  */
 
 const OFFLINE_DATA = {
   cases: [
+    // ══════════════════════════════════════════════
+    // CLINIC CASES (CL001 – CL003)
+    // ══════════════════════════════════════════════
     {
       "caseId": "OSPE-CL001",
       "title": "Warfarin Counseling — AF ใหม่",

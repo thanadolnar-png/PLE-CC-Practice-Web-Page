@@ -168,23 +168,23 @@
         </a>
       </div>
 
-      <!-- Header Information -->
-      <header class="viewer-header">
+      <!-- Header Information (no-print) -->
+      <header class="viewer-header no-print">
         <h1 class="viewer-title" id="case-title">โหลดชื่อเคส...</h1>
         <div class="viewer-meta-tags" id="case-meta-tags">
           <!-- Filled dynamically by JS -->
         </div>
       </header>
 
-      <!-- Role / Practice Mode Selector -->
-      <div class="role-selector-container" id="mode-selector">
+      <!-- Role / Practice Mode Selector (no-print) -->
+      <div class="role-selector-container id="mode-selector" class="role-selector-container no-print">
         <button class="role-btn active" id="role-btn-solo" onclick="setViewerRole('solo')">👤 ฝึกคนเดียว (Solo)</button>
         <button class="role-btn" id="role-btn-examinee" onclick="setViewerRole('examinee')">✍️ เป็นคนสอบ (Examinee)</button>
         <button class="role-btn" id="role-btn-examiner" onclick="setViewerRole('examiner')">🔎 เป็นคนตรวจ/คนไข้ (Examiner)</button>
       </div>
 
-      <!-- Share links for Multiplayer practicing -->
-      <div class="share-buttons-container">
+      <!-- Share links for Multiplayer practicing (no-print) -->
+      <div class="share-buttons-container no-print">
         <button class="btn btn-secondary btn-share" id="share-examinee-btn" onclick="copyShareLink('examinee')">🔗 ก๊อปปี้ลิงก์สำหรับเพื่อนสอบ</button>
         <button class="btn btn-secondary btn-share" id="share-examiner-btn" onclick="copyShareLink('examiner')">🔗 ก๊อปปี้ลิงก์สำหรับผู้ประเมิน</button>
       </div>
@@ -195,8 +195,8 @@
         <!-- Left Pane: Case description & Doc embed -->
         <section class="viewer-pane" id="left-pane">
           
-          <!-- Tabs selection -->
-          <div class="viewer-tabs" id="doc-tabs-bar">
+          <!-- Tabs selection (no-print) -->
+          <div class="viewer-tabs no-print" id="doc-tabs-bar">
             <button class="viewer-tab-btn active" id="tab-btn-content" onclick="switchViewerTab('content')">📖 โจทย์และข้อมูลผู้ป่วย</button>
             <button class="viewer-tab-btn" id="tab-btn-doc" onclick="switchViewerTab('doc')">📄 เอกสาร Google Doc ต้นฉบับ</button>
           </div>
@@ -216,18 +216,18 @@
             
           </div>
 
-          <!-- Tab Content 2: Embedded Google Doc -->
-          <div id="view-tab-doc-area" class="view-tab-content">
+          <!-- Tab Content 2: Embedded Google Doc (no-print) -->
+          <div id="view-tab-doc-area" class="view-tab-content no-print">
             <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
-              หากเนื้อหาไม่แสดงหรือต้องการแก้ไขข้อมูล กรุณาคลิกเปิด <a href="" id="case-doc-direct-link" target="_blank" style="color: var(--primary); font-weight: 600; text-decoration: underline;">เปิดในหน้าต่างใหม่ (Open in Google Docs)</a>
+              หากเนื้อหาไม่แสดงหรือต้องการแก้ไขข้อมูล กรุณาคลิกเปิด <a href="" id="case-doc-direct-link" target="_blank" style="color: var(--primary); font-weight: 600; text-decoration: underline;">เปิด in Google Docs</a>
             </p>
             <div class="doc-iframe-wrapper">
               <iframe id="doc-embed-iframe" class="doc-iframe" src="" title="Google Doc Embed"></iframe>
             </div>
           </div>
 
-          <!-- Print layout only note (always shows in print) -->
-          <div class="print-only" style="margin-top: 2rem;">
+          <!-- Print layout only note (always shows in print, forces a new page for Checklist table) -->
+          <div class="print-only print-page-break" style="margin-top: 2rem;">
             <h3 class="viewer-section-title">Checklist และกลุ่มคะแนน</h3>
             <div id="print-checklist-list"></div>
           </div>
@@ -271,7 +271,7 @@
             </p>
           </div>
 
-          <div id="checklist-and-notes-section">
+          <div id="checklist-and-notes-section" class="no-print">
             <!-- Checklist Group -->
             <h3 class="viewer-section-title" style="margin-top: 0; border-left-color: var(--success);">
               รายการทักษะประเมิน (Checklist)
@@ -350,7 +350,8 @@
       // 1. ลองดึงข้อมูลจาก API สด
       if (currentApiUrl) {
         try {
-          const res = await fetch(`${currentApiUrl}?action=getCase&id=${activeCaseId}`);
+          const cacheBuster = new Date().getTime();
+          const res = await fetch(`${currentApiUrl}?action=getCase&id=${activeCaseId}&_cb=${cacheBuster}`);
           const result = await res.json();
           if (result.success && result.data) {
             matchedCase = result.data;

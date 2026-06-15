@@ -479,9 +479,9 @@ function checkTableTemplate(table, targetCaseId) {
       const keyText = row.getCell(0).getText().trim().toLowerCase();
       const valText = row.getCell(1).getText().trim();
       
-      // ถ้าร้องขอ caseId เจาะจง ให้เช็คตรงกัน
+      // ถ้าร้องขอ caseId เจาะจง ให้เช็คตรงกันแบบเป๊ะๆ
       if (targetCaseId) {
-        if ((keyText.includes('รหัสเคส') || keyText.includes('case id') || keyText.includes('caseid')) && valText.includes(targetCaseId)) {
+        if ((keyText.includes('รหัสเคส') || keyText.includes('case id') || keyText.includes('caseid')) && valText === targetCaseId) {
           return true;
         }
       } else {
@@ -881,13 +881,68 @@ function setupSheets() {
  */
 function updateDocsWithSampleContent() {
   const docIds = {
+    Clinic: '1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g',
     Product: '1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw',
     SAP: '1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg'
   };
   
   const results = [];
   
-  // 1. เคส Product
+  // 1. เคส Clinic (Warfarin Counseling)
+  try {
+    const doc = DocumentApp.openById(docIds.Clinic);
+    const body = doc.getBody();
+    body.clear();
+    
+    body.appendParagraph('[OSPE-CL001] Warfarin Counseling — AF ใหม่').setHeading(DocumentApp.ParagraphHeading.HEADING_1);
+    
+    body.appendParagraph('ข้อมูลเคส').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('- หมวด: Clinic');
+    body.appendParagraph('- OSPE Main Group: การบริบาลทางเภสัชกรรม (Pharmaceutical Care)');
+    body.appendParagraph('- Station/Sub-topic: Anticoagulation Counseling');
+    body.appendParagraph('- Course Group: Anticoagulation');
+    body.appendParagraph('- โรค/หัวข้อ: Atrial Fibrillation, Warfarin');
+    body.appendParagraph('- ระดับ: 3');
+    body.appendParagraph('- ผู้เขียน: Lin');
+    body.appendParagraph('- วันที่: 15/06/2026');
+    
+    body.appendParagraph('โจทย์').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('ผู้ป่วยชายไทยอายุ 65 ปี ได้รับการวินิจฉัยว่าเป็น Non-valvular Atrial Fibrillation และได้รับยา Warfarin 3 mg วันละ 1 ครั้ง เป็นครั้งแรก ให้ท่านทำการประเมินความปลอดภัย ให้คำปรึกษาและแนะนำการปฏิบัติตัวเกี่ยวกับการใช้ยา Warfarin แก่ผู้ป่วยอย่างครบถ้วน (เวลาปฏิบัติการ 4 นาที)');
+    
+    body.appendParagraph('ข้อมูลผู้ป่วย').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    const tableData = [
+      ['หัวข้อ', 'ข้อมูล'],
+      ['ชื่อ-สกุล', 'นายสมนึก รักดี'],
+      ['อายุ', '65 ปี'],
+      ['โรคประจำตัว', 'Non-valvular Atrial Fibrillation, Hypertension'],
+      ['ใบสั่งยา', 'Warfarin 3 mg tab 1 tablet PO QD (at 18:00)'],
+      ['ประวัติแพ้ยา', 'NKDA']
+    ];
+    body.appendTable(tableData);
+    
+    body.appendParagraph('Checklist').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('## (กลุ่ม: การซักประวัติและการประเมินความปลอดภัย)').setHeading(DocumentApp.ParagraphHeading.HEADING_3);
+    body.appendListItem('☐ (2) ซักประวัติการแพ้ยา ประวัติโรคประจำตัว และการใช้ยาร่วม (โดยเฉพาะสมุนไพร/อาหารเสริม)');
+    body.appendListItem('☐ (1) แจ้งเป้าหมายการรักษาและการออกฤทธิ์ของยา Warfarin (เพื่อป้องกันภาวะลิ่มเลือดอุดตันและหลอดเลือดสมอง)');
+    body.appendListItem('☐ (2) อธิบายวิธีรับประทานยาอย่างถูกต้อง (ทานเวลาเดียวกันทุกวัน โดยปกติแนะนำตอนเย็น 18:00 น. ก่อนหรือหลังอาหารก็ได้)');
+    body.appendListItem('☐ (1) แนะนำการปฏิบัติเมื่อลืมกินยา (หากไม่เกิน 12 ชั่วโมงให้ทานทันที หากเกิน 12 ชั่วโมงให้ข้ามไปทานมื้อถัดไป ห้ามเพิ่มขนาดยาเป็น 2 เท่า)');
+    
+    body.appendParagraph('## (กลุ่ม: การจัดการความเสี่ยงและคำแนะนำเพิ่ม)').setHeading(DocumentApp.ParagraphHeading.HEADING_3);
+    body.appendListItem('☐ (2) แนะนำอาการข้างเคียงรุนแรงที่ต้องพบแพทย์ทันที (เลือดออกผิดปกติ เช่น จุดจ้ำเลือดตามตัว ปัสสาวะ/อุจจาระมีสีเข้มหรือมีเลือดปน เลือดกำเดาไหลไม่หยุด)');
+    body.appendListItem('☐ (2) แนะนำเรื่องอาหารที่มีวิตามินเคสูง (ผักใบเขียว เช่น ผักคะน้า ผักโขม) ว่าให้รับประทานในปริมาณที่สม่ำเสมอทุกวัน ไม่ลดหรือเพิ่มปริมาณอย่างเฉียบพลัน');
+    body.appendListItem('☐ (1) แนะนำการหลีกเลี่ยงพฤติกรรมเสี่ยงที่ทำให้เกิดบาดแผลและเลือดออก เช่น การใช้แปรงสีฟันขนอ่อนนุ่ม ใช้เครื่องโกนหนวดไฟฟ้า');
+    
+    body.appendParagraph('หมายเหตุ / เฉลย').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('- Warfarin มีความเสี่ยงต่อปฏิกิริยาระหว่างยา (Drug Interactions) สูงมาก เช่น ยา NSAIDs, ยาฆ่าเชื้อฆ่าราบางกลุ่ม หรืออาหารเสริมจำพวก แปะก๊วย โสม น้ำมันปลา');
+    body.appendParagraph('- ต้องประเมินค่า INR อย่างสม่ำเสมอตามแพทย์นัด (Target INR มักอยู่ที่ 2.0 - 3.0 สำหรับ Non-valvular AF)');
+    body.appendParagraph('- เน้นย้ำการพกบัตรผู้ใช้ยา Warfarin ติดตัวไว้เสมอ');
+    
+    results.push('เขียนข้อมูลเคส Clinic เรียบร้อย');
+  } catch (e) {
+    results.push('บิลด์เคส Clinic ล้มเหลว: ' + e.toString());
+  }
+
+  // 2. เคส Product
   try {
     const doc = DocumentApp.openById(docIds.Product);
     const body = doc.getBody();
@@ -941,7 +996,7 @@ function updateDocsWithSampleContent() {
     results.push('บิลด์เคส Product ล้มเหลว: ' + e.toString());
   }
   
-  // 2. เคส SAP
+  // 3. เคส SAP
   try {
     const doc = DocumentApp.openById(docIds.SAP);
     const body = doc.getBody();
@@ -1650,5 +1705,13 @@ function scanDocForCases(docId) {
     Logger.log('Error scanning Doc ID ' + docId + ': ' + e.toString());
   }
   return cases;
+}
+
+function debugCase() {
+  // ทดสอบ Clinic
+  const result = getCaseContentFromDoc('1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g', 'OSPE-CL001');
+  Logger.log('contentHtml length: ' + (result.contentHtml || '').length);
+  Logger.log('checklist count: ' + (result.checklist || []).length);
+  Logger.log('scenario: ' + (result.scenario ? result.scenario.substring(0, 100) : 'N/A'));
 }
 
