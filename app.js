@@ -9,7 +9,8 @@
 
 // อัปเดต URL ของ Google Apps Script Web App ที่นี่หลังทำ Deployment เสร็จ
 const API_URL_KEY = 'ple_cc_api_url';
-let currentApiUrl = localStorage.getItem(API_URL_KEY) || '';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwhdMVZ2mcR2dwUagrcLJ6Os1PjwrKO_X8xjwEOJUWYYONZfmYjvVbdXrCVh7qFC0iM/exec';
+let currentApiUrl = API_URL;
 
 const AppState = {
   theme: localStorage.getItem('theme') || 'light',

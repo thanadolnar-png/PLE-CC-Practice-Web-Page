@@ -31,6 +31,9 @@ const CONFIG = {
 
 // ฐานข้อมูลเคสเริ่มต้น (Fallback กรณี Sheet ว่างเปล่าหรือไม่ถูกสร้าง)
 const DEFAULT_CASES = [
+  // ══════════════════════════════════════════════
+  // CLINIC CASES (CL001 – CL002)
+  // ══════════════════════════════════════════════
   {
     caseId: 'OSPE-CL001',
     title: 'Warfarin Counseling — AF ใหม่',
@@ -44,6 +47,21 @@ const DEFAULT_CASES = [
     isActive: 'TRUE'
   },
   {
+    caseId: 'OSPE-CL002',
+    title: 'Warfarin Counseling — AF เปลี่ยนมาจาก NOAC',
+    category: 'Clinic',
+    courseGroup: 'Anticoagulation',
+    disease: 'Atrial Fibrillation, Warfarin, Drug Switching',
+    difficulty: 4,
+    docId: '1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g',
+    author: 'Lin',
+    createdDate: '15/06/2026',
+    isActive: 'TRUE'
+  },
+  // ══════════════════════════════════════════════
+  // PRODUCT CASES (PD001 – PD002)
+  // ══════════════════════════════════════════════
+  {
     caseId: 'OSPE-PD001',
     title: 'Compounding — Cold Cream & Labeling',
     category: 'Product',
@@ -56,12 +74,39 @@ const DEFAULT_CASES = [
     isActive: 'TRUE'
   },
   {
+    caseId: 'OSPE-PD002',
+    title: 'Compounding — Oral Suspension & Labeling',
+    category: 'Product',
+    courseGroup: 'Compounding - Liquid',
+    disease: 'Pediatric Fever, Paracetamol Suspension',
+    difficulty: 3,
+    docId: '1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw',
+    author: 'Fon',
+    createdDate: '15/06/2026',
+    isActive: 'TRUE'
+  },
+  // ══════════════════════════════════════════════
+  // SAP CASES (SP001 – SP002)
+  // ══════════════════════════════════════════════
+  {
     caseId: 'OSPE-SP001',
     title: 'Pharmacy Law — ยาควบคุมพิเศษ',
     category: 'SAP',
     courseGroup: 'Pharmacy Law',
     disease: 'Special Controlled Drugs Regulation',
     difficulty: 2,
+    docId: '1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg',
+    author: 'Irene',
+    createdDate: '15/06/2026',
+    isActive: 'TRUE'
+  },
+  {
+    caseId: 'OSPE-SP002',
+    title: 'Pharmacy Law — ยาเสพติดให้โทษประเภท 3',
+    category: 'SAP',
+    courseGroup: 'Pharmacy Law',
+    disease: 'Narcotic Drug, Codeine Prescription',
+    difficulty: 3,
     docId: '1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg',
     author: 'Irene',
     createdDate: '15/06/2026',
@@ -198,8 +243,8 @@ function getCaseList(params = {}) {
     if (sheet) {
       const data = sheet.getDataRange().getValues();
       if (data.length > 1) {
-        const headers = data[0];
-        const rows = data.slice(1);
+        const headers = ['caseId', 'title', 'category', 'courseGroup', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive'];
+        const rows = data.length > 2 ? data.slice(2) : [];
         
         cases = rows.map(row => {
           const item = {};
@@ -665,9 +710,9 @@ function getCourseGroups(category = 'All') {
     const sheet = ss.getSheetByName(CONFIG.sheets.courseGroups);
     if (sheet) {
       const data = sheet.getDataRange().getValues();
-      if (data.length > 1) {
-        const headers = data[0];
-        const rows = data.slice(1);
+      if (data.length > 2) {
+        const headers = data[1]; // แถวที่ 2 คือ Headers
+        const rows = data.slice(2); // ข้ามแถว 1 (แบนเนอร์) และแถว 2 (Headers)
         groups = rows.map(row => {
           const item = {};
           headers.forEach((header, index) => {
@@ -937,7 +982,57 @@ function updateDocsWithSampleContent() {
     body.appendParagraph('- ต้องประเมินค่า INR อย่างสม่ำเสมอตามแพทย์นัด (Target INR มักอยู่ที่ 2.0 - 3.0 สำหรับ Non-valvular AF)');
     body.appendParagraph('- เน้นย้ำการพกบัตรผู้ใช้ยา Warfarin ติดตัวไว้เสมอ');
     
-    results.push('เขียนข้อมูลเคส Clinic เรียบร้อย');
+    // ── เพิ่มเคส CL002 ต่อท้ายใน Doc เดิม ──
+    body.appendHorizontalRule();
+    body.appendParagraph('[OSPE-CL002] Warfarin Counseling — AF เปลี่ยนมาจาก NOAC').setHeading(DocumentApp.ParagraphHeading.HEADING_1);
+    
+    body.appendParagraph('ข้อมูลเคส').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('- หมวด: Clinic');
+    body.appendParagraph('- OSPE Main Group: การบริบาลทางเภสัชกรรม (Pharmaceutical Care)');
+    body.appendParagraph('- Station/Sub-topic: Anticoagulation Counseling — Drug Switching');
+    body.appendParagraph('- Course Group: Anticoagulation');
+    body.appendParagraph('- โรค/หัวข้อ: Atrial Fibrillation, Warfarin, Drug Switching');
+    body.appendParagraph('- ระดับ: 4');
+    body.appendParagraph('- ผู้เขียน: Lin');
+    body.appendParagraph('- วันที่: 15/06/2026');
+    
+    body.appendParagraph('โจทย์').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('ผู้ป่วยหญิงไทย อายุ 72 ปี มีโรคประจำตัว Non-valvular Atrial Fibrillation และ CKD Stage 3 เคยได้รับ Dabigatran 110 mg วันละ 2 ครั้ง มา 2 ปี แต่ขณะนี้แพทย์ตัดสินใจเปลี่ยนยาต้านการแข็งตัวของเลือดมาเป็น Warfarin เนื่องจากค่า eGFR ลดลงต่อเนื่อง ให้ท่านทำการให้คำปรึกษาผู้ป่วยเรื่องการเปลี่ยนยา ความแตกต่างระหว่างยา 2 ชนิด และข้อควรปฏิบัติสำหรับยา Warfarin ที่เริ่มใช้ใหม่ (เวลาปฏิบัติการ 4 นาที)');
+    
+    body.appendParagraph('ข้อมูลผู้ป่วย').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    const tableData2 = [
+      ['หัวข้อ', 'ข้อมูล'],
+      ['ชื่อ-สกุล', 'นางสุดา มานะชัย'],
+      ['อายุ', '72 ปี'],
+      ['โรคประจำตัว', 'Non-valvular AF, CKD Stage 3, Hypertension, DM Type 2'],
+      ['ค่าไต (eGFR)', '28 mL/min/1.73m² (ล่าสุด)'],
+      ['ยาเดิม', 'Dabigatran 110mg PO BID (ใช้มา 2 ปี)'],
+      ['ยาใหม่', 'Warfarin 2 mg tab 1 tablet PO QD (at 18:00) — เริ่มวันนี้'],
+      ['ยาร่วมอื่น', 'Amlodipine 5mg OD, Metformin 500mg BD, Furosemide 20mg OD'],
+      ['ประวัติแพ้ยา', 'NKDA']
+    ];
+    body.appendTable(tableData2);
+    
+    body.appendParagraph('Checklist').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('## (กลุ่ม: การซักประวัติและประเมินความเข้าใจเดิม)').setHeading(DocumentApp.ParagraphHeading.HEADING_3);
+    body.appendListItem('☐ (1) ซักประวัติการใช้ยา Dabigatran และประเมินความสม่ำเสมอในการรับประทานยา');
+    body.appendListItem('☐ (2) อธิบายเหตุผลที่ต้องเปลี่ยนยา (ไตเสื่อมลง eGFR < 30 ทำให้ Dabigatran สะสมในร่างกาย เสี่ยงเลือดออกรุนแรง)');
+    body.appendListItem('☐ (1) อธิบายความแตกต่างระหว่าง Dabigatran (ขนาดยาคงที่) กับ Warfarin (ต้องติดตาม INR อย่างสม่ำเสมอ)');
+    
+    body.appendParagraph('## (กลุ่ม: การให้คำแนะนำ Warfarin)').setHeading(DocumentApp.ParagraphHeading.HEADING_3);
+    body.appendListItem('☐ (2) อธิบายวิธีรับประทานยา Warfarin 2mg วันละครั้ง เวลาเดียวกันทุกวัน');
+    body.appendListItem('☐ (2) เน้นความสำคัญของการตรวจ INR อย่างสม่ำเสมอ บอกเป้าหมาย Target INR = 2.0-3.0');
+    body.appendListItem('☐ (2) แนะนำอาการผิดปกติที่ต้องรีบพบแพทย์ทันที (เลือดออกผิดปกติ, ฉี่มีเลือดปน, อุจจาระดำ)');
+    body.appendListItem('☐ (1) แนะนำเรื่องอาหารวิตามินเค (ผักใบเขียว) ให้กินสม่ำเสมอ ไม่เพิ่ม-ลดกระทันหัน');
+    body.appendListItem('☐ (1) เน้นห้ามซื้อยาแก้ปวด NSAIDs/Aspirin เองเพราะเพิ่มความเสี่ยงเลือดออก');
+    
+    body.appendParagraph('หมายเหตุ / เฉลย').setHeading(DocumentApp.ParagraphHeading.HEADING_2);
+    body.appendParagraph('- ข้อบ่งชี้การเปลี่ยนยา: Dabigatran ห้ามใช้เมื่อ CrCl < 30 mL/min เพราะยาถูกขับออกทางไตกว่า 80% หากไตเสื่อม ยาสะสมและเพิ่มความเสี่ยงเลือดออกรุนแรง');
+    body.appendParagraph('- การเปลี่ยนยา (Switching): หยุด Dabigatran ตอนเย็น เริ่ม Warfarin วันรุ่งขึ้น และต้องตรวจ INR ซ้ำภายใน 5-7 วัน');
+    body.appendParagraph('- Drug interactions สำคัญ: Furosemide + Warfarin อาจเพิ่มฤทธิ์ Warfarin เล็กน้อย ต้องติดตาม INR อย่างใกล้ชิดในช่วงแรก');
+    body.appendParagraph('- Metformin ไม่ควรใช้เมื่อ eGFR < 30 ให้แนะนำผู้ป่วยนำใบปรึกษาแพทย์ไปพิจารณาปรับยา DM ด้วย');
+    
+    results.push('เขียนข้อมูลเคส Clinic (CL001 + CL002) เรียบร้อย');
   } catch (e) {
     results.push('บิลด์เคส Clinic ล้มเหลว: ' + e.toString());
   }
@@ -1469,8 +1564,8 @@ function syncCaseLibraryFromDocs() {
   // โหลดรายการเดิมที่มีอยู่ใน Sheet
   const existingCasesMap = {};
   const data = sheetLib.getDataRange().getValues();
-  const headers = data[0];
-  const rows = data.slice(1);
+  const headers = ['caseId', 'title', 'category', 'courseGroup', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive'];
+  const rows = data.length > 2 ? data.slice(2) : []; // อ่านข้อมูลจากแถว 3 เป็นต้นไป
   rows.forEach(row => {
     const caseId = row[0];
     if (caseId) {
@@ -1518,14 +1613,18 @@ function syncCaseLibraryFromDocs() {
   });
   
   // เคลียร์ชีทใต้ส่วนหัว
+  // เคลียร์ชีทใต้ส่วนหัวแบนเนอร์ (แถว 2 ลงไปทั้งหมด)
   if (sheetLib.getLastRow() > 1) {
     sheetLib.getRange(2, 1, sheetLib.getLastRow() - 1, sheetLib.getLastColumn()).clearContent();
   }
   
+  // เขียน Headers ใหม่ที่แถวที่ 2
+  sheetLib.getRange(2, 1, 1, headers.length).setValues([headers]);
+  
   // เรียงลำดับ รหัสเคส
   const sortedCaseIds = Object.keys(existingCasesMap).sort();
   
-  // เขียนข้อมูลกลับคืนลง Sheet
+  // เขียนข้อมูลกลับคืนลง Sheet (จะกลายเป็นแถว 3 เป็นต้นไป)
   sortedCaseIds.forEach(caseId => {
     const c = existingCasesMap[caseId];
     sheetLib.appendRow([

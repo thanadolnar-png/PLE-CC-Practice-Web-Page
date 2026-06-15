@@ -477,14 +477,15 @@
           const randomRoomId = String(Math.floor(1000 + Math.random() * 9000));
           
           const res = await fetch(`${currentApiUrl}?action=createRoom&roomId=${randomRoomId}&caseId=${caseSelect}&hostRole=${SimState.lobbyRole}&playerName=${encodeURIComponent(playerName)}`);
-          const result = await res.json();
+          const resultWrapper = await res.json();
           
-          if (result.roomId) {
+          if (resultWrapper.success && resultWrapper.data && resultWrapper.data.roomId) {
+            const result = resultWrapper.data;
             SimState.roomId = result.roomId;
             SimState.role = SimState.lobbyRole;
             setupLobbyRoomUI();
           } else {
-            throw new Error('การสร้างห้องล้มเหลว');
+            throw new Error(resultWrapper.error || 'การสร้างห้องล้มเหลว');
           }
         } else {
           // Join Mode
@@ -496,14 +497,15 @@
           }
           
           const res = await fetch(`${currentApiUrl}?action=joinRoom&roomId=${roomIdInput}&role=${SimState.lobbyRole}&playerName=${encodeURIComponent(playerName)}`);
-          const result = await res.json();
+          const resultWrapper = await res.json();
           
-          if (result.roomId) {
+          if (resultWrapper.success && resultWrapper.data && resultWrapper.data.roomId) {
+            const result = resultWrapper.data;
             SimState.roomId = result.roomId;
             SimState.role = SimState.lobbyRole;
             setupLobbyRoomUI();
           } else {
-            throw new Error(result.error || 'ไม่พบห้องที่ระบุ หรือห้องเต็มแล้ว');
+            throw new Error(resultWrapper.error || (resultWrapper.data && resultWrapper.data.error) || 'ไม่พบห้องที่ระบุ หรือห้องเต็มแล้ว');
           }
         }
       } catch (e) {
@@ -534,9 +536,10 @@
       
       try {
         const res = await fetch(`${currentApiUrl}?action=getRoomStatus&roomId=${SimState.roomId}`);
-        const room = await res.json();
+        const roomWrapper = await res.json();
         
-        if (room && room.roomId) {
+        if (roomWrapper.success && roomWrapper.data && roomWrapper.data.roomId) {
+          const room = roomWrapper.data;
           document.getElementById('lobby-examinee-display').textContent = room.examineeName || 'กำลังรอ...';
           document.getElementById('lobby-examiner-display').textContent = room.examinerName || 'กำลังรอ...';
           
