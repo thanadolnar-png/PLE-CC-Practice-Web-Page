@@ -6,6 +6,56 @@
 const OFFLINE_DATA = {
       "cases": [
             {
+                  "caseId": "OSPE-CL025",
+                  "title": "Asthma Exacerbation Assessment",
+                  "category": "Clinic",
+                  "mainGroup": "Respiratory",
+                  "subTopic": "Asthma",
+                  "disease": "Asthma",
+                  "difficulty": 2,
+                  "docId": "",
+                  "author": "Lin",
+                  "createdDate": "2026-07-04T12:00:00.000Z",
+                  "isActive": true,
+                  "linkedNextCase": "OSPE-CL026",
+                  "contentHtml": "<p>ผู้ป่วยหญิง อายุ 35 ปี มาที่ร้านยาด้วยอาการหอบหืดกำเริบ ไอ หายใจเสียงหวีด ให้ประเมินระดับความรุนแรงและซักประวัติ</p>",
+                  "content": "<p>ผู้ป่วยหญิง อายุ 35 ปี มาที่ร้านยาด้วยอาการหอบหืดกำเริบ ไอ หายใจเสียงหวีด ให้ประเมินระดับความรุนแรงและซักประวัติ</p>",
+                  "checklist": [
+                        { "id": "cl025_1", "text": "ทักทายผู้ป่วย แนะนำตัว", "score": 1, "group": "ซักประวัติ", "checked": false },
+                        { "id": "cl025_2", "text": "ซักประวัติอาการหอบหืดกำเริบ (ความถี่ ความรุนแรง การรบกวนชีวิตประจำวัน)", "score": 2, "group": "ซักประวัติ", "checked": false },
+                        { "id": "cl025_3", "text": "ประเมินว่าควรส่งต่อโรงพยาบาลหรือจ่ายยาเบื้องต้น", "score": 2, "group": "ประเมินผล", "checked": false }
+                  ],
+                  "noteHtml": "<p>เคสนี้เป็นเคสซักประวัติ 1 สถานี มีสถานีต่อเนื่องเป็น CL026 สำหรับการจ่ายยา</p>",
+                  "note": "<p>เคสนี้เป็นเคสซักประวัติ 1 สถานี มีสถานีต่อเนื่องเป็น CL026 สำหรับการจ่ายยา</p>",
+                  "patientInfoHtml": "<p>ผู้ป่วยหญิง 35 ปี</p>",
+                  "scenario": "ซักประวัติและประเมิน Asthma Exacerbation"
+            },
+            {
+                  "caseId": "OSPE-CL026",
+                  "title": "Asthma Exacerbation Dispensing (ต่อจาก CL025)",
+                  "category": "Clinic",
+                  "mainGroup": "Respiratory",
+                  "subTopic": "Asthma",
+                  "disease": "Asthma",
+                  "difficulty": 2,
+                  "docId": "",
+                  "author": "Lin",
+                  "createdDate": "2026-07-04T12:00:00.000Z",
+                  "isActive": true,
+                  "linkedFromCase": "OSPE-CL025",
+                  "contentHtml": "<p>ต่อเนื่องจากสถานีซักประวัติ CL025 ผู้ป่วยมีอาการไม่รุนแรง ให้จ่ายยา Salbutamol MDI และให้คำแนะนำการใช้ยา</p>",
+                  "content": "<p>ต่อเนื่องจากสถานีซักประวัติ CL025 ผู้ป่วยมีอาการไม่รุนแรง ให้จ่ายยา Salbutamol MDI และให้คำแนะนำการใช้ยา</p>",
+                  "checklist": [
+                        { "id": "cl026_1", "text": "จ่ายยา Salbutamol MDI อย่างถูกต้อง", "score": 1, "group": "จ่ายยา", "checked": false },
+                        { "id": "cl026_2", "text": "อธิบายวิธีการใช้ MDI อย่างถูกต้อง 4 ขั้นตอน", "score": 3, "group": "จ่ายยา", "checked": false },
+                        { "id": "cl026_3", "text": "อธิบายผลข้างเคียง (ใจสั่น มือสั่น)", "score": 1, "group": "จ่ายยา", "checked": false }
+                  ],
+                  "noteHtml": "<p>สถานีนี้เน้นจ่ายยา ต่อจากสถานีที่แล้ว</p>",
+                  "note": "<p>สถานีนี้เน้นจ่ายยา ต่อจากสถานีที่แล้ว</p>",
+                  "patientInfoHtml": "<p>ผู้ป่วยหญิง 35 ปี</p>",
+                  "scenario": "จ่ายยา Salbutamol MDI และสอนการใช้ยา"
+            },
+            {
                   "caseId": "OSPE-CL001",
                   "title": "Warfarin Counseling",
                   "category": "Clinic",

@@ -294,11 +294,14 @@
           </div>
 
           <!-- Action buttons (no-print) -->
-          <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem;" id="viewer-action-buttons" class="no-print">
-            <button class="btn btn-secondary" style="flex: 1;" onclick="window.print()">
+          <div style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;" id="viewer-action-buttons" class="no-print">
+            <button id="btn-next-linked-station" class="btn btn-primary" style="display: none; width: 100%; font-size: 1rem; padding: 0.75rem; justify-content: center; background: linear-gradient(135deg, var(--primary), var(--secondary));">
+              ⏩ ไปยังสถานีต่อเนื่อง (ถัดไป)
+            </button>
+            <button class="btn btn-secondary" style="width: 100%;" onclick="window.print()">
               🖨️ พิมพ์หน้านี้ / เซฟ PDF
             </button>
-            <button class="btn btn-danger" style="flex: 1;" onclick="resetChecklistProgress()">
+            <button class="btn btn-danger" style="width: 100%;" onclick="resetChecklistProgress()">
               🔄 รีเซ็ตการติ๊ก
             </button>
           </div>
@@ -393,11 +396,34 @@
       const displayTitle = c.title.startsWith(`[${c.caseId}]`) ? c.title : `[${c.caseId}] ${c.title}`;
       document.getElementById('case-title').textContent = displayTitle;
       
-      // Render tags
-      const tagsContainer = document.getElementById('case-meta-tags');
-      tagsContainer.innerHTML = `
-        <span class="badge badge-${c.category.toLowerCase()}">${c.category}</span>
-        <span class="case-card-tag" style="background-color: var(--primary-light); color: var(--primary);">${c.mainGroup || ""}${c.subTopic ? " · " + c.subTopic : ""}</span>
+      // Render Case Meta Tags
+      const metaContainer = document.getElementById('case-meta-tags');
+      metaContainer.innerHTML = '';
+      if (c.category) {
+        metaContainer.innerHTML += `<span class="badge badge-${c.category.toLowerCase()}">${c.category}</span>`;
+      }
+      if (c.tags) {
+        const tList = c.tags.split(',').map(t => t.trim()).filter(Boolean);
+        tList.forEach(t => {
+          metaContainer.innerHTML += `<span class="badge tag-badge">#${t}</span>`;
+        });
+      }
+      if (c.linkedNextCase) {
+        metaContainer.innerHTML += `<span class="badge tag-badge" style="background: var(--warning); color: var(--warning-dark);">🔗 มีสถานีต่อเนื่อง</span>`;
+        
+        const nextBtn = document.getElementById('btn-next-linked-station');
+        if (nextBtn) {
+          nextBtn.style.display = 'flex';
+          nextBtn.onclick = () => {
+            window.location.href = `case-viewer.html?id=${encodeURIComponent(c.linkedNextCase)}`;
+          };
+        }
+      } else {
+        const nextBtn = document.getElementById('btn-next-linked-station');
+        if (nextBtn) nextBtn.style.display = 'none';
+      }
+      
+      metaContainer.innerHTML += `
         <span class="case-card-tag">โรค/หัวข้อ: ${c.disease || 'ความรู้หลัก'}</span>
         <span class="case-card-tag">ระดับ: ${c.difficulty || '1'}</span>
         <span class="case-card-tag">ผู้เขียน: ${c.author || 'ไม่ระบุ'}</span>

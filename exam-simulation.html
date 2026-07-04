@@ -158,50 +158,54 @@
           </div>
 
           <!-- ═══════════════════════════════════════════
+               SHARED EXAM CONFIGURATION (SOLO & LOBBY HOST)
+               ═══════════════════════════════════════════ -->
+          <div id="shared-exam-config" style="display: block; margin-bottom: 1.5rem;">
+            <!-- Proportion Checkboxes + Number Inputs -->
+            <div class="form-group">
+              <label class="form-label" style="margin-bottom: 0.75rem; display: block;">
+                📊 สัดส่วนหมวดวิชา (เลือกหมวดที่ต้องการ &amp; ระบุจำนวนฐาน)
+              </label>
+              
+              <div class="proportion-row" id="proportion-row-clinic">
+                <input type="checkbox" id="chk-clinic" checked onchange="toggleProportionCategory('clinic')">
+                <span class="proportion-label clinic">Clinic</span>
+                <input type="number" id="num-clinic" class="proportion-num-input" min="0" max="50" value="8" oninput="updateProportionSumText()">
+                <span class="proportion-hint">ฐาน</span>
+              </div>
+
+              <div class="proportion-row" id="proportion-row-product">
+                <input type="checkbox" id="chk-product" checked onchange="toggleProportionCategory('product')">
+                <span class="proportion-label product">Product</span>
+                <input type="number" id="num-product" class="proportion-num-input" min="0" max="50" value="6" oninput="updateProportionSumText()">
+                <span class="proportion-hint">ฐาน</span>
+              </div>
+
+              <div class="proportion-row" id="proportion-row-sap">
+                <input type="checkbox" id="chk-sap" checked onchange="toggleProportionCategory('sap')">
+                <span class="proportion-label sap">SAP</span>
+                <input type="number" id="num-sap" class="proportion-num-input" min="0" max="50" value="2" oninput="updateProportionSumText()">
+                <span class="proportion-hint">ฐาน</span>
+              </div>
+
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.75rem; text-align: center; padding: 0.5rem; background: var(--surface); border-radius: var(--radius-sm);" id="proportion-sum-text">
+                รวม: Clinic 8 + Product 6 + SAP 2 = <strong>16 สถานี</strong>
+              </p>
+            </div>
+
+            <!-- Rest Stations count -->
+            <div class="form-group" style="margin-top: 1rem;">
+              <label class="form-label" for="rest-stations-count">จำนวนสถานีพัก (Rest Stations)</label>
+              <input type="number" id="rest-stations-count" class="select-filter" style="width: 100%; border: 1px solid var(--border); padding: 0.5rem;" min="0" max="5" value="0">
+            </div>
+          </div>
+
+          <!-- ═══════════════════════════════════════════
                SOLO SETUP CONTAINER
                ═══════════════════════════════════════════ -->
           <div id="setup-solo-container" style="display: block;">
             <form id="setup-form" onsubmit="event.preventDefault(); startExamSimulation();">
-
-              <!-- Proportion Checkboxes + Number Inputs -->
-              <div class="form-group">
-                <label class="form-label" style="margin-bottom: 0.75rem; display: block;">
-                  📊 สัดส่วนหมวดวิชา (เลือกหมวดที่ต้องการ &amp; ระบุจำนวนฐาน)
-                </label>
-                
-                <div class="proportion-row" id="proportion-row-clinic">
-                  <input type="checkbox" id="chk-clinic" checked onchange="toggleProportionCategory('clinic')">
-                  <span class="proportion-label clinic">Clinic</span>
-                  <input type="number" id="num-clinic" class="proportion-num-input" min="0" max="50" value="8" oninput="updateProportionSumText()">
-                  <span class="proportion-hint">ฐาน</span>
-                </div>
-
-                <div class="proportion-row" id="proportion-row-product">
-                  <input type="checkbox" id="chk-product" checked onchange="toggleProportionCategory('product')">
-                  <span class="proportion-label product">Product</span>
-                  <input type="number" id="num-product" class="proportion-num-input" min="0" max="50" value="6" oninput="updateProportionSumText()">
-                  <span class="proportion-hint">ฐาน</span>
-                </div>
-
-                <div class="proportion-row" id="proportion-row-sap">
-                  <input type="checkbox" id="chk-sap" checked onchange="toggleProportionCategory('sap')">
-                  <span class="proportion-label sap">SAP</span>
-                  <input type="number" id="num-sap" class="proportion-num-input" min="0" max="50" value="2" oninput="updateProportionSumText()">
-                  <span class="proportion-hint">ฐาน</span>
-                </div>
-
-                <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.75rem; text-align: center; padding: 0.5rem; background: var(--surface); border-radius: var(--radius-sm);" id="proportion-sum-text">
-                  รวม: Clinic 8 + Product 6 + SAP 2 = <strong>16 สถานี</strong>
-                </p>
-              </div>
-
-              <!-- Rest Stations count -->
-              <div class="form-group" style="margin-top: 1rem;">
-                <label class="form-label" for="rest-stations-count">จำนวนสถานีพัก (Rest Stations)</label>
-                <input type="number" id="rest-stations-count" class="select-filter" style="width: 100%; border: 1px solid var(--border); padding: 0.5rem;" min="0" max="5" value="0">
-              </div>
-
-              <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem; padding: 0.75rem; font-size: 1rem;">
+              <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 1rem;">
                 🎲 สุ่มสถานีและเริ่มสอบทันที
               </button>
             </form>
@@ -212,7 +216,7 @@
                ═══════════════════════════════════════════ -->
           <div id="setup-lobby-container" style="display: none;">
             <div style="padding: 0.75rem 1rem; background: var(--primary-light); border-radius: var(--radius-md); margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--primary);">
-              <strong>📡 โหมดออนไลน์แบบจับคู่:</strong> ผู้เข้าสอบ + ผู้ประเมิน/คนไข้จำลอง เห็นหน้าจอเดียวกันแบบเรียลไทม์
+              <strong>📡 โหมดออนไลน์แบบจับคู่:</strong> ผู้เข้าสอบ + ผู้ประเมิน เห็นหน้าจอเดียวกันแบบเรียลไทม์
             </div>
 
             <form id="lobby-setup-form" onsubmit="event.preventDefault(); submitLobbySetup();">
@@ -225,22 +229,9 @@
               <div class="form-group" style="margin-top: 1rem;">
                 <label class="form-label" for="lobby-role-select">บทบาทในการจำลองสอบ</label>
                 <select id="lobby-role-select" class="select-filter" style="width: 100%;" onchange="toggleLobbyRole(this.value)">
-                  <option value="examiner">🔎 ฉันเป็นผู้ประเมิน/คนไข้จำลอง (Host — สร้างห้องและควบคุมการสอบ)</option>
+                  <option value="examiner">🔎 ฉันเป็นผู้ประเมิน (Host — สร้างห้องและสุ่มข้อสอบ)</option>
                   <option value="examinee">✍️ ฉันเป็นผู้เข้าสอบ (เข้าร่วมห้องที่มีอยู่)</option>
                 </select>
-              </div>
-
-              <!-- Create Room: Host config -->
-              <div id="lobby-create-fields" style="display: block; margin-top: 1rem; border-top: 1px dashed var(--border); padding-top: 1rem;">
-                <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
-                  🎯 <strong>Host</strong> เลือกเคสที่จะซ้อม ระบบจะสร้างรหัสห้อง 4 หลักให้อัตโนมัติ
-                </p>
-                <div class="form-group">
-                  <label class="form-label" for="lobby-case-select">เลือกโจทย์ที่จะสอบ (Case Selection)</label>
-                  <select id="lobby-case-select" class="select-filter" style="width: 100%;">
-                    <!-- Populate case list dynamically -->
-                  </select>
-                </div>
               </div>
 
               <!-- Join Room: Examinee config -->
@@ -462,24 +453,26 @@
       const lobbyBtn = document.getElementById('setup-tab-lobby-btn');
       const soloCon = document.getElementById('setup-solo-container');
       const lobbyCon = document.getElementById('setup-lobby-container');
+      const sharedConfig = document.getElementById('shared-exam-config');
       
       if (mode === 'solo') {
         soloBtn.className = 'btn btn-primary';
         lobbyBtn.className = 'btn btn-secondary';
         soloCon.style.display = 'block';
         lobbyCon.style.display = 'none';
+        sharedConfig.style.display = 'block';
         SimState.isLobby = false;
       } else {
         soloBtn.className = 'btn btn-secondary';
         lobbyBtn.className = 'btn btn-primary';
         soloCon.style.display = 'none';
         lobbyCon.style.display = 'block';
+        sharedConfig.style.display = SimState.lobbyRole === 'examiner' ? 'block' : 'none';
         SimState.isLobby = true;
-        initLobbyCaseDropdown();
       }
     }
 
-    // ─── Proportion checkbox+number helpers ───────────────────
+    // ─── Proportion helpers ───────────────────
     function toggleProportionCategory(cat) {
       const chk = document.getElementById(`chk-${cat}`);
       const numInput = document.getElementById(`num-${cat}`);
@@ -510,44 +503,24 @@
         `รวม: Clinic ${clinic} + Product ${product} + SAP ${sap} = <strong>${total} สถานี</strong>`;
     }
 
-    // ─── Lobby role toggle (Examiner=Host / Examinee=Join) ─────
+    // ─── Lobby role toggle ─────
     function toggleLobbyRole(role) {
       SimState.lobbyRole = role;
-      const createFields = document.getElementById('lobby-create-fields');
       const joinFields = document.getElementById('lobby-join-fields');
       const submitBtn = document.getElementById('lobby-submit-btn');
+      const sharedConfig = document.getElementById('shared-exam-config');
       
       if (role === 'examiner') {
-        createFields.style.display = 'block';
         joinFields.style.display = 'none';
+        sharedConfig.style.display = 'block';
         submitBtn.textContent = '📡 สร้างห้องซ้อมสอบ (Host)';
       } else {
-        createFields.style.display = 'none';
         joinFields.style.display = 'block';
+        sharedConfig.style.display = 'none';
         submitBtn.textContent = '📡 เข้าร่วมห้องสอบเดิม';
       }
     }
 
-    // Populate the case dropdown for Lobby
-    function initLobbyCaseDropdown() {
-      const select = document.getElementById('lobby-case-select');
-      if (select && typeof AppState !== 'undefined' && AppState.cases) {
-        select.innerHTML = '';
-        
-        // Add random option at the top
-        const randOpt = document.createElement('option');
-        randOpt.value = 'random';
-        randOpt.textContent = '🎲 [สุ่มเคส] สุ่มเลือกเคสจากคลังข้อสอบ';
-        select.appendChild(randOpt);
-
-        AppState.cases.forEach(c => {
-          const opt = document.createElement('option');
-          opt.value = c.caseId;
-          opt.textContent = `[${c.category}] ${c.caseId} - ${c.title}`;
-          select.appendChild(opt);
-        });
-      }
-    }
 
     // Hook into app.js onCasesLoaded
     const _origOnCasesLoaded = typeof onCasesLoaded === 'function' ? onCasesLoaded : null;
@@ -555,6 +528,17 @@
       if (_origOnCasesLoaded) _origOnCasesLoaded();
       initLobbyCaseDropdown();
     };
+
+    function getRestCaseData() {
+      return {
+        caseId: 'REST', title: 'สถานีพัก (Rest Station)', category: 'REST',
+        scenario: '<div style="text-align:center;padding:2rem;"><span style="font-size:4rem;">🥤</span><h3 style="font-family:var(--font-title);margin-top:1rem;">คุณอยู่ในสถานีพัก (Rest Station)</h3><p style="color:var(--text-secondary);margin-top:0.5rem;">ใช้เวลานี้ในการพักผ่อน สูดหายใจเข้าลึกๆ หรือจิบน้ำ</p></div>',
+        contentHtml: '<div style="text-align:center;padding:2rem;"><span style="font-size:4rem;">🥤</span><h3 style="font-family:var(--font-title);margin-top:1rem;">คุณอยู่ในสถานีพัก</h3></div>',
+        patientInfoHtml: '<div style="text-align:center;color:var(--text-muted);padding:1rem;">ไม่มีข้อมูลผู้ป่วยสำหรับสถานีพัก</div>',
+        checklist: [],
+        noteHtml: '<p>สถานีพักไม่มีการประเมินคะแนน</p>'
+      };
+    }
 
     // ─── Submit Lobby Form ────────────────────────────────────
     async function submitLobbySetup() {
@@ -832,40 +816,14 @@
         return;
       }
       
-      // Load cases
+      // Load cases instantly from offline DB without API fallback
       let loadedCases = [];
       for (let i = 0; i < examSet.length; i++) {
         const st = examSet[i];
-        let matchedCase = AppState.cases.find(c => c.caseId === st.caseId);
-        
-        if (typeof currentApiUrl !== 'undefined' && currentApiUrl && (!matchedCase || !matchedCase.checklist)) {
-          try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 seconds timeout per case
-            
-            const res = await fetch(`${currentApiUrl}?action=getCase&id=${st.caseId}`, { signal: controller.signal });
-            clearTimeout(timeoutId);
-            const result = await res.json();
-            if (result.success && result.data) matchedCase = result.data;
-          } catch (e) {
-            console.error('โหลดเคสไม่ผ่าน:', st.caseId, e);
-          }
-        }
-        
-        if (!matchedCase) {
-          matchedCase = AppState.cases.find(c => c.caseId === st.caseId) || AppState.cases[0];
-        }
-        
+        let matchedCase = AppState.cases.find(c => c.caseId === st.caseId) || AppState.cases[0];
         if (matchedCase) loadedCases.push(matchedCase);
       }
-      
-      if (loadedCases.length === 0) {
-        showGlobalLoader(false);
-        alert('ไม่พบเคสที่ตรงกับเงื่อนไข กรุณาตรวจสอบฐานข้อมูลเคส');
-        return;
-      }
 
-      // Insert rest stations
       SimState.stations = [];
       const restInterval = restCount > 0 ? Math.floor(loadedCases.length / restCount) : 999;
       let restInserted = 0;
@@ -879,14 +837,7 @@
           SimState.stations.push({
             stationNumber: stationNumCounter++,
             isRest: true,
-            case: {
-              caseId: 'REST', title: 'สถานีพัก (Rest Station)', category: 'REST',
-              scenario: '<div style="text-align:center;padding:2rem;"><span style="font-size:4rem;">🥤</span><h3 style="font-family:var(--font-title);margin-top:1rem;">คุณอยู่ในสถานีพัก (Rest Station)</h3><p style="color:var(--text-secondary);margin-top:0.5rem;">ใช้เวลานี้ในการพักผ่อน สูดหายใจเข้าลึกๆ หรือจิบน้ำ</p></div>',
-              contentHtml: '<div style="text-align:center;padding:2rem;"><span style="font-size:4rem;">🥤</span><h3 style="font-family:var(--font-title);margin-top:1rem;">คุณอยู่ในสถานีพัก</h3></div>',
-              patientInfoHtml: '<div style="text-align:center;color:var(--text-muted);padding:1rem;">ไม่มีข้อมูลผู้ป่วยสำหรับสถานีพัก</div>',
-              checklist: [],
-              noteHtml: '<p>สถานีพักไม่มีการประเมินคะแนน</p>'
-            }
+            case: getRestCaseData()
           });
         }
       }
@@ -905,12 +856,12 @@
       startTimer();
     }
 
-    // Generate exam set locally (offline)
+    // Generate exam set locally (offline) with Linked Cases support
     function generateLocalExamSet(clinic, product, sap) {
       if (typeof AppState === 'undefined' || !AppState.cases) return [];
       const list = AppState.cases;
       const pool = {
-        Clinic: shuffle(list.filter(c => c.category === 'Clinic')),
+        Clinic: shuffle(list.filter(c => c.category === 'Clinic' && (!c.linkedFromCase))), // Prevent selecting parts of a chain directly if you want, but for now just shuffle all
         Product: shuffle(list.filter(c => c.category === 'Product')),
         SAP: shuffle(list.filter(c => c.category === 'SAP'))
       };
@@ -926,13 +877,38 @@
         return items;
       };
       
-      const selected = [
+      let initialSelected = [
         ...getFromPool('Clinic', clinic),
         ...getFromPool('Product', product),
         ...getFromPool('SAP', sap)
       ];
       
-      return shuffle(selected).map((c, idx) => ({
+      initialSelected = shuffle(initialSelected);
+      
+      let finalSet = [];
+      let addedIds = new Set();
+      
+      for (let caseObj of initialSelected) {
+        if (!addedIds.has(caseObj.caseId)) {
+          finalSet.push(caseObj);
+          addedIds.add(caseObj.caseId);
+          
+          let current = caseObj;
+          // While there is a linked next case, pull it in immediately after
+          while (current.linkedNextCase) {
+            let nextCase = AppState.cases.find(c => c.caseId === current.linkedNextCase);
+            if (nextCase && !addedIds.has(nextCase.caseId)) {
+              finalSet.push(nextCase);
+              addedIds.add(nextCase.caseId);
+              current = nextCase;
+            } else {
+              break;
+            }
+          }
+        }
+      }
+      
+      return finalSet.map((c, idx) => ({
         stationNumber: idx + 1,
         caseId: c.caseId,
         title: c.title,
