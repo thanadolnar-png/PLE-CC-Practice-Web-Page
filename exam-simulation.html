@@ -234,6 +234,19 @@
                 </select>
               </div>
 
+              <!-- Host/Examiner config: select case -->
+              <div id="lobby-create-fields" style="display: block; margin-top: 1rem; border-top: 1px dashed var(--border); padding-top: 1rem;">
+                <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+                  🔎 <strong>ผู้ประเมิน</strong>: เลือกเคสสอบปฏิบัติการที่ต้องการประเมินผู้สอบ
+                </p>
+                <div class="form-group">
+                  <label class="form-label" for="lobby-case-select">เลือกเคสสอบสำหรับสถานีนี้</label>
+                  <select id="lobby-case-select" class="select-filter" style="width: 100%;">
+                    <!-- Filled dynamically by JS -->
+                  </select>
+                </div>
+              </div>
+
               <!-- Join Room: Examinee config -->
               <div id="lobby-join-fields" style="display: none; margin-top: 1rem; border-top: 1px dashed var(--border); padding-top: 1rem;">
                 <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
@@ -467,7 +480,7 @@
         lobbyBtn.className = 'btn btn-primary';
         soloCon.style.display = 'none';
         lobbyCon.style.display = 'block';
-        sharedConfig.style.display = SimState.lobbyRole === 'examiner' ? 'block' : 'none';
+        sharedConfig.style.display = 'none'; // Hide Solo config in Lobby Mode
         SimState.isLobby = true;
       }
     }
@@ -507,16 +520,16 @@
     function toggleLobbyRole(role) {
       SimState.lobbyRole = role;
       const joinFields = document.getElementById('lobby-join-fields');
+      const createFields = document.getElementById('lobby-create-fields');
       const submitBtn = document.getElementById('lobby-submit-btn');
-      const sharedConfig = document.getElementById('shared-exam-config');
       
       if (role === 'examiner') {
         joinFields.style.display = 'none';
-        sharedConfig.style.display = 'block';
+        if (createFields) createFields.style.display = 'block';
         submitBtn.textContent = '📡 สร้างห้องซ้อมสอบ (Host)';
       } else {
         joinFields.style.display = 'block';
-        sharedConfig.style.display = 'none';
+        if (createFields) createFields.style.display = 'none';
         submitBtn.textContent = '📡 เข้าร่วมห้องสอบเดิม';
       }
     }
