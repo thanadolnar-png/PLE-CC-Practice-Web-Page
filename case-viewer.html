@@ -104,27 +104,125 @@
     }
 
     @media print {
-      body {
-        background-color: white;
-        color: black;
+      :root, [data-theme="dark"] {
+        --bg-primary: #f8fafc;
+        --bg-secondary: #f1f5f9;
+        --surface: #ffffff;
+        --border: #cbd5e1;
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --text-muted: #64748b;
+        --primary: #6366f1;
+        --sap: #f59e0b;
       }
-      .navbar, .viewer-tabs, .doc-iframe-wrapper, #api-status-banner, .btn, .progress-card, .theme-toggle-btn, .role-selector-container, #viewer-timer-card {
+
+      body {
+        background-color: white !important;
+        color: var(--text-primary) !important;
+        font-size: 11pt !important;
+        line-height: 1.5 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .navbar, .viewer-tabs, .doc-iframe-wrapper, #api-status-banner, .btn, .progress-card, .theme-toggle-btn, .role-selector-container, #viewer-timer-card, .no-print {
         display: none !important;
       }
       .viewer-grid {
-        display: block;
+        display: block !important;
+        width: 100% !important;
       }
       .viewer-pane {
-        border: none;
-        box-shadow: none;
-        padding: 0;
-        margin-bottom: 2rem;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 0 1.5rem 0 !important;
+        width: 100% !important;
+        background: transparent !important;
       }
+      .viewer-title {
+        font-size: 20pt !important;
+        color: var(--text-primary) !important;
+        margin-top: 0 !important;
+        margin-bottom: 1.5rem !important;
+        font-weight: 800 !important;
+        border-bottom: 2px solid var(--text-primary) !important;
+        padding-bottom: 0.5rem !important;
+      }
+      .viewer-section-title {
+        font-size: 13pt !important;
+        color: var(--text-secondary) !important;
+        margin-top: 1.5rem !important;
+        margin-bottom: 0.75rem !important;
+        border-left: 4px solid var(--primary) !important;
+        padding-left: 0.5rem !important;
+        font-weight: 700 !important;
+      }
+      
+      /* Checklist table styling */
+      .print-checklist-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin-top: 1rem !important;
+        margin-bottom: 1.5rem !important;
+        font-size: 10pt !important;
+      }
+      .print-checklist-table th, .print-checklist-table td {
+        border: 1px solid var(--text-muted) !important;
+        padding: 0.5rem 0.75rem !important;
+        text-align: left !important;
+        vertical-align: middle !important;
+      }
+      .print-checklist-table th {
+        background-color: var(--bg-secondary) !important;
+        color: var(--text-primary) !important;
+        font-weight: 700 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .print-center-cell {
+        text-align: center !important;
+      }
+
+      /* Note / Answer box */
       .note-content {
         display: block !important;
+        background-color: var(--bg-primary) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border) !important;
+        border-left: 5px solid var(--sap) !important;
+        padding: 1.25rem !important;
+        margin-top: 1rem !important;
+        border-radius: var(--radius-sm) !important;
+        font-size: 10pt !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        page-break-inside: avoid !important;
+      }
+      
+      /* Page Break Utilities */
+      .print-page-break {
+        page-break-before: always !important;
+      }
+      
+      /* Patient Info Table formatting in print */
+      table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin: 1rem 0 !important;
+        page-break-inside: avoid !important;
+      }
+      th, td {
+        border: 1px solid var(--border) !important;
+        padding: 0.5rem 0.75rem !important;
+        font-size: 10pt !important;
+      }
+      th {
+        background-color: var(--bg-primary) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
       .print-only {
-        display: block;
+        display: block !important;
       }
     }
   </style>
@@ -162,16 +260,16 @@
     <div class="container">
       
       <!-- Back navigation button -->
-      <div style="margin-bottom: 1.5rem;">
+      <div style="margin-bottom: 1.5rem;" class="no-print">
         <a href="case-library.html" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--font-title); font-weight: 600; color: var(--primary);">
           ← ย้อนกลับไปคลังเคส
         </a>
       </div>
 
-      <!-- Header Information (no-print) -->
-      <header class="viewer-header no-print">
+      <!-- Header Information -->
+      <header class="viewer-header">
         <h1 class="viewer-title" id="case-title">โหลดชื่อเคส...</h1>
-        <div class="viewer-meta-tags" id="case-meta-tags">
+        <div class="viewer-meta-tags no-print" id="case-meta-tags">
           <!-- Filled dynamically by JS -->
         </div>
       </header>
