@@ -1,4 +1,4 @@
-﻿# PLE-CC2 OSPE Practice System — Google Apps Script
+# PLE-CC2 OSPE Practice System — Google Apps Script
 ## รายการ Function ทั้งหมด (Function Index)
 
 Owner: Maxnum (ธนดล) | PLE Chair 2569

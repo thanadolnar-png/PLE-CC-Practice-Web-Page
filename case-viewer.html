@@ -390,7 +390,8 @@
     }
 
     function renderCaseDetail(c) {
-      document.getElementById('case-title').textContent = c.title;
+      const displayTitle = c.title.startsWith(`[${c.caseId}]`) ? c.title : `[${c.caseId}] ${c.title}`;
+      document.getElementById('case-title').textContent = displayTitle;
       
       // Render tags
       const tagsContainer = document.getElementById('case-meta-tags');

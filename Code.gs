@@ -1520,10 +1520,7 @@ function onOpen() {
   try {
     const ui = SpreadsheetApp.getUi();
     ui.createMenu('🥼 RxCU OSPE System')
-        .addItem('🛠️ Setup Sheets & Lobby (สร้างตารางหลัก)', 'menuSetupSheets')
         .addItem('🔄 Sync Case Library from Docs (ดึงเคสจาก Docs เข้าคลัง)', 'menuSyncCaseLibrary')
-        .addItem('📝 Populate Sample Docs (สร้างเคสตัวอย่าง)', 'menuSetupDocs')
-        .addItem('🏠 Decorate Banners (จัดแต่งแบนเนอร์กลับหน้าแรก)', 'menuDecorateBanners')
         .addToUi();
   } catch (e) {
     Logger.log('Cannot build UI in non-spreadsheet context: ' + e.toString());

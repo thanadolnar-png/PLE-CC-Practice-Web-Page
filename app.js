@@ -1,4 +1,4 @@
-﻿/**
+/**
  * PLE-CC2 OSPE Practice System — Main Application Logic
  * File: app.js
  * ====================================================
@@ -10,7 +10,7 @@
 // อัปเดต URL ของ Google Apps Script Web App ที่นี่หลังทำ Deployment เสร็จ
 const API_URL_KEY = 'ple_cc_api_url';
 const API_URL = 'https://script.google.com/macros/s/AKfycbwhdMVZ2mcR2dwUagrcLJ6Os1PjwrKO_X8xjwEOJUWYYONZfmYjvVbdXrCVh7qFC0iM/exec';
-let currentApiUrl = API_URL;
+let currentApiUrl = localStorage.getItem(API_URL_KEY) || API_URL;
 
 const AppState = {
   theme: localStorage.getItem('theme') || 'light',
@@ -96,7 +96,12 @@ async function loadCasesData() {
   if (currentApiUrl) {
     try {
       const cacheBuster = new Date().getTime();
-      const response = await fetch(`${currentApiUrl}?action=getCaseList&_cb=${cacheBuster}`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000); // 4 seconds timeout
+      
+      const response = await fetch(`${currentApiUrl}?action=getCaseList&_cb=${cacheBuster}`, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      
       const result = await response.json();
       
       if (result.success && result.data && result.data.cases) {
