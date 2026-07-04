@@ -786,7 +786,7 @@
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 seconds timeout
         
-        const res = await fetch(`${currentApiUrl}?action=getRoomStatus&roomId=${SimState.roomId}`, { signal: controller.signal });
+        const res = await fetch(`${currentApiUrl}?action=getRoomStatus&roomId=${SimState.roomId}&_t=${Date.now()}`, { signal: controller.signal });
         clearTimeout(timeoutId);
         const roomWrapper = await res.json();
         
@@ -841,7 +841,11 @@
                 if (waitingMsg) waitingMsg.textContent = 'แชร์รหัสห้องนี้ให้ผู้เข้าสอบ:';
               }
             } else {
+              document.getElementById('lobby-waiting-msg').textContent = 'เชื่อมต่อสำเร็จ! รอผู้ประเมินกดเริ่มการสอบ...';
+              document.getElementById('lobby-waiting-msg').style.color = 'var(--primary)';
               document.getElementById('lobby-start-exam-btn').style.display = 'none';
+              document.getElementById('lobby-waiting-title').textContent = 'เชื่อมต่อสำเร็จ!';
+              document.getElementById('lobby-waiting-desc').textContent = 'กรุณารอผู้ประเมินกดเริ่มการสอบ...';
             }
           } else if (room.status === 'countdown') {
             document.getElementById('lobby-waiting-screen').style.display = 'none';
@@ -918,7 +922,11 @@
           }
         }
       } catch (e) {
-        console.warn('Lobby sync error:', e);
+        if (e.name !== 'AbortError') {
+          console.warn('Lobby sync error:', e);
+        }
+      } finally {
+        isSyncing = false;
       }
     }
 
@@ -958,8 +966,8 @@
       showGlobalLoader(true);
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 seconds timeout
-        await fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&status=countdown`, { signal: controller.signal });
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds timeout
+        await fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&status=countdown&_t=${Date.now()}`, { signal: controller.signal });
         clearTimeout(timeoutId);
         await syncLobbyStatus();
       } catch (e) {
