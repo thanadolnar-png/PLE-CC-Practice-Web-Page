@@ -183,6 +183,14 @@
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
+      .print-checklist-table tr.print-table-group-row td {
+        background-color: var(--bg-secondary) !important;
+        color: var(--text-primary) !important;
+        font-weight: 700 !important;
+        font-size: 10.5pt !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
       .print-center-cell {
         text-align: center !important;
       }
@@ -604,8 +612,7 @@
         <table class="print-checklist-table">
           <thead>
             <tr>
-              <th style="width: 25%;">กลุ่ม</th>
-              <th style="width: 55%;">รายละเอียดการปฏิบัติงาน</th>
+              <th style="width: 80%;">รายละเอียดการปฏิบัติงาน / เกณฑ์ประเมิน</th>
               <th style="width: 10%;" class="print-center-cell">คะแนน</th>
               <th style="width: 10%;" class="print-center-cell">ผลประเมิน</th>
             </tr>
@@ -620,6 +627,15 @@
         grpHdr.className = 'checklist-group-title';
         grpHdr.textContent = `กลุ่ม: ${groupName}`;
         container.appendChild(grpHdr);
+        
+        // แทรกแถวหมวดประเมินในตารางพิมพ์
+        printTableHtml += `
+          <tr class="print-table-group-row">
+            <td colspan="3" style="background-color: var(--bg-secondary); font-weight: 700; font-family: var(--font-title); padding: 0.6rem 0.8rem;">
+              📁 หมวดประเมิน: ${escapeHtml(groupName)}
+            </td>
+          </tr>
+        `;
         
         // 2. รายการในกลุ่ม
         groups[groupName].forEach((item, idx) => {
@@ -640,12 +656,11 @@
           
           container.appendChild(el);
           
-          // ตารางพิมพ์
+          // ตารางพิมพ์ (ไม่มีคอลัมน์กลุ่มแยกเดี่ยวซ้ายสุดแล้ว)
           printTableHtml += `
             <tr>
-              ${idx === 0 ? `<td rowspan="${groups[groupName].length}" style="font-weight: 600; vertical-align: middle;">${escapeHtml(groupName)}</td>` : ''}
               <td>${escapeHtml(item.text)}</td>
-              <td class="print-center-cell">${item.score}</td>
+              <td class="print-center-cell" style="font-weight: bold;">${item.score}</td>
               <td class="print-center-cell">[ ${isChecked ? '✓' : ' '} ]</td>
             </tr>
           `;
