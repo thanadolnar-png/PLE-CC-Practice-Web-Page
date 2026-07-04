@@ -249,15 +249,8 @@
                 </div>
               </div>
 
-              <!-- Create fields -->
-              <div id="lobby-create-fields" style="display: block; margin-top: 1rem; border-top: 1px dashed var(--border); padding-top: 1rem;">
-                <div class="form-group">
-                  <label class="form-label" for="lobby-case-select">เลือกเคสสอบสำหรับสถานีนี้ (Case Selection)</label>
-                  <select id="lobby-case-select" class="select-filter" style="width: 100%;">
-                    <!-- Populate case list dynamically -->
-                  </select>
-                </div>
-              </div>
+              <!-- Create fields removed (Case Selection is now automatic based on proportion) -->
+              <div id="lobby-create-fields" style="display: none;"></div>
 
               <!-- Join fields -->
               <div id="lobby-join-fields" style="display: none; margin-top: 1rem; border-top: 1px dashed var(--border); padding-top: 1rem;">
@@ -315,6 +308,12 @@
           <button id="lobby-start-exam-btn" class="btn btn-primary" style="display: none; margin: 0 auto; padding: 0.75rem 2rem; font-size: 1.1rem;" onclick="startLobbyExamOnServer()">
             🚀 เริ่มการซ้อมจำลองสอบร่วมกัน
           </button>
+        </div>
+
+        <!-- Countdown Overlay -->
+        <div id="lobby-countdown-screen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 9999; flex-direction: column; justify-content: center; align-items: center; color: white;">
+          <h2 style="font-family: var(--font-title); font-size: 2rem; margin-bottom: 1rem;">เตรียมตัวเริ่มการสอบ</h2>
+          <div id="lobby-countdown-number" style="font-size: 8rem; font-weight: 900; color: var(--primary-light);">3</div>
         </div>
 
         <div class="exam-layout">
@@ -546,7 +545,11 @@
         if (createRadio) createRadio.disabled = true;
         toggleLobbyOp('join');
       } else {
-        if (createRadio) createRadio.disabled = false;
+        if (createRadio) {
+          createRadio.disabled = false;
+          createRadio.checked = true;
+        }
+        toggleLobbyOp('create');
       }
     }
 
@@ -607,11 +610,13 @@
     }
 
 
+    // Initialize Lobby Case Dropdown (REMOVED logic but keep empty function to avoid errors)
+    function initLobbyCaseDropdown() {}
+    
     // Hook into app.js onCasesLoaded
     const _origOnCasesLoaded = typeof onCasesLoaded === 'function' ? onCasesLoaded : null;
     onCasesLoaded = function() {
       if (_origOnCasesLoaded) _origOnCasesLoaded();
-      initLobbyCaseDropdown();
     };
 
     function getRestCaseData() {
@@ -786,6 +791,7 @@
           
           if (room.status === 'setup') {
             document.getElementById('lobby-waiting-screen').style.display = 'block';
+            document.getElementById('lobby-countdown-screen').style.display = 'none';
             document.querySelector('.exam-layout').style.display = 'none';
             
             if (SimState.role === 'examiner') {
@@ -793,39 +799,38 @@
               startBtn.style.display = 'block';
               startBtn.disabled = !(room.examineeName && room.examinerName);
             }
+          } else if (room.status === 'countdown') {
+            document.getElementById('lobby-waiting-screen').style.display = 'none';
+            document.querySelector('.exam-layout').style.display = 'none';
+            document.getElementById('lobby-countdown-screen').style.display = 'flex';
+            
+            // Build stations during countdown if not built
+            if (SimState.stations.length === 0) {
+              buildStationsFromRoom(room);
+            }
+            
+            if (SimState.role === 'examiner' && !SimState.countdownInterval) {
+              let count = 3;
+              document.getElementById('lobby-countdown-number').textContent = count;
+              SimState.countdownInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                  document.getElementById('lobby-countdown-number').textContent = count;
+                } else {
+                  clearInterval(SimState.countdownInterval);
+                  SimState.countdownInterval = null;
+                  fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&status=running&timerRunning=TRUE&timerValue=240`);
+                }
+              }, 1000);
+            }
           } else if (room.status === 'running') {
             document.getElementById('lobby-waiting-screen').style.display = 'none';
+            document.getElementById('lobby-countdown-screen').style.display = 'none';
             document.querySelector('.exam-layout').style.display = 'flex';
             
             // Build stations if not exist or if joining late
             if (SimState.stations.length === 0) {
-              showGlobalLoader(true);
-              let fullExamSet = [];
-              if (room.examSet && typeof room.examSet === 'string' && room.examSet.length > 0) {
-                try {
-                  fullExamSet = JSON.parse(room.examSet);
-                } catch(e) {}
-              }
-              
-              if (fullExamSet.length === 0) {
-                 // Fallback for old rooms without examSet
-                 fullExamSet = [{stationNumber: 1, caseId: room.caseId}];
-              }
-              
-              SimState.stations = [];
-              SimState.studentScores = {};
-              SimState.totalStations = fullExamSet.length;
-              
-              for (let i = 0; i < fullExamSet.length; i++) {
-                SimState.studentScores[fullExamSet[i].stationNumber] = [];
-                if (fullExamSet[i].caseId === 'REST') {
-                  SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: true, case: getRestCaseData() });
-                } else {
-                  let matchedCase = AppState.cases.find(c => c.caseId === fullExamSet[i].caseId) || AppState.cases[0];
-                  SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: false, case: matchedCase });
-                }
-              }
-              showGlobalLoader(false);
+              buildStationsFromRoom(room);
             }
             
             // Find current station index by matching caseId, or if it changed
@@ -873,17 +878,46 @@
       }
     }
 
-    // Examiner starts exam on server
+    function buildStationsFromRoom(room) {
+      showGlobalLoader(true);
+      let fullExamSet = [];
+      if (room.examSet && typeof room.examSet === 'string' && room.examSet.length > 0) {
+        try {
+          fullExamSet = JSON.parse(room.examSet);
+        } catch(e) {}
+      }
+      
+      if (fullExamSet.length === 0) {
+         // Fallback for old rooms without examSet
+         fullExamSet = [{stationNumber: 1, caseId: room.caseId}];
+      }
+      
+      SimState.stations = [];
+      SimState.studentScores = {};
+      SimState.totalStations = fullExamSet.length;
+      
+      for (let i = 0; i < fullExamSet.length; i++) {
+        SimState.studentScores[fullExamSet[i].stationNumber] = [];
+        if (fullExamSet[i].caseId === 'REST') {
+          SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: true, case: getRestCaseData() });
+        } else {
+          let matchedCase = AppState.cases.find(c => c.caseId === fullExamSet[i].caseId) || AppState.cases[0];
+          SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: false, case: matchedCase });
+        }
+      }
+      showGlobalLoader(false);
+    }
+
+    // Examiner starts exam on server (Go to countdown first)
     async function startLobbyExamOnServer() {
       if (!SimState.isLobby || !SimState.roomId) return;
       showGlobalLoader(true);
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 seconds timeout
-        await fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&status=running&timerRunning=TRUE&timerValue=240`, { signal: controller.signal });
+        await fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&status=countdown`, { signal: controller.signal });
         clearTimeout(timeoutId);
         await syncLobbyStatus();
-        startTimer();
       } catch (e) {
         alert('ไม่สามารถเริ่มการสอบบนเซิร์ฟเวอร์ได้: ' + e.toString());
       }
@@ -1143,8 +1177,16 @@
       const c = st.case;
       
       document.getElementById('exam-station-badge').textContent = `STATION ${st.stationNumber}`;
-      document.getElementById('exam-case-title').textContent = c.title;
-      document.getElementById('exam-case-id').textContent = c.caseId;
+      
+      if (SimState.role === 'examinee') {
+        document.getElementById('exam-case-title').textContent = st.isRest ? 'สถานีพัก' : 'โจทย์สถานีที่ ' + st.stationNumber;
+        document.getElementById('exam-case-id').style.display = 'none';
+      } else {
+        document.getElementById('exam-case-title').textContent = c.title;
+        document.getElementById('exam-case-id').textContent = c.caseId;
+        document.getElementById('exam-case-id').style.display = 'inline';
+      }
+      
       document.getElementById('exam-scenario-content').innerHTML = c.contentHtml || `<p>${c.scenario || ''}</p>`;
       document.getElementById('exam-patient-content').innerHTML = c.patientInfoHtml || '<p>ไม่มีตารางข้อมูลผู้ป่วย</p>';
       
