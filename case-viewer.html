@@ -402,6 +402,12 @@
       if (c.category) {
         metaContainer.innerHTML += `<span class="badge badge-${c.category.toLowerCase()}">${c.category}</span>`;
       }
+      
+      let groupText = c.mainGroup || "";
+      if (c.subTopic) groupText += " · " + c.subTopic;
+      if (groupText) {
+        metaContainer.innerHTML += `<span class="case-card-tag" style="background-color: var(--primary-light); color: var(--primary);">${groupText}</span>`;
+      }
       if (c.tags) {
         const tList = c.tags.split(',').map(t => t.trim()).filter(Boolean);
         tList.forEach(t => {
