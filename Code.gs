@@ -238,7 +238,7 @@ function getCaseList(params = {}) {
     if (sheet) {
       const data = sheet.getDataRange().getValues();
       if (data.length > 1) {
-        const headers = ['caseId', 'title', 'category', 'mainGroup', 'subTopic', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive'];
+        const headers = ['caseId', 'title', 'category', 'mainGroup', 'subTopic', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive', 'linkedNextCase', 'linkedFromCase'];
         const rows = data.length > 2 ? data.slice(2) : [];
         
         cases = rows.map(row => {
