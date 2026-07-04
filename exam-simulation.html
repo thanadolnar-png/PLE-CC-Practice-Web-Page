@@ -847,40 +847,47 @@
               document.getElementById('lobby-waiting-title').textContent = 'เชื่อมต่อสำเร็จ!';
               document.getElementById('lobby-waiting-desc').textContent = 'กรุณารอผู้ประเมินกดเริ่มการสอบ...';
             }
-          } else if (room.status === 'countdown') {
+          } else if (room.status === 'running' || room.status === 'countdown') {
             document.getElementById('lobby-waiting-screen').style.display = 'none';
-            document.querySelector('.exam-layout').style.display = 'none';
-            document.getElementById('lobby-countdown-screen').style.display = 'flex';
-            
-            // Build stations during countdown if not built
-            if (SimState.stations.length === 0) {
-              buildStationsFromRoom(room);
-            }
-            
-            if (SimState.role === 'examiner' && !SimState.countdownInterval) {
-              let count = 3;
-              document.getElementById('lobby-countdown-number').textContent = count;
-              SimState.countdownInterval = setInterval(() => {
-                count--;
-                if (count > 0) {
-                  document.getElementById('lobby-countdown-number').textContent = count;
-                } else {
-                  clearInterval(SimState.countdownInterval);
-                  SimState.countdownInterval = null;
-                  SimState.timerRunning = true;
-                  fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&status=running&timerRunning=TRUE&timerValue=240&_t=${Date.now()}`);
-                }
-              }, 1000);
-            }
-          } else if (room.status === 'running') {
-            document.getElementById('lobby-waiting-screen').style.display = 'none';
-            document.getElementById('lobby-countdown-screen').style.display = 'none';
-            document.querySelector('.exam-layout').style.display = 'flex';
             
             // Build stations if not exist or if joining late
             if (SimState.stations.length === 0) {
               buildStationsFromRoom(room);
             }
+            
+            if (!SimState.hasDoneCountdown) {
+              document.querySelector('.exam-layout').style.display = 'none';
+              document.getElementById('lobby-countdown-screen').style.display = 'flex';
+              
+              if (!SimState.countdownInterval) {
+                let count = 3;
+                document.getElementById('lobby-countdown-number').textContent = count;
+                SimState.countdownInterval = setInterval(() => {
+                  count--;
+                  if (count > 0) {
+                    document.getElementById('lobby-countdown-number').textContent = count;
+                  } else {
+                    clearInterval(SimState.countdownInterval);
+                    SimState.countdownInterval = null;
+                    SimState.hasDoneCountdown = true;
+                    document.getElementById('lobby-countdown-screen').style.display = 'none';
+                    document.querySelector('.exam-layout').style.display = 'flex';
+                    
+                    let targetIdx = SimState.stations.findIndex(st => st.case.caseId === room.caseId);
+                    renderStation(targetIdx !== -1 ? targetIdx : 0);
+                    
+                    SimState.timerRunning = room.timerRunning || true;
+                    SimState.timerValue = room.timerValue || 240;
+                    updateTimerDisplay();
+                    if (SimState.timerRunning) startLocalCountdown();
+                  }
+                }, 1000);
+              }
+              return; // Wait for countdown to finish
+            }
+            
+            document.getElementById('lobby-countdown-screen').style.display = 'none';
+            document.querySelector('.exam-layout').style.display = 'flex';
             
             // Find current station index by matching caseId, or if it changed
             let targetIdx = SimState.stations.findIndex(st => st.case.caseId === room.caseId);
@@ -896,8 +903,8 @@
               SimState.studentScores[currStationNum] = room.checklistProgress || [];
             }
             
-            if (SimState.role === 'examinee') {
-              if (Math.abs(SimState.timerValue - room.timerValue) > 3) {
+            if (SimState.role === 'examinee' || SimState.role === 'examiner') {
+              if (Math.abs(SimState.timerValue - room.timerValue) > 5) {
                 SimState.timerValue = room.timerValue;
                 updateTimerDisplay();
               }
@@ -968,7 +975,7 @@
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds timeout
-        await fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&status=countdown&_t=${Date.now()}`, { signal: controller.signal });
+        await fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&status=running&timerRunning=TRUE&timerValue=240&_t=${Date.now()}`, { signal: controller.signal });
         clearTimeout(timeoutId);
         await syncLobbyStatus();
       } catch (e) {
@@ -1312,17 +1319,10 @@
       // Timer per station (solo only, lobby handled separately)
       if (!SimState.isLobby) {
         startTimer();
-      } else if (SimState.role === 'examiner') {
-        startLocalCountdown();
-        if (SimState.timerSyncInterval) clearInterval(SimState.timerSyncInterval);
-        SimState.timerSyncInterval = setInterval(() => {
-          if (SimState.timerRunning) {
-            // Include checklist progress when syncing
-            const currStationNum = SimState.stations[SimState.currentIdx].stationNumber;
-            const checkedIds = SimState.studentScores[currStationNum] || [];
-            fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&timerValue=${SimState.timerValue}&checklistProgress=${checkedIds.join(',')}&_t=${Date.now()}`);
-          }
-        }, 5000);
+      } else if (SimState.role === 'examiner' && !SimState.timerInterval) {
+        // We only rely on startLocalCountdown triggered by syncLobbyStatus,
+        // but just to be safe if it wasn't triggered:
+        if (SimState.timerRunning) startLocalCountdown();
       }
     }
 
