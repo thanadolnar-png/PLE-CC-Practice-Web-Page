@@ -791,143 +791,7 @@
         const roomWrapper = await res.json();
         
         if (roomWrapper.success && roomWrapper.data && roomWrapper.data.roomId) {
-          const room = roomWrapper.data;
-          document.getElementById('lobby-examinee-display').textContent = room.examineeName || 'กำลังรอ...';
-          document.getElementById('lobby-examiner-display').textContent = room.examinerName || 'กำลังรอ...';
-          
-          const dot = document.getElementById('lobby-dot');
-          const statusText = document.getElementById('lobby-status-text');
-          
-          if (room.examineeName && room.examinerName) {
-            dot.style.background = 'var(--success)';
-            statusText.textContent = room.status.toUpperCase();
-          } else {
-            dot.style.background = 'var(--warning)';
-            statusText.textContent = 'WAITING';
-          }
-          
-          if (room.status === 'setup') {
-            document.getElementById('lobby-waiting-screen').style.display = 'block';
-            document.getElementById('lobby-countdown-screen').style.display = 'none';
-            document.querySelector('.exam-layout').style.display = 'none';
-            
-            // Update UI with names
-            const examinerEl = document.getElementById('lobby-status-examiner');
-            const examineeEl = document.getElementById('lobby-status-examinee');
-            
-            if (room.examinerName) {
-              examinerEl.textContent = room.examinerName;
-              examinerEl.style.color = 'var(--primary)';
-            }
-            if (room.examineeName) {
-              examineeEl.textContent = room.examineeName;
-              examineeEl.style.color = 'var(--primary)';
-            }
-            
-            if (SimState.role === 'examiner') {
-              const startBtn = document.getElementById('lobby-start-exam-btn');
-              startBtn.style.display = 'block';
-              const waitingMsg = document.getElementById('lobby-waiting-msg');
-              
-              if (room.examineeName && room.examinerName) {
-                startBtn.disabled = false;
-                startBtn.textContent = '🚀 เริ่มการสอบทันที';
-                startBtn.classList.add('btn-primary');
-                if (waitingMsg) waitingMsg.textContent = 'ผู้เข้าสอบเชื่อมต่อแล้ว สามารถกดเริ่มสอบได้เลย';
-              } else {
-                startBtn.disabled = true;
-                startBtn.textContent = 'รอผู้เข้าสอบเชื่อมต่อ...';
-                startBtn.classList.remove('btn-primary');
-                if (waitingMsg) waitingMsg.textContent = 'แชร์รหัสห้องนี้ให้ผู้เข้าสอบ:';
-              }
-            } else {
-              document.getElementById('lobby-waiting-msg').textContent = 'เชื่อมต่อสำเร็จ! รอผู้ประเมินกดเริ่มการสอบ...';
-              document.getElementById('lobby-waiting-msg').style.color = 'var(--primary)';
-              document.getElementById('lobby-start-exam-btn').style.display = 'none';
-              document.getElementById('lobby-waiting-title').textContent = 'เชื่อมต่อสำเร็จ!';
-              document.getElementById('lobby-waiting-desc').textContent = 'กรุณารอผู้ประเมินกดเริ่มการสอบ...';
-            }
-          } else if (room.status === 'running' || room.status === 'countdown') {
-            document.getElementById('lobby-waiting-screen').style.display = 'none';
-            
-            // Build stations if not exist or if joining late
-            if (SimState.stations.length === 0) {
-              buildStationsFromRoom(room);
-            }
-            
-            if (!SimState.hasDoneCountdown) {
-              document.querySelector('.exam-layout').style.display = 'none';
-              document.getElementById('lobby-countdown-screen').style.display = 'flex';
-              
-              if (!SimState.countdownInterval) {
-                let count = 3;
-                document.getElementById('lobby-countdown-number').textContent = count;
-                SimState.countdownInterval = setInterval(() => {
-                  count--;
-                  if (count > 0) {
-                    document.getElementById('lobby-countdown-number').textContent = count;
-                  } else {
-                    clearInterval(SimState.countdownInterval);
-                    SimState.countdownInterval = null;
-                    SimState.hasDoneCountdown = true;
-                    document.getElementById('lobby-countdown-screen').style.display = 'none';
-                    document.querySelector('.exam-layout').style.display = 'flex';
-                    
-                    let targetIdx = SimState.stations.findIndex(st => st.case.caseId === room.caseId);
-                    renderStation(targetIdx !== -1 ? targetIdx : 0);
-                    
-                    SimState.timerRunning = room.timerRunning || true;
-                    SimState.timerValue = room.timerValue || 240;
-                    updateTimerDisplay();
-                    if (SimState.timerRunning) startLocalCountdown();
-                  }
-                }, 1000);
-              }
-              return; // Wait for countdown to finish
-            }
-            
-            document.getElementById('lobby-countdown-screen').style.display = 'none';
-            document.querySelector('.exam-layout').style.display = 'flex';
-            
-            // Find current station index by matching caseId, or if it changed
-            let targetIdx = SimState.stations.findIndex(st => st.case.caseId === room.caseId);
-            if (targetIdx !== -1 && targetIdx !== SimState.currentIdx) {
-              renderStation(targetIdx);
-            } else if (SimState.currentIdx === 0 && SimState.stations[0].case.caseId === room.caseId && document.getElementById('exam-case-title').textContent === 'โหลดเคส...') {
-              renderStation(0);
-            }
-            
-            if (SimState.role === 'examinee') {
-              // Sync checklist progress continuously during exam for the examinee
-              const currStationNum = SimState.stations[SimState.currentIdx].stationNumber;
-              SimState.studentScores[currStationNum] = room.checklistProgress || [];
-            }
-            
-            if (SimState.role === 'examinee' || SimState.role === 'examiner') {
-              if (Math.abs(SimState.timerValue - room.timerValue) > 5) {
-                SimState.timerValue = room.timerValue;
-                updateTimerDisplay();
-              }
-              if (SimState.timerRunning !== room.timerRunning) {
-                SimState.timerRunning = room.timerRunning;
-                if (SimState.timerRunning) {
-                  startLocalCountdown();
-                } else {
-                  if (SimState.timerInterval) clearInterval(SimState.timerInterval);
-                }
-              }
-            }
-          } else if (room.status === 'results') {
-            if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
-            if (SimState.timerInterval) clearInterval(SimState.timerInterval);
-            
-            if (SimState.stations.length === 0) {
-              // Just a fallback
-              let matchedCase = room.caseDetail || AppState.cases.find(c => c.caseId === room.caseId) || AppState.cases[0];
-              SimState.stations = [{ stationNumber: 1, case: matchedCase }];
-            }
-            finishExamSimulation();
-          }
+          applyRoomState(roomWrapper.data);
         }
       } catch (e) {
         if (e.name !== 'AbortError') {
@@ -935,6 +799,162 @@
         }
       } finally {
         isSyncing = false;
+      }
+    }
+
+    function applyRoomState(room) {
+      try {
+        document.getElementById('lobby-examinee-display').textContent = room.examineeName || 'กำลังรอ...';
+        document.getElementById('lobby-examiner-display').textContent = room.examinerName || 'กำลังรอ...';
+        
+        const dot = document.getElementById('lobby-dot');
+        const statusText = document.getElementById('lobby-status-text');
+        
+        if (room.examineeName && room.examinerName) {
+          dot.style.background = 'var(--success)';
+          statusText.textContent = room.status.toUpperCase();
+        } else {
+          dot.style.background = 'var(--warning)';
+          statusText.textContent = 'WAITING';
+        }
+        
+        if (room.status === 'setup') {
+          document.getElementById('lobby-waiting-screen').style.display = 'block';
+          document.getElementById('lobby-countdown-screen').style.display = 'none';
+          document.querySelector('.exam-layout').style.display = 'none';
+          
+          // Update UI with names
+          const examinerEl = document.getElementById('lobby-status-examiner');
+          const examineeEl = document.getElementById('lobby-status-examinee');
+          
+          if (room.examinerName) {
+            examinerEl.textContent = room.examinerName;
+            examinerEl.style.color = 'var(--primary)';
+          }
+          if (room.examineeName) {
+            examineeEl.textContent = room.examineeName;
+            examineeEl.style.color = 'var(--primary)';
+          }
+          
+          if (SimState.role === 'examiner') {
+            const startBtn = document.getElementById('lobby-start-exam-btn');
+            startBtn.style.display = 'block';
+            const waitingMsg = document.getElementById('lobby-waiting-msg');
+            
+            if (room.examineeName && room.examinerName) {
+              startBtn.disabled = false;
+              startBtn.textContent = '🚀 เริ่มการสอบทันที';
+              startBtn.classList.add('btn-primary');
+              if (waitingMsg) waitingMsg.textContent = 'ผู้เข้าสอบเชื่อมต่อแล้ว สามารถกดเริ่มสอบได้เลย';
+            } else {
+              startBtn.disabled = true;
+              startBtn.textContent = 'รอผู้เข้าสอบเชื่อมต่อ...';
+              startBtn.classList.remove('btn-primary');
+              if (waitingMsg) waitingMsg.textContent = 'แชร์รหัสห้องนี้ให้ผู้เข้าสอบ:';
+            }
+          } else {
+            document.getElementById('lobby-waiting-msg').textContent = 'เชื่อมต่อสำเร็จ! รอผู้ประเมินกดเริ่มการสอบ...';
+            document.getElementById('lobby-waiting-msg').style.color = 'var(--primary)';
+            document.getElementById('lobby-start-exam-btn').style.display = 'none';
+            document.getElementById('lobby-waiting-title').textContent = 'เชื่อมต่อสำเร็จ!';
+            document.getElementById('lobby-waiting-desc').textContent = 'กรุณารอผู้ประเมินกดเริ่มการสอบ...';
+          }
+        } else if (room.status === 'running' || room.status === 'countdown') {
+          document.getElementById('lobby-waiting-screen').style.display = 'none';
+          
+          // Build stations if not exist or if joining late
+          if (SimState.stations.length === 0) {
+            buildStationsFromRoom(room);
+          }
+          
+          if (!SimState.hasDoneCountdown) {
+            document.querySelector('.exam-layout').style.display = 'none';
+            document.getElementById('lobby-countdown-screen').style.display = 'flex';
+            
+            if (!SimState.countdownInterval) {
+              let count = 3;
+              document.getElementById('lobby-countdown-number').textContent = count;
+              SimState.countdownInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                  document.getElementById('lobby-countdown-number').textContent = count;
+                } else {
+                  clearInterval(SimState.countdownInterval);
+                  SimState.countdownInterval = null;
+                  SimState.hasDoneCountdown = true;
+                  document.getElementById('lobby-countdown-screen').style.display = 'none';
+                  document.querySelector('.exam-layout').style.display = 'flex';
+                  
+                  let targetIdx = SimState.stations.findIndex(st => st.case && st.case.caseId === room.caseId);
+                  renderStation(targetIdx !== -1 ? targetIdx : 0);
+                  
+                  SimState.timerRunning = room.timerRunning || true;
+                  SimState.timerValue = room.timerValue || 240;
+                  updateTimerDisplay();
+                  if (SimState.timerRunning) startLocalCountdown();
+                }
+              }, 1000);
+            }
+            return; // Wait for countdown to finish
+          }
+          
+          document.getElementById('lobby-countdown-screen').style.display = 'none';
+          document.querySelector('.exam-layout').style.display = 'flex';
+          
+          // Find current station index by matching caseId
+          let targetIdx = SimState.stations.findIndex(st => st.case && st.case.caseId === room.caseId);
+          const stationChanged = targetIdx !== -1 && targetIdx !== SimState.currentIdx;
+          const isFirstLoad = SimState.currentIdx === 0 && SimState.stations[0] && SimState.stations[0].case && SimState.stations[0].case.caseId === room.caseId && document.getElementById('exam-case-title').textContent === 'โหลดเคส...';
+
+          if (stationChanged || isFirstLoad) {
+            renderStation(stationChanged ? targetIdx : 0);
+            // Station changed — force timer reset for everyone
+            SimState.timerValue = room.timerValue || 240;
+            updateTimerDisplay();
+            SimState.timerRunning = true;
+            if (SimState.timerInterval) clearInterval(SimState.timerInterval);
+            startLocalCountdown();
+          } else {
+            // Same station — only sync timer if drifted significantly
+            if (Math.abs(SimState.timerValue - room.timerValue) > 5) {
+              SimState.timerValue = room.timerValue;
+              updateTimerDisplay();
+            }
+            if (SimState.timerRunning !== room.timerRunning) {
+              SimState.timerRunning = room.timerRunning;
+              if (SimState.timerRunning) {
+                startLocalCountdown();
+              } else {
+                if (SimState.timerInterval) clearInterval(SimState.timerInterval);
+              }
+            }
+          }
+
+          if (SimState.role === 'examinee') {
+            // Sync checklist progress continuously during exam for the examinee
+            if (SimState.stations[SimState.currentIdx]) {
+              const currStationNum = SimState.stations[SimState.currentIdx].stationNumber;
+              SimState.studentScores[currStationNum] = room.checklistProgress || [];
+            }
+          }
+        } else if (room.status === 'results') {
+          if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
+          if (SimState.timerInterval) clearInterval(SimState.timerInterval);
+          
+          if (SimState.stations.length === 0) {
+            // Just a fallback
+            let matchedCase = room.caseDetail || AppState.cases.find(c => c.caseId === room.caseId) || AppState.cases[0];
+            SimState.stations = [{ stationNumber: 1, case: matchedCase }];
+          }
+          finishExamSimulation();
+        }
+      } catch (err) {
+        console.error('Error in applyRoomState:', err);
+        // Only alert once to avoid spamming
+        if (!window.hasAlertedApplyError) {
+          alert('เกิดข้อผิดพลาดในการซิงก์หน้าจอ: ' + err.message);
+          window.hasAlertedApplyError = true;
+        }
       }
     }
 
@@ -975,11 +995,27 @@
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds timeout
-        await fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&status=running&timerRunning=TRUE&timerValue=240&_t=${Date.now()}`, { signal: controller.signal });
+        const res = await fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&status=running&timerRunning=TRUE&timerValue=240&_t=${Date.now()}`, { signal: controller.signal });
         clearTimeout(timeoutId);
-        await syncLobbyStatus();
+        
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const data = await res.json();
+        if (!data.success) throw new Error('Server returned unsuccessful response');
+        
+        // Force local state transition immediately
+        const mockRoom = {
+          roomId: SimState.roomId,
+          status: 'running',
+          timerRunning: true,
+          timerValue: 240,
+          caseId: SimState.stations[SimState.currentIdx]?.case?.caseId || (AppState.cases[0] ? AppState.cases[0].caseId : null),
+          examineeName: document.getElementById('lobby-status-examinee').textContent,
+          examinerName: document.getElementById('lobby-status-examiner').textContent
+        };
+        applyRoomState(mockRoom);
+        
       } catch (e) {
-        alert('ไม่สามารถเริ่มการสอบบนเซิร์ฟเวอร์ได้: ' + e.toString());
+        alert('ไม่สามารถเริ่มการสอบบนเซิร์ฟเวอร์ได้: ' + e.toString() + ' กรุณาลองใหม่อีกครั้ง');
       }
       showGlobalLoader(false);
     }
@@ -1007,7 +1043,13 @@
         updateTimerDisplay();
         if (SimState.timerValue <= 0) {
           clearInterval(SimState.timerInterval);
-          if (SimState.role === 'examiner') finishExamSimulation();
+          if (SimState.role === 'examiner') {
+            if (SimState.currentIdx < SimState.stations.length - 1) {
+              nextStation();
+            } else {
+              finishExamSimulation();
+            }
+          }
         }
       }, 1000);
     }
@@ -1454,7 +1496,14 @@
       if (SimState.currentIdx < SimState.stations.length - 1) {
         const nextIdx = SimState.currentIdx + 1;
         if (SimState.isLobby && SimState.role === 'examiner') {
-          fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&caseId=${SimState.stations[nextIdx].case.caseId}&timerValue=240&status=running&_t=${Date.now()}`);
+          // Reset timer locally immediately
+          SimState.timerValue = 240;
+          SimState.timerRunning = true;
+          if (SimState.timerInterval) clearInterval(SimState.timerInterval);
+          updateTimerDisplay();
+          startLocalCountdown();
+          // Push new station + reset timer to server
+          fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&caseId=${SimState.stations[nextIdx].case.caseId}&timerValue=240&timerRunning=TRUE&status=running&_t=${Date.now()}`);
         }
         renderStation(nextIdx);
       }
@@ -1464,7 +1513,14 @@
       if (SimState.currentIdx > 0) {
         const prevIdx = SimState.currentIdx - 1;
         if (SimState.isLobby && SimState.role === 'examiner') {
-          fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&caseId=${SimState.stations[prevIdx].case.caseId}&timerValue=240&status=running&_t=${Date.now()}`);
+          // Reset timer locally immediately
+          SimState.timerValue = 240;
+          SimState.timerRunning = true;
+          if (SimState.timerInterval) clearInterval(SimState.timerInterval);
+          updateTimerDisplay();
+          startLocalCountdown();
+          // Push new station + reset timer to server
+          fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&caseId=${SimState.stations[prevIdx].case.caseId}&timerValue=240&timerRunning=TRUE&status=running&_t=${Date.now()}`);
         }
         renderStation(prevIdx);
       }
