@@ -1,10 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU 84-85</title>
   <link rel="stylesheet" href="style.css">
+  <script src="case-data-offline.js"></script>
+  <script src="app.js"></script>
   <style>
     .setup-screen { display: block; }
     .exam-screen { display: none; }
@@ -37,6 +39,7 @@
     .station-badge.clinic { background-color: var(--clinic); }
     .station-badge.product { background-color: var(--product); }
     .station-badge.sap { background-color: var(--sap); }
+    .station-badge.rest { background-color: var(--text-muted); }
 
     .exam-note-content-area {
       display: none;
@@ -51,6 +54,57 @@
     }
     .exam-note-content-area.show {
       display: block;
+    }
+
+    /* ─── Proportion Checkbox+Number UI ─── */
+    .proportion-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      margin-bottom: 0.5rem;
+      transition: background 0.2s;
+    }
+    .proportion-row.disabled-row {
+      opacity: 0.45;
+    }
+    .proportion-row input[type="checkbox"] {
+      width: 1.1rem;
+      height: 1.1rem;
+      accent-color: var(--primary);
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .proportion-label {
+      font-weight: 700;
+      min-width: 60px;
+    }
+    .proportion-label.clinic { color: var(--clinic); }
+    .proportion-label.product { color: var(--product); }
+    .proportion-label.sap { color: var(--sap); }
+    .proportion-num-input {
+      width: 70px;
+      padding: 0.3rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 1rem;
+      font-weight: 700;
+      text-align: center;
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: var(--font-title);
+    }
+    .proportion-num-input:disabled {
+      background: var(--surface);
+      color: var(--text-muted);
+    }
+    .proportion-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-left: auto;
     }
   </style>
 </head>
@@ -103,47 +157,41 @@
             <button id="setup-tab-lobby-btn" type="button" class="btn btn-secondary" style="flex: 1; padding: 0.5rem;" onclick="toggleSetupView('lobby')">👥 ซ้อมออนไลน์ (Lobby)</button>
           </div>
 
-          <!-- SOLO SETUP CONTAINER -->
+          <!-- ═══════════════════════════════════════════
+               SOLO SETUP CONTAINER
+               ═══════════════════════════════════════════ -->
           <div id="setup-solo-container" style="display: block;">
             <form id="setup-form" onsubmit="event.preventDefault(); startExamSimulation();">
-              
-              <!-- Number of Stations -->
+
+              <!-- Proportion Checkboxes + Number Inputs -->
               <div class="form-group">
-                <label class="form-label" for="stations-count">จำนวนสถานีสอบทั้งหมด</label>
-                <select id="stations-count" class="select-filter" style="width: 100%;" onchange="adjustProportions(this.value)">
-                  <option value="16">16 สถานี (มาตรฐานสภาเภสัชกรรม)</option>
-                  <option value="10">10 สถานี (แบบย่อ)</option>
-                  <option value="5">5 สถานี (ซ้อมด่วน)</option>
-                  <option value="3">3 สถานี (ซ้อมเฉพาะแบบทดสอบ)</option>
-                </select>
-              </div>
-
-              <!-- Proportions Slider -->
-              <div class="form-group">
-                <label class="form-label">สัดส่วนหมวดวิชา (Proportions)</label>
-                <div class="slider-group">
-                  
-                  <div class="slider-row">
-                    <span style="color: var(--clinic); font-weight: bold;">Clinic</span>
-                    <input type="range" id="slider-clinic" min="0" max="16" value="8" oninput="updateSlidersFrom('clinic')">
-                    <span class="slider-val" id="val-clinic">8</span>
-                  </div>
-
-                  <div class="slider-row">
-                    <span style="color: var(--product); font-weight: bold;">Product</span>
-                    <input type="range" id="slider-product" min="0" max="16" value="6" oninput="updateSlidersFrom('product')">
-                    <span class="slider-val" id="val-product">6</span>
-                  </div>
-
-                  <div class="slider-row">
-                    <span style="color: var(--sap); font-weight: bold;">SAP</span>
-                    <input type="range" id="slider-sap" min="0" max="16" value="2" oninput="updateSlidersFrom('sap')">
-                    <span class="slider-val" id="val-sap">2</span>
-                  </div>
-
+                <label class="form-label" style="margin-bottom: 0.75rem; display: block;">
+                  📊 สัดส่วนหมวดวิชา (เลือกหมวดที่ต้องการ &amp; ระบุจำนวนฐาน)
+                </label>
+                
+                <div class="proportion-row" id="proportion-row-clinic">
+                  <input type="checkbox" id="chk-clinic" checked onchange="toggleProportionCategory('clinic')">
+                  <span class="proportion-label clinic">Clinic</span>
+                  <input type="number" id="num-clinic" class="proportion-num-input" min="0" max="50" value="8" oninput="updateProportionSumText()">
+                  <span class="proportion-hint">ฐาน</span>
                 </div>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; text-align: center;" id="proportion-sum-text">
-                  สัดส่วนที่แนะนำ: Clinic 8 : Product 6 : SAP 2 (รวม 16 สถานี)
+
+                <div class="proportion-row" id="proportion-row-product">
+                  <input type="checkbox" id="chk-product" checked onchange="toggleProportionCategory('product')">
+                  <span class="proportion-label product">Product</span>
+                  <input type="number" id="num-product" class="proportion-num-input" min="0" max="50" value="6" oninput="updateProportionSumText()">
+                  <span class="proportion-hint">ฐาน</span>
+                </div>
+
+                <div class="proportion-row" id="proportion-row-sap">
+                  <input type="checkbox" id="chk-sap" checked onchange="toggleProportionCategory('sap')">
+                  <span class="proportion-label sap">SAP</span>
+                  <input type="number" id="num-sap" class="proportion-num-input" min="0" max="50" value="2" oninput="updateProportionSumText()">
+                  <span class="proportion-hint">ฐาน</span>
+                </div>
+
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.75rem; text-align: center; padding: 0.5rem; background: var(--surface); border-radius: var(--radius-sm);" id="proportion-sum-text">
+                  รวม: Clinic 8 + Product 6 + SAP 2 = <strong>16 สถานี</strong>
                 </p>
               </div>
 
@@ -153,24 +201,20 @@
                 <input type="number" id="rest-stations-count" class="select-filter" style="width: 100%; border: 1px solid var(--border); padding: 0.5rem;" min="0" max="5" value="0">
               </div>
 
-              <!-- Role Selection -->
-              <div class="form-group" style="margin-top: 1.5rem;">
-                <label class="form-label" for="sim-role-select">บทบาทในการจำลองสอบ</label>
-                <select id="sim-role-select" class="select-filter" style="width: 100%;">
-                  <option value="solo">👤 ฝึกซ้อมคนเดียว (Solo Mode — เห็นทั้งโจทย์และ Checklist)</option>
-                  <option value="examinee">✍️ ฉันเป็นผู้เข้าสอบ (Examinee — เห็นเฉพาะโจทย์และนาฬิกาจับเวลา)</option>
-                  <option value="examiner">🔎 ฉันเป็นผู้ประเมิน/คนไข้ (Examiner/SP — เห็น Checklist และเฉลย)</option>
-                </select>
-              </div>
-
-              <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;">
+              <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem; padding: 0.75rem; font-size: 1rem;">
                 🎲 สุ่มสถานีและเริ่มสอบทันที
               </button>
             </form>
           </div>
 
-          <!-- LOBBY MULTIPLAYER SETUP CONTAINER -->
+          <!-- ═══════════════════════════════════════════
+               LOBBY MULTIPLAYER SETUP CONTAINER
+               ═══════════════════════════════════════════ -->
           <div id="setup-lobby-container" style="display: none;">
+            <div style="padding: 0.75rem 1rem; background: var(--primary-light); border-radius: var(--radius-md); margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--primary);">
+              <strong>📡 โหมดออนไลน์แบบจับคู่:</strong> ผู้เข้าสอบ + ผู้ประเมิน/คนไข้จำลอง เห็นหน้าจอเดียวกันแบบเรียลไทม์
+            </div>
+
             <form id="lobby-setup-form" onsubmit="event.preventDefault(); submitLobbySetup();">
               
               <div class="form-group">
@@ -181,28 +225,16 @@
               <div class="form-group" style="margin-top: 1rem;">
                 <label class="form-label" for="lobby-role-select">บทบาทในการจำลองสอบ</label>
                 <select id="lobby-role-select" class="select-filter" style="width: 100%;" onchange="toggleLobbyRole(this.value)">
-                  <option value="examiner">🔎 ฉันเป็นผู้ประเมิน/คนไข้จำลอง (Examiner — ควบคุมการสอบ/ประเมินผล)</option>
-                  <option value="examinee">✍️ ฉันเป็นผู้เข้าสอบ (Examinee — ซ้อมตอบข้อสอบตามคำถาม)</option>
+                  <option value="examiner">🔎 ฉันเป็นผู้ประเมิน/คนไข้จำลอง (Host — สร้างห้องและควบคุมการสอบ)</option>
+                  <option value="examinee">✍️ ฉันเป็นผู้เข้าสอบ (เข้าร่วมห้องที่มีอยู่)</option>
                 </select>
               </div>
 
-              <!-- Mode Choice: Create vs Join -->
-              <div class="form-group" style="margin-top: 1.5rem;">
-                <label class="form-label">ประเภทดำเนินการ</label>
-                <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
-                  <label style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
-                    <input type="radio" name="lobby-op" value="create" checked onchange="toggleLobbyOp(this.value)">
-                    <span>สร้างห้องซ้อมสอบใหม่ (Host)</span>
-                  </label>
-                  <label style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
-                    <input type="radio" name="lobby-op" value="join" onchange="toggleLobbyOp(this.value)">
-                    <span>เข้าร่วมห้องเดิมที่มีอยู่</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Create fields -->
+              <!-- Create Room: Host config -->
               <div id="lobby-create-fields" style="display: block; margin-top: 1rem; border-top: 1px dashed var(--border); padding-top: 1rem;">
+                <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+                  🎯 <strong>Host</strong> เลือกเคสที่จะซ้อม ระบบจะสร้างรหัสห้อง 4 หลักให้อัตโนมัติ
+                </p>
                 <div class="form-group">
                   <label class="form-label" for="lobby-case-select">เลือกโจทย์ที่จะสอบ (Case Selection)</label>
                   <select id="lobby-case-select" class="select-filter" style="width: 100%;">
@@ -211,16 +243,19 @@
                 </div>
               </div>
 
-              <!-- Join fields -->
+              <!-- Join Room: Examinee config -->
               <div id="lobby-join-fields" style="display: none; margin-top: 1rem; border-top: 1px dashed var(--border); padding-top: 1rem;">
+                <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+                  ✍️ <strong>ผู้เข้าสอบ</strong>: รอรับรหัสห้องจาก Host แล้วกรอกด้านล่าง
+                </p>
                 <div class="form-group">
                   <label class="form-label" for="lobby-room-id-input">รหัสห้องสอบ (Room ID 4 หลัก)</label>
-                  <input type="text" id="lobby-room-id-input" class="select-filter" style="width: 100%; border: 1px solid var(--border); padding: 0.5rem; text-align: center; font-size: 1.25rem; font-weight: bold; letter-spacing: 0.25rem;" placeholder="เช่น 1234">
+                  <input type="text" id="lobby-room-id-input" class="select-filter" style="width: 100%; border: 1px solid var(--border); padding: 0.5rem; text-align: center; font-size: 1.5rem; font-weight: bold; letter-spacing: 0.5rem;" placeholder="เช่น 1234" maxlength="4">
                 </div>
               </div>
 
-              <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;" id="lobby-submit-btn">
-                📡 เชื่อมต่อเซิร์ฟเวอร์และเปิดห้องสอบ
+              <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem; padding: 0.75rem; font-size: 1rem;" id="lobby-submit-btn">
+                📡 สร้างห้องซ้อมสอบ (Host)
               </button>
             </form>
           </div>
@@ -230,13 +265,13 @@
       <!-- ──────────────────────────────────────────────────────────
            2. EXAM RUNNING SCREEN
            ────────────────────────────────────────────────────────── -->
-      <section class="exam-screen" id="exam-running-view">
+      <section class="exam-screen" id="exam-running-view" style="display: none;">
         
         <!-- Lobby Info Panel (Only shown in Lobby Mode) -->
         <div id="exam-lobby-info-bar" style="display: none; background: var(--primary-light); color: var(--primary); padding: 0.75rem 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; font-family: var(--font-title); font-size: 0.9rem; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm);">
           <div>
             <span>📍 รหัสห้องซ้อม: <strong id="lobby-room-id-display" style="font-size: 1.1rem; color: var(--primary);">----</strong></span>
-            <span style="margin-left: 1.5rem;">👨‍🎓 ผู้เข้าสอบ: <span id="lobby-examinee-display" style="font-weight: bold;">กำลังรอ...</span></span>
+            <span style="margin-left: 1.5rem;">✍️ ผู้เข้าสอบ: <span id="lobby-examinee-display" style="font-weight: bold;">กำลังรอ...</span></span>
             <span style="margin-left: 1.5rem;">🔎 ผู้ประเมิน: <span id="lobby-examiner-display" style="font-weight: bold;">กำลังรอ...</span></span>
           </div>
           <div id="lobby-status-indicator" style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; font-weight: bold; background: white; padding: 0.25rem 0.5rem; border-radius: var(--radius-sm);">
@@ -250,6 +285,12 @@
           <span style="font-size: 4rem; display: block; margin-bottom: 1rem;">⏳</span>
           <h3 style="font-family: var(--font-title); font-size: 1.5rem; color: var(--text-primary); margin-bottom: 0.5rem;" id="lobby-waiting-title">กำลังรอการเตรียมพร้อม...</h3>
           <p style="color: var(--text-secondary); margin-bottom: 2rem;" id="lobby-waiting-desc">รอผู้เข้าร่วมการจำลองซ้อมสอบเข้ามาเชื่อมต่อที่ห้องนี้</p>
+          
+          <!-- Room ID display for Host to share -->
+          <div id="lobby-room-code-share" style="display: none; margin: 1.5rem auto; padding: 1rem 2rem; background: var(--bg); border: 2px solid var(--primary); border-radius: var(--radius-lg); max-width: 300px;">
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;">แชร์รหัสห้องนี้ให้ผู้เข้าสอบ:</p>
+            <div style="font-size: 2.5rem; font-weight: 900; letter-spacing: 0.5rem; color: var(--primary); font-family: var(--font-title);" id="lobby-share-code-display">----</div>
+          </div>
           
           <!-- Examiner Start button -->
           <button id="lobby-start-exam-btn" class="btn btn-primary" style="display: none; margin: 0 auto; padding: 0.75rem 2rem; font-size: 1.1rem;" onclick="startLobbyExamOnServer()">
@@ -331,7 +372,7 @@
             </div>
 
             <!-- Mini Map stations layout -->
-            <div class="minimap-card">
+            <div class="minimap-card" id="minimap-card-el">
               <h4 class="minimap-title" id="minimap-progress-title">แผนที่สถานี (0/16)</h4>
               <div class="minimap-grid" id="exam-minimap-grid">
                 <!-- 16 Squares populated dynamically -->
@@ -343,7 +384,9 @@
               <button class="btn btn-secondary" onclick="prevStation()" id="btn-prev-station">← ก่อนหน้า</button>
               <button class="btn btn-primary btn-clinic" onclick="nextStation()" id="btn-next-station">ถัดไป →</button>
             </div>
-            
+
+            <!-- Finish Exam Button -->
+            <button class="btn btn-secondary" id="btn-finish-exam" onclick="finishExamSimulation()" style="width: 100%; margin-top: 0.75rem; border-color: var(--danger); color: var(--danger);">
               🏁 ส่งกระดาษคำตอบ (จบการสอบ)
             </button>
           </div>
@@ -379,12 +422,16 @@
           </div>
         </div>
       </section>
-              🏁 ส่งกระดา�  <script>
-    // ──────────────────────────────────────────────────────────
-    // Exam Simulation Logic
-    // ──────────────────────────────────────────────────────────
-    
-    // โครงสร้าง State การจำลองสอบ
+
+    </div>
+  </main>
+
+  <script>
+    // ══════════════════════════════════════════════════════════════
+    // Exam Simulation Logic — Single clean script block
+    // ══════════════════════════════════════════════════════════════
+
+    // State object
     const SimState = {
       totalStations: 16,
       clinic: 8,
@@ -392,75 +439,88 @@
       sap: 2,
       restStations: 0,
       role: 'solo', // solo, examinee, examiner
-      stations: [], // เคสของแต่ละสถานี
+      stations: [],
       currentIdx: 0,
-      studentScores: {}, // { stationNumber: [checked_item_ids] }
-      timerValue: 240, // 4 นาที (วินาที)
+      studentScores: {},
+      timerValue: 240,
       timerInterval: null,
       timerRunning: false,
+      timerSyncInterval: null,
       
       // Lobby fields
       isLobby: false,
       roomId: '',
       lobbyPlayerName: '',
-      lobbyOp: 'create', // create, join
-      lobbyRole: 'examiner', // examiner, examinee
+      lobbyRole: 'examiner',
       lobbyPollInterval: null,
       lastServerSyncTime: 0
     };
 
-    // Toggle between Solo setup and Lobby setup tabs
+    // ─── UI: Tab switching Solo ↔ Lobby ───────────────────────
     function toggleSetupView(mode) {
-      const soloTabBtn = document.getElementById('setup-tab-solo-btn');
-      const lobbyTabBtn = document.getElementById('setup-tab-lobby-btn');
-      const soloContainer = document.getElementById('setup-solo-container');
-      const lobbyContainer = document.getElementById('setup-lobby-container');
+      const soloBtn = document.getElementById('setup-tab-solo-btn');
+      const lobbyBtn = document.getElementById('setup-tab-lobby-btn');
+      const soloCon = document.getElementById('setup-solo-container');
+      const lobbyCon = document.getElementById('setup-lobby-container');
       
       if (mode === 'solo') {
-        soloTabBtn.className = 'btn btn-primary';
-        lobbyTabBtn.className = 'btn btn-secondary';
-        soloContainer.style.display = 'block';
-        lobbyContainer.style.display = 'none';
+        soloBtn.className = 'btn btn-primary';
+        lobbyBtn.className = 'btn btn-secondary';
+        soloCon.style.display = 'block';
+        lobbyCon.style.display = 'none';
         SimState.isLobby = false;
       } else {
-        soloTabBtn.className = 'btn btn-secondary';
-        lobbyTabBtn.className = 'btn btn-primary';
-        soloContainer.style.display = 'none';
-        lobbyContainer.style.display = 'block';
+        soloBtn.className = 'btn btn-secondary';
+        lobbyBtn.className = 'btn btn-primary';
+        soloCon.style.display = 'none';
+        lobbyCon.style.display = 'block';
         SimState.isLobby = true;
         initLobbyCaseDropdown();
       }
     }
 
-    // Toggle role inside Lobby form
-    function toggleLobbyRole(role) {
-      SimState.lobbyRole = role;
-      const caseSelectField = document.getElementById('lobby-create-fields');
-      const submitBtn = document.getElementById('lobby-submit-btn');
+    // ─── Proportion checkbox+number helpers ───────────────────
+    function toggleProportionCategory(cat) {
+      const chk = document.getElementById(`chk-${cat}`);
+      const numInput = document.getElementById(`num-${cat}`);
+      const row = document.getElementById(`proportion-row-${cat}`);
       
-      const joinRadio = document.querySelector('input[name="lobby-op"][value="join"]');
-      const createRadio = document.querySelector('input[name="lobby-op"][value="create"]');
-      
-      if (role === 'examinee') {
-        joinRadio.checked = true;
-        createRadio.disabled = true;
-        toggleLobbyOp('join');
+      if (chk.checked) {
+        numInput.disabled = false;
+        row.classList.remove('disabled-row');
       } else {
-        createRadio.disabled = false;
+        numInput.disabled = true;
+        numInput.value = 0;
+        row.classList.add('disabled-row');
       }
+      updateProportionSumText();
     }
 
-    // Toggle Lobby operations: Create Room vs Join Room
-    function toggleLobbyOp(op) {
-      SimState.lobbyOp = op;
+    function getProportionValues() {
+      const clinic = document.getElementById('chk-clinic').checked ? (parseInt(document.getElementById('num-clinic').value) || 0) : 0;
+      const product = document.getElementById('chk-product').checked ? (parseInt(document.getElementById('num-product').value) || 0) : 0;
+      const sap = document.getElementById('chk-sap').checked ? (parseInt(document.getElementById('num-sap').value) || 0) : 0;
+      return { clinic, product, sap };
+    }
+
+    function updateProportionSumText() {
+      const { clinic, product, sap } = getProportionValues();
+      const total = clinic + product + sap;
+      document.getElementById('proportion-sum-text').innerHTML =
+        `รวม: Clinic ${clinic} + Product ${product} + SAP ${sap} = <strong>${total} สถานี</strong>`;
+    }
+
+    // ─── Lobby role toggle (Examiner=Host / Examinee=Join) ─────
+    function toggleLobbyRole(role) {
+      SimState.lobbyRole = role;
       const createFields = document.getElementById('lobby-create-fields');
       const joinFields = document.getElementById('lobby-join-fields');
       const submitBtn = document.getElementById('lobby-submit-btn');
       
-      if (op === 'create') {
+      if (role === 'examiner') {
         createFields.style.display = 'block';
         joinFields.style.display = 'none';
-        submitBtn.textContent = '📡 สร้างห้องซ้อมสอบใหม่ (Host)';
+        submitBtn.textContent = '📡 สร้างห้องซ้อมสอบ (Host)';
       } else {
         createFields.style.display = 'none';
         joinFields.style.display = 'block';
@@ -468,10 +528,10 @@
       }
     }
 
-    // Populate the dropdown menu with all available cases
+    // Populate the case dropdown for Lobby
     function initLobbyCaseDropdown() {
       const select = document.getElementById('lobby-case-select');
-      if (select && AppState && AppState.cases) {
+      if (select && typeof AppState !== 'undefined' && AppState.cases) {
         select.innerHTML = '';
         AppState.cases.forEach(c => {
           const opt = document.createElement('option');
@@ -482,20 +542,17 @@
       }
     }
 
-    // Hook into app.js loadCasesData callback
-    const originalOnCasesLoaded = typeof onCasesLoaded === 'function' ? onCasesLoaded : null;
+    // Hook into app.js onCasesLoaded
+    const _origOnCasesLoaded = typeof onCasesLoaded === 'function' ? onCasesLoaded : null;
     onCasesLoaded = function() {
-      if (originalOnCasesLoaded) originalOnCasesLoaded();
+      if (_origOnCasesLoaded) _origOnCasesLoaded();
       initLobbyCaseDropdown();
     };
 
-    // Submit Lobby Form (Create/Join)
+    // ─── Submit Lobby Form ────────────────────────────────────
     async function submitLobbySetup() {
       const playerName = document.getElementById('lobby-player-name').value.trim();
-      if (!playerName) {
-        alert('กรุณากรอกชื่อผู้ใช้งาน');
-        return;
-      }
+      if (!playerName) { alert('กรุณากรอกชื่อผู้ใช้งาน'); return; }
       
       if (!currentApiUrl) {
         alert('กรุณากรอกและเชื่อมต่อ Google Sheets API URL ที่แถบด้านบนของหน้าเว็บหลักก่อนใช้งานโหมดออนไลน์');
@@ -506,37 +563,32 @@
       SimState.lobbyPlayerName = playerName;
       
       try {
-        if (SimState.lobbyOp === 'create') {
+        if (SimState.lobbyRole === 'examiner') {
+          // Host: create room
           const caseSelect = document.getElementById('lobby-case-select').value;
           const randomRoomId = String(Math.floor(1000 + Math.random() * 9000));
           
-          const res = await fetch(`${currentApiUrl}?action=createRoom&roomId=${randomRoomId}&caseId=${caseSelect}&hostRole=${SimState.lobbyRole}&playerName=${encodeURIComponent(playerName)}`);
+          const res = await fetch(`${currentApiUrl}?action=createRoom&roomId=${randomRoomId}&caseId=${caseSelect}&hostRole=examiner&playerName=${encodeURIComponent(playerName)}`);
           const resultWrapper = await res.json();
           
           if (resultWrapper.success && resultWrapper.data && resultWrapper.data.roomId) {
-            const result = resultWrapper.data;
-            SimState.roomId = result.roomId;
-            SimState.role = SimState.lobbyRole;
+            SimState.roomId = resultWrapper.data.roomId;
+            SimState.role = 'examiner';
             setupLobbyRoomUI();
           } else {
             throw new Error(resultWrapper.error || 'การสร้างห้องล้มเหลว');
           }
         } else {
-          // Join Mode
+          // Examinee: join room
           const roomIdInput = document.getElementById('lobby-room-id-input').value.trim();
-          if (!roomIdInput) {
-            alert('กรุณากรอกรหัสห้อง 4 หลัก');
-            showGlobalLoader(false);
-            return;
-          }
+          if (!roomIdInput) { alert('กรุณากรอกรหัสห้อง 4 หลัก'); showGlobalLoader(false); return; }
           
-          const res = await fetch(`${currentApiUrl}?action=joinRoom&roomId=${roomIdInput}&role=${SimState.lobbyRole}&playerName=${encodeURIComponent(playerName)}`);
+          const res = await fetch(`${currentApiUrl}?action=joinRoom&roomId=${roomIdInput}&role=examinee&playerName=${encodeURIComponent(playerName)}`);
           const resultWrapper = await res.json();
           
           if (resultWrapper.success && resultWrapper.data && resultWrapper.data.roomId) {
-            const result = resultWrapper.data;
-            SimState.roomId = result.roomId;
-            SimState.role = SimState.lobbyRole;
+            SimState.roomId = resultWrapper.data.roomId;
+            SimState.role = 'examinee';
             setupLobbyRoomUI();
           } else {
             throw new Error(resultWrapper.error || (resultWrapper.data && resultWrapper.data.error) || 'ไม่พบห้องที่ระบุ หรือห้องเต็มแล้ว');
@@ -549,25 +601,32 @@
       }
     }
 
-    // Initialize UI for Lobby Mode and start polling
+    // Initialize Lobby Room UI
     async function setupLobbyRoomUI() {
       document.getElementById('exam-setup-view').style.display = 'none';
       document.getElementById('exam-running-view').style.display = 'block';
       document.getElementById('exam-lobby-info-bar').style.display = 'flex';
       document.getElementById('lobby-room-id-display').textContent = SimState.roomId;
       
-      await syncLobbyStatus();
+      // Show room code share for Host
+      if (SimState.role === 'examiner') {
+        const shareEl = document.getElementById('lobby-room-code-share');
+        if (shareEl) {
+          shareEl.style.display = 'block';
+          document.getElementById('lobby-share-code-display').textContent = SimState.roomId;
+        }
+      }
       
+      await syncLobbyStatus();
       showGlobalLoader(false);
       
       if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
       SimState.lobbyPollInterval = setInterval(syncLobbyStatus, 2500);
     }
 
-    // Sync state with server via Polling
+    // Sync with server
     async function syncLobbyStatus() {
       if (!SimState.isLobby || !SimState.roomId) return;
-      
       try {
         const res = await fetch(`${currentApiUrl}?action=getRoomStatus&roomId=${SimState.roomId}`);
         const roomWrapper = await res.json();
@@ -597,8 +656,7 @@
               startBtn.style.display = 'block';
               startBtn.disabled = !(room.examineeName && room.examinerName);
             }
-          }
-          else if (room.status === 'running') {
+          } else if (room.status === 'running') {
             document.getElementById('lobby-waiting-screen').style.display = 'none';
             document.querySelector('.exam-layout').style.display = 'flex';
             
@@ -608,10 +666,8 @@
               if (!matchedCase) {
                 matchedCase = AppState.cases.find(c => c.caseId === room.caseId) || AppState.cases[0];
               }
-              
               SimState.stations = [{ stationNumber: 1, case: matchedCase }];
               SimState.studentScores = { 1: room.checklistProgress || [] };
-              
               renderStation(0);
               showGlobalLoader(false);
             }
@@ -621,7 +677,6 @@
                 SimState.timerValue = room.timerValue;
                 updateTimerDisplay();
               }
-              
               if (SimState.timerRunning !== room.timerRunning) {
                 SimState.timerRunning = room.timerRunning;
                 if (SimState.timerRunning) {
@@ -630,11 +685,8 @@
                   if (SimState.timerInterval) clearInterval(SimState.timerInterval);
                 }
               }
-            } else if (SimState.role === 'examiner') {
-              // Examiner sets check lists on click and synchronizes outwards
             }
-          }
-          else if (room.status === 'results') {
+          } else if (room.status === 'results') {
             if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
             if (SimState.timerInterval) clearInterval(SimState.timerInterval);
             
@@ -642,7 +694,6 @@
               let matchedCase = room.caseDetail || AppState.cases.find(c => c.caseId === room.caseId) || AppState.cases[0];
               SimState.stations = [{ stationNumber: 1, case: matchedCase }];
             }
-            
             SimState.studentScores = { 1: room.checklistProgress || [] };
             finishExamSimulation();
           }
@@ -652,7 +703,7 @@
       }
     }
 
-    // Start exam button clicked by Examiner
+    // Examiner starts exam on server
     async function startLobbyExamOnServer() {
       if (!SimState.isLobby || !SimState.roomId) return;
       showGlobalLoader(true);
@@ -666,15 +717,13 @@
       showGlobalLoader(false);
     }
 
-    // Examiner writes checklist item to server
+    // Sync checklist to server
     async function updateLobbyChecklistOnServer() {
       if (!SimState.isLobby || !SimState.roomId) return;
       const checkedIds = SimState.studentScores[1] || [];
-      const timestamp = new Date().getTime();
-      
+      const timestamp = Date.now();
       if (timestamp - SimState.lastServerSyncTime < 800) return;
       SimState.lastServerSyncTime = timestamp;
-      
       try {
         fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&checklistProgress=${checkedIds.join(',')}`);
       } catch (e) {
@@ -682,130 +731,47 @@
       }
     }
 
-    // Local Countdown timer (used in Lobby for Examinee, and also Examiner)
+    // Local countdown for Lobby
     function startLocalCountdown() {
       if (SimState.timerInterval) clearInterval(SimState.timerInterval);
       SimState.timerInterval = setInterval(() => {
         if (!SimState.timerRunning) return;
         SimState.timerValue--;
         updateTimerDisplay();
-        
         if (SimState.timerValue <= 0) {
           clearInterval(SimState.timerInterval);
-          if (SimState.role === 'examiner') {
-            finishExamSimulation();
-          }
+          if (SimState.role === 'examiner') finishExamSimulation();
         }
       }, 1000);
     }
 
-    // ปรับสไลเดอร์สัดส่วนให้สัมพันธ์กันเมื่อเปลี่ยนสถานีรวม
-    function adjustProportions(totalVal) {
-      const total = parseInt(totalVal);
-      SimState.totalStations = total;
-      
-      let clinic = 8, product = 6, sap = 2;
-      if (total === 10) {
-        clinic = 5; product = 4; sap = 1;
-      } else if (total === 5) {
-        clinic = 3; product = 1; sap = 1;
-      } else if (total === 3) {
-        clinic = 1; product = 1; sap = 1;
-      }
-      
-      document.getElementById('slider-clinic').value = clinic;
-      document.getElementById('slider-product').value = product;
-      document.getElementById('slider-sap').value = sap;
-      
-      document.getElementById('val-clinic').textContent = clinic;
-      document.getElementById('val-product').textContent = product;
-      document.getElementById('val-sap').textContent = sap;
-      
-      updateSlidersMax(total);
-      updateProportionSumText();
-    }
-
-    // อัปเดตขีดสูงสุดของสไลเดอร์
-    function updateSlidersMax(max) {
-      const inputs = ['clinic', 'product', 'sap'];
-      inputs.forEach(id => {
-        const slider = document.getElementById(`slider-${id}`);
-        slider.max = max;
-      });
-    }
-
-    // ปรับสไลเดอร์
-    function updateSlidersFrom(changedSource) {
-      const total = SimState.totalStations;
-      let clinic = parseInt(document.getElementById('slider-clinic').value);
-      let product = parseInt(document.getElementById('slider-product').value);
-      let sap = parseInt(document.getElementById('slider-sap').value);
-      
-      let sum = clinic + product + sap;
-      if (sum !== total) {
-        if (changedSource === 'clinic') {
-          const remainder = total - clinic;
-          if (remainder >= 0) {
-            product = Math.round(remainder * 0.75);
-            sap = remainder - product;
-          } else {
-            clinic = total; product = 0; sap = 0;
-          }
-        } else if (changedSource === 'product') {
-          const remainder = total - product;
-          if (remainder >= 0) {
-            clinic = Math.round(remainder * 0.8);
-            sap = remainder - clinic;
-          } else {
-            product = total; clinic = 0; sap = 0;
-          }
-        } else {
-          const remainder = total - sap;
-          if (remainder >= 0) {
-            clinic = Math.round(remainder * 0.55);
-            product = remainder - clinic;
-          } else {
-            sap = total; clinic = 0; product = 0;
-          }
-        }
-      }
-
-      document.getElementById('slider-clinic').value = clinic;
-      document.getElementById('slider-product').value = product;
-      document.getElementById('slider-sap').value = sap;
-      
-      document.getElementById('val-clinic').textContent = clinic;
-      document.getElementById('val-product').textContent = product;
-      document.getElementById('val-sap').textContent = sap;
-      
-      updateProportionSumText();
-    }
-
-    function updateProportionSumText() {
-      const clinic = document.getElementById('slider-clinic').value;
-      const product = document.getElementById('slider-product').value;
-      const sap = document.getElementById('slider-sap').value;
-      
-      document.getElementById('proportion-sum-text').textContent = 
-        `สัดส่วนจำลอง: Clinic ${clinic} : Product ${product} : SAP ${sap} (รวม ${SimState.totalStations} สถานี)`;
-    }
-
-    // เริ่มการสอบจำลอง (Solo Mode)
+    // ═══════════════════════════════════════════
+    // SOLO EXAM START
+    // ═══════════════════════════════════════════
     async function startExamSimulation() {
-      showGlobalLoader(true);
+      const { clinic, product, sap } = getProportionValues();
+      const total = clinic + product + sap;
       
-      const clinic = parseInt(document.getElementById('slider-clinic').value);
-      const product = parseInt(document.getElementById('slider-product').value);
-      const sap = parseInt(document.getElementById('slider-sap').value);
+      if (total === 0) {
+        alert('กรุณาเลือกอย่างน้อย 1 หมวดวิชาและระบุจำนวนมากกว่า 0');
+        return;
+      }
+      
       const restCount = parseInt(document.getElementById('rest-stations-count').value) || 0;
-      SimState.role = document.getElementById('sim-role-select').value;
+      SimState.clinic = clinic;
+      SimState.product = product;
+      SimState.sap = sap;
+      SimState.totalStations = total;
+      SimState.role = 'solo';
       SimState.isLobby = false;
+      
+      showGlobalLoader(true);
       
       let examSet = null;
       
-      if (currentApiUrl) {
+      if (typeof currentApiUrl !== 'undefined' && currentApiUrl) {
         try {
-          const res = await fetch(`${currentApiUrl}?action=getExamSet&totalStations=${SimState.totalStations}&clinicCount=${clinic}&productCount=${product}&sapCount=${sap}`);
+          const res = await fetch(`${currentApiUrl}?action=getExamSet&totalStations=${total}&clinicCount=${clinic}&productCount=${product}&sapCount=${sap}`);
           const result = await res.json();
           if (result.success && result.data && result.data.stations) {
             examSet = result.data.stations;
@@ -821,25 +787,23 @@
       
       if (!examSet || examSet.length === 0) {
         showGlobalLoader(false);
-        alert('เกิดข้อผิดพลาด: ไม่สามารถสร้างชุดข้อสอบสุ่มได้ เนื่องจากฐานข้อมูลว่างเปล่า');
+        alert('เกิดข้อผิดพลาด: ไม่สามารถสร้างชุดข้อสอบสุ่มได้ เนื่องจากฐานข้อมูลว่างเปล่า กรุณาโหลดเคสก่อน');
         return;
       }
       
-      SimState.stations = [];
+      // Load cases
       let loadedCases = [];
       for (let i = 0; i < examSet.length; i++) {
         const st = examSet[i];
         let matchedCase = AppState.cases.find(c => c.caseId === st.caseId);
         
-        if (currentApiUrl && (!matchedCase || !matchedCase.checklist)) {
+        if (typeof currentApiUrl !== 'undefined' && currentApiUrl && (!matchedCase || !matchedCase.checklist)) {
           try {
             const res = await fetch(`${currentApiUrl}?action=getCase&id=${st.caseId}`);
             const result = await res.json();
-            if (result.success && result.data) {
-              matchedCase = result.data;
-            }
+            if (result.success && result.data) matchedCase = result.data;
           } catch (e) {
-            console.error('โหลดเคสไอดีไม่ผ่าน:', st.caseId, e);
+            console.error('โหลดเคสไม่ผ่าน:', st.caseId, e);
           }
         }
         
@@ -847,20 +811,23 @@
           matchedCase = AppState.cases.find(c => c.caseId === st.caseId) || AppState.cases[0];
         }
         
-        loadedCases.push(matchedCase);
+        if (matchedCase) loadedCases.push(matchedCase);
+      }
+      
+      if (loadedCases.length === 0) {
+        showGlobalLoader(false);
+        alert('ไม่พบเคสที่ตรงกับเงื่อนไข กรุณาตรวจสอบฐานข้อมูลเคส');
+        return;
       }
 
-      // แทรกสถานีพัก (Rest Stations)
-      let restInterval = restCount > 0 ? Math.floor(loadedCases.length / restCount) : 999;
+      // Insert rest stations
+      SimState.stations = [];
+      const restInterval = restCount > 0 ? Math.floor(loadedCases.length / restCount) : 999;
       let restInserted = 0;
       let stationNumCounter = 1;
 
       for (let i = 0; i < loadedCases.length; i++) {
-        SimState.stations.push({
-          stationNumber: stationNumCounter++,
-          isRest: false,
-          case: loadedCases[i]
-        });
+        SimState.stations.push({ stationNumber: stationNumCounter++, isRest: false, case: loadedCases[i] });
         
         if (restCount > 0 && (i + 1) % restInterval === 0 && restInserted < restCount) {
           restInserted++;
@@ -868,12 +835,10 @@
             stationNumber: stationNumCounter++,
             isRest: true,
             case: {
-              caseId: 'REST',
-              title: 'สถานีพัก (Rest Station)',
-              category: 'REST',
-              scenario: '<div style="text-align: center; padding: 2rem;"><span style="font-size: 4rem;">🥤</span><h3 style="font-family: var(--font-title); margin-top: 1rem;">คุณอยู่ในสถานีพัก (Rest Station)</h3><p style="color: var(--text-secondary); margin-top: 0.5rem;">ใช้เวลานี้ในการพักผ่อน สูดหายใจเข้าลึกๆ หรือจิบน้ำ เพื่อเตรียมความพร้อมสำหรับสถานีถัดไป</p></div>',
-              contentHtml: '<div style="text-align: center; padding: 2rem;"><span style="font-size: 4rem;">🥤</span><h3 style="font-family: var(--font-title); margin-top: 1rem;">คุณอยู่ในสถานีพัก (Rest Station)</h3><p style="color: var(--text-secondary); margin-top: 0.5rem;">ใช้เวลานี้ในการพักผ่อน สูดหายใจเข้าลึกๆ หรือจิบน้ำ เพื่อเตรียมความพร้อมสำหรับสถานีถัดไป</p></div>',
-              patientInfoHtml: '<div style="text-align: center; color: var(--text-muted); padding: 1rem;">ไม่มีข้อมูลผู้ป่วยสำหรับสถานีพัก</div>',
+              caseId: 'REST', title: 'สถานีพัก (Rest Station)', category: 'REST',
+              scenario: '<div style="text-align:center;padding:2rem;"><span style="font-size:4rem;">🥤</span><h3 style="font-family:var(--font-title);margin-top:1rem;">คุณอยู่ในสถานีพัก (Rest Station)</h3><p style="color:var(--text-secondary);margin-top:0.5rem;">ใช้เวลานี้ในการพักผ่อน สูดหายใจเข้าลึกๆ หรือจิบน้ำ</p></div>',
+              contentHtml: '<div style="text-align:center;padding:2rem;"><span style="font-size:4rem;">🥤</span><h3 style="font-family:var(--font-title);margin-top:1rem;">คุณอยู่ในสถานีพัก</h3></div>',
+              patientInfoHtml: '<div style="text-align:center;color:var(--text-muted);padding:1rem;">ไม่มีข้อมูลผู้ป่วยสำหรับสถานีพัก</div>',
               checklist: [],
               noteHtml: '<p>สถานีพักไม่มีการประเมินคะแนน</p>'
             }
@@ -882,15 +847,11 @@
       }
 
       SimState.totalStations = SimState.stations.length;
-      
       SimState.currentIdx = 0;
       SimState.studentScores = {};
-      SimState.stations.forEach(st => {
-        SimState.studentScores[st.stationNumber] = [];
-      });
+      SimState.stations.forEach(st => { SimState.studentScores[st.stationNumber] = []; });
       
       showGlobalLoader(false);
-      
       document.getElementById('exam-setup-view').style.display = 'none';
       document.getElementById('exam-running-view').style.display = 'block';
       document.getElementById('exam-lobby-info-bar').style.display = 'none';
@@ -899,8 +860,9 @@
       startTimer();
     }
 
-    // สุ่มเคสในเบราว์เซอร์ (Offline Fallback)
+    // Generate exam set locally (offline)
     function generateLocalExamSet(clinic, product, sap) {
+      if (typeof AppState === 'undefined' || !AppState.cases) return [];
       const list = AppState.cases;
       const pool = {
         Clinic: shuffle(list.filter(c => c.category === 'Clinic')),
@@ -909,6 +871,7 @@
       };
       
       const getFromPool = (cat, count) => {
+        if (count === 0) return [];
         let items = pool[cat].slice(0, count);
         let idx = 0;
         while (items.length < count && pool[cat].length > 0) {
@@ -924,9 +887,7 @@
         ...getFromPool('SAP', sap)
       ];
       
-      const shuffled = shuffle(selected);
-      
-      return shuffled.map((c, idx) => ({
+      return shuffle(selected).map((c, idx) => ({
         stationNumber: idx + 1,
         caseId: c.caseId,
         title: c.title,
@@ -943,14 +904,12 @@
       return array;
     }
 
-    // จับเวลาการซ้อม
+    // ─── Timer ───────────────────────────────────────────────
     function startTimer() {
       if (SimState.timerInterval) clearInterval(SimState.timerInterval);
-      
       SimState.timerValue = 240;
       SimState.timerRunning = true;
       document.getElementById('timer-toggle-btn').textContent = '⏸️ พักตัวจับเวลา';
-      
       updateTimerDisplay();
       
       if (SimState.isLobby) {
@@ -963,10 +922,8 @@
       
       SimState.timerInterval = setInterval(() => {
         if (!SimState.timerRunning) return;
-        
         SimState.timerValue--;
         updateTimerDisplay();
-        
         if (SimState.timerValue <= 0) {
           clearInterval(SimState.timerInterval);
           alert('หมดเวลาสถานีปัจจุบัน! ระบบจะขยับไปยังสถานีถัดไปอัตโนมัติ');
@@ -982,7 +939,6 @@
     function toggleTimer() {
       SimState.timerRunning = !SimState.timerRunning;
       document.getElementById('timer-toggle-btn').textContent = SimState.timerRunning ? '⏸️ พักตัวจับเวลา' : '▶️ เล่นตัวจับเวลาต่อ';
-      
       if (SimState.isLobby && SimState.role === 'examiner') {
         fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&timerRunning=${SimState.timerRunning ? 'TRUE' : 'FALSE'}&timerValue=${SimState.timerValue}`);
       }
@@ -991,7 +947,6 @@
     function resetTimer() {
       SimState.timerValue = 240;
       updateTimerDisplay();
-      
       if (SimState.isLobby && SimState.role === 'examiner') {
         fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&timerValue=240`);
       }
@@ -1001,19 +956,14 @@
       const minutes = Math.floor(SimState.timerValue / 60);
       const seconds = SimState.timerValue % 60;
       const displayStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-      
       const timerEl = document.getElementById('exam-timer');
       timerEl.textContent = displayStr;
-      
       timerEl.className = 'timer-display';
-      if (SimState.timerValue < 10) {
-        timerEl.classList.add('danger');
-      } else if (SimState.timerValue < 60) {
-        timerEl.classList.add('warn');
-      }
+      if (SimState.timerValue < 10) timerEl.classList.add('danger');
+      else if (SimState.timerValue < 60) timerEl.classList.add('warn');
     }
 
-    // แสดงรายละเอียดเคสและเกณฑ์
+    // ─── Render station ───────────────────────────────────────
     function renderStation(idx) {
       SimState.currentIdx = idx;
       const st = SimState.stations[idx];
@@ -1022,81 +972,63 @@
       document.getElementById('exam-station-badge').textContent = `STATION ${st.stationNumber}`;
       document.getElementById('exam-case-title').textContent = c.title;
       document.getElementById('exam-case-id').textContent = c.caseId;
-      document.getElementById('exam-scenario-content').innerHTML = c.contentHtml || `<p>${c.scenario}</p>`;
+      document.getElementById('exam-scenario-content').innerHTML = c.contentHtml || `<p>${c.scenario || ''}</p>`;
       document.getElementById('exam-patient-content').innerHTML = c.patientInfoHtml || '<p>ไม่มีตารางข้อมูลผู้ป่วย</p>';
       
       const badge = document.getElementById('exam-station-badge');
-      badge.className = 'station-badge ' + c.category.toLowerCase();
+      badge.className = 'station-badge ' + (c.category || 'rest').toLowerCase();
       
-      // ขยายพื้นที่ประเมินเต็มจอ Examiner Full-width
+      // Examiner layout
       const examLayout = document.querySelector('.exam-layout');
       if (examLayout) {
-        if (SimState.role === 'examiner') {
-          examLayout.classList.add('examiner-layout');
-        } else {
-          examLayout.classList.remove('examiner-layout');
-        }
+        examLayout.classList.toggle('examiner-layout', SimState.role === 'examiner');
       }
 
       const progressCard = document.getElementById('exam-progress-card');
       const noticeCard = document.getElementById('exam-examinee-notice');
-      const chkContainer = document.getElementById('exam-checklist-container') || document.querySelector('.checklist-container');
+      const chkContainer = document.getElementById('exam-checklist-container');
       const noteContainer = document.getElementById('exam-note-container');
       
+      // Solo mode: show everything, no Examiner notes
       if (SimState.role === 'solo') {
         progressCard.style.display = 'block';
         noticeCard.style.display = 'none';
         chkContainer.style.display = 'block';
         noteContainer.style.display = 'none';
-        
         renderExamChecklist(st.stationNumber, c);
-      } 
-      else if (SimState.role === 'examinee') {
+      } else if (SimState.role === 'examinee') {
         progressCard.style.display = 'none';
         noticeCard.style.display = 'block';
         chkContainer.style.display = 'none';
         noteContainer.style.display = 'none';
-        
         if (SimState.isLobby) {
           document.getElementById('timer-toggle-btn').style.display = 'none';
           document.querySelector('.exam-nav').style.display = 'none';
-          document.querySelector('button[onclick="finishExamSimulation()"]').style.display = 'none';
-        } else {
-          document.getElementById('timer-toggle-btn').style.display = 'inline-block';
-          document.querySelector('.exam-nav').style.display = 'flex';
-          document.querySelector('button[onclick="finishExamSimulation()"]').style.display = 'block';
+          document.getElementById('btn-finish-exam').style.display = 'none';
         }
-      } 
-      else if (SimState.role === 'examiner') {
+      } else if (SimState.role === 'examiner') {
         progressCard.style.display = 'block';
         noticeCard.style.display = 'none';
         chkContainer.style.display = 'block';
         noteContainer.style.display = 'block';
-        
         document.getElementById('exam-note-content-area').innerHTML = c.noteHtml || c.note || '<p>ไม่มีเฉลย/รายละเอียดเพิ่มเติม</p>';
         document.getElementById('exam-note-content-area').classList.add('show');
         document.getElementById('exam-toggle-note-btn').textContent = '🔒 ซ่อนบทบาทคนไข้จำลอง / เฉลย';
-        
         renderExamChecklist(st.stationNumber, c);
-        
         if (SimState.isLobby) {
           document.getElementById('timer-toggle-btn').style.display = 'inline-block';
           document.querySelector('.exam-nav').style.display = 'flex';
-          document.querySelector('button[onclick="finishExamSimulation()"]').style.display = 'block';
+          document.getElementById('btn-finish-exam').style.display = 'block';
         }
       }
       
-      const minimapCard = document.querySelector('.minimap-card');
-      if (minimapCard) {
-        minimapCard.style.display = SimState.isLobby ? 'none' : 'block';
-      }
+      // Minimap
+      const minimapCard = document.getElementById('minimap-card-el');
+      if (minimapCard) minimapCard.style.display = SimState.isLobby ? 'none' : 'block';
+      if (!SimState.isLobby) renderMiniMap();
       
-      if (!SimState.isLobby) {
-        renderMiniMap();
-      }
-      
+      // Nav buttons
       document.getElementById('btn-prev-station').disabled = idx === 0;
-      
       const nextBtn = document.getElementById('btn-next-station');
       if (idx === SimState.stations.length - 1) {
         nextBtn.textContent = 'สิ้นสุดการสอบ 🏁';
@@ -1104,27 +1036,27 @@
         nextBtn.onclick = finishExamSimulation;
       } else {
         nextBtn.textContent = 'ถัดไป →';
-        nextBtn.className = 'btn btn-primary ' + 'btn-' + SimState.stations[idx+1].case.category.toLowerCase();
+        const nextCat = SimState.stations[idx + 1].case.category || 'clinic';
+        nextBtn.className = 'btn btn-primary btn-' + nextCat.toLowerCase();
         nextBtn.onclick = nextStation;
       }
       
+      // Timer per station (solo only, lobby handled separately)
       if (!SimState.isLobby) {
         startTimer();
-      } else {
-        if (SimState.role === 'examiner') {
-          startLocalCountdown();
-          if (SimState.timerSyncInterval) clearInterval(SimState.timerSyncInterval);
-          SimState.timerSyncInterval = setInterval(() => {
-            if (SimState.timerRunning) {
-              fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&timerValue=${SimState.timerValue}`);
-            }
-          }, 5000);
-        }
+      } else if (SimState.role === 'examiner') {
+        startLocalCountdown();
+        if (SimState.timerSyncInterval) clearInterval(SimState.timerSyncInterval);
+        SimState.timerSyncInterval = setInterval(() => {
+          if (SimState.timerRunning) {
+            fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&timerValue=${SimState.timerValue}`);
+          }
+        }, 5000);
       }
     }
 
     function renderExamChecklist(stationNum, c) {
-      const chkContainer = document.getElementById('exam-checklist-container') || document.querySelector('.exam-sidebar-pane .checklist-container');
+      const chkContainer = document.getElementById('exam-checklist-container');
       chkContainer.innerHTML = '';
       
       if (!c.checklist || c.checklist.length === 0) {
@@ -1133,12 +1065,11 @@
       }
       
       const checkedList = SimState.studentScores[stationNum] || [];
-      
       const groups = {};
       c.checklist.forEach(item => {
-        const groupName = item.group || 'ทั่วไป';
-        if (!groups[groupName]) groups[groupName] = [];
-        groups[groupName].push(item);
+        const g = item.group || 'ทั่วไป';
+        if (!groups[g]) groups[g] = [];
+        groups[g].push(item);
       });
       
       Object.keys(groups).forEach(groupName => {
@@ -1153,21 +1084,14 @@
           const el = document.createElement('div');
           el.className = `checklist-item ${isChecked ? 'checked' : ''}`;
           el.setAttribute('data-id', item.id);
-          el.setAttribute('data-score', item.score);
-          
           el.style.padding = '0.5rem 0.75rem';
           el.style.gap = '0.5rem';
-          
-          el.addEventListener('click', () => {
-            toggleExamChecklistItem(stationNum, item.id, item.score);
-          });
-          
+          el.addEventListener('click', () => toggleExamChecklistItem(stationNum, item.id, item.score));
           el.innerHTML = `
             <div class="checkbox-custom" style="width:1.1rem; height:1.1rem;"></div>
             <span class="checklist-item-score" style="font-size:0.75rem;">(${item.score} คะแนน)</span>
             <span class="checklist-item-text" style="font-size:0.85rem;">${escapeHtml(item.text)}</span>
           `;
-          
           chkContainer.appendChild(el);
         });
       });
@@ -1176,26 +1100,17 @@
     }
 
     function toggleExamChecklistItem(stationNum, itemId, itemScore) {
-      if (!SimState.studentScores[stationNum]) {
-        SimState.studentScores[stationNum] = [];
-      }
-      
-      const index = SimState.studentScores[stationNum].indexOf(itemId);
-      if (index > -1) {
-        SimState.studentScores[stationNum].splice(index, 1);
+      if (!SimState.studentScores[stationNum]) SimState.studentScores[stationNum] = [];
+      const idx = SimState.studentScores[stationNum].indexOf(itemId);
+      if (idx > -1) {
+        SimState.studentScores[stationNum].splice(idx, 1);
       } else {
         SimState.studentScores[stationNum].push(itemId);
       }
       
-      const items = document.querySelectorAll('.checklist-item');
-      items.forEach(el => {
-        const id = el.getAttribute('data-id');
-        if (id === itemId) {
-          if (SimState.studentScores[stationNum].includes(itemId)) {
-            el.classList.add('checked');
-          } else {
-            el.classList.remove('checked');
-          }
+      document.querySelectorAll('.checklist-item').forEach(el => {
+        if (el.getAttribute('data-id') === itemId) {
+          el.classList.toggle('checked', SimState.studentScores[stationNum].includes(itemId));
         }
       });
       
@@ -1211,28 +1126,18 @@
 
     function updateExamProgressUI(stationNum, c) {
       const checked = SimState.studentScores[stationNum] || [];
-      let score = 0;
-      let total = 0;
-      
+      let score = 0, total = 0;
       c.checklist.forEach(item => {
         total += item.score;
-        if (checked.includes(item.id)) {
-          score += item.score;
-        }
+        if (checked.includes(item.id)) score += item.score;
       });
-      
       document.getElementById('exam-score').textContent = `${score} / ${total}`;
       if (total > 0) {
         const pct = Math.round((score / total) * 100);
         document.getElementById('exam-pct').textContent = `${pct}%`;
-        
         const fill = document.getElementById('exam-bar-fill');
         fill.style.width = `${pct}%`;
-        if (pct >= 80) {
-          fill.classList.add('pass');
-        } else {
-          fill.classList.remove('pass');
-        }
+        fill.classList.toggle('pass', pct >= 80);
       }
     }
 
@@ -1240,35 +1145,23 @@
       const grid = document.getElementById('exam-minimap-grid');
       if (!grid) return;
       grid.innerHTML = '';
-      
       let completedCount = 0;
       
       SimState.stations.forEach((st, idx) => {
         const cell = document.createElement('div');
         cell.className = 'minimap-cell';
-        if (idx === SimState.currentIdx) {
-          cell.classList.add('active');
-        }
-        
+        if (idx === SimState.currentIdx) cell.classList.add('active');
         const checked = SimState.studentScores[st.stationNumber] || [];
-        if (checked.length > 0) {
-          cell.classList.add('done');
-          completedCount++;
-        }
-        
+        if (checked.length > 0) { cell.classList.add('done'); completedCount++; }
         cell.textContent = st.stationNumber;
-        
         if (SimState.role !== 'examinee') {
           cell.style.cursor = 'pointer';
-          cell.addEventListener('click', () => {
-            renderStation(idx);
-          });
+          cell.addEventListener('click', () => renderStation(idx));
         }
-        
         grid.appendChild(cell);
       });
       
-      document.getElementById('minimap-progress-title').textContent = 
+      document.getElementById('minimap-progress-title').textContent =
         `ความคืบหน้าสถานี (${completedCount}/${SimState.totalStations})`;
     }
 
@@ -1295,7 +1188,6 @@
       }
     }
 
-    // ก่อนหน้าสถานี
     function prevStation() {
       if (SimState.currentIdx > 0) {
         const prevIdx = SimState.currentIdx - 1;
@@ -1307,49 +1199,40 @@
       }
     }
 
-    // สิ้นสุดและคำนวณผลการสอบ
+    // ─── Finish exam ──────────────────────────────────────────
     function finishExamSimulation() {
       if (SimState.timerInterval) clearInterval(SimState.timerInterval);
       if (SimState.timerSyncInterval) clearInterval(SimState.timerSyncInterval);
+      if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
+      
       if (SimState.isLobby && SimState.role === 'examiner') {
         fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&status=results`);
       }
       
       showGlobalLoader(true);
       
-      let passedStations = 0;
-      let totalMaxScore = 0;
-      let totalEarnedScore = 0;
-      
+      let passedStations = 0, totalMaxScore = 0, totalEarnedScore = 0;
       const tbody = document.getElementById('results-stations-tbody');
       tbody.innerHTML = '';
       
       SimState.stations.forEach(st => {
         const c = st.case;
         const checked = SimState.studentScores[st.stationNumber] || [];
-        
-        let earned = 0;
-        let max = 0;
-        
+        let earned = 0, max = 0;
         c.checklist.forEach(item => {
           max += item.score;
-          if (checked.includes(item.id)) {
-            earned += item.score;
-          }
+          if (checked.includes(item.id)) earned += item.score;
         });
-        
         totalMaxScore += max;
         totalEarnedScore += earned;
-        
         const pct = max > 0 ? Math.round((earned / max) * 100) : 0;
         const isPassed = pct >= 80;
         if (isPassed) passedStations++;
-        
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>สถานี ${st.stationNumber}</td>
-          <td><a href="case-viewer.html?id=${c.caseId}" target="_blank" style="color:var(--primary); font-weight:700;">${c.title}</a></td>
-          <td><span class="badge badge-${c.category.toLowerCase()}">${c.category}</span></td>
+          <td><a href="case-viewer.html?id=${c.caseId}" target="_blank" style="color:var(--primary);font-weight:700;">${c.title}</a></td>
+          <td><span class="badge badge-${(c.category || 'rest').toLowerCase()}">${c.category || 'REST'}</span></td>
           <td>${earned} / ${max}</td>
           <td>${pct}%</td>
           <td><strong style="color: ${isPassed ? 'var(--success)' : 'var(--danger)'};">${isPassed ? 'ผ่าน' : 'ตก'}</strong></td>
@@ -1357,7 +1240,6 @@
         tbody.appendChild(tr);
       });
       
-      // แสดงรายงานสรุปผล
       document.getElementById('results-score-val').textContent = `${totalEarnedScore}/${totalMaxScore}`;
       const totalPct = totalMaxScore > 0 ? Math.round((totalEarnedScore / totalMaxScore) * 100) : 0;
       document.getElementById('results-score-pct').textContent = `${totalPct}%`;
@@ -1366,7 +1248,7 @@
       statusText.textContent = passedStations === SimState.totalStations ? 'PASSED (ผ่านการประเมิน)' : 'FAILED (ไม่ผ่านเกณฑ์)';
       statusText.style.color = passedStations === SimState.totalStations ? 'var(--success)' : 'var(--danger)';
       
-      document.getElementById('results-summary-desc').textContent = 
+      document.getElementById('results-summary-desc').textContent =
         `ผ่านการประเมินวิชาชีพทั้งหมด ${passedStations} จาก ${SimState.totalStations} สถานีสอบ (ผ่านเมื่อสอบได้คะแนนตั้งแต่ร้อยละ 80 ขึ้นไปต่อสถานี)`;
       
       showGlobalLoader(false);
@@ -1383,177 +1265,19 @@
       document.getElementById('exam-results-view').style.display = 'none';
       document.getElementById('exam-setup-view').style.display = 'block';
     }
-  </script>   items.forEach(el => {
-        const id = el.getAttribute('data-id');
-        if (id === itemId) {
-          if (SimState.studentScores[stationNum].includes(itemId)) {
-            el.classList.add('checked');
-          } else {
-            el.classList.remove('checked');
-          }
-        }
-      });
-      
-      const currentCase = SimState.stations[SimState.currentIdx].case;
-      updateExamProgressUI(stationNum, currentCase);
-      renderMiniMap(); // อัปเดตสถานะความก้าวหน้าในแผนที่
+
+    // Helper: escape HTML
+    function escapeHtml(str) {
+      if (typeof str !== 'string') return str || '';
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    function updateExamProgressUI(stationNum, c) {
-      const checked = SimState.studentScores[stationNum] || [];
-      let score = 0;
-      let total = 0;
-      
-      c.checklist.forEach(item => {
-        total += item.score;
-        if (checked.includes(item.id)) {
-          score += item.score;
-        }
-      });
-      
-      document.getElementById('exam-score').textContent = `${score} / ${total}`;
-      if (total > 0) {
-        const pct = Math.round((score / total) * 100);
-        document.getElementById('exam-pct').textContent = `${pct}%`;
-        
-        const fill = document.getElementById('exam-bar-fill');
-        fill.style.width = `${pct}%`;
-        if (pct >= 80) {
-          fill.classList.add('pass');
-        } else {
-          fill.classList.remove('pass');
-        }
-      }
-    }
-
-    function renderMiniMap() {
-      const grid = document.getElementById('exam-minimap-grid');
-      if (!grid) return;
-      grid.innerHTML = '';
-      
-      let completedCount = 0;
-      
-      SimState.stations.forEach((st, idx) => {
-        const cell = document.createElement('div');
-        cell.className = 'minimap-cell';
-        if (idx === SimState.currentIdx) {
-          cell.classList.add('active');
-        }
-        
-        // ตรวจสอบว่ามีข้อมูลคะแนน
-        const checked = SimState.studentScores[st.stationNumber] || [];
-        if (checked.length > 0) {
-          cell.classList.add('done');
-          completedCount++;
-        }
-        
-        cell.textContent = st.stationNumber;
-        
-        // ใน Examinee Mode ห้ามกดเปลี่ยนห้องเอง
-        if (SimState.role !== 'examinee') {
-          cell.style.cursor = 'pointer';
-          cell.addEventListener('click', () => {
-            renderStation(idx);
-          });
-        }
-        
-        grid.appendChild(cell);
-      });
-      
-      document.getElementById('minimap-progress-title').textContent = 
-        `ความคืบหน้าสถานี (${completedCount}/${SimState.totalStations})`;
-    }
-
-    function toggleExamNote() {
-      const area = document.getElementById('exam-note-content-area');
-      const btn = document.getElementById('exam-toggle-note-btn');
-      if (area.classList.contains('show')) {
-        area.classList.remove('show');
-        btn.textContent = '🔑 แสดงเฉลย / บทบาทผู้ป่วยจำลอง';
-      } else {
-        area.classList.add('show');
-        btn.textContent = '🔒 ซ่อนบทบาทคนไข้จำลอง / เฉลย';
-      }
-    }
-
-    function nextStation() {
-      if (SimState.currentIdx < SimState.stations.length - 1) {
-        renderStation(SimState.currentIdx + 1);
-      }
-    }
-
-    function prevStation() {
-      if (SimState.currentIdx > 0) {
-        renderStation(SimState.currentIdx - 1);
-      }
-    }
-
-    // สิ้นสุดและคำนวณผลการสอบ
-    function finishExamSimulation() {
-      if (SimState.timerInterval) clearInterval(SimState.timerInterval);
-      showGlobalLoader(true);
-      
-      let passedStations = 0;
-      let totalMaxScore = 0;
-      let totalEarnedScore = 0;
-      
-      const tbody = document.getElementById('results-stations-tbody');
-      tbody.innerHTML = '';
-      
-      SimState.stations.forEach(st => {
-        const c = st.case;
-        const checked = SimState.studentScores[st.stationNumber] || [];
-        
-        let earned = 0;
-        let max = 0;
-        
-        c.checklist.forEach(item => {
-          max += item.score;
-          if (checked.includes(item.id)) {
-            earned += item.score;
-          }
-        });
-        
-        totalMaxScore += max;
-        totalEarnedScore += earned;
-        
-        const pct = max > 0 ? Math.round((earned / max) * 100) : 0;
-        const isPassed = pct >= 80;
-        if (isPassed) passedStations++;
-        
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>สถานี ${st.stationNumber}</td>
-          <td><a href="case-viewer.html?id=${c.caseId}" target="_blank" style="color:var(--primary); font-weight:700;">${c.title}</a></td>
-          <td><span class="badge badge-${c.category.toLowerCase()}">${c.category}</span></td>
-          <td>${earned} / ${max}</td>
-          <td>${pct}%</td>
-          <td><strong style="color: ${isPassed ? 'var(--success)' : 'var(--danger)'};">${isPassed ? 'ผ่าน' : 'ตก'}</strong></td>
-        `;
-        tbody.appendChild(tr);
-      });
-      
-      // แสดงรายงานสรุปผล
-      document.getElementById('results-score-val').textContent = `${totalEarnedScore}/${totalMaxScore}`;
-      const totalPct = totalMaxScore > 0 ? Math.round((totalEarnedScore / totalMaxScore) * 100) : 0;
-      document.getElementById('results-score-pct').textContent = `${totalPct}%`;
-      
-      const statusText = document.getElementById('results-status-text');
-      statusText.textContent = passedStations === SimState.totalStations ? 'PASSED (ผ่านการประเมิน)' : 'FAILED (ไม่ผ่านเกณฑ์)';
-      statusText.style.color = passedStations === SimState.totalStations ? 'var(--success)' : 'var(--danger)';
-      
-      document.getElementById('results-summary-desc').textContent = 
-        `ผ่านการประเมินวิชาชีพทั้งหมด ${passedStations} จาก ${SimState.totalStations} สถานีสอบ (ผ่านเมื่อสอบได้คะแนนตั้งแต่ร้อยละ 80 ขึ้นไปต่อสถานี)`;
-      
-      showGlobalLoader(false);
-      document.getElementById('exam-running-view').style.display = 'none';
-      document.getElementById('exam-results-view').style.display = 'block';
-    }
-
-    function restartSetup() {
-      document.getElementById('exam-results-view').style.display = 'none';
-      document.getElementById('exam-setup-view').style.display = 'block';
-    }
+    // Init proportion sum text on load
+    document.addEventListener('DOMContentLoaded', () => {
+      updateProportionSumText();
+    });
   </script>
+
+
 </body>
 </html>
