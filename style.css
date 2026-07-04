@@ -1335,3 +1335,163 @@ a {
 }
 
 
+/* ══════════════════════════════════════════════════
+   SKELETON LOADING SYSTEM
+   ══════════════════════════════════════════════════ */
+
+/* Base shimmer animation */
+@keyframes skeleton-shimmer {
+  0% { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--border) 25%,
+    var(--bg-secondary) 50%,
+    var(--border) 75%
+  );
+  background-size: 600px 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+  border-radius: var(--radius-sm);
+  display: block;
+}
+
+[data-theme="dark"] .skeleton {
+  background: linear-gradient(
+    90deg,
+    #1e293b 25%,
+    #334155 50%,
+    #1e293b 75%
+  );
+  background-size: 600px 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+}
+
+/* ── Skeleton: Stat Card (หน้าแรก) ── */
+.skeleton-stat-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+}
+.skeleton-stat-card .skel-num {
+  width: 60px;
+  height: 42px;
+  border-radius: var(--radius-md);
+}
+.skeleton-stat-card .skel-label {
+  width: 100px;
+  height: 14px;
+}
+
+/* ── Skeleton: Case Card (คลังเคส) ── */
+.skeleton-case-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-sm);
+  min-height: 160px;
+}
+.skeleton-case-card .skel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.skeleton-case-card .skel-badge {
+  width: 60px;
+  height: 22px;
+  border-radius: var(--radius-full);
+}
+.skeleton-case-card .skel-id {
+  width: 80px;
+  height: 16px;
+}
+.skeleton-case-card .skel-title {
+  width: 85%;
+  height: 20px;
+  border-radius: var(--radius-sm);
+}
+.skeleton-case-card .skel-title-short {
+  width: 60%;
+  height: 20px;
+  border-radius: var(--radius-sm);
+}
+.skeleton-case-card .skel-tag {
+  width: 120px;
+  height: 14px;
+}
+.skeleton-case-card .skel-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+}
+.skeleton-case-card .skel-stars {
+  width: 60px;
+  height: 14px;
+}
+.skeleton-case-card .skel-author {
+  width: 90px;
+  height: 14px;
+}
+
+/* ── Skeleton: Hero Stats (index page) ── */
+.stats-grid.is-loading .stat-card {
+  position: relative;
+  overflow: hidden;
+}
+.stats-grid.is-loading .stat-num,
+.stats-grid.is-loading .stat-label {
+  color: transparent;
+  border-radius: var(--radius-sm);
+}
+.stats-grid.is-loading .stat-num::after,
+.stats-grid.is-loading .stat-label::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    var(--border) 25%,
+    var(--bg-secondary) 50%,
+    var(--border) 75%
+  );
+  background-size: 600px 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+}
+
+/* ── Page fade-in after skeleton ── */
+@keyframes content-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.content-loaded {
+  animation: content-fade-in 0.4s ease forwards;
+}
+.case-card {
+  opacity: 0;
+  animation: content-fade-in 0.35s ease forwards;
+}
+/* Staggered delay for cards */
+.case-card:nth-child(1)  { animation-delay: 0.00s; }
+.case-card:nth-child(2)  { animation-delay: 0.04s; }
+.case-card:nth-child(3)  { animation-delay: 0.08s; }
+.case-card:nth-child(4)  { animation-delay: 0.12s; }
+.case-card:nth-child(5)  { animation-delay: 0.16s; }
+.case-card:nth-child(6)  { animation-delay: 0.20s; }
+.case-card:nth-child(7)  { animation-delay: 0.24s; }
+.case-card:nth-child(8)  { animation-delay: 0.28s; }
+.case-card:nth-child(9)  { animation-delay: 0.32s; }
+.case-card:nth-child(10) { animation-delay: 0.36s; }
+.case-card:nth-child(n+11) { animation-delay: 0.40s; }

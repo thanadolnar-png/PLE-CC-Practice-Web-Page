@@ -16,6 +16,7 @@
 // คอนฟิกหลักของระบบ
 const CONFIG = {
   spreadsheetId: '1Fuakz3nCXa7klgQznrtGUNVRvNp_g9BJRfWNHD0awxI',
+  adminPasscode: 'rxcu_ple_cc', // รหัสผ่านสำหรับป้องกันการ Sync และจัดการระบบใน Google Sheet
   sheets: {
     caseLibrary: 'CaseLibrary',
     mainGroups: 'MainGroups',
@@ -158,12 +159,6 @@ function doGet(e) {
           
         case 'getStats':
           return buildResponse(getSystemStats());
-          
-        case 'setupSheets':
-          return buildResponse(setupSheets());
-          
-        case 'setupDocs':
-          return buildResponse(updateDocsWithSampleContent());
           
         case 'createRoom':
           return buildResponse(createRoom(e.parameter));
@@ -1527,25 +1522,19 @@ function onOpen() {
   }
 }
 
-function menuSetupSheets() {
-  const res = setupSheets();
-  SpreadsheetApp.getUi().alert('สำเร็จ!\n' + res.message + '\n\nรายละเอียด:\n' + res.details.join('\n'));
-}
-
 function menuSyncCaseLibrary() {
-  const res = syncCaseLibraryFromDocs();
-  SpreadsheetApp.getUi().alert('สำเร็จ!\n' + res.message + '\n\nรายละเอียด:\n' + res.details.join('\n'));
-}
-
-function menuSetupDocs() {
-  const res = updateDocsWithSampleContent();
-  SpreadsheetApp.getUi().alert('สำเร็จ!\n' + res.message + '\n\nรายละเอียด:\n' + res.details.join('\n'));
-}
-
-function menuDecorateBanners() {
-  const ss = getSpreadsheet();
-  decorateHomeBanners(ss);
-  SpreadsheetApp.getUi().alert('สำเร็จ! ตกแต่งและจัด Format แบนเนอร์กลับสู่หน้าแรกเรียบร้อยตามเกณฑ์');
+  const ui = SpreadsheetApp.getUi();
+  const response = ui.prompt('🔒 การยืนยันตัวตน (Authentication)', 'กรุณากรอกรหัสผ่าน (Admin Passcode) เพื่อเข้าซิงค์เคสเข้าระบบ:', ui.ButtonSet.OK_CANCEL);
+  
+  if (response.getSelectedButton() == ui.Button.OK) {
+    const password = response.getResponseText().trim();
+    if (password === CONFIG.adminPasscode) {
+      const res = syncCaseLibraryFromDocs();
+      ui.alert('สำเร็จ!\n' + res.message + '\n\nรายละเอียด:\n' + res.details.join('\n'));
+    } else {
+      ui.alert('❌ รหัสผ่านไม่ถูกต้อง! คุณไม่ได้รับสิทธิ์ในการเปลี่ยนแปลงข้อมูลคลังเคส');
+    }
+  }
 }
 
 /**

@@ -109,7 +109,7 @@
       <p class="hero-subtitle">ระบบจำลองฝึกทักษะวิชาชีพการซักประวัติ จ่ายยา คำแนะนำยา และตั้งตำรับ (OSPE) สำหรับการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม RxCU 84 และ 85</p>
       
       <!-- Stats Dashboard -->
-      <div class="stats-grid" id="stats-dashboard">
+      <div class="stats-grid is-loading" id="stats-dashboard">
         <div class="stat-card clinic-stat" id="stat-card-clinic">
           <span class="stat-num" id="stat-clinic">0</span>
           <span class="stat-label">เคส Clinic (คลินิก)</span>
@@ -235,5 +235,17 @@
 
   <script src="case-data-offline.js?v=3.2"></script>
   <script src="app.js"></script>
+  <script>
+    // Remove skeleton loading class after cases are loaded
+    const _origOnCasesLoadedIndex = typeof onCasesLoaded === 'function' ? onCasesLoaded : null;
+    onCasesLoaded = function() {
+      if (_origOnCasesLoadedIndex) _origOnCasesLoadedIndex();
+      const grid = document.getElementById('stats-dashboard');
+      if (grid) {
+        grid.classList.remove('is-loading');
+        grid.classList.add('content-loaded');
+      }
+    };
+  </script>
 </body>
 </html>
