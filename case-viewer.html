@@ -359,6 +359,16 @@
           const result = await res.json();
           if (result.success && result.data) {
             matchedCase = result.data;
+            
+            // ป้องกันปัญหากรณี Apps Script ฝั่ง Google ยังไม่ได้ Deploy เวอร์ชั่นใหม่ (ทำให้ API ตอบกลับมาโดยไม่มี linkedNextCase)
+            // ให้เอาค่าจาก Offline DB มาเติมเต็มข้อมูลที่ขาดหายไป
+            if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+              const offC = OFFLINE_DATA.cases.find(c => c.caseId === activeCaseId);
+              if (offC) {
+                if (!matchedCase.linkedNextCase && offC.linkedNextCase) matchedCase.linkedNextCase = offC.linkedNextCase;
+                if (!matchedCase.linkedFromCase && offC.linkedFromCase) matchedCase.linkedFromCase = offC.linkedFromCase;
+              }
+            }
           }
         } catch (e) {
           console.warn('ดึงข้อมูลผ่าน API ล้มเหลว สลับไปใช้ออฟไลน์:', e);
