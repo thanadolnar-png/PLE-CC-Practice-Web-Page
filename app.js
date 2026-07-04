@@ -115,13 +115,34 @@ function updateThemeButtonIcon(btn) {
 
 // จัดการ API Input modal/config
 function initApiConfig() {
+  const modal = document.getElementById('api-config-modal');
   const configBtn = document.getElementById('api-config-btn');
+  const closeBtn = document.getElementById('api-close-btn');
   const inputEl = document.getElementById('api-url-input');
   const saveBtn = document.getElementById('api-save-btn');
   
   if (inputEl) {
     inputEl.value = currentApiUrl;
   }
+  
+  if (modal && configBtn) {
+    configBtn.addEventListener('click', () => {
+      modal.classList.add('show');
+    });
+  }
+  
+  if (modal && closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      modal.classList.remove('show');
+    });
+  }
+  
+  // ปิดเมื่อคลิกพื้นที่ด้านนอก (backdrop)
+  window.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.remove('show');
+    }
+  });
   
   if (saveBtn && inputEl) {
     saveBtn.addEventListener('click', () => {

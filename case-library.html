@@ -6,31 +6,6 @@
   <title>คลังเคสข้อสอบ OSPE | RxCU 84-85</title>
   <link rel="stylesheet" href="style.css">
   
-  <style>
-    /* แบนเนอร์แสดงสถานะของ API ย่อย */
-    .api-banner {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      font-size: 0.85rem;
-      font-weight: 600;
-      width: 100%;
-      text-align: center;
-      font-family: var(--font-title);
-    }
-    .api-banner.connected {
-      background-color: rgba(16, 185, 129, 0.15);
-      color: var(--success);
-      border-bottom: 1px solid var(--success);
-    }
-    .api-banner.offline {
-      background-color: rgba(249, 115, 22, 0.15);
-      color: var(--warning);
-      border-bottom: 1px solid var(--warning);
-    }
-  </style>
 </head>
 <body>
 
@@ -47,6 +22,14 @@
         <div class="logo-icon">🥼</div>
         <span>RxCU OSPE Hub</span>
       </a>
+      <!-- Mobile hamburger -->
+      <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle navigation" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
       <ul class="nav-links" id="nav-menu">
         <li><a href="index.html" class="nav-link" id="nav-home">หน้าแรก</a></li>
         <li><a href="case-library.html" class="nav-link active" id="nav-library">คลังเคสสอบ</a></li>
@@ -184,6 +167,16 @@
   <script src="case-data-offline.js?v=3.2"></script>
   <script src="app.js"></script>
   <script>
+    // ─ Hamburger toggle ─
+    const _hamburger = document.getElementById('nav-hamburger');
+    const _navMenu = document.getElementById('nav-menu');
+    if (_hamburger && _navMenu) {
+      _hamburger.addEventListener('click', () => {
+        const isOpen = _navMenu.classList.toggle('open');
+        _hamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+
     // ดึง URL Parameter ถ้าต้องการฟิลเตอร์หมวดมาจากหน้าแรก
     document.addEventListener('DOMContentLoaded', () => {
       const catParam = getUrlParam('cat');

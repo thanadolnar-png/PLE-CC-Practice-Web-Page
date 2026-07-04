@@ -11,68 +11,6 @@
   <meta property="og:title" content="PLE-CC2 OSPE Practice Hub">
   <meta property="og:description" content="ระบบฝึกซ้อมเตรียมตัวสอบทักษะวิชาชีพสภาเภสัชกรรม (OSPE) สำหรับนิสิตเภสัชฯ จุฬาฯ">
   <meta property="og:type" content="website">
-  
-  <style>
-    /* สไตล์เฉพาะตัวสำหรับแบนเนอร์และพื้นที่ตั้งค่า API */
-    .api-banner {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      font-size: 0.85rem;
-      font-weight: 600;
-      width: 100%;
-      text-align: center;
-      font-family: var(--font-title);
-    }
-    .api-banner.connected {
-      background-color: rgba(16, 185, 129, 0.15);
-      color: var(--success);
-      border-bottom: 1px solid var(--success);
-    }
-    .api-banner.offline {
-      background-color: rgba(249, 115, 22, 0.15);
-      color: var(--warning);
-      border-bottom: 1px solid var(--warning);
-    }
-    .config-box {
-      background-color: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem;
-      margin-top: 3rem;
-      box-shadow: var(--shadow-sm);
-    }
-    .config-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--primary);
-    }
-    .config-inputs {
-      display: flex;
-      gap: 0.75rem;
-      margin-top: 0.75rem;
-    }
-    .config-input {
-      flex: 1;
-      padding: 0.65rem 1rem;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
-      font-family: var(--font-body);
-      font-size: 0.9rem;
-    }
-    .config-input:focus {
-      outline: none;
-      border-color: var(--primary);
-    }
-  </style>
 </head>
 <body>
 
@@ -89,6 +27,14 @@
         <div class="logo-icon">🥼</div>
         <span>RxCU OSPE Hub</span>
       </a>
+      <!-- Mobile hamburger -->
+      <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle navigation" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
       <ul class="nav-links" id="nav-menu">
         <li><a href="index.html" class="nav-link active" id="nav-home">หน้าแรก</a></li>
         <li><a href="case-library.html" class="nav-link" id="nav-library">คลังเคสสอบ</a></li>
@@ -105,7 +51,7 @@
   <!-- Hero Section -->
   <header class="hero" id="home-hero">
     <div class="container">
-      <h1 class="hero-gradient-text">PLE-CC2 OSPE Practice Hub</h1>
+      <h1 class="hero-title">PLE-CC2 OSPE Practice Hub</h1>
       <p class="hero-subtitle">ระบบจำลองฝึกทักษะวิชาชีพการซักประวัติ จ่ายยา คำแนะนำยา และตั้งตำรับ (OSPE) สำหรับการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม</p>
       
       <!-- Stats Dashboard -->
@@ -128,7 +74,7 @@
         </div>
       </div>
 
-      <div style="display: flex; gap: 1rem; justify-content: center;">
+      <div class="hero-cta">
         <a href="exam-simulation.html" class="btn btn-primary" id="btn-start-sim">🎯 เริ่มต้นจำลองการสอบจริง</a>
         <a href="case-library.html" class="btn btn-secondary" id="btn-goto-library">📚 เปิดดูคลังเคสทั้งหมด</a>
       </div>
@@ -144,10 +90,10 @@
   <!-- Category Selection Section -->
   <main class="main-section" id="category-section">
     <div class="container">
-      <h2 style="text-align: center; font-size: 2rem; margin-bottom: 1rem; font-family: var(--font-title);">
+      <h2 class="section-heading">
         ฝึกฝนตามหมวดหมู่ทักษะหลัก
       </h2>
-      <p style="text-align: center; color: var(--text-secondary); max-width: 600px; margin: 0 auto 3rem auto;">
+      <p class="section-lead">
         เลือกหัวข้อการทำทบทวนบทเรียนตามหลักสูตรสภาเภสัชกรรม (PLE-CC2) เพื่อเจาะลึกเฉพาะหมวด
       </p>
 
@@ -177,31 +123,54 @@
         </article>
       </div>
 
-      <!-- API URL configuration panel -->
-      <section class="config-box" id="api-config-panel" style="display: none;">
-        <h3 class="config-title">⚙️ ตั้งค่า API Google Apps Script (Web App)</h3>
-        <p style="font-size: 0.85rem; color: var(--text-secondary);">
-          ใส่ลิงก์ Web App URL ที่ได้จากการ Deploy ใน Google Apps Script เพื่อเปิดใช้งานการดึงข้อมูลสดแบบ Real-time จาก Google Docs และ Google Sheets (หากไม่ได้ระบุ ระบบจะใช้งาน Offline Database สำรองอัตโนมัติ)
-        </p>
-        <div class="config-inputs">
-          <input type="text" id="api-url-input" class="config-input" placeholder="https://script.google.com/macros/s/AKfycb.../exec">
-          <button id="api-save-btn" class="btn btn-primary" style="padding: 0.65rem 1.25rem; font-size: 0.9rem;" id="btn-save-api">บันทึกค่า URL</button>
-        </div>
-      </section>
     </div>
   </main>
 
   <!-- Footer -->
   <footer class="footer" id="main-footer">
-    <div class="container">
-      <p>© 2026 คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม ปีการศึกษา 2569 | ฝ่ายวิชาการ</p>
-      <p style="font-size: 0.8rem; color: var(--text-muted);">พัฒนาโดยประธานโครงการและเพื่อนพ้องวิชาการเภสัชฯ จุฬาฯ</p>
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <p>© 2026 คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม ปีการศึกษา 2569 | ฝ่ายวิชาการ</p>
+        <p class="footer-credit">พัฒนาโดยประธานโครงการและเพื่อนพ้องวิชาการเภสัชฯ จุฬาฯ</p>
+      </div>
+      <button id="api-config-btn" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">⚙️ ตั้งค่าระบบ (API)</button>
     </div>
   </footer>
+
+  <!-- API Config Modal -->
+  <dialog id="api-config-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">ตั้งค่าการเชื่อมต่อ API</h3>
+        <button id="api-close-btn" class="modal-close" aria-label="Close modal">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">
+          ใส่ลิงก์ Web App URL ที่ได้จากการ Deploy ใน Google Apps Script เพื่อเปิดใช้งานการดึงข้อมูลสดแบบ Real-time (หากเว้นว่าง ระบบจะใช้งาน Offline Database สำรองอัตโนมัติ)
+        </p>
+        <div class="config-inputs">
+          <input type="text" id="api-url-input" class="config-input" placeholder="https://script.google.com/macros/s/AKfycb.../exec">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="api-save-btn" class="btn btn-primary">บันทึกและโหลดข้อมูลใหม่</button>
+      </div>
+    </div>
+  </dialog>
 
   <script src="case-data-offline.js?v=3.2"></script>
   <script src="app.js"></script>
   <script>
+    // ─ Hamburger toggle ─
+    const _hamburger = document.getElementById('nav-hamburger');
+    const _navMenu = document.getElementById('nav-menu');
+    if (_hamburger && _navMenu) {
+      _hamburger.addEventListener('click', () => {
+        const isOpen = _navMenu.classList.toggle('open');
+        _hamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+
     // Remove skeleton loading class after cases are loaded
     const _origOnCasesLoadedIndex = typeof onCasesLoaded === 'function' ? onCasesLoaded : null;
     onCasesLoaded = function() {

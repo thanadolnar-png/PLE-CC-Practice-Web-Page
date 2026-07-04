@@ -25,130 +25,6 @@
     const _fbDb = firebase.database();
     let _fbRoomRef = null;  // will be set when joining a room
   </script>
-  <style>
-    /* OTP 4-box room code input */
-    .otp-box {
-      width: 3.2rem;
-      height: 3.8rem;
-      border: 2px solid var(--border);
-      border-radius: var(--radius-md);
-      text-align: center;
-      font-size: 2rem;
-      font-weight: 800;
-      font-family: var(--font-mono);
-      color: var(--primary);
-      background: var(--surface);
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .otp-box:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 99,102,241),0.15);
-    }
-    .otp-box.filled {
-      border-color: var(--primary);
-      background: color-mix(in srgb, var(--primary) 8%, var(--surface));
-    }
-
-    .setup-screen { display: block; }
-    .exam-screen { display: none; }
-    .results-screen { display: none; }
-    
-    .exam-header-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 0.75rem;
-    }
-    .current-station-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      font-family: var(--font-title);
-    }
-    
-    .station-badge {
-      display: inline-block;
-      padding: 0.25rem 0.5rem;
-      border-radius: var(--radius-sm);
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: white;
-      font-family: var(--font-title);
-    }
-    .station-badge.clinic { background-color: var(--clinic); }
-    .station-badge.product { background-color: var(--product); }
-    .station-badge.sap { background-color: var(--sap); }
-    .station-badge.rest { background-color: var(--text-muted); }
-
-    .exam-note-content-area {
-      display: none;
-      padding: 1rem;
-      border: 1px solid var(--border);
-      border-top: none;
-      background: var(--surface);
-      border-radius: 0 0 var(--radius-md) var(--radius-md);
-      font-size: 0.85rem;
-      max-height: 250px;
-      overflow-y: auto;
-    }
-    .exam-note-content-area.show {
-      display: block;
-    }
-
-    /* ─── Proportion Checkbox+Number UI ─── */
-    .proportion-row {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.6rem 0.75rem;
-      border-radius: var(--radius-sm);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      margin-bottom: 0.5rem;
-      transition: background 0.2s;
-    }
-    .proportion-row.disabled-row {
-      opacity: 0.45;
-    }
-    .proportion-row input[type="checkbox"] {
-      width: 1.1rem;
-      height: 1.1rem;
-      accent-color: var(--primary);
-      flex-shrink: 0;
-      cursor: pointer;
-    }
-    .proportion-label {
-      font-weight: 700;
-      min-width: 60px;
-    }
-    .proportion-label.clinic { color: var(--clinic); }
-    .proportion-label.product { color: var(--product); }
-    .proportion-label.sap { color: var(--sap); }
-    .proportion-num-input {
-      width: 70px;
-      padding: 0.3rem 0.5rem;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      font-size: 1rem;
-      font-weight: 700;
-      text-align: center;
-      background: var(--bg);
-      color: var(--text-primary);
-      font-family: var(--font-title);
-    }
-    .proportion-num-input:disabled {
-      background: var(--surface);
-      color: var(--text-muted);
-    }
-    .proportion-hint {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-left: auto;
-    }
-  </style>
 </head>
 <body>
 
@@ -159,6 +35,14 @@
         <div class="logo-icon">🥼</div>
         <span>RxCU OSPE Hub</span>
       </a>
+      <!-- Mobile hamburger -->
+      <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle navigation" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
       <ul class="nav-links" id="nav-menu">
         <li><a href="index.html" class="nav-link" id="nav-home">หน้าแรก</a></li>
         <li><a href="case-library.html" class="nav-link" id="nav-library">คลังเคสสอบ</a></li>
@@ -365,7 +249,7 @@
         </div>
 
         <!-- Countdown Overlay -->
-        <div id="lobby-countdown-screen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 9999; flex-direction: column; justify-content: center; align-items: center; color: white;">
+        <div id="lobby-countdown-screen">
           <h2 style="font-family: var(--font-title); font-size: 2rem; margin-bottom: 1rem;">เตรียมตัวเริ่มการสอบ</h2>
           <div id="lobby-countdown-number" style="font-size: 8rem; font-weight: 900; color: var(--primary-light);">3</div>
         </div>
@@ -1093,11 +977,11 @@
     function showTimeoutPopup(callback) {
       playTimeoutSound();
       const overlay = document.createElement('div');
-      overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:flex;justify-content:center;align-items:center;flex-direction:column;color:white;backdrop-filter:blur(5px);';
+      overlay.className = 'fullscreen-overlay';
       overlay.innerHTML = `
         <div style="font-size: 6rem; margin-bottom: 1rem; animation: pulse 1s infinite;">⏰</div>
         <h1 style="font-size: 3.5rem; margin-bottom: 1rem; color: var(--danger); font-family: var(--font-title); font-weight: 800;">หมดเวลา!</h1>
-        <p style="font-size: 1.5rem; color: #ddd; font-family: var(--font-body);">กำลังเตรียมพร้อม...</p>
+        <p style="font-size: 1.5rem; color: var(--text-muted); font-family: var(--font-body);">กำลังเตรียมพร้อม...</p>
       `;
       document.body.appendChild(overlay);
       setTimeout(() => {
@@ -1696,6 +1580,16 @@
     document.addEventListener('DOMContentLoaded', () => {
       updateProportionSumText();
       initOtpBoxes();
+
+      // ─ Hamburger toggle ─
+      const _hamburger = document.getElementById('nav-hamburger');
+      const _navMenu = document.getElementById('nav-menu');
+      if (_hamburger && _navMenu) {
+        _hamburger.addEventListener('click', () => {
+          const isOpen = _navMenu.classList.toggle('open');
+          _hamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+      }
     });
   </script>
 
