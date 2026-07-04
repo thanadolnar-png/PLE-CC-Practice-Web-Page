@@ -7,6 +7,24 @@
   <link rel="stylesheet" href="style.css">
   <script src="case-data-offline.js"></script>
   <script src="app.js"></script>
+  <!-- Firebase SDK (CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script>
+    // ─── Firebase Config ──────────────────────────────────────
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyAnhyqwtMeAyDu_aDLW-Qc27F6d3qmJ2YQ",
+      authDomain: "realtime-database-11f5e.firebaseapp.com",
+      projectId: "realtime-database-11f5e",
+      storageBucket: "realtime-database-11f5e.firebasestorage.app",
+      messagingSenderId: "431990525852",
+      appId: "1:431990525852:web:220c425051890b7c768259",
+      databaseURL: "https://realtime-database-11f5e-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
+    const _fbApp = firebase.initializeApp(FIREBASE_CONFIG);
+    const _fbDb = firebase.database();
+    let _fbRoomRef = null;  // will be set when joining a room
+  </script>
   <style>
     .setup-screen { display: block; }
     .exam-screen { display: none; }
@@ -641,22 +659,17 @@
       };
     }
 
-    // ─── Submit Lobby Form ────────────────────────────────────
+    // ─── Submit Lobby Form (Firebase) ────────────────────────────────────
     async function submitLobbySetup() {
       const playerName = document.getElementById('lobby-player-name').value.trim();
       if (!playerName) { alert('กรุณากรอกชื่อผู้ใช้งาน'); return; }
-      
-      if (!currentApiUrl) {
-        alert('กรุณากรอกและเชื่อมต่อ Google Sheets API URL ที่แถบด้านบนของหน้าเว็บหลักก่อนใช้งานโหมดออนไลน์');
-        return;
-      }
       
       showGlobalLoader(true);
       SimState.lobbyPlayerName = playerName;
       
       try {
         if (SimState.lobbyOp === 'create') {
-          // Host: create room
+          // Host: create room via Firebase
           const { clinic, product, sap } = getProportionValues();
           const total = clinic + product + sap;
           if (total === 0) {
@@ -687,61 +700,68 @@
           }
           
           SimState.totalStations = fullExamSet.length;
-          
           const randomRoomId = String(Math.floor(1000 + Math.random() * 9000));
-          
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
-          
           const examSetJson = JSON.stringify(fullExamSet);
           
-          const res = await fetch(`${currentApiUrl}?action=createRoom&roomId=${randomRoomId}&caseId=${fullExamSet[0].caseId}&hostRole=${SimState.lobbyRole}&playerName=${encodeURIComponent(playerName)}&examSet=${encodeURIComponent(examSetJson)}`, { 
-            signal: controller.signal 
-          });
-          clearTimeout(timeoutId);
-          const resultWrapper = await res.json();
+          // Write room to Firebase
+          const roomData = {
+            roomId: randomRoomId,
+            hostRole: SimState.lobbyRole,
+            examineeName: SimState.lobbyRole === 'examinee' ? playerName : '',
+            examinerName: SimState.lobbyRole === 'examiner' ? playerName : '',
+            caseId: fullExamSet[0].caseId,
+            timerValue: 240,
+            timerRunning: false,
+            status: 'setup',
+            examSet: examSetJson,
+            checklistProgress: '',
+            createdAt: Date.now()
+          };
+          await _fbDb.ref('rooms/' + randomRoomId).set(roomData);
           
-          if (resultWrapper.success && resultWrapper.data && resultWrapper.data.roomId) {
-            SimState.roomId = resultWrapper.data.roomId;
-            SimState.role = SimState.lobbyRole;
-            
-            // Set up local stations
-            SimState.stations = [];
-            for (let i = 0; i < fullExamSet.length; i++) {
-              if (fullExamSet[i].caseId === 'REST') {
-                SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: true, case: getRestCaseData() });
-              } else {
-                let matchedCase = AppState.cases.find(c => c.caseId === fullExamSet[i].caseId) || AppState.cases[0];
-                SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: false, case: matchedCase });
-              }
+          SimState.roomId = randomRoomId;
+          SimState.role = SimState.lobbyRole;
+          
+          // Set up local stations
+          SimState.stations = [];
+          for (let i = 0; i < fullExamSet.length; i++) {
+            if (fullExamSet[i].caseId === 'REST') {
+              SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: true, case: getRestCaseData() });
+            } else {
+              let matchedCase = AppState.cases.find(c => c.caseId === fullExamSet[i].caseId) || AppState.cases[0];
+              SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: false, case: matchedCase });
             }
-            SimState.currentIdx = 0;
-            SimState.studentScores = {};
-            SimState.stations.forEach(st => { SimState.studentScores[st.stationNumber] = []; });
-            
-            setupLobbyRoomUI();
-          } else {
-            throw new Error(resultWrapper.error || 'การสร้างห้องล้มเหลว');
           }
+          SimState.currentIdx = 0;
+          SimState.studentScores = {};
+          SimState.stations.forEach(st => { SimState.studentScores[st.stationNumber] = []; });
+          
+          setupLobbyRoomUI();
+
         } else {
-          // Join Mode: Join Room
+          // Examinee: Join Room via Firebase
           const roomIdInput = document.getElementById('lobby-room-id-input').value.trim();
           if (!roomIdInput) { alert('กรุณากรอกรหัสห้อง 4 หลัก'); showGlobalLoader(false); return; }
           
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 seconds timeout
-          
-          const res = await fetch(`${currentApiUrl}?action=joinRoom&roomId=${roomIdInput}&role=${SimState.lobbyRole}&playerName=${encodeURIComponent(playerName)}`, { signal: controller.signal });
-          clearTimeout(timeoutId);
-          const resultWrapper = await res.json();
-          
-          if (resultWrapper.success && resultWrapper.data && resultWrapper.data.roomId) {
-            SimState.roomId = resultWrapper.data.roomId;
-            SimState.role = SimState.lobbyRole;
-            setupLobbyRoomUI();
-          } else {
-            throw new Error(resultWrapper.error || (resultWrapper.data && resultWrapper.data.error) || 'ไม่พบห้องที่ระบุ หรือห้องเต็มแล้ว');
+          // Read room from Firebase
+          const snapshot = await _fbDb.ref('rooms/' + roomIdInput).get();
+          if (!snapshot.exists()) {
+            throw new Error('ไม่พบห้องรหัส ' + roomIdInput + ' กรุณาตรวจสอบรหัสห้องใหม่');
           }
+          
+          const roomData = snapshot.val();
+          // Register player name based on role
+          const updateData = {};
+          if (SimState.lobbyRole === 'examinee') {
+            updateData.examineeName = playerName;
+          } else {
+            updateData.examinerName = playerName;
+          }
+          await _fbDb.ref('rooms/' + roomIdInput).update(updateData);
+          
+          SimState.roomId = roomIdInput;
+          SimState.role = SimState.lobbyRole;
+          setupLobbyRoomUI();
         }
       } catch (e) {
         console.error(e);
@@ -750,8 +770,8 @@
       }
     }
 
-    // Initialize Lobby Room UI
-    async function setupLobbyRoomUI() {
+    // Initialize Lobby Room UI — attach Firebase real-time listener
+    function setupLobbyRoomUI() {
       document.getElementById('exam-setup-view').style.display = 'none';
       document.getElementById('exam-running-view').style.display = 'block';
       document.querySelector('.exam-layout').style.display = 'none';
@@ -759,7 +779,7 @@
       document.getElementById('exam-lobby-info-bar').style.display = 'flex';
       document.getElementById('lobby-room-id-display').textContent = SimState.roomId;
       
-      // Show room code share for Host and setup Examinee view
+      // Show room code share for Host
       const shareEl = document.getElementById('lobby-room-code-share');
       if (SimState.role === 'examiner') {
         if (shareEl) {
@@ -770,37 +790,24 @@
         if (shareEl) shareEl.style.display = 'none';
       }
       
-      await syncLobbyStatus();
-      showGlobalLoader(false);
+      // Detach any old listener first
+      if (_fbRoomRef) _fbRoomRef.off();
       
-      if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
-      SimState.lobbyPollInterval = setInterval(syncLobbyStatus, 3500);
+      // Attach Firebase real-time listener
+      _fbRoomRef = _fbDb.ref('rooms/' + SimState.roomId);
+      _fbRoomRef.on('value', (snapshot) => {
+        if (!snapshot.exists()) return;
+        applyRoomState(snapshot.val());
+      }, (err) => {
+        console.error('Firebase listener error:', err);
+      });
+      
+      showGlobalLoader(false);
     }
 
-    let isSyncing = false;
-    // Sync with server
-    async function syncLobbyStatus() {
-      if (!SimState.isLobby || !SimState.roomId || isSyncing) return;
-      isSyncing = true;
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 seconds timeout
-        
-        const res = await fetch(`${currentApiUrl}?action=getRoomStatus&roomId=${SimState.roomId}&_t=${Date.now()}`, { signal: controller.signal });
-        clearTimeout(timeoutId);
-        const roomWrapper = await res.json();
-        
-        if (roomWrapper.success && roomWrapper.data && roomWrapper.data.roomId) {
-          applyRoomState(roomWrapper.data);
-        }
-      } catch (e) {
-        if (e.name !== 'AbortError') {
-          console.warn('Lobby sync error:', e);
-        }
-      } finally {
-        isSyncing = false;
-      }
-    }
+    // syncLobbyStatus replaced by Firebase real-time listener in setupLobbyRoomUI()
+    // Kept as no-op to avoid reference errors from old code paths
+    function syncLobbyStatus() {}
 
     function applyRoomState(room) {
       try {
@@ -988,49 +995,37 @@
       showGlobalLoader(false);
     }
 
-    // Examiner starts exam on server (Go to countdown first)
+    // Examiner starts exam (Firebase)
     async function startLobbyExamOnServer() {
       if (!SimState.isLobby || !SimState.roomId) return;
       showGlobalLoader(true);
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds timeout
-        const res = await fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&status=running&timerRunning=TRUE&timerValue=240&_t=${Date.now()}`, { signal: controller.signal });
-        clearTimeout(timeoutId);
-        
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        const data = await res.json();
-        if (!data.success) throw new Error('Server returned unsuccessful response');
-        
-        // Force local state transition immediately
-        const mockRoom = {
-          roomId: SimState.roomId,
+        const firstCaseId = SimState.stations[0]?.case?.caseId || null;
+        await _fbDb.ref('rooms/' + SimState.roomId).update({
           status: 'running',
           timerRunning: true,
           timerValue: 240,
-          caseId: SimState.stations[SimState.currentIdx]?.case?.caseId || (AppState.cases[0] ? AppState.cases[0].caseId : null),
-          examineeName: document.getElementById('lobby-status-examinee').textContent,
-          examinerName: document.getElementById('lobby-status-examiner').textContent
-        };
-        applyRoomState(mockRoom);
-        
+          caseId: firstCaseId
+        });
+        // Firebase listener will automatically trigger applyRoomState for all clients
       } catch (e) {
-        alert('ไม่สามารถเริ่มการสอบบนเซิร์ฟเวอร์ได้: ' + e.toString() + ' กรุณาลองใหม่อีกครั้ง');
+        alert('ไม่สามารถเริ่มการสอบได้: ' + e.toString());
       }
       showGlobalLoader(false);
     }
 
-    // Sync checklist to server
+    // Sync checklist to Firebase
     async function updateLobbyChecklistOnServer() {
       if (!SimState.isLobby || !SimState.roomId) return;
-      const checkedIds = SimState.studentScores[1] || [];
+      const stationNum = SimState.stations[SimState.currentIdx]?.stationNumber || 1;
+      const checkedIds = SimState.studentScores[stationNum] || [];
       const timestamp = Date.now();
-      if (timestamp - SimState.lastServerSyncTime < 800) return;
+      if (timestamp - SimState.lastServerSyncTime < 500) return;
       SimState.lastServerSyncTime = timestamp;
       try {
-        fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&checklistProgress=${checkedIds.join(',')}&_t=${Date.now()}`);
+        _fbDb.ref('rooms/' + SimState.roomId).update({ checklistProgress: checkedIds.join(',') });
       } catch (e) {
-        console.warn('Error syncing checklist to server:', e);
+        console.warn('Error syncing checklist:', e);
       }
     }
 
@@ -1223,7 +1218,7 @@
       
       if (SimState.isLobby) {
         if (SimState.role === 'examiner') {
-          fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&timerRunning=TRUE&timerValue=240&_t=${Date.now()}`);
+          _fbDb.ref('rooms/' + SimState.roomId).update({ timerRunning: true, timerValue: 240 });
         }
         startLocalCountdown();
         return;
@@ -1249,7 +1244,10 @@
       SimState.timerRunning = !SimState.timerRunning;
       document.getElementById('timer-toggle-btn').textContent = SimState.timerRunning ? '⏸️ พักตัวจับเวลา' : '▶️ เล่นตัวจับเวลาต่อ';
       if (SimState.isLobby && SimState.role === 'examiner') {
-        fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&timerRunning=${SimState.timerRunning ? 'TRUE' : 'FALSE'}&timerValue=${SimState.timerValue}&_t=${Date.now()}`);
+        _fbDb.ref('rooms/' + SimState.roomId).update({
+          timerRunning: SimState.timerRunning,
+          timerValue: SimState.timerValue
+        });
       }
     }
 
@@ -1257,7 +1255,7 @@
       SimState.timerValue = 240;
       updateTimerDisplay();
       if (SimState.isLobby && SimState.role === 'examiner') {
-        fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&timerValue=240&_t=${Date.now()}`);
+        _fbDb.ref('rooms/' + SimState.roomId).update({ timerValue: 240, timerRunning: false });
       }
     }
 
@@ -1433,9 +1431,9 @@
       renderMiniMap(); // Always render minimap
       
       if (SimState.isLobby) {
-        // Sync checklist directly when toggled
+        // Sync checklist directly when toggled (Firebase)
         const checkedIds = SimState.studentScores[stationNum] || [];
-        fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&checklistProgress=${checkedIds.join(',')}&_t=${Date.now()}`);
+        _fbDb.ref('rooms/' + SimState.roomId).update({ checklistProgress: checkedIds.join(',') });
       }
     }
 
@@ -1496,14 +1494,19 @@
       if (SimState.currentIdx < SimState.stations.length - 1) {
         const nextIdx = SimState.currentIdx + 1;
         if (SimState.isLobby && SimState.role === 'examiner') {
-          // Reset timer locally immediately
+          // Reset timer locally
           SimState.timerValue = 240;
           SimState.timerRunning = true;
           if (SimState.timerInterval) clearInterval(SimState.timerInterval);
           updateTimerDisplay();
           startLocalCountdown();
-          // Push new station + reset timer to server
-          fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&caseId=${SimState.stations[nextIdx].case.caseId}&timerValue=240&timerRunning=TRUE&status=running&_t=${Date.now()}`);
+          // Push to Firebase — Examinee will react in real-time
+          _fbDb.ref('rooms/' + SimState.roomId).update({
+            caseId: SimState.stations[nextIdx].case.caseId,
+            timerValue: 240,
+            timerRunning: true,
+            status: 'running'
+          });
         }
         renderStation(nextIdx);
       }
@@ -1513,14 +1516,19 @@
       if (SimState.currentIdx > 0) {
         const prevIdx = SimState.currentIdx - 1;
         if (SimState.isLobby && SimState.role === 'examiner') {
-          // Reset timer locally immediately
+          // Reset timer locally
           SimState.timerValue = 240;
           SimState.timerRunning = true;
           if (SimState.timerInterval) clearInterval(SimState.timerInterval);
           updateTimerDisplay();
           startLocalCountdown();
-          // Push new station + reset timer to server
-          fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&caseId=${SimState.stations[prevIdx].case.caseId}&timerValue=240&timerRunning=TRUE&status=running&_t=${Date.now()}`);
+          // Push to Firebase — Examinee will react in real-time
+          _fbDb.ref('rooms/' + SimState.roomId).update({
+            caseId: SimState.stations[prevIdx].case.caseId,
+            timerValue: 240,
+            timerRunning: true,
+            status: 'running'
+          });
         }
         renderStation(prevIdx);
       }
@@ -1533,8 +1541,10 @@
       if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
       
       if (SimState.isLobby && SimState.role === 'examiner') {
-        fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&status=results&_t=${Date.now()}`);
+        _fbDb.ref('rooms/' + SimState.roomId).update({ status: 'results' });
       }
+      // Detach Firebase listener
+      if (_fbRoomRef) { _fbRoomRef.off(); _fbRoomRef = null; }
       
       showGlobalLoader(true);
       
@@ -1589,6 +1599,8 @@
       SimState.isLobby = false;
       SimState.roomId = '';
       SimState.stations = [];
+      // Detach Firebase listener on reset
+      if (_fbRoomRef) { _fbRoomRef.off(); _fbRoomRef = null; }
       document.getElementById('exam-results-view').style.display = 'none';
       document.getElementById('exam-setup-view').style.display = 'block';
     }
