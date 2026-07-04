@@ -774,15 +774,17 @@
       showGlobalLoader(false);
       
       if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
-      SimState.lobbyPollInterval = setInterval(syncLobbyStatus, 2500);
+      SimState.lobbyPollInterval = setInterval(syncLobbyStatus, 3500);
     }
 
+    let isSyncing = false;
     // Sync with server
     async function syncLobbyStatus() {
-      if (!SimState.isLobby || !SimState.roomId) return;
+      if (!SimState.isLobby || !SimState.roomId || isSyncing) return;
+      isSyncing = true;
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000); // 4 seconds timeout
+        const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 seconds timeout
         
         const res = await fetch(`${currentApiUrl}?action=getRoomStatus&roomId=${SimState.roomId}`, { signal: controller.signal });
         clearTimeout(timeoutId);
