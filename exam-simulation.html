@@ -533,6 +533,13 @@
       const select = document.getElementById('lobby-case-select');
       if (select && typeof AppState !== 'undefined' && AppState.cases) {
         select.innerHTML = '';
+        
+        // Add random option at the top
+        const randOpt = document.createElement('option');
+        randOpt.value = 'random';
+        randOpt.textContent = '🎲 [สุ่มเคส] สุ่มเลือกเคสจากคลังข้อสอบ';
+        select.appendChild(randOpt);
+
         AppState.cases.forEach(c => {
           const opt = document.createElement('option');
           opt.value = c.caseId;
@@ -565,10 +572,26 @@
       try {
         if (SimState.lobbyRole === 'examiner') {
           // Host: create room
-          const caseSelect = document.getElementById('lobby-case-select').value;
+          let caseSelect = document.getElementById('lobby-case-select').value;
+          if (caseSelect === 'random') {
+            const activeCases = AppState.cases.filter(c => c.isActive === 'TRUE' || c.isActive === true || c.isActive === 'yes' || c.isActive === undefined || c.isActive === '');
+            if (activeCases.length > 0) {
+              caseSelect = activeCases[Math.floor(Math.random() * activeCases.length)].caseId;
+            } else if (AppState.cases.length > 0) {
+              caseSelect = AppState.cases[Math.floor(Math.random() * AppState.cases.length)].caseId;
+            } else {
+              alert('ไม่พบเคสในระบบที่จะทำการสุ่มสอบ');
+              showGlobalLoader(false);
+              return;
+            }
+          }
           const randomRoomId = String(Math.floor(1000 + Math.random() * 9000));
           
-          const res = await fetch(`${currentApiUrl}?action=createRoom&roomId=${randomRoomId}&caseId=${caseSelect}&hostRole=examiner&playerName=${encodeURIComponent(playerName)}`);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 seconds timeout
+          
+          const res = await fetch(`${currentApiUrl}?action=createRoom&roomId=${randomRoomId}&caseId=${caseSelect}&hostRole=examiner&playerName=${encodeURIComponent(playerName)}`, { signal: controller.signal });
+          clearTimeout(timeoutId);
           const resultWrapper = await res.json();
           
           if (resultWrapper.success && resultWrapper.data && resultWrapper.data.roomId) {
@@ -583,7 +606,11 @@
           const roomIdInput = document.getElementById('lobby-room-id-input').value.trim();
           if (!roomIdInput) { alert('กรุณากรอกรหัสห้อง 4 หลัก'); showGlobalLoader(false); return; }
           
-          const res = await fetch(`${currentApiUrl}?action=joinRoom&roomId=${roomIdInput}&role=examinee&playerName=${encodeURIComponent(playerName)}`);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 seconds timeout
+          
+          const res = await fetch(`${currentApiUrl}?action=joinRoom&roomId=${roomIdInput}&role=examinee&playerName=${encodeURIComponent(playerName)}`, { signal: controller.signal });
+          clearTimeout(timeoutId);
           const resultWrapper = await res.json();
           
           if (resultWrapper.success && resultWrapper.data && resultWrapper.data.roomId) {
@@ -628,7 +655,11 @@
     async function syncLobbyStatus() {
       if (!SimState.isLobby || !SimState.roomId) return;
       try {
-        const res = await fetch(`${currentApiUrl}?action=getRoomStatus&roomId=${SimState.roomId}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000); // 4 seconds timeout
+        
+        const res = await fetch(`${currentApiUrl}?action=getRoomStatus&roomId=${SimState.roomId}`, { signal: controller.signal });
+        clearTimeout(timeoutId);
         const roomWrapper = await res.json();
         
         if (roomWrapper.success && roomWrapper.data && roomWrapper.data.roomId) {
@@ -670,6 +701,9 @@
               SimState.studentScores = { 1: room.checklistProgress || [] };
               renderStation(0);
               showGlobalLoader(false);
+            } else if (SimState.role === 'examinee') {
+              // Sync checklist progress continuously during exam for the examinee
+              SimState.studentScores[1] = room.checklistProgress || [];
             }
             
             if (SimState.role === 'examinee') {
@@ -708,7 +742,10 @@
       if (!SimState.isLobby || !SimState.roomId) return;
       showGlobalLoader(true);
       try {
-        await fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&status=running&timerRunning=TRUE&timerValue=240`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 seconds timeout
+        await fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&status=running&timerRunning=TRUE&timerValue=240`, { signal: controller.signal });
+        clearTimeout(timeoutId);
         await syncLobbyStatus();
         startTimer();
       } catch (e) {
@@ -771,7 +808,11 @@
       
       if (typeof currentApiUrl !== 'undefined' && currentApiUrl) {
         try {
-          const res = await fetch(`${currentApiUrl}?action=getExamSet&totalStations=${total}&clinicCount=${clinic}&productCount=${product}&sapCount=${sap}`);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 4000); // 4 seconds timeout
+          
+          const res = await fetch(`${currentApiUrl}?action=getExamSet&totalStations=${total}&clinicCount=${clinic}&productCount=${product}&sapCount=${sap}`, { signal: controller.signal });
+          clearTimeout(timeoutId);
           const result = await res.json();
           if (result.success && result.data && result.data.stations) {
             examSet = result.data.stations;
@@ -799,7 +840,11 @@
         
         if (typeof currentApiUrl !== 'undefined' && currentApiUrl && (!matchedCase || !matchedCase.checklist)) {
           try {
-            const res = await fetch(`${currentApiUrl}?action=getCase&id=${st.caseId}`);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 seconds timeout per case
+            
+            const res = await fetch(`${currentApiUrl}?action=getCase&id=${st.caseId}`, { signal: controller.signal });
+            clearTimeout(timeoutId);
             const result = await res.json();
             if (result.success && result.data) matchedCase = result.data;
           } catch (e) {
