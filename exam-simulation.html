@@ -26,6 +26,30 @@
     let _fbRoomRef = null;  // will be set when joining a room
   </script>
   <style>
+    /* OTP 4-box room code input */
+    .otp-box {
+      width: 3.2rem;
+      height: 3.8rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: var(--primary);
+      background: var(--surface);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .otp-box:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 99,102,241),0.15);
+    }
+    .otp-box.filled {
+      border-color: var(--primary);
+      background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+    }
+
     .setup-screen { display: block; }
     .exam-screen { display: none; }
     .results-screen { display: none; }
@@ -273,14 +297,15 @@
               <!-- Join fields -->
               <div id="lobby-join-fields" style="display: none; margin-top: 1rem; border-top: 1px dashed var(--border); padding-top: 1rem;">
                 <div class="form-group">
-                  <label class="form-label" for="lobby-room-id-input">ระบุรหัสห้องสอบ หรือเลือกจากห้องที่เปิดอยู่</label>
-                  <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-                    <input type="text" id="lobby-room-id-input" class="select-filter" style="flex: 1; border: 1px solid var(--border); padding: 0.5rem; text-align: center; font-size: 1.25rem; font-weight: bold; letter-spacing: 0.25rem;" placeholder="เช่น 1234" maxlength="4">
-                    <button type="button" class="btn btn-secondary" onclick="fetchOpenRooms()" style="padding: 0 1rem;">🔄 รีเฟรชห้อง</button>
+                  <label class="form-label" style="text-align:center; display:block; margin-bottom:0.75rem;">กรอกรหัสห้องสอบ 4 หลัก</label>
+                  <div style="display: flex; gap: 0.75rem; justify-content: center; margin-bottom: 0.5rem;">
+                    <input type="text" class="otp-box" id="otp-0" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" class="otp-box" id="otp-1" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" class="otp-box" id="otp-2" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" class="otp-box" id="otp-3" maxlength="1" inputmode="numeric" pattern="[0-9]">
                   </div>
-                  <div id="lobby-room-list" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); padding: 0.5rem;">
-                    <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1rem;">คลิกปุ่มรีเฟรชเพื่อดูห้องสอบที่เปิดอยู่</p>
-                  </div>
+                  <!-- Hidden input that holds the combined value -->
+                  <input type="hidden" id="lobby-room-id-input">
                 </div>
               </div>
 
@@ -599,44 +624,53 @@
         if (createFields) createFields.style.display = 'none';
         if (joinFields) joinFields.style.display = 'block';
         if (sharedConfig && SimState.isLobby) sharedConfig.style.display = 'none';
-        if (submitBtn) submitBtn.textContent = '📡 เข้าร่วมห้องที่มีอยู่';
-        fetchOpenRooms();
+        if (submitBtn) submitBtn.textContent = '📡 เข้าร่วมห้องสอบ';
+        // Focus first OTP box
+        setTimeout(() => { const el = document.getElementById('otp-0'); if (el) el.focus(); }, 100);
       }
     }
 
-    // Fetch open rooms
-    async function fetchOpenRooms() {
-      if (!currentApiUrl) return;
-      const listContainer = document.getElementById('lobby-room-list');
-      listContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1rem;">กำลังโหลด...</p>';
-      try {
-        const res = await fetch(`${currentApiUrl}?action=getOpenRooms&_t=${Date.now()}`);
-        const result = await res.json();
-        if (result.success && result.data && result.data.rooms) {
-          const rooms = result.data.rooms;
-          if (rooms.length === 0) {
-            listContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1rem;">ไม่พบห้องสอบที่เปิดอยู่</p>';
-            return;
+    // OTP 4-box input logic
+    function initOtpBoxes() {
+      for (let i = 0; i < 4; i++) {
+        const box = document.getElementById('otp-' + i);
+        if (!box) continue;
+        box.addEventListener('input', function() {
+          this.value = this.value.replace(/[^0-9]/g, '');
+          if (this.value) {
+            this.classList.add('filled');
+            if (i < 3) document.getElementById('otp-' + (i+1)).focus();
+          } else {
+            this.classList.remove('filled');
           }
-          let html = '';
-          rooms.forEach(r => {
-            const hostName = r.hostRole === 'examinee' ? r.examineeName : r.examinerName;
-            html += `
-              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; border-bottom: 1px solid var(--border);">
-                <div>
-                  <div style="font-weight: bold; color: var(--primary);">ห้อง: ${r.roomId}</div>
-                  <div style="font-size: 0.8rem; color: var(--text-secondary);">โฮสต์: ${hostName} (${r.hostRole})</div>
-                </div>
-                <button type="button" class="btn btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;" onclick="document.getElementById('lobby-room-id-input').value='${r.roomId}'">เลือก</button>
-              </div>
-            `;
+          // Update hidden input
+          const code = [0,1,2,3].map(j => (document.getElementById('otp-'+j).value || '')).join('');
+          document.getElementById('lobby-room-id-input').value = code;
+        });
+        box.addEventListener('keydown', function(e) {
+          if (e.key === 'Backspace' && !this.value && i > 0) {
+            document.getElementById('otp-' + (i-1)).focus();
+          }
+          if (e.key === 'Enter') {
+            document.getElementById('lobby-submit-btn').click();
+          }
+        });
+        box.addEventListener('paste', function(e) {
+          e.preventDefault();
+          const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,4);
+          text.split('').forEach((ch, j) => {
+            const el = document.getElementById('otp-' + j);
+            if (el) { el.value = ch; el.classList.add('filled'); }
           });
-          listContainer.innerHTML = html;
-        }
-      } catch (e) {
-        listContainer.innerHTML = '<p style="text-align: center; color: var(--danger); font-size: 0.85rem; padding: 1rem;">ดึงข้อมูลห้องล้มเหลว</p>';
+          document.getElementById('lobby-room-id-input').value = text;
+          const nextEl = document.getElementById('otp-' + Math.min(text.length, 3));
+          if (nextEl) nextEl.focus();
+        });
       }
     }
+
+    // Kept as no-op (rooms now in Firebase, no Google Sheets list)
+    function fetchOpenRooms() {}
 
 
     // Initialize Lobby Case Dropdown (REMOVED logic but keep empty function to avoid errors)
@@ -922,19 +956,22 @@
             if (SimState.timerInterval) clearInterval(SimState.timerInterval);
             startLocalCountdown();
           } else {
-            // Same station — only sync timer if drifted significantly
-            if (Math.abs(SimState.timerValue - room.timerValue) > 5) {
-              SimState.timerValue = room.timerValue;
-              updateTimerDisplay();
-            }
-            if (SimState.timerRunning !== room.timerRunning) {
-              SimState.timerRunning = room.timerRunning;
-              if (SimState.timerRunning) {
-                startLocalCountdown();
-              } else {
-                if (SimState.timerInterval) clearInterval(SimState.timerInterval);
+            // Same station — Host is timer source of truth, only Examinee syncs from Firebase
+            if (SimState.role === 'examinee') {
+              if (Math.abs(SimState.timerValue - room.timerValue) > 5) {
+                SimState.timerValue = room.timerValue;
+                updateTimerDisplay();
+              }
+              if (SimState.timerRunning !== room.timerRunning) {
+                SimState.timerRunning = room.timerRunning;
+                if (SimState.timerRunning) {
+                  startLocalCountdown();
+                } else {
+                  if (SimState.timerInterval) clearInterval(SimState.timerInterval);
+                }
               }
             }
+            // Host (examiner) does NOT sync timer from Firebase - it is the source of truth
           }
 
           if (SimState.role === 'examinee') {
@@ -1614,6 +1651,7 @@
     // Init proportion sum text on load
     document.addEventListener('DOMContentLoaded', () => {
       updateProportionSumText();
+      initOtpBoxes();
     });
   </script>
 
