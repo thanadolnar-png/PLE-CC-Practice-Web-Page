@@ -1353,21 +1353,19 @@
         grpHdr.textContent = `กลุ่ม: ${groupName}`;
         chkContainer.appendChild(grpHdr);
         
-        groups[groupName].forEach(item => {
-          const isChecked = checkedList.includes(item.id);
-          const el = document.createElement('div');
-          el.className = `checklist-item ${isChecked ? 'checked' : ''}`;
-          el.setAttribute('data-id', item.id);
-          el.style.padding = '0.5rem 0.75rem';
-          el.style.gap = '0.5rem';
-          el.addEventListener('click', () => toggleExamChecklistItem(stationNum, item.id, item.score));
-          el.innerHTML = `
-            <div class="checkbox-custom"></div>
-            <span class="checklist-item-score">(${item.score} คะแนน)</span>
-            <span class="checklist-item-text">${escapeHtml(item.text)}</span>
-          `;
-          chkContainer.appendChild(el);
-        });
+          groups[groupName].forEach(item => {
+            const isChecked = checkedList.includes(item.id);
+            const el = document.createElement('div');
+            el.className = `checklist-item ${isChecked ? 'checked' : ''}`;
+            el.setAttribute('data-id', item.id);
+            el.addEventListener('click', () => toggleExamChecklistItem(stationNum, item.id, item.score));
+            el.innerHTML = `
+              <div class="checkbox-custom"></div>
+              <span class="checklist-item-score">(${item.score} คะแนน)</span>
+              <span class="checklist-item-text">${escapeHtml(item.text)}</span>
+            `;
+            chkContainer.appendChild(el);
+          });
       });
       
       updateExamProgressUI(stationNum, c);
