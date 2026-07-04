@@ -323,6 +323,30 @@
             <div id="exam-patient-content">
               <!-- Table dynamically generated -->
             </div>
+
+            <!-- Added margin top for checklist section -->
+            <div style="margin-top: 2rem;"></div>
+            <!-- Examinee Notice Card -->
+            <div id="exam-examinee-notice" style="display: none; padding: 1.5rem; text-align: center; border: 1px dashed var(--border); border-radius: var(--radius-lg); background: var(--surface); color: var(--text-secondary); margin-bottom: 1.5rem;">
+              <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">✍️</span>
+              <h4 style="font-family: var(--font-title); font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; font-size: 0.9rem;">คุณกำลังเข้าสอบ</h4>
+              <p style="font-size: 0.8rem; line-height: 1.4;">เกณฑ์ Checklist และเฉลยถูกซ่อนไว้ ให้ผู้ประเมินซักถามและให้คะแนน</p>
+            </div>
+
+            <!-- Examiner Notes Container -->
+            <div class="note-container" id="exam-note-container" style="display: none; margin-bottom: 1.5rem;">
+              <button class="btn btn-secondary" style="width: 100%; font-size: 0.85rem; padding: 0.5rem;" id="exam-toggle-note-btn" onclick="toggleExamNote()">
+                🔑 แสดงเฉลย / บทบาทผู้ป่วยจำลอง
+              </button>
+              <div class="exam-note-content-area" id="exam-note-content-area">
+                <!-- Filled dynamically by JS -->
+              </div>
+            </div>
+
+            <!-- Checklist container -->
+            <div class="checklist-container" id="exam-checklist-container" style="margin-bottom: 1.5rem; overflow-y: auto;">
+              <!-- Checklist items populated dynamically -->
+            </div>
           </div>
 
           <!-- Right Sidebar Pane: Timer, Checklist, Minimap -->
@@ -353,27 +377,6 @@
               </div>
             </div>
 
-            <!-- Examinee Notice Card -->
-            <div id="exam-examinee-notice" style="display: none; padding: 1.5rem; text-align: center; border: 1px dashed var(--border); border-radius: var(--radius-lg); background: var(--surface); color: var(--text-secondary); margin-bottom: 1.5rem;">
-              <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">✍️</span>
-              <h4 style="font-family: var(--font-title); font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; font-size: 0.9rem;">คุณกำลังเข้าสอบ</h4>
-              <p style="font-size: 0.8rem; line-height: 1.4;">เกณฑ์ Checklist และเฉลยถูกซ่อนไว้ ให้ผู้ประเมินซักถามและให้คะแนน</p>
-            </div>
-
-            <!-- Examiner Notes Container -->
-            <div class="note-container" id="exam-note-container" style="display: none; margin-bottom: 1.5rem;">
-              <button class="btn btn-secondary" style="width: 100%; font-size: 0.85rem; padding: 0.5rem;" id="exam-toggle-note-btn" onclick="toggleExamNote()">
-                🔑 แสดงเฉลย / บทบาทผู้ป่วยจำลอง
-              </button>
-              <div class="exam-note-content-area" id="exam-note-content-area">
-                <!-- Filled dynamically by JS -->
-              </div>
-            </div>
-
-            <!-- Checklist container -->
-            <div class="checklist-container" id="exam-checklist-container" style="margin-bottom: 1.5rem; overflow-y: auto;">
-              <!-- Checklist items populated dynamically -->
-            </div>
 
             <!-- Mini Map stations layout -->
             <div class="minimap-card" id="minimap-card-el">
