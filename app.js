@@ -152,7 +152,14 @@ async function loadCasesData() {
       const result = await response.json();
       
       if (result.success && result.data && result.data.cases) {
-        AppState.cases = result.data.cases;
+        let fetchedCases = result.data.cases;
+        if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+          fetchedCases = fetchedCases.map(apiCase => {
+            const offlineMatch = OFFLINE_DATA.cases.find(o => o.caseId === apiCase.caseId);
+            return offlineMatch ? Object.assign({}, offlineMatch, apiCase) : apiCase;
+          });
+        }
+        AppState.cases = fetchedCases;
         showApiStatusBanner(true, 'API Connected');
         onCasesLoaded();
         return;

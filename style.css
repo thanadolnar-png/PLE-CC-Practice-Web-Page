@@ -1239,13 +1239,11 @@ a {
 }
 
 /* --- Examiner Full-Width Layout (Toggled via JS) --- */
-.viewer-grid.examiner-layout #left-pane,
-.exam-layout.examiner-layout #exam-left-pane {
+.viewer-grid.examiner-layout #left-pane {
   display: none !important;
 }
 
-.viewer-grid.examiner-layout #right-pane,
-.exam-layout.examiner-layout .exam-sidebar-pane {
+.viewer-grid.examiner-layout #right-pane {
   flex: 0 0 100% !important;
   max-width: 100% !important;
   width: 100% !important;

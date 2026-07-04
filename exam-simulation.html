@@ -592,7 +592,7 @@
       const listContainer = document.getElementById('lobby-room-list');
       listContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1rem;">กำลังโหลด...</p>';
       try {
-        const res = await fetch(`${currentApiUrl}?action=getOpenRooms`);
+        const res = await fetch(`${currentApiUrl}?action=getOpenRooms&_t=${Date.now()}`);
         const result = await res.json();
         if (result.success && result.data && result.data.rooms) {
           const rooms = result.data.rooms;
@@ -867,7 +867,8 @@
                 } else {
                   clearInterval(SimState.countdownInterval);
                   SimState.countdownInterval = null;
-                  fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&status=running&timerRunning=TRUE&timerValue=240`);
+                  SimState.timerRunning = true;
+                  fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&status=running&timerRunning=TRUE&timerValue=240&_t=${Date.now()}`);
                 }
               }, 1000);
             }
@@ -984,7 +985,7 @@
       if (timestamp - SimState.lastServerSyncTime < 800) return;
       SimState.lastServerSyncTime = timestamp;
       try {
-        fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&checklistProgress=${checkedIds.join(',')}`);
+        fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&checklistProgress=${checkedIds.join(',')}&_t=${Date.now()}`);
       } catch (e) {
         console.warn('Error syncing checklist to server:', e);
       }
@@ -1173,7 +1174,7 @@
       
       if (SimState.isLobby) {
         if (SimState.role === 'examiner') {
-          fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&timerRunning=TRUE&timerValue=240`);
+          fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&timerRunning=TRUE&timerValue=240&_t=${Date.now()}`);
         }
         startLocalCountdown();
         return;
@@ -1199,7 +1200,7 @@
       SimState.timerRunning = !SimState.timerRunning;
       document.getElementById('timer-toggle-btn').textContent = SimState.timerRunning ? '⏸️ พักตัวจับเวลา' : '▶️ เล่นตัวจับเวลาต่อ';
       if (SimState.isLobby && SimState.role === 'examiner') {
-        fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&timerRunning=${SimState.timerRunning ? 'TRUE' : 'FALSE'}&timerValue=${SimState.timerValue}`);
+        fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&timerRunning=${SimState.timerRunning ? 'TRUE' : 'FALSE'}&timerValue=${SimState.timerValue}&_t=${Date.now()}`);
       }
     }
 
@@ -1207,7 +1208,7 @@
       SimState.timerValue = 240;
       updateTimerDisplay();
       if (SimState.isLobby && SimState.role === 'examiner') {
-        fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&timerValue=240`);
+        fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&timerValue=240&_t=${Date.now()}`);
       }
     }
 
@@ -1319,7 +1320,7 @@
             // Include checklist progress when syncing
             const currStationNum = SimState.stations[SimState.currentIdx].stationNumber;
             const checkedIds = SimState.studentScores[currStationNum] || [];
-            fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&timerValue=${SimState.timerValue}&checklistProgress=${checkedIds.join(',')}`);
+            fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&timerValue=${SimState.timerValue}&checklistProgress=${checkedIds.join(',')}&_t=${Date.now()}`);
           }
         }, 5000);
       }
@@ -1392,7 +1393,7 @@
       if (SimState.isLobby) {
         // Sync checklist directly when toggled
         const checkedIds = SimState.studentScores[stationNum] || [];
-        fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&checklistProgress=${checkedIds.join(',')}`);
+        fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&checklistProgress=${checkedIds.join(',')}&_t=${Date.now()}`);
       }
     }
 
@@ -1453,7 +1454,7 @@
       if (SimState.currentIdx < SimState.stations.length - 1) {
         const nextIdx = SimState.currentIdx + 1;
         if (SimState.isLobby && SimState.role === 'examiner') {
-          fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&caseId=${SimState.stations[nextIdx].case.caseId}&timerValue=240&status=running`);
+          fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&caseId=${SimState.stations[nextIdx].case.caseId}&timerValue=240&status=running&_t=${Date.now()}`);
         }
         renderStation(nextIdx);
       }
@@ -1463,7 +1464,7 @@
       if (SimState.currentIdx > 0) {
         const prevIdx = SimState.currentIdx - 1;
         if (SimState.isLobby && SimState.role === 'examiner') {
-          fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&caseId=${SimState.stations[prevIdx].case.caseId}&timerValue=240&status=running`);
+          fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&caseId=${SimState.stations[prevIdx].case.caseId}&timerValue=240&status=running&_t=${Date.now()}`);
         }
         renderStation(prevIdx);
       }
@@ -1476,7 +1477,7 @@
       if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
       
       if (SimState.isLobby && SimState.role === 'examiner') {
-        fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&status=results`);
+        fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&status=results&_t=${Date.now()}`);
       }
       
       showGlobalLoader(true);
