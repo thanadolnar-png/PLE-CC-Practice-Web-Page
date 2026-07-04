@@ -39,6 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // จัดการหน้าปัจจุบัน
   detectCurrentPage();
+  
+  // จัดการปุ่มเปลี่ยนมุมมอง (Grid/List)
+  initViewToggles();
 });
 
 // ตรวจสอบ Theme
@@ -48,6 +51,50 @@ function initTheme() {
   if (themeBtn) {
     updateThemeButtonIcon(themeBtn);
     themeBtn.addEventListener('click', toggleTheme);
+  }
+}
+
+// ตรวจสอบและตั้งค่ามุมมอง Grid/List
+function initViewToggles() {
+  const btnGrid = document.getElementById('btn-view-grid');
+  const btnList = document.getElementById('btn-view-list');
+  const container = document.getElementById('case-list-container');
+  
+  if (!btnGrid || !btnList || !container) return;
+  
+  // โหลดค่าจาก LocalStorage
+  const savedView = localStorage.getItem('ple_case_view') || 'grid';
+  if (savedView === 'list') {
+    setListView(true);
+  }
+  
+  btnGrid.addEventListener('click', () => setListView(false));
+  btnList.addEventListener('click', () => setListView(true));
+  
+  function setListView(isList) {
+    if (isList) {
+      container.classList.add('list-view');
+      btnList.classList.add('active');
+      btnGrid.classList.remove('active');
+      
+      btnList.style.background = 'var(--bg-secondary)';
+      btnList.style.color = 'var(--text-primary)';
+      btnGrid.style.background = 'transparent';
+      btnGrid.style.color = 'var(--text-muted)';
+      
+      localStorage.setItem('ple_case_view', 'list');
+    } else {
+      container.classList.remove('list-view');
+      btnGrid.classList.add('active');
+      btnList.classList.remove('active');
+      
+      btnGrid.style.background = 'var(--bg-secondary)';
+      btnGrid.style.color = 'var(--text-primary)';
+      btnList.style.background = 'transparent';
+      btnList.style.color = 'var(--text-muted)';
+      
+      localStorage.setItem('ple_case_view', 'grid');
+    }
   }
 }
 

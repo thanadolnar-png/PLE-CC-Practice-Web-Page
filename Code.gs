@@ -1483,8 +1483,8 @@ function getOpenRooms() {
     const status = data[i][8];
     const lastUpdated = new Date(data[i][9]).getTime();
     
-    // Only show rooms in 'setup' status and updated within last 2 hours
-    if (status === 'setup' && (now - lastUpdated) < 7200000) {
+    // Only show rooms in 'setup' status and updated within last 5 minutes (300,000 ms)
+    if (status === 'setup' && (now - lastUpdated) < 300000) {
       rooms.push({
         roomId: String(data[i][0]),
         hostRole: data[i][2],

@@ -298,9 +298,20 @@
           <h3 style="font-family: var(--font-title); font-size: 1.5rem; color: var(--text-primary); margin-bottom: 0.5rem;" id="lobby-waiting-title">กำลังรอการเตรียมพร้อม...</h3>
           <p style="color: var(--text-secondary); margin-bottom: 2rem;" id="lobby-waiting-desc">รอผู้เข้าร่วมการจำลองซ้อมสอบเข้ามาเชื่อมต่อที่ห้องนี้</p>
           
+          <div id="lobby-players-status" style="margin: 1.5rem auto; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius-md); max-width: 400px; text-align: left; background: var(--bg); font-size: 1.1rem;">
+            <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border); padding-bottom: 0.5rem;">
+              <span>👨‍🏫 ผู้ประเมิน (Host):</span>
+              <strong id="lobby-status-examiner" style="color: var(--text-muted);">รอการเชื่อมต่อ...</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span>👨‍🎓 ผู้เข้าสอบ (Examinee):</span>
+              <strong id="lobby-status-examinee" style="color: var(--text-muted);">รอการเชื่อมต่อ...</strong>
+            </div>
+          </div>
+          
           <!-- Room ID display for Host to share -->
           <div id="lobby-room-code-share" style="display: none; margin: 1.5rem auto; padding: 1rem 2rem; background: var(--bg); border: 2px solid var(--primary); border-radius: var(--radius-lg); max-width: 300px;">
-            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;">แชร์รหัสห้องนี้ให้ผู้เข้าสอบ:</p>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;" id="lobby-waiting-msg">แชร์รหัสห้องนี้ให้ผู้เข้าสอบ:</p>
             <div style="font-size: 2.5rem; font-weight: 900; letter-spacing: 0.5rem; color: var(--primary); font-family: var(--font-title);" id="lobby-share-code-display">----</div>
           </div>
           
@@ -743,16 +754,20 @@
     async function setupLobbyRoomUI() {
       document.getElementById('exam-setup-view').style.display = 'none';
       document.getElementById('exam-running-view').style.display = 'block';
+      document.querySelector('.exam-layout').style.display = 'none';
+      document.getElementById('lobby-waiting-screen').style.display = 'block';
       document.getElementById('exam-lobby-info-bar').style.display = 'flex';
       document.getElementById('lobby-room-id-display').textContent = SimState.roomId;
       
-      // Show room code share for Host
+      // Show room code share for Host and setup Examinee view
+      const shareEl = document.getElementById('lobby-room-code-share');
       if (SimState.role === 'examiner') {
-        const shareEl = document.getElementById('lobby-room-code-share');
         if (shareEl) {
           shareEl.style.display = 'block';
           document.getElementById('lobby-share-code-display').textContent = SimState.roomId;
         }
+      } else {
+        if (shareEl) shareEl.style.display = 'none';
       }
       
       await syncLobbyStatus();
@@ -794,10 +809,37 @@
             document.getElementById('lobby-countdown-screen').style.display = 'none';
             document.querySelector('.exam-layout').style.display = 'none';
             
+            // Update UI with names
+            const examinerEl = document.getElementById('lobby-status-examiner');
+            const examineeEl = document.getElementById('lobby-status-examinee');
+            
+            if (room.examinerName) {
+              examinerEl.textContent = room.examinerName;
+              examinerEl.style.color = 'var(--primary)';
+            }
+            if (room.examineeName) {
+              examineeEl.textContent = room.examineeName;
+              examineeEl.style.color = 'var(--primary)';
+            }
+            
             if (SimState.role === 'examiner') {
               const startBtn = document.getElementById('lobby-start-exam-btn');
               startBtn.style.display = 'block';
-              startBtn.disabled = !(room.examineeName && room.examinerName);
+              const waitingMsg = document.getElementById('lobby-waiting-msg');
+              
+              if (room.examineeName && room.examinerName) {
+                startBtn.disabled = false;
+                startBtn.textContent = '🚀 เริ่มการสอบทันที';
+                startBtn.classList.add('btn-primary');
+                if (waitingMsg) waitingMsg.textContent = 'ผู้เข้าสอบเชื่อมต่อแล้ว สามารถกดเริ่มสอบได้เลย';
+              } else {
+                startBtn.disabled = true;
+                startBtn.textContent = 'รอผู้เข้าสอบเชื่อมต่อ...';
+                startBtn.classList.remove('btn-primary');
+                if (waitingMsg) waitingMsg.textContent = 'แชร์รหัสห้องนี้ให้ผู้เข้าสอบ:';
+              }
+            } else {
+              document.getElementById('lobby-start-exam-btn').style.display = 'none';
             }
           } else if (room.status === 'countdown') {
             document.getElementById('lobby-waiting-screen').style.display = 'none';
