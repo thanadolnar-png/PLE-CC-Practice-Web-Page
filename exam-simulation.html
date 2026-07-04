@@ -962,17 +962,22 @@
           } else {
             // Same station — Host is timer source of truth, only Examinee syncs from Firebase
             if (SimState.role === 'examinee') {
-              if (Math.abs(SimState.timerValue - room.timerValue) > 5) {
-                SimState.timerValue = room.timerValue;
-                updateTimerDisplay();
-              }
+              // Only sync pause/play state, DO NOT sync timerValue continuously 
+              // because room.timerValue in Firebase is stagnant and only updates on pause/reset.
               if (SimState.timerRunning !== room.timerRunning) {
                 SimState.timerRunning = room.timerRunning;
-                if (SimState.timerRunning) {
+                if (room.timerRunning) {
+                  // Resync the value only when toggling play/pause
+                  SimState.timerValue = room.timerValue; 
+                  updateTimerDisplay();
                   startLocalCountdown();
                 } else {
                   if (SimState.timerInterval) clearInterval(SimState.timerInterval);
                 }
+              } else if (!SimState.timerRunning && SimState.timerValue !== room.timerValue) {
+                // If it's paused and the value changed (e.g. Examiner hit Reset)
+                SimState.timerValue = room.timerValue;
+                updateTimerDisplay();
               }
             }
             // Host (examiner) does NOT sync timer from Firebase - it is the source of truth
