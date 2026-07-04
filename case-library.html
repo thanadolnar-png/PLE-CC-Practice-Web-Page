@@ -61,98 +61,90 @@
   <main class="main-section" style="padding-top: 0;" id="library-content">
     <div class="container">
       
-      <!-- Filter Bar -->
-      <section class="filter-bar" id="filters-section">
-        <!-- Search bar -->
-        <div class="search-input-wrapper">
-          <svg class="search-icon-svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
-          <input type="text" id="search-case" class="search-input" placeholder="ค้นหาด้วยชื่อเคส, ตัวยา, ชื่อโรค..." aria-label="Search cases">
-        </div>
-        
-        <!-- Select filters -->
-        <div class="filter-selects">
-          <!-- Category Filter -->
-          <select id="filter-category" class="select-filter" aria-label="Filter by category">
-            <option value="All">ทุกหมวด (All Category)</option>
-            <option value="Clinic">Clinic (คลินิก)</option>
-            <option value="Product">Product (ผลิต)</option>
-            <option value="SAP">SAP (สังคมศาสตร์)</option>
-          </select>
-          
-          <!-- OSPE Main Group Filter -->
-          <select id="filter-course-group" class="select-filter" aria-label="Filter by OSPE Main Group">
-            <option value="All">ทุก OSPE Main Group</option>
-            <!-- Filled dynamically by JS -->
-          </select>
-          
-          <!-- Difficulty Filter -->
-          <select id="filter-difficulty" class="select-filter" aria-label="Filter by difficulty">
-            <option value="All">ทุกระดับความยาก</option>
-            <option value="1">ระดับ 1 (ง่าย)</option>
-            <option value="2">ระดับ 2 (ปานกลาง)</option>
-            <option value="3">ระดับ 3 (ท้าทาย)</option>
-          </select>
-          
-          <!-- View Toggles -->
-          <div class="view-toggles" style="display: flex; gap: 0.25rem; margin-left: 0.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.2rem;">
-            <button id="btn-view-grid" class="view-toggle-btn active" title="แบบตาราง (Grid View)" style="background: var(--bg-secondary); border: none; border-radius: var(--radius-sm); padding: 0.4rem; cursor: pointer; color: var(--text-primary); display: flex; align-items: center; justify-content: center;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-            </button>
-            <button id="btn-view-list" class="view-toggle-btn" title="แบบรายการ (List View)" style="background: transparent; border: none; border-radius: var(--radius-sm); padding: 0.4rem; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; justify-content: center;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-            </button>
+      <div class="library-layout">
+        <!-- Filter Bar (Sidebar Console) -->
+        <aside class="filter-console" id="filters-section">
+          <!-- Search bar -->
+          <div class="search-input-wrapper">
+            <svg class="search-icon-svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input type="text" id="search-case" class="search-input" placeholder="ค้นหาด้วยชื่อเคส, ตัวยา, โรค..." aria-label="Search cases">
           </div>
-        </div>
-      </section>
+          
+          <!-- Select filters -->
+          <div class="filter-selects">
+            <!-- Category Filter -->
+            <label class="filter-group-label">หมวดวิชา</label>
+            <select id="filter-category" class="select-filter" aria-label="Filter by category">
+              <option value="All">ทุกหมวด (All Category)</option>
+              <option value="Clinic">Clinic (คลินิก)</option>
+              <option value="Product">Product (ผลิต)</option>
+              <option value="SAP">SAP (สังคมศาสตร์)</option>
+            </select>
+            
+            <!-- OSPE Main Group Filter -->
+            <label class="filter-group-label">OSPE Main Group</label>
+            <select id="filter-course-group" class="select-filter" aria-label="Filter by OSPE Main Group">
+              <option value="All">ทุก OSPE Main Group</option>
+              <!-- Filled dynamically by JS -->
+            </select>
+            
+            <!-- Difficulty Filter -->
+            <label class="filter-group-label">ระดับความยาก</label>
+            <select id="filter-difficulty" class="select-filter" aria-label="Filter by difficulty">
+              <option value="All">ทุกระดับความยาก</option>
+              <option value="1">ระดับ 1 (ง่าย)</option>
+              <option value="2">ระดับ 2 (ปานกลาง)</option>
+              <option value="3">ระดับ 3 (ท้าทาย)</option>
+            </select>
+            
+            <!-- View Toggles -->
+            <label class="filter-group-label">รูปแบบมุมมอง</label>
+            <div class="view-toggles">
+              <button id="btn-view-grid" class="view-toggle-btn active" title="แบบตาราง (Grid View)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              </button>
+              <button id="btn-view-list" class="view-toggle-btn" title="แบบรายการ (List View)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+              </button>
+            </div>
+          </div>
+        </aside>
 
-      <!-- Case Cards Grid -->
-      <section class="case-grid" id="case-list-container">
-        <!-- Skeleton placeholders shown while loading -->
-        <div class="skeleton-case-card" id="sk1">
-          <div class="skel-header"><span class="skeleton skel-badge"></span><span class="skeleton skel-id"></span></div>
-          <span class="skeleton skel-title"></span>
-          <span class="skeleton skel-title-short"></span>
-          <span class="skeleton skel-tag"></span>
-          <div class="skel-meta"><span class="skeleton skel-stars"></span><span class="skeleton skel-author"></span></div>
-        </div>
-        <div class="skeleton-case-card" id="sk2">
-          <div class="skel-header"><span class="skeleton skel-badge"></span><span class="skeleton skel-id"></span></div>
-          <span class="skeleton skel-title"></span>
-          <span class="skeleton skel-title-short"></span>
-          <span class="skeleton skel-tag"></span>
-          <div class="skel-meta"><span class="skeleton skel-stars"></span><span class="skeleton skel-author"></span></div>
-        </div>
-        <div class="skeleton-case-card" id="sk3">
-          <div class="skel-header"><span class="skeleton skel-badge"></span><span class="skeleton skel-id"></span></div>
-          <span class="skeleton skel-title"></span>
-          <span class="skeleton skel-title-short"></span>
-          <span class="skeleton skel-tag"></span>
-          <div class="skel-meta"><span class="skeleton skel-stars"></span><span class="skeleton skel-author"></span></div>
-        </div>
-        <div class="skeleton-case-card" id="sk4">
-          <div class="skel-header"><span class="skeleton skel-badge"></span><span class="skeleton skel-id"></span></div>
-          <span class="skeleton skel-title"></span>
-          <span class="skeleton skel-title-short"></span>
-          <span class="skeleton skel-tag"></span>
-          <div class="skel-meta"><span class="skeleton skel-stars"></span><span class="skeleton skel-author"></span></div>
-        </div>
-        <div class="skeleton-case-card" id="sk5">
-          <div class="skel-header"><span class="skeleton skel-badge"></span><span class="skeleton skel-id"></span></div>
-          <span class="skeleton skel-title"></span>
-          <span class="skeleton skel-title-short"></span>
-          <span class="skeleton skel-tag"></span>
-          <div class="skel-meta"><span class="skeleton skel-stars"></span><span class="skeleton skel-author"></span></div>
-        </div>
-        <div class="skeleton-case-card" id="sk6">
-          <div class="skel-header"><span class="skeleton skel-badge"></span><span class="skeleton skel-id"></span></div>
-          <span class="skeleton skel-title"></span>
-          <span class="skeleton skel-title-short"></span>
-          <span class="skeleton skel-tag"></span>
-          <div class="skel-meta"><span class="skeleton skel-stars"></span><span class="skeleton skel-author"></span></div>
-        </div>
-      </section>
+        <!-- Case Cards Grid (Ledger Area) -->
+        <section class="case-grid" id="case-list-container">
+          <!-- Skeleton placeholders shown while loading -->
+          <div class="skeleton-case-card" id="sk1">
+            <div class="skel-header"><span class="skeleton skel-badge"></span><span class="skeleton skel-id"></span></div>
+            <span class="skeleton skel-title"></span>
+            <span class="skeleton skel-title-short"></span>
+            <span class="skeleton skel-tag"></span>
+            <div class="skel-meta"><span class="skeleton skel-stars"></span><span class="skeleton skel-author"></span></div>
+          </div>
+          <div class="skeleton-case-card" id="sk2">
+            <div class="skel-header"><span class="skeleton skel-badge"></span><span class="skeleton skel-id"></span></div>
+            <span class="skeleton skel-title"></span>
+            <span class="skeleton skel-title-short"></span>
+            <span class="skeleton skel-tag"></span>
+            <div class="skel-meta"><span class="skeleton skel-stars"></span><span class="skeleton skel-author"></span></div>
+          </div>
+          <div class="skeleton-case-card" id="sk3">
+            <div class="skel-header"><span class="skeleton skel-badge"></span><span class="skeleton skel-id"></span></div>
+            <span class="skeleton skel-title"></span>
+            <span class="skeleton skel-title-short"></span>
+            <span class="skeleton skel-tag"></span>
+            <div class="skel-meta"><span class="skeleton skel-stars"></span><span class="skeleton skel-author"></span></div>
+          </div>
+          <div class="skeleton-case-card" id="sk4">
+            <div class="skel-header"><span class="skeleton skel-badge"></span><span class="skeleton skel-id"></span></div>
+            <span class="skeleton skel-title"></span>
+            <span class="skeleton skel-title-short"></span>
+            <span class="skeleton skel-tag"></span>
+            <div class="skel-meta"><span class="skeleton skel-stars"></span><span class="skeleton skel-author"></span></div>
+          </div>
+        </section>
+      </div>
 
     </div>
   </main>
