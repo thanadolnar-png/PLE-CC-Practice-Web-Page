@@ -229,37 +229,46 @@
               <div class="form-group" style="margin-top: 1rem;">
                 <label class="form-label" for="lobby-role-select">บทบาทในการจำลองสอบ</label>
                 <select id="lobby-role-select" class="select-filter" style="width: 100%;" onchange="toggleLobbyRole(this.value)">
-                  <option value="examiner">🔎 ฉันเป็นผู้ประเมิน (Host — สร้างห้องและสุ่มข้อสอบ)</option>
-                  <option value="examinee">✍️ ฉันเป็นผู้เข้าสอบ (เข้าร่วมห้องที่มีอยู่)</option>
+                  <option value="examiner">🔎 ฉันเป็นผู้ประเมิน/ผู้ให้คะแนน (Examiner — ดูแนวคำตอบ/เฉลย)</option>
+                  <option value="examinee">✍️ ฉันเป็นผู้เข้าสอบ (Examinee — ทำการตอบและแสดงสถานการณ์)</option>
                 </select>
               </div>
 
-              <!-- Host/Examiner config: select case -->
+              <!-- Mode Choice: Create vs Join -->
+              <div class="form-group" style="margin-top: 1.5rem;">
+                <label class="form-label">เลือกรูปแบบการเชื่อมต่อ</label>
+                <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                  <label style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+                    <input type="radio" name="lobby-op" value="create" checked onchange="toggleLobbyOp(this.value)">
+                    <span>สร้างห้องซ้อมสอบใหม่ (Host)</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+                    <input type="radio" name="lobby-op" value="join" onchange="toggleLobbyOp(this.value)">
+                    <span>เข้าร่วมห้องที่มีอยู่</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Create fields -->
               <div id="lobby-create-fields" style="display: block; margin-top: 1rem; border-top: 1px dashed var(--border); padding-top: 1rem;">
-                <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
-                  🔎 <strong>ผู้ประเมิน</strong>: เลือกเคสสอบปฏิบัติการที่ต้องการประเมินผู้สอบ
-                </p>
                 <div class="form-group">
-                  <label class="form-label" for="lobby-case-select">เลือกเคสสอบสำหรับสถานีนี้</label>
+                  <label class="form-label" for="lobby-case-select">เลือกเคสสอบสำหรับสถานีนี้ (Case Selection)</label>
                   <select id="lobby-case-select" class="select-filter" style="width: 100%;">
-                    <!-- Filled dynamically by JS -->
+                    <!-- Populate case list dynamically -->
                   </select>
                 </div>
               </div>
 
-              <!-- Join Room: Examinee config -->
+              <!-- Join fields -->
               <div id="lobby-join-fields" style="display: none; margin-top: 1rem; border-top: 1px dashed var(--border); padding-top: 1rem;">
-                <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
-                  ✍️ <strong>ผู้เข้าสอบ</strong>: รอรับรหัสห้องจาก Host แล้วกรอกด้านล่าง
-                </p>
                 <div class="form-group">
                   <label class="form-label" for="lobby-room-id-input">รหัสห้องสอบ (Room ID 4 หลัก)</label>
-                  <input type="text" id="lobby-room-id-input" class="select-filter" style="width: 100%; border: 1px solid var(--border); padding: 0.5rem; text-align: center; font-size: 1.5rem; font-weight: bold; letter-spacing: 0.5rem;" placeholder="เช่น 1234" maxlength="4">
+                  <input type="text" id="lobby-room-id-input" class="select-filter" style="width: 100%; border: 1px solid var(--border); padding: 0.5rem; text-align: center; font-size: 1.25rem; font-weight: bold; letter-spacing: 0.25rem;" placeholder="เช่น 1234" maxlength="4">
                 </div>
               </div>
 
-              <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem; padding: 0.75rem; font-size: 1rem;" id="lobby-submit-btn">
-                📡 สร้างห้องซ้อมสอบ (Host)
+              <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;" id="lobby-submit-btn">
+                📡 สร้างห้องซ้อมสอบใหม่ (Host)
               </button>
             </form>
           </div>
@@ -459,6 +468,7 @@
       roomId: '',
       lobbyPlayerName: '',
       lobbyRole: 'examiner',
+      lobbyOp: 'create',
       lobbyPollInterval: null,
       lastServerSyncTime: 0
     };
@@ -522,18 +532,33 @@
     // ─── Lobby role toggle ─────
     function toggleLobbyRole(role) {
       SimState.lobbyRole = role;
-      const joinFields = document.getElementById('lobby-join-fields');
+      const joinRadio = document.querySelector('input[name="lobby-op"][value="join"]');
+      const createRadio = document.querySelector('input[name="lobby-op"][value="create"]');
+      
+      if (role === 'examinee') {
+        if (joinRadio) joinRadio.checked = true;
+        if (createRadio) createRadio.disabled = true;
+        toggleLobbyOp('join');
+      } else {
+        if (createRadio) createRadio.disabled = false;
+      }
+    }
+
+    // Toggle Lobby operations: Create Room vs Join Room
+    function toggleLobbyOp(op) {
+      SimState.lobbyOp = op;
       const createFields = document.getElementById('lobby-create-fields');
+      const joinFields = document.getElementById('lobby-join-fields');
       const submitBtn = document.getElementById('lobby-submit-btn');
       
-      if (role === 'examiner') {
-        joinFields.style.display = 'none';
+      if (op === 'create') {
         if (createFields) createFields.style.display = 'block';
-        submitBtn.textContent = '📡 สร้างห้องซ้อมสอบ (Host)';
+        if (joinFields) joinFields.style.display = 'none';
+        if (submitBtn) submitBtn.textContent = '📡 สร้างห้องซ้อมสอบใหม่ (Host)';
       } else {
-        joinFields.style.display = 'block';
         if (createFields) createFields.style.display = 'none';
-        submitBtn.textContent = '📡 เข้าร่วมห้องสอบเดิม';
+        if (joinFields) joinFields.style.display = 'block';
+        if (submitBtn) submitBtn.textContent = '📡 เข้าร่วมห้องที่มีอยู่';
       }
     }
 
@@ -570,7 +595,7 @@
       SimState.lobbyPlayerName = playerName;
       
       try {
-        if (SimState.lobbyRole === 'examiner') {
+        if (SimState.lobbyOp === 'create') {
           // Host: create room
           let caseSelect = document.getElementById('lobby-case-select').value;
           if (caseSelect === 'random') {
@@ -590,32 +615,32 @@
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 seconds timeout
           
-          const res = await fetch(`${currentApiUrl}?action=createRoom&roomId=${randomRoomId}&caseId=${caseSelect}&hostRole=examiner&playerName=${encodeURIComponent(playerName)}`, { signal: controller.signal });
+          const res = await fetch(`${currentApiUrl}?action=createRoom&roomId=${randomRoomId}&caseId=${caseSelect}&hostRole=${SimState.lobbyRole}&playerName=${encodeURIComponent(playerName)}`, { signal: controller.signal });
           clearTimeout(timeoutId);
           const resultWrapper = await res.json();
           
           if (resultWrapper.success && resultWrapper.data && resultWrapper.data.roomId) {
             SimState.roomId = resultWrapper.data.roomId;
-            SimState.role = 'examiner';
+            SimState.role = SimState.lobbyRole;
             setupLobbyRoomUI();
           } else {
             throw new Error(resultWrapper.error || 'การสร้างห้องล้มเหลว');
           }
         } else {
-          // Examinee: join room
+          // Join Mode: Join Room
           const roomIdInput = document.getElementById('lobby-room-id-input').value.trim();
           if (!roomIdInput) { alert('กรุณากรอกรหัสห้อง 4 หลัก'); showGlobalLoader(false); return; }
           
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 seconds timeout
           
-          const res = await fetch(`${currentApiUrl}?action=joinRoom&roomId=${roomIdInput}&role=examinee&playerName=${encodeURIComponent(playerName)}`, { signal: controller.signal });
+          const res = await fetch(`${currentApiUrl}?action=joinRoom&roomId=${roomIdInput}&role=${SimState.lobbyRole}&playerName=${encodeURIComponent(playerName)}`, { signal: controller.signal });
           clearTimeout(timeoutId);
           const resultWrapper = await res.json();
           
           if (resultWrapper.success && resultWrapper.data && resultWrapper.data.roomId) {
             SimState.roomId = resultWrapper.data.roomId;
-            SimState.role = 'examinee';
+            SimState.role = SimState.lobbyRole;
             setupLobbyRoomUI();
           } else {
             throw new Error(resultWrapper.error || (resultWrapper.data && resultWrapper.data.error) || 'ไม่พบห้องที่ระบุ หรือห้องเต็มแล้ว');
