@@ -262,8 +262,14 @@
               <!-- Join fields -->
               <div id="lobby-join-fields" style="display: none; margin-top: 1rem; border-top: 1px dashed var(--border); padding-top: 1rem;">
                 <div class="form-group">
-                  <label class="form-label" for="lobby-room-id-input">รหัสห้องสอบ (Room ID 4 หลัก)</label>
-                  <input type="text" id="lobby-room-id-input" class="select-filter" style="width: 100%; border: 1px solid var(--border); padding: 0.5rem; text-align: center; font-size: 1.25rem; font-weight: bold; letter-spacing: 0.25rem;" placeholder="เช่น 1234" maxlength="4">
+                  <label class="form-label" for="lobby-room-id-input">ระบุรหัสห้องสอบ หรือเลือกจากห้องที่เปิดอยู่</label>
+                  <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                    <input type="text" id="lobby-room-id-input" class="select-filter" style="flex: 1; border: 1px solid var(--border); padding: 0.5rem; text-align: center; font-size: 1.25rem; font-weight: bold; letter-spacing: 0.25rem;" placeholder="เช่น 1234" maxlength="4">
+                    <button type="button" class="btn btn-secondary" onclick="fetchOpenRooms()" style="padding: 0 1rem;">🔄 รีเฟรชห้อง</button>
+                  </div>
+                  <div id="lobby-room-list" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); padding: 0.5rem;">
+                    <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1rem;">คลิกปุ่มรีเฟรชเพื่อดูห้องสอบที่เปิดอยู่</p>
+                  </div>
                 </div>
               </div>
 
@@ -493,7 +499,7 @@
         lobbyBtn.className = 'btn btn-primary';
         soloCon.style.display = 'none';
         lobbyCon.style.display = 'block';
-        sharedConfig.style.display = 'none'; // Hide Solo config in Lobby Mode
+        sharedConfig.style.display = SimState.lobbyOp === 'create' ? 'block' : 'none';
         SimState.isLobby = true;
       }
     }
@@ -550,15 +556,53 @@
       const createFields = document.getElementById('lobby-create-fields');
       const joinFields = document.getElementById('lobby-join-fields');
       const submitBtn = document.getElementById('lobby-submit-btn');
+      const sharedConfig = document.getElementById('shared-exam-config');
       
       if (op === 'create') {
         if (createFields) createFields.style.display = 'block';
         if (joinFields) joinFields.style.display = 'none';
+        if (sharedConfig && SimState.isLobby) sharedConfig.style.display = 'block';
         if (submitBtn) submitBtn.textContent = '📡 สร้างห้องซ้อมสอบใหม่ (Host)';
       } else {
         if (createFields) createFields.style.display = 'none';
         if (joinFields) joinFields.style.display = 'block';
+        if (sharedConfig && SimState.isLobby) sharedConfig.style.display = 'none';
         if (submitBtn) submitBtn.textContent = '📡 เข้าร่วมห้องที่มีอยู่';
+        fetchOpenRooms();
+      }
+    }
+
+    // Fetch open rooms
+    async function fetchOpenRooms() {
+      if (!currentApiUrl) return;
+      const listContainer = document.getElementById('lobby-room-list');
+      listContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1rem;">กำลังโหลด...</p>';
+      try {
+        const res = await fetch(`${currentApiUrl}?action=getOpenRooms`);
+        const result = await res.json();
+        if (result.success && result.data && result.data.rooms) {
+          const rooms = result.data.rooms;
+          if (rooms.length === 0) {
+            listContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1rem;">ไม่พบห้องสอบที่เปิดอยู่</p>';
+            return;
+          }
+          let html = '';
+          rooms.forEach(r => {
+            const hostName = r.hostRole === 'examinee' ? r.examineeName : r.examinerName;
+            html += `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; border-bottom: 1px solid var(--border);">
+                <div>
+                  <div style="font-weight: bold; color: var(--primary);">ห้อง: ${r.roomId}</div>
+                  <div style="font-size: 0.8rem; color: var(--text-secondary);">โฮสต์: ${hostName} (${r.hostRole})</div>
+                </div>
+                <button type="button" class="btn btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;" onclick="document.getElementById('lobby-room-id-input').value='${r.roomId}'">เลือก</button>
+              </div>
+            `;
+          });
+          listContainer.innerHTML = html;
+        }
+      } catch (e) {
+        listContainer.innerHTML = '<p style="text-align: center; color: var(--danger); font-size: 0.85rem; padding: 1rem;">ดึงข้อมูลห้องล้มเหลว</p>';
       }
     }
 
@@ -597,31 +641,68 @@
       try {
         if (SimState.lobbyOp === 'create') {
           // Host: create room
-          let caseSelect = document.getElementById('lobby-case-select').value;
-          if (caseSelect === 'random') {
-            const activeCases = AppState.cases.filter(c => c.isActive === 'TRUE' || c.isActive === true || c.isActive === 'yes' || c.isActive === undefined || c.isActive === '');
-            if (activeCases.length > 0) {
-              caseSelect = activeCases[Math.floor(Math.random() * activeCases.length)].caseId;
-            } else if (AppState.cases.length > 0) {
-              caseSelect = AppState.cases[Math.floor(Math.random() * AppState.cases.length)].caseId;
-            } else {
-              alert('ไม่พบเคสในระบบที่จะทำการสุ่มสอบ');
-              showGlobalLoader(false);
-              return;
+          const { clinic, product, sap } = getProportionValues();
+          const total = clinic + product + sap;
+          if (total === 0) {
+            alert('กรุณาเลือกอย่างน้อย 1 หมวดวิชาและระบุจำนวนมากกว่า 0');
+            showGlobalLoader(false);
+            return;
+          }
+          
+          let examSetRaw = generateLocalExamSet(clinic, product, sap);
+          if (!examSetRaw || examSetRaw.length === 0) {
+            alert('เกิดข้อผิดพลาด: ไม่สามารถสร้างชุดข้อสอบสุ่มได้ กรุณาโหลดเคสก่อน');
+            showGlobalLoader(false);
+            return;
+          }
+          
+          const restCount = parseInt(document.getElementById('rest-stations-count').value) || 0;
+          const restInterval = restCount > 0 ? Math.floor(examSetRaw.length / restCount) : 999;
+          let restInserted = 0;
+          let stationNumCounter = 1;
+          const fullExamSet = [];
+          
+          for (let i = 0; i < examSetRaw.length; i++) {
+            fullExamSet.push({ stationNumber: stationNumCounter++, caseId: examSetRaw[i].caseId });
+            if (restCount > 0 && (i + 1) % restInterval === 0 && restInserted < restCount) {
+              restInserted++;
+              fullExamSet.push({ stationNumber: stationNumCounter++, caseId: 'REST' });
             }
           }
+          
+          SimState.totalStations = fullExamSet.length;
+          
           const randomRoomId = String(Math.floor(1000 + Math.random() * 9000));
           
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 seconds timeout
+          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
           
-          const res = await fetch(`${currentApiUrl}?action=createRoom&roomId=${randomRoomId}&caseId=${caseSelect}&hostRole=${SimState.lobbyRole}&playerName=${encodeURIComponent(playerName)}`, { signal: controller.signal });
+          const examSetJson = JSON.stringify(fullExamSet);
+          
+          const res = await fetch(`${currentApiUrl}?action=createRoom&roomId=${randomRoomId}&caseId=${fullExamSet[0].caseId}&hostRole=${SimState.lobbyRole}&playerName=${encodeURIComponent(playerName)}&examSet=${encodeURIComponent(examSetJson)}`, { 
+            signal: controller.signal 
+          });
           clearTimeout(timeoutId);
           const resultWrapper = await res.json();
           
           if (resultWrapper.success && resultWrapper.data && resultWrapper.data.roomId) {
             SimState.roomId = resultWrapper.data.roomId;
             SimState.role = SimState.lobbyRole;
+            
+            // Set up local stations
+            SimState.stations = [];
+            for (let i = 0; i < fullExamSet.length; i++) {
+              if (fullExamSet[i].caseId === 'REST') {
+                SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: true, case: getRestCaseData() });
+              } else {
+                let matchedCase = AppState.cases.find(c => c.caseId === fullExamSet[i].caseId) || AppState.cases[0];
+                SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: false, case: matchedCase });
+              }
+            }
+            SimState.currentIdx = 0;
+            SimState.studentScores = {};
+            SimState.stations.forEach(st => { SimState.studentScores[st.stationNumber] = []; });
+            
             setupLobbyRoomUI();
           } else {
             throw new Error(resultWrapper.error || 'การสร้างห้องล้มเหลว');
@@ -716,19 +797,49 @@
             document.getElementById('lobby-waiting-screen').style.display = 'none';
             document.querySelector('.exam-layout').style.display = 'flex';
             
-            if (SimState.stations.length === 0 || SimState.stations[0].case.caseId !== room.caseId) {
+            // Build stations if not exist or if joining late
+            if (SimState.stations.length === 0) {
               showGlobalLoader(true);
-              let matchedCase = room.caseDetail;
-              if (!matchedCase) {
-                matchedCase = AppState.cases.find(c => c.caseId === room.caseId) || AppState.cases[0];
+              let fullExamSet = [];
+              if (room.examSet && typeof room.examSet === 'string' && room.examSet.length > 0) {
+                try {
+                  fullExamSet = JSON.parse(room.examSet);
+                } catch(e) {}
               }
-              SimState.stations = [{ stationNumber: 1, case: matchedCase }];
-              SimState.studentScores = { 1: room.checklistProgress || [] };
-              renderStation(0);
+              
+              if (fullExamSet.length === 0) {
+                 // Fallback for old rooms without examSet
+                 fullExamSet = [{stationNumber: 1, caseId: room.caseId}];
+              }
+              
+              SimState.stations = [];
+              SimState.studentScores = {};
+              SimState.totalStations = fullExamSet.length;
+              
+              for (let i = 0; i < fullExamSet.length; i++) {
+                SimState.studentScores[fullExamSet[i].stationNumber] = [];
+                if (fullExamSet[i].caseId === 'REST') {
+                  SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: true, case: getRestCaseData() });
+                } else {
+                  let matchedCase = AppState.cases.find(c => c.caseId === fullExamSet[i].caseId) || AppState.cases[0];
+                  SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: false, case: matchedCase });
+                }
+              }
               showGlobalLoader(false);
-            } else if (SimState.role === 'examinee') {
+            }
+            
+            // Find current station index by matching caseId, or if it changed
+            let targetIdx = SimState.stations.findIndex(st => st.case.caseId === room.caseId);
+            if (targetIdx !== -1 && targetIdx !== SimState.currentIdx) {
+              renderStation(targetIdx);
+            } else if (SimState.currentIdx === 0 && SimState.stations[0].case.caseId === room.caseId && document.getElementById('exam-case-title').textContent === 'โหลดเคส...') {
+              renderStation(0);
+            }
+            
+            if (SimState.role === 'examinee') {
               // Sync checklist progress continuously during exam for the examinee
-              SimState.studentScores[1] = room.checklistProgress || [];
+              const currStationNum = SimState.stations[SimState.currentIdx].stationNumber;
+              SimState.studentScores[currStationNum] = room.checklistProgress || [];
             }
             
             if (SimState.role === 'examinee') {
@@ -749,11 +860,11 @@
             if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
             if (SimState.timerInterval) clearInterval(SimState.timerInterval);
             
-            if (SimState.stations.length === 0 || SimState.stations[0].case.caseId !== room.caseId) {
+            if (SimState.stations.length === 0) {
+              // Just a fallback
               let matchedCase = room.caseDetail || AppState.cases.find(c => c.caseId === room.caseId) || AppState.cases[0];
               SimState.stations = [{ stationNumber: 1, case: matchedCase }];
             }
-            SimState.studentScores = { 1: room.checklistProgress || [] };
             finishExamSimulation();
           }
         }
@@ -1111,7 +1222,10 @@
         if (SimState.timerSyncInterval) clearInterval(SimState.timerSyncInterval);
         SimState.timerSyncInterval = setInterval(() => {
           if (SimState.timerRunning) {
-            fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&timerValue=${SimState.timerValue}`);
+            // Include checklist progress when syncing
+            const currStationNum = SimState.stations[SimState.currentIdx].stationNumber;
+            const checkedIds = SimState.studentScores[currStationNum] || [];
+            fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&timerValue=${SimState.timerValue}&checklistProgress=${checkedIds.join(',')}`);
           }
         }, 5000);
       }
@@ -1179,10 +1293,12 @@
       const currentCase = SimState.stations[SimState.currentIdx].case;
       updateExamProgressUI(stationNum, currentCase);
       
-      if (!SimState.isLobby) {
-        renderMiniMap();
-      } else {
-        updateLobbyChecklistOnServer();
+      renderMiniMap(); // Always render minimap
+      
+      if (SimState.isLobby) {
+        // Sync checklist directly when toggled
+        const checkedIds = SimState.studentScores[stationNum] || [];
+        fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&checklistProgress=${checkedIds.join(',')}`);
       }
     }
 
@@ -1244,7 +1360,6 @@
         const nextIdx = SimState.currentIdx + 1;
         if (SimState.isLobby && SimState.role === 'examiner') {
           fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&caseId=${SimState.stations[nextIdx].case.caseId}&timerValue=240&status=running`);
-          SimState.studentScores[1] = [];
         }
         renderStation(nextIdx);
       }
@@ -1255,7 +1370,6 @@
         const prevIdx = SimState.currentIdx - 1;
         if (SimState.isLobby && SimState.role === 'examiner') {
           fetch(`${currentApiUrl}?action=updateRoomStatus&roomId=${SimState.roomId}&caseId=${SimState.stations[prevIdx].case.caseId}&timerValue=240&status=running`);
-          SimState.studentScores[1] = [];
         }
         renderStation(prevIdx);
       }

@@ -166,6 +166,9 @@ function doGet(e) {
         case 'joinRoom':
           return buildResponse(joinRoom(e.parameter));
           
+        case 'getOpenRooms':
+          return buildResponse(getOpenRooms());
+          
         case 'getRoomStatus':
           return buildResponse(getRoomStatus(e.parameter.roomId));
           
@@ -903,7 +906,7 @@ function setupSheets() {
   let sheetLobby = ss.getSheetByName(CONFIG.sheets.lobbyRooms);
   if (!sheetLobby) {
     sheetLobby = ss.insertSheet(CONFIG.sheets.lobbyRooms);
-    sheetLobby.appendRow(['roomId', 'caseId', 'hostRole', 'examineeName', 'examinerName', 'timerValue', 'timerRunning', 'checklistProgress', 'status', 'lastUpdated']);
+    sheetLobby.appendRow(['roomId', 'caseId', 'hostRole', 'examineeName', 'examinerName', 'timerValue', 'timerRunning', 'checklistProgress', 'status', 'lastUpdated', 'examSet']);
     results.push('สร้างชีท LobbyRooms และลงทะเบียนเรียบร้อย');
   } else {
     results.push('ชีท LobbyRooms มีอยู่แล้ว');
@@ -1351,13 +1354,14 @@ function createRoom(params) {
   let sheet = ss.getSheetByName(CONFIG.sheets.lobbyRooms);
   if (!sheet) {
     sheet = ss.insertSheet(CONFIG.sheets.lobbyRooms);
-    sheet.appendRow(['roomId', 'caseId', 'hostRole', 'examineeName', 'examinerName', 'timerValue', 'timerRunning', 'checklistProgress', 'status', 'lastUpdated']);
+    sheet.appendRow(['roomId', 'caseId', 'hostRole', 'examineeName', 'examinerName', 'timerValue', 'timerRunning', 'checklistProgress', 'status', 'lastUpdated', 'examSet']);
   }
   
   const roomId = params.roomId || String(Math.floor(1000 + Math.random() * 9000));
   const caseId = params.caseId || '';
   const hostRole = params.hostRole || 'examiner';
   const playerName = params.playerName || 'Host';
+  const examSet = params.examSet || '';
   
   const examineeName = hostRole === 'examinee' ? playerName : '';
   const examinerName = hostRole === 'examiner' ? playerName : '';
@@ -1373,9 +1377,9 @@ function createRoom(params) {
   }
   
   if (foundRowIdx > -1) {
-    sheet.getRange(foundRowIdx, 2, 1, 9).setValues([[caseId, hostRole, examineeName, examinerName, 240, 'FALSE', '', 'setup', timestamp]]);
+    sheet.getRange(foundRowIdx, 2, 1, 10).setValues([[caseId, hostRole, examineeName, examinerName, 240, 'FALSE', '', 'setup', timestamp, examSet]]);
   } else {
-    sheet.appendRow([roomId, caseId, hostRole, examineeName, examinerName, 240, 'FALSE', '', 'setup', timestamp]);
+    sheet.appendRow([roomId, caseId, hostRole, examineeName, examinerName, 240, 'FALSE', '', 'setup', timestamp, examSet]);
   }
   
   return { roomId: roomId, status: 'created', role: hostRole };
@@ -1443,7 +1447,8 @@ function getRoomStatus(roomId) {
         timerRunning: String(data[i][6]) === 'TRUE',
         checklistProgress: data[i][7] ? String(data[i][7]).split(',') : [],
         status: data[i][8],
-        lastUpdated: data[i][9]
+        lastUpdated: data[i][9],
+        examSet: data[i][10] || ''
       };
       break;
     }
@@ -1463,6 +1468,33 @@ function getRoomStatus(roomId) {
   }
   
   return room;
+}
+
+function getOpenRooms() {
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName(CONFIG.sheets.lobbyRooms);
+  if (!sheet) return { rooms: [] };
+  
+  const data = sheet.getDataRange().getValues();
+  const rooms = [];
+  const now = new Date().getTime();
+  
+  for (let i = 1; i < data.length; i++) {
+    const status = data[i][8];
+    const lastUpdated = new Date(data[i][9]).getTime();
+    
+    // Only show rooms in 'setup' status and updated within last 2 hours
+    if (status === 'setup' && (now - lastUpdated) < 7200000) {
+      rooms.push({
+        roomId: String(data[i][0]),
+        hostRole: data[i][2],
+        examineeName: data[i][3],
+        examinerName: data[i][4],
+        examSet: data[i][10] || ''
+      });
+    }
+  }
+  return { rooms: rooms };
 }
 
 function updateRoomStatus(roomId, params) {
