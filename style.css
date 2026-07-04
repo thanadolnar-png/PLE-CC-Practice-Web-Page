@@ -319,6 +319,12 @@ a {
 }
 .btn-product:hover { background-color: #7c3aed; }
 
+.btn-sap {
+  background-color: var(--sap);
+  color: white;
+}
+.btn-sap:hover { background-color: #d97706; }
+
 .btn-danger {
   background-color: var(--danger);
   color: white;

@@ -358,7 +358,7 @@
             </div>
 
             <!-- Checklist container -->
-            <div class="checklist-container" id="exam-checklist-container" style="margin-bottom: 1.5rem; max-height: 300px; overflow-y: auto;">
+            <div class="checklist-container" id="exam-checklist-container" style="margin-bottom: 1.5rem; overflow-y: auto;">
               <!-- Checklist items populated dynamically -->
             </div>
 
@@ -1109,9 +1109,9 @@
           el.style.gap = '0.5rem';
           el.addEventListener('click', () => toggleExamChecklistItem(stationNum, item.id, item.score));
           el.innerHTML = `
-            <div class="checkbox-custom" style="width:1.1rem; height:1.1rem;"></div>
-            <span class="checklist-item-score" style="font-size:0.75rem;">(${item.score} คะแนน)</span>
-            <span class="checklist-item-text" style="font-size:0.85rem;">${escapeHtml(item.text)}</span>
+            <div class="checkbox-custom"></div>
+            <span class="checklist-item-score">(${item.score} คะแนน)</span>
+            <span class="checklist-item-text">${escapeHtml(item.text)}</span>
           `;
           chkContainer.appendChild(el);
         });

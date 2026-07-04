@@ -1547,14 +1547,14 @@ function syncCaseLibraryFromDocs() {
   let sheetLib = ss.getSheetByName(CONFIG.sheets.caseLibrary);
   if (!sheetLib) {
     sheetLib = ss.insertSheet(CONFIG.sheets.caseLibrary);
-    const headers = ['caseId', 'title', 'category', 'mainGroup', 'subTopic', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive'];
+    const headers = ['caseId', 'title', 'category', 'mainGroup', 'subTopic', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive', 'linkedNextCase', 'linkedFromCase'];
     sheetLib.appendRow(headers);
   }
   
   // โหลดรายการเดิมที่มีอยู่ใน Sheet
   const existingCasesMap = {};
   const data = sheetLib.getDataRange().getValues();
-  const headers = ['caseId', 'title', 'category', 'mainGroup', 'subTopic', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive'];
+  const headers = ['caseId', 'title', 'category', 'mainGroup', 'subTopic', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive', 'linkedNextCase', 'linkedFromCase'];
   const rows = data.length > 2 ? data.slice(2) : []; // อ่านข้อมูลจากแถว 3 เป็นต้นไป
   rows.forEach(row => {
     const caseId = row[0];
@@ -1599,8 +1599,18 @@ function syncCaseLibraryFromDocs() {
       docId: c.docId || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].docId : ''),
       author: c.author || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].author : ''),
       createdDate: c.createdDate || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].createdDate : ''),
-      isActive: (existingCasesMap[c.caseId] && existingCasesMap[c.caseId].isActive !== undefined) ? existingCasesMap[c.caseId].isActive : 'TRUE'
+      isActive: (existingCasesMap[c.caseId] && existingCasesMap[c.caseId].isActive !== undefined) ? existingCasesMap[c.caseId].isActive : 'TRUE',
+      linkedFromCase: c.linkedFromCase || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].linkedFromCase : ''),
+      linkedNextCase: existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].linkedNextCase : ''
     };
+  });
+  
+  // Auto-link next cases based on linkedFromCase
+  Object.keys(existingCasesMap).forEach(caseId => {
+    const c = existingCasesMap[caseId];
+    if (c.linkedFromCase && existingCasesMap[c.linkedFromCase]) {
+      existingCasesMap[c.linkedFromCase].linkedNextCase = c.caseId;
+    }
   });
   
   // เคลียร์ชีทใต้ส่วนหัว
@@ -1629,7 +1639,9 @@ function syncCaseLibraryFromDocs() {
       c.docId,
       c.author,
       c.createdDate,
-      c.isActive
+      c.isActive,
+      c.linkedNextCase || '',
+      c.linkedFromCase || ''
     ]);
   });
   
@@ -1700,6 +1712,13 @@ function scanDocForCases(docId) {
           }
           
           if (isTableCase && caseId) {
+            let linkedFromCase = '';
+            const linkMatch = title.match(/\(ต่อจาก\s*(OSPE-[A-Z0-9]+|[A-Z0-9]+)\)/i);
+            if (linkMatch) {
+              linkedFromCase = linkMatch[1].toUpperCase();
+              if (!linkedFromCase.startsWith('OSPE-')) linkedFromCase = 'OSPE-' + linkedFromCase;
+            }
+            
             cases.push({
               caseId: caseId,
               title: title || 'Untitled Case',
@@ -1711,7 +1730,8 @@ function scanDocForCases(docId) {
               docId: docId,
               author: author || 'Unknown',
               createdDate: createdDate || new Date().toLocaleDateString('th-TH'),
-              isActive: 'TRUE'
+              isActive: 'TRUE',
+              linkedFromCase: linkedFromCase
             });
           }
         }
@@ -1778,6 +1798,13 @@ function scanDocForCases(docId) {
             j++;
           }
           
+          let linkedFromCase = '';
+          const linkMatch = title.match(/\(ต่อจาก\s*(OSPE-[A-Z0-9]+|[A-Z0-9]+)\)/i);
+          if (linkMatch) {
+            linkedFromCase = linkMatch[1].toUpperCase();
+            if (!linkedFromCase.startsWith('OSPE-')) linkedFromCase = 'OSPE-' + linkedFromCase;
+          }
+          
           cases.push({
             caseId: caseId,
             title: title || 'Untitled Case',
@@ -1789,7 +1816,8 @@ function scanDocForCases(docId) {
             docId: docId,
             author: author || '',
             createdDate: createdDate || new Date().toLocaleDateString('th-TH'),
-            isActive: 'TRUE'
+            isActive: 'TRUE',
+            linkedFromCase: linkedFromCase
           });
           
           i = j - 1;
