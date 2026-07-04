@@ -148,23 +148,46 @@
         width: 100% !important;
         background: transparent !important;
       }
-      .viewer-title {
-        font-size: 20pt !important;
-        color: var(--text-primary) !important;
-        margin-top: 0 !important;
+      .viewer-header {
+        border: 1.5px solid var(--text-primary) !important;
+        padding: 20px 25px !important;
+        border-radius: var(--radius-md) !important;
         margin-bottom: 1.5rem !important;
+        background-color: var(--bg-secondary) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .viewer-title {
+        font-size: 18pt !important;
+        color: var(--text-primary) !important;
+        margin: 0 !important;
         font-weight: 800 !important;
-        border-bottom: 2px solid var(--text-primary) !important;
-        padding-bottom: 0.5rem !important;
+        border-bottom: none !important;
+        padding-bottom: 0 !important;
+      }
+      #view-tab-content-area {
+        border: 1.5px solid var(--border) !important;
+        padding: 25px !important;
+        border-radius: var(--radius-md) !important;
+        background-color: #ffffff !important;
+        margin-bottom: 1.5rem !important;
       }
       .viewer-section-title {
         font-size: 13pt !important;
         color: var(--text-secondary) !important;
-        margin-top: 1.5rem !important;
+        margin-top: 1rem !important;
         margin-bottom: 0.75rem !important;
         border-left: 4px solid var(--primary) !important;
         padding-left: 0.5rem !important;
         font-weight: 700 !important;
+      }
+      .print-only {
+        border: 1.5px solid var(--border) !important;
+        padding: 25px !important;
+        border-radius: var(--radius-md) !important;
+        background-color: #ffffff !important;
+        margin-top: 1.5rem !important;
+        display: block !important;
       }
       
       /* Checklist table styling */
@@ -172,7 +195,7 @@
         width: 100% !important;
         border-collapse: collapse !important;
         margin-top: 1rem !important;
-        margin-bottom: 1.5rem !important;
+        margin-bottom: 1rem !important;
         font-size: 10pt !important;
       }
       .print-checklist-table th, .print-checklist-table td {
@@ -199,17 +222,16 @@
       .print-center-cell {
         text-align: center !important;
       }
-
-      /* Note / Answer box */
+      
       .note-content {
         display: block !important;
         background-color: var(--bg-primary) !important;
         color: var(--text-primary) !important;
-        border: 1px solid var(--border) !important;
-        border-left: 5px solid var(--sap) !important;
-        padding: 1.25rem !important;
+        border: 1.5px solid var(--border) !important;
+        border-left: 6px solid var(--sap) !important;
+        padding: 25px !important;
         margin-top: 1rem !important;
-        border-radius: var(--radius-sm) !important;
+        border-radius: var(--radius-md) !important;
         font-size: 10pt !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
