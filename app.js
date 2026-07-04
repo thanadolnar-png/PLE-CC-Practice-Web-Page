@@ -8,9 +8,8 @@
  */
 
 // อัปเดต URL ของ Google Apps Script Web App ที่นี่หลังทำ Deployment เสร็จ
-const API_URL_KEY = 'ple_cc_api_url';
 const API_URL = 'https://script.google.com/macros/s/AKfycbwhdMVZ2mcR2dwUagrcLJ6Os1PjwrKO_X8xjwEOJUWYYONZfmYjvVbdXrCVh7qFC0iM/exec';
-let currentApiUrl = localStorage.getItem(API_URL_KEY) || API_URL;
+let currentApiUrl = API_URL;
 
 const AppState = {
   theme: localStorage.getItem('theme') || 'light',
@@ -113,45 +112,9 @@ function updateThemeButtonIcon(btn) {
     : `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m0 13.5V21M4.22 4.22l1.59 1.59m12.38 12.38l1.59 1.59M21 12h-2.25m-13.5 0H3m2.28 6.06l1.59-1.59m12.38-12.38l1.59-1.59M12 7.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z"></path></svg>`;
 }
 
-// จัดการ API Input modal/config
+// จัดการ API Input modal/config (Deprecated: API is configured backend-only now)
 function initApiConfig() {
-  const modal = document.getElementById('api-config-modal');
-  const configBtn = document.getElementById('api-config-btn');
-  const closeBtn = document.getElementById('api-close-btn');
-  const inputEl = document.getElementById('api-url-input');
-  const saveBtn = document.getElementById('api-save-btn');
-  
-  if (inputEl) {
-    inputEl.value = currentApiUrl;
-  }
-  
-  if (modal && configBtn) {
-    configBtn.addEventListener('click', () => {
-      modal.classList.add('show');
-    });
-  }
-  
-  if (modal && closeBtn) {
-    closeBtn.addEventListener('click', () => {
-      modal.classList.remove('show');
-    });
-  }
-  
-  // ปิดเมื่อคลิกพื้นที่ด้านนอก (backdrop)
-  window.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      modal.classList.remove('show');
-    }
-  });
-  
-  if (saveBtn && inputEl) {
-    saveBtn.addEventListener('click', () => {
-      currentApiUrl = inputEl.value.trim();
-      localStorage.setItem(API_URL_KEY, currentApiUrl);
-      alert('บันทึก API URL เรียบร้อย ระบบจะโหลดข้อมูลใหม่!');
-      window.location.reload();
-    });
-  }
+  // No-op
 }
 
 // ──────────────────────────────────────────────────────────────

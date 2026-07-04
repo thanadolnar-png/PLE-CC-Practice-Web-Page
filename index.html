@@ -150,30 +150,8 @@
         <p>© 2026 คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม ปีการศึกษา 2569 | ฝ่ายวิชาการ</p>
         <p class="footer-credit">พัฒนาโดยประธานโครงการและเพื่อนพ้องวิชาการเภสัชฯ จุฬาฯ</p>
       </div>
-      <button id="api-config-btn" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">⚙️ ตั้งค่าระบบ (API)</button>
     </div>
   </footer>
-
-  <!-- API Config Modal -->
-  <dialog id="api-config-modal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">ตั้งค่าการเชื่อมต่อ API</h3>
-        <button id="api-close-btn" class="modal-close" aria-label="Close modal">×</button>
-      </div>
-      <div class="modal-body">
-        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">
-          ใส่ลิงก์ Web App URL ที่ได้จากการ Deploy ใน Google Apps Script เพื่อเปิดใช้งานการดึงข้อมูลสดแบบ Real-time (หากเว้นว่าง ระบบจะใช้งาน Offline Database สำรองอัตโนมัติ)
-        </p>
-        <div class="config-inputs">
-          <input type="text" id="api-url-input" class="config-input" placeholder="https://script.google.com/macros/s/AKfycb.../exec">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button id="api-save-btn" class="btn btn-primary">บันทึกและโหลดข้อมูลใหม่</button>
-      </div>
-    </div>
-  </dialog>
 
   <script src="case-data-offline.js?v=3.2"></script>
   <script src="app.js"></script>
