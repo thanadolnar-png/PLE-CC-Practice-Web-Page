@@ -326,191 +326,438 @@ function getCase(caseId) {
 }
 
 /**
- * ──────────────────────────────────────────────────────────────
- * 3. Google Docs Parser (ดึงข้อความ & รูปภาพภาพประกอบ)
- * ──────────────────────────────────────────────────────────────
+ * 🔍 DEBUG FUNCTION: ทดสอบการอ่านเนื้อหาเคสแบบ step-by-step
+ * วิธีใช้: เปิด Apps Script → เลือก testGetCaseContent → กด Run → ดู Execution Log
  */
-function getCaseContentFromDoc(docId, targetCaseId) {
+function testGetCaseContent() {
+  const docId = '1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g';
+  const targetCaseId = 'OSPE-CL999';
+  
+  Logger.log('=== testGetCaseContent: ' + targetCaseId + ' ===');
+  
   const doc = DocumentApp.openById(docId);
-  const body = doc.getBody();
+  const bodies = getAllDocumentTabBodies(doc);
+  Logger.log('Total bodies (tabs): ' + bodies.length);
   
-  let currentSection = '';
-  let scenario = '';
-  let patientInfoHtml = '';
-  let noteHtml = '';
-  let contentHtml = '';
-  
-  const checklist = [];
-  let currentGroup = 'ทั่วไป';
-  
-  let recording = false;
-  let hasFoundCase = false;
-  
-  const numChildren = body.getNumChildren();
-  
-  for (let i = 0; i < numChildren; i++) {
-    const child = body.getChild(i);
-    const type = child.getType();
+  for (let b = 0; b < bodies.length; b++) {
+    const body = bodies[b];
+    Logger.log('\n--- Scanning body/tab ' + b + ' (' + body.getText().length + ' chars) ---');
     
-    // 1. ตรวจสอบว่าตารางแม่แบบเขียนเคสหรือไม่ (Table Template)
-    if (type === DocumentApp.ElementType.TABLE) {
-      const table = child.asTable();
-      const isTemplate = checkTableTemplate(table, targetCaseId);
-      if (isTemplate) {
-        return parseTableTemplateToCaseData(table, targetCaseId);
+    let recording = false;
+    let hasFoundCase = false;
+    let currentSection = '';
+    let scenario = '';
+    let checklist = [];
+    let patientInfoHtml = '';
+    let contentHtml = '';
+    let noteHtml = '';
+    let currentGroup = 'ทั่วไป';
+    
+    const numChildren = body.getNumChildren();
+    Logger.log('numChildren: ' + numChildren);
+    
+    for (let i = 0; i < numChildren; i++) {
+      const child = body.getChild(i);
+      const type = child.getType();
+      
+      if (type === DocumentApp.ElementType.TABLE) {
+        if (recording) Logger.log('[i=' + i + '] TABLE in section=' + currentSection);
+        continue;
       }
       
-      // ถ้าเป็นตารางทั่วไปที่อยู่ในส่วน ข้อมูลผู้ป่วย หรือ เฉลย
-      if (recording) {
-        if (currentSection === 'PATIENT_INFO') {
-          patientInfoHtml += parseTableToHtml(table);
-        } else if (currentSection === 'NOTE') {
-          noteHtml += parseTableToHtml(table);
-        }
-      }
-      continue;
-    }
-    
-    // 2. ตรวจสอบย่อหน้าหัวข้อต่างๆ
-    if (type === DocumentApp.ElementType.PARAGRAPH) {
-      const p = child.asParagraph();
-      const text = p.getText().trim();
-      const heading = p.getHeading();
-      
-      // ค้นหาการประกาศเคสใหม่ในแบบข้อเขียน เช่น # [OSPE-CL001] หรือ [OSPE-CL001]
-      const caseIdMatch = text.match(/^#+\s*\[(OSPE-[A-Z0-9]+)\]/) || text.match(/^\[(OSPE-[A-Z0-9]+)\]/);
-      if (caseIdMatch) {
-        const foundCaseId = caseIdMatch[1];
-        if (foundCaseId === targetCaseId) {
-          recording = true;
-          hasFoundCase = true;
-          currentSection = 'METADATA';
+      if (type === DocumentApp.ElementType.PARAGRAPH) {
+        const p = child.asParagraph();
+        const text = p.getText().trim();
+        const heading = p.getHeading();
+        
+        // Log only when recording or when finding case header
+        const caseIdMatch = text.match(/^#+\s*[\[{](OSPE-[A-Z0-9]+)[\]}]/) || text.match(/^[\[{](OSPE-[A-Z0-9]+)[\]}]/);
+        if (caseIdMatch) {
+          const foundCaseId = caseIdMatch[1];
+          Logger.log('[i=' + i + '] CASE HEADER found: ' + foundCaseId + ' | heading=' + heading + ' | text preview: ' + text.substring(0, 60));
+          if (foundCaseId === targetCaseId) {
+            recording = true;
+            hasFoundCase = true;
+            currentSection = 'METADATA';
+            Logger.log('  → recording=TRUE, currentSection=METADATA');
+            continue;
+          } else if (recording) {
+            Logger.log('  → Found next case, stopping');
+            break;
+          }
           continue;
-        } else if (recording) {
-          // เจอเคสถัดไปแล้ว สั่งตัดการบันทึก (Multi-case support)
-          recording = false;
-          break;
+        }
+        
+        if (!recording) continue;
+        
+        // Log all paragraphs when recording
+        Logger.log('[i=' + i + '] PARA | heading=' + heading + ' | section=' + currentSection + ' | text: ' + text.substring(0, 80));
+        
+        // Section detection
+        const isHeadingLevel = (heading === DocumentApp.ParagraphHeading.HEADING1 || 
+                                 heading === DocumentApp.ParagraphHeading.HEADING2 ||
+                                 heading === DocumentApp.ParagraphHeading.HEADING3 ||
+                                 text.startsWith('## ') || text.startsWith('# '));
+        
+        if (isHeadingLevel && !text.startsWith('(กลุ่ม:') && !text.startsWith('**กลุ่ม:')) {
+          const cleanText = text.replace(/^#+\s*/, '').trim();
+          let newSection = '';
+          if (cleanText.includes('ข้อมูลเคส')) newSection = 'METADATA';
+          else if (cleanText.includes('โจทย์') || cleanText.includes('สถานการณ์')) newSection = 'SCENARIO';
+          else if (cleanText.includes('ข้อมูลผู้ป่วย')) newSection = 'PATIENT_INFO';
+          else if (cleanText.toLowerCase().includes('checklist') || cleanText.includes('ทักษะ') || cleanText.includes('รายการ') || cleanText.includes('เกณฑ์') || cleanText.includes('ประเมิน') || cleanText.includes('สมรรถนะ')) newSection = 'CHECKLIST';
+          else if (cleanText.includes('หมายเหตุ') || cleanText.includes('เฉลย') || cleanText.includes('ข้อมูลผู้ตรวจ')) newSection = 'NOTE';
+          else newSection = 'OTHER';
+          
+          Logger.log('  → SECTION CHANGE: ' + currentSection + ' → ' + newSection + ' (cleanText: "' + cleanText + '")');
+          currentSection = newSection;
+          continue;
         }
       }
       
       if (!recording) continue;
       
-      // ตรวจสอบหัวข้อหลักย่อย (ต้องไม่ใช่การระบุกลุ่มย่อยของ Checklist เช่น (กลุ่ม: ...))
-      if ((heading === DocumentApp.ParagraphHeading.HEADING1 || 
-           heading === DocumentApp.ParagraphHeading.HEADING2 || 
-           text.startsWith('## ') || 
-           text.startsWith('# ')) &&
-          !text.startsWith('(กลุ่ม:') &&
-          !text.startsWith('**กลุ่ม:')) {
+      // Content collection logging
+      if (currentSection === 'SCENARIO' && type === DocumentApp.ElementType.PARAGRAPH) {
+        const t = child.asParagraph().getText().trim();
+        if (t) { Logger.log('  → SCENARIO collected: ' + t.substring(0, 60)); scenario += t + '\n'; }
+      } else if (currentSection === 'CHECKLIST') {
+        let t = '';
+        if (type === DocumentApp.ElementType.LIST_ITEM) t = child.asListItem().getText().trim();
+        else if (type === DocumentApp.ElementType.PARAGRAPH) t = child.asParagraph().getText().trim();
+        if (t) Logger.log('  → CHECKLIST item: ' + t.substring(0, 60));
+      } else if (currentSection === 'NOTE' && type === DocumentApp.ElementType.PARAGRAPH) {
+        const t = child.asParagraph().getText().trim();
+        if (t) Logger.log('  → NOTE collected: ' + t.substring(0, 60));
+      }
+    }
+    
+    if (hasFoundCase) {
+      Logger.log('\n=== RESULT ===');
+      Logger.log('scenario length: ' + scenario.length);
+      Logger.log('patientInfoHtml length: ' + patientInfoHtml.length);
+      Logger.log('checklist items: ' + checklist.length);
+      Logger.log('noteHtml length: ' + noteHtml.length);
+      return;
+    }
+  }
+  
+  Logger.log('Case NOT FOUND in any tab!');
+}
+
+/**
+ * 🔍 DEBUG FUNCTION: ทดสอบการอ่าน Tabs ใน Google Doc
+ * วิธีใช้: เปิด Apps Script → เลือกฟังก์ชัน testDocTabs → กด Run → ดู Execution Log
+ */
+function testDocTabs() {
+  // ใส่ DocId ของ Doc ที่มีหลาย Tab
+  const docId = '1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g'; // Clinic Doc
+  
+  const doc = DocumentApp.openById(docId);
+  Logger.log('=== DOC TAB DIAGNOSTIC ===');
+  Logger.log('Doc Name: ' + doc.getName());
+  Logger.log('Has getTabs method: ' + (typeof doc.getTabs === 'function'));
+  
+  if (typeof doc.getTabs !== 'function') {
+    Logger.log('❌ doc.getTabs() is NOT available in this runtime');
+    Logger.log('Fallback: reading doc.getBody() → ' + doc.getBody().getText().substring(0, 100));
+    return;
+  }
+  
+  const tabs = doc.getTabs();
+  Logger.log('Total tabs returned: ' + tabs.length);
+  
+  if (tabs.length === 0) {
+    Logger.log('❌ getTabs() returned empty array — Tabs API may not be enabled for this doc');
+    Logger.log('Fallback body text: ' + doc.getBody().getText().substring(0, 100));
+    return;
+  }
+  
+  tabs.forEach(function(tab, idx) {
+    try {
+      Logger.log('--- Tab ' + idx + ' ---');
+      Logger.log('  Title: ' + tab.getTitle());
+      Logger.log('  ID: ' + tab.getId());
+      Logger.log('  Has asDocumentTab: ' + (typeof tab.asDocumentTab === 'function'));
+      
+      if (typeof tab.asDocumentTab === 'function') {
+        const docTab = tab.asDocumentTab();
+        const body = docTab.getBody();
+        const text = body.getText();
+        Logger.log('  Body length: ' + text.length + ' chars');
+        Logger.log('  First 200 chars: ' + text.substring(0, 200));
         
-        const cleanText = text.replace(/^#+\s*/, '').trim();
-        if (cleanText.includes('ข้อมูลเคส')) {
-          currentSection = 'METADATA';
-        } else if (cleanText.includes('โจทย์') || cleanText.includes('สถานการณ์')) {
-          currentSection = 'SCENARIO';
-        } else if (cleanText.includes('ข้อมูลผู้ป่วย')) {
-          currentSection = 'PATIENT_INFO';
-        } else if (cleanText.includes('Checklist') || cleanText.toLowerCase().includes('checklist') || cleanText.includes('\u0e17\u0e31\u0e01\u0e29\u0e30') || cleanText.includes('\u0e23\u0e32\u0e22\u0e01\u0e32\u0e23') || cleanText.includes('\u0e40\u0e01\u0e13\u0e11') || cleanText.includes('\u0e1b\u0e23\u0e30\u0e40\u0e21\u0e34\u0e19') || cleanText.includes('\u0e2a\u0e21\u0e23\u0e23\u0e16\u0e19\u0e30')) {
-          currentSection = 'CHECKLIST';
-        } else if (cleanText.includes('หมายเหตุ') || cleanText.includes('เฉลย') || cleanText.includes('ข้อมูลผู้ตรวจ')) {
-          currentSection = 'NOTE';
-        } else {
-          currentSection = 'OTHER';
+        // ค้นหา Case ID ใน Tab นี้
+        const matches = text.match(/[\[({](OSPE-[A-Z0-9]+)[\])}]/g);
+        Logger.log('  Case IDs found: ' + (matches ? matches.join(', ') : 'none'));
+      }
+      
+      // ลูก Tab (nested)
+      if (typeof tab.getChildTabs === 'function') {
+        const children = tab.getChildTabs();
+        Logger.log('  Child tabs: ' + children.length);
+      }
+    } catch (e) {
+      Logger.log('  ❌ Error reading tab ' + idx + ': ' + e.toString());
+    }
+  });
+}
+
+/**
+ * Helper function to retrieve all Document Tab bodies recursively (supporting nested tabs)
+ */
+function getAllDocumentTabBodies(doc) {
+  const bodies = [];
+  
+  // ตรวจสอบว่า getTabs API พร้อมใช้งานหรือไม่
+  if (typeof doc.getTabs !== 'function') {
+    Logger.log('[getAllDocumentTabBodies] doc.getTabs() ไม่พร้อมใช้งาน ใช้ getBody() แทน');
+    try {
+      const body = doc.getBody();
+      if (body) bodies.push(body);
+    } catch(e) {}
+    return bodies;
+  }
+  
+  const tabs = doc.getTabs();
+  Logger.log('[getAllDocumentTabBodies] พบ ' + tabs.length + ' แท็บ');
+  
+  function traverse(tabList, depth) {
+    if (!tabList || tabList.length === 0) return;
+    tabList.forEach(function(tab, idx) {
+      try {
+        Logger.log('[Tab ' + depth + '.' + idx + '] ' + tab.getTitle());
+        if (typeof tab.asDocumentTab === 'function') {
+          const body = tab.asDocumentTab().getBody();
+          if (body) {
+            bodies.push(body);
+            Logger.log('  → เพิ่ม body สำเร็จ (' + body.getText().length + ' chars)');
+          }
+        }
+      } catch (e) {
+        Logger.log('  → ❌ Error: ' + e.toString());
+      }
+      
+      // Traverse nested child tabs
+      if (typeof tab.getChildTabs === 'function') {
+        const childTabs = tab.getChildTabs();
+        if (childTabs && childTabs.length > 0) {
+          traverse(childTabs, depth + 1);
+        }
+      }
+    });
+  }
+  
+  if (tabs.length > 0) {
+    traverse(tabs, 0);
+  }
+  
+  // Fallback: ถ้าไม่สามารถดึง body ได้จาก getTabs ให้ใช้ getBody() เดิม
+  if (bodies.length === 0) {
+    Logger.log('[getAllDocumentTabBodies] ไม่ได้รับ body จาก getTabs() — fallback to doc.getBody()');
+    try {
+      const body = doc.getBody();
+      if (body) bodies.push(body);
+    } catch (e) {}
+  }
+  
+  return bodies;
+}
+
+function getCaseContentFromDoc(docId, targetCaseId) {
+  const doc = DocumentApp.openById(docId);
+  const bodies = getAllDocumentTabBodies(doc);
+  
+  for (let b = 0; b < bodies.length; b++) {
+    const body = bodies[b];
+    let currentSection = '';
+    let scenario = '';
+    let patientInfoHtml = '';
+    let noteHtml = '';
+    let contentHtml = '';
+    
+    const checklist = [];
+    let currentGroup = 'ทั่วไป';
+    
+    let recording = false;
+    let hasFoundCase = false;
+    
+    const numChildren = body.getNumChildren();
+    
+    for (let i = 0; i < numChildren; i++) {
+      const child = body.getChild(i);
+      const type = child.getType();
+      
+      // 1. ตรวจสอบว่าตารางแม่แบบเขียนเคสหรือไม่ (Table Template)
+      if (type === DocumentApp.ElementType.TABLE) {
+        const table = child.asTable();
+        const isTemplate = checkTableTemplate(table, targetCaseId);
+        if (isTemplate) {
+          return parseTableTemplateToCaseData(table, targetCaseId);
+        }
+        
+        // ถ้าเป็นตารางทั่วไปที่อยู่ในส่วน ข้อมูลผู้ป่วย หรือ เฉลย
+        if (recording) {
+          if (currentSection === 'PATIENT_INFO') {
+            patientInfoHtml += parseTableToHtml(table);
+          } else if (currentSection === 'NOTE') {
+            noteHtml += parseTableToHtml(table);
+          }
         }
         continue;
       }
       
-      // ตรวจสอบกลุ่ม Checklist
-      if (currentSection === 'CHECKLIST' && 
-          (heading === DocumentApp.ParagraphHeading.HEADING2 ||
-           heading === DocumentApp.ParagraphHeading.HEADING3 || 
-           heading === DocumentApp.ParagraphHeading.HEADING4 || 
-           text.startsWith('###') || 
-           text.startsWith('**กลุ่ม:') ||
-           text.startsWith('(กลุ่ม:'))) {
+      // 2. ตรวจสอบย่อหน้าหัวข้อต่างๆ
+      if (type === DocumentApp.ElementType.PARAGRAPH) {
+        const p = child.asParagraph();
+        const text = p.getText().trim();
+        const heading = p.getHeading();
         
-        const groupMatch = text.match(/\(กลุ่ม:\s*([^)]+)\)/) || text.match(/กลุ่ม:\s*([^*]+)/);
-        if (groupMatch) {
-          currentGroup = groupMatch[1].trim();
-        } else {
-          currentGroup = text.replace(/^#+\s*/, '').replace(/\*+/g, '').trim();
-        }
-        continue;
-      }
-    }
-    
-    if (!recording) continue;
-    
-    // 3. สะสมข้อมูลข้อความจากย่อหน้า
-    if (currentSection === 'SCENARIO') {
-      if (type === DocumentApp.ElementType.PARAGRAPH) {
-        const paragraphHtml = parseParagraphToHtml(child.asParagraph());
-        if (paragraphHtml) {
-          contentHtml += paragraphHtml;
-          scenario += child.asParagraph().getText().trim() + '\n';
-        }
-      }
-    } 
-    else if (currentSection === 'PATIENT_INFO') {
-      if (type === DocumentApp.ElementType.PARAGRAPH) {
-        const paragraphHtml = parseParagraphToHtml(child.asParagraph());
-        if (paragraphHtml) {
-          patientInfoHtml += paragraphHtml;
-        }
-      }
-    } 
-    else if (currentSection === 'CHECKLIST') {
-      if (type === DocumentApp.ElementType.PARAGRAPH || type === DocumentApp.ElementType.LIST_ITEM) {
-        let text = '';
-        if (type === DocumentApp.ElementType.PARAGRAPH) {
-          text = child.asParagraph().getText().trim();
-        } else {
-          text = child.asListItem().getText().trim();
+        // ค้นหาการประกาศเคสใหม่ — รองรับทั้ง [OSPE-CL001] และ {OSPE-CL001}
+        const caseIdMatch = text.match(/^#+\s*[\[{](OSPE-[A-Z0-9]+)[\]}]/) || text.match(/^[\[{](OSPE-[A-Z0-9]+)[\]}]/);
+        if (caseIdMatch) {
+          const foundCaseId = caseIdMatch[1];
+          if (foundCaseId === targetCaseId) {
+            recording = true;
+            hasFoundCase = true;
+            currentSection = 'METADATA';
+            continue;
+          } else if (recording) {
+            // เจอเคสถัดไปแล้ว หยุดบันทึกแล้ว return ทันที
+            return {
+              scenario: scenario.trim(),
+              patientInfoHtml: patientInfoHtml,
+              contentHtml: contentHtml,
+              checklist: checklist,
+              noteHtml: noteHtml
+            };
+          }
         }
         
-        const isChecklistItem = type === DocumentApp.ElementType.LIST_ITEM || text.startsWith('[ ]') || text.startsWith('[x]') || text.startsWith('\u2610') || text.startsWith('\u2611') || text.startsWith('\u2705') || text.startsWith('\u2714') || text.startsWith('\u25cb') || text.startsWith('-') || text.startsWith('*') || /^\\d+\\./.test(text);
-        if (isChecklistItem && text.length > 3) {
-          let cleanText = text.replace(/^([-*\u2022\u2710\u2705\u2714\u2610\u2611]|\[\s*\]|\[x\]|\d+\.)\s*/, '').trim();
-          const scoreMatch = cleanText.match(/^\((\d+(\.\d+)?)\)\s*(.*)$/);
-          let score = 1;
-          let itemText = cleanText;
+        if (!recording) continue;
+        
+        // ตรวจสอบหัวข้อหลักย่อย (ต้องไม่ใช่การระบุกลุ่มย่อยของ Checklist เช่น (กลุ่ม: ...))
+        if ((heading === DocumentApp.ParagraphHeading.HEADING1 || 
+             heading === DocumentApp.ParagraphHeading.HEADING2 || 
+             text.startsWith('## ') || 
+             text.startsWith('# ')) &&
+            !text.startsWith('(กลุ่ม:') &&
+            !text.startsWith('**กลุ่ม:')) {
           
-          if (scoreMatch) {
-            score = parseFloat(scoreMatch[1]);
-            itemText = scoreMatch[3].trim();
+          const cleanText = text.replace(/^#+\s*/, '').trim();
+          if (cleanText.includes('ข้อมูลเคส')) {
+            currentSection = 'METADATA';
+          } else if (cleanText.includes('โจทย์') || cleanText.includes('สถานการณ์')) {
+            currentSection = 'SCENARIO';
+          } else if (cleanText.includes('ข้อมูลผู้ป่วย')) {
+            currentSection = 'PATIENT_INFO';
+          } else if (cleanText.includes('Checklist') || cleanText.toLowerCase().includes('checklist') || cleanText.includes('\u0e17\u0e31\u0e01\u0e29\u0e30') || cleanText.includes('\u0e23\u0e32\u0e22\u0e01\u0e32\u0e23') || cleanText.includes('\u0e40\u0e01\u0e13\u0e11') || cleanText.includes('\u0e1b\u0e23\u0e30\u0e40\u0e21\u0e34\u0e19') || cleanText.includes('\u0e2a\u0e21\u0e23\u0e23\u0e16\u0e19\u0e30')) {
+            currentSection = 'CHECKLIST';
+          } else if (cleanText.includes('หมายเหตุ') || cleanText.includes('เฉลย') || cleanText.includes('ข้อมูลผู้ตรวจ')) {
+            currentSection = 'NOTE';
+          } else {
+            currentSection = 'OTHER';
+          }
+          continue;
+        }
+        
+        // ตรวจสอบกลุ่ม Checklist
+        if (currentSection === 'CHECKLIST' && 
+            (heading === DocumentApp.ParagraphHeading.HEADING2 ||
+             heading === DocumentApp.ParagraphHeading.HEADING3 || 
+             heading === DocumentApp.ParagraphHeading.HEADING4 || 
+             text.startsWith('###') || 
+             text.startsWith('**กลุ่ม:') ||
+             text.startsWith('(กลุ่ม:'))) {
+          
+          const groupMatch = text.match(/\(กลุ่ม:\s*([^)]+)\)/) || text.match(/กลุ่ม:\s*([^*]+)/);
+          if (groupMatch) {
+            currentGroup = groupMatch[1].trim();
+          } else {
+            currentGroup = text.replace(/^#+\s*/, '').replace(/\*+/g, '').trim();
+          }
+          continue;
+        }
+      }
+      
+      if (!recording) continue;
+      
+      // 3. สะสมข้อมูลข้อความจากย่อหน้า
+      if (currentSection === 'SCENARIO') {
+        if (type === DocumentApp.ElementType.PARAGRAPH) {
+          const paragraphHtml = parseParagraphToHtml(child.asParagraph());
+          if (paragraphHtml) {
+            contentHtml += paragraphHtml;
+            scenario += child.asParagraph().getText().trim() + '\n';
+          }
+        }
+      } 
+      else if (currentSection === 'PATIENT_INFO') {
+        if (type === DocumentApp.ElementType.PARAGRAPH) {
+          const paragraphHtml = parseParagraphToHtml(child.asParagraph());
+          if (paragraphHtml) {
+            patientInfoHtml += paragraphHtml;
+          }
+        }
+      } 
+      else if (currentSection === 'CHECKLIST') {
+        if (type === DocumentApp.ElementType.PARAGRAPH || type === DocumentApp.ElementType.LIST_ITEM) {
+          let text = '';
+          if (type === DocumentApp.ElementType.PARAGRAPH) {
+            text = child.asParagraph().getText().trim();
+          } else {
+            text = child.asListItem().getText().trim();
           }
           
-          const itemId = 'chk_' + simpleHash(itemText).substring(0, 10);
-          checklist.push({
-            id: itemId,
-            text: itemText,
-            score: score,
-            group: currentGroup,
-            checked: false
-          });
+          const isChecklistItem = type === DocumentApp.ElementType.LIST_ITEM || text.startsWith('[ ]') || text.startsWith('[x]') || text.startsWith('\u2610') || text.startsWith('\u2611') || text.startsWith('\u2705') || text.startsWith('\u2714') || text.startsWith('\u25cb') || text.startsWith('-') || text.startsWith('*') || /^\\d+\\./.test(text);
+          if (isChecklistItem && text.length > 3) {
+            let cleanText = text.replace(/^([-*\u2022\u2710\u2705\u2714\u2610\u2611]|\[\s*\]|\[x\]|\d+\.)\s*/, '').trim();
+            const scoreMatch = cleanText.match(/^\((\d+(\.\d+)?)\)\s*(.*)$/);
+            let score = 1;
+            let itemText = cleanText;
+            
+            if (scoreMatch) {
+              score = parseFloat(scoreMatch[1]);
+              itemText = scoreMatch[3].trim();
+            }
+            
+            const itemId = 'chk_' + simpleHash(itemText).substring(0, 10);
+            checklist.push({
+              id: itemId,
+              text: itemText,
+              score: score,
+              group: currentGroup,
+              checked: false
+            });
+          }
+        }
+      } 
+      else if (currentSection === 'NOTE') {
+        if (type === DocumentApp.ElementType.PARAGRAPH) {
+          const paragraphHtml = parseParagraphToHtml(child.asParagraph());
+          if (paragraphHtml) {
+            noteHtml += paragraphHtml;
+          }
+        } else if (type === DocumentApp.ElementType.LIST_ITEM) {
+          const liHtml = parseParagraphToHtml(child.asParagraph());
+          noteHtml += `<li>${liHtml}</li>`;
         }
       }
-    } 
-    else if (currentSection === 'NOTE') {
-      if (type === DocumentApp.ElementType.PARAGRAPH) {
-        const paragraphHtml = parseParagraphToHtml(child.asParagraph());
-        if (paragraphHtml) {
-          noteHtml += paragraphHtml;
-        }
-      } else if (type === DocumentApp.ElementType.LIST_ITEM) {
-        const liHtml = parseParagraphToHtml(child.asParagraph());
-        noteHtml += `<li>${liHtml}</li>`;
-      }
+    } // end for i loop
+    
+    // If we finished scanning a body tab and found the case, return it
+    if (hasFoundCase) {
+      return {
+        scenario: scenario.trim(),
+        patientInfoHtml: patientInfoHtml,
+        contentHtml: contentHtml,
+        checklist: checklist,
+        noteHtml: noteHtml
+      };
     }
-  }
+  } // end for b loop
   
-  return {
-    scenario: scenario.trim(),
-    patientInfoHtml: patientInfoHtml,
-    contentHtml: contentHtml,
-    checklist: checklist,
-    noteHtml: noteHtml
-  };
+  throw new Error('Case ' + targetCaseId + ' not found in any tab of this document.');
 }
 
 function checkTableTemplate(table, targetCaseId) {
@@ -1690,90 +1937,92 @@ function scanDocForCases(docId) {
   const cases = [];
   try {
     const doc = DocumentApp.openById(docId);
-    const body = doc.getBody();
-    const numChildren = body.getNumChildren();
+    const bodies = getAllDocumentTabBodies(doc);
     
-    for (let i = 0; i < numChildren; i++) {
-      const child = body.getChild(i);
-      const type = child.getType();
+    bodies.forEach(body => {
+      const numChildren = body.getNumChildren();
       
-      // Case 1: ตารางแม่แบบ (Table Template)
-      if (type === DocumentApp.ElementType.TABLE) {
-        const table = child.asTable();
-        const numRows = table.getNumRows();
-        if (numRows >= 4) {
-          let caseId = '';
-          let title = '';
-          let category = '';
-          let mainGroup = '';
-          let subTopic = '';
-          let disease = '';
-          let difficulty = 2;
-          let author = '';
-          let createdDate = '';
-          let isTableCase = false;
-          
-          for (let r = 0; r < numRows; r++) {
-            const row = table.getRow(r);
-            if (row.getNumCells() < 2) continue;
-            const keyText = row.getCell(0).getText().trim().toLowerCase();
-            const valText = row.getCell(1).getText().trim();
+      for (let i = 0; i < numChildren; i++) {
+        const child = body.getChild(i);
+        const type = child.getType();
+        
+        // Case 1: ตารางแม่แบบ (Table Template)
+        if (type === DocumentApp.ElementType.TABLE) {
+          const table = child.asTable();
+          const numRows = table.getNumRows();
+          if (numRows >= 4) {
+            let caseId = '';
+            let title = '';
+            let category = '';
+            let mainGroup = '';
+            let subTopic = '';
+            let disease = '';
+            let difficulty = 2;
+            let author = '';
+            let createdDate = '';
+            let isTableCase = false;
             
-            if (keyText.includes('รหัสเคส') || keyText.includes('case id') || keyText.includes('caseid')) {
-              const match = valText.match(/OSPE-[A-Z0-9]+/i);
-              if (match) {
-                caseId = match[0].toUpperCase();
-                isTableCase = true;
+            for (let r = 0; r < numRows; r++) {
+              const row = table.getRow(r);
+              if (row.getNumCells() < 2) continue;
+              const keyText = row.getCell(0).getText().trim().toLowerCase();
+              const valText = row.getCell(1).getText().trim();
+              
+              if (keyText.includes('รหัสเคส') || keyText.includes('case id') || keyText.includes('caseid')) {
+                const match = valText.match(/OSPE-[A-Z0-9]+/i);
+                if (match) {
+                  caseId = match[0].toUpperCase();
+                  isTableCase = true;
+                }
+              } else if (keyText.includes('ชื่อเคส') || keyText.includes('หัวข้อ') || keyText.includes('title')) {
+                title = valText;
+              } else if (keyText.includes('หมวด') || keyText.includes('category')) {
+                category = valText;
+              } else if (keyText.includes('ospe main group') || keyText.includes('กลุ่มวิชา') || keyText.includes('course group') || keyText.includes('mainGroup')) {
+                mainGroup = valText;
+              } else if (keyText.includes('โรค/หัวข้อ') || keyText.includes('โรค') || keyText.includes('disease')) {
+                disease = valText;
+              } else if (keyText.includes('ระดับ') || keyText.includes('difficulty')) {
+                const diffMatch = valText.match(/\d+/);
+                difficulty = diffMatch ? parseInt(diffMatch[0]) : 2;
+              } else if (keyText.includes('ผู้เขียน') || keyText.includes('author')) {
+                author = valText;
+              } else if (keyText.includes('วันที่') || keyText.includes('date')) {
+                createdDate = valText;
               }
-            } else if (keyText.includes('ชื่อเคส') || keyText.includes('หัวข้อ') || keyText.includes('title')) {
-              title = valText;
-            } else if (keyText.includes('หมวด') || keyText.includes('category')) {
-              category = valText;
-            } else if (keyText.includes('ospe main group') || keyText.includes('กลุ่มวิชา') || keyText.includes('course group') || keyText.includes('mainGroup')) {
-              mainGroup = valText;
-            } else if (keyText.includes('โรค/หัวข้อ') || keyText.includes('โรค') || keyText.includes('disease')) {
-              disease = valText;
-            } else if (keyText.includes('ระดับ') || keyText.includes('difficulty')) {
-              const diffMatch = valText.match(/\d+/);
-              difficulty = diffMatch ? parseInt(diffMatch[0]) : 2;
-            } else if (keyText.includes('ผู้เขียน') || keyText.includes('author')) {
-              author = valText;
-            } else if (keyText.includes('วันที่') || keyText.includes('date')) {
-              createdDate = valText;
-            }
-          }
-          
-          if (isTableCase && caseId) {
-            let linkedFromCase = '';
-            const linkMatch = title.match(/\(ต่อจาก\s*(OSPE-[A-Z0-9]+|[A-Z0-9]+)\)/i);
-            if (linkMatch) {
-              linkedFromCase = linkMatch[1].toUpperCase();
-              if (!linkedFromCase.startsWith('OSPE-')) linkedFromCase = 'OSPE-' + linkedFromCase;
             }
             
-            cases.push({
-              caseId: caseId,
-              title: title || 'Untitled Case',
-              category: category || '',
-              mainGroup: mainGroup || '',
-              subTopic: subTopic || '',
-              disease: disease || '',
-              difficulty: difficulty,
-              docId: docId,
-              author: author || 'Unknown',
-              createdDate: createdDate || new Date().toLocaleDateString('th-TH'),
-              isActive: 'TRUE',
-              linkedFromCase: linkedFromCase
-            });
+            if (isTableCase && caseId) {
+              let linkedFromCase = '';
+              const linkMatch = title.match(/\(ต่อจาก\s*(OSPE-[A-Z0-9]+|[A-Z0-9]+)\)/i);
+              if (linkMatch) {
+                linkedFromCase = linkMatch[1].toUpperCase();
+                if (!linkedFromCase.startsWith('OSPE-')) linkedFromCase = 'OSPE-' + linkedFromCase;
+              }
+              
+              cases.push({
+                caseId: caseId,
+                title: title || 'Untitled Case',
+                category: category || '',
+                mainGroup: mainGroup || '',
+                subTopic: subTopic || '',
+                disease: disease || '',
+                difficulty: difficulty,
+                docId: docId,
+                author: author || 'Unknown',
+                createdDate: createdDate || new Date().toLocaleDateString('th-TH'),
+                isActive: 'TRUE',
+                linkedFromCase: linkedFromCase
+              });
+            }
           }
         }
-      }
       
       // Case 2: รูปแบบข้อความธรรมดา (Heading/Paragraph Case)
       if (type === DocumentApp.ElementType.PARAGRAPH) {
         const p = child.asParagraph();
         const text = p.getText().trim();
-        const caseIdMatch = text.match(/^#+\s*\[(OSPE-[A-Z0-9]+)\]\s*(.*)$/) || text.match(/^\[(OSPE-[A-Z0-9]+)\]\s*(.*)$/);
+        const caseIdMatch = text.match(/^#+\s*[\[{](OSPE-[A-Z0-9]+)[\]}]\s*(.*)$/) || text.match(/^[\[{](OSPE-[A-Z0-9]+)[\]}]\s*(.*)$/);
         
         if (caseIdMatch) {
           const caseId = caseIdMatch[1].toUpperCase();
@@ -1802,7 +2051,7 @@ function scanDocForCases(docId) {
                                 nextChild.asParagraph().getText().trim() : 
                                 nextChild.asListItem().getText().trim();
               
-              if (nextText.match(/^#+\s*\[OSPE-[A-Z0-9]+\]/) || nextText.match(/^\[OSPE-[A-Z0-9]+\]/)) {
+              if (nextText.match(/^#+\s*[\[{]OSPE-[A-Z0-9]+[\]}]/) || nextText.match(/^[\[{]OSPE-[A-Z0-9]+[\]}]/)) {
                 break;
               }
               
@@ -1856,6 +2105,7 @@ function scanDocForCases(docId) {
         }
       }
     }
+  });
   } catch (e) {
     Logger.log('Error scanning Doc ID ' + docId + ': ' + e.toString());
   }

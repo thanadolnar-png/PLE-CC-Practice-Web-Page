@@ -167,6 +167,20 @@ async function loadCasesData() {
 }
 
 function onCasesLoaded() {
+  // Normalize data to fix potential trailing spaces from Google Sheets
+  if (AppState.cases && AppState.cases.length > 0) {
+    AppState.cases.forEach(c => {
+      if (typeof c.category === 'string') {
+        c.category = c.category.trim();
+        // Map Thai names just in case they were typed in Thai
+        if (c.category === 'คลินิก') c.category = 'Clinic';
+        if (c.category === 'ผลิต') c.category = 'Product';
+        if (c.category === 'สังคม' || c.category === 'สังคมฯ') c.category = 'SAP';
+      }
+      if (typeof c.mainGroup === 'string') c.mainGroup = c.mainGroup.trim();
+    });
+  }
+
   showGlobalLoader(false);
   updateStatsDashboard();
   
