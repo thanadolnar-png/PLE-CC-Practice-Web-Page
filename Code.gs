@@ -575,6 +575,7 @@ function getCaseContentFromDoc(docId, targetCaseId) {
     let patientInfoHtml = '';
     let noteHtml = '';
     let contentHtml = '';
+    let equipmentHtml = '';
     
     const checklist = [];
     let currentGroup = 'ทั่วไป';
@@ -629,7 +630,8 @@ function getCaseContentFromDoc(docId, targetCaseId) {
               patientInfoHtml: patientInfoHtml,
               contentHtml: contentHtml,
               checklist: checklist,
-              noteHtml: noteHtml
+              noteHtml: noteHtml,
+              equipmentHtml: equipmentHtml
             };
           }
         }
@@ -651,6 +653,8 @@ function getCaseContentFromDoc(docId, targetCaseId) {
             currentSection = 'SCENARIO';
           } else if (cleanText.includes('ข้อมูลผู้ป่วย')) {
             currentSection = 'PATIENT_INFO';
+          } else if (cleanText.includes('สิ่งที่มีให้') || cleanText.includes('อุปกรณ์')) {
+            currentSection = 'EQUIPMENT';
           } else if (cleanText.includes('Checklist') || cleanText.toLowerCase().includes('checklist') || cleanText.includes('\u0e17\u0e31\u0e01\u0e29\u0e30') || cleanText.includes('\u0e23\u0e32\u0e22\u0e01\u0e32\u0e23') || cleanText.includes('\u0e40\u0e01\u0e13\u0e11') || cleanText.includes('\u0e1b\u0e23\u0e30\u0e40\u0e21\u0e34\u0e19') || cleanText.includes('\u0e2a\u0e21\u0e23\u0e23\u0e16\u0e19\u0e30')) {
             currentSection = 'CHECKLIST';
           } else if (cleanText.includes('หมายเหตุ') || cleanText.includes('เฉลย') || cleanText.includes('ข้อมูลผู้ตรวจ')) {
@@ -698,6 +702,17 @@ function getCaseContentFromDoc(docId, targetCaseId) {
           if (paragraphHtml) {
             patientInfoHtml += paragraphHtml;
           }
+        }
+      } 
+      else if (currentSection === 'EQUIPMENT') {
+        if (type === DocumentApp.ElementType.PARAGRAPH) {
+          const paragraphHtml = parseParagraphToHtml(child.asParagraph());
+          if (paragraphHtml) {
+            equipmentHtml += paragraphHtml;
+          }
+        } else if (type === DocumentApp.ElementType.LIST_ITEM) {
+          const liText = child.asListItem().getText().trim();
+          equipmentHtml += `<li>${escapeHtml(liText)}</li>`;
         }
       } 
       else if (currentSection === 'CHECKLIST') {
@@ -752,7 +767,8 @@ function getCaseContentFromDoc(docId, targetCaseId) {
         patientInfoHtml: patientInfoHtml,
         contentHtml: contentHtml,
         checklist: checklist,
-        noteHtml: noteHtml
+        noteHtml: noteHtml,
+        equipmentHtml: equipmentHtml
       };
     }
   } // end for b loop

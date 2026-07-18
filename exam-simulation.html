@@ -287,6 +287,11 @@
             <div id="exam-patient-content">
               <!-- Table dynamically generated -->
             </div>
+            
+            <h3 class="viewer-section-title" id="exam-equipment-title" style="display: none;">สิ่งที่มีให้ในสถานี (Provided Items)</h3>
+            <div id="exam-equipment-content" style="display: none;">
+              <!-- Filled dynamically by JS -->
+            </div>
 
             <!-- Added margin top for checklist section -->
             <div style="margin-top: 2rem;"></div>
@@ -1252,6 +1257,22 @@
       
       document.getElementById('exam-scenario-content').innerHTML = c.contentHtml || `<p>${c.scenario || ''}</p>`;
       document.getElementById('exam-patient-content').innerHTML = c.patientInfoHtml || '<p>ไม่มีตารางข้อมูลผู้ป่วย</p>';
+
+      // Render Equipment
+      if (c.equipmentHtml) {
+        document.getElementById('exam-equipment-title').style.display = 'block';
+        const eqContent = document.getElementById('exam-equipment-content');
+        eqContent.style.display = 'block';
+        // Wrap with ul if it starts with li but has no ul wrapper
+        if (c.equipmentHtml.startsWith('<li')) {
+          eqContent.innerHTML = `<ul>${c.equipmentHtml}</ul>`;
+        } else {
+          eqContent.innerHTML = c.equipmentHtml;
+        }
+      } else {
+        document.getElementById('exam-equipment-title').style.display = 'none';
+        document.getElementById('exam-equipment-content').style.display = 'none';
+      }
       
       const badge = document.getElementById('exam-station-badge');
       badge.className = 'station-badge ' + (c.category || 'rest').toLowerCase();

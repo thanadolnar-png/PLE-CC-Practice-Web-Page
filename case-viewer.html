@@ -351,6 +351,11 @@
               <!-- Table or list filled dynamically by JS -->
             </div>
             
+            <h3 class="viewer-section-title" id="equipment-section-title" style="display: none;">สิ่งที่มีให้ในสถานี (Provided Items)</h3>
+            <div id="case-equipment-content" style="display: none;">
+              <!-- Filled dynamically by JS -->
+            </div>
+            
           </div>
 
           <!-- Tab Content 2: Embedded Google Doc (no-print) -->
@@ -585,6 +590,19 @@
       // Render Scenario & Patient Info
       document.getElementById('case-scenario-content').innerHTML = c.contentHtml || `<p>${c.scenario}</p>`;
       document.getElementById('case-patient-content').innerHTML = c.patientInfoHtml || '<p>ไม่มีตารางข้อมูลผู้ป่วย</p>';
+      
+      // Render Equipment
+      if (c.equipmentHtml) {
+        document.getElementById('equipment-section-title').style.display = 'block';
+        const eqContent = document.getElementById('case-equipment-content');
+        eqContent.style.display = 'block';
+        // Wrap with ul if it starts with li but has no ul wrapper
+        if (c.equipmentHtml.startsWith('<li')) {
+          eqContent.innerHTML = `<ul>${c.equipmentHtml}</ul>`;
+        } else {
+          eqContent.innerHTML = c.equipmentHtml;
+        }
+      }
       
       // Setup IFrame Document URL
       const iframe = document.getElementById('doc-embed-iframe');
