@@ -26,9 +26,103 @@ const AppState = {
 };
 
 // ──────────────────────────────────────────────────────────────
+// 0. AUTHENTICATION & LOCK SYSTEM (Password: rxcu_ple_cc)
+// ──────────────────────────────────────────────────────────────
+const SYSTEM_AUTH_PASS = 'rxcu_ple_cc';
+
+function initAuthGuard() {
+  const isAuth = localStorage.getItem('ospe_auth_pass') === SYSTEM_AUTH_PASS;
+  
+  if (!isAuth) {
+    document.body.classList.add('auth-locked');
+    renderAuthModal();
+  } else {
+    document.body.classList.remove('auth-locked');
+    addLogoutButton();
+  }
+}
+
+function renderAuthModal() {
+  if (document.getElementById('auth-gate-overlay')) return;
+  
+  const overlay = document.createElement('div');
+  overlay.id = 'auth-gate-overlay';
+  overlay.className = 'auth-gate-overlay';
+  overlay.innerHTML = `
+    <div class="auth-card">
+      <div class="auth-icon-circle">🔐</div>
+      <h2 class="auth-title">RxCU OSPE Hub</h2>
+      <p class="auth-subtitle">ระบบฝึกซ้อมเตรียมสอบ OSPE (สำหรับ RxCU 84-85)<br>โปรดใส่รหัสผ่านเพื่อเข้าใช้งานระบบ</p>
+      
+      <form id="auth-form" onsubmit="handleAuthSubmit(event)">
+        <div class="auth-input-group">
+          <input type="password" id="auth-pass-input" class="auth-input" placeholder="กรอกรหัสผ่าน . . ." autocomplete="current-password" autofocus required>
+          <button type="button" class="auth-eye-btn" onclick="togglePassVisibility()" title="แสดง/ซ่อนรหัสผ่าน">
+            <svg id="eye-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </button>
+        </div>
+        <div id="auth-error" class="auth-error-msg">⚠️ รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง</div>
+        <button type="submit" class="btn btn-primary auth-submit-btn">🔑 ปลดล็อกเข้าใช้งาน (Unlock)</button>
+      </form>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function togglePassVisibility() {
+  const input = document.getElementById('auth-pass-input');
+  if (!input) return;
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+function handleAuthSubmit(e) {
+  e.preventDefault();
+  const input = document.getElementById('auth-pass-input');
+  const errorMsg = document.getElementById('auth-error');
+  
+  if (input && input.value.trim() === SYSTEM_AUTH_PASS) {
+    localStorage.setItem('ospe_auth_pass', SYSTEM_AUTH_PASS);
+    document.body.classList.remove('auth-locked');
+    const overlay = document.getElementById('auth-gate-overlay');
+    if (overlay) overlay.remove();
+    addLogoutButton();
+  } else {
+    if (errorMsg) errorMsg.style.display = 'block';
+    if (input) {
+      input.value = '';
+      input.focus();
+    }
+  }
+}
+
+function logoutAuth() {
+  if (confirm('คุณต้องการออกจากระบบ / ล็อกหน้าจอหรือไม่?')) {
+    localStorage.removeItem('ospe_auth_pass');
+    window.location.reload();
+  }
+}
+
+function addLogoutButton() {
+  const navMenu = document.getElementById('nav-menu');
+  if (navMenu && !document.getElementById('btn-logout')) {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <button id="btn-logout" class="nav-logout-btn" onclick="logoutAuth()" title="ออกจากระบบ / Logout">
+        <span>🔒</span> Logout
+      </button>
+    `;
+    navMenu.appendChild(li);
+  }
+}
+
+// ──────────────────────────────────────────────────────────────
 // 1. Initializer & Event Listeners
 // ──────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  initAuthGuard();
   initTheme();
   initApiConfig();
   loadChecklistProgress();
@@ -313,13 +407,6 @@ function renderCaseList() {
       window.location.href = `case-viewer.html?id=${c.caseId}`;
     });
     
-    // สร้างดาวระดับความยาก
-    let stars = '';
-    const diff = parseInt(c.difficulty) || 1;
-    for (let i = 0; i < 3; i++) {
-      stars += i < diff ? '★' : '☆';
-    }
-    
     card.innerHTML = `
       <div class="case-card-header">
         <span class="badge badge-${c.category.toLowerCase()}">${c.category}</span>
@@ -330,7 +417,6 @@ function renderCaseList() {
         <span class="case-card-tag">${c.mainGroup || ""}${c.subTopic ? " · " + c.subTopic : ""}</span>
       </div>
       <div class="case-card-meta">
-        <span class="difficulty-stars">${stars}</span>
         <span>ผู้เขียน: ${c.author || 'ไม่ระบุ'}</span>
       </div>
     `;
@@ -482,4 +568,150 @@ function escapeHtml(text) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+// ──────────────────────────────────────────────────────────────
+// Interactive Lightbox System (Zoomable & Pannable / Draggable)
+// ──────────────────────────────────────────────────────────────
+let lightboxScale = 1;
+let lightboxTranslateX = 0;
+let lightboxTranslateY = 0;
+let isLightboxDragging = false;
+let lightboxStartX = 0;
+let lightboxStartY = 0;
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Create overlay
+  const overlay = document.createElement('div');
+  overlay.id = 'image-lightbox';
+  overlay.className = 'lightbox-overlay';
+  overlay.innerHTML = `
+    <div class="lightbox-toolbar">
+      <div class="lightbox-hint">💡 หมุนเมาส์เพื่อย่อ-ขยาย | คลิกแล้วลากเพื่อย้ายรูปภาพ</div>
+      <div class="lightbox-actions">
+        <button type="button" class="lightbox-btn" onclick="zoomLightbox(0.25)" title="ขยายรูป (Zoom In)">🔍+</button>
+        <button type="button" class="lightbox-btn" onclick="zoomLightbox(-0.25)" title="ย่อรูป (Zoom Out)">🔍-</button>
+        <button type="button" class="lightbox-btn" onclick="resetLightboxTransform()" title="ขนาดปกติ (Reset)">↺</button>
+        <button type="button" class="lightbox-btn lightbox-btn-close" onclick="closeLightbox()" title="ปิด (Close)">✕</button>
+      </div>
+    </div>
+    <div class="lightbox-img-wrapper" id="lightbox-wrapper">
+      <img class="lightbox-content" id="lightbox-img" src="" alt="Enlarged Image" draggable="false">
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const wrapper = document.getElementById('lightbox-wrapper');
+  const img = document.getElementById('lightbox-img');
+
+  // Close when clicking background outside toolbar and image
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay || e.target === wrapper) {
+      closeLightbox();
+    }
+  });
+
+  // Mouse wheel zoom
+  overlay.addEventListener('wheel', function(e) {
+    if (!overlay.classList.contains('active')) return;
+    e.preventDefault();
+    const delta = e.deltaY < 0 ? 0.25 : -0.25;
+    zoomLightbox(delta);
+  }, { passive: false });
+
+  // Mouse Dragging
+  wrapper.addEventListener('mousedown', function(e) {
+    if (e.target !== img) return;
+    e.preventDefault();
+    isLightboxDragging = true;
+    lightboxStartX = e.clientX - lightboxTranslateX;
+    lightboxStartY = e.clientY - lightboxTranslateY;
+    wrapper.style.cursor = 'grabbing';
+  });
+
+  window.addEventListener('mousemove', function(e) {
+    if (!isLightboxDragging) return;
+    lightboxTranslateX = e.clientX - lightboxStartX;
+    lightboxTranslateY = e.clientY - lightboxStartY;
+    updateLightboxTransform();
+  });
+
+  window.addEventListener('mouseup', function() {
+    if (isLightboxDragging) {
+      isLightboxDragging = false;
+      if (wrapper) wrapper.style.cursor = 'grab';
+    }
+  });
+
+  // Mobile Touch Drag
+  wrapper.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 1 && e.target === img) {
+      isLightboxDragging = true;
+      lightboxStartX = e.touches[0].clientX - lightboxTranslateX;
+      lightboxStartY = e.touches[0].clientY - lightboxTranslateY;
+    }
+  }, { passive: true });
+
+  window.addEventListener('touchmove', function(e) {
+    if (!isLightboxDragging || e.touches.length !== 1) return;
+    lightboxTranslateX = e.touches[0].clientX - lightboxStartX;
+    lightboxTranslateY = e.touches[0].clientY - lightboxStartY;
+    updateLightboxTransform();
+  }, { passive: true });
+
+  window.addEventListener('touchend', function() {
+    isLightboxDragging = false;
+  });
+
+  // Attach delegated click listener for content images
+  document.body.addEventListener('click', function(e) {
+    if (e.target.tagName === 'IMG' && !e.target.closest('#image-lightbox')) {
+      const contentArea = e.target.closest('#case-scenario-content, #case-patient-content, #case-equipment-content, #exam-scenario-content, #exam-patient-content, #exam-equipment-content, .case-content-area');
+      if (contentArea) {
+        openLightbox(e.target.src);
+      }
+    }
+  });
+});
+
+function openLightbox(src) {
+  const overlay = document.getElementById('image-lightbox');
+  if (!overlay) return;
+  const img = document.getElementById('lightbox-img');
+  img.src = src;
+  resetLightboxTransform();
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  const overlay = document.getElementById('image-lightbox');
+  if (!overlay) return;
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+  setTimeout(() => {
+    if (!overlay.classList.contains('active')) {
+      document.getElementById('lightbox-img').src = '';
+      resetLightboxTransform();
+    }
+  }, 300);
+}
+
+function zoomLightbox(delta) {
+  lightboxScale = Math.min(Math.max(0.4, lightboxScale + delta), 5);
+  updateLightboxTransform();
+}
+
+function resetLightboxTransform() {
+  lightboxScale = 1;
+  lightboxTranslateX = 0;
+  lightboxTranslateY = 0;
+  updateLightboxTransform();
+}
+
+function updateLightboxTransform() {
+  const img = document.getElementById('lightbox-img');
+  if (img) {
+    img.style.transform = `translate(${lightboxTranslateX}px, ${lightboxTranslateY}px) scale(${lightboxScale})`;
+  }
 }

@@ -2126,3 +2126,326 @@ a {
   border: 1px solid var(--border);
 }
 
+/* ══════════════════════════════════════════════════
+   PASSWORD GATE UI (AUTH LOCK SCREEN)
+   ══════════════════════════════════════════════════ */
+body.auth-locked {
+  overflow: hidden !important;
+}
+
+body.auth-locked > *:not(#auth-gate-overlay) {
+  filter: blur(8px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.auth-gate-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: authFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes authFadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.auth-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), var(--shadow-glow);
+  width: 100%;
+  max-width: 440px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--clinic), var(--product), var(--sap));
+}
+
+.auth-icon-circle {
+  width: 4.5rem;
+  height: 4.5rem;
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  margin: 0 auto 1.25rem auto;
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-family: var(--font-title);
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.auth-subtitle {
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.75rem;
+  line-height: 1.55;
+}
+
+.auth-input-group {
+  position: relative;
+  margin-bottom: 1.25rem;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 0.85rem 3rem 0.85rem 1.25rem;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  transition: var(--transition);
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+.auth-eye-btn {
+  position: absolute;
+  right: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  transition: var(--transition);
+}
+
+.auth-eye-btn:hover {
+  color: var(--primary);
+}
+
+.auth-error-msg {
+  display: none;
+  color: var(--danger);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: var(--font-title);
+  margin-bottom: 1.25rem;
+  padding: 0.6rem;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.auth-submit-btn {
+  width: 100%;
+  padding: 0.85rem;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: var(--font-title);
+}
+
+.nav-logout-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-family: var(--font-title);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: var(--transition);
+}
+
+.nav-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+/* ══════════════════════════════════════════════════
+   INLINE CONTENT IMAGE CONSTRAINTS & LIGHTBOX SYSTEM
+   ══════════════════════════════════════════════════ */
+
+#case-scenario-content img,
+#case-patient-content img,
+#case-equipment-content img,
+#exam-scenario-content img,
+#exam-patient-content img,
+#exam-equipment-content img,
+.case-content-area img {
+  max-width: 100% !important;
+  max-height: 460px !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  display: block;
+  margin: 1rem auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  cursor: zoom-in;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#case-scenario-content img:hover,
+#case-patient-content img:hover,
+#case-equipment-content img:hover,
+#exam-scenario-content img:hover,
+#exam-patient-content img:hover,
+#exam-equipment-content img:hover,
+.case-content-area img:hover {
+  transform: scale(1.015);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+}
+
+/* Interactive Zoom & Drag Lightbox */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.94);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 999999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 1.25rem;
+}
+
+.lightbox-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.lightbox-toolbar {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  gap: 1rem;
+  background: var(--surface);
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+}
+
+.lightbox-hint {
+  font-family: var(--font-title);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.lightbox-actions {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.lightbox-btn {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.lightbox-btn:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.lightbox-btn-close {
+  background: var(--danger);
+  color: white;
+  border-color: var(--danger);
+  border-radius: var(--radius-full);
+  width: 2.2rem;
+  height: 2.2rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-btn-close:hover {
+  background: #dc2626;
+}
+
+.lightbox-img-wrapper {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+  cursor: grab;
+  user-select: none;
+}
+
+.lightbox-content {
+  max-width: 88vw;
+  max-height: 80vh;
+  border-radius: var(--radius-md);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  transition: transform 0.08s ease-out;
+  transform-origin: center center;
+  object-fit: contain;
+  pointer-events: auto;
+}
+
