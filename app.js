@@ -52,7 +52,7 @@ function renderAuthModal() {
     <div class="auth-card">
       <div class="auth-icon-circle">🔐</div>
       <h2 class="auth-title">RxCU OSPE Hub</h2>
-      <p class="auth-subtitle">ระบบฝึกซ้อมเตรียมสอบ OSPE (สำหรับ RxCU 84-85)<br>โปรดใส่รหัสผ่านเพื่อเข้าใช้งานระบบ</p>
+      <p class="auth-subtitle">ระบบฝึกซ้อมเตรียมสอบ OSPE (สำหรับ RxCU)<br>โปรดใส่รหัสผ่านเพื่อเข้าใช้งานระบบ</p>
       
       <form id="auth-form" onsubmit="handleAuthSubmit(event)">
         <div class="auth-input-group">
