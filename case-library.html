@@ -72,10 +72,10 @@
             <input type="text" id="search-case" class="search-input" placeholder="ค้นหาด้วยชื่อเคส, ตัวยา, โรค..." aria-label="Search cases">
           </div>
           
-          <!-- Select filters -->
+          <!-- Select filters (Ladder Filter System) -->
           <div class="filter-selects">
-            <!-- Category Filter -->
-            <label class="filter-group-label">หมวดวิชา</label>
+            <!-- Step 1: Category Filter -->
+            <label class="filter-group-label">1. หมวดวิชา (Category)</label>
             <select id="filter-category" class="select-filter" aria-label="Filter by category">
               <option value="All">ทุกหมวด (All Category)</option>
               <option value="Clinic">Clinic (คลินิก)</option>
@@ -83,11 +83,18 @@
               <option value="SAP">SAP (สังคมศาสตร์)</option>
             </select>
             
-            <!-- OSPE Main Group Filter -->
-            <label class="filter-group-label">OSPE Main Group</label>
+            <!-- Step 2: OSPE Main Group Filter -->
+            <label class="filter-group-label">2. กลุ่มวิชาหลัก (Main Group)</label>
             <select id="filter-course-group" class="select-filter" aria-label="Filter by OSPE Main Group">
               <option value="All">ทุก OSPE Main Group</option>
-              <!-- Filled dynamically by JS -->
+              <!-- Filled dynamically by JS based on Category -->
+            </select>
+
+            <!-- Step 3: Disease / Topic Filter -->
+            <label class="filter-group-label">3. โรค / หัวข้อสอบ (Disease / Topic)</label>
+            <select id="filter-disease" class="select-filter" aria-label="Filter by Disease or Topic">
+              <option value="All">ทุกโรค / หัวข้อสอบ</option>
+              <!-- Filled dynamically by JS based on Main Group -->
             </select>
             
             <!-- View Toggles -->

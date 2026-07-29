@@ -19,7 +19,7 @@ const AppState = {
   activeFilters: {
     category: 'All',
     mainGroup: 'All',
-    difficulty: 'All',
+    disease: 'All',
     search: ''
   },
   checklistProgress: {} // { caseId: [checked_id1, checked_id2] }
@@ -332,27 +332,31 @@ function updateStatsDashboard() {
 // 4. Filtering Logic
 // ──────────────────────────────────────────────────────────────
 function applyFilters() {
-  let list = [...AppState.cases];
-  const { category, mainGroup, difficulty, search } = AppState.activeFilters;
+  let list = Array.isArray(AppState.cases) ? [...AppState.cases] : [];
+  const { category, mainGroup, disease, search } = AppState.activeFilters;
   
   if (category && category !== 'All') {
-    list = list.filter(c => c.category === category);
+    list = list.filter(c => c && c.category === category);
   }
   
   if (mainGroup && mainGroup !== 'All') {
-    list = list.filter(c => c.mainGroup === mainGroup);
+    list = list.filter(c => c && c.mainGroup === mainGroup);
   }
-  
-  if (difficulty && difficulty !== 'All') {
-    list = list.filter(c => String(c.difficulty) === String(difficulty));
+
+  if (disease && disease !== 'All') {
+    list = list.filter(c => c && (c.disease === disease || c.subTopic === disease));
   }
   
   if (search) {
     const q = search.toLowerCase();
     list = list.filter(c => 
-      c.title.toLowerCase().includes(q) ||
-      c.caseId.toLowerCase().includes(q) ||
-      (c.disease && c.disease.toLowerCase().includes(q))
+      c && (
+        (c.title && c.title.toLowerCase().includes(q)) ||
+        (c.caseId && c.caseId.toLowerCase().includes(q)) ||
+        (c.disease && c.disease.toLowerCase().includes(q)) ||
+        (c.subTopic && c.subTopic.toLowerCase().includes(q)) ||
+        (c.tags && c.tags.toLowerCase().includes(q))
+      )
     );
   }
   
@@ -361,23 +365,63 @@ function applyFilters() {
 
 function renderFilterSelectOptions() {
   const selectGroup = document.getElementById('filter-course-group');
+  const selectDisease = document.getElementById('filter-disease');
   if (!selectGroup) return;
-  
-  // ดึงกลุ่มวิชาที่ไม่ซ้ำกัน
+
+  const currentCategory = AppState.activeFilters.category;
+  const currentMainGroup = AppState.activeFilters.mainGroup;
+
+  // 1. Filter Cases for Main Group options based on Category
+  let availableCasesForGroup = AppState.cases;
+  if (currentCategory && currentCategory !== 'All') {
+    availableCasesForGroup = availableCasesForGroup.filter(c => c && c.category === currentCategory);
+  }
+
+  // Extract unique Main Groups
   const groups = new Set();
-  AppState.cases.forEach(c => {
-    if (c.mainGroup) groups.add(c.mainGroup);
+  availableCasesForGroup.forEach(c => {
+    if (c && c.mainGroup) groups.add(c.mainGroup);
   });
-  
-  // เคลียร์ยกเว้นอันแรก
+
+  // Preserve current group selection if valid, else reset to All
+  const preservedGroup = groups.has(currentMainGroup) ? currentMainGroup : 'All';
+  AppState.activeFilters.mainGroup = preservedGroup;
+
   selectGroup.innerHTML = '<option value="All">ทุก OSPE Main Group</option>';
-  
   groups.forEach(g => {
     const opt = document.createElement('option');
     opt.value = g;
     opt.textContent = g;
+    if (g === preservedGroup) opt.selected = true;
     selectGroup.appendChild(opt);
   });
+
+  // 2. Filter Cases for Disease/Topic options based on Category & Main Group
+  if (selectDisease) {
+    let availableCasesForDisease = availableCasesForGroup;
+    if (preservedGroup && preservedGroup !== 'All') {
+      availableCasesForDisease = availableCasesForDisease.filter(c => c && c.mainGroup === preservedGroup);
+    }
+
+    const diseases = new Set();
+    availableCasesForDisease.forEach(c => {
+      if (c && c.disease) diseases.add(c.disease);
+      else if (c && c.subTopic) diseases.add(c.subTopic);
+    });
+
+    const currentDisease = AppState.activeFilters.disease;
+    const preservedDisease = diseases.has(currentDisease) ? currentDisease : 'All';
+    AppState.activeFilters.disease = preservedDisease;
+
+    selectDisease.innerHTML = '<option value="All">ทุกโรค / หัวข้อสอบ</option>';
+    diseases.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d;
+      opt.textContent = d;
+      if (d === preservedDisease) opt.selected = true;
+      selectDisease.appendChild(opt);
+    });
+  }
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -516,7 +560,7 @@ function detectCurrentPage() {
     const searchInput = document.getElementById('search-case');
     const selectCat = document.getElementById('filter-category');
     const selectGroup = document.getElementById('filter-course-group');
-    const selectDiff = document.getElementById('filter-difficulty');
+    const selectDisease = document.getElementById('filter-disease');
     
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
@@ -529,6 +573,9 @@ function detectCurrentPage() {
     if (selectCat) {
       selectCat.addEventListener('change', (e) => {
         AppState.activeFilters.category = e.target.value;
+        AppState.activeFilters.mainGroup = 'All';
+        AppState.activeFilters.disease = 'All';
+        renderFilterSelectOptions();
         applyFilters();
         renderCaseList();
       });
@@ -537,14 +584,16 @@ function detectCurrentPage() {
     if (selectGroup) {
       selectGroup.addEventListener('change', (e) => {
         AppState.activeFilters.mainGroup = e.target.value;
+        AppState.activeFilters.disease = 'All';
+        renderFilterSelectOptions();
         applyFilters();
         renderCaseList();
       });
     }
-    
-    if (selectDiff) {
-      selectDiff.addEventListener('change', (e) => {
-        AppState.activeFilters.difficulty = e.target.value;
+
+    if (selectDisease) {
+      selectDisease.addEventListener('change', (e) => {
+        AppState.activeFilters.disease = e.target.value;
         applyFilters();
         renderCaseList();
       });
