@@ -240,17 +240,17 @@ async function loadCasesData() {
   if (initialCases.length > 0) {
     AppState.cases = initialCases;
     onCasesLoaded();
-    showApiStatusBanner(true, '⚡ ใช้งานข้อมูล Cache/Offline (กำลังซิงก์ข้อมูลล่าสุด..)');
+    showApiStatusBanner(true, '⚡ ใช้งานข้อมูลในเครื่อง (กำลังตรวจสอบการซิงก์กับ Google Sheet...)');
   } else {
     showGlobalLoader(true);
   }
   
-  // 2. Background Sync with Google Apps Script API (Extended Timeout 12s for Cold Starts)
+  // 2. Background Sync with Google Apps Script API (Extended Timeout 25s for Cold Starts)
   if (currentApiUrl) {
     try {
       const cacheBuster = new Date().getTime();
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 seconds for GAS cold start
+      const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 seconds for GAS cold start
       
       const response = await fetch(`${currentApiUrl}?action=getCaseList&_cb=${cacheBuster}`, { signal: controller.signal });
       clearTimeout(timeoutId);
@@ -272,7 +272,7 @@ async function loadCasesData() {
         AppState.cases = fetchedCases;
         AppState.dataReady = true;
         AppState.dataReadyCount = fetchedCases.length;
-        showApiStatusBanner(true, `✅ ข้อมูลพร้อมแล้ว — เชื่อมต่อสำเร็จ (${fetchedCases.length} เคส)`);
+        showApiStatusBanner(true, `✅ ซิงก์ข้อมูลล่าสุดกับ Google Sheet สำเร็จ (${fetchedCases.length} เคส)`);
         // Dispatch event so exam-simulation and other pages can react
         window.dispatchEvent(new CustomEvent('appDataReady', { detail: { count: fetchedCases.length } }));
         onCasesLoaded();
@@ -283,7 +283,7 @@ async function loadCasesData() {
       if (AppState.cases && AppState.cases.length > 0) {
         AppState.dataReady = true;
         AppState.dataReadyCount = AppState.cases.length;
-        showApiStatusBanner(true, '⚡ ใช้งานข้อมูล Offline ในเครื่อง (พร้อมใช้งาน)');
+        showApiStatusBanner(false, '⚠️ ไม่สามารถซิงก์ข้อมูลจาก Google Sheet ได้ (ใช้งานข้อมูลล่าสุดในเครื่อง)');
         window.dispatchEvent(new CustomEvent('appDataReady', { detail: { count: AppState.cases.length, isOffline: true } }));
       } else {
         showApiStatusBanner(false, '⚠️ ไม่สามารถเชื่อมต่อ API ได้ — ใช้งานข้อมูล Offline');
