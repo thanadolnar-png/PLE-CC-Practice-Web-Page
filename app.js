@@ -869,8 +869,73 @@ if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
 }
 
 // ──────────────────────────────────────────────────────────────
-// 10. Database Preloader (Game-style Splash Progress Bar)
+// 10. Database Preloader (IndexedDB Cache & Progress Bar)
 // ──────────────────────────────────────────────────────────────
+const DB_NAME = 'RxCU_OSPE_DB';
+const DB_VERSION = 1;
+const STORE_NAME = 'case_details';
+const DB_VERSION_STR = 'v1.2.6'; // อัปเดตเวอร์ชันนี้เมื่อมีข้อมูลเคสใหม่ในตัวแปรออฟไลน์เพื่อบังคับโหลดใหม่
+
+function openIndexedDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+    request.onsuccess = (e) => resolve(e.target.result);
+    request.onerror = (e) => reject(e.target.error);
+  });
+}
+
+function getCaseFromDB(db, id) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.get(id);
+    request.onsuccess = (e) => resolve(e.target.result);
+    request.onerror = (e) => reject(e.target.error);
+  });
+}
+
+function getAllCasesFromDB(db) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.getAll();
+    const keysRequest = store.getAllKeys();
+    
+    request.onsuccess = (e) => {
+      const items = e.target.result;
+      keysRequest.onsuccess = (ev) => {
+        const keys = ev.target.result;
+        const resultObj = {};
+        keys.forEach((key, idx) => {
+          resultObj[key] = items[idx];
+        });
+        resolve(resultObj);
+      };
+      keysRequest.onerror = (e) => reject(e.target.error);
+    };
+    request.onerror = (e) => reject(e.target.error);
+  });
+}
+
+function saveCasesToDB(db, casesObj) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    store.clear();
+    for (const [id, caseData] of Object.entries(casesObj)) {
+      store.put(caseData, id);
+    }
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = (e) => reject(e.target.error);
+  });
+}
+
 function injectSplashOverlay() {
   if (document.getElementById('db-loading-splash')) return;
   const overlay = document.createElement('div');
@@ -924,21 +989,45 @@ function hideSplashOverlay() {
 
 async function loadOfflineDetailsWithProgress() {
   const url = 'case-details-offline.js';
-  
-  // ป้องกันการโหลดซ้ำหากโหลดเสร็จแล้ว
-  if (typeof OFFLINE_CASE_DETAILS !== 'undefined') {
-    return;
-  }
-  
-  let showOverlayTimeout = setTimeout(() => {
-    injectSplashOverlay();
-  }, 100); // ดีเลย์ 100ms ป้องกันการกระพริบหากดึงจาก Cache (ซึ่งจะเร็วมาก)
+  const cleanId = getUrlParam('id') ? getUrlParam('id').trim() : null;
   
   try {
+    const db = await openIndexedDB();
+    const cachedVersion = localStorage.getItem('ospe_db_version');
+    
+    // A. หากเคยโหลดและบันทึกลง IndexedDB เวอร์ชันล่าสุดตรงกันแล้ว
+    if (cachedVersion === DB_VERSION_STR) {
+      console.log('[Database Preloader] Database matches DB_VERSION_STR in IndexedDB.');
+      
+      if (cleanId) {
+        // ดึงเฉพาะเคสที่ต้องการสำหรับหน้านี้มาใช้ทันที (ใช้เวลา ~2ms)
+        const cachedCase = await getCaseFromDB(db, cleanId);
+        if (cachedCase) {
+          window.OFFLINE_CASE_DETAILS = { [cleanId]: cachedCase };
+          console.log(`[Database Preloader] Case ${cleanId} retrieved instantly from IndexedDB cache.`);
+          mergeOfflineDetails();
+          return;
+        }
+      } else {
+        // โหลดข้อมูลเคสทั้งหมดในเบื้องหลัง เพื่อใช้ในหน้า Simulator / สุ่มเคส
+        const allDetails = await getAllCasesFromDB(db);
+        if (allDetails && Object.keys(allDetails).length > 0) {
+          window.OFFLINE_CASE_DETAILS = allDetails;
+          console.log('[Database Preloader] All cases retrieved from IndexedDB.');
+          mergeOfflineDetails();
+          return;
+        }
+      }
+    }
+    
+    // B. หากเป็นครั้งแรก หรือมีการเปลี่ยนเวอร์ชัน ให้โหลดข้อมูลใหม่พร้อม Progress Bar
+    let showOverlayTimeout = setTimeout(() => {
+      injectSplashOverlay();
+    }, 100); // ป้องกันภาพกระพริบหากโหลดจาก cache ท้องถิ่นเสร็จเร็วมาก
+    
     const response = await fetch(url);
     if (!response.ok) throw new Error('Network response was not ok');
     
-    // ขนาดไฟล์จริงประมาณ 1.86 MB (1950550 bytes decompressed)
     const contentLength = +response.headers.get('Content-Length') || 1860000;
     const reader = response.body.getReader();
     
@@ -952,7 +1041,7 @@ async function loadOfflineDetailsWithProgress() {
       receivedLength += value.length;
       
       let pct = Math.round((receivedLength / contentLength) * 100);
-      if (pct > 99) pct = 99; // ค้างไว้ที่ 99% จนกว่าจะประกอบร่างเสร็จ
+      if (pct > 99) pct = 99; // ค้างที่ 99% จนกว่าจะประกอบร่างเสร็จ
       
       updateSplashProgress(pct, receivedLength, contentLength);
     }
@@ -975,12 +1064,20 @@ async function loadOfflineDetailsWithProgress() {
     document.head.appendChild(script);
     
     updateSplashProgress(100, receivedLength, receivedLength);
-    console.log('[Database Preloader] Offline database loaded & parsed successfully.');
+    console.log('[Database Preloader] Database downloaded and evaluated.');
     
-    // ผสานข้อมูลออฟไลน์เข้ากับ AppState
+    // บันทึกลง IndexedDB เพื่อใช้งานครั้งต่อไป
+    if (typeof OFFLINE_CASE_DETAILS !== 'undefined') {
+      await saveCasesToDB(db, OFFLINE_CASE_DETAILS);
+      localStorage.setItem('ospe_db_version', DB_VERSION_STR);
+      console.log('[Database Preloader] Database stored in IndexedDB.');
+    }
+    
     mergeOfflineDetails();
+    clearTimeout(showOverlayTimeout);
+    hideSplashOverlay();
   } catch (err) {
-    console.warn('[Database Preloader] Dynamic prefetch failed. Fallback to static injection:', err);
+    console.warn('[Database Preloader] IndexedDB cache load failed. Falling back to static script:', err);
     // กรณีฉุกเฉิน: แทรกสคริปต์ตรงๆ
     await new Promise((resolve) => {
       const script = document.createElement('script');
@@ -992,9 +1089,6 @@ async function loadOfflineDetailsWithProgress() {
       script.onerror = resolve;
       document.head.appendChild(script);
     });
-  } finally {
-    clearTimeout(showOverlayTimeout);
-    hideSplashOverlay();
   }
 }
 
