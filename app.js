@@ -300,16 +300,30 @@ async function loadCasesData() {
  * @returns {Promise<object|null>} full case object or null
  */
 async function fetchCaseDetail(caseId) {
-  if (!currentApiUrl || !caseId) return null;
+  if (!caseId) return null;
+  const cleanId = caseId.trim();
+
+  // 1. Check local OFFLINE_CASE_DETAILS if loaded (0ms instant resolution)
+  if (typeof OFFLINE_CASE_DETAILS !== 'undefined' && OFFLINE_CASE_DETAILS[cleanId]) {
+    const det = OFFLINE_CASE_DETAILS[cleanId];
+    const idx = AppState.cases.findIndex(c => c.caseId && c.caseId.trim() === cleanId);
+    if (idx !== -1) {
+      AppState.cases[idx] = Object.assign({}, AppState.cases[idx], det);
+      return AppState.cases[idx];
+    }
+    return Object.assign({ caseId: cleanId }, det);
+  }
+
+  // 2. Fetch from API
+  if (!currentApiUrl) return null;
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s for GAS cold start
-    const res = await fetch(`${currentApiUrl}?action=getCase&id=${encodeURIComponent(caseId)}`, { signal: controller.signal });
+    const res = await fetch(`${currentApiUrl}?action=getCase&id=${encodeURIComponent(cleanId)}`, { signal: controller.signal });
     clearTimeout(timeoutId);
     const json = await res.json();
     if (json.success && json.data) {
-      // Merge into AppState.cases
-      const idx = AppState.cases.findIndex(c => c.caseId === caseId);
+      const idx = AppState.cases.findIndex(c => c.caseId && c.caseId.trim() === cleanId);
       if (idx !== -1) {
         AppState.cases[idx] = Object.assign({}, AppState.cases[idx], json.data);
         return AppState.cases[idx];
@@ -317,15 +331,15 @@ async function fetchCaseDetail(caseId) {
       return json.data;
     }
   } catch (e) {
-    console.warn('fetchCaseDetail failed for', caseId, e);
+    console.warn('fetchCaseDetail failed for', cleanId, e);
   }
   return null;
 }
 
 function onCasesLoaded() {
-  // Normalize data to fix potential trailing spaces from Google Sheets
+  // Normalize data & merge offline details if available
   if (AppState.cases && AppState.cases.length > 0) {
-    AppState.cases.forEach(c => {
+    AppState.cases.forEach((c, idx) => {
       if (typeof c.category === 'string') {
         c.category = c.category.trim();
         // Map Thai names just in case they were typed in Thai
@@ -334,6 +348,12 @@ function onCasesLoaded() {
         if (c.category === 'สังคม' || c.category === 'สังคมฯ') c.category = 'SAP';
       }
       if (typeof c.mainGroup === 'string') c.mainGroup = c.mainGroup.trim();
+
+      // Merge offline details if available
+      const cleanId = (c.caseId || '').trim();
+      if (typeof OFFLINE_CASE_DETAILS !== 'undefined' && OFFLINE_CASE_DETAILS[cleanId]) {
+        AppState.cases[idx] = Object.assign({}, c, OFFLINE_CASE_DETAILS[cleanId]);
+      }
     });
   }
 
