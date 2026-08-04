@@ -768,7 +768,7 @@ function getCaseContentFromDoc(docId, targetCaseId) {
             noteHtml += paragraphHtml;
           }
         } else if (type === DocumentApp.ElementType.LIST_ITEM) {
-          const liHtml = parseParagraphToHtml(child.asParagraph());
+          const liHtml = parseParagraphToHtml(child.asListItem());
           noteHtml += `<li>${liHtml}</li>`;
         }
       }
@@ -910,7 +910,7 @@ function parseCellToHtml(cell) {
     } else if (type === DocumentApp.ElementType.TABLE) {
       html += parseTableToHtml(child.asTable());
     } else if (type === DocumentApp.ElementType.LIST_ITEM) {
-      html += `<li>${parseParagraphToHtml(child.asParagraph())}</li>`;
+      html += `<li>${parseParagraphToHtml(child.asListItem())}</li>`;
     }
   }
   return html;
@@ -976,6 +976,9 @@ function parseTableToHtml(table) {
         if (para.getType() === DocumentApp.ElementType.PARAGRAPH) {
           const paraHtml = parseParagraphToHtml(para.asParagraph());
           // Unwrap outer <p> tags for inline table display
+          cellHtml += paraHtml.replace(/^<p>(.*)<\/p>$/s, '$1');
+        } else if (para.getType() === DocumentApp.ElementType.LIST_ITEM) {
+          const paraHtml = parseParagraphToHtml(para.asListItem());
           cellHtml += paraHtml.replace(/^<p>(.*)<\/p>$/s, '$1');
         }
       }
