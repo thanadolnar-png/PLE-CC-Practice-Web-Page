@@ -559,6 +559,16 @@
                   AppState.currentCase = updatedCase;
                   renderCaseDetail(updatedCase);
                   setViewerRole(currentRole);
+                  
+                  // บันทึกความเปลี่ยนแปลงลง IndexedDB เพื่อให้การเข้าชมครั้งถัดไปเปิดได้ทันทีเป็นข้อมูลล่าสุด (0ms)
+                  if (typeof OFFLINE_CASE_DETAILS !== 'undefined') {
+                    OFFLINE_CASE_DETAILS[cleanId] = updatedCase;
+                    openIndexedDB().then(db => {
+                      saveCasesToDB(db, OFFLINE_CASE_DETAILS).then(() => {
+                        console.log(`[Background Sync] Case ${cleanId} updates saved to IndexedDB.`);
+                      });
+                    }).catch(err => console.warn('[Background Sync] Failed to save to IndexedDB:', err));
+                  }
                 } else {
                   console.log(`[Background Sync] Case ${cleanId} is up to date.`);
                 }
@@ -583,6 +593,16 @@
             if (offlineCase) {
               if (!matchedCase.linkedNextCase && offlineCase.linkedNextCase) matchedCase.linkedNextCase = offlineCase.linkedNextCase;
               if (!matchedCase.linkedFromCase && offlineCase.linkedFromCase) matchedCase.linkedFromCase = offlineCase.linkedFromCase;
+            }
+            
+            // บันทึกความเปลี่ยนแปลงลง IndexedDB เพื่อให้การเข้าชมครั้งถัดไปเปิดได้ทันทีเป็นข้อมูลล่าสุด (0ms)
+            if (typeof OFFLINE_CASE_DETAILS !== 'undefined') {
+              OFFLINE_CASE_DETAILS[cleanId] = matchedCase;
+              openIndexedDB().then(db => {
+                saveCasesToDB(db, OFFLINE_CASE_DETAILS).then(() => {
+                  console.log(`[Blocking Load] Synced Case ${cleanId} saved to IndexedDB.`);
+                });
+              }).catch(err => console.warn('[Blocking Load] Failed to save to IndexedDB:', err));
             }
           }
         } catch (e) {

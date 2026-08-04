@@ -221,11 +221,26 @@ function initApiConfig() {
 // 2. Data Fetching & State
 // ──────────────────────────────────────────────────────────────
 async function loadCasesData() {
-  // 1. Render Offline Data IMMEDIATELY in 0ms if available
-  if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases && OFFLINE_DATA.cases.length > 0) {
-    AppState.cases = OFFLINE_DATA.cases;
+  // 1. ดึงข้อมูลรายการเคสจาก LocalStorage (Cache) มาเรนเดอร์ก่อนทันที 0ms เพื่อความเร็ว
+  let initialCases = [];
+  const cachedListStr = localStorage.getItem('ospe_cached_case_list');
+  if (cachedListStr) {
+    try {
+      initialCases = JSON.parse(cachedListStr);
+    } catch (e) {
+      initialCases = [];
+    }
+  }
+  
+  // หากยังไม่มี Cache ให้ใช้สคริปต์ Offline ตั้งต้น
+  if (initialCases.length === 0 && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+    initialCases = OFFLINE_DATA.cases;
+  }
+  
+  if (initialCases.length > 0) {
+    AppState.cases = initialCases;
     onCasesLoaded();
-    showApiStatusBanner(true, '⚡ ใช้งานข้อมูล Offline ในเครื่อง (กำลังซิงก์ข้อมูลล่าสุด..)');
+    showApiStatusBanner(true, '⚡ ใช้งานข้อมูล Cache/Offline (กำลังซิงก์ข้อมูลล่าสุด..)');
   } else {
     showGlobalLoader(true);
   }
@@ -250,6 +265,10 @@ async function loadCasesData() {
             return offlineMatch ? Object.assign({}, offlineMatch, apiCase) : apiCase;
           });
         }
+        
+        // บันทึกความเปลี่ยนแปลงลง Cache LocalStorage
+        localStorage.setItem('ospe_cached_case_list', JSON.stringify(fetchedCases));
+        
         AppState.cases = fetchedCases;
         AppState.dataReady = true;
         AppState.dataReadyCount = fetchedCases.length;
