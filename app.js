@@ -215,21 +215,28 @@ function initApiConfig() {
 // 2. Data Fetching & State
 // ──────────────────────────────────────────────────────────────
 async function loadCasesData() {
-  showGlobalLoader(true);
+  // 1. Render Offline Data IMMEDIATELY in 0ms if available
+  if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases && OFFLINE_DATA.cases.length > 0) {
+    AppState.cases = OFFLINE_DATA.cases;
+    onCasesLoaded();
+    showApiStatusBanner(true, '⚡ ใช้งานข้อมูล Offline ในเครื่อง (พร้อมใช้งานทันที)');
+  } else {
+    showGlobalLoader(true);
+  }
   
-  // 1. ลองดึงข้อมูลผ่าน API
+  // 2. Background Sync with Google Apps Script API (Extended Timeout 12s for Cold Starts)
   if (currentApiUrl) {
     try {
       const cacheBuster = new Date().getTime();
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000); // 4 seconds timeout
+      const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 seconds for GAS cold start
       
       const response = await fetch(`${currentApiUrl}?action=getCaseList&_cb=${cacheBuster}`, { signal: controller.signal });
       clearTimeout(timeoutId);
       
       const result = await response.json();
       
-      if (result.success && result.data && result.data.cases) {
+      if (result.success && result.data && result.data.cases && result.data.cases.length > 0) {
         let fetchedCases = result.data.cases;
         if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
           fetchedCases = fetchedCases.map(apiCase => {
@@ -238,26 +245,33 @@ async function loadCasesData() {
           });
         }
         AppState.cases = fetchedCases;
-        showApiStatusBanner(true, 'API Connected');
+        showApiStatusBanner(true, '🟢 เชื่อมต่อซิงก์ข้อมูลสดสำเร็จ (Live Google Sheet Synced)');
         onCasesLoaded();
         return;
       }
     } catch (e) {
-      console.warn('ไม่สามารถเชื่อมต่อ API ได้, สลับไปใช้งานโหมด Offline:', e);
-      showApiStatusBanner(false, 'API Connection Failed — Using Offline Data');
+      console.warn('Google Apps Script API response delayed/timed out. Continuing with offline data:', e);
+      if (AppState.cases && AppState.cases.length > 0) {
+        showApiStatusBanner(true, '⚡ ใช้งานข้อมูล Offline ในเครื่อง (พร้อมใช้งาน)');
+      } else {
+        showApiStatusBanner(false, '⚠️ ไม่สามารถเชื่อมต่อ API ได้ — ใช้งานข้อมูล Offline');
+      }
     }
   } else {
-    showApiStatusBanner(false, 'No API Configured — Using Offline Data');
+    if (!AppState.cases || AppState.cases.length === 0) {
+      showApiStatusBanner(false, 'No API Configured — Using Offline Data');
+    }
   }
   
-  // 2. Fallback ใช้ข้อมูล Offline
-  if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
-    AppState.cases = OFFLINE_DATA.cases;
-  } else {
-    AppState.cases = [];
+  // Fallback if offline data wasn't loaded at step 1
+  if (!AppState.cases || AppState.cases.length === 0) {
+    if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+      AppState.cases = OFFLINE_DATA.cases;
+    } else {
+      AppState.cases = [];
+    }
+    onCasesLoaded();
   }
-  
-  onCasesLoaded();
 }
 
 function onCasesLoaded() {
