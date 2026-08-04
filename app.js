@@ -129,7 +129,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initApiConfig();
   loadChecklistProgress();
   
-  // โหลดข้อมูลเคสเบื้องต้น
+  // โหลดฐานข้อมูลรายละเอียดออฟไลน์พร้อม Progress Bar แบบ Asynchronous
+  loadOfflineDetailsWithProgress();
+  
+  // โหลดข้อมูลเคสเบื้องต้น (แบบสรุป)
   loadCasesData();
 
   // จัดการหน้าปัจจุบัน
@@ -864,4 +867,147 @@ if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
       });
   });
 }
+
+// ──────────────────────────────────────────────────────────────
+// 10. Database Preloader (Game-style Splash Progress Bar)
+// ──────────────────────────────────────────────────────────────
+function injectSplashOverlay() {
+  if (document.getElementById('db-loading-splash')) return;
+  const overlay = document.createElement('div');
+  overlay.id = 'db-loading-splash';
+  overlay.className = 'db-splash-overlay';
+  overlay.innerHTML = `
+    <div class="db-splash-card">
+      <div class="db-splash-logo">🥼</div>
+      <h2 class="db-splash-title">RxCU OSPE Hub</h2>
+      <p class="db-splash-status" id="db-splash-status">กำลังจัดเตรียมคลังข้อสอบและรูปภาพ...</p>
+      <div class="db-splash-progress-container">
+        <div class="db-splash-progress-bar" id="db-splash-progress"></div>
+      </div>
+      <div class="db-splash-percentage" id="db-splash-pct">0%</div>
+      <p class="db-splash-hint">ดาวน์โหลดฐานข้อมูลในเครื่อง (1.8 MB)<br>โหลดช้าเฉพาะครั้งแรกเท่านั้น ครั้งถัดไปจะเปิดได้ทันทีผ่านระบบ Cache ⚡</p>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  
+  // Trigger layout to enable transition
+  overlay.offsetHeight; 
+  overlay.classList.add('active');
+}
+
+function updateSplashProgress(pct, received, total) {
+  const pctEl = document.getElementById('db-splash-pct');
+  const barEl = document.getElementById('db-splash-progress');
+  const statusEl = document.getElementById('db-splash-status');
+  
+  if (barEl) barEl.style.width = `${pct}%`;
+  if (pctEl) pctEl.textContent = `${pct}%`;
+  
+  if (statusEl) {
+    const receivedMB = (received / (1024 * 1024)).toFixed(2);
+    const totalMB = total ? (total / (1024 * 1024)).toFixed(2) : '1.77';
+    statusEl.textContent = `กำลังโหลดฐานข้อมูล: ${receivedMB} MB / ${totalMB} MB`;
+  }
+}
+
+function hideSplashOverlay() {
+  const overlay = document.getElementById('db-loading-splash');
+  if (!overlay) return;
+  overlay.classList.remove('active');
+  // Wait for transition before removing
+  setTimeout(() => {
+    if (overlay.parentNode) {
+      overlay.parentNode.removeChild(overlay);
+    }
+  }, 400);
+}
+
+async function loadOfflineDetailsWithProgress() {
+  const url = 'case-details-offline.js';
+  
+  // ป้องกันการโหลดซ้ำหากโหลดเสร็จแล้ว
+  if (typeof OFFLINE_CASE_DETAILS !== 'undefined') {
+    return;
+  }
+  
+  let showOverlayTimeout = setTimeout(() => {
+    injectSplashOverlay();
+  }, 100); // ดีเลย์ 100ms ป้องกันการกระพริบหากดึงจาก Cache (ซึ่งจะเร็วมาก)
+  
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Network response was not ok');
+    
+    // ขนาดไฟล์จริงประมาณ 1.86 MB (1950550 bytes decompressed)
+    const contentLength = +response.headers.get('Content-Length') || 1860000;
+    const reader = response.body.getReader();
+    
+    let receivedLength = 0;
+    const chunks = [];
+    
+    while(true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      receivedLength += value.length;
+      
+      let pct = Math.round((receivedLength / contentLength) * 100);
+      if (pct > 99) pct = 99; // ค้างไว้ที่ 99% จนกว่าจะประกอบร่างเสร็จ
+      
+      updateSplashProgress(pct, receivedLength, contentLength);
+    }
+    
+    // รวมเศษส่วนของไบต์
+    const allChunks = new Uint8Array(receivedLength);
+    let position = 0;
+    for(let chunk of chunks) {
+      allChunks.set(chunk, position);
+      position += chunk.length;
+    }
+    
+    // แปลงรหัสไบต์เป็นข้อความสคริปต์
+    const decoder = new TextDecoder('utf-8');
+    const scriptText = decoder.decode(allChunks);
+    
+    // แทรกสคริปต์เพื่อรันตัวแปร OFFLINE_CASE_DETAILS ลงหน้าต่างหลัก
+    const script = document.createElement('script');
+    script.textContent = scriptText;
+    document.head.appendChild(script);
+    
+    updateSplashProgress(100, receivedLength, receivedLength);
+    console.log('[Database Preloader] Offline database loaded & parsed successfully.');
+    
+    // ผสานข้อมูลออฟไลน์เข้ากับ AppState
+    mergeOfflineDetails();
+  } catch (err) {
+    console.warn('[Database Preloader] Dynamic prefetch failed. Fallback to static injection:', err);
+    // กรณีฉุกเฉิน: แทรกสคริปต์ตรงๆ
+    await new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = url;
+      script.onload = () => {
+        mergeOfflineDetails();
+        resolve();
+      };
+      script.onerror = resolve;
+      document.head.appendChild(script);
+    });
+  } finally {
+    clearTimeout(showOverlayTimeout);
+    hideSplashOverlay();
+  }
+}
+
+function mergeOfflineDetails() {
+  if (typeof OFFLINE_CASE_DETAILS !== 'undefined' && AppState.cases && AppState.cases.length > 0) {
+    AppState.cases.forEach((c, idx) => {
+      const cleanId = (c.caseId || '').trim();
+      if (OFFLINE_CASE_DETAILS[cleanId]) {
+        AppState.cases[idx] = Object.assign({}, c, OFFLINE_CASE_DETAILS[cleanId]);
+      }
+    });
+    console.log('[Database Preloader] Merged offline details into AppState.');
+  }
+}
+
 
