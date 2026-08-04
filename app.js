@@ -203,9 +203,10 @@ function toggleTheme() {
 }
 
 function updateThemeButtonIcon(btn) {
-  btn.innerHTML = AppState.theme === 'light' 
-    ? `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"></path></svg>`
-    : `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m0 13.5V21M4.22 4.22l1.59 1.59m12.38 12.38l1.59 1.59M21 12h-2.25m-13.5 0H3m2.28 6.06l1.59-1.59m12.38-12.38l1.59-1.59M12 7.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z"></path></svg>`;
+  if (!btn) return;
+  const isLight = AppState.theme === 'light';
+  btn.innerHTML = isLight ? '🌙' : '☀️';
+  btn.setAttribute('title', isLight ? 'สลับเป็นโหมดกลางคืน (Dark Mode)' : 'สลับเป็นโหมดกลางวัน (Light Mode)');
 }
 
 // จัดการ API Input modal/config (Deprecated: API is configured backend-only now)
@@ -289,7 +290,7 @@ async function loadCasesData() {
     window.dispatchEvent(new CustomEvent('appDataReady', { detail: { count: AppState.cases.length, isOffline: true } }));
   }
 }
-}
+
 
 /**
  * fetchCaseDetail — ดึงข้อมูล scenario/checklist เต็มของเคสจาก API แบบ on-demand
@@ -369,6 +370,9 @@ function showApiStatusBanner(isConnected, message) {
 // 3. Stats Dashboard update
 // ──────────────────────────────────────────────────────────────
 function updateStatsDashboard() {
+  const dashboard = document.getElementById('stats-dashboard');
+  if (dashboard) dashboard.classList.remove('is-loading');
+
   const clinicNum = document.getElementById('stat-clinic');
   const productNum = document.getElementById('stat-product');
   const sapNum = document.getElementById('stat-sap');

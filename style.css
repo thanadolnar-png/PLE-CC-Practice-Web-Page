@@ -178,9 +178,9 @@ a {
 }
 
 .theme-toggle-btn {
-  background: none;
+  background: var(--bg-secondary);
   border: 1px solid var(--border);
-  color: var(--text-secondary);
+  color: var(--text-primary);
   width: 2.5rem;
   height: 2.5rem;
   border-radius: var(--radius-full);
@@ -188,6 +188,7 @@ a {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  font-size: 1.25rem;
   transition: var(--transition);
 }
 
