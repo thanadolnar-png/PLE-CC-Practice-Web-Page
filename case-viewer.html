@@ -485,54 +485,108 @@
           currentRole = modeParam;
         }
         
-        setTimeout(loadCaseDetail, 400); // ดีเลย์สั้นๆ ให้ระบบดาวน์โหลดฐานข้อมูลเสร็จก่อน
+        // ถ้าโหลดฐานข้อมูลออฟไลน์เสร็จแล้ว ให้รันได้ทันทีเลยโดยไม่ต้องรอหน่วงเวลา 400ms
+        if (typeof OFFLINE_CASE_DETAILS !== 'undefined') {
+          loadCaseDetail();
+        } else {
+          // ถ้ายังโหลดไม่เสร็จ ให้รอตรวจสอบเป็นระยะ (ทุกๆ 30ms)
+          const checkInterval = setInterval(() => {
+            if (typeof OFFLINE_CASE_DETAILS !== 'undefined') {
+              clearInterval(checkInterval);
+              loadCaseDetail();
+            }
+          }, 30);
+          // ป้องกันการวนลูปไม่สิ้นสุด ให้เคลียร์หลังจาก 5 วินาที
+          setTimeout(() => clearInterval(checkInterval), 5000);
+        }
       } else {
         alert('กรุณาระบุรหัสเคสสอบ');
         window.location.href = 'case-library.html';
       }
     });
 
+    // ค้นหาข้อมูลเคสจาก Offline Database ทั้งส่วนสรุปและรายละเอียดแบบครบถ้วน
+    function getOfflineCase(caseId) {
+      const cleanId = (caseId || '').trim();
+      let baseCase = {};
+      if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+        baseCase = OFFLINE_DATA.cases.find(c => c.caseId === cleanId) || {};
+      }
+      if (typeof OFFLINE_CASE_DETAILS !== 'undefined' && OFFLINE_CASE_DETAILS[cleanId]) {
+        return Object.assign({}, baseCase, OFFLINE_CASE_DETAILS[cleanId]);
+      }
+      return Object.keys(baseCase).length > 0 ? baseCase : null;
+    }
+
     async function loadCaseDetail() {
-      showGlobalLoader(true);
+      const cleanId = (activeCaseId || '').trim();
       
+      // 1. ตรวจสอบข้อมูลออฟไลน์ในเครื่องก่อน (โหลดทันทีใน 0ms)
+      const offlineCase = getOfflineCase(cleanId);
+      const hasOfflineChecklist = offlineCase && offlineCase.checklist && offlineCase.checklist.length > 0;
+      
+      if (hasOfflineChecklist) {
+        // เรนเดอร์ข้อมูลออฟไลน์ขึ้นมาก่อนทันทีเพื่อประสบการณ์ใช้งานที่รวดเร็วแบบ Offline-First
+        AppState.currentCase = offlineCase;
+        renderCaseDetail(offlineCase);
+        setViewerRole(currentRole);
+        showGlobalLoader(false);
+        console.log(`[Offline-First] Case ${cleanId} rendered instantly from offline database (0ms).`);
+        
+        // รันการดึงข้อมูลเวอร์ชันล่าสุดจาก API สดในเบื้องหลัง (Background Sync)
+        if (currentApiUrl) {
+          fetch(`${currentApiUrl}?action=getCase&id=${encodeURIComponent(cleanId)}&_cb=${new Date().getTime()}`)
+            .then(res => res.json())
+            .then(result => {
+              if (result.success && result.data) {
+                const updatedCase = result.data;
+                
+                // รวมค่า linkedNextCase/linkedFromCase จากออฟไลน์เพื่อป้องกัน API เก่าตกหล่น
+                if (offlineCase) {
+                  if (!updatedCase.linkedNextCase && offlineCase.linkedNextCase) updatedCase.linkedNextCase = offlineCase.linkedNextCase;
+                  if (!updatedCase.linkedFromCase && offlineCase.linkedFromCase) updatedCase.linkedFromCase = offlineCase.linkedFromCase;
+                }
+                
+                // เปรียบเทียบข้อมูลเพื่อหลีกเลี่ยงการกะพริบของ UI หากไม่มีอะไรเปลี่ยนแปลง
+                const isDifferent = JSON.stringify(AppState.currentCase) !== JSON.stringify(updatedCase);
+                if (isDifferent) {
+                  console.log(`[Background Sync] Case ${cleanId} has updates. Re-rendering UI...`);
+                  AppState.currentCase = updatedCase;
+                  renderCaseDetail(updatedCase);
+                  setViewerRole(currentRole);
+                } else {
+                  console.log(`[Background Sync] Case ${cleanId} is up to date.`);
+                }
+              }
+            })
+            .catch(e => console.warn('[Background Sync] Failed to fetch latest data:', e));
+        }
+        return;
+      }
+      
+      // 2. Fallback: ถ้าไม่มีข้อมูลออฟไลน์ หรือไม่มี Checklist ให้โหลดจาก API สดแบบปิดกั้นหน้าจอ (Blocking Load)
+      showGlobalLoader(true);
       let matchedCase = null;
       
-      // 1. ลองดึงข้อมูลจาก API สด
       if (currentApiUrl) {
         try {
           const cacheBuster = new Date().getTime();
-          const res = await fetch(`${currentApiUrl}?action=getCase&id=${activeCaseId}&_cb=${cacheBuster}`);
+          const res = await fetch(`${currentApiUrl}?action=getCase&id=${encodeURIComponent(cleanId)}&_cb=${cacheBuster}`);
           const result = await res.json();
           if (result.success && result.data) {
             matchedCase = result.data;
-            
-            // ป้องกันปัญหากรณี Apps Script ฝั่ง Google ยังไม่ได้ Deploy เวอร์ชั่นใหม่ (ทำให้ API ตอบกลับมาโดยไม่มี linkedNextCase)
-            // ให้เอาค่าจาก Offline DB มาเติมเต็มข้อมูลที่ขาดหายไป
-            if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
-              const offC = OFFLINE_DATA.cases.find(c => c.caseId === activeCaseId);
-              if (offC) {
-                if (!matchedCase.linkedNextCase && offC.linkedNextCase) matchedCase.linkedNextCase = offC.linkedNextCase;
-                if (!matchedCase.linkedFromCase && offC.linkedFromCase) matchedCase.linkedFromCase = offC.linkedFromCase;
-              }
+            if (offlineCase) {
+              if (!matchedCase.linkedNextCase && offlineCase.linkedNextCase) matchedCase.linkedNextCase = offlineCase.linkedNextCase;
+              if (!matchedCase.linkedFromCase && offlineCase.linkedFromCase) matchedCase.linkedFromCase = offlineCase.linkedFromCase;
             }
           }
         } catch (e) {
-          console.warn('ดึงข้อมูลผ่าน API ล้มเหลว สลับไปใช้ออฟไลน์:', e);
+          console.warn('ดึงข้อมูลผ่าน API ล้มเหลว:', e);
         }
       }
       
-      // 2. ถ้าดึง API ไม่สำเร็จ หรือดึงสำเร็จแต่ไม่มี Checklist ให้ใช้ข้อมูลจาก Offline Database
-      const hasChecklist = matchedCase && matchedCase.checklist && matchedCase.checklist.length > 0;
-      if (!hasChecklist) {
-        let offlineCase = null;
-        if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
-          offlineCase = OFFLINE_DATA.cases.find(c => c.caseId === activeCaseId);
-        }
-        if (offlineCase && offlineCase.checklist && offlineCase.checklist.length > 0) {
-          matchedCase = offlineCase;
-        } else if (!matchedCase) {
-          matchedCase = AppState.cases.find(c => c.caseId === activeCaseId);
-        }
+      if (!matchedCase && offlineCase) {
+        matchedCase = offlineCase;
       }
       
       if (!matchedCase) {
@@ -544,7 +598,7 @@
       
       AppState.currentCase = matchedCase;
       renderCaseDetail(matchedCase);
-      setViewerRole(currentRole); // ตั้งบทบาทและเปิดแสดงตามที่เซ็ต
+      setViewerRole(currentRole);
       showGlobalLoader(false);
     }
 

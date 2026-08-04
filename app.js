@@ -849,3 +849,19 @@ function updateLightboxTransform() {
     img.style.transform = `translate(${lightboxTranslateX}px, ${lightboxTranslateY}px) scale(${lightboxScale})`;
   }
 }
+
+// ──────────────────────────────────────────────────────────────
+// 9. Service Worker Registration (Game-like Cache & Offline Mode)
+// ──────────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => {
+        console.log('[Service Worker] Registration successful with scope:', reg.scope);
+      })
+      .catch(err => {
+        console.warn('[Service Worker] Registration failed:', err);
+      });
+  });
+}
+
