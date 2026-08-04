@@ -311,15 +311,90 @@
               <!-- Scenario text dynamically generated -->
             </div>
 
-            <h3 class="viewer-section-title" id="exam-patient-title">ข้อมูลผู้ป่วย (Patient Info)</h3>
-            <div id="exam-patient-content">
-              <!-- Table dynamically generated -->
+            <!-- Patient Info Collapsible Accordion -->
+            <div class="patient-accordion" id="exam-patient-accordion" style="margin-bottom: 1.5rem; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden;">
+              <button
+                id="exam-patient-toggle-btn"
+                onclick="togglePatientAccordion()"
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  width: 100%;
+                  padding: 0.75rem 1rem;
+                  background: var(--bg-secondary);
+                  border: none;
+                  cursor: pointer;
+                  font-family: var(--font-title);
+                  font-size: 1rem;
+                  font-weight: 700;
+                  color: var(--text-primary);
+                  text-align: left;
+                  gap: 0.5rem;
+                "
+              >
+                <span id="exam-patient-title">📊 ข้อมูลผู้ป่วย (Patient Info)</span>
+                <svg id="exam-patient-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s ease; flex-shrink: 0;">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+              <div
+                id="exam-patient-content"
+                style="
+                  overflow: hidden;
+                  max-height: 2000px;
+                  transition: max-height 0.35s ease, padding 0.35s ease;
+                  padding: 1rem;
+                  background: var(--surface);
+                "
+              >
+                <!-- Table dynamically generated -->
+              </div>
             </div>
+
             
-            <h3 class="viewer-section-title" id="exam-equipment-title" style="display: none;">สิ่งที่มีให้ในสถานี (Provided Items)</h3>
-            <div id="exam-equipment-content" style="display: none;">
-              <!-- Filled dynamically by JS -->
+
+            <!-- Equipment Collapsible Accordion -->
+            <div class="patient-accordion" id="exam-equipment-accordion" style="display: none; margin-bottom: 1.5rem; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden;">
+              <button
+                id="exam-equipment-toggle-btn"
+                onclick="toggleEquipmentAccordion()"
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  width: 100%;
+                  padding: 0.75rem 1rem;
+                  background: var(--bg-secondary);
+                  border: none;
+                  cursor: pointer;
+                  font-family: var(--font-title);
+                  font-size: 1rem;
+                  font-weight: 700;
+                  color: var(--text-primary);
+                  text-align: left;
+                  gap: 0.5rem;
+                "
+              >
+                <span id="exam-equipment-title">&#129514; สิ่งที่มีให้ในสถานี (Provided Items)</span>
+                <svg id="exam-equipment-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s ease; flex-shrink: 0;">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+              <div
+                id="exam-equipment-content"
+                style="
+                  overflow: hidden;
+                  max-height: 2000px;
+                  transition: max-height 0.35s ease, padding 0.35s ease;
+                  padding: 1rem;
+                  background: var(--surface);
+                "
+              >
+                <!-- Filled dynamically by JS -->
+              </div>
             </div>
+
 
             <!-- Added margin top for checklist section -->
             <div style="margin-top: 2rem;"></div>
@@ -1324,23 +1399,37 @@
       }
       
       document.getElementById('exam-scenario-content').innerHTML = c.contentHtml || `<p>${c.scenario || ''}</p>`;
-      document.getElementById('exam-patient-content').innerHTML = c.patientInfoHtml || '<p>ไม่มีตารางข้อมูลผู้ป่วย</p>';
 
-      // Render Equipment
+      // Render patientInfoHtml — convert ##Header markers to styled headings
+      const rawPatient = c.patientInfoHtml || '<p>ไม่มีตารางข้อมูลผู้ป่วย</p>';
+      const processedPatient = rawPatient.replace(
+        /<p[^>]*>##([^<]+)<\/p>/gi,
+        (match, heading) => `<p style="font-family:var(--font-title);font-weight:700;color:var(--text-primary);margin:1rem 0 0.35rem 0;font-size:0.92rem;border-left:3px solid var(--primary);padding-left:0.6rem;">&#128204; ${heading.trim()}</p>`
+      );
+      document.getElementById('exam-patient-content').innerHTML = processedPatient;
+
+      // Reset patient accordion — expand on every new station
+      _patientAccordionOpen = false;
+      togglePatientAccordion();
+
+      // Render Equipment accordion
+      const equipAccordion = document.getElementById('exam-equipment-accordion');
       if (c.equipmentHtml) {
-        document.getElementById('exam-equipment-title').style.display = 'block';
+        if (equipAccordion) equipAccordion.style.display = 'block';
         const eqContent = document.getElementById('exam-equipment-content');
-        eqContent.style.display = 'block';
         // Wrap with ul if it starts with li but has no ul wrapper
         if (c.equipmentHtml.startsWith('<li')) {
           eqContent.innerHTML = `<ul>${c.equipmentHtml}</ul>`;
         } else {
           eqContent.innerHTML = c.equipmentHtml;
         }
+        // Reset equipment accordion — expand on every new station
+        _equipmentAccordionOpen = false;
+        toggleEquipmentAccordion();
       } else {
-        document.getElementById('exam-equipment-title').style.display = 'none';
-        document.getElementById('exam-equipment-content').style.display = 'none';
+        if (equipAccordion) equipAccordion.style.display = 'none';
       }
+
       
       const badge = document.getElementById('exam-station-badge');
       badge.className = 'station-badge ' + (c.category || 'rest').toLowerCase();
@@ -1661,6 +1750,45 @@
     function escapeHtml(str) {
       if (typeof str !== 'string') return str || '';
       return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ─── Patient Info Accordion toggle ───────────────────────
+    let _patientAccordionOpen = true;
+    function togglePatientAccordion() {
+      const content = document.getElementById('exam-patient-content');
+      const chevron = document.getElementById('exam-patient-chevron');
+      const btn = document.getElementById('exam-patient-toggle-btn');
+      if (!content) return;
+      _patientAccordionOpen = !_patientAccordionOpen;
+      if (_patientAccordionOpen) {
+        content.style.maxHeight = '2000px';
+        content.style.padding = '1rem';
+        if (chevron) chevron.style.transform = 'rotate(0deg)';
+        if (btn) btn.style.background = 'var(--bg-secondary)';
+      } else {
+        content.style.maxHeight = '0';
+        content.style.padding = '0';
+        if (chevron) chevron.style.transform = 'rotate(-90deg)';
+        if (btn) btn.style.background = 'var(--bg-secondary)';
+      }
+    }
+
+    // ─── Equipment Accordion toggle ───────────────────────────
+    let _equipmentAccordionOpen = true;
+    function toggleEquipmentAccordion() {
+      const content = document.getElementById('exam-equipment-content');
+      const chevron = document.getElementById('exam-equipment-chevron');
+      if (!content) return;
+      _equipmentAccordionOpen = !_equipmentAccordionOpen;
+      if (_equipmentAccordionOpen) {
+        content.style.maxHeight = '2000px';
+        content.style.padding = '1rem';
+        if (chevron) chevron.style.transform = 'rotate(0deg)';
+      } else {
+        content.style.maxHeight = '0';
+        content.style.padding = '0';
+        if (chevron) chevron.style.transform = 'rotate(-90deg)';
+      }
     }
 
     // ─── Data Ready Bar helpers ───────────────────────────────
