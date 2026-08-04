@@ -718,31 +718,45 @@ function getCaseContentFromDoc(docId, targetCaseId) {
       else if (currentSection === 'CHECKLIST') {
         if (type === DocumentApp.ElementType.PARAGRAPH || type === DocumentApp.ElementType.LIST_ITEM) {
           let text = '';
-          if (type === DocumentApp.ElementType.PARAGRAPH) {
-            text = child.asParagraph().getText().trim();
-          } else {
-            text = child.asListItem().getText().trim();
+          let itemImageHtml = '';
+          const para = (type === DocumentApp.ElementType.PARAGRAPH) ? child.asParagraph() : child.asListItem();
+          text = para.getText().trim();
+
+          // ดึงรูปภาพ inline ที่อยู่ในข้อ checklist ด้วย
+          const numParaChildren = para.getNumChildren();
+          for (let pi = 0; pi < numParaChildren; pi++) {
+            const pc = para.getChild(pi);
+            if (pc.getType() === DocumentApp.ElementType.INLINE_IMAGE) {
+              try {
+                const img = pc.asInlineImage();
+                const blob = img.getBlob();
+                const base64 = Utilities.base64Encode(blob.getBytes());
+                const mime = blob.getContentType() || 'image/png';
+                itemImageHtml += `<div class="case-image-wrapper" style="text-align:center;margin:8px 0;"><img src="data:${mime};base64,${base64}" class="case-image" style="max-width:100%;height:auto;border-radius:6px;" alt="รูปประกอบ" /></div>`;
+              } catch(e) {}
+            }
           }
-          
+
           const isChecklistItem = type === DocumentApp.ElementType.LIST_ITEM || text.startsWith('[ ]') || text.startsWith('[x]') || text.startsWith('\u2610') || text.startsWith('\u2611') || text.startsWith('\u2705') || text.startsWith('\u2714') || text.startsWith('\u25cb') || text.startsWith('-') || text.startsWith('*') || /^\\d+\\./.test(text);
           if (isChecklistItem && text.length > 3) {
             let cleanText = text.replace(/^([-*\u2022\u2710\u2705\u2714\u2610\u2611]|\[\s*\]|\[x\]|\d+\.)\s*/, '').trim();
             const scoreMatch = cleanText.match(/^\((\d+(\.\d+)?)\)\s*(.*)$/);
             let score = 1;
             let itemText = cleanText;
-            
+
             if (scoreMatch) {
               score = parseFloat(scoreMatch[1]);
               itemText = scoreMatch[3].trim();
             }
-            
+
             const itemId = 'chk_' + simpleHash(itemText).substring(0, 10);
             checklist.push({
               id: itemId,
               text: itemText,
               score: score,
               group: currentGroup,
-              checked: false
+              checked: false,
+              imageHtml: itemImageHtml || ''
             });
           }
         }
@@ -945,17 +959,28 @@ function parseParagraphToHtml(paragraph) {
 function parseTableToHtml(table) {
   let html = '<div class="table-responsive"><table class="table-patient-info">';
   const numRows = table.getNumRows();
-  
+
   for (let r = 0; r < numRows; r++) {
     const row = table.getRow(r);
     html += '<tr>';
     const numCells = row.getNumCells();
-    
+
     for (let c = 0; c < numCells; c++) {
       const cell = row.getCell(c);
-      const text = cell.getText().trim();
-      const tag = r === 0 ? 'th' : 'td'; // แถวแรกเป็น Header
-      html += `<${tag}>${escapeHtml(text)}</${tag}>`;
+      const tag = r === 0 ? 'th' : 'td';
+      // Parse cell paragraphs to support inline images
+      let cellHtml = '';
+      const numParas = cell.getNumChildren();
+      for (let p = 0; p < numParas; p++) {
+        const para = cell.getChild(p);
+        if (para.getType() === DocumentApp.ElementType.PARAGRAPH) {
+          const paraHtml = parseParagraphToHtml(para.asParagraph());
+          // Unwrap outer <p> tags for inline table display
+          cellHtml += paraHtml.replace(/^<p>(.*)<\/p>$/s, '$1');
+        }
+      }
+      if (!cellHtml) cellHtml = escapeHtml(cell.getText().trim());
+      html += `<${tag}>${cellHtml}</${tag}>`;
     }
     html += '</tr>';
   }
