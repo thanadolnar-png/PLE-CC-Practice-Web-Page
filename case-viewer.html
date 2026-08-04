@@ -505,15 +505,20 @@
       }
     });
 
-    // ค้นหาข้อมูลเคสจาก Offline Database ทั้งส่วนสรุปและรายละเอียดแบบครบถ้วน
+    // ค้นหาข้อมูลเคสจาก Offline Database ทั้งส่วนสรุปและรายละเอียดแบบครบถ้วน (รองรับตัวอักษรพิมพ์เล็ก/ใหญ่)
     function getOfflineCase(caseId) {
       const cleanId = (caseId || '').trim();
       let baseCase = {};
       if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
         baseCase = OFFLINE_DATA.cases.find(c => c.caseId === cleanId) || {};
       }
-      if (typeof OFFLINE_CASE_DETAILS !== 'undefined' && OFFLINE_CASE_DETAILS[cleanId]) {
-        return Object.assign({}, baseCase, OFFLINE_CASE_DETAILS[cleanId]);
+      if (typeof OFFLINE_CASE_DETAILS !== 'undefined') {
+        const details = OFFLINE_CASE_DETAILS[cleanId] || 
+                        OFFLINE_CASE_DETAILS[cleanId.toUpperCase()] || 
+                        OFFLINE_CASE_DETAILS[cleanId.toLowerCase()];
+        if (details) {
+          return Object.assign({}, baseCase, details);
+        }
       }
       return Object.keys(baseCase).length > 0 ? baseCase : null;
     }
