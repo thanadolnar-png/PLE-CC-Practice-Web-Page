@@ -219,7 +219,7 @@ async function loadCasesData() {
   if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases && OFFLINE_DATA.cases.length > 0) {
     AppState.cases = OFFLINE_DATA.cases;
     onCasesLoaded();
-    showApiStatusBanner(true, '⚡ ใช้งานข้อมูล Offline ในเครื่อง (กำลังซิงก์ข้อมูลล่าสุดสด...)');
+    showApiStatusBanner(true, '⚡ ใช้งานข้อมูล Offline ในเครื่อง (กำลังซิงก์ข้อมูลล่าสุด..)');
   } else {
     showGlobalLoader(true);
   }
