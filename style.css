@@ -2057,6 +2057,11 @@ a {
     grid-template-columns: 1fr;
     gap: 2rem;
   }
+  .filter-console {
+    position: relative;
+    top: 0;
+    box-shadow: none;
+  }
 }
 
 .filter-console {
