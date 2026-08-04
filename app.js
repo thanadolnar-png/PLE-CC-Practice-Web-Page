@@ -283,10 +283,11 @@ async function loadCasesData() {
       if (AppState.cases && AppState.cases.length > 0) {
         AppState.dataReady = true;
         AppState.dataReadyCount = AppState.cases.length;
-        showApiStatusBanner(false, '⚠️ ไม่สามารถซิงก์ข้อมูลจาก Google Sheet ได้ (ใช้งานข้อมูลล่าสุดในเครื่อง)');
+        // ปรับเป็นแสดงแถบสีเขียวเสมอ (true) เพื่อให้นิสิตไม่กังวล และใช้คำว่า "พร้อมใช้งาน"
+        showApiStatusBanner(true, '✅ พร้อมใช้งาน (ใช้งานข้อมูลล่าสุดในเครื่อง)');
         window.dispatchEvent(new CustomEvent('appDataReady', { detail: { count: AppState.cases.length, isOffline: true } }));
       } else {
-        showApiStatusBanner(false, '⚠️ ไม่สามารถเชื่อมต่อ API ได้ — ใช้งานข้อมูล Offline');
+        showApiStatusBanner(false, '⚠️ ไม่พบข้อมูลข้อสอบในเครื่อง กรุณาเชื่อมต่ออินเทอร์เน็ต');
       }
     }
   } else {
@@ -404,7 +405,81 @@ function showApiStatusBanner(isConnected, message) {
   if (banner) {
     banner.style.display = 'flex';
     banner.className = isConnected ? 'api-banner connected' : 'api-banner offline';
-    banner.querySelector('.banner-text').textContent = message;
+    
+    let textSpan = banner.querySelector('.banner-text');
+    if (!textSpan) {
+      banner.innerHTML = '<span class="banner-text"></span>';
+      textSpan = banner.querySelector('.banner-text');
+    }
+    textSpan.textContent = message;
+    
+    // แทรกปุ่มซิงก์ใหม่แบบ dynamic หากกำหนด API URL และไม่มีปุ่มเดิมอยู่
+    let syncBtn = banner.querySelector('#btn-force-sync');
+    if (currentApiUrl && !syncBtn) {
+      syncBtn = document.createElement('button');
+      syncBtn.id = 'btn-force-sync';
+      syncBtn.innerHTML = '🔄 ซิงก์ข้อมูลใหม่';
+      syncBtn.style.cssText = `
+        margin-left: 10px;
+        padding: 3px 8px;
+        font-size: 0.72rem;
+        background: rgba(255, 255, 255, 0.15);
+        color: inherit;
+        border: 1px solid currentColor;
+        border-radius: 4px;
+        cursor: pointer;
+        font-family: var(--font-title);
+        font-weight: 600;
+        transition: all 0.2s ease;
+      `;
+      syncBtn.onmouseover = () => {
+        syncBtn.style.background = 'rgba(255, 255, 255, 0.3)';
+      };
+      syncBtn.onmouseout = () => {
+        syncBtn.style.background = 'rgba(255, 255, 255, 0.15)';
+      };
+      syncBtn.onclick = (e) => {
+        e.stopPropagation();
+        forceSyncDatabase();
+      };
+      banner.appendChild(syncBtn);
+    }
+  }
+}
+
+async function forceSyncDatabase() {
+  const btn = document.getElementById('btn-force-sync');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = '⌛ กำลังซิงก์...';
+  }
+  
+  showApiStatusBanner(true, '🔄 กำลังดึงข้อมูลล่าสุดจาก Google Sheets และ Docs...');
+  
+  // ล้างแคชใน LocalStorage และลบข้อมูลแคช DB เพื่อบังคับให้ดึงใหม่ทั้งหมด
+  localStorage.removeItem('ospe_cached_case_list');
+  localStorage.removeItem('ospe_db_version');
+  
+  try {
+    // บังคับดาวน์โหลดข้อมูลทั้งหมดใหม่แบบล้างแคช
+    await loadOfflineDetailsWithProgress();
+    await loadCasesData();
+    showApiStatusBanner(true, '✅ ซิงก์ข้อมูลล่าสุดสำเร็จแล้ว!');
+    
+    // รีโหลดหน้าจอเพื่อแสดงผลกรณีอยู่ในหน้าดูเคส
+    if (window.location.pathname.includes('case-viewer.html')) {
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    }
+  } catch (err) {
+    console.error('Force sync failed:', err);
+    showApiStatusBanner(false, '⚠️ ไม่สามารถซิงก์ได้ชั่วคราว (ใช้ข้อมูลเดิมในเครื่อง)');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = '🔄 ซิงก์ข้อมูลใหม่';
+    }
   }
 }
 
