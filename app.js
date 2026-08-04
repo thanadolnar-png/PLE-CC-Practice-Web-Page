@@ -22,7 +22,9 @@ const AppState = {
     disease: 'All',
     search: ''
   },
-  checklistProgress: {} // { caseId: [checked_id1, checked_id2] }
+  checklistProgress: {}, // { caseId: [checked_id1, checked_id2] }
+  dataReady: false,      // true = API sync done (full content available)
+  dataReadyCount: 0      // number of cases with full content confirmed
 };
 
 // ──────────────────────────────────────────────────────────────
@@ -245,7 +247,11 @@ async function loadCasesData() {
           });
         }
         AppState.cases = fetchedCases;
-        showApiStatusBanner(true, '🟢 เชื่อมต่อซิงก์ข้อมูลสดสำเร็จ (Live Google Sheet Synced)');
+        AppState.dataReady = true;
+        AppState.dataReadyCount = fetchedCases.length;
+        showApiStatusBanner(true, `✅ ข้อมูลพร้อมแล้ว — เชื่อมต่อสำเร็จ (${fetchedCases.length} เคส)`);
+        // Dispatch event so exam-simulation and other pages can react
+        window.dispatchEvent(new CustomEvent('appDataReady', { detail: { count: fetchedCases.length } }));
         onCasesLoaded();
         return;
       }
@@ -272,6 +278,36 @@ async function loadCasesData() {
     }
     onCasesLoaded();
   }
+}
+
+/**
+ * fetchCaseDetail — ดึงข้อมูล scenario/checklist เต็มของเคสจาก API แบบ on-demand
+ * ใช้เมื่อ case ที่อยู่ใน AppState.cases ไม่มี contentHtml / scenario / checklist
+ * (เช่น เคสใหม่ที่ยังไม่ได้อัปเดตใน offline file)
+ * @param {string} caseId
+ * @returns {Promise<object|null>} full case object or null
+ */
+async function fetchCaseDetail(caseId) {
+  if (!currentApiUrl || !caseId) return null;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s for GAS cold start
+    const res = await fetch(`${currentApiUrl}?action=getCase&id=${encodeURIComponent(caseId)}`, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    const json = await res.json();
+    if (json.success && json.data) {
+      // Merge into AppState.cases
+      const idx = AppState.cases.findIndex(c => c.caseId === caseId);
+      if (idx !== -1) {
+        AppState.cases[idx] = Object.assign({}, AppState.cases[idx], json.data);
+        return AppState.cases[idx];
+      }
+      return json.data;
+    }
+  } catch (e) {
+    console.warn('fetchCaseDetail failed for', caseId, e);
+  }
+  return null;
 }
 
 function onCasesLoaded() {

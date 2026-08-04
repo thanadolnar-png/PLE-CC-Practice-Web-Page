@@ -62,6 +62,34 @@
     <p style="font-family: var(--font-title); font-weight: 500; color: var(--text-secondary);">กำลังจัดเตรียมสุ่มสถานีสอบ...</p>
   </div>
 
+  <!-- Data Ready Status Bar -->
+  <div id="data-ready-bar" style="
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.82rem;
+    font-family: var(--font-body);
+    font-weight: 500;
+    background: linear-gradient(90deg, #fff7ed, #fffbeb);
+    border-bottom: 1px solid #fed7aa;
+    color: #92400e;
+    transition: all 0.5s ease;
+  ">
+    <span id="data-ready-icon" style="font-size:1rem;">🔄</span>
+    <span id="data-ready-text">กำลังโหลดข้อมูลเคส — รอสักครู่ก่อนใช้งาน Lobby...</span>
+    <span id="data-ready-spinner" style="
+      width: 14px; height: 14px;
+      border: 2px solid #f59e0b;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+      flex-shrink: 0;
+    "></span>
+  </div>
+
   <!-- Main Container -->
   <main class="main-section" style="padding: 2rem 0;">
     <div class="container">
@@ -746,7 +774,7 @@
     // Kept as no-op to avoid reference errors from old code paths
     function syncLobbyStatus() {}
 
-    function applyRoomState(room) {
+    async function applyRoomState(room) {
       try {
         document.getElementById('lobby-examinee-display').textContent = room.examineeName || 'กำลังรอ...';
         document.getElementById('lobby-examiner-display').textContent = room.examinerName || 'กำลังรอ...';
@@ -808,7 +836,7 @@
           
           // Build stations if not exist or if joining late
           if (SimState.stations.length === 0) {
-            buildStationsFromRoom(room);
+            await buildStationsFromRoom(room);
           }
           
           if (!SimState.hasDoneCountdown) {
@@ -910,7 +938,7 @@
       }
     }
 
-    function buildStationsFromRoom(room) {
+    async function buildStationsFromRoom(room) {
       showGlobalLoader(true);
       let fullExamSet = [];
       if (room.examSet && typeof room.examSet === 'string' && room.examSet.length > 0) {
@@ -933,7 +961,37 @@
         if (fullExamSet[i].caseId === 'REST') {
           SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: true, case: getRestCaseData() });
         } else {
-          let matchedCase = AppState.cases.find(c => c.caseId === fullExamSet[i].caseId) || AppState.cases[0];
+          const targetCaseId = (fullExamSet[i].caseId || '').trim();
+          let matchedCase = AppState.cases.find(c => c.caseId && c.caseId.trim() === targetCaseId);
+          
+          // ── Lazy-fetch: ถ้าเคสไม่มี content ให้ดึงเพิ่มจาก API ──
+          if (matchedCase && !matchedCase.contentHtml && !matchedCase.scenario && !(matchedCase.checklist && matchedCase.checklist.length > 0)) {
+            console.log(`[LazyFetch] ${targetCaseId} has no content — fetching from API...`);
+            setDataReadyBar('loading', `⏳ กำลังโหลดโจทย์ ${targetCaseId}...`);
+            try {
+              const fetched = typeof fetchCaseDetail !== 'undefined' ? await fetchCaseDetail(targetCaseId) : null;
+              if (fetched) {
+                matchedCase = fetched;
+                console.log(`[LazyFetch] ${targetCaseId} — loaded successfully!`);
+              } else {
+                console.warn(`[LazyFetch] ${targetCaseId} — fetch returned null`);
+              }
+            } catch(fetchErr) {
+              console.warn('[LazyFetch] Error fetching case detail:', fetchErr);
+            }
+          }
+          
+          // ── Fallback: ถ้ายังไม่พบเคสเลย ใช้ OFFLINE_DATA โดยตรง ──
+          if (!matchedCase && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+            matchedCase = OFFLINE_DATA.cases.find(c => c.caseId && c.caseId.trim() === targetCaseId);
+          }
+          
+          // ── Last resort: ใช้ AppState.cases[0] ──
+          if (!matchedCase) {
+            matchedCase = AppState.cases[0];
+            console.warn(`[buildStationsFromRoom] Case ${targetCaseId} not found — falling back to first case`);
+          }
+          
           SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: false, case: matchedCase });
         }
       }
@@ -1605,10 +1663,57 @@
       return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
+    // ─── Data Ready Bar helpers ───────────────────────────────
+    function setDataReadyBar(state, text) {
+      const bar = document.getElementById('data-ready-bar');
+      const icon = document.getElementById('data-ready-icon');
+      const textEl = document.getElementById('data-ready-text');
+      const spinner = document.getElementById('data-ready-spinner');
+      if (!bar) return;
+      if (state === 'ready') {
+        bar.style.background = 'linear-gradient(90deg, #f0fdf4, #dcfce7)';
+        bar.style.borderBottomColor = '#86efac';
+        bar.style.color = '#15803d';
+        if (icon) icon.textContent = '✅';
+        if (textEl) textEl.textContent = text;
+        if (spinner) spinner.style.display = 'none';
+        setTimeout(() => { if (bar) bar.style.display = 'none'; }, 5000);
+      } else if (state === 'loading') {
+        bar.style.background = 'linear-gradient(90deg, #fff7ed, #fffbeb)';
+        bar.style.borderBottomColor = '#fed7aa';
+        bar.style.color = '#92400e';
+        if (icon) icon.textContent = '🔄';
+        if (textEl) textEl.textContent = text;
+        if (spinner) spinner.style.display = 'inline-block';
+        bar.style.display = 'flex';
+      } else if (state === 'offline') {
+        bar.style.background = 'linear-gradient(90deg, #f1f5f9, #e2e8f0)';
+        bar.style.borderBottomColor = '#cbd5e1';
+        bar.style.color = '#475569';
+        if (icon) icon.textContent = '⚡';
+        if (textEl) textEl.textContent = text;
+        if (spinner) spinner.style.display = 'none';
+        setTimeout(() => { if (bar) bar.style.display = 'none'; }, 5000);
+      }
+    }
+
     // Init proportion sum text on load
     document.addEventListener('DOMContentLoaded', () => {
       updateProportionSumText();
       initOtpBoxes();
+
+      // ─ Init data-ready bar based on AppState ─
+      if (typeof AppState !== 'undefined' && AppState.dataReady) {
+        setDataReadyBar('ready', `✅ ข้อมูลพร้อมแล้ว — ${AppState.dataReadyCount} เคส (พร้อมใช้งาน Lobby)`);
+      } else {
+        setDataReadyBar('loading', '🔄 กำลังโหลดข้อมูลเคส — รอสักครู่ก่อนใช้งาน Lobby...');
+      }
+
+      // ─ Listen for appDataReady event from app.js ─
+      window.addEventListener('appDataReady', (e) => {
+        const count = e.detail && e.detail.count ? e.detail.count : '';
+        setDataReadyBar('ready', `✅ ข้อมูลพร้อมแล้ว — ${count} เคส (พร้อมใช้งาน Lobby ได้เลย)`);
+      });
 
       // ─ Hamburger toggle ─
       const _hamburger = document.getElementById('nav-hamburger');
