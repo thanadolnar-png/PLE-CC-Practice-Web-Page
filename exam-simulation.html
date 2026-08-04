@@ -1843,7 +1843,11 @@
       // ─ Listen for appDataReady event from app.js ─
       window.addEventListener('appDataReady', (e) => {
         const count = e.detail && e.detail.count ? e.detail.count : '';
-        setDataReadyBar('ready', `✅ ข้อมูลพร้อมแล้ว — ${count} เคส (พร้อมใช้งาน Lobby ได้เลย)`);
+        if (e.detail && e.detail.isOffline) {
+          setDataReadyBar('offline', `⚡ ข้อมูล Offline พร้อมใช้งาน — ${count} เคส`);
+        } else {
+          setDataReadyBar('ready', `✅ ข้อมูลพร้อมแล้ว — ${count} เคส (พร้อมใช้งาน Lobby ได้เลย)`);
+        }
       });
 
       // ─ Hamburger toggle ─

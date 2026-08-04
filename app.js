@@ -258,7 +258,10 @@ async function loadCasesData() {
     } catch (e) {
       console.warn('Google Apps Script API response delayed/timed out. Continuing with offline data:', e);
       if (AppState.cases && AppState.cases.length > 0) {
+        AppState.dataReady = true;
+        AppState.dataReadyCount = AppState.cases.length;
         showApiStatusBanner(true, '⚡ ใช้งานข้อมูล Offline ในเครื่อง (พร้อมใช้งาน)');
+        window.dispatchEvent(new CustomEvent('appDataReady', { detail: { count: AppState.cases.length, isOffline: true } }));
       } else {
         showApiStatusBanner(false, '⚠️ ไม่สามารถเชื่อมต่อ API ได้ — ใช้งานข้อมูล Offline');
       }
@@ -276,8 +279,16 @@ async function loadCasesData() {
     } else {
       AppState.cases = [];
     }
+    AppState.dataReady = true;
+    AppState.dataReadyCount = AppState.cases.length;
+    window.dispatchEvent(new CustomEvent('appDataReady', { detail: { count: AppState.cases.length, isOffline: true } }));
     onCasesLoaded();
+  } else if (!AppState.dataReady) {
+    AppState.dataReady = true;
+    AppState.dataReadyCount = AppState.cases.length;
+    window.dispatchEvent(new CustomEvent('appDataReady', { detail: { count: AppState.cases.length, isOffline: true } }));
   }
+}
 }
 
 /**
