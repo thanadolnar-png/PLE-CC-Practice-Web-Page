@@ -968,7 +968,7 @@ if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
 const DB_NAME = 'RxCU_OSPE_DB';
 const DB_VERSION = 1;
 const STORE_NAME = 'case_details';
-const DB_VERSION_STR = 'v1.2.7'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
+const DB_VERSION_STR = 'v1.2.8'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
 
 function openIndexedDB() {
   return new Promise((resolve, reject) => {
@@ -1079,7 +1079,7 @@ async function loadOfflineDetailsWithProgress() {
       injectSplashOverlay();
     }, 100); // ป้องกันภาพกระพริบหากโหลดเสร็จเร็วมาก
     
-    const response = await fetch(url);
+    const response = await fetch(url + '?v=' + DB_VERSION_STR);
     if (!response.ok) throw new Error('Network response was not ok');
     
     const contentLength = +response.headers.get('Content-Length') || 1860000;
