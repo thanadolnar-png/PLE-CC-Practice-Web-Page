@@ -1951,8 +1951,6 @@ a {
   background: var(--surface);
   border-radius: 0 0 var(--radius-md) var(--radius-md);
   font-size: 0.85rem;
-  max-height: 250px;
-  overflow-y: auto;
 }
 .exam-note-content-area.show {
   display: block;
