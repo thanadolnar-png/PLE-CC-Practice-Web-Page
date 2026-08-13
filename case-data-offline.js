@@ -1,6 +1,6 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Generated on 2026-08-13 19:32:46
+ * Generated on 2026-08-13 19:43:55
  */
 
 const OFFLINE_DATA = {
@@ -1913,7 +1913,7 @@ const OFFLINE_DATA = {
       "difficulty": 3,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ทดสอบ",
-      "createdDate": "04/07/2026",
+      "createdDate": "4/7/2026",
       "isActive": true
     },
     {
