@@ -1542,17 +1542,17 @@ function executeBatchPrint() {
       }
 
       if (mode === 'full' || mode === 'checklist') {
-        if (mode === 'full') {
-          html += `<div class="print-page-break-before" style="page-break-before: always; margin-top: 1rem;"></div>`;
-        }
+        const pageBreakAttr = (mode === 'full') ? 'class="print-page-break-before" style="page-break-before: always; margin-top: 1.25rem;"' : 'style="margin-top: 1.25rem;"';
+        
+        html += `<div ${pageBreakAttr}>`;
 
         if (c.checklist && c.checklist.length > 0) {
           let chkTable = `<table class="print-checklist-table" style="width:100%; border-collapse:collapse; margin-top:0.5rem;">
             <thead>
               <tr>
-                <th style="width:75%; border:1px solid #475569; padding:0.4rem;">รายละเอียดการปฏิบัติงาน / เกณฑ์ประเมิน</th>
-                <th style="width:12.5%; border:1px solid #475569; padding:0.4rem; text-align:center;">คะแนน</th>
-                <th style="width:12.5%; border:1px solid #475569; padding:0.4rem; text-align:center;">ผลประเมิน</th>
+                <th style="width:75%; border:1px solid #475569; padding:0.4rem; text-align:left;">รายละเอียดการปฏิบัติงาน / เกณฑ์ประเมิน</th>
+                <th style="width:12.5%; border:1px solid #475569; padding:0.4rem; text-align:center; vertical-align:middle;">คะแนน</th>
+                <th style="width:12.5%; border:1px solid #475569; padding:0.4rem; text-align:center; vertical-align:middle;">ผลประเมิน</th>
               </tr>
             </thead>
             <tbody>`;
@@ -1568,26 +1568,30 @@ function executeBatchPrint() {
             chkTable += `<tr style="background:#f1f5f9; font-weight:700;"><td colspan="3" style="border:1px solid #475569; padding:0.4rem;">📁 หมวดประเมิน: ${escapeHtml(gName)}</td></tr>`;
             groups[gName].forEach(item => {
               chkTable += `<tr>
-                <td style="border:1px solid #475569; padding:0.4rem;">${item.textHtml || escapeHtml(item.text)}${item.imageHtml ? `<div style="margin-top:0.25rem;">${item.imageHtml}</div>` : ''}</td>
-                <td style="border:1px solid #475569; padding:0.4rem; text-align:center; font-weight:bold;">${item.score}</td>
-                <td style="border:1px solid #475569; padding:0.4rem; text-align:center;">[ &nbsp; ]</td>
+                <td style="border:1px solid #475569; padding:0.45rem 0.6rem; vertical-align:middle;">${item.textHtml || escapeHtml(item.text)}${item.imageHtml ? `<div style="margin-top:0.25rem;">${item.imageHtml}</div>` : ''}</td>
+                <td style="border:1px solid #475569; padding:0.4rem; text-align:center; vertical-align:middle; font-weight:bold;">${item.score}</td>
+                <td style="border:1px solid #475569; padding:0.4rem; text-align:center; vertical-align:middle;">
+                  <span class="print-eval-box"></span>
+                </td>
               </tr>`;
             });
           });
           chkTable += `</tbody></table>`;
 
-          html += `<div style="margin-top:1.25rem;">
-            <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #10b981; padding-left:0.5rem;">📋 รายการทักษะประเมิน (Checklist)</h3>
+          html += `<div>
+            <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #10b981; padding-left:0.5rem; page-break-after:avoid;">📋 รายการทักษะประเมิน (Checklist)</h3>
             ${chkTable}
           </div>`;
         }
 
         if (c.noteHtml && c.noteHtml.trim() !== '') {
           html += `<div style="margin-top:1.25rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem;">
-            <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #f59e0b; padding-left:0.5rem;">🔑 เฉลย / ข้อมูลผู้ตรวจ (Examiner Notes)</h3>
+            <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #f59e0b; padding-left:0.5rem; page-break-after:avoid;">🔑 เฉลย / ข้อมูลผู้ตรวจ (Examiner Notes)</h3>
             <div style="font-size:0.9rem; line-height:1.5;">${c.noteHtml}</div>
           </div>`;
         }
+
+        html += `</div>`;
       }
 
       caseWrapper.innerHTML = html;

@@ -433,7 +433,7 @@
           </div>
 
           <!-- Print layout only note (shows in print) -->
-          <div class="print-only print-hide-question" style="margin-top: 1rem;">
+          <div class="print-only print-hide-question" id="print-checklist-wrapper" style="margin-top: 1rem;">
             <h3 class="viewer-section-title">Checklist และกลุ่มคะแนน</h3>
             <div id="print-checklist-list"></div>
           </div>
@@ -886,9 +886,11 @@
           // ตารางพิมพ์ (ไม่มีคอลัมน์กลุ่มแยกเดี่ยวซ้ายสุดแล้ว)
           printTableHtml += `
             <tr>
-              <td>${item.textHtml || escapeHtml(item.text)}${imgHtml ? `<div style="margin-top:0.25rem;">${imgHtml}</div>` : ''}</td>
-              <td class="print-center-cell" style="font-weight: bold;">${item.score}</td>
-              <td class="print-center-cell">[ ${isChecked ? '✓' : ' '} ]</td>
+              <td style="vertical-align: middle; padding: 0.45rem 0.6rem;">${item.textHtml || escapeHtml(item.text)}${imgHtml ? `<div style="margin-top:0.25rem;">${imgHtml}</div>` : ''}</td>
+              <td class="print-center-cell" style="font-weight: bold; text-align: center; vertical-align: middle;">${item.score}</td>
+              <td class="print-center-cell" style="text-align: center; vertical-align: middle;">
+                <span class="print-eval-box"></span>
+              </td>
             </tr>
           `;
         });
@@ -1208,12 +1210,12 @@
       document.body.classList.add('print-scale-' + scale);
 
       // Handle Full mode page break between question and checklist
-      const chkContainer = document.getElementById('print-checklist-list');
-      if (chkContainer) {
+      const chkWrapper = document.getElementById('print-checklist-wrapper');
+      if (chkWrapper) {
         if (mode === 'full') {
-          chkContainer.classList.add('print-page-break-before');
+          chkWrapper.classList.add('print-page-break-before');
         } else {
-          chkContainer.classList.remove('print-page-break-before');
+          chkWrapper.classList.remove('print-page-break-before');
         }
       }
 
@@ -1233,7 +1235,7 @@
         window.print();
         setTimeout(() => {
           document.body.classList.remove('print-mode-question', 'print-mode-checklist', 'print-orientation-portrait', 'print-orientation-landscape', 'print-scale-80', 'print-scale-100', 'print-scale-120', 'print-scale-140', 'print-scale-160');
-          if (chkContainer) chkContainer.classList.remove('print-page-break-before');
+          if (chkWrapper) chkWrapper.classList.remove('print-page-break-before');
           if (titleDisplay && titleDisplay.dataset.origTitle) {
             titleDisplay.textContent = titleDisplay.dataset.origTitle;
           }

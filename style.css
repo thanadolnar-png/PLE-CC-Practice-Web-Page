@@ -3048,11 +3048,32 @@ body.print-mode-checklist .print-hide-checklist {
   display: none !important;
 }
 
+.print-eval-box {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid #334155;
+  border-radius: 3px;
+  background-color: #ffffff;
+  margin: 0 auto;
+  vertical-align: middle;
+}
+
 @media print {
+  h1, h2, h3, h4, .viewer-section-title {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
   .print-page-break-before {
     page-break-before: always !important;
     break-before: page !important;
     margin-top: 1rem !important;
+  }
+
+  .print-center-cell {
+    text-align: center !important;
+    vertical-align: middle !important;
   }
 
   body.print-scale-80 {
