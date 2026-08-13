@@ -805,6 +805,7 @@ a {
   gap: 0.75rem;
   align-items: flex-start;
   padding: 0.75rem 1rem;
+  margin-bottom: 0.65rem;
   background-color: var(--bg-primary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -989,11 +990,10 @@ a {
 
 /* Exam Running Layout */
 .exam-layout {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 2rem;
-  height: calc(100vh - 6rem);
-  overflow: hidden;
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
 }
 
 @media (max-width: 900px) {
@@ -1009,17 +1009,13 @@ a {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 2.25rem;
-  overflow-y: auto;
-  height: 100%;
+  overflow-y: visible;
+  height: auto;
+  width: 100%;
 }
 
 .exam-sidebar-pane {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  height: 100%;
-  overflow-y: auto;
-  padding-right: 0.25rem;
+  display: none;
 }
 
 /* Timer styles */
