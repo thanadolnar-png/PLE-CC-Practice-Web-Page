@@ -1791,29 +1791,39 @@
       if (SimState.timerSyncInterval) clearInterval(SimState.timerSyncInterval);
       if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
       
-      if (SimState.isLobby && SimState.role === 'examiner') {
-        _fbDb.ref('rooms/' + SimState.roomId).update({ status: 'results' });
+      if (typeof _fbDb !== 'undefined' && _fbDb && SimState.isLobby && SimState.role === 'examiner') {
+        try {
+          _fbDb.ref('rooms/' + SimState.roomId).update({ status: 'results' });
+        } catch (e) {
+          console.warn('Firebase status update error:', e);
+        }
       }
-      // Detach Firebase listener
-      if (_fbRoomRef) { _fbRoomRef.off(); _fbRoomRef = null; }
       
-      showGlobalLoader(true);
+      // Detach Firebase listener
+      if (typeof _fbRoomRef !== 'undefined' && _fbRoomRef) {
+        try { _fbRoomRef.off(); } catch (e) {}
+        _fbRoomRef = null;
+      }
+      
+      showGlobalLoader(true, 'กำลังสรุปผลคะแนนการสอบ...');
       
       try {
         let passedStations = 0, totalMaxScore = 0, totalEarnedScore = 0;
         const tbody = document.getElementById('results-stations-tbody');
         if (tbody) tbody.innerHTML = '';
         
-        const totalStationsCount = (SimState.stations && SimState.stations.length) || SimState.totalStations || 0;
+        const stationsList = SimState.stations || [];
+        const totalStationsCount = stationsList.length || SimState.totalStations || 0;
         
-        (SimState.stations || []).forEach(st => {
+        stationsList.forEach(st => {
           const c = st.case || {};
           const checked = SimState.studentScores[st.stationNumber] || [];
           let earned = 0, max = 0;
           const checklist = Array.isArray(c.checklist) ? c.checklist : [];
           checklist.forEach(item => {
-            max += (item.score || 0);
-            if (checked.includes(item.id)) earned += (item.score || 0);
+            const itemScore = parseInt(item.score) || 0;
+            max += itemScore;
+            if (checked.includes(item.id)) earned += itemScore;
           });
           totalMaxScore += max;
           totalEarnedScore += earned;
@@ -1865,10 +1875,16 @@
         console.error('Error generating exam results:', err);
       } finally {
         showGlobalLoader(false);
+        const globalLoaderEl = document.getElementById('global-loader');
+        if (globalLoaderEl) globalLoaderEl.style.display = 'none';
+        
         const runningView = document.getElementById('exam-running-view');
         if (runningView) runningView.style.display = 'none';
+        
         const resultsView = document.getElementById('exam-results-view');
         if (resultsView) resultsView.style.display = 'block';
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
 

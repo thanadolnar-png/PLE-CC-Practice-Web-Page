@@ -462,9 +462,13 @@ function onCasesLoaded() {
   }
 }
 
-function showGlobalLoader(show) {
+function showGlobalLoader(show, message) {
   const loader = document.getElementById('global-loader');
   if (loader) {
+    if (message) {
+      const p = loader.querySelector('p');
+      if (p) p.textContent = message;
+    }
     loader.style.display = show ? 'flex' : 'none';
   }
 }
