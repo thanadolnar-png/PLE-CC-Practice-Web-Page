@@ -1053,98 +1053,335 @@ a {
   100% { transform: scale(1); }
 }
 
-/* Mini Map / Stations grid */
-.minimap-card {
-  background-color: var(--surface);
+/* ---------- Control Tab Redesign ---------- */
+.control-tab {
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 1.25rem;
-  flex: 1;
-  overflow-y: auto;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.tab-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+
+.control-tab .tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-primary);
+  padding: 3px;
+  border-radius: var(--radius-md);
+}
+
+.control-tab .tab {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+
+.control-tab .tab.active {
+  background: var(--surface);
+  color: var(--text-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.station-indicator {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.station-indicator span {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.tab-panel {
+  padding: 16px 20px;
+}
+
+.tab-panel.hidden {
+  display: none !important;
+}
+
+/* Timer row */
+.timer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.timer-block {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ring-wrap {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
+.ring {
+  width: 64px;
+  height: 64px;
+  transform: rotate(-90deg);
+}
+
+.ring-track {
+  fill: none;
+  stroke: var(--bg-secondary);
+  stroke-width: 7;
+}
+
+.ring-progress {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 7;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.3s linear, stroke 0.3s ease;
+}
+
+.timer-readout {
   display: flex;
   flex-direction: column;
 }
 
-.minimap-title {
-  font-size: 1.1rem;
+.timer-readout #exam-timer {
+  font-family: var(--font-mono);
+  font-size: 32px;
   font-weight: 700;
-  margin-bottom: 0.75rem;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
-.minimap-grid {
+.timer-readout small {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.timer-actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
   align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-#exam-progress-card,
-#minimap-card-el {
-  display: flex !important;
+.score-chip {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
 }
 
-.minimap-cell {
+.score-chip strong {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.score-chip em {
+  font-style: normal;
+  color: var(--success);
+  font-weight: 700;
+  background: var(--primary-light);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+/* Blister rail */
+.rail-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.rail {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px 8px;
+  scroll-behavior: smooth;
+  flex: 1;
+}
+
+.rail::-webkit-scrollbar {
+  height: 4px;
+}
+
+.rail::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.rail-nav {
+  flex-shrink: 0;
   width: 28px;
-  height: 28px;
-  min-width: 28px;
-  border-radius: 50%;
-  background-color: var(--bg-primary);
-  border: 2px solid var(--border);
+  height: 38px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.rail-nav:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--bg-secondary);
+}
+
+/* Blister / Pill Station Cell */
+.station-cell {
+  position: relative;
+  flex-shrink: 0;
+  width: 36px;
+  height: 46px;
+  border-radius: 18px 18px 8px 8px;
+  border: 1.5px solid var(--border);
+  background: linear-gradient(180deg, var(--surface), var(--bg-secondary));
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
   font-weight: 700;
+  font-size: 13px;
+  color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
   box-sizing: border-box;
 }
 
-.minimap-cell:hover {
+.station-cell:hover {
+  transform: translateY(-2px);
   border-color: var(--primary);
-  background-color: var(--bg-secondary);
-  transform: scale(1.15);
+  color: var(--primary);
 }
 
-.minimap-cell.active {
-  border-color: var(--primary) !important;
-  background-color: var(--primary) !important;
-  color: white !important;
-  box-shadow: 0 0 0 3px var(--primary-light);
+.station-cell.current {
+  background: linear-gradient(180deg, var(--primary), var(--primary-dark)) !important;
+  border-color: var(--primary-dark) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.35), 0 0 0 2px var(--primary-light);
+  transform: translateY(-2px);
 }
 
-.minimap-cell.done {
-  background-color: var(--success);
-  border-color: var(--success);
-  color: white;
+.station-cell.done {
+  background: linear-gradient(180deg, var(--success), #059669) !important;
+  border-color: #059669 !important;
+  color: #ffffff !important;
 }
 
-.minimap-cell.done.active {
-  background-color: var(--success) !important;
-  border-color: var(--success) !important;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+.station-cell.done.current {
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.35), 0 0 0 2px rgba(16, 185, 129, 0.4);
 }
 
-.minimap-cell.rest {
-  background-color: var(--bg-secondary);
-  color: var(--text-muted);
-  font-size: 0.6rem;
+.station-cell.rest {
   border-style: dashed;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
 }
 
-.minimap-cell[data-cat="clinic"]  { border-color: var(--clinic); color: var(--clinic); }
-.minimap-cell[data-cat="product"] { border-color: var(--product); color: var(--product); }
-.minimap-cell[data-cat="sap"]     { border-color: var(--sap); color: var(--sap); }
+.station-cell[data-cat="clinic"]  { border-top: 3px solid var(--clinic); }
+.station-cell[data-cat="product"] { border-top: 3px solid var(--product); }
+.station-cell[data-cat="sap"]     { border-top: 3px solid var(--sap); }
 
-.minimap-cell.active[data-cat],
-.minimap-cell.done[data-cat] {
-  color: white !important;
+.control-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-.minimap-dot { position: absolute; top: 2px; right: 2px; width: 5px; height: 5px; border-radius: 50%; }
+/* Overview tab grid */
+.overview-caption {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  margin: 0 0 12px;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.grid .station-cell {
+  width: 40px;
+  height: 50px;
+  font-size: 13.5px;
+}
+
+/* Station preview banner */
+.station-preview {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.station-preview-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.station-preview h2 {
+  font-size: 1.1rem;
+  margin: 0;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.station-code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
 
 /* Rest station */
 .minimap-cell.rest {

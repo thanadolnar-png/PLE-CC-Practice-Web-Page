@@ -283,73 +283,90 @@
           <div id="lobby-countdown-number" style="font-size: 8rem; font-weight: 900; color: var(--primary-light);">3</div>
         </div>
 
-        <!-- Sticky Header Container (Single Compact Bar: Timer + Score + Minimap Circles + Nav) -->
-        <div id="exam-sticky-top-header" style="position: sticky; top: 4.5rem; z-index: 99; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 0.6rem 1.25rem; margin-bottom: 1.25rem; box-shadow: var(--shadow-md);">
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
-            
-            <!-- 1. Left: Digital Timer & Controls -->
-            <div style="display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0;">
-              <div class="timer-display" id="exam-timer" style="font-size: 2.2rem; font-weight: 800; font-family: var(--font-mono); color: var(--primary); line-height: 1;">04:00</div>
-              <div style="display: flex; flex-direction: column; gap: 0.15rem;">
-                <span id="exam-timer-label" style="font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">จับเวลาสถานี</span>
-                <div class="timer-controls" style="display: flex; gap: 0.25rem;">
-                  <button class="btn btn-secondary" style="padding: 0.15rem 0.45rem; font-size: 0.7rem;" id="timer-toggle-btn" onclick="toggleTimer()">⏸️</button>
-                  <button class="btn btn-secondary" style="padding: 0.15rem 0.45rem; font-size: 0.7rem;" onclick="resetTimer()">🔄</button>
+        <!-- Sticky Header Container: Control Tab + Station Preview Banner -->
+        <div id="exam-sticky-top-header" style="position: sticky; top: 4.5rem; z-index: 99; background: var(--bg); padding-top: 0.25rem; padding-bottom: 0.5rem; margin-bottom: 1.25rem;">
+          
+          <!-- 1. Control Tab Component -->
+          <section class="control-tab">
+            <div class="tab-head">
+              <div class="tabs">
+                <button class="tab active" data-tab="timer" onclick="switchControlTab('timer')">เวลา &amp; ควบคุม</button>
+                <button class="tab" data-tab="overview" onclick="switchControlTab('overview')">ภาพรวมสถานี</button>
+              </div>
+              <div class="station-indicator" id="minimap-progress-title">
+                สถานี <span id="curNum">1</span> / <span id="totalNum">16</span>
+              </div>
+            </div>
+
+            <!-- Tab Panel 1: Timer & Controls -->
+            <div class="tab-panel" id="panel-timer">
+              <div class="timer-row">
+                <div class="timer-block">
+                  <div class="ring-wrap">
+                    <svg class="ring" viewBox="0 0 100 100">
+                      <circle class="ring-track" cx="50" cy="50" r="44"></circle>
+                      <circle class="ring-progress" id="ringProgress" cx="50" cy="50" r="44"></circle>
+                    </svg>
+                  </div>
+                  <div class="timer-readout">
+                    <span id="exam-timer">04:00</span>
+                    <small id="exam-timer-label">เวลาที่เหลือ · สถานีนี้</small>
+                  </div>
+                </div>
+                <div class="timer-actions">
+                  <button class="btn ghost" id="timer-toggle-btn" onclick="toggleTimer()">⏸ พักตัวจับเวลา</button>
+                  <button class="btn outline" onclick="resetTimer()">🔄 เริ่มต้นใหม่</button>
+                  <div class="score-chip" id="exam-progress-card">
+                    <span>คะแนน</span>
+                    <strong id="exam-score">0 / 0</strong>
+                    <em id="exam-pct">0%</em>
+                    <div id="exam-bar-fill" class="progress-bar-fill" style="display:none;"></div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <!-- 2. Center: Score Progress & Station Circles Minimap -->
-            <div style="display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 0; justify-content: center; flex-wrap: wrap;">
-              
-              <!-- Score Mini Indicator -->
-              <div class="progress-card" id="exam-progress-card" style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-secondary); padding: 0.35rem 0.65rem; border-radius: var(--radius-md); border: 1px solid var(--border); flex-shrink: 0; margin: 0;">
-                <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);">คะแนน:</span>
-                <span id="exam-score" style="font-weight: 800; font-size: 0.85rem;">0 / 0</span>
-                <span id="exam-pct" style="font-weight: 800; font-size: 0.85rem; color: var(--primary); background: var(--primary-light); padding: 0.1rem 0.4rem; border-radius: var(--radius-sm);">0%</span>
-                <div id="exam-bar-fill" class="progress-bar-fill" style="display:none;"></div>
+              <!-- Blister / Pill Rail -->
+              <div class="rail-wrap" id="minimap-card-el">
+                <button class="rail-nav" id="railPrevBtn" onclick="scrollRail(-1)">‹</button>
+                <div class="rail" id="exam-minimap-grid"></div>
+                <button class="rail-nav" id="railNextBtn" onclick="scrollRail(1)">›</button>
               </div>
 
-              <!-- Station Circles Minimap -->
-              <div class="minimap-card" id="minimap-card-el" style="display: flex; align-items: center; gap: 0.4rem; margin: 0;">
-                <h4 class="minimap-title" id="minimap-progress-title" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin: 0; white-space: nowrap;">สถานี:</h4>
-                <div class="minimap-grid" id="exam-minimap-grid">
-                  <!-- Small Circles 1, 2, 3... 16 -->
+              <!-- Control Action Buttons -->
+              <div class="control-actions">
+                <div class="exam-nav" style="display: flex; gap: 8px;">
+                  <button class="btn outline" id="btn-prev-station" onclick="prevStation()">← ก่อนหน้า</button>
+                  <button class="btn primary" id="btn-next-station" onclick="nextStation()">ถัดไป →</button>
                 </div>
+                <button class="btn danger" id="btn-finish-exam" onclick="finishExamSimulation()">ส่งข้อสอบ</button>
               </div>
-
             </div>
 
-            <!-- 3. Right: Navigation Controls & Submit Button -->
-            <div style="display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0;">
-              <div class="exam-nav" style="display: flex; gap: 0.3rem;">
-                <button class="btn btn-secondary" onclick="prevStation()" id="btn-prev-station" style="padding: 0.35rem 0.65rem; font-size: 0.85rem;">← ก่อนหน้า</button>
-                <button class="btn btn-primary btn-clinic" onclick="nextStation()" id="btn-next-station" style="padding: 0.35rem 0.65rem; font-size: 0.85rem;">ถัดไป →</button>
-              </div>
-              <button class="btn btn-secondary" id="btn-finish-exam" onclick="finishExamSimulation()" style="padding: 0.35rem 0.65rem; font-size: 0.8rem; border-color: var(--danger); color: var(--danger);" title="ส่งกระดาษคำตอบ (จบการสอบ)">
-                🏁 ส่งข้อสอบ
-              </button>
+            <!-- Tab Panel 2: Overview Grid -->
+            <div class="tab-panel hidden" id="panel-overview">
+              <p class="overview-caption">แตะสถานีเพื่อข้ามไปทำโดยตรง — เซลล์สีเขียวคือสถานีที่ทำคะแนนแล้ว</p>
+              <div class="grid" id="railFull"></div>
             </div>
+          </section>
 
-          </div>
+          <!-- 2. Station Preview Banner -->
+          <section class="station-preview" style="margin-top: 10px; margin-bottom: 0;">
+            <div class="station-preview-head">
+              <span class="station-badge" id="exam-station-badge">STATION 1</span>
+              <h2 id="exam-case-title">โหลดเคส...</h2>
+              <span class="station-code" id="exam-case-id">OSPE-CL001</span>
+            </div>
+            <button class="gdocs-link btn btn-secondary no-print" onclick="updateSimCurrentCaseFromDoc()" id="btn-update-sim-doc">
+              🔄 อัปเดตข้อมูลจาก Google เอกสาร
+            </button>
+          </section>
+
         </div>
 
         <div class="exam-layout">
           
           <!-- Full-Width Content Pane: Case info -->
           <div class="exam-content-pane" id="exam-left-pane" style="width: 100%;">
-            <div class="exam-header-meta">
-              <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-                <span class="station-badge" id="exam-station-badge">STATION 1</span>
-                <span class="current-station-title" id="exam-case-title">โหลดเคส...</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                <span id="exam-case-id" style="font-family: var(--font-mono); font-weight: 700; color: var(--text-muted);">OSPE-CL001</span>
-                <button class="btn btn-secondary no-print" style="font-size: 0.75rem; padding: 0.25rem 0.65rem;" onclick="updateSimCurrentCaseFromDoc()" id="btn-update-sim-doc">
-                  🔄 Update Data From Google Docs
-                </button>
-              </div>
-            </div>
 
             <h3 class="viewer-section-title" style="margin-top: 0;">โจทย์ / สถานการณ์ (Scenario)</h3>
             <div id="exam-scenario-content" style="margin-bottom: 2rem;">
@@ -1375,15 +1392,97 @@
       }
     }
 
+    function switchControlTab(tabName) {
+      document.querySelectorAll('.control-tab .tab').forEach(t => t.classList.remove('active'));
+      const activeTab = document.querySelector(`.control-tab .tab[data-tab="${tabName}"]`);
+      if (activeTab) activeTab.classList.add('active');
+      
+      const timerPanel = document.getElementById('panel-timer');
+      const overviewPanel = document.getElementById('panel-overview');
+      if (timerPanel) timerPanel.classList.toggle('hidden', tabName !== 'timer');
+      if (overviewPanel) overviewPanel.classList.toggle('hidden', tabName !== 'overview');
+    }
+
+    function scrollRail(dir) {
+      const rail = document.getElementById('exam-minimap-grid');
+      if (rail) rail.scrollBy({ left: dir * 160, behavior: 'smooth' });
+    }
+
     function updateTimerDisplay() {
       const minutes = Math.floor(SimState.timerValue / 60);
       const seconds = SimState.timerValue % 60;
       const displayStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
       const timerEl = document.getElementById('exam-timer');
-      timerEl.textContent = displayStr;
-      timerEl.className = 'timer-display';
-      if (SimState.timerValue < 10) timerEl.classList.add('danger');
-      else if (SimState.timerValue < 60) timerEl.classList.add('warn');
+      if (timerEl) {
+        timerEl.textContent = displayStr;
+        timerEl.className = 'timer-display';
+        if (SimState.timerValue < 10) timerEl.classList.add('danger');
+        else if (SimState.timerValue < 60) timerEl.classList.add('warn');
+      }
+      
+      const ringProgress = document.getElementById('ringProgress');
+      if (ringProgress) {
+        const CIRC = 2 * Math.PI * 44; // 276.46
+        const totalSecs = 240;
+        const frac = Math.max(0, Math.min(1, SimState.timerValue / totalSecs));
+        ringProgress.style.strokeDasharray = CIRC;
+        ringProgress.style.strokeDashoffset = CIRC * (1 - frac);
+        if (SimState.timerValue <= 60) {
+          ringProgress.style.stroke = 'var(--warning)';
+        } else {
+          ringProgress.style.stroke = 'var(--primary)';
+        }
+      }
+    }
+
+    function renderMiniMap() {
+      const railMini = document.getElementById('exam-minimap-grid');
+      const railFull = document.getElementById('railFull');
+      if (!railMini) return;
+      
+      railMini.innerHTML = '';
+      if (railFull) railFull.innerHTML = '';
+      let completedCount = 0;
+      
+      SimState.stations.forEach((st, idx) => {
+        const isCurrent = idx === SimState.currentIdx;
+        const checked = SimState.studentScores[st.stationNumber] || [];
+        const isDone = checked.length > 0;
+        if (isDone) completedCount++;
+        
+        [railMini, railFull].forEach(container => {
+          if (!container) return;
+          const cell = document.createElement('div');
+          cell.className = 'station-cell';
+          if (isCurrent) cell.classList.add('current');
+          if (isDone) cell.classList.add('done');
+          if (st.isRest) cell.classList.add('rest');
+          
+          const cat = st.case && st.case.category ? st.case.category.toLowerCase() : '';
+          if (cat && !st.isRest) cell.setAttribute('data-cat', cat);
+          
+          cell.textContent = isDone && !isCurrent ? '✓' : st.stationNumber;
+          cell.title = st.isRest ? 'พักระหว่างสถานี' : (st.case && st.case.title ? st.case.title : 'สถานี ' + st.stationNumber);
+          
+          const canClick = SimState.role !== 'examinee';
+          if (canClick) {
+            cell.style.cursor = 'pointer';
+            cell.addEventListener('click', () => renderStation(idx));
+          } else {
+            cell.style.cursor = 'default';
+            cell.style.opacity = '0.85';
+          }
+          container.appendChild(cell);
+        });
+      });
+      
+      const activeInMini = railMini.querySelector('.station-cell.current');
+      if (activeInMini) activeInMini.scrollIntoView({ inline: 'center', block: 'nearest' });
+      
+      const curEl = document.getElementById('curNum');
+      if (curEl) curEl.textContent = SimState.currentIdx + 1;
+      const totalEl = document.getElementById('totalNum');
+      if (totalEl) totalEl.textContent = SimState.stations.length;
     }
 
     // ─── Render station ───────────────────────────────────────
@@ -1604,40 +1703,7 @@
       }
     }
 
-    function renderMiniMap() {
-      const grid = document.getElementById('exam-minimap-grid');
-      if (!grid) return;
-      grid.innerHTML = '';
-      let completedCount = 0;
-      
-      SimState.stations.forEach((st, idx) => {
-        const cell = document.createElement('div');
-        cell.className = 'minimap-cell';
-        if (idx === SimState.currentIdx) cell.classList.add('active');
-        const checked = SimState.studentScores[st.stationNumber] || [];
-        if (checked.length > 0) { cell.classList.add('done'); completedCount++; }
-        if (st.isRest) cell.classList.add('rest');
-        // แสดง category color
-        const cat = st.case && st.case.category ? st.case.category.toLowerCase() : '';
-        if (cat && !st.isRest) cell.setAttribute('data-cat', cat);
-        cell.textContent = st.stationNumber;
-        cell.title = st.isRest ? 'พักระหว่างสถานี' : (st.case && st.case.title ? st.case.title : 'สถานี ' + st.stationNumber);
-        // Solo หรือ Lobby-Examiner กดได้ — Examinee ดูอย่างเดียว
-        const canClick = SimState.role !== 'examinee';
-        if (canClick) {
-          cell.style.cursor = 'pointer';
-          cell.addEventListener('click', () => renderStation(idx));
-        } else {
-          cell.style.cursor = 'default';
-          cell.style.opacity = '0.85';
-        }
-        grid.appendChild(cell);
-      });
-      
-      const lobbyBadge = SimState.isLobby ? ' 🌐' : '';
-      document.getElementById('minimap-progress-title').textContent =
-        `ความคืบหน้าสถานี (${completedCount}/${SimState.stations.length})${lobbyBadge}`;
-    }
+
 
     function toggleExamNote() {
       const area = document.getElementById('exam-note-content-area');
