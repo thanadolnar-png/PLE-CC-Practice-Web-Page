@@ -8,7 +8,7 @@
  */
 
 // อัปเดต URL ของ Google Apps Script Web App ที่นี่หลังทำ Deployment เสร็จ
-const API_URL = 'https://script.google.com/macros/s/AKfycbwhdMVZ2mcR2dwUagrcLJ6Os1PjwrKO_X8xjwEOJUWYYONZfmYjvVbdXrCVh7qFC0iM/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbyabU-EfF9Ob4zwi07DvovB3gxVyednn1HZ4OUyWIi4wQBczPCaaRDgyHlkaMvnM_AK/exec';
 let currentApiUrl = API_URL;
 
 const AppState = {

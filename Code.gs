@@ -294,35 +294,240 @@ function getCase(caseId) {
   
   const listResult = getCaseList();
   const matchedCase = listResult.cases.find(c => c.caseId === caseId);
+  if (!matchedCase) throw new Error('Case not found: ' + caseId);
   
-  if (!matchedCase) {
-    throw new Error('Case not found: ' + caseId);
-  }
-  
-  // ดึงข้อมูล HTML และ Checklist จาก Google Doc
   if (matchedCase.docId) {
+    let docData = null;
     try {
-      const docData = getCaseContentFromDoc(matchedCase.docId, caseId);
-      matchedCase.contentHtml = docData.contentHtml;
-      matchedCase.content = docData.contentHtml; // รองรับตัวแปรเก่า
-      matchedCase.checklist = docData.checklist;
-      matchedCase.noteHtml = docData.noteHtml;
-      matchedCase.note = docData.noteHtml;       // รองรับตัวแปรเก่า
-      matchedCase.patientInfoHtml = docData.patientInfoHtml;
-      matchedCase.scenario = docData.scenario;
+      // ✅ Primary: Docs REST API — รองรับ inline images ทุกรูปแบบ (เหมือน Python compiler)
+      docData = getCaseContentViaDocsRestApi(matchedCase.docId, caseId);
     } catch (e) {
-      Logger.log('Error parsing Doc ' + matchedCase.docId + ': ' + e.toString());
-      matchedCase.contentHtml = `<p style="color: red;">ไม่สามารถโหลดเนื้อหาจาก Google Doc ได้: ${e.toString()}</p>`;
-      matchedCase.checklist = [];
-      matchedCase.noteHtml = '<p>ไม่มีคำอธิบายเพิ่มเติม</p>';
-      matchedCase.error = e.toString();
+      Logger.log('REST API failed (' + e + '), falling back to Document Service');
+      try {
+        docData = getCaseContentFromDoc(matchedCase.docId, caseId);
+      } catch (e2) {
+        Logger.log('Document Service also failed: ' + e2);
+        docData = {
+          contentHtml: '<p style="color:red">โหลดเนื้อหาไม่ได้: ' + e2.toString() + '</p>',
+          checklist: [], noteHtml: '', patientInfoHtml: '', equipmentHtml: '', scenario: ''
+        };
+      }
     }
+    matchedCase.contentHtml    = docData.contentHtml;
+    matchedCase.content        = docData.contentHtml;
+    matchedCase.checklist      = docData.checklist;
+    matchedCase.noteHtml       = docData.noteHtml;
+    matchedCase.note           = docData.noteHtml;
+    matchedCase.patientInfoHtml = docData.patientInfoHtml;
+    matchedCase.equipmentHtml  = docData.equipmentHtml;
+    matchedCase.scenario       = docData.scenario;
   } else {
     matchedCase.contentHtml = '<p>ไม่มีลิงก์เอกสาร Google Doc กำหนดไว้</p>';
     matchedCase.checklist = [];
   }
   
   return matchedCase;
+}
+
+// ============================================================
+// getCaseContentViaDocsRestApi
+// ใช้ Google Docs REST API — รองรับ inline images ทุกรูปแบบ
+// ============================================================
+function getCaseContentViaDocsRestApi(docId, targetCaseId) {
+  const token = ScriptApp.getOAuthToken();
+  const resp = UrlFetchApp.fetch(
+    'https://docs.googleapis.com/v1/documents/' + docId + '?includeTabsContent=true',
+    { headers: { 'Authorization': 'Bearer ' + token }, muteHttpExceptions: true }
+  );
+  if (resp.getResponseCode() !== 200) {
+    throw new Error('Docs REST API ' + resp.getResponseCode() + ': ' + resp.getContentText().substring(0, 200));
+  }
+  const docJson = JSON.parse(resp.getContentText());
+  const cleanTarget = targetCaseId.trim();
+
+  // Collect all tab sections
+  const sections = [];
+  function addTabSec_(tab) {
+    const dt = tab.documentTab;
+    if (dt && dt.body && dt.body.content) {
+      sections.push({ content: dt.body.content, inlineObjects: dt.inlineObjects || {} });
+    }
+    (tab.childTabs || []).forEach(addTabSec_);
+  }
+  if (docJson.tabs && docJson.tabs.length > 0) {
+    docJson.tabs.forEach(addTabSec_);
+  } else {
+    sections.push({ content: (docJson.body && docJson.body.content) || [], inlineObjects: docJson.inlineObjects || {} });
+  }
+
+  // Image cache
+  const _ic = {};
+  function fetchImg_(inlineObjects, objId) {
+    if (_ic[objId] !== undefined) return _ic[objId];
+    const obj = inlineObjects[objId];
+    if (!obj) { _ic[objId] = null; return null; }
+    const uri = obj.inlineObjectProperties
+      && obj.inlineObjectProperties.embeddedObject
+      && obj.inlineObjectProperties.embeddedObject.imageProperties
+      && obj.inlineObjectProperties.embeddedObject.imageProperties.contentUri;
+    if (!uri) { _ic[objId] = null; return null; }
+    try {
+      const ir = UrlFetchApp.fetch(uri, { headers: { 'Authorization': 'Bearer ' + token }, muteHttpExceptions: true });
+      if (ir.getResponseCode() !== 200) { _ic[objId] = null; return null; }
+      const b64 = Utilities.base64Encode(ir.getContent());
+      const ct = ((ir.getHeaders()['Content-Type'] || ir.getHeaders()['content-type'] || 'image/png') + '').split(';')[0];
+      _ic[objId] = 'data:' + ct + ';base64,' + b64;
+      return _ic[objId];
+    } catch(e) { _ic[objId] = null; return null; }
+  }
+
+  function applyTs_(ts, txt) {
+    if (!ts || !txt || txt === '\n') return escapeHtml(txt || '');
+    let s = escapeHtml(txt);
+    if (ts.bold) s = '<strong>' + s + '</strong>';
+    if (ts.italic) s = '<em>' + s + '</em>';
+    if (ts.underline) s = '<u>' + s + '</u>';
+    if (ts.strikethrough) s = '<del>' + s + '</del>';
+    if (ts.foregroundColor && ts.foregroundColor.color && ts.foregroundColor.color.rgbColor) {
+      const rgb = ts.foregroundColor.color.rgbColor;
+      s = '<span style="color:rgb(' + Math.round((rgb.red||0)*255) + ',' + Math.round((rgb.green||0)*255) + ',' + Math.round((rgb.blue||0)*255) + ')">' + s + '</span>';
+    }
+    if (ts.link && ts.link.url) s = '<a href="' + ts.link.url + '" target="_blank" rel="noopener">' + s + '</a>';
+    return s;
+  }
+
+  function getParaTxt_(para) {
+    return (para.elements || []).map(el => (el.textRun && el.textRun.content) || '').join('').trim();
+  }
+
+  function renderEls_(elements, inlineObjects) {
+    let html = ''; let hasImg = false;
+    for (const el of (elements || [])) {
+      if (el.textRun) {
+        const t = el.textRun.content || '';
+        if (t === '\n') continue;
+        html += applyTs_(el.textRun.textStyle, t);
+      } else if (el.inlineObjectElement) {
+        const dataUri = fetchImg_(inlineObjects, el.inlineObjectElement.inlineObjectId);
+        if (dataUri) {
+          hasImg = true;
+          html += '</p><div class="case-image-wrapper" style="text-align:center;margin:12px 0;"><img src="' + dataUri + '" class="case-image" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);" alt="รูปภาพประกอบเคส"/></div><p>';
+        }
+      }
+    }
+    return { html: html, hasImg: hasImg };
+  }
+
+  function parsePara_(para, inlineObjects) {
+    if (!para.elements || para.elements.length === 0) return '';
+    const { html, hasImg } = renderEls_(para.elements, inlineObjects);
+    const trimmed = html.trim();
+    if (!trimmed && !hasImg) return '';
+    return ('<p>' + trimmed + '</p>').replace(/<p><\/p>/g, '').replace(/<p>\s*<\/p>/g, '');
+  }
+
+  function parseTable_(table) {
+    let h = '<div class="table-responsive"><table class="table-patient-info" style="width:100%;border-collapse:collapse;">';
+    const rows = table.tableRows || [];
+    for (let r = 0; r < rows.length; r++) {
+      h += '<tr>';
+      for (const cell of (rows[r].tableCells || [])) {
+        const tag = r === 0 ? 'th' : 'td';
+        let ct = '';
+        for (const c of (cell.content || [])) { if (c.paragraph) ct += getParaTxt_(c.paragraph); }
+        h += '<' + tag + ' style="border:1px solid #e2e8f0;padding:0.5rem 0.75rem;">' + escapeHtml(ct) + '</' + tag + '>';
+      }
+      h += '</tr>';
+    }
+    return h + '</table></div>';
+  }
+
+  function isHeading_(para) {
+    const st = (para.paragraphStyle && para.paragraphStyle.namedStyleType) || '';
+    if (st.startsWith('HEADING_')) return true;
+    const ft = (para.elements && para.elements[0] && para.elements[0].textRun && para.elements[0].textRun.content) || '';
+    return ft.startsWith('## ') || ft.startsWith('# ');
+  }
+
+  // Parse each tab section
+  for (const { content, inlineObjects } of sections) {
+    let recording = false, currentSection = 'SCENARIO';
+    let scenario = '', contentHtml = '', patientInfoHtml = '', equipmentHtml = '', noteHtml = '';
+    const checklist = []; let currentGroup = '';
+
+    for (const se of content) {
+      if (se.paragraph) {
+        const para = se.paragraph;
+        const text = getParaTxt_(para);
+        const cm = text.match(/^#+\s*[\[{]([A-Z0-9\-]+)[\]}]/) || text.match(/^[\[{]([A-Z0-9\-]+)[\]}]/);
+        if (cm) {
+          if (cm[1].trim() === cleanTarget) { recording = true; currentSection = 'SCENARIO'; }
+          else if (recording) break;
+          continue;
+        }
+        if (!recording) continue;
+
+        if (isHeading_(para) && !text.startsWith('(กลุ่ม:') && !text.startsWith('**กลุ่ม:')) {
+          const ct = text.replace(/^#+\s*/, '').trim();
+          if (ct.includes('ข้อมูลเคส')) currentSection = 'METADATA';
+          else if (ct.includes('โจทย์') || ct.includes('สถานการณ์')) currentSection = 'SCENARIO';
+          else if (ct.includes('ข้อมูลผู้ป่วย')) currentSection = 'PATIENT_INFO';
+          else if (ct.includes('สิ่งที่มีให้') || ct.includes('อุปกรณ์')) currentSection = 'EQUIPMENT';
+          else if (ct.toLowerCase().includes('checklist') || ct.includes('ทักษะ') || ct.includes('รายการ') || ct.includes('เกณฑ์') || ct.includes('ประเมิน') || ct.includes('สมรรถนะ')) currentSection = 'CHECKLIST';
+          else if (ct.includes('หมายเหตุ') || ct.includes('เฉลย') || ct.includes('ข้อมูลผู้ตรวจ')) currentSection = 'NOTE';
+          else currentSection = 'OTHER';
+          continue;
+        }
+
+        if (currentSection === 'CHECKLIST') {
+          const gm = text.match(/\(กลุ่ม:\s*([^)]+)\)/) || text.match(/กลุ่ม:\s*(.*)$/);
+          if (gm) { currentGroup = gm[1].replace(/\*/g,'').trim(); continue; }
+        }
+
+        if (currentSection === 'SCENARIO') {
+          const ph = parsePara_(para, inlineObjects); if (ph) { contentHtml += ph; scenario += text + '\n'; }
+        } else if (currentSection === 'PATIENT_INFO') {
+          const ph = parsePara_(para, inlineObjects); if (ph) patientInfoHtml += ph;
+        } else if (currentSection === 'EQUIPMENT') {
+          const ph = parsePara_(para, inlineObjects); if (ph) equipmentHtml += ph;
+        } else if (currentSection === 'NOTE') {
+          const ph = parsePara_(para, inlineObjects); if (ph) noteHtml += ph;
+        } else if (currentSection === 'CHECKLIST') {
+          if (!text) continue;
+          let itemText = text;
+          for (const pat of [/^\[\s*[x✓✅✔☑]\s*\]\s*(.*)/, /^\[\s*\]\s*(.*)/, /^[☐☑✅✔○]\s*(.*)/, /^[-*]\s+(.*)/, /^\d+\.\s+(.*)/]) {
+            const m = text.match(pat); if (m) { itemText = m[1].trim(); break; }
+          }
+          const sm = itemText.match(/^\((\d+(?:\.\d+)?)\)\s*(.*)/);
+          const sc = sm ? parseFloat(sm[1]) : 1;
+          if (sm) itemText = sm[2].trim();
+          if (!itemText) continue;
+          let imgHtml = '';
+          for (const el of (para.elements || [])) {
+            if (el.inlineObjectElement) {
+              const du = fetchImg_(inlineObjects, el.inlineObjectElement.inlineObjectId);
+              if (du) imgHtml += '<div class="case-image-wrapper" style="text-align:center;margin:8px 0;"><img src="' + du + '" class="case-image" style="max-width:90%;height:auto;border-radius:6px;" alt="รูปประกอบ"/></div>';
+            }
+          }
+          checklist.push({ id: 'chk_' + simpleHash(itemText).substring(0, 10), text: itemText, score: sc, group: currentGroup, checked: false, imageHtml: imgHtml });
+        }
+
+      } else if (se.table) {
+        if (!recording) continue;
+        const th = parseTable_(se.table);
+        if (currentSection === 'PATIENT_INFO') patientInfoHtml += th;
+        else if (currentSection === 'NOTE') noteHtml += th;
+        else if (currentSection === 'EQUIPMENT') equipmentHtml += th;
+        else if (currentSection === 'SCENARIO') contentHtml += th;
+      }
+    }
+
+    if (recording) {
+      return { scenario: scenario.trim(), contentHtml, patientInfoHtml, equipmentHtml, checklist, noteHtml };
+    }
+  }
+
+  throw new Error('Case ' + targetCaseId + ' not found in any tab via REST API.');
 }
 
 /**
