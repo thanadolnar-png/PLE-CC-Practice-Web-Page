@@ -414,7 +414,7 @@
             <!-- Examiner Notes Container -->
             <div class="note-container" id="exam-note-container" style="display: none; margin-bottom: 1.5rem;">
               <button class="btn btn-secondary" style="width: 100%; font-size: 0.85rem; padding: 0.5rem;" id="exam-toggle-note-btn" onclick="toggleExamNote()">
-                🔑 แสดงเฉลย / บทบาทผู้ป่วยจำลอง
+                🔑 แสดงเฉลย / ข้อมูลผู้ตรวจ / บทบาทผู้ป่วยจำลอง
               </button>
               <div class="exam-note-content-area" id="exam-note-content-area">
                 <!-- Filled dynamically by JS -->
@@ -1451,12 +1451,15 @@
       const chkContainer = document.getElementById('exam-checklist-container');
       const noteContainer = document.getElementById('exam-note-container');
       
-      // Solo mode: show everything, no Examiner notes
+      // Solo mode: show progress, checklist, and examiner note button
       if (SimState.role === 'solo') {
         progressCard.style.display = 'block';
         noticeCard.style.display = 'none';
         chkContainer.style.display = 'block';
-        noteContainer.style.display = 'none';
+        noteContainer.style.display = 'block';
+        document.getElementById('exam-note-content-area').innerHTML = c.noteHtml || c.note || '<p>ไม่มีเฉลย/รายละเอียดเพิ่มเติม</p>';
+        document.getElementById('exam-note-content-area').classList.remove('show');
+        document.getElementById('exam-toggle-note-btn').textContent = '🔑 แสดงเฉลย / ข้อมูลผู้ตรวจ / บทบาทผู้ป่วยจำลอง';
         renderExamChecklist(st.stationNumber, c);
       } else if (SimState.role === 'examinee') {
         progressCard.style.display = 'none';
@@ -1642,10 +1645,10 @@
       const btn = document.getElementById('exam-toggle-note-btn');
       if (area.classList.contains('show')) {
         area.classList.remove('show');
-        btn.textContent = '🔑 แสดงเฉลย / บทบาทผู้ป่วยจำลอง';
+        btn.textContent = '🔑 แสดงเฉลย / ข้อมูลผู้ตรวจ / บทบาทผู้ป่วยจำลอง';
       } else {
         area.classList.add('show');
-        btn.textContent = '🔒 ซ่อนบทบาทคนไข้จำลอง / เฉลย';
+        btn.textContent = '🔒 ซ่อนเฉลย / ข้อมูลผู้ตรวจ / บทบาทผู้ป่วยจำลอง';
       }
     }
 
