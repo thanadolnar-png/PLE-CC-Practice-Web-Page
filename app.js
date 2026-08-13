@@ -787,38 +787,110 @@ function handleChecklistItemClick(caseId, itemId, itemScore) {
 
 function updateChecklistUI(caseId) {
   const checkedItems = AppState.checklistProgress[caseId] || [];
-  
-  // 1. อัปเดต Class ของรายการ Checklist
   const items = document.querySelectorAll('.checklist-item');
-  let currentScore = 0;
-  let totalScore = 0;
+  
+  // 1. Group checklist items by parent-subset hierarchy
+  const groups = [];
+  let currentGroup = null;
   
   items.forEach(el => {
     const itemId = el.getAttribute('data-id');
-    const score = parseInt(el.getAttribute('data-score')) || 1;
-    totalScore += score;
+    const score = parseFloat(el.getAttribute('data-score')) || 1.0;
+    const isSubset = el.classList.contains('is-subset');
     
-    if (checkedItems.includes(itemId)) {
+    if (!isSubset) {
+      if (currentGroup) {
+        groups.push(currentGroup);
+      }
+      currentGroup = {
+        parentId: itemId,
+        parentScore: score,
+        subsets: []
+      };
+    } else {
+      if (currentGroup) {
+        currentGroup.subsets.push({
+          id: itemId,
+          score: score
+        });
+      } else {
+        groups.push({
+          parentId: itemId,
+          parentScore: score,
+          subsets: []
+        });
+      }
+    }
+  });
+  if (currentGroup) {
+    groups.push(currentGroup);
+  }
+  
+  // 2. Perform 2-way master sync checking logic
+  const finalChecked = new Set(checkedItems);
+  
+  groups.forEach(g => {
+    // If subsets checked score >= parent score or all subsets checked, auto-check parent
+    const checkedSubsets = g.subsets.filter(s => finalChecked.has(s.id));
+    const subsetsScore = checkedSubsets.reduce((sum, s) => sum + s.score, 0);
+    const shouldAutoCheckParent = g.subsets.length > 0 && 
+      (subsetsScore >= g.parentScore || checkedSubsets.length === g.subsets.length);
+      
+    if (shouldAutoCheckParent) {
+      finalChecked.add(g.parentId);
+    }
+    
+    // If parent is checked, auto-check all subsets
+    if (finalChecked.has(g.parentId)) {
+      g.subsets.forEach(s => finalChecked.add(s.id));
+    }
+  });
+  
+  // Sync back to AppState and persist
+  AppState.checklistProgress[caseId] = Array.from(finalChecked);
+  localStorage.setItem('ospe_checklist_progress', JSON.stringify(AppState.checklistProgress));
+  
+  // 3. Update DOM classes for checkboxes
+  items.forEach(el => {
+    const itemId = el.getAttribute('data-id');
+    if (finalChecked.has(itemId)) {
       el.classList.add('checked');
-      currentScore += score;
     } else {
       el.classList.remove('checked');
     }
   });
   
-  // 2. อัปเดตคะแนน
+  // 4. Calculate total score and current score with parent caps
+  let currentScore = 0;
+  let totalScore = 0;
+  
+  groups.forEach(g => {
+    totalScore += g.parentScore;
+    
+    if (finalChecked.has(g.parentId)) {
+      currentScore += g.parentScore;
+    } else {
+      const checkedSubsets = g.subsets.filter(s => finalChecked.has(s.id));
+      const subsetsScore = checkedSubsets.reduce((sum, s) => sum + s.score, 0);
+      currentScore += Math.min(subsetsScore, g.parentScore);
+    }
+  });
+  
+  // 5. Update score displays in UI
   const scoreDisplay = document.getElementById('score-display');
   const pctDisplay = document.getElementById('percentage-display');
   const fillBar = document.getElementById('progress-bar-fill');
   
-  if (scoreDisplay) scoreDisplay.textContent = `${currentScore} / ${totalScore}`;
+  // Format to 2 decimal places only if not integer
+  const formatScore = (num) => Number.isInteger(num) ? num.toString() : num.toFixed(2);
+  
+  if (scoreDisplay) scoreDisplay.textContent = `${formatScore(currentScore)} / ${formatScore(totalScore)}`;
   
   if (totalScore > 0) {
     const pct = Math.round((currentScore / totalScore) * 100);
     if (pctDisplay) pctDisplay.textContent = `${pct}%`;
     if (fillBar) {
       fillBar.style.width = `${pct}%`;
-      // หากผ่าน 80% ให้แถบเป็นสีเขียว
       if (pct >= 80) {
         fillBar.classList.add('pass');
       } else {
