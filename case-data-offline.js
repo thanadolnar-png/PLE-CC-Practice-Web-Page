@@ -1,23 +1,10 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Generated on 2026-08-13 19:24:07
+ * Generated on 2026-08-13 19:32:46
  */
 
 const OFFLINE_DATA = {
   "cases": [
-    {
-      "caseId": "OSPE-CL024",
-      "title": "Hypertension  & Dispensing",
-      "category": "Clinic",
-      "mainGroup": "Hypertension",
-      "subTopic": "",
-      "disease": "Hypertension, Drug-Drug Interaction",
-      "difficulty": 3,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "ทดสอบ",
-      "createdDate": "04/07/2026",
-      "isActive": true
-    },
     {
       "caseId": "OSPE-CL4801",
       "title": "Asthma, Salbutamol MDI",
