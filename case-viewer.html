@@ -655,11 +655,18 @@
         `;
         
         // 2. รายการในกลุ่ม
-        groups[groupName].forEach((item) => {
+        let isCurrentSubsetSequence = false;
+        groups[groupName].forEach((item, itemIdx) => {
           const globalIdx = itemGlobalIndices.get(item) || 0;
           const isChecked = checkedList.includes(item.id);
           const imgHtml = getChecklistItemImage(item, globalIdx, c);
-          const isSubset = item.isSubset || (item.score === 0 && !item.text.startsWith('(')) || item.text.trim().startsWith('- ') || item.text.trim().startsWith('•');
+          
+          const prevItem = itemIdx > 0 ? groups[groupName][itemIdx - 1] : null;
+          if (prevItem && (prevItem.text.includes('หัวข้อล่าง') || prevItem.text.includes('ดังต่อไปนี้') || prevItem.text.includes('เลือกตอบ'))) {
+            isCurrentSubsetSequence = true;
+          }
+          
+          const isSubset = item.isSubset || (isCurrentSubsetSequence && itemIdx > 0 && !item.text.includes('หัวข้อล่าง')) || (item.score === 0 && !item.text.startsWith('(')) || item.text.trim().startsWith('- ') || item.text.trim().startsWith('•');
           const el = document.createElement('div');
           el.className = `checklist-item ${isChecked ? 'checked' : ''} ${isSubset ? 'is-subset' : ''}`;
           el.setAttribute('data-id', item.id);
