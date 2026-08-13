@@ -1,10 +1,23 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Enriched on 2026-08-13
+ * Generated on 2026-08-13 18:28:57
  */
 
 const OFFLINE_DATA = {
   "cases": [
+    {
+      "caseId": "OSPE-CL024",
+      "title": "Hypertension  & Dispensing",
+      "category": "Clinic",
+      "mainGroup": "Hypertension",
+      "subTopic": "",
+      "disease": "Hypertension, Drug-Drug Interaction",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "isActive": true
+    },
     {
       "caseId": "OSPE-CL4801",
       "title": "Asthma, Salbutamol MDI",
@@ -38,6 +51,19 @@ const OFFLINE_DATA = {
       "mainGroup": "วิธีการใช้ยาเลื่อนประจำเดือน",
       "subTopic": "",
       "disease": ", Norethisterone",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "มิ้นท์",
+      "createdDate": "01/08/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CL4806",
+      "title": "Dyslipidemia, Friedewald Equation Calculation",
+      "category": "Clinic",
+      "mainGroup": "แปลผลทางห้องปฏิบัติการ",
+      "subTopic": "",
+      "disease": "Dyslipidemia",
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มิ้นท์",
@@ -228,7 +254,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL5229",
-      "title": "Hypertension",
+      "title": "Hypertension, ISMN & Viagra Drug Interaction",
       "category": "Clinic",
       "mainGroup": "ให้คำแนะนำเกี่ยวกับยา",
       "subTopic": "",
@@ -540,7 +566,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL5502",
-      "title": "ยา FBC",
+      "title": "การนับเม็ดยา FBC",
       "category": "Clinic",
       "mainGroup": "นับเม็ดยาและเขียนฉลากยา",
       "subTopic": "",
@@ -553,7 +579,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL5504",
-      "title": "Cloxacillin",
+      "title": "ซักประวัติและจ่ายยา Cloxacillin",
       "category": "Clinic",
       "mainGroup": "ซักประวัติ",
       "subTopic": "",
@@ -579,7 +605,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL5510",
-      "title": "DM",
+      "title": "แนะนำการใช้ยา DM",
       "category": "Clinic",
       "mainGroup": "แนะนำการใช้ยา",
       "subTopic": "",
@@ -592,7 +618,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL5512",
-      "title": "Warfarin",
+      "title": "เขียนฉลากยา Warfarin",
       "category": "Clinic",
       "mainGroup": "เขียนฉลากยา",
       "subTopic": "",
@@ -631,7 +657,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL5515",
-      "title": "Isoniazid ผู้ป่วย TB",
+      "title": "แนะนำการใช้ยา Isoniazid ผู้ป่วย TB",
       "category": "Clinic",
       "mainGroup": "แนะนำการใช้ยา",
       "subTopic": "",
@@ -644,7 +670,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL5521",
-      "title": "Insulin",
+      "title": "แนะนำการใช้ยา Insulin",
       "category": "Clinic",
       "mainGroup": "แนะนำการใช้ยา",
       "subTopic": "",
@@ -670,7 +696,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL5524",
-      "title": "Lipid profile",
+      "title": "แปลผลแล็บ Lipid profile",
       "category": "Clinic",
       "mainGroup": "แนะนำการปฏิบัติตัว",
       "subTopic": "",
@@ -709,7 +735,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL5529",
-      "title": "เกลื้อน",
+      "title": "เกลื้อน เคส CL5529: เกลื้อน",
       "category": "Clinic",
       "mainGroup": "ซักประวัติ",
       "subTopic": "",
@@ -812,6 +838,19 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
+      "caseId": "OSPE-CL5617",
+      "title": "เปิดหนังสือ",
+      "category": "Clinic",
+      "mainGroup": "เปิดหนังสือ",
+      "subTopic": "",
+      "disease": "เปิดหนังสือหาข้อมูลยา Advir",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "กิ๊ฟ",
+      "createdDate": "03/08/2026",
+      "isActive": true
+    },
+    {
       "caseId": "OSPE-CL5621",
       "title": "Constipation",
       "category": "Clinic",
@@ -839,7 +878,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL5701",
-      "title": "นับเม็ดยาและเขียนฉลาก",
+      "title": "นับเม็ดยาและเขียนฉลาก NSAIDs",
       "category": "Clinic",
       "mainGroup": "การนับเม็ดยา",
       "subTopic": "",
@@ -852,7 +891,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL5702",
-      "title": "ซักประวัติ",
+      "title": "ซักประวัติ Warfarin",
       "category": "Clinic",
       "mainGroup": "ซักประวัติ",
       "subTopic": "",
@@ -935,19 +974,6 @@ const OFFLINE_DATA = {
       "mainGroup": "การจ่ายยาและการให้คะแนะนำด้านยา",
       "subTopic": "",
       "disease": "Alendronate & simvastatin",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "กิ๊ฟ",
-      "createdDate": "03/08/2026",
-      "isActive": true
-    },
-    {
-      "caseId": "OSPE-CL5717",
-      "title": "เปิดหนังสือ",
-      "category": "Clinic",
-      "mainGroup": "เปิดหนังสือ",
-      "subTopic": "",
-      "disease": "เปิดหนังสือหาข้อมูลยา Advir",
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กิ๊ฟ",
@@ -1098,21 +1124,8 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-CL5816",
-      "title": "ซักประวัติและจ่ายยา",
-      "category": "Clinic",
-      "mainGroup": "การซักประวัติและจ่ายยา",
-      "subTopic": "",
-      "disease": "NSAIDs",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "เพ้นท์",
-      "createdDate": "03/08/2026",
-      "isActive": true
-    },
-    {
       "caseId": "OSPE-CL5910",
-      "title": "ซักประวัติและจ่ายยา",
+      "title": "ซักประวัติและจ่ายยา Drug allergy",
       "category": "clinic",
       "mainGroup": "การส่งมอบยาเทคนิคพิเศษ",
       "subTopic": "",
@@ -1120,12 +1133,12 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ไอ",
-      "createdDate": "01/08/2026 (วันที่เขียน)",
+      "createdDate": "01/08/2026",
       "isActive": true
     },
     {
       "caseId": "OSPE-CL5911",
-      "title": "การนับเม็ดยา",
+      "title": "การนับเม็ดยา Bisacodyl",
       "category": "clinic",
       "mainGroup": "การซักประวัติจ่ายยาผู้ป่วยในร้านยา",
       "subTopic": "",
@@ -1138,7 +1151,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL5916",
-      "title": "เปิดหนังสือ",
+      "title": "เปิดหนังสือ Drug interaactions",
       "category": "Clinic",
       "mainGroup": "เปิดหนังสือ",
       "subTopic": "",
@@ -1146,12 +1159,12 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ไอ",
-      "createdDate": "01/08/2026 (วันที่เขียน)",
+      "createdDate": "01/08/2026",
       "isActive": true
     },
     {
       "caseId": "OSPE-CL6002",
-      "title": "การนับเม็ดยา",
+      "title": "การนับเม็ดยา Piroxicam",
       "category": "Clinic",
       "mainGroup": "การนับเม็ดยา",
       "subTopic": "",
@@ -1177,7 +1190,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL6010",
-      "title": "แปลผล lab",
+      "title": "แปลผล lab Thyroid function test",
       "category": "Clinic",
       "mainGroup": "แปลผล lab ของผู้ป่วย",
       "subTopic": "",
@@ -1185,12 +1198,12 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มีน",
-      "createdDate": "16/07/2026 (วันที่เขียน)",
+      "createdDate": "16/07/2026",
       "isActive": true
     },
     {
       "caseId": "OSPE-CL6011",
-      "title": "เปิดหนังสือ",
+      "title": "เปิดหนังสือ Vaccine HAVRIX®",
       "category": "Clinic",
       "mainGroup": "เปิดหนังสือ",
       "subTopic": "",
@@ -1198,25 +1211,25 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มีน",
-      "createdDate": "16/07/2026 (วันที่เขียน)",
+      "createdDate": "16/07/2026",
       "isActive": true
     },
     {
       "caseId": "OSPE-CL6014",
-      "title": "ส่งมอบยาเทคนิคพิเศษ",
+      "title": "ส่งมอบยาเทคนิคพิเศษ Vaginal Tablet",
       "category": "Clinic",
       "mainGroup": "จ่ายยาเทคนิคพิเศษ",
       "subTopic": "",
-      "disease": "จ่ายยาเทคนิคพิเศษ",
+      "disease": "Vaginal Tablet",
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มีน",
-      "createdDate": "16/07/2026 (วันที่เขียน)",
+      "createdDate": "16/07/2026",
       "isActive": true
     },
     {
       "caseId": "OSPE-CL6016",
-      "title": "ซักประวัติและจ่ายยาในร้านยา",
+      "title": "ซักประวัติและจ่ายยาในร้านยา hypoglycemia",
       "category": "Clinic",
       "mainGroup": "ซักประวัติและจ่ายยาในร้านยา",
       "subTopic": "",
@@ -1224,12 +1237,38 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มีน",
-      "createdDate": "16/07/2026 (วันที่เขียน)",
+      "createdDate": "16/07/2026",
       "isActive": true
     },
     {
-      "caseId": "OSPE-CL6105",
-      "title": "จับผิดใบสั่งยา",
+      "caseId": "OSPE-CL61102",
+      "title": "ยาคุมกำเนิด (Oral Contraceptive)",
+      "category": "Clinic",
+      "mainGroup": "นับเม็ดยาและเขียนฉลาก",
+      "subTopic": "",
+      "disease": "Tetracycline",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "กุ๊กกุ๊ก",
+      "createdDate": "02/08/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CL61104",
+      "title": "ยาคุมกำเนิดสำหรับสตรีให้นมบุตร",
+      "category": "Clinic",
+      "mainGroup": "ซักประวัติและให้คำปรึกษา",
+      "subTopic": "",
+      "disease": "ยาคุมกำเนิด",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "กุ๊กกุ๊ก",
+      "createdDate": "02/08/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CL61105",
+      "title": "จับผิดใบสั่งยา (Prescription Screening)",
       "category": "Clinic",
       "mainGroup": "จับผิดใบสั่งยา",
       "subTopic": "",
@@ -1237,25 +1276,12 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กุ๊กกุ๊ก",
-      "createdDate": "2/8/2026",
-      "isActive": true
-    },
-    {
-      "caseId": "OSPE-CL6109",
-      "title": "การแปลผลทางห้องปฏิบัติการและการให้คำแนะนำผู้ป่วย",
-      "category": "Clinic",
-      "mainGroup": "การแปลผลทางห้องปฏิบัติการและการให้คำแนะนำผู้ป่วย",
-      "subTopic": "",
-      "disease": "",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "กุ๊กกุ๊ก",
-      "createdDate": "2/8/2026",
+      "createdDate": "02/08/2026",
       "isActive": true
     },
     {
       "caseId": "OSPE-CL61109",
-      "title": "การแปลผลทางห้องปฏิบัติการและการให้คำแนะนำผู้ป่วย",
+      "title": "แปลผล Lab ทางห้องปฏิบัติการและให้คำแนะนำ",
       "category": "Clinic",
       "mainGroup": "การแปลผลทางห้องปฏิบัติการและการให้คำแนะนำผู้ป่วย",
       "subTopic": "",
@@ -1268,7 +1294,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL61110",
-      "title": "Gentamicin",
+      "title": "เปิดหนังสือ DIS / Gentamicin Y-site Compatibility",
       "category": "Clinic",
       "mainGroup": "เปิดหนังสือ",
       "subTopic": "",
@@ -1281,7 +1307,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL61113",
-      "title": "ยาสอดช่องคลอด",
+      "title": "ยาสอดช่องคลอด (Vaginal Suppository)",
       "category": "Clinic",
       "mainGroup": "ยาเทคนิคพิเศษ",
       "subTopic": "",
@@ -1294,7 +1320,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL61115",
-      "title": "ADR",
+      "title": "ประเมินอาการไม่พึงประสงค์จากยา (ADR Assessment)",
       "category": "Clinic",
       "mainGroup": "ซักประวัติและให้คำปรึกษา",
       "subTopic": "",
@@ -1306,34 +1332,8 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-CL6113",
-      "title": "dosing calculation",
-      "category": "Clinic",
-      "mainGroup": "dosing calculation",
-      "subTopic": "",
-      "disease": "-",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "บอล",
-      "createdDate": "2/8/2026",
-      "isActive": true
-    },
-    {
-      "caseId": "OSPE-CL6115",
-      "title": "GERD",
-      "category": "Clinic",
-      "mainGroup": "การซักประวัติให้คำแนะนำ",
-      "subTopic": "",
-      "disease": "GERD",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "กุ๊กกุ๊ก",
-      "createdDate": "2/8/2026",
-      "isActive": true
-    },
-    {
       "caseId": "OSPE-CL61202",
-      "title": "Bisacodyl",
+      "title": "นับเม็ดยาและเขียนฉลาก (Bisacodyl)",
       "category": "Clinic",
       "mainGroup": "นับเม็ดยาและเขียนฉลาก",
       "subTopic": "",
@@ -1346,7 +1346,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL61204",
-      "title": "GERD",
+      "title": "ซักประวัติและจ่ายยาโรคกรดไหลย้อน (GERD)",
       "category": "Clinic",
       "mainGroup": "การซักประวัติให้คำแนะนำ",
       "subTopic": "",
@@ -1359,7 +1359,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL61205",
-      "title": "จับผิดใบสั่งยา",
+      "title": "จับผิดใบสั่งยา (Prescription Screening)",
       "category": "Clinic",
       "mainGroup": "จับผิดใบสั่งยา",
       "subTopic": "",
@@ -1372,7 +1372,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL61209",
-      "title": "การแปลผลทางห้องปฏิบัติการและการให้คำแนะนำผู้ป่วย",
+      "title": "แปลผล Lab ทางห้องปฏิบัติการ (Total CO2)",
       "category": "Clinic",
       "mainGroup": "การแปลผลทางห้องปฏิบัติการและการให้คำแนะนำผู้ป่วย",
       "subTopic": "",
@@ -1385,7 +1385,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL61213",
-      "title": "Allergic rhinitis",
+      "title": "เปิดหนังสือ DIS / Allergic Rhinitis (Singulair)",
       "category": "Clinic",
       "mainGroup": "เปิดหนังสือ",
       "subTopic": "",
@@ -1398,7 +1398,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL61304",
-      "title": "Eye ointments",
+      "title": "แนะนำการใช้ยาเทคนิคพิเศษ ยาป้ายตา (Eye Ointments)",
       "category": "Clinic",
       "mainGroup": "แนะนำการใช้ยาเทคนิคพิเศษ",
       "subTopic": "",
@@ -1411,7 +1411,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL61315",
-      "title": "ADR",
+      "title": "ซักประวัติและประเมินอาการไม่พึงประสงค์จากยา (ADR)",
       "category": "Clinic",
       "mainGroup": "ซักประวัติและให้คำปรึกษา",
       "subTopic": "",
@@ -1424,15 +1424,15 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL6204",
-      "title": "ซักประวัติและจ่ายยาในร้านยา",
+      "title": "ซักประวัติและจ่ายยาในร้านยา Pyelonephritis",
       "category": "Clinic",
       "mainGroup": "การซักประวัติและจ่ายยา",
       "subTopic": "",
-      "disease": "กรวยไตอักเสบ",
+      "disease": "Pyelonephritis",
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มีน",
-      "createdDate": "13/07/2026 (วันที่เขียน)",
+      "createdDate": "13/07/2026",
       "isActive": true
     },
     {
@@ -1446,32 +1446,6 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "บอล",
       "createdDate": "02/08/2026",
-      "isActive": true
-    },
-    {
-      "caseId": "OSPE-CL6209",
-      "title": "การแปลผลทางห้องปฏิบัติการและการให้คำแนะนำผู้ป่วย",
-      "category": "Clinic",
-      "mainGroup": "การแปลผลทางห้องปฏิบัติการและการให้คำแนะนำผู้ป่วย",
-      "subTopic": "",
-      "disease": "",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "กุ๊กกุ๊ก",
-      "createdDate": "2/8/2026",
-      "isActive": true
-    },
-    {
-      "caseId": "OSPE-CL6210",
-      "title": "Gentamicin",
-      "category": "Clinic",
-      "mainGroup": "เปิดหนังสือ",
-      "subTopic": "",
-      "disease": "Gentamicin",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "กุ๊กกุ๊ก",
-      "createdDate": "2/8/2026",
       "isActive": true
     },
     {
@@ -1615,19 +1589,6 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "3/8/69",
-      "isActive": true
-    },
-    {
-      "caseId": "OSPE-CL6767",
-      "title": "ซักประวัติและจ่ายยาในร้านยา",
-      "category": "Clinic",
-      "mainGroup": "ตรวจสอบความถูกต้องของยากับใบสั่งยา",
-      "subTopic": "",
-      "disease": "ตรวจสอบความถูกต้องของยากับใบสั่งยา",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "มีน",
-      "createdDate": "16/07/2026 (วันที่เขียน)",
       "isActive": true
     },
     {
@@ -1973,7 +1934,7 @@ const OFFLINE_DATA = {
       "title": "Compounding — Cold Cream & Labeling",
       "category": "Product",
       "mainGroup": "Compounding - Topical",
-      "subTopic": "Dry Skin, Cold Cream",
+      "subTopic": "",
       "disease": "Dry Skin, Cold Cream",
       "difficulty": 2,
       "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
@@ -1986,7 +1947,7 @@ const OFFLINE_DATA = {
       "title": "Ointment Compounding — Sulfur 10% Ointment",
       "category": "Product",
       "mainGroup": "Compounding - Topical",
-      "subTopic": "Scabies (Sulfur Ointment)",
+      "subTopic": "",
       "disease": "Scabies (Sulfur Ointment)",
       "difficulty": 2,
       "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
@@ -1999,7 +1960,7 @@ const OFFLINE_DATA = {
       "title": "Syrup Compounding — Paracetamol Syrup 120mg/5mL",
       "category": "Product",
       "mainGroup": "Compounding - Oral Liquid",
-      "subTopic": "Pediatric Fever (Paracetamol Syrup)",
+      "subTopic": "",
       "disease": "Pediatric Fever (Paracetamol Syrup)",
       "difficulty": 2,
       "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
@@ -2051,7 +2012,7 @@ const OFFLINE_DATA = {
       "title": "ยาควบคุมพิเศษ ยาอันตราย",
       "category": "SAP",
       "mainGroup": "Law & Regulations Ethics",
-      "subTopic": "Special Controlled Drugs Regulation",
+      "subTopic": "",
       "disease": "ยาลดความอ้วน",
       "difficulty": 2,
       "docId": "1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg",
@@ -2064,7 +2025,7 @@ const OFFLINE_DATA = {
       "title": "ยาตามกฎหมาย",
       "category": "SAP",
       "mainGroup": "Law & Regulations Ethics",
-      "subTopic": "Cannabis Regulation under Narcotics Act",
+      "subTopic": "",
       "disease": "ระบุประเภทของยาตามกฎหมาย",
       "difficulty": 2,
       "docId": "1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg",
@@ -2077,7 +2038,7 @@ const OFFLINE_DATA = {
       "title": "ยาตามกฎหมาย",
       "category": "SAP",
       "mainGroup": "Law & Regulations Ethics",
-      "subTopic": "Diazepam Control (Psychotropic Type 4)",
+      "subTopic": "",
       "disease": "ระบุประเภทของยาตามกฎหมาย",
       "difficulty": 2,
       "docId": "1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg",
