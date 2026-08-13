@@ -1452,7 +1452,7 @@
       
       // Solo mode: show progress, checklist, and examiner note button
       if (SimState.role === 'solo') {
-        progressCard.style.display = 'block';
+        progressCard.style.display = 'flex';
         noticeCard.style.display = 'none';
         chkContainer.style.display = 'block';
         noteContainer.style.display = 'block';
@@ -1471,7 +1471,7 @@
           document.getElementById('btn-finish-exam').style.display = 'none';
         }
       } else if (SimState.role === 'examiner') {
-        progressCard.style.display = 'block';
+        progressCard.style.display = 'flex';
         noticeCard.style.display = 'none';
         chkContainer.style.display = 'block';
         noteContainer.style.display = 'block';
@@ -1488,7 +1488,7 @@
       
       // Minimap — แสดงทุก mode (solo + lobby)
       const minimapCard = document.getElementById('minimap-card-el');
-      if (minimapCard) minimapCard.style.display = 'block';
+      if (minimapCard) minimapCard.style.display = 'flex';
       renderMiniMap();
       
       // Nav buttons

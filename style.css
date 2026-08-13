@@ -1079,6 +1079,11 @@ a {
   align-items: center;
 }
 
+#exam-progress-card,
+#minimap-card-el {
+  display: flex !important;
+}
+
 .minimap-cell {
   width: 28px;
   height: 28px;
