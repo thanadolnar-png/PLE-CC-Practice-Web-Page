@@ -780,7 +780,31 @@
       document.getElementById('case-viewer-app').style.display = 'block';
     }
 
-        function renderChecklist(c) {
+    function getChecklistItemImage(item, globalIdx, c) {
+      if (item.imageHtml) return item.imageHtml;
+      if (!c || !c.noteHtml) return '';
+      if (!c._noteImages) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = c.noteHtml;
+        const wrappers = tempDiv.querySelectorAll('.case-image-wrapper');
+        if (wrappers && wrappers.length > 0) {
+          c._noteImages = Array.from(wrappers).map(w => w.outerHTML);
+        } else {
+          const imgs = tempDiv.querySelectorAll('img');
+          c._noteImages = Array.from(imgs).map(img => `<div class="case-image-wrapper" style="text-align:center;margin:8px 0;">${img.outerHTML}</div>`);
+        }
+      }
+      const totalItems = (c.checklist || []).length;
+      if (c._noteImages && c._noteImages.length === totalItems && c._noteImages[globalIdx]) {
+        return c._noteImages[globalIdx];
+      }
+      if (c._noteImages && c._noteImages.length === 1 && totalItems === 1 && c._noteImages[0]) {
+        return c._noteImages[0];
+      }
+      return '';
+    }
+
+    function renderChecklist(c) {
       const container = document.getElementById('checklist-items-container');
       const printContainer = document.getElementById('print-checklist-list');
       container.innerHTML = '';
@@ -790,6 +814,10 @@
         container.innerHTML = '<p class="empty-state">ไม่มีรายการ Checklist ในเอกสารนี้</p>';
         return;
       }
+      
+      // Map global index for each item
+      const itemGlobalIndices = new Map();
+      c.checklist.forEach((item, index) => itemGlobalIndices.set(item, index));
       
       // แยกกลุ่ม Checklist ตามกลุ่มทักษะย่อย
       const groups = {};
@@ -832,8 +860,10 @@
         `;
         
         // 2. รายการในกลุ่ม
-        groups[groupName].forEach((item, idx) => {
+        groups[groupName].forEach((item) => {
+          const globalIdx = itemGlobalIndices.get(item) || 0;
           const isChecked = checkedList.includes(item.id);
+          const imgHtml = getChecklistItemImage(item, globalIdx, c);
           const el = document.createElement('div');
           el.className = `checklist-item ${isChecked ? 'checked' : ''}`;
           el.setAttribute('data-id', item.id);
@@ -847,7 +877,7 @@
             <div style="flex:1; min-width:0;">
               <span class="checklist-item-score">(${item.score} คะแนน)</span>
               <span class="checklist-item-text">${item.textHtml || escapeHtml(item.text)}</span>
-              ${item.imageHtml ? `<div class="checklist-item-image" style="margin-top:0.5rem; pointer-events:none;">${item.imageHtml}</div>` : ''}
+              ${imgHtml ? `<div class="checklist-item-image" style="margin-top:0.5rem; pointer-events:none;">${imgHtml}</div>` : ''}
             </div>
           `;
           
@@ -856,7 +886,7 @@
           // ตารางพิมพ์ (ไม่มีคอลัมน์กลุ่มแยกเดี่ยวซ้ายสุดแล้ว)
           printTableHtml += `
             <tr>
-              <td>${item.textHtml || escapeHtml(item.text)}</td>
+              <td>${item.textHtml || escapeHtml(item.text)}${imgHtml ? `<div style="margin-top:0.25rem;">${imgHtml}</div>` : ''}</td>
               <td class="print-center-cell" style="font-weight: bold;">${item.score}</td>
               <td class="print-center-cell">[ ${isChecked ? '✓' : ' '} ]</td>
             </tr>

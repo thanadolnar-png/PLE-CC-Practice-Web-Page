@@ -1638,6 +1638,30 @@
       }
     }
 
+    function getExamChecklistItemImage(item, globalIdx, c) {
+      if (item.imageHtml) return item.imageHtml;
+      if (!c || !c.noteHtml) return '';
+      if (!c._noteImages) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = c.noteHtml;
+        const wrappers = tempDiv.querySelectorAll('.case-image-wrapper');
+        if (wrappers && wrappers.length > 0) {
+          c._noteImages = Array.from(wrappers).map(w => w.outerHTML);
+        } else {
+          const imgs = tempDiv.querySelectorAll('img');
+          c._noteImages = Array.from(imgs).map(img => `<div class="case-image-wrapper" style="text-align:center;margin:8px 0;">${img.outerHTML}</div>`);
+        }
+      }
+      const totalItems = (c.checklist || []).length;
+      if (c._noteImages && c._noteImages.length === totalItems && c._noteImages[globalIdx]) {
+        return c._noteImages[globalIdx];
+      }
+      if (c._noteImages && c._noteImages.length === 1 && totalItems === 1 && c._noteImages[0]) {
+        return c._noteImages[0];
+      }
+      return '';
+    }
+
     function renderExamChecklist(stationNum, c) {
       const chkContainer = document.getElementById('exam-checklist-container');
       chkContainer.innerHTML = '';
@@ -1646,6 +1670,9 @@
         chkContainer.innerHTML = '<p class="empty-state">ไม่มีรายการ Checklist ในเอกสารนี้</p>';
         return;
       }
+      
+      const itemGlobalIndices = new Map();
+      c.checklist.forEach((item, index) => itemGlobalIndices.set(item, index));
       
       const checkedList = SimState.studentScores[stationNum] || [];
       const groups = {};
@@ -1662,22 +1689,24 @@
         grpHdr.textContent = `กลุ่ม: ${groupName}`;
         chkContainer.appendChild(grpHdr);
         
-          groups[groupName].forEach(item => {
-            const isChecked = checkedList.includes(item.id);
-            const el = document.createElement('div');
-            el.className = `checklist-item ${isChecked ? 'checked' : ''}`;
-            el.setAttribute('data-id', item.id);
-            el.addEventListener('click', () => toggleExamChecklistItem(stationNum, item.id, item.score));
-            el.innerHTML = `
-              <div class="checkbox-custom"></div>
-              <div style="flex:1; min-width:0;">
-                <span class="checklist-item-score">(${item.score} คะแนน)</span>
-                <span class="checklist-item-text">${item.textHtml || escapeHtml(item.text)}</span>
-                ${item.imageHtml ? `<div class="checklist-item-image" style="margin-top:0.5rem; pointer-events:none;">${item.imageHtml}</div>` : ''}
-              </div>
-            `;
-            chkContainer.appendChild(el);
-          });
+        groups[groupName].forEach(item => {
+          const globalIdx = itemGlobalIndices.get(item) || 0;
+          const isChecked = checkedList.includes(item.id);
+          const imgHtml = getExamChecklistItemImage(item, globalIdx, c);
+          const el = document.createElement('div');
+          el.className = `checklist-item ${isChecked ? 'checked' : ''}`;
+          el.setAttribute('data-id', item.id);
+          el.addEventListener('click', () => toggleExamChecklistItem(stationNum, item.id, item.score));
+          el.innerHTML = `
+            <div class="checkbox-custom"></div>
+            <div style="flex:1; min-width:0;">
+              <span class="checklist-item-score">(${item.score} คะแนน)</span>
+              <span class="checklist-item-text">${item.textHtml || escapeHtml(item.text)}</span>
+              ${imgHtml ? `<div class="checklist-item-image" style="margin-top:0.5rem; pointer-events:none;">${imgHtml}</div>` : ''}
+            </div>
+          `;
+          chkContainer.appendChild(el);
+        });
       });
       
       updateExamProgressUI(stationNum, c);
