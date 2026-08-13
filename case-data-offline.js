@@ -1,8 +1,3 @@
-/**
- * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Generated on 2026-08-13 19:50:13
- */
-
 const OFFLINE_DATA = {
   "cases": [
     {
@@ -1904,19 +1899,6 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-CLSP23",
-      "title": "Warfarin  Expert",
-      "category": "Clinic",
-      "mainGroup": "Anticoagulation",
-      "subTopic": "",
-      "disease": "Atrial Fibrillation, Warfarin",
-      "difficulty": 3,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "ทดสอบ",
-      "createdDate": "4/7/2026",
-      "isActive": true
-    },
-    {
       "caseId": "OSPE-PD001",
       "title": "Compounding — Cold Cream & Labeling",
       "category": "Product",
@@ -2151,4 +2133,4 @@ const OFFLINE_DATA = {
       "isActive": true
     }
   ]
-};
+}
