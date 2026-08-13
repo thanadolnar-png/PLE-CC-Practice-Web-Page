@@ -1088,13 +1088,6 @@ document.addEventListener('DOMContentLoaded', () => {
       closeReportModal();
     }
   });
-
-  // Pre-load report history (badge count/data) on startup if on case-library page
-  if (document.getElementById('report-history-section')) {
-    setTimeout(() => {
-      loadReportHistory();
-    }, 1200);
-  }
 });
 
 function openLightbox(src) {
