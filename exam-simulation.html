@@ -1484,10 +1484,10 @@
         }
       }
       
-      // Minimap
+      // Minimap — แสดงทุก mode (solo + lobby)
       const minimapCard = document.getElementById('minimap-card-el');
-      if (minimapCard) minimapCard.style.display = SimState.isLobby ? 'none' : 'block';
-      if (!SimState.isLobby) renderMiniMap();
+      if (minimapCard) minimapCard.style.display = 'block';
+      renderMiniMap();
       
       // Nav buttons
       document.getElementById('btn-prev-station').disabled = idx === 0;
@@ -1614,16 +1614,27 @@
         if (idx === SimState.currentIdx) cell.classList.add('active');
         const checked = SimState.studentScores[st.stationNumber] || [];
         if (checked.length > 0) { cell.classList.add('done'); completedCount++; }
+        if (st.isRest) cell.classList.add('rest');
+        // แสดง category color
+        const cat = st.case && st.case.category ? st.case.category.toLowerCase() : '';
+        if (cat && !st.isRest) cell.setAttribute('data-cat', cat);
         cell.textContent = st.stationNumber;
-        if (SimState.role !== 'examinee') {
+        cell.title = st.isRest ? 'พักระหว่างสถานี' : (st.case && st.case.title ? st.case.title : 'สถานี ' + st.stationNumber);
+        // Solo หรือ Lobby-Examiner กดได้ — Examinee ดูอย่างเดียว
+        const canClick = SimState.role !== 'examinee';
+        if (canClick) {
           cell.style.cursor = 'pointer';
           cell.addEventListener('click', () => renderStation(idx));
+        } else {
+          cell.style.cursor = 'default';
+          cell.style.opacity = '0.85';
         }
         grid.appendChild(cell);
       });
       
+      const lobbyBadge = SimState.isLobby ? ' 🌐' : '';
       document.getElementById('minimap-progress-title').textContent =
-        `ความคืบหน้าสถานี (${completedCount}/${SimState.totalStations})`;
+        `ความคืบหน้าสถานี (${completedCount}/${SimState.stations.length})${lobbyBadge}`;
     }
 
     function toggleExamNote() {

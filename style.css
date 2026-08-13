@@ -1117,17 +1117,37 @@ a {
   color: var(--success);
 }
 
-.minimap-dot {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 6px;
-  height: 6px;
-  border-radius: var(--radius-full);
-}
-.minimap-dot.clinic { background-color: var(--clinic); }
+.minimap-dot { position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: var(--radius-full); }
+.minimap-dot.clinic  { background-color: var(--clinic); }
 .minimap-dot.product { background-color: var(--product); }
-.minimap-dot.sap { background-color: var(--sap); }
+.minimap-dot.sap     { background-color: var(--sap); }
+
+/* Category color on left border */
+.minimap-cell[data-cat="clinic"]  { border-left: 3px solid var(--clinic); }
+.minimap-cell[data-cat="product"] { border-left: 3px solid var(--product); }
+.minimap-cell[data-cat="sap"]     { border-left: 3px solid var(--sap); }
+
+/* Done = checked at least one item */
+.minimap-cell.done {
+  background-color: rgba(16, 185, 129, 0.12);
+  border-color: var(--success);
+  color: var(--success);
+}
+.minimap-cell.done.active {
+  background-color: rgba(16, 185, 129, 0.25);
+  box-shadow: 0 0 0 2px var(--success);
+}
+
+/* Rest station */
+.minimap-cell.rest {
+  background-color: var(--bg-secondary);
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: default !important;
+  border-style: dashed;
+}
 
 /* Navigation buttons at bottom of exam */
 .exam-nav {
