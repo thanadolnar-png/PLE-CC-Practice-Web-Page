@@ -1,6 +1,6 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Generated on 2026-08-13 11:06:45
+ * Generated on 2026-08-13 11:50:29
  */
 
 const OFFLINE_DATA = {
@@ -16,19 +16,6 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มดเขียว",
       "createdDate": "02/08/2026",
-      "isActive": true
-    },
-    {
-      "caseId": "OSPE-CL024",
-      "title": "Hypertension  & Dispensing",
-      "category": "Clinic",
-      "mainGroup": "Hypertension",
-      "subTopic": "",
-      "disease": "Hypertension, Drug-Drug Interaction",
-      "difficulty": 3,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "ทดสอบ",
-      "createdDate": "04/07/2026",
       "isActive": true
     },
     {
@@ -553,7 +540,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL6802",
-      "title": "Untitled Case",
+      "title": "การประเมินแพ้ยา",
       "category": "Clinic",
       "mainGroup": "ประเมินแพ้ยา และให้คำแนะนำ",
       "subTopic": "",
