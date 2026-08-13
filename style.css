@@ -1073,66 +1073,73 @@ a {
 }
 
 .minimap-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  align-items: center;
 }
 
 .minimap-cell {
-  aspect-ratio: 1;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 50%;
   background-color: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border: 2px solid var(--border);
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 700;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.2s ease;
   position: relative;
+  box-sizing: border-box;
 }
 
 .minimap-cell:hover {
   border-color: var(--primary);
   background-color: var(--bg-secondary);
+  transform: scale(1.15);
 }
 
 .minimap-cell.active {
-  border-color: var(--primary);
-  background-color: var(--primary-light);
-  color: var(--primary);
-  box-shadow: 0 0 0 2px var(--primary);
+  border-color: var(--primary) !important;
+  background-color: var(--primary) !important;
+  color: white !important;
+  box-shadow: 0 0 0 3px var(--primary-light);
 }
 
-.minimap-cell.completed {
-  background-color: rgba(16, 185, 129, 0.15);
-  border-color: var(--success);
-  color: var(--success);
-}
-
-.minimap-dot { position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: var(--radius-full); }
-.minimap-dot.clinic  { background-color: var(--clinic); }
-.minimap-dot.product { background-color: var(--product); }
-.minimap-dot.sap     { background-color: var(--sap); }
-
-/* Category color on left border */
-.minimap-cell[data-cat="clinic"]  { border-left: 3px solid var(--clinic); }
-.minimap-cell[data-cat="product"] { border-left: 3px solid var(--product); }
-.minimap-cell[data-cat="sap"]     { border-left: 3px solid var(--sap); }
-
-/* Done = checked at least one item */
 .minimap-cell.done {
-  background-color: rgba(16, 185, 129, 0.12);
+  background-color: var(--success);
   border-color: var(--success);
-  color: var(--success);
+  color: white;
 }
+
 .minimap-cell.done.active {
-  background-color: rgba(16, 185, 129, 0.25);
-  box-shadow: 0 0 0 2px var(--success);
+  background-color: var(--success) !important;
+  border-color: var(--success) !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
 }
+
+.minimap-cell.rest {
+  background-color: var(--bg-secondary);
+  color: var(--text-muted);
+  font-size: 0.6rem;
+  border-style: dashed;
+}
+
+.minimap-cell[data-cat="clinic"]  { border-color: var(--clinic); color: var(--clinic); }
+.minimap-cell[data-cat="product"] { border-color: var(--product); color: var(--product); }
+.minimap-cell[data-cat="sap"]     { border-color: var(--sap); color: var(--sap); }
+
+.minimap-cell.active[data-cat],
+.minimap-cell.done[data-cat] {
+  color: white !important;
+}
+
+.minimap-dot { position: absolute; top: 2px; right: 2px; width: 5px; height: 5px; border-radius: 50%; }
 
 /* Rest station */
 .minimap-cell.rest {
