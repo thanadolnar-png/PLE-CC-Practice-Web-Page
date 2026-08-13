@@ -1,6 +1,6 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Generated on 2026-08-05 13:58:09
+ * Generated on 2026-08-13 09:45:35
  */
 
 const OFFLINE_DATA = {
@@ -353,7 +353,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "Lin",
-      "createdDate": "5/8/2569",
+      "createdDate": "12/8/2569",
       "isActive": true
     },
     {
@@ -399,13 +399,39 @@ const OFFLINE_DATA = {
       "caseId": "OSPE-CL123456",
       "title": "ซักประวัติและจ่ายยา",
       "category": "Clinic",
-      "mainGroup": "ให้คำปรึกษาเรื่องยา",
+      "mainGroup": "ซักประวัติและจ่ายยา",
       "subTopic": "",
-      "disease": "ให้คำปรึกษาเรื่องยา",
+      "disease": "Bacterial Pharyngitis",
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "3/8/69",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CL12381273827",
+      "title": "จ่ายยาและอธิบายวิธีการใช้ยา",
+      "category": "Clinic",
+      "mainGroup": "ให้คำปรึกษาเรื่องยา",
+      "subTopic": "",
+      "disease": "Diclofenac",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ฟ้า เร้กเก้",
+      "createdDate": "3/8/69",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CL123857829852",
+      "title": "นับเม็ดยาและเขียนฉลาก",
+      "category": "Clinic",
+      "mainGroup": "การซักประวัติและจ่ายยา",
+      "subTopic": "",
+      "disease": "NSAIDs",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "เพ้นท์",
+      "createdDate": "03/08/2026",
       "isActive": true
     },
     {
@@ -457,7 +483,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ส้มส้ม",
-      "createdDate": "5/8/2569",
+      "createdDate": "12/8/2569",
       "isActive": true
     },
     {
@@ -503,13 +529,26 @@ const OFFLINE_DATA = {
       "caseId": "OSPE-CL999",
       "title": "แปลผล lab และให้คำแนะนำ",
       "category": "Clinic",
-      "mainGroup": "การซักประวัติและจ่ายยา",
+      "mainGroup": "การแปลผลทางห้องปฏิบัติการและการให้คำแนะนำผู้ป่วย",
       "subTopic": "",
-      "disease": "NSAIDs",
+      "disease": "anemia",
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "เพ้นท์",
+      "author": "กิ๊ฟ",
       "createdDate": "03/08/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CL999123123",
+      "title": "คำนวณขนาดยา",
+      "category": "Clinic",
+      "mainGroup": "",
+      "subTopic": "",
+      "disease": "คำนวณขนาดยา Dopamine",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ (คนเขียน)",
+      "createdDate": "04/07/2026 (วันที่เขียน)",
       "isActive": true
     },
     {
@@ -574,7 +613,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
       "author": "มิน",
-      "createdDate": "5/8/2569",
+      "createdDate": "12/8/2569",
       "isActive": true
     },
     {
@@ -587,7 +626,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
       "author": "มิน",
-      "createdDate": "5/8/2569",
+      "createdDate": "12/8/2569",
       "isActive": true
     },
     {
@@ -731,6 +770,19 @@ const OFFLINE_DATA = {
       "docId": "1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg",
       "author": "Japan",
       "createdDate": "02/08/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-SP012559",
+      "title": "Salbutramine",
+      "category": "SAP",
+      "mainGroup": "Law & Regulations Ethics",
+      "subTopic": "",
+      "disease": "วัตถุออกฤทธิ์ต่อจิตและประสาท",
+      "difficulty": 2,
+      "docId": "1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg",
+      "author": "แม็กนั่ม",
+      "createdDate": "07/08/2026",
       "isActive": true
     }
   ]

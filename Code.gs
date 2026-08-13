@@ -917,8 +917,64 @@ function parseCellToHtml(cell) {
 }
 
 /**
- * ฟังก์ชันย่อยแปลงย่อย่อหน้าใน Doc เป็น HTML (รองรับการแปลงรูปภาพฝังในตัวอักษร)
+ * ฟังก์ชันย่อยแปลงย่อย่อหน้าใน Doc เป็น HTML (รองรับสี ตัวหนา ตัวเอียง ลิงก์ และรูปภาพ)
  */
+function parseTextElementToHtml(textElement) {
+  const text = textElement.getText();
+  if (!text) return '';
+  
+  try {
+    const indices = textElement.getTextAttributeIndices();
+    if (!indices || indices.length === 0) return escapeHtml(text);
+    
+    let html = '';
+    for (let i = 0; i < indices.length; i++) {
+      const start = indices[i];
+      const end = (i + 1 < indices.length) ? indices[i + 1] : text.length;
+      const chunk = text.substring(start, end);
+      if (!chunk) continue;
+      
+      let chunkHtml = escapeHtml(chunk);
+      const styles = [];
+      
+      const isBold = textElement.isBold(start);
+      const isItalic = textElement.isItalic(start);
+      const isUnderline = textElement.isUnderline(start);
+      const isStrikethrough = textElement.isStrikethrough(start);
+      const fgColor = textElement.getForegroundColor(start);
+      const bgColor = textElement.getBackgroundColor(start);
+      const linkUrl = textElement.getLinkUrl(start);
+      
+      if (isBold) styles.push('font-weight: 700;');
+      if (isItalic) styles.push('font-style: italic;');
+      
+      const decors = [];
+      if (isUnderline) decors.push('underline');
+      if (isStrikethrough) decors.push('line-through');
+      if (decors.length > 0) styles.push('text-decoration: ' + decors.join(' ') + ';');
+      
+      if (fgColor && fgColor !== '#000000') {
+        styles.push('color: ' + fgColor + ';');
+      }
+      if (bgColor && bgColor !== '#ffffff') {
+        styles.push('background-color: ' + bgColor + '; padding: 0 2px; border-radius: 3px;');
+      }
+      
+      if (styles.length > 0) {
+        chunkHtml = '<span style="' + styles.join(' ') + '">' + chunkHtml + '</span>';
+      }
+      if (linkUrl) {
+        chunkHtml = '<a href="' + escapeHtml(linkUrl) + '" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: underline;">' + chunkHtml + '</a>';
+      }
+      
+      html += chunkHtml;
+    }
+    return html;
+  } catch(e) {
+    return escapeHtml(text);
+  }
+}
+
 function parseParagraphToHtml(paragraph) {
   let html = '';
   const numChildren = paragraph.getNumChildren();
@@ -932,8 +988,7 @@ function parseParagraphToHtml(paragraph) {
     const type = child.getType();
     
     if (type === DocumentApp.ElementType.TEXT) {
-      const text = child.asText().getText();
-      html += escapeHtml(text);
+      html += parseTextElementToHtml(child.asText());
     } else if (type === DocumentApp.ElementType.INLINE_IMAGE) {
       try {
         const image = child.asInlineImage();

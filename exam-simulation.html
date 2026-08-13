@@ -1542,7 +1542,7 @@
               <div class="checkbox-custom"></div>
               <div style="flex:1; min-width:0;">
                 <span class="checklist-item-score">(${item.score} คะแนน)</span>
-                <span class="checklist-item-text">${escapeHtml(item.text)}</span>
+                <span class="checklist-item-text">${item.textHtml || escapeHtml(item.text)}</span>
                 ${item.imageHtml ? `<div class="checklist-item-image" style="margin-top:0.5rem; pointer-events:none;">${item.imageHtml}</div>` : ''}
               </div>
             `;

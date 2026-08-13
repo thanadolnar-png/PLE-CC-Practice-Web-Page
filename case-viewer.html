@@ -465,7 +465,7 @@
     </div>
   </footer>
 
-  <script src="case-data-offline.js?v=1.2.8"></script>
+  <script src="case-data-offline.js?v=1.3.1"></script>
   <script src="app.js"></script>
 
   <script>
@@ -779,7 +779,7 @@
             <div class="checkbox-custom"></div>
             <div style="flex:1; min-width:0;">
               <span class="checklist-item-score">(${item.score} คะแนน)</span>
-              <span class="checklist-item-text">${escapeHtml(item.text)}</span>
+              <span class="checklist-item-text">${item.textHtml || escapeHtml(item.text)}</span>
               ${item.imageHtml ? `<div class="checklist-item-image" style="margin-top:0.5rem; pointer-events:none;">${item.imageHtml}</div>` : ''}
             </div>
           `;
@@ -789,7 +789,7 @@
           // ตารางพิมพ์ (ไม่มีคอลัมน์กลุ่มแยกเดี่ยวซ้ายสุดแล้ว)
           printTableHtml += `
             <tr>
-              <td>${escapeHtml(item.text)}</td>
+              <td>${item.textHtml || escapeHtml(item.text)}</td>
               <td class="print-center-cell" style="font-weight: bold;">${item.score}</td>
               <td class="print-center-cell">[ ${isChecked ? '✓' : ' '} ]</td>
             </tr>
