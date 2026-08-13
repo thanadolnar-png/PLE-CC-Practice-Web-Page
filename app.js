@@ -400,8 +400,8 @@ async function updateCurrentCaseFromDoc() {
     const updatedCase = await fetchCaseDetail(caseId, true); // forceLive = true
     if (updatedCase && (updatedCase.contentHtml || updatedCase.scenario || updatedCase.checklist)) {
       AppState.currentCase = updatedCase;
-      if (typeof renderCaseDetails === 'function') {
-        renderCaseDetails(updatedCase);
+      if (typeof renderCaseDetail === 'function') {
+        renderCaseDetail(updatedCase);
       }
       if (typeof showToast === 'function') {
         showToast('✅ Update Data From Google Docs สำเร็จเรียบร้อย!', 'success');
