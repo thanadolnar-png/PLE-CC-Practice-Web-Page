@@ -1308,7 +1308,7 @@ a {
   font-family: var(--font-mono);
   font-weight: 700;
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--text-primary) !important;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
   box-sizing: border-box;
@@ -1317,25 +1317,33 @@ a {
 .station-cell:hover {
   transform: translateY(-2px);
   border-color: var(--primary);
-  color: var(--primary);
+  color: var(--primary) !important;
 }
 
 .station-cell.current {
-  background: linear-gradient(180deg, var(--primary), var(--primary-dark)) !important;
-  border-color: var(--primary-dark) !important;
+  background: #4f46e5 !important;
+  background: linear-gradient(180deg, #6366f1, #4338ca) !important;
+  border-color: #3730a3 !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.35), 0 0 0 2px var(--primary-light);
-  transform: translateY(-2px);
+  font-weight: 800 !important;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.45), 0 0 0 3px rgba(99, 102, 241, 0.35) !important;
+  transform: translateY(-3px);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .station-cell.done {
   background: linear-gradient(180deg, var(--success), #059669) !important;
   border-color: #059669 !important;
   color: #ffffff !important;
+  font-weight: 700 !important;
 }
 
 .station-cell.done.current {
-  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.35), 0 0 0 2px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(180deg, #10b981, #047857) !important;
+  border-color: #047857 !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.45), 0 0 0 3px rgba(16, 185, 129, 0.35) !important;
 }
 
 .station-cell.rest {
