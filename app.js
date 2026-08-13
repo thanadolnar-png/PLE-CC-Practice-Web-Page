@@ -325,16 +325,24 @@ async function loadCasesData() {
 async function fetchCaseDetail(caseId, forceLive = false) {
   if (!caseId) return null;
   const cleanId = caseId.trim();
+  const ospeId = cleanId.startsWith('OSPE-') ? cleanId : ('OSPE-' + cleanId);
+  const rawId = cleanId.replace(/^OSPE-/i, '');
 
   // 1. Check local OFFLINE_CASE_DETAILS if loaded and not forceLive (0ms instant resolution)
-  if (!forceLive && typeof OFFLINE_CASE_DETAILS !== 'undefined' && OFFLINE_CASE_DETAILS[cleanId]) {
-    const det = OFFLINE_CASE_DETAILS[cleanId];
-    const idx = AppState.cases.findIndex(c => c.caseId && c.caseId.trim() === cleanId);
-    if (idx !== -1) {
-      AppState.cases[idx] = Object.assign({}, AppState.cases[idx], det);
-      return AppState.cases[idx];
+  if (!forceLive && typeof OFFLINE_CASE_DETAILS !== 'undefined') {
+    const det = OFFLINE_CASE_DETAILS[cleanId] || 
+                OFFLINE_CASE_DETAILS[ospeId] || 
+                OFFLINE_CASE_DETAILS[rawId] || 
+                OFFLINE_CASE_DETAILS[cleanId.toUpperCase()] || 
+                OFFLINE_CASE_DETAILS[ospeId.toUpperCase()];
+    if (det) {
+      const idx = AppState.cases.findIndex(c => c.caseId && (c.caseId.trim() === cleanId || c.caseId.trim() === ospeId || c.caseId.trim() === rawId));
+      if (idx !== -1) {
+        AppState.cases[idx] = Object.assign({}, AppState.cases[idx], det);
+        return AppState.cases[idx];
+      }
+      return Object.assign({ caseId: ospeId }, det);
     }
-    return Object.assign({ caseId: cleanId }, det);
   }
 
   // 2. Fetch live from API (Google Apps Script Web App)

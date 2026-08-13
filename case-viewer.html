@@ -572,21 +572,40 @@
       }
     });
 
-    // ค้นหาข้อมูลเคสจาก Offline Database ทั้งส่วนสรุปและรายละเอียดแบบครบถ้วน (รองรับตัวอักษรพิมพ์เล็ก/ใหญ่)
+    // ค้นหาข้อมูลเคสจาก Offline Database ทั้งส่วนสรุปและรายละเอียดแบบครบถ้วน (รองรับรหัสแบบมี/ไม่มี OSPE- และพิมพ์เล็ก/ใหญ่)
     function getOfflineCase(caseId) {
-      const cleanId = (caseId || '').trim();
+      if (!caseId) return null;
+      const cleanId = caseId.trim();
+      const upperId = cleanId.toUpperCase();
+      const ospeId = cleanId.startsWith('OSPE-') ? cleanId : ('OSPE-' + cleanId);
+      const rawId = cleanId.replace(/^OSPE-/i, '');
+      const upperOspeId = ospeId.toUpperCase();
+      const upperRawId = rawId.toUpperCase();
+
       let baseCase = {};
       if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
-        baseCase = OFFLINE_DATA.cases.find(c => c.caseId === cleanId) || {};
+        baseCase = OFFLINE_DATA.cases.find(c => 
+          c.caseId === cleanId || 
+          c.caseId === ospeId || 
+          c.caseId === rawId || 
+          c.caseId === upperId || 
+          c.caseId === upperOspeId || 
+          c.caseId === upperRawId
+        ) || {};
       }
+
       if (typeof OFFLINE_CASE_DETAILS !== 'undefined') {
         const details = OFFLINE_CASE_DETAILS[cleanId] || 
-                        OFFLINE_CASE_DETAILS[cleanId.toUpperCase()] || 
-                        OFFLINE_CASE_DETAILS[cleanId.toLowerCase()];
+                        OFFLINE_CASE_DETAILS[ospeId] || 
+                        OFFLINE_CASE_DETAILS[rawId] || 
+                        OFFLINE_CASE_DETAILS[upperId] || 
+                        OFFLINE_CASE_DETAILS[upperOspeId] || 
+                        OFFLINE_CASE_DETAILS[upperRawId];
         if (details) {
           return Object.assign({}, baseCase, details);
         }
       }
+
       return Object.keys(baseCase).length > 0 ? baseCase : null;
     }
 
