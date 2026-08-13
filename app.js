@@ -755,13 +755,30 @@ function handleChecklistItemClick(caseId, itemId, itemScore) {
     AppState.checklistProgress[caseId] = [];
   }
   
-  const index = AppState.checklistProgress[caseId].indexOf(itemId);
-  if (index > -1) {
-    // เอาออก (Uncheck)
-    AppState.checklistProgress[caseId].splice(index, 1);
+  const currentChecked = AppState.checklistProgress[caseId];
+  const index = currentChecked.indexOf(itemId);
+  const isChecking = (index === -1);
+  
+  if (isChecking) {
+    currentChecked.push(itemId);
   } else {
-    // ใส่เข้า (Check)
-    AppState.checklistProgress[caseId].push(itemId);
+    currentChecked.splice(index, 1);
+  }
+  
+  // 2-Way Master Sync: If parent checklist item, toggle all following subset items
+  const clickedEl = document.querySelector(`.checklist-item[data-id="${itemId}"]`);
+  if (clickedEl && !clickedEl.classList.contains('is-subset')) {
+    let nextEl = clickedEl.nextElementSibling;
+    while (nextEl && nextEl.classList.contains('is-subset')) {
+      const subId = nextEl.getAttribute('data-id');
+      const subIdx = currentChecked.indexOf(subId);
+      if (isChecking && subIdx === -1) {
+        currentChecked.push(subId);
+      } else if (!isChecking && subIdx > -1) {
+        currentChecked.splice(subIdx, 1);
+      }
+      nextEl = nextEl.nextElementSibling;
+    }
   }
   
   saveChecklistProgress();

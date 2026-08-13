@@ -874,6 +874,19 @@ a {
   color: var(--text-secondary);
 }
 
+/* Subset / Nested Checklist Items */
+.checklist-item.is-subset {
+  margin-left: 1.75rem;
+  border-left: 3px solid var(--primary-light, #94a3b8);
+  background-color: var(--surface);
+  font-size: 0.9rem;
+}
+
+.checklist-item.is-subset:hover {
+  border-left-color: var(--primary);
+  background-color: var(--bg-primary);
+}
+
 /* Progress area */
 .progress-card {
   background-color: var(--bg-secondary);

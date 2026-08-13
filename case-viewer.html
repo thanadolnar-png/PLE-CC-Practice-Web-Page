@@ -659,18 +659,20 @@
           const globalIdx = itemGlobalIndices.get(item) || 0;
           const isChecked = checkedList.includes(item.id);
           const imgHtml = getChecklistItemImage(item, globalIdx, c);
+          const isSubset = item.isSubset || (item.score === 0 && !item.text.startsWith('(')) || item.text.trim().startsWith('- ') || item.text.trim().startsWith('•');
           const el = document.createElement('div');
-          el.className = `checklist-item ${isChecked ? 'checked' : ''}`;
+          el.className = `checklist-item ${isChecked ? 'checked' : ''} ${isSubset ? 'is-subset' : ''}`;
           el.setAttribute('data-id', item.id);
           el.setAttribute('data-score', item.score);
           el.addEventListener('click', () => {
             handleChecklistItemClick(c.caseId, item.id, item.score);
           });
           
+          const scoreDisplay = item.score > 0 ? `<span class="checklist-item-score">(${item.score} คะแนน)</span>` : '';
           el.innerHTML = `
             <div class="checkbox-custom"></div>
             <div style="flex:1; min-width:0;">
-              <span class="checklist-item-score">(${item.score} คะแนน)</span>
+              ${scoreDisplay}
               <span class="checklist-item-text">${item.textHtml || escapeHtml(item.text)}</span>
               ${imgHtml ? `<div class="checklist-item-image" style="margin-top:0.5rem; pointer-events:none;">${imgHtml}</div>` : ''}
             </div>
