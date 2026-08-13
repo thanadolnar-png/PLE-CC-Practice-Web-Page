@@ -28,9 +28,9 @@ const AppState = {
 };
 
 // ──────────────────────────────────────────────────────────────
-// 0. AUTHENTICATION & LOCK SYSTEM (Password: rxcu_ple_cc)
+// 0. AUTHENTICATION & LOCK SYSTEM (Password: rxcu)
 // ──────────────────────────────────────────────────────────────
-const SYSTEM_AUTH_PASS = 'rxcu_ple_cc';
+const SYSTEM_AUTH_PASS = 'rxcu';
 
 function initAuthGuard() {
   const isAuth = localStorage.getItem('ospe_auth_pass') === SYSTEM_AUTH_PASS;

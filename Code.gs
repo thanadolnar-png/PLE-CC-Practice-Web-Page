@@ -16,7 +16,7 @@
 // คอนฟิกหลักของระบบ
 const CONFIG = {
   spreadsheetId: '1Fuakz3nCXa7klgQznrtGUNVRvNp_g9BJRfWNHD0awxI',
-  adminPasscode: 'rxcu_ple_cc', // รหัสผ่านสำหรับป้องกันการ Sync และจัดการระบบใน Google Sheet
+  adminPasscode: 'rxcu', // รหัสผ่านสำหรับป้องกันการ Sync และจัดการระบบใน Google Sheet
   sheets: {
     caseLibrary: 'CaseLibrary',
     mainGroups: 'MainGroups',
