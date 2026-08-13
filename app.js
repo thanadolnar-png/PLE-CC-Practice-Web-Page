@@ -1303,7 +1303,7 @@ function createBatchPrintModalDOM() {
             <div class="print-radio-list">
               <label class="print-radio-label">
                 <input type="radio" name="batch-print-mode" value="full" checked>
-                <span><strong>พิมพ์รวมทั้งหมด (Full Cases)</strong><br><small style="color:var(--text-secondary);">โจทย์ + ข้อมูลผู้ป่วย + Checklist + เฉลย</small></span>
+                <span><strong>พิมพ์รวมทั้งหมด (Full Cases)</strong><br><small style="color:var(--text-secondary);">โจทย์ + ข้อมูลผู้ป่วย + Checklist + เฉลย (แยกคำถามและเฉลยคนละหน้าอัตโนมัติ)</small></span>
               </label>
               <label class="print-radio-label">
                 <input type="radio" name="batch-print-mode" value="question">
@@ -1312,6 +1312,13 @@ function createBatchPrintModalDOM() {
               <label class="print-radio-label">
                 <input type="radio" name="batch-print-mode" value="checklist">
                 <span><strong>พิมพ์เฉพาะ Checklist & เฉลย (Answer Only)</strong><br><small style="color:var(--text-secondary);">เกณฑ์ประเมิน + เฉลย (สำหรับกรรมการผู้ตรวจ)</small></span>
+              </label>
+            </div>
+
+            <div style="margin-top: 0.75rem; border-top: 1px dashed var(--border); padding-top: 0.5rem;">
+              <label class="print-radio-label" style="background: var(--bg-secondary);">
+                <input type="checkbox" id="batch-hide-title">
+                <span>🙈 <strong>ซ่อนชื่อเคส / ชื่อโรคในหัวกระดาษ</strong><br><small style="color:var(--text-secondary);">เพื่อซ่อนชื่อโรค/เฉลย เมื่อนำโจทย์ไปติดหน้าห้องสอบ</small></span>
               </label>
             </div>
           </div>
@@ -1460,6 +1467,22 @@ function executeBatchPrint() {
   const mode = document.querySelector('input[name="batch-print-mode"]:checked')?.value || 'full';
   const orient = document.querySelector('input[name="batch-print-orient"]:checked')?.value || 'portrait';
   const scale = document.getElementById('batch-print-scale')?.value || '100';
+  const hideTitle = document.getElementById('batch-hide-title')?.checked || false;
+
+  // Apply dynamic page print style for landscape/portrait
+  if (typeof applyDynamicPrintStyle === 'function') {
+    applyDynamicPrintStyle(orient);
+  } else {
+    let styleEl = document.getElementById('dynamic-page-print-style');
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = 'dynamic-page-print-style';
+      document.head.appendChild(styleEl);
+    }
+    styleEl.textContent = (orient === 'landscape') ? 
+      '@media print { @page { size: A4 landscape !important; margin: 8mm !important; } }' :
+      '@media print { @page { size: A4 portrait !important; margin: 8mm !important; } }';
+  }
 
   showGlobalLoader(true, `กำลังจัดเตรียมชุดเอกสารสั่งพิมพ์ (${count} เคส)...`);
 
@@ -1486,12 +1509,13 @@ function executeBatchPrint() {
       const caseWrapper = document.createElement('div');
       caseWrapper.className = 'batch-print-case';
       
-      const title = c.title || ('เคส ' + c.caseId);
+      const rawTitle = c.title || ('เคส ' + c.caseId);
+      const displayTitle = hideTitle ? 'สถานีสอบ OSPE (OSPE Station)' : `${rawTitle} (${c.caseId})`;
       const cat = c.category || 'CLINIC';
 
       let html = `<div style="border-bottom: 2px solid #000; padding-bottom: 0.5rem; margin-bottom: 1rem;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <h2 style="margin:0; font-size:1.3rem; font-weight:800; font-family:var(--font-title);">${escapeHtml(title)} (${escapeHtml(c.caseId)})</h2>
+          <h2 style="margin:0; font-size:1.3rem; font-weight:800; font-family:var(--font-title);">${escapeHtml(displayTitle)}</h2>
           <span style="font-weight:700; border:1px solid #000; padding:2px 8px; border-radius:4px; font-size:0.85rem;">หมวด: ${escapeHtml(cat)}</span>
         </div>
       </div>`;
@@ -1518,6 +1542,10 @@ function executeBatchPrint() {
       }
 
       if (mode === 'full' || mode === 'checklist') {
+        if (mode === 'full') {
+          html += `<div class="print-page-break-before" style="page-break-before: always; margin-top: 1rem;"></div>`;
+        }
+
         if (c.checklist && c.checklist.length > 0) {
           let chkTable = `<table class="print-checklist-table" style="width:100%; border-collapse:collapse; margin-top:0.5rem;">
             <thead>
