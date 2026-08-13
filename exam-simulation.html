@@ -299,46 +299,55 @@
             </div>
 
             <!-- Tab Panel 1: Timer & Controls -->
-            <div class="tab-panel" id="panel-timer">
-              <div class="timer-row">
-                <div class="timer-block">
-                  <div class="ring-wrap">
-                    <svg class="ring" viewBox="0 0 100 100">
-                      <circle class="ring-track" cx="50" cy="50" r="44"></circle>
-                      <circle class="ring-progress" id="ringProgress" cx="50" cy="50" r="44"></circle>
-                    </svg>
+            <div class="tab-panel" id="panel-timer" style="padding: 10px 14px;">
+              
+              <!-- 1. Upper Row: Timer Display + Attached Controls + Fuse Strip + Score Chip -->
+              <div class="timer-row" style="margin-bottom: 8px; gap: 10px; align-items: center;">
+                
+                <!-- Left: Timer + Controls + Fuse Bar ("ชนวนระเบิด") -->
+                <div style="display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 260px;">
+                  <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <div class="timer-readout" style="display: flex; align-items: baseline; gap: 8px;">
+                      <span id="exam-timer" style="font-family: var(--font-mono); font-size: 28px; font-weight: 700; line-height: 1; color: var(--text-primary);">04:00</span>
+                      <small id="exam-timer-label" style="font-size: 11px; color: var(--text-muted);">เวลาที่เหลือ · สถานีนี้</small>
+                    </div>
+
+                    <!-- Green Box attached controls right next to timer -->
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      <button class="btn ghost" id="timer-toggle-btn" onclick="toggleTimer()" style="padding: 4px 10px; font-size: 12px;">⏸ พักตัวจับเวลา</button>
+                      <button class="btn outline" onclick="resetTimer()" style="padding: 4px 10px; font-size: 12px;">🔄 เริ่มต้นใหม่</button>
+                    </div>
                   </div>
-                  <div class="timer-readout">
-                    <span id="exam-timer">04:00</span>
-                    <small id="exam-timer-label">เวลาที่เหลือ · สถานีนี้</small>
+
+                  <!-- Fuse/Bomb Progress Bar Strip ("ชนวนระเบิด") -->
+                  <div class="timer-fuse-track" style="width: 100%; height: 5px; background: var(--bg-secondary); border-radius: 3px; overflow: hidden; margin-top: 2px;">
+                    <div id="timer-fuse-fill" style="height: 100%; width: 100%; background: linear-gradient(90deg, var(--primary), #6366f1); border-radius: 3px; transition: width 0.3s linear, background 0.3s ease;"></div>
                   </div>
                 </div>
-                <div class="timer-actions">
-                  <button class="btn ghost" id="timer-toggle-btn" onclick="toggleTimer()">⏸ พักตัวจับเวลา</button>
-                  <button class="btn outline" onclick="resetTimer()">🔄 เริ่มต้นใหม่</button>
-                  <div class="score-chip" id="exam-progress-card">
-                    <span>คะแนน</span>
-                    <strong id="exam-score">0 / 0</strong>
-                    <em id="exam-pct">0%</em>
-                    <div id="exam-bar-fill" class="progress-bar-fill" style="display:none;"></div>
-                  </div>
+
+                <!-- Right: Score Chip -->
+                <div class="score-chip" id="exam-progress-card" style="margin: 0; padding: 5px 10px;">
+                  <span>คะแนน</span>
+                  <strong id="exam-score">0 / 0</strong>
+                  <em id="exam-pct">0%</em>
+                  <div id="exam-bar-fill" class="progress-bar-fill" style="display:none;"></div>
                 </div>
               </div>
 
-              <!-- Blister / Pill Rail -->
-              <div class="rail-wrap" id="minimap-card-el">
-                <button class="rail-nav" id="railPrevBtn" onclick="scrollRail(-1)">‹</button>
-                <div class="rail" id="exam-minimap-grid"></div>
-                <button class="rail-nav" id="railNextBtn" onclick="scrollRail(1)">›</button>
+              <!-- 2. Blister / Pill Rail -->
+              <div class="rail-wrap" id="minimap-card-el" style="margin-bottom: 8px;">
+                <button class="rail-nav" id="railPrevBtn" onclick="scrollRail(-1)" style="height: 34px; width: 24px;">‹</button>
+                <div class="rail" id="exam-minimap-grid" style="padding-bottom: 4px;"></div>
+                <button class="rail-nav" id="railNextBtn" onclick="scrollRail(1)" style="height: 34px; width: 24px;">›</button>
               </div>
 
-              <!-- Control Action Buttons -->
-              <div class="control-actions">
-                <div class="exam-nav" style="display: flex; gap: 8px;">
-                  <button class="btn outline" id="btn-prev-station" onclick="prevStation()">← ก่อนหน้า</button>
-                  <button class="btn primary" id="btn-next-station" onclick="nextStation()">ถัดไป →</button>
+              <!-- 3. Control Action Buttons (Compact inline) -->
+              <div class="control-actions" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                <div class="exam-nav" style="display: flex; gap: 6px;">
+                  <button class="btn outline" id="btn-prev-station" onclick="prevStation()" style="padding: 5px 12px; font-size: 12.5px;">← ก่อนหน้า</button>
+                  <button class="btn primary" id="btn-next-station" onclick="nextStation()" style="padding: 5px 12px; font-size: 12.5px;">ถัดไป →</button>
                 </div>
-                <button class="btn danger" id="btn-finish-exam" onclick="finishExamSimulation()">ส่งข้อสอบ</button>
+                <button class="btn danger" id="btn-finish-exam" onclick="finishExamSimulation()" style="padding: 5px 12px; font-size: 12.5px;">🏁 สิ้นสุดการสอบ</button>
               </div>
             </div>
 
@@ -1420,17 +1429,19 @@
         else if (SimState.timerValue < 60) timerEl.classList.add('warn');
       }
       
-      const ringProgress = document.getElementById('ringProgress');
-      if (ringProgress) {
-        const CIRC = 2 * Math.PI * 44; // 276.46
+      // Update Fuse/Bomb Strip Bar ("ชนวนระเบิด")
+      const fuseFill = document.getElementById('timer-fuse-fill');
+      if (fuseFill) {
         const totalSecs = 240;
         const frac = Math.max(0, Math.min(1, SimState.timerValue / totalSecs));
-        ringProgress.style.strokeDasharray = CIRC;
-        ringProgress.style.strokeDashoffset = CIRC * (1 - frac);
-        if (SimState.timerValue <= 60) {
-          ringProgress.style.stroke = 'var(--warning)';
+        const pct = (frac * 100).toFixed(1);
+        fuseFill.style.width = `${pct}%`;
+        if (SimState.timerValue <= 30) {
+          fuseFill.style.background = 'var(--danger)';
+        } else if (SimState.timerValue <= 60) {
+          fuseFill.style.background = 'var(--warning)';
         } else {
-          ringProgress.style.stroke = 'var(--primary)';
+          fuseFill.style.background = 'linear-gradient(90deg, var(--primary), #6366f1)';
         }
       }
     }
