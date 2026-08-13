@@ -1201,6 +1201,78 @@
       // Apply dynamic print style for landscape/portrait
       applyDynamicPrintStyle(orient);
 
+      let printArea = document.getElementById('single-case-print-execution-area');
+      if (!printArea) {
+        printArea = document.createElement('div');
+        printArea.id = 'single-case-print-execution-area';
+        printArea.className = 'print-only-block';
+        document.body.appendChild(printArea);
+      }
+      printArea.innerHTML = '';
+
+      const c = AppState.currentCaseDetail || {};
+      const cat = c.category || 'CLINIC';
+      const rawTitle = c.title || document.getElementById('case-title-display')?.textContent || 'ข้อสอบ OSPE';
+      const displayTitle = hideTitle ? 'สถานีสอบ OSPE (OSPE Station)' : `${rawTitle} (${c.caseId || activeCaseId || ''})`;
+
+      let html = `<div class="batch-print-case">
+        <div style="border-bottom: 2px solid #000; padding-bottom: 0.5rem; margin-bottom: 1rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 style="margin:0; font-size:1.3rem; font-weight:800; font-family:var(--font-title);">${escapeHtml(displayTitle)}</h2>
+            <span style="font-weight:700; border:1px solid #000; padding:2px 8px; border-radius:4px; font-size:0.85rem;">หมวด: ${escapeHtml(cat)}</span>
+          </div>
+        </div>`;
+
+      if (mode === 'full' || mode === 'question') {
+        html += `<div style="margin-bottom:1.25rem;">
+          <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #3b82f6; padding-left:0.5rem;">📌 สถานการณ์ (Scenario)</h3>
+          <div style="font-size:0.95rem; line-height:1.5;">${c.scenario || document.getElementById('case-scenario-content')?.innerHTML || ''}</div>
+        </div>`;
+
+        const patientHtml = c.patientInfoHtml || document.getElementById('case-patient-content')?.innerHTML || '';
+        if (patientHtml) {
+          html += `<div style="margin-bottom:1.25rem;">
+            <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #06b6d4; padding-left:0.5rem;">👤 ข้อมูลผู้ป่วย (Patient Info)</h3>
+            <div style="font-size:0.95rem; line-height:1.5;">${patientHtml}</div>
+          </div>`;
+        }
+
+        const equipHtml = c.equipmentHtml || document.getElementById('case-equipment-content')?.innerHTML || '';
+        if (equipHtml && equipHtml.trim() !== '') {
+          html += `<div style="margin-bottom:1.25rem;">
+            <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #8b5cf6; padding-left:0.5rem;">📦 สิ่งที่มีให้ในสถานี</h3>
+            <div style="font-size:0.95rem; line-height:1.5;">${equipHtml}</div>
+          </div>`;
+        }
+      }
+
+      if (mode === 'full' || mode === 'checklist') {
+        const pageBreakAttr = (mode === 'full') ? 'class="print-page-break-before" style="page-break-before: always; margin-top: 1.25rem;"' : 'style="margin-top: 1.25rem;"';
+        
+        html += `<div ${pageBreakAttr}>`;
+
+        const printChkHtml = document.getElementById('print-checklist-list')?.innerHTML || '';
+        if (printChkHtml) {
+          html += `<div>
+            <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #10b981; padding-left:0.5rem; page-break-after:avoid;">📋 รายการทักษะประเมิน (Checklist)</h3>
+            <div>${printChkHtml}</div>
+          </div>`;
+        }
+
+        const noteHtml = c.noteHtml || document.getElementById('note-content-area')?.innerHTML || '';
+        if (noteHtml && noteHtml.trim() !== '') {
+          html += `<div style="margin-top:1.25rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem;">
+            <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #f59e0b; padding-left:0.5rem; page-break-after:avoid;">🔑 เฉลย / ข้อมูลผู้ตรวจ (Examiner Notes)</h3>
+            <div style="font-size:0.9rem; line-height:1.5;">${noteHtml}</div>
+          </div>`;
+        }
+
+        html += `</div>`;
+      }
+
+      html += `</div>`;
+      printArea.innerHTML = html;
+
       document.body.classList.remove('print-mode-question', 'print-mode-checklist', 'print-orientation-portrait', 'print-orientation-landscape', 'print-scale-80', 'print-scale-100', 'print-scale-120', 'print-scale-140', 'print-scale-160');
 
       if (mode === 'question') document.body.classList.add('print-mode-question');
@@ -1209,38 +1281,15 @@
       document.body.classList.add('print-orientation-' + orient);
       document.body.classList.add('print-scale-' + scale);
 
-      // Handle Full mode page break between question and checklist
-      const chkWrapper = document.getElementById('print-checklist-wrapper');
-      if (chkWrapper) {
-        if (mode === 'full') {
-          chkWrapper.classList.add('print-page-break-before');
-        } else {
-          chkWrapper.classList.remove('print-page-break-before');
-        }
-      }
-
-      // Hide title if requested
-      const titleDisplay = document.getElementById('case-title-display');
-      const origTitle = titleDisplay ? titleDisplay.dataset.origTitle || titleDisplay.textContent : '';
-      if (titleDisplay) {
-        if (!titleDisplay.dataset.origTitle) titleDisplay.dataset.origTitle = origTitle;
-        if (hideTitle) {
-          titleDisplay.textContent = 'สถานีสอบ OSPE (OSPE Station)';
-        }
-      }
-
       closeSingleCasePrintModal();
 
       setTimeout(() => {
         window.print();
         setTimeout(() => {
           document.body.classList.remove('print-mode-question', 'print-mode-checklist', 'print-orientation-portrait', 'print-orientation-landscape', 'print-scale-80', 'print-scale-100', 'print-scale-120', 'print-scale-140', 'print-scale-160');
-          if (chkWrapper) chkWrapper.classList.remove('print-page-break-before');
-          if (titleDisplay && titleDisplay.dataset.origTitle) {
-            titleDisplay.textContent = titleDisplay.dataset.origTitle;
-          }
+          if (printArea) printArea.innerHTML = '';
         }, 500);
-      }, 150);
+      }, 200);
     }
   </script>
 

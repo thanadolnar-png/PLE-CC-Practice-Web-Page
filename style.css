@@ -2983,50 +2983,54 @@ body.auth-locked > *:not(#auth-gate-overlay) {
 
 .print-radio-label {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.65rem;
   padding: 0.65rem 0.85rem;
-  background: var(--bg-primary);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
   cursor: pointer;
-  font-size: 0.88rem;
-  color: var(--text-primary);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: rgba(0,0,0,0.05);
   transition: all 0.15s ease;
+  min-height: 44px;
 }
 
-.print-radio-label:hover {
+.print-radio-label:hover,
+.print-radio-label:active {
   border-color: var(--primary);
-  background: rgba(99, 102, 241, 0.05);
+  background: var(--bg-secondary);
 }
 
 .print-radio-label input[type="radio"],
 .print-radio-label input[type="checkbox"] {
-  accent-color: var(--primary);
-  width: 1.1rem;
-  height: 1.1rem;
+  margin-top: 0.15rem;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
   cursor: pointer;
 }
 
 .print-preview-container {
-  background: #cbd5e1;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 1.5rem;
-  min-height: 240px;
-  max-height: 380px;
-  overflow-y: auto;
-  border: 1px solid var(--border);
+  max-height: 320px;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
 }
 
 .print-preview-paper {
-  background: white;
-  color: black;
+  background: #ffffff;
+  color: #0f172a;
   padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   border-radius: 4px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-  margin: 0 auto;
-  transition: transform 0.2s ease, width 0.2s ease;
   transform-origin: top center;
+  transition: transform 0.2s ease;
 }
 
 .print-preview-paper.landscape {
@@ -3060,6 +3064,35 @@ body.print-mode-checklist .print-hide-checklist {
 }
 
 @media print {
+  /* Universal Mobile (iOS Safari & Android Chrome) & Desktop Isolation */
+  body > *:not(#single-case-print-execution-area):not(#batch-print-execution-area) {
+    display: none !important;
+  }
+
+  .no-print,
+  .navbar,
+  .hero,
+  .main-section,
+  .footer,
+  .print-modal-overlay,
+  .filter-console,
+  .loader-container,
+  aside, header, nav, footer, iframe {
+    display: none !important;
+  }
+
+  #single-case-print-execution-area,
+  #batch-print-execution-area {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    visibility: visible !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
   h1, h2, h3, h4, .viewer-section-title {
     page-break-after: avoid !important;
     break-after: avoid !important;
