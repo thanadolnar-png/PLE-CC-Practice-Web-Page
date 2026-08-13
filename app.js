@@ -322,12 +322,12 @@ async function loadCasesData() {
  * @param {string} caseId
  * @returns {Promise<object|null>} full case object or null
  */
-async function fetchCaseDetail(caseId) {
+async function fetchCaseDetail(caseId, forceLive = false) {
   if (!caseId) return null;
   const cleanId = caseId.trim();
 
-  // 1. Check local OFFLINE_CASE_DETAILS if loaded (0ms instant resolution)
-  if (typeof OFFLINE_CASE_DETAILS !== 'undefined' && OFFLINE_CASE_DETAILS[cleanId]) {
+  // 1. Check local OFFLINE_CASE_DETAILS if loaded and not forceLive (0ms instant resolution)
+  if (!forceLive && typeof OFFLINE_CASE_DETAILS !== 'undefined' && OFFLINE_CASE_DETAILS[cleanId]) {
     const det = OFFLINE_CASE_DETAILS[cleanId];
     const idx = AppState.cases.findIndex(c => c.caseId && c.caseId.trim() === cleanId);
     if (idx !== -1) {
@@ -337,15 +337,23 @@ async function fetchCaseDetail(caseId) {
     return Object.assign({ caseId: cleanId }, det);
   }
 
-  // 2. Fetch from API
+  // 2. Fetch live from API (Google Apps Script Web App)
   if (!currentApiUrl) return null;
   try {
+    const cb = new Date().getTime();
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s for GAS cold start
-    const res = await fetch(`${currentApiUrl}?action=getCase&id=${encodeURIComponent(cleanId)}`, { signal: controller.signal });
+    const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s for GAS cold start
+    const res = await fetch(`${currentApiUrl}?action=getCase&id=${encodeURIComponent(cleanId)}&_cb=${cb}`, { signal: controller.signal });
     clearTimeout(timeoutId);
     const json = await res.json();
     if (json.success && json.data) {
+      // Update in memory & IndexedDB
+      if (typeof saveCaseToIndexedDB === 'function') {
+        saveCaseToIndexedDB(json.data);
+      }
+      if (typeof OFFLINE_CASE_DETAILS !== 'undefined') {
+        OFFLINE_CASE_DETAILS[cleanId] = json.data;
+      }
       const idx = AppState.cases.findIndex(c => c.caseId && c.caseId.trim() === cleanId);
       if (idx !== -1) {
         AppState.cases[idx] = Object.assign({}, AppState.cases[idx], json.data);
@@ -357,6 +365,67 @@ async function fetchCaseDetail(caseId) {
     console.warn('fetchCaseDetail failed for', cleanId, e);
   }
   return null;
+}
+
+/**
+ * updateCurrentCaseFromDoc — ปุ่มดึงข้อมูลและรูปภาพล่าสุดสดๆ จาก Google Docs (Live Sync)
+ */
+async function updateCurrentCaseFromDoc() {
+  if (!AppState.currentCase || !AppState.currentCase.caseId) {
+    if (typeof showToast === 'function') showToast('❌ ไม่พบรหัสเคสที่จะอัปเดต', 'error');
+    return;
+  }
+  
+  const caseId = AppState.currentCase.caseId;
+  const btnTop = document.getElementById('btn-update-doc-top');
+  const btnAction = document.getElementById('btn-update-doc');
+  
+  const origTopText = btnTop ? btnTop.innerHTML : '';
+  const origActionText = btnAction ? btnAction.innerHTML : '';
+  
+  if (btnTop) {
+    btnTop.disabled = true;
+    btnTop.innerHTML = '⏳ กำลัง Update Data From Google Docs...';
+  }
+  if (btnAction) {
+    btnAction.disabled = true;
+    btnAction.innerHTML = '⏳ กำลัง Update Data From Google Docs...';
+  }
+  
+  if (typeof showToast === 'function') {
+    showToast('⏳ กำลังดึงข้อมูลและรูปภาพล่าสุดจาก Google Docs...', 'info');
+  }
+  
+  try {
+    const updatedCase = await fetchCaseDetail(caseId, true); // forceLive = true
+    if (updatedCase && (updatedCase.contentHtml || updatedCase.scenario || updatedCase.checklist)) {
+      AppState.currentCase = updatedCase;
+      if (typeof renderCaseDetails === 'function') {
+        renderCaseDetails(updatedCase);
+      }
+      if (typeof showToast === 'function') {
+        showToast('✅ Update Data From Google Docs สำเร็จเรียบร้อย!', 'success');
+      }
+    } else {
+      if (typeof showToast === 'function') {
+        showToast('⚠️ ไม่สามารถดึงข้อมูลล่าสุดจาก Google Docs ได้ หรือโครงสร้างไม่ถูกต้อง', 'warning');
+      }
+    }
+  } catch (e) {
+    console.error('Update live case failed:', e);
+    if (typeof showToast === 'function') {
+      showToast('❌ เกิดข้อผิดพลาดในการเชื่อมต่อ Google Docs', 'error');
+    }
+  } finally {
+    if (btnTop) {
+      btnTop.disabled = false;
+      btnTop.innerHTML = origTopText;
+    }
+    if (btnAction) {
+      btnAction.disabled = false;
+      btnAction.innerHTML = origActionText;
+    }
+  }
 }
 
 function onCasesLoaded() {

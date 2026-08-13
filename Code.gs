@@ -599,10 +599,15 @@ function getCaseContentFromDoc(docId, targetCaseId) {
         
         // ถ้าเป็นตารางทั่วไปที่อยู่ในส่วน ข้อมูลผู้ป่วย หรือ เฉลย
         if (recording) {
+          const tableHtml = parseTableToHtml(table);
           if (currentSection === 'PATIENT_INFO') {
-            patientInfoHtml += parseTableToHtml(table);
+            patientInfoHtml += tableHtml;
           } else if (currentSection === 'NOTE') {
-            noteHtml += parseTableToHtml(table);
+            noteHtml += tableHtml;
+          } else if (currentSection === 'EQUIPMENT') {
+            equipmentHtml += tableHtml;
+          } else {
+            contentHtml += tableHtml;
           }
         }
         continue;
