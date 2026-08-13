@@ -1871,35 +1871,49 @@
      * updateSimCurrentCaseFromDoc — ปุ่มดึงข้อมูลสดจาก Google Docs ในระบบซ้อมสอบ
      */
     async function updateSimCurrentCaseFromDoc() {
-      if (typeof SimState === 'undefined' || !SimState.stations || !SimState.stations[SimState.currentStationIndex]) {
+      const idx = SimState.currentIdx;
+      if (typeof SimState === 'undefined' || !SimState.stations || !SimState.stations[idx]) {
         if (typeof showToast === 'function') showToast('❌ ไม่พบเคสสถานีปัจจุบัน', 'error');
         return;
       }
       
-      const currentSt = SimState.stations[SimState.currentStationIndex];
-      const caseId = currentSt.caseId;
+      const currentSt = SimState.stations[idx];
+      // stations[idx].case.caseId (lobby/solo structure)
+      const caseId = (currentSt.case && currentSt.case.caseId) || currentSt.caseId;
+      if (!caseId || caseId === 'REST') {
+        if (typeof showToast === 'function') showToast('⚠️ สถานีนี้เป็นสถานีพักหรือไม่มีเคส', 'warning');
+        return;
+      }
+      
       const btn = document.getElementById('btn-update-sim-doc');
       const origText = btn ? btn.innerHTML : '';
       
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '⏳ กำลัง Update Data From Google Docs...';
+        btn.innerHTML = '⏳ กำลัง Update...';
       }
       
       if (typeof showToast === 'function') showToast('⏳ กำลังดึงข้อมูลและรูปภาพล่าสุดจาก Google Docs...', 'info');
       
       try {
         const updatedCase = await fetchCaseDetail(caseId, true); // forceLive = true
-        if (updatedCase) {
-          SimState.stations[SimState.currentStationIndex] = Object.assign({}, currentSt, updatedCase);
-          if (typeof loadCurrentStationData === 'function') {
-            loadCurrentStationData();
+        if (updatedCase && (updatedCase.contentHtml || updatedCase.scenario || updatedCase.checklist)) {
+          // Merge into the .case sub-object
+          if (currentSt.case) {
+            SimState.stations[idx].case = Object.assign({}, currentSt.case, updatedCase);
+          } else {
+            SimState.stations[idx] = Object.assign({}, currentSt, updatedCase);
           }
-          if (typeof showToast === 'function') showToast('✅ Update Data From Google Docs สำเร็จเรียบร้อย!', 'success');
+          if (typeof renderStation === 'function') {
+            renderStation(idx);
+          }
+          if (typeof showToast === 'function') showToast('✅ Update Data From Google Docs สำเร็จ!', 'success');
+        } else {
+          if (typeof showToast === 'function') showToast('⚠️ ดึงข้อมูลล่าสุดไม่สำเร็จ ลองใหม่อีกครั้ง', 'warning');
         }
       } catch (e) {
         console.error('Update sim station failed:', e);
-        if (typeof showToast === 'function') showToast('❌ เกิดข้อผิดพลาดในการดึงข้อมูลสด', 'error');
+        if (typeof showToast === 'function') showToast('❌ เกิดข้อผิดพลาดในการเชื่อมต่อ Google Docs', 'error');
       } finally {
         if (btn) {
           btn.disabled = false;
