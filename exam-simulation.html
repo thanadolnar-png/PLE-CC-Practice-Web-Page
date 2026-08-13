@@ -283,53 +283,58 @@
           <div id="lobby-countdown-number" style="font-size: 8rem; font-weight: 900; color: var(--primary-light);">3</div>
         </div>
 
-        <!-- Top Timer Banner -->
-        <div class="timer-card" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; margin-bottom: 1rem; overflow: hidden; min-width: 0; background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
-          <div style="text-align: left; display: flex; flex-direction: column; gap: 0.5rem;">
-            <div id="exam-timer-label" style="font-size: 1rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">จับเวลาสถานีสอบ</div>
-            <div class="timer-controls" style="justify-content: flex-start;">
-              <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" id="timer-toggle-btn" onclick="toggleTimer()">⏸️ พักตัวจับเวลา</button>
-              <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="resetTimer()">🔄 เริ่มต้นใหม่</button>
-            </div>
-          </div>
-          <div class="timer-display" id="exam-timer" style="font-size: clamp(3.5rem, 6vw, 5rem); white-space: nowrap; font-weight: 800; line-height: 1; margin: 0;">04:00</div>
-        </div>
-
-        <!-- Top Status & Progress Bar (Contains Score Progress, Minimap, and Navigation) -->
-        <div id="exam-top-status-bar" style="display: grid; grid-template-columns: minmax(200px, 1fr) minmax(260px, 2fr) auto; gap: 1rem; margin-bottom: 1.5rem; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; box-shadow: var(--shadow-sm);">
+        <!-- Sticky Header Container (Timer + Top Status & Progress Bar) -->
+        <div id="exam-sticky-top-header" style="position: sticky; top: 4.5rem; z-index: 99; background: var(--bg); padding-top: 0.5rem; padding-bottom: 0.5rem; margin-bottom: 1rem;">
           
-          <!-- Score Progress Card -->
-          <div class="progress-card" id="exam-progress-card" style="padding: 0.75rem 1rem; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border); margin: 0;">
-            <div class="progress-header" style="font-size: 0.85rem; margin-bottom: 0.4rem; font-weight: 700; display: flex; justify-content: space-between;">
-              <span>คะแนนสถานีปัจจุบัน</span>
-              <span id="exam-pct" style="color: var(--primary); font-weight: 800;">0%</span>
+          <!-- Top Timer Banner -->
+          <div class="timer-card" style="display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1.75rem; margin-bottom: 0.75rem; overflow: hidden; min-width: 0; background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+            <div style="text-align: left; display: flex; flex-direction: column; gap: 0.4rem;">
+              <div id="exam-timer-label" style="font-size: 0.9rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">จับเวลาสถานีสอบ</div>
+              <div class="timer-controls" style="justify-content: flex-start;">
+                <button class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;" id="timer-toggle-btn" onclick="toggleTimer()">⏸️ พักตัวจับเวลา</button>
+                <button class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;" onclick="resetTimer()">🔄 เริ่มต้นใหม่</button>
+              </div>
             </div>
-            <div class="progress-bar-bg" style="height: 8px; margin-bottom: 0.4rem;">
-              <div id="exam-bar-fill" class="progress-bar-fill"></div>
-            </div>
-            <div style="font-size: 0.8rem; display: flex; justify-content: space-between; color: var(--text-secondary);">
-              <span>คะแนน: <strong id="exam-score">0 / 0</strong></span>
-              <span>เกณฑ์ผ่าน 80%</span>
-            </div>
+            <div class="timer-display" id="exam-timer" style="font-size: clamp(2.8rem, 5vw, 4rem); white-space: nowrap; font-weight: 800; line-height: 1; margin: 0;">04:00</div>
           </div>
 
-          <!-- Minimap Card -->
-          <div class="minimap-card" id="minimap-card-el" style="padding: 0.75rem 1rem; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border); margin: 0;">
-            <h4 class="minimap-title" id="minimap-progress-title" style="font-size: 0.85rem; margin-bottom: 0.5rem; font-weight: 700; color: var(--text-primary);">ความคืบหน้าสถานี (0/16)</h4>
-            <div class="minimap-grid" id="exam-minimap-grid">
-              <!-- 16 Squares populated dynamically -->
+          <!-- Top Status & Progress Bar (Contains Score Progress, Minimap, and Navigation) -->
+          <div id="exam-top-status-bar" style="display: grid; grid-template-columns: minmax(200px, 1fr) minmax(260px, 2fr) auto; gap: 1rem; margin-bottom: 0; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 0.75rem 1.25rem; box-shadow: var(--shadow-sm);">
+            
+            <!-- Score Progress Card -->
+            <div class="progress-card" id="exam-progress-card" style="padding: 0.65rem 0.85rem; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border); margin: 0;">
+              <div class="progress-header" style="font-size: 0.85rem; margin-bottom: 0.35rem; font-weight: 700; display: flex; justify-content: space-between;">
+                <span>คะแนนสถานีปัจจุบัน</span>
+                <span id="exam-pct" style="color: var(--primary); font-weight: 800;">0%</span>
+              </div>
+              <div class="progress-bar-bg" style="height: 7px; margin-bottom: 0.35rem;">
+                <div id="exam-bar-fill" class="progress-bar-fill"></div>
+              </div>
+              <div style="font-size: 0.78rem; display: flex; justify-content: space-between; color: var(--text-secondary);">
+                <span>คะแนน: <strong id="exam-score">0 / 0</strong></span>
+                <span>เกณฑ์ผ่าน 80%</span>
+              </div>
             </div>
-          </div>
 
-          <!-- Navigation Controls & Finish -->
-          <div style="display: flex; flex-direction: column; gap: 0.5rem; align-items: stretch; min-width: 170px;">
-            <div class="exam-nav" style="display: flex; gap: 0.5rem; width: 100%;">
-              <button class="btn btn-secondary" onclick="prevStation()" id="btn-prev-station" style="flex: 1; padding: 0.45rem 0.65rem; font-size: 0.85rem;">← ก่อนหน้า</button>
-              <button class="btn btn-primary btn-clinic" onclick="nextStation()" id="btn-next-station" style="flex: 1; padding: 0.45rem 0.65rem; font-size: 0.85rem;">ถัดไป →</button>
+            <!-- Minimap Card -->
+            <div class="minimap-card" id="minimap-card-el" style="padding: 0.65rem 0.85rem; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border); margin: 0;">
+              <h4 class="minimap-title" id="minimap-progress-title" style="font-size: 0.85rem; margin-bottom: 0.4rem; font-weight: 700; color: var(--text-primary);">ความคืบหน้าสถานี (0/16)</h4>
+              <div class="minimap-grid" id="exam-minimap-grid">
+                <!-- 16 Squares populated dynamically -->
+              </div>
             </div>
-            <button class="btn btn-secondary" id="btn-finish-exam" onclick="finishExamSimulation()" style="width: 100%; padding: 0.4rem 0.65rem; font-size: 0.8rem; border-color: var(--danger); color: var(--danger);">
-              🏁 ส่งกระดาษคำตอบ
-            </button>
+
+            <!-- Navigation Controls & Finish -->
+            <div style="display: flex; flex-direction: column; gap: 0.4rem; align-items: stretch; min-width: 170px;">
+              <div class="exam-nav" style="display: flex; gap: 0.4rem; width: 100%;">
+                <button class="btn btn-secondary" onclick="prevStation()" id="btn-prev-station" style="flex: 1; padding: 0.4rem 0.6rem; font-size: 0.85rem;">← ก่อนหน้า</button>
+                <button class="btn btn-primary btn-clinic" onclick="nextStation()" id="btn-next-station" style="flex: 1; padding: 0.4rem 0.6rem; font-size: 0.85rem;">ถัดไป →</button>
+              </div>
+              <button class="btn btn-secondary" id="btn-finish-exam" onclick="finishExamSimulation()" style="width: 100%; padding: 0.35rem 0.6rem; font-size: 0.8rem; border-color: var(--danger); color: var(--danger);">
+                🏁 ส่งกระดาษคำตอบ
+              </button>
+            </div>
+
           </div>
 
         </div>
