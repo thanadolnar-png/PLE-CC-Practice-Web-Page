@@ -1,6 +1,6 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Generated on 2026-08-13 11:51:59
+ * Generated on 2026-08-13 12:04:30
  */
 
 const OFFLINE_DATA = {
@@ -16,6 +16,19 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มดเขียว",
       "createdDate": "02/08/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CL024",
+      "title": "Hypertension  & Dispensing",
+      "category": "Clinic",
+      "mainGroup": "Hypertension",
+      "subTopic": "",
+      "disease": "Hypertension, Drug-Drug Interaction",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
       "isActive": true
     },
     {
@@ -132,7 +145,124 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มีน",
+      "createdDate": "13/7/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CL5910",
+      "title": "ซักประวัติและจ่ายยา",
+      "category": "clinic",
+      "mainGroup": "การส่งมอบยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Asthma & COPD",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ไอ",
+      "createdDate": "01/08/2026 (วันที่เขียน)",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CL5911",
+      "title": "การนับเม็ดยา",
+      "category": "clinic",
+      "mainGroup": "การซักประวัติจ่ายยาผู้ป่วยในร้านยา",
+      "subTopic": "",
+      "disease": "GERD and muscle pain",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ส้มส้ม",
+      "createdDate": "13/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CL5916",
+      "title": "เปิดหนังสือ",
+      "category": "Clinic",
+      "mainGroup": "เปิดหนังสือ",
+      "subTopic": "",
+      "disease": "อันตรกิริยาระหว่าง Warfarin และ Metronidazole",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ไอ",
+      "createdDate": "01/08/2026 (วันที่เขียน)",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CL6002",
+      "title": "การนับเม็ดยา",
+      "category": "Clinic",
+      "mainGroup": "การนับเม็ดยา",
+      "subTopic": "",
+      "disease": "osteoarthritis",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "มีน",
       "createdDate": "13/07/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CL6005",
+      "title": "ซักประวัติและจ่ายยาในร้านยา",
+      "category": "Clinic",
+      "mainGroup": "ตรวจสอบความถูกต้องของยากับใบสั่งยา",
+      "subTopic": "",
+      "disease": "ตรวจสอบความถูกต้องของยากับใบสั่งยา",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "มีน",
+      "createdDate": "16/07/2026 (วันที่เขียน)",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CL6010",
+      "title": "แปลผล lab",
+      "category": "Clinic",
+      "mainGroup": "แปลผล lab ของผู้ป่วย",
+      "subTopic": "",
+      "disease": "Thyroid function test",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "มีน",
+      "createdDate": "16/07/2026 (วันที่เขียน)",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CL6011",
+      "title": "เปิดหนังสือ",
+      "category": "Clinic",
+      "mainGroup": "เปิดหนังสือ",
+      "subTopic": "",
+      "disease": "วัคซีนป้องกันโรคไวรัสตับอักเสบเอชนิดเชื้อตาย (HAVRIX®)",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "มีน",
+      "createdDate": "16/07/2026 (วันที่เขียน)",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CL6014",
+      "title": "ส่งมอบยาเทคนิคพิเศษ",
+      "category": "Clinic",
+      "mainGroup": "จ่ายยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "จ่ายยาเทคนิคพิเศษ",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "มีน",
+      "createdDate": "16/07/2026 (วันที่เขียน)",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CL6016",
+      "title": "ซักประวัติและจ่ายยาในร้านยา",
+      "category": "Clinic",
+      "mainGroup": "ซักประวัติและจ่ายยาในร้านยา",
+      "subTopic": "",
+      "disease": "hypoglycemia จากยาโรคประจำตัว",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "มีน",
+      "createdDate": "16/07/2026 (วันที่เขียน)",
       "isActive": true
     },
     {
@@ -332,15 +462,15 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL6204",
-      "title": "จัดยาพร้อมเขียนฉลากยา",
+      "title": "ซักประวัติและจ่ายยาในร้านยา",
       "category": "Clinic",
-      "mainGroup": "drug labeling",
+      "mainGroup": "การซักประวัติและจ่ายยา",
       "subTopic": "",
-      "disease": "-",
+      "disease": "กรวยไตอักเสบ",
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "บอล",
-      "createdDate": "02/08/2026",
+      "author": "มีน",
+      "createdDate": "13/07/2026 (วันที่เขียน)",
       "isActive": true
     },
     {
