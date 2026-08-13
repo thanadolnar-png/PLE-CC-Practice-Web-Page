@@ -21,7 +21,8 @@ const CONFIG = {
     caseLibrary: 'CaseLibrary',
     mainGroups: 'MainGroups',
     settings: 'Settings',
-    lobbyRooms: 'LobbyRooms'
+    lobbyRooms: 'LobbyRooms',
+    caseReports: 'CaseReports'
   },
   defaultExamRatio: {
     clinic: 8,
@@ -174,6 +175,12 @@ function doGet(e) {
           
         case 'updateRoomStatus':
           return buildResponse(updateRoomStatus(e.parameter.roomId, e.parameter));
+        
+        case 'submitReport':
+          return buildResponse(submitCaseReport(e.parameter));
+          
+        case 'getReports':
+          return buildResponse(getCaseReports(e.parameter));
           
         default:
           return buildResponse({ error: 'Invalid action parameter' }, 400);
@@ -2428,4 +2435,203 @@ function debugCase() {
   Logger.log('checklist count: ' + (result.checklist || []).length);
   Logger.log('scenario: ' + (result.scenario ? result.scenario.substring(0, 100) : 'N/A'));
 }
+
+
+// ══════════════════════════════════════════════════════════════════
+// CASE REPORT SYSTEM
+// ══════════════════════════════════════════════════════════════════
+
+/**
+ * ตั้งค่า Sheet CaseReports พร้อม Headers และ Data Validation Dropdown ที่ Column G
+ * เรียกครั้งเดียวจาก Apps Script Editor (ไม่ต้อง Deploy)
+ */
+function setupReportSheet() {
+  const ss = getSpreadsheet();
+  let sheet = ss.getSheetByName(CONFIG.sheets.caseReports);
+  
+  if (!sheet) {
+    sheet = ss.insertSheet(CONFIG.sheets.caseReports);
+    Logger.log('Created new sheet: CaseReports');
+  }
+  
+  // Set Headers row 1
+  const headers = [
+    'Timestamp', 'ReportID', 'CaseID', 'CaseTitle',
+    'ProblemType', 'Description', 'Status', 'StaffNotes'
+  ];
+  
+  const headerRange = sheet.getRange(1, 1, 1, headers.length);
+  headerRange.setValues([headers]);
+  headerRange.setFontWeight('bold');
+  headerRange.setBackground('#4a90d9');
+  headerRange.setFontColor('#ffffff');
+  
+  // Freeze header row
+  sheet.setFrozenRows(1);
+  
+  // Set column widths
+  sheet.setColumnWidth(1, 160); // Timestamp
+  sheet.setColumnWidth(2, 130); // ReportID
+  sheet.setColumnWidth(3, 130); // CaseID
+  sheet.setColumnWidth(4, 200); // CaseTitle
+  sheet.setColumnWidth(5, 180); // ProblemType
+  sheet.setColumnWidth(6, 350); // Description
+  sheet.setColumnWidth(7, 140); // Status
+  sheet.setColumnWidth(8, 250); // StaffNotes
+  
+  // Set Data Validation Dropdown on Column G (Status) — rows 2 to 1000
+  const statusRange = sheet.getRange(2, 7, 999, 1);
+  const rule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(['ยังไม่แก้ไข', 'กำลังแก้ไข', 'แก้ไขแล้ว'], true)
+    .setAllowInvalid(false)
+    .build();
+  statusRange.setDataValidation(rule);
+  
+  // Pre-fill default status color using conditional formatting
+  const rules = sheet.getConditionalFormatRules();
+  
+  // Red — ยังไม่แก้ไข
+  rules.push(SpreadsheetApp.newConditionalFormatRule()
+    .whenTextEqualTo('ยังไม่แก้ไข')
+    .setBackground('#f4cccc')
+    .setRanges([statusRange])
+    .build());
+  
+  // Yellow — กำลังแก้ไข
+  rules.push(SpreadsheetApp.newConditionalFormatRule()
+    .whenTextEqualTo('กำลังแก้ไข')
+    .setBackground('#fff2cc')
+    .setRanges([statusRange])
+    .build());
+  
+  // Green — แก้ไขแล้ว
+  rules.push(SpreadsheetApp.newConditionalFormatRule()
+    .whenTextEqualTo('แก้ไขแล้ว')
+    .setBackground('#d9ead3')
+    .setRanges([statusRange])
+    .build());
+  
+  sheet.setConditionalFormatRules(rules);
+  
+  Logger.log('setupReportSheet complete ✅');
+  return { success: true, message: 'CaseReports sheet setup complete' };
+}
+
+/**
+ * บันทึก Report ใหม่เข้า CaseReports Sheet
+ * รับ params: caseId, caseTitle, problemType, description
+ */
+function submitCaseReport(params) {
+  try {
+    const ss = getSpreadsheet();
+    let sheet = ss.getSheetByName(CONFIG.sheets.caseReports);
+    
+    // Auto-create sheet if missing
+    if (!sheet) {
+      setupReportSheet();
+      sheet = ss.getSheetByName(CONFIG.sheets.caseReports);
+    }
+    
+    // Validate required fields
+    const caseId = (params.caseId || '').trim();
+    const problemType = (params.problemType || '').trim();
+    const description = (params.description || '').trim();
+    const caseTitle = (params.caseTitle || caseId).trim();
+    
+    if (!caseId || !problemType || !description) {
+      return { success: false, error: 'Missing required fields: caseId, problemType, description' };
+    }
+    
+    // Generate short ReportID: RPT-YYYYMMDD-XXXX
+    const now = new Date();
+    const dateStr = Utilities.formatDate(now, 'Asia/Bangkok', 'yyyyMMdd');
+    const randSuffix = Math.floor(1000 + Math.random() * 9000).toString();
+    const reportId = 'RPT-' + dateStr + '-' + randSuffix;
+    
+    // Timestamp formatted for Thai timezone
+    const timestamp = Utilities.formatDate(now, 'Asia/Bangkok', 'dd/MM/yyyy HH:mm:ss');
+    
+    // Append row
+    sheet.appendRow([
+      timestamp,
+      reportId,
+      caseId,
+      caseTitle,
+      problemType,
+      description,
+      'ยังไม่แก้ไข',
+      ''
+    ]);
+    
+    Logger.log('New report submitted: ' + reportId + ' for case ' + caseId);
+    return {
+      success: true,
+      reportId: reportId,
+      message: 'Report submitted successfully'
+    };
+    
+  } catch (e) {
+    Logger.log('submitCaseReport error: ' + e.toString());
+    return { success: false, error: e.toString() };
+  }
+}
+
+/**
+ * ดึงรายการ Reports ทั้งหมดจาก CaseReports Sheet
+ * รับ params: caseId (optional filter), status (optional filter: ยังไม่แก้ไข/กำลังแก้ไข/แก้ไขแล้ว)
+ */
+function getCaseReports(params) {
+  try {
+    const ss = getSpreadsheet();
+    const sheet = ss.getSheetByName(CONFIG.sheets.caseReports);
+    
+    if (!sheet) {
+      return { reports: [], total: 0 };
+    }
+    
+    const data = sheet.getDataRange().getValues();
+    if (data.length <= 1) {
+      return { reports: [], total: 0 };
+    }
+    
+    // Skip header row
+    const filterCaseId = (params && params.caseId) ? params.caseId.trim() : '';
+    const filterStatus = (params && params.status) ? params.status.trim() : '';
+    
+    const reports = [];
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      // Skip empty rows
+      if (!row[1]) continue;
+      
+      const report = {
+        timestamp:   row[0] ? row[0].toString() : '',
+        reportId:    row[1] ? row[1].toString() : '',
+        caseId:      row[2] ? row[2].toString() : '',
+        caseTitle:   row[3] ? row[3].toString() : '',
+        problemType: row[4] ? row[4].toString() : '',
+        description: row[5] ? row[5].toString() : '',
+        status:      row[6] ? row[6].toString() : 'ยังไม่แก้ไข',
+        staffNotes:  row[7] ? row[7].toString() : ''
+      };
+      
+      // Apply filters
+      if (filterCaseId && report.caseId !== filterCaseId) continue;
+      if (filterStatus && report.status !== filterStatus) continue;
+      
+      reports.push(report);
+    }
+    
+    // Sort: newest first (reverse order since appendRow adds at bottom)
+    reports.reverse();
+    
+    return { reports: reports, total: reports.length };
+    
+  } catch (e) {
+    Logger.log('getCaseReports error: ' + e.toString());
+    return { reports: [], total: 0, error: e.toString() };
+  }
+}
+
+
 

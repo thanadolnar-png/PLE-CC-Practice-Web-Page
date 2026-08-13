@@ -111,6 +111,11 @@
             <button class="btn btn-secondary" style="width: 100%; font-size: 0.85rem; padding: 0.5rem; justify-content: center; border-color: var(--primary); color: var(--primary);" onclick="openBatchPrintModal()">
               🖨️ เครื่องมือสั่งพิมพ์หลายเคส
             </button>
+            
+            <!-- Report Case Button -->
+            <button class="btn-report-case" id="btn-open-report-modal" onclick="openReportModal()">
+              🚨 แจ้งปัญหาเคส
+            </button>
           </div>
         </aside>
 
@@ -147,9 +152,88 @@
           </div>
         </section>
       </div>
+      
+      <!-- Report History Section -->
+      <section class="report-history-section" id="report-history-section">
+        <div class="report-history-header">
+          <h2 class="report-history-title">
+            📋 ประวัติการแจ้งปัญหาเคส
+            <span class="report-history-count-badge" id="report-count-badge">0</span>
+          </h2>
+          <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+            <div class="report-history-filter-group">
+              <button class="report-history-filter-btn active" data-filter="all" onclick="setReportFilter('all')">ทั้งหมด</button>
+              <button class="report-history-filter-btn" data-filter="pending" onclick="setReportFilter('pending')">🔴 รอดำเนินการ</button>
+              <button class="report-history-filter-btn" data-filter="in-progress" onclick="setReportFilter('in-progress')">🟡 กำลังแก้ไข</button>
+              <button class="report-history-filter-btn" data-filter="resolved" onclick="setReportFilter('resolved')">🟢 แก้ไขแล้ว</button>
+            </div>
+            <button class="report-history-toggle-btn" id="report-history-toggle-btn" onclick="toggleReportHistory()">🔽 แสดงประวัติ</button>
+          </div>
+        </div>
+        <!-- Body: hidden by default, populated on toggle -->
+        <div id="report-history-body" style="display:none;">
+          <div class="report-history-empty">
+            <div class="empty-icon">📋</div>
+            <p>คลิก "แสดงประวัติ" เพื่อโหลดรายการ Report</p>
+          </div>
+        </div>
+      </section>
 
     </div>
   </main>
+
+  <!-- Report Modal Overlay -->
+  <div id="report-modal-overlay" class="report-modal-overlay">
+    <div class="report-modal-card">
+      <div class="report-modal-header">
+        <h3>🚨 แจ้งปัญหาเคสสอบ (Report Case)</h3>
+        <button class="report-modal-close" onclick="closeReportModal()" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="report-modal-body">
+        
+        <!-- Case Picker Form Group -->
+        <div class="report-form-group">
+          <label class="report-form-label" for="report-case-search">เลือกเคสที่มีปัญหา<span class="required">*</span></label>
+          <div class="report-case-search-wrapper">
+            <input type="text" id="report-case-search" class="report-case-search-input" placeholder="พิมพ์รหัสเคสหรือชื่อเคสเพื่อค้นหา..." oninput="handleReportCaseSearch(event)">
+            <div id="report-case-dropdown" class="report-case-dropdown">
+              <!-- Filled dynamically by JS -->
+            </div>
+          </div>
+          <div id="report-selected-case-badge" class="report-selected-case-badge">
+            <span>เลือกเคส: </span>
+            <span id="report-selected-case-text"></span>
+            <button type="button" class="report-selected-case-clear" onclick="clearReportCase()">&times;</button>
+          </div>
+        </div>
+
+        <!-- Problem Type Form Group -->
+        <div class="report-form-group">
+          <label class="report-form-label" for="report-problem-type">ประเภทของปัญหา<span class="required">*</span></label>
+          <select id="report-problem-type" class="report-select">
+            <option value="">-- โปรดเลือกประเภทปัญหา --</option>
+            <option value="ข้อมูลเคส/โรคผิดพลาด">ข้อมูลเคส/โจทย์/โรคผิดพลาด</option>
+            <option value="Checklist ผิดพลาด / คะแนนไม่ถูกต้อง">Checklist ผิดพลาด / คะแนนไม่ถูกต้อง</option>
+            <option value="ภาพประกอบหาย / โหลดไม่ขึ้น">ภาพประกอบหาย / โหลดไม่ขึ้น</option>
+            <option value="เฉลยหรือข้อมูลผู้ตรวจไม่ครบ">เฉลยหรือข้อมูลผู้ตรวจไม่ครบ</option>
+            <option value="ข้อผิดพลาดในเนื้อหา (พิมพ์ผิด)">ข้อผิดพลาดในเนื้อหา (พิมพ์ผิด, คำผิด)</option>
+            <option value="อื่นๆ">อื่นๆ</option>
+          </select>
+        </div>
+
+        <!-- Problem Description Form Group -->
+        <div class="report-form-group">
+          <label class="report-form-label" for="report-description">รายละเอียดปัญหา<span class="required">*</span></label>
+          <textarea id="report-description" class="report-textarea" placeholder="โปรดเขียนรายละเอียดปัญหาที่ต้องการให้แก้ไข (เช่น 'Checklist ข้อ 3 คะแนนควรเป็น 0.5 ไม่ใช่ 1 คะแนน' หรือ 'รูปยาไม่แสดงผล'...)"></textarea>
+        </div>
+
+      </div>
+      <div class="report-modal-footer">
+        <button class="report-cancel-btn" onclick="closeReportModal()">ยกเลิก</button>
+        <button class="report-submit-btn" id="report-submit-btn" onclick="submitCaseReport()">🚨 ส่ง Report</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Footer -->
   <footer class="footer" id="main-footer" style="margin-top: 3rem; padding: 1.5rem 0; border-top: 1px solid var(--border); text-align: center; color: var(--text-muted); font-size: 0.85rem;">
@@ -175,7 +259,7 @@
       });
     }
 
-    // ดึง URL Parameter ถ้าต้องการฟิลเตอร์หมวดมาจากหน้าแรก
+    // ดึง URL Parameter ถ้าต้องการฟิลเตอร์หมวดมาจากหน้าแรก หรือต้องการแสดง Report Modal ทันที
     document.addEventListener('DOMContentLoaded', () => {
       const catParam = getUrlParam('cat');
       if (catParam) {
@@ -189,6 +273,14 @@
             renderCaseList();
           }, 350);
         }
+      }
+
+      // เปิด Report Modal อัตโนมัติ หากมี parameter ?report=CASE_ID
+      const reportParam = getUrlParam('report');
+      if (reportParam) {
+        setTimeout(() => {
+          openReportModal(reportParam);
+        }, 1500);
       }
     });
   </script>

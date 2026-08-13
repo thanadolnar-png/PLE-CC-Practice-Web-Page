@@ -147,6 +147,10 @@
 
       <!-- Header Information -->
       <header class="viewer-header">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem;" class="no-print">
+          <a href="case-library.html" class="back-link" id="back-to-library-link">← กลับไปคลังเคสสอบ</a>
+          <a href="#" class="back-link" id="report-case-direct-link" style="color: #e53e3e; font-weight: 600;" onclick="goToReportCase(event)">🚨 แจ้งปัญหาเคสนี้</a>
+        </div>
         <h1 class="viewer-title" id="case-title">โหลดชื่อเคส...</h1>
         <div class="viewer-meta-tags no-print" id="case-meta-tags">
           <!-- Filled dynamically by JS -->
@@ -319,6 +323,11 @@
     let viewerTimerVal = 240;
     let viewerTimerInterval = null;
     let viewerTimerRunning = false;
+
+    function goToReportCase(event) {
+      if (event) event.preventDefault();
+      window.location.href = `case-library.html?report=${encodeURIComponent(activeCaseId)}`;
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
       if (activeCaseId) {
@@ -662,6 +671,11 @@
           const imgHtml = getChecklistItemImage(item, globalIdx, c);
           
           const prevItem = itemIdx > 0 ? groups[groupName][itemIdx - 1] : null;
+          // Reset subset sequence when an explicitly-non-subset item is encountered from the DB
+          if (item.isSubset === false && isCurrentSubsetSequence) {
+            isCurrentSubsetSequence = false;
+          }
+          // Set if previous item was a trigger phrase header
           if (prevItem && (prevItem.text.includes('หัวข้อล่าง') || prevItem.text.includes('ดังต่อไปนี้') || prevItem.text.includes('เลือกตอบ'))) {
             isCurrentSubsetSequence = true;
           }

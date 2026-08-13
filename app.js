@@ -795,7 +795,8 @@ function updateChecklistUI(caseId) {
   
   items.forEach(el => {
     const itemId = el.getAttribute('data-id');
-    const score = parseFloat(el.getAttribute('data-score')) || 1.0;
+    const rawScore = parseFloat(el.getAttribute('data-score'));
+    const score = isNaN(rawScore) ? 1.0 : rawScore;
     const isSubset = el.classList.contains('is-subset');
     
     if (!isSubset) {
@@ -1073,6 +1074,27 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
+
+  // Report System Event Listeners: Close dropdown or modal when clicking outside
+  document.addEventListener('click', function(e) {
+    const dropdown = document.getElementById('report-case-dropdown');
+    const searchInput = document.getElementById('report-case-search');
+    if (dropdown && dropdown.classList.contains('show') && !dropdown.contains(e.target) && e.target !== searchInput) {
+      dropdown.classList.remove('show');
+    }
+    
+    const overlay = document.getElementById('report-modal-overlay');
+    if (overlay && overlay.classList.contains('show') && e.target === overlay) {
+      closeReportModal();
+    }
+  });
+
+  // Pre-load report history (badge count/data) on startup if on case-library page
+  if (document.getElementById('report-history-section')) {
+    setTimeout(() => {
+      loadReportHistory();
+    }, 1200);
+  }
 });
 
 function openLightbox(src) {
@@ -1763,4 +1785,384 @@ function triggerNativePrint(orient, scale, mode, printAreaId, onDone) {
 }
 
 
+// ──────────────────────────────────────────────────────────────
+// CASE REPORT SYSTEM
+// ──────────────────────────────────────────────────────────────
+
+// State for the report system
+const ReportState = {
+  selectedCaseId: '',
+  selectedCaseTitle: '',
+  allReports: [],
+  activeFilter: 'all'  // 'all' | 'pending' | 'in-progress' | 'resolved'
+};
+
+/**
+ * Open the report modal, optionally pre-select a case by caseId
+ */
+function openReportModal(preselectedCaseId = '') {
+  const overlay = document.getElementById('report-modal-overlay');
+  if (!overlay) return;
+
+  // Reset form
+  const searchInput = document.getElementById('report-case-search');
+  const problemSelect = document.getElementById('report-problem-type');
+  const descTextarea = document.getElementById('report-description');
+  const badge = document.getElementById('report-selected-case-badge');
+  const badgeText = document.getElementById('report-selected-case-text');
+
+  if (searchInput) searchInput.value = '';
+  if (problemSelect) problemSelect.value = '';
+  if (descTextarea) descTextarea.value = '';
+  
+  ReportState.selectedCaseId = '';
+  ReportState.selectedCaseTitle = '';
+
+  // Pre-select case if provided
+  if (preselectedCaseId && AppState.cases) {
+    const found = AppState.cases.find(c => c.caseId === preselectedCaseId);
+    if (found) {
+      ReportState.selectedCaseId = found.caseId;
+      ReportState.selectedCaseTitle = found.title || found.caseId;
+      if (searchInput) searchInput.value = `${found.caseId} — ${found.title || ''}`;
+      if (badge) badge.classList.add('show');
+      if (badgeText) badgeText.innerHTML = `<strong>${found.caseId}</strong> ${found.title || ''}`;
+    }
+  } else {
+    if (badge) badge.classList.remove('show');
+  }
+
+  overlay.classList.add('show');
+  setTimeout(() => { if (searchInput) searchInput.focus(); }, 200);
+}
+
+/**
+ * Close the report modal
+ */
+function closeReportModal() {
+  const overlay = document.getElementById('report-modal-overlay');
+  if (overlay) overlay.classList.remove('show');
+  const dropdown = document.getElementById('report-case-dropdown');
+  if (dropdown) dropdown.classList.remove('show');
+}
+
+/**
+ * Handle case search input inside report modal — filter & show dropdown
+ */
+function handleReportCaseSearch(event) {
+  const query = event.target.value.trim().toLowerCase();
+  const dropdown = document.getElementById('report-case-dropdown');
+  if (!dropdown) return;
+
+  if (!query) {
+    dropdown.classList.remove('show');
+    ReportState.selectedCaseId = '';
+    ReportState.selectedCaseTitle = '';
+    const badge = document.getElementById('report-selected-case-badge');
+    if (badge) badge.classList.remove('show');
+    return;
+  }
+
+  const cases = AppState.cases || [];
+  const matched = cases.filter(c =>
+    c.caseId.toLowerCase().includes(query) ||
+    (c.title || '').toLowerCase().includes(query) ||
+    (c.disease || '').toLowerCase().includes(query)
+  ).slice(0, 12);
+
+  if (matched.length === 0) {
+    dropdown.innerHTML = `<div class="report-case-option" style="color:var(--text-muted);">ไม่พบเคส</div>`;
+  } else {
+    dropdown.innerHTML = matched.map(c => `
+      <div class="report-case-option" onclick="selectReportCase('${c.caseId}', '${(c.title || '').replace(/'/g, "\\'")}')">
+        <span class="opt-id">${c.caseId}</span>
+        <span class="opt-title">${c.title || ''}</span>
+      </div>
+    `).join('');
+  }
+  dropdown.classList.add('show');
+}
+
+/**
+ * Select a case from the dropdown
+ */
+function selectReportCase(caseId, caseTitle) {
+  ReportState.selectedCaseId = caseId;
+  ReportState.selectedCaseTitle = caseTitle;
+
+  const searchInput = document.getElementById('report-case-search');
+  if (searchInput) searchInput.value = `${caseId} — ${caseTitle}`;
+
+  const dropdown = document.getElementById('report-case-dropdown');
+  if (dropdown) dropdown.classList.remove('show');
+
+  const badge = document.getElementById('report-selected-case-badge');
+  const badgeText = document.getElementById('report-selected-case-text');
+  if (badge) badge.classList.add('show');
+  if (badgeText) badgeText.innerHTML = `<strong>${caseId}</strong> ${caseTitle}`;
+}
+
+/**
+ * Clear selected case in report modal
+ */
+function clearReportCase() {
+  ReportState.selectedCaseId = '';
+  ReportState.selectedCaseTitle = '';
+  const searchInput = document.getElementById('report-case-search');
+  if (searchInput) { searchInput.value = ''; searchInput.focus(); }
+  const badge = document.getElementById('report-selected-case-badge');
+  if (badge) badge.classList.remove('show');
+}
+
+/**
+ * Submit the report form to Apps Script
+ */
+async function submitCaseReport() {
+  const problemSelect = document.getElementById('report-problem-type');
+  const descTextarea = document.getElementById('report-description');
+  const submitBtn = document.getElementById('report-submit-btn');
+
+  const caseId = ReportState.selectedCaseId;
+  const caseTitle = ReportState.selectedCaseTitle;
+  const problemType = problemSelect ? problemSelect.value.trim() : '';
+  const description = descTextarea ? descTextarea.value.trim() : '';
+
+  // Validate
+  if (!caseId) {
+    showReportToast('⚠️ กรุณาเลือกเคสก่อน', true);
+    const searchInput = document.getElementById('report-case-search');
+    if (searchInput) searchInput.focus();
+    return;
+  }
+  if (!problemType) {
+    showReportToast('⚠️ กรุณาเลือกประเภทปัญหา', true);
+    if (problemSelect) problemSelect.focus();
+    return;
+  }
+  if (!description || description.length < 5) {
+    showReportToast('⚠️ กรุณาอธิบายปัญหาให้ละเอียดขึ้น', true);
+    if (descTextarea) descTextarea.focus();
+    return;
+  }
+
+  // Disable button during submission
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'กำลังส่ง...';
+  }
+
+  try {
+    const params = new URLSearchParams({
+      action: 'submitReport',
+      caseId: caseId,
+      caseTitle: caseTitle,
+      problemType: problemType,
+      description: description
+    });
+    
+    const res = await fetch(`${currentApiUrl}?${params.toString()}`, {
+      signal: AbortSignal.timeout(15000)
+    });
+    const json = await res.json();
+    
+    if (json && json.data && json.data.success) {
+      closeReportModal();
+      showReportToast(`✅ ส่ง Report สำเร็จ! (${json.data.reportId})`);
+      // Reload history after short delay
+      setTimeout(() => loadReportHistory(), 1000);
+    } else {
+      const errMsg = (json && json.data && json.data.error) ? json.data.error : 'Unknown error';
+      showReportToast(`❌ ส่งไม่สำเร็จ: ${errMsg}`, true);
+    }
+  } catch (e) {
+    showReportToast('❌ ไม่สามารถเชื่อมต่อ API ได้ กรุณาลองใหม่', true);
+    console.error('submitCaseReport error:', e);
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '🚨 ส่ง Report';
+    }
+  }
+}
+
+/**
+ * Load report history from Apps Script and render it
+ */
+async function loadReportHistory() {
+  const container = document.getElementById('report-history-body');
+  if (!container) return;
+  
+  // Show loading state
+  container.innerHTML = `
+    <div class="report-history-loading">
+      <div class="report-history-spinner"></div>
+      <span>กำลังโหลดประวัติ Report...</span>
+    </div>
+  `;
+
+  try {
+    const res = await fetch(`${currentApiUrl}?action=getReports`, {
+      signal: AbortSignal.timeout(15000)
+    });
+    const json = await res.json();
+    
+    if (json && json.data && json.data.reports) {
+      ReportState.allReports = json.data.reports;
+    } else {
+      ReportState.allReports = [];
+    }
+  } catch (e) {
+    ReportState.allReports = [];
+    console.warn('loadReportHistory: API unavailable');
+  }
+  
+  renderReportHistory();
+  updateReportCountBadge();
+}
+
+/**
+ * Get status display info for a report
+ */
+function getReportStatusInfo(status) {
+  switch (status) {
+    case 'กำลังแก้ไข':
+      return { cls: 'status-in-progress', icon: '🟡', label: 'กำลังแก้ไข' };
+    case 'แก้ไขแล้ว':
+      return { cls: 'status-resolved', icon: '🟢', label: 'แก้ไขแล้ว' };
+    default:
+      return { cls: 'status-pending', icon: '🔴', label: 'ยังไม่แก้ไข' };
+  }
+}
+
+/**
+ * Render the report history table based on current filter
+ */
+function renderReportHistory() {
+  const container = document.getElementById('report-history-body');
+  if (!container) return;
+  
+  const filter = ReportState.activeFilter;
+  let reports = ReportState.allReports;
+  
+  if (filter === 'pending') {
+    reports = reports.filter(r => r.status === 'ยังไม่แก้ไข');
+  } else if (filter === 'in-progress') {
+    reports = reports.filter(r => r.status === 'กำลังแก้ไข');
+  } else if (filter === 'resolved') {
+    reports = reports.filter(r => r.status === 'แก้ไขแล้ว');
+  }
+  
+  if (reports.length === 0) {
+    container.innerHTML = `
+      <div class="report-history-empty">
+        <div class="empty-icon">📋</div>
+        <p>${ReportState.allReports.length === 0 ? 'ยังไม่มี Report ใด ๆ ในระบบ' : 'ไม่มี Report ที่ตรงกับตัวกรองนี้'}</p>
+      </div>
+    `;
+    return;
+  }
+  
+  const rows = reports.map(r => {
+    const statusInfo = getReportStatusInfo(r.status);
+    const caseLink = `<a href="case-viewer.html?id=${r.caseId}" class="report-case-id-link">${r.caseId}</a>`;
+    const caseTitle = r.caseTitle ? `<div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">${r.caseTitle}</div>` : '';
+    const staffNotes = r.staffNotes
+      ? `<span class="report-staff-notes-cell">${r.staffNotes}</span>`
+      : `<span style="color:var(--text-muted);font-size:0.78rem;">—</span>`;
+    
+    return `
+      <tr>
+        <td><span class="report-timestamp">${r.timestamp}</span></td>
+        <td>${caseLink}${caseTitle}</td>
+        <td><span class="report-problem-type">${r.problemType}</span></td>
+        <td class="report-description-cell">${r.description}</td>
+        <td><span class="report-status-badge ${statusInfo.cls}">${statusInfo.icon} ${statusInfo.label}</span></td>
+        <td>${staffNotes}</td>
+      </tr>
+    `;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="report-history-table-wrapper">
+      <table class="report-history-table">
+        <thead>
+          <tr>
+            <th>วันที่</th>
+            <th>เคส</th>
+            <th>ประเภทปัญหา</th>
+            <th>รายละเอียด</th>
+            <th>สถานะ</th>
+            <th>หมายเหตุสตาฟ</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+/**
+ * Set the active filter for report history
+ */
+function setReportFilter(filter) {
+  ReportState.activeFilter = filter;
+  
+  // Update active button
+  document.querySelectorAll('.report-history-filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+  
+  renderReportHistory();
+}
+
+/**
+ * Toggle report history section visibility
+ */
+function toggleReportHistory() {
+  const body = document.getElementById('report-history-body');
+  const toggleBtn = document.getElementById('report-history-toggle-btn');
+  if (!body || !toggleBtn) return;
+  
+  const isHidden = body.style.display === 'none';
+  body.style.display = isHidden ? '' : 'none';
+  toggleBtn.textContent = isHidden ? '🔼 ซ่อนประวัติ' : '🔽 แสดงประวัติ';
+  
+  // Load on first open
+  if (isHidden && ReportState.allReports.length === 0) {
+    loadReportHistory();
+  }
+}
+
+/**
+ * Update the count badge in the report history section header
+ */
+function updateReportCountBadge() {
+  const badge = document.getElementById('report-count-badge');
+  if (!badge) return;
+  const pending = ReportState.allReports.filter(r => r.status !== 'แก้ไขแล้ว').length;
+  badge.textContent = ReportState.allReports.length;
+  badge.style.background = pending > 0 ? '#e53e3e' : '#2f855a';
+}
+
+/**
+ * Show a toast notification
+ */
+function showReportToast(message, isError = false) {
+  let toast = document.getElementById('report-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'report-toast';
+    toast.className = 'report-toast';
+    document.body.appendChild(toast);
+  }
+  
+  toast.textContent = message;
+  toast.className = `report-toast ${isError ? 'error-toast' : ''}`;
+  
+  // Force reflow then show
+  void toast.offsetHeight;
+  toast.classList.add('show');
+  
+  setTimeout(() => { toast.classList.remove('show'); }, 3500);
+}
 
