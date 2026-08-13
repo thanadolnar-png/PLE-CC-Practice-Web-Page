@@ -1202,6 +1202,8 @@ async function loadOfflineDetailsWithProgress() {
     
     mergeOfflineDetails();
     clearTimeout(showOverlayTimeout);
+    mergeOfflineDetails();
+    clearTimeout(showOverlayTimeout);
     hideSplashOverlay();
   } catch (err) {
     console.warn('[Database Preloader] IndexedDB cache load failed. Falling back to static script:', err);
@@ -1232,6 +1234,337 @@ function mergeOfflineDetails() {
     });
     console.log('[Database Preloader] Merged offline details into AppState.');
   }
+}
+
+// ─── Batch Multi-Case Print System ──────────────────────────────────
+let selectedBatchCaseIds = new Set();
+
+function openBatchPrintModal() {
+  let modal = document.getElementById('batch-print-modal');
+  if (!modal) {
+    createBatchPrintModalDOM();
+    modal = document.getElementById('batch-print-modal');
+  }
+  if (modal) {
+    modal.style.display = 'flex';
+    renderBatchCaseSelectionList();
+  }
+}
+
+function closeBatchPrintModal() {
+  const modal = document.getElementById('batch-print-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function createBatchPrintModalDOM() {
+  const div = document.createElement('div');
+  div.id = 'batch-print-modal';
+  div.className = 'print-modal-overlay no-print';
+  div.style.display = 'none';
+  div.innerHTML = `
+    <div class="print-modal-card" style="max-width: 1040px;">
+      <div class="print-modal-header">
+        <h3 style="margin: 0; font-family: var(--font-title); font-size: 1.15rem; display: flex; align-items: center; gap: 0.5rem;">
+          🖨️ เครื่องมือสั่งพิมพ์หลายเคสพร้อมกัน (Batch Print Tools)
+        </h3>
+        <button class="btn btn-secondary" onclick="closeBatchPrintModal()" style="padding: 4px 10px; font-size: 0.85rem;">✕ ปิด</button>
+      </div>
+
+      <div class="print-modal-body">
+        <div class="print-options-grid">
+          <!-- 1. Selection & Filter -->
+          <div class="print-option-group" style="grid-column: span 2;">
+            <div class="print-option-title" style="justify-content: space-between;">
+              <span>📦 1. เลือกเคสข้อสอบที่ต้องการพิมพ์</span>
+              <span id="batch-selected-count-badge" style="font-size: 0.82rem; font-weight: 700; background: var(--primary); color: white; padding: 2px 8px; border-radius: 12px;">เลือกแล้ว 0 เคส</span>
+            </div>
+
+            <div style="display: flex; gap: 0.75rem; margin-bottom: 0.85rem; flex-wrap: wrap;">
+              <input type="text" id="batch-search-input" class="form-control" placeholder="🔍 ค้นหาชื่อเคส, ตัวยา, โรค..." style="flex: 2; min-width: 200px; padding: 0.45rem 0.75rem; font-size: 0.88rem;" oninput="renderBatchCaseSelectionList()">
+              <select id="batch-cat-select" class="form-control" style="flex: 1; min-width: 130px; padding: 0.45rem 0.75rem; font-size: 0.88rem;" onchange="renderBatchCaseSelectionList()">
+                <option value="All">ทุกหมวด (All Category)</option>
+                <option value="Clinic">Clinic (คลินิก)</option>
+                <option value="Product">Product (ผลิต)</option>
+                <option value="SAP">SAP (สังคมฯ)</option>
+              </select>
+              <button class="btn btn-secondary" onclick="selectAllBatchCases(true)" style="padding: 4px 10px; font-size: 0.82rem;">☑️ เลือกทั้งหมด</button>
+              <button class="btn btn-secondary" onclick="selectAllBatchCases(false)" style="padding: 4px 10px; font-size: 0.82rem;">☐ ล้างทั้งหมด</button>
+            </div>
+
+            <!-- Scrollable Case Checkbox Rail -->
+            <div id="batch-case-checkbox-list" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.5rem; background: var(--bg-primary); display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.4rem;">
+              <!-- Filled dynamically by JS -->
+            </div>
+          </div>
+
+          <!-- 2. Print Content Options -->
+          <div class="print-option-group">
+            <div class="print-option-title">📑 2. เลือกรูปแบบเนื้อหา</div>
+            <div class="print-radio-list">
+              <label class="print-radio-label">
+                <input type="radio" name="batch-print-mode" value="full" checked>
+                <span><strong>พิมพ์รวมทั้งหมด (Full Cases)</strong><br><small style="color:var(--text-secondary);">โจทย์ + ข้อมูลผู้ป่วย + Checklist + เฉลย</small></span>
+              </label>
+              <label class="print-radio-label">
+                <input type="radio" name="batch-print-mode" value="question">
+                <span><strong>พิมพ์เฉพาะโจทย์ / คำถาม (Question Only)</strong><br><small style="color:var(--text-secondary);">โจทย์ + สิ่งที่มีให้ (สำหรับแปะหน้าห้องสอบ)</small></span>
+              </label>
+              <label class="print-radio-label">
+                <input type="radio" name="batch-print-mode" value="checklist">
+                <span><strong>พิมพ์เฉพาะ Checklist & เฉลย (Answer Only)</strong><br><small style="color:var(--text-secondary);">เกณฑ์ประเมิน + เฉลย (สำหรับกรรมการผู้ตรวจ)</small></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 3. Orientation & Scale -->
+          <div class="print-option-group">
+            <div class="print-option-title">📐 3. ทิศทาง & ขนาดตัวหนังสือ</div>
+            <div style="margin-bottom: 0.85rem;">
+              <label style="font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 0.3rem;">ทิศทางกระดาษ:</label>
+              <div style="display: flex; gap: 0.5rem;">
+                <label class="print-radio-label" style="flex:1; padding:0.4rem 0.6rem;">
+                  <input type="radio" name="batch-print-orient" value="portrait" checked>
+                  <span>📄 แนวตั้ง</span>
+                </label>
+                <label class="print-radio-label" style="flex:1; padding:0.4rem 0.6rem;">
+                  <input type="radio" name="batch-print-orient" value="landscape">
+                  <span>🖼️ แนวนอน</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label style="font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 0.3rem;">ขนาดตัวหนังสือ (Scale Zoom):</label>
+              <select id="batch-print-scale" class="form-control" style="width:100%; padding:0.45rem; font-size:0.88rem;">
+                <option value="80">80% (กระทัดรัด - ประหยัดกระดาษ)</option>
+                <option value="100" selected>100% (ขนาดมาตรฐาน)</option>
+                <option value="120">120% (ตัวใหญ่ อ่านง่าย)</option>
+                <option value="140">140% (ตัวใหญ่พิเศษ - สำหรับแปะหน้าห้องสอบ)</option>
+                <option value="160">160% (ยักษ์ใหญ่)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding: 1rem 1.5rem; background: var(--bg-secondary); border-top: 1px solid var(--border); display: flex; gap: 1rem; justify-content: flex-end; align-items: center;">
+        <button class="btn btn-secondary" onclick="closeBatchPrintModal()">ยกเลิก</button>
+        <button class="btn btn-primary" onclick="executeBatchPrint()" style="padding: 0.6rem 1.5rem; font-size: 1rem; background: linear-gradient(135deg, var(--primary), #4338ca);">
+          🖨️ เริ่มสั่งพิมพ์ทุกเคสที่เลือก (Batch Print)
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(div);
+}
+
+function renderBatchCaseSelectionList() {
+  const container = document.getElementById('batch-case-checkbox-list');
+  if (!container) return;
+
+  const search = (document.getElementById('batch-search-input')?.value || '').toLowerCase().trim();
+  const cat = document.getElementById('batch-cat-select')?.value || 'All';
+
+  const allCases = AppState.cases || [];
+  const filtered = allCases.filter(c => {
+    const matchCat = cat === 'All' || (c.category || '').toLowerCase() === cat.toLowerCase();
+    const matchSearch = !search || 
+      (c.caseId || '').toLowerCase().includes(search) || 
+      (c.title || '').toLowerCase().includes(search) || 
+      (c.disease || '').toLowerCase().includes(search);
+    return matchCat && matchSearch;
+  });
+
+  container.innerHTML = '';
+  if (filtered.length === 0) {
+    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 1rem;">ไม่พบเคสที่ตรงกับเงื่อนไข</div>';
+    return;
+  }
+
+  filtered.forEach(c => {
+    const isChecked = selectedBatchCaseIds.has(c.caseId);
+    const label = document.createElement('label');
+    label.className = 'print-radio-label';
+    label.style.padding = '0.4rem 0.6rem';
+    label.style.fontSize = '0.82rem';
+    label.style.whiteSpace = 'nowrap';
+    label.style.overflow = 'hidden';
+    label.style.textOverflow = 'ellipsis';
+    
+    label.innerHTML = `
+      <input type="checkbox" value="${escapeHtml(c.caseId)}" ${isChecked ? 'checked' : ''} onchange="toggleBatchCaseSelection('${escapeHtml(c.caseId)}', this.checked)">
+      <span title="${escapeHtml(c.title || c.caseId)}"><strong>${escapeHtml(c.caseId)}</strong> - ${escapeHtml(c.title || '')}</span>
+    `;
+    container.appendChild(label);
+  });
+
+  updateBatchSelectedCountBadge();
+}
+
+function toggleBatchCaseSelection(caseId, isChecked) {
+  if (isChecked) selectedBatchCaseIds.add(caseId);
+  else selectedBatchCaseIds.delete(caseId);
+  updateBatchSelectedCountBadge();
+}
+
+function selectAllBatchCases(select) {
+  const search = (document.getElementById('batch-search-input')?.value || '').toLowerCase().trim();
+  const cat = document.getElementById('batch-cat-select')?.value || 'All';
+  const allCases = AppState.cases || [];
+
+  allCases.forEach(c => {
+    const matchCat = cat === 'All' || (c.category || '').toLowerCase() === cat.toLowerCase();
+    const matchSearch = !search || 
+      (c.caseId || '').toLowerCase().includes(search) || 
+      (c.title || '').toLowerCase().includes(search) || 
+      (c.disease || '').toLowerCase().includes(search);
+    if (matchCat && matchSearch) {
+      if (select) selectedBatchCaseIds.add(c.caseId);
+      else selectedBatchCaseIds.delete(c.caseId);
+    }
+  });
+
+  renderBatchCaseSelectionList();
+}
+
+function updateBatchSelectedCountBadge() {
+  const badge = document.getElementById('batch-selected-count-badge');
+  if (badge) {
+    badge.textContent = `เลือกแล้ว ${selectedBatchCaseIds.size} เคส`;
+  }
+}
+
+function executeBatchPrint() {
+  if (selectedBatchCaseIds.size === 0) {
+    alert('กรุณาเลือกอย่างน้อย 1 เคสเพื่อทำการสั่งพิมพ์');
+    return;
+  }
+
+  const mode = document.querySelector('input[name="batch-print-mode"]:checked')?.value || 'full';
+  const orient = document.querySelector('input[name="batch-print-orient"]:checked')?.value || 'portrait';
+  const scale = document.getElementById('batch-print-scale')?.value || '100';
+
+  showGlobalLoader(true, 'กำลังเตรียมชุดเอกสารสำหรับสั่งพิมพ์...');
+
+  // Create temporary printable DOM container
+  let printArea = document.getElementById('batch-print-execution-area');
+  if (!printArea) {
+    printArea = document.createElement('div');
+    printArea.id = 'batch-print-execution-area';
+    printArea.className = 'print-only-block';
+    document.body.appendChild(printArea);
+  }
+  printArea.innerHTML = '';
+
+  const offlineMap = (typeof OFFLINE_CASE_DETAILS !== 'undefined') ? OFFLINE_CASE_DETAILS : {};
+  const caseList = Array.from(selectedBatchCaseIds).map(cid => {
+    const base = (AppState.cases || []).find(x => x.caseId === cid) || { caseId: cid };
+    const details = offlineMap[cid] || offlineMap[cid.toUpperCase()] || offlineMap[cid.toLowerCase()] || {};
+    return Object.assign({}, base, details);
+  });
+
+  caseList.forEach((c) => {
+    const caseWrapper = document.createElement('div');
+    caseWrapper.className = 'batch-print-case';
+    
+    const title = c.title || ('เคส ' + c.caseId);
+    const cat = c.category || 'CLINIC';
+
+    let html = `<div style="border-bottom: 2px solid #000; padding-bottom: 0.5rem; margin-bottom: 1rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="margin:0; font-size:1.3rem; font-weight:800; font-family:var(--font-title);">${escapeHtml(title)} (${escapeHtml(c.caseId)})</h2>
+        <span style="font-weight:700; border:1px solid #000; padding:2px 8px; border-radius:4px; font-size:0.85rem;">หมวด: ${escapeHtml(cat)}</span>
+      </div>
+    </div>`;
+
+    if (mode === 'full' || mode === 'question') {
+      html += `<div style="margin-bottom:1.25rem;">
+        <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #3b82f6; padding-left:0.5rem;">📌 สถานการณ์ (Scenario)</h3>
+        <div style="font-size:0.95rem; line-height:1.5;">${c.scenario || '<p>ไม่มีข้อมูลสถานการณ์</p>'}</div>
+      </div>`;
+
+      if (c.patientInfoHtml) {
+        html += `<div style="margin-bottom:1.25rem;">
+          <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #06b6d4; padding-left:0.5rem;">👤 ข้อมูลผู้ป่วย (Patient Info)</h3>
+          <div style="font-size:0.95rem; line-height:1.5;">${c.patientInfoHtml}</div>
+        </div>`;
+      }
+
+      if (c.equipmentHtml && c.equipmentHtml.trim() !== '') {
+        html += `<div style="margin-bottom:1.25rem;">
+          <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #8b5cf6; padding-left:0.5rem;">📦 สิ่งที่มีให้ในสถานี</h3>
+          <div style="font-size:0.95rem; line-height:1.5;">${c.equipmentHtml}</div>
+        </div>`;
+      }
+    }
+
+    if (mode === 'full' || mode === 'checklist') {
+      if (c.checklist && c.checklist.length > 0) {
+        let chkTable = `<table class="print-checklist-table" style="width:100%; border-collapse:collapse; margin-top:0.5rem;">
+          <thead>
+            <tr>
+              <th style="width:75%; border:1px solid #475569; padding:0.4rem;">รายละเอียดการปฏิบัติงาน / เกณฑ์ประเมิน</th>
+              <th style="width:12.5%; border:1px solid #475569; padding:0.4rem; text-align:center;">คะแนน</th>
+              <th style="width:12.5%; border:1px solid #475569; padding:0.4rem; text-align:center;">ผลประเมิน</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+        const groups = {};
+        c.checklist.forEach(item => {
+          const g = item.group || 'ทั่วไป';
+          if (!groups[g]) groups[g] = [];
+          groups[g].push(item);
+        });
+
+        Object.keys(groups).forEach(gName => {
+          chkTable += `<tr style="background:#f1f5f9; font-weight:700;"><td colspan="3" style="border:1px solid #475569; padding:0.4rem;">📁 หมวดประเมิน: ${escapeHtml(gName)}</td></tr>`;
+          groups[gName].forEach(item => {
+            chkTable += `<tr>
+              <td style="border:1px solid #475569; padding:0.4rem;">${item.textHtml || escapeHtml(item.text)}${item.imageHtml ? `<div style="margin-top:0.25rem;">${item.imageHtml}</div>` : ''}</td>
+              <td style="border:1px solid #475569; padding:0.4rem; text-align:center; font-weight:bold;">${item.score}</td>
+              <td style="border:1px solid #475569; padding:0.4rem; text-align:center;">[ &nbsp; ]</td>
+            </tr>`;
+          });
+        });
+        chkTable += `</tbody></table>`;
+
+        html += `<div style="margin-top:1.25rem;">
+          <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #10b981; padding-left:0.5rem;">📋 รายการทักษะประเมิน (Checklist)</h3>
+          ${chkTable}
+        </div>`;
+      }
+
+      if (c.noteHtml && c.noteHtml.trim() !== '') {
+        html += `<div style="margin-top:1.25rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem;">
+          <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #f59e0b; padding-left:0.5rem;">🔑 เฉลย / ข้อมูลผู้ตรวจ (Examiner Notes)</h3>
+          <div style="font-size:0.9rem; line-height:1.5;">${c.noteHtml}</div>
+        </div>`;
+      }
+    }
+
+    caseWrapper.innerHTML = html;
+    printArea.appendChild(caseWrapper);
+  });
+
+  document.body.classList.remove('print-mode-question', 'print-mode-checklist', 'print-orientation-portrait', 'print-orientation-landscape', 'print-scale-80', 'print-scale-100', 'print-scale-120', 'print-scale-140', 'print-scale-160');
+
+  if (mode === 'question') document.body.classList.add('print-mode-question');
+  else if (mode === 'checklist') document.body.classList.add('print-mode-checklist');
+
+  document.body.classList.add('print-orientation-' + orient);
+  document.body.classList.add('print-scale-' + scale);
+
+  closeBatchPrintModal();
+  showGlobalLoader(false);
+
+  setTimeout(() => {
+    window.print();
+    setTimeout(() => {
+      document.body.classList.remove('print-mode-question', 'print-mode-checklist', 'print-orientation-portrait', 'print-orientation-landscape', 'print-scale-80', 'print-scale-100', 'print-scale-120', 'print-scale-140', 'print-scale-160');
+      if (printArea) printArea.innerHTML = '';
+    }, 500);
+  }, 200);
 }
 
 

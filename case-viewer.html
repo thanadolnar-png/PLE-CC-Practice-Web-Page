@@ -403,7 +403,7 @@
           </div>
 
           <!-- Tab Content 1: Case Detail HTML -->
-          <div id="view-tab-content-area" class="view-tab-content active">
+          <div id="view-tab-content-area" class="view-tab-content active print-hide-checklist">
             
             <h3 class="viewer-section-title" id="scenario-section-title">สถานการณ์ (Scenario)</h3>
             <div id="case-scenario-content">
@@ -433,7 +433,7 @@
           </div>
 
           <!-- Print layout only note (shows in print) -->
-          <div class="print-only" style="margin-top: 1rem;">
+          <div class="print-only print-hide-question" style="margin-top: 1rem;">
             <h3 class="viewer-section-title">Checklist และกลุ่มคะแนน</h3>
             <div id="print-checklist-list"></div>
           </div>
@@ -490,7 +490,7 @@
           </div>
 
           <!-- Note / Answer Section (always visible when printing, toggleable on web screen) -->
-          <div class="note-container print-page-break" id="case-note-section">
+          <div class="note-container print-page-break print-hide-question" id="case-note-section">
             <button class="btn btn-secondary no-print" style="width: 100%;" id="toggle-note-btn" onclick="toggleNote()">
               🔑 เปิดแสดงเฉลย / ข้อมูลผู้ตรวจ
             </button>
@@ -507,8 +507,8 @@
             <button class="btn btn-secondary" style="width: 100%; border-color: var(--primary); color: var(--primary);" onclick="updateCurrentCaseFromDoc()" id="btn-update-doc">
               🔄 Update Data From Google Docs
             </button>
-            <button class="btn btn-secondary" style="width: 100%;" onclick="window.print()">
-              🖨️ พิมพ์หน้านี้ / เซฟ PDF
+            <button class="btn btn-secondary" style="width: 100%;" onclick="openSingleCasePrintModal()">
+              🖨️ พิมพ์หน้านี้ / เซฟ PDF (ปรับแต่ง)
             </button>
             <button class="btn btn-danger" style="width: 100%;" onclick="resetChecklistProgress()">
               🔄 รีเซ็ตการติ๊ก
@@ -1088,6 +1088,192 @@
         updateChecklistUI(activeCaseId);
       }
     }
+
+    // ─── Single Case Custom Print System ──────────────────────────────────
+    function openSingleCasePrintModal() {
+      const modal = document.getElementById('single-case-print-modal');
+      if (modal) {
+        modal.style.display = 'flex';
+        updateSingleCasePrintPreview();
+      }
+    }
+
+    function closeSingleCasePrintModal() {
+      const modal = document.getElementById('single-case-print-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function updateSingleCasePrintPreview() {
+      const paper = document.getElementById('single-case-print-preview-paper');
+      if (!paper) return;
+
+      const mode = document.querySelector('input[name="single-print-mode"]:checked')?.value || 'full';
+      const orient = document.querySelector('input[name="single-print-orient"]:checked')?.value || 'portrait';
+      const scale = parseInt(document.getElementById('single-print-scale')?.value || '100');
+
+      paper.className = `print-preview-paper ${orient}`;
+      paper.style.transform = `scale(${scale / 100})`;
+      paper.style.marginBottom = `${(scale - 100) * 1.5}px`;
+
+      const c = AppState.currentCaseDetail || {};
+      const title = c.title || document.getElementById('case-title-display')?.textContent || 'ข้อสอบ OSPE';
+      const cat = c.category || 'CLINIC';
+
+      let html = `<div style="border-bottom: 2px solid #000; padding-bottom: 0.5rem; margin-bottom: 1rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h2 style="margin:0; font-size:1.2rem; font-weight:800; font-family:var(--font-title);">${escapeHtml(title)}</h2>
+          <span style="font-weight:700; border:1px solid #000; padding:2px 8px; border-radius:4px; font-size:0.85rem;">หมวด: ${escapeHtml(cat)}</span>
+        </div>
+      </div>`;
+
+      if (mode === 'full' || mode === 'question') {
+        html += `<div style="margin-bottom:1rem;">
+          <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #3b82f6; padding-left:0.5rem;">📌 สถานการณ์ (Scenario)</h4>
+          <div style="font-size:0.9rem; line-height:1.5;">${c.scenario || document.getElementById('case-scenario-content')?.innerHTML || ''}</div>
+        </div>`;
+
+        const patientHtml = c.patientInfoHtml || document.getElementById('case-patient-content')?.innerHTML || '';
+        if (patientHtml) {
+          html += `<div style="margin-bottom:1rem;">
+            <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #06b6d4; padding-left:0.5rem;">👤 ข้อมูลผู้ป่วย (Patient Info)</h4>
+            <div style="font-size:0.9rem; line-height:1.5;">${patientHtml}</div>
+          </div>`;
+        }
+
+        const equipHtml = c.equipmentHtml || document.getElementById('case-equipment-content')?.innerHTML || '';
+        if (equipHtml && equipHtml.trim() !== '') {
+          html += `<div style="margin-bottom:1rem;">
+            <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #8b5cf6; padding-left:0.5rem;">📦 สิ่งที่มีให้ในสถานี</h4>
+            <div style="font-size:0.9rem; line-height:1.5;">${equipHtml}</div>
+          </div>`;
+        }
+      }
+
+      if (mode === 'full' || mode === 'checklist') {
+        const printChkHtml = document.getElementById('print-checklist-list')?.innerHTML || '';
+        if (printChkHtml) {
+          html += `<div style="margin-top:1rem;">
+            <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #10b981; padding-left:0.5rem;">📋 รายการทักษะประเมิน (Checklist)</h4>
+            <div>${printChkHtml}</div>
+          </div>`;
+        }
+
+        const noteHtml = c.noteHtml || document.getElementById('note-content-area')?.innerHTML || '';
+        if (noteHtml && noteHtml.trim() !== '') {
+          html += `<div style="margin-top:1rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem;">
+            <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #f59e0b; padding-left:0.5rem;">🔑 เฉลย / ข้อมูลผู้ตรวจ (Examiner Notes)</h4>
+            <div style="font-size:0.88rem; line-height:1.5;">${noteHtml}</div>
+          </div>`;
+        }
+      }
+
+      paper.innerHTML = html;
+    }
+
+    function executeSingleCasePrint() {
+      const mode = document.querySelector('input[name="single-print-mode"]:checked')?.value || 'full';
+      const orient = document.querySelector('input[name="single-print-orient"]:checked')?.value || 'portrait';
+      const scale = document.getElementById('single-print-scale')?.value || '100';
+
+      document.body.classList.remove('print-mode-question', 'print-mode-checklist', 'print-orientation-portrait', 'print-orientation-landscape', 'print-scale-80', 'print-scale-100', 'print-scale-120', 'print-scale-140', 'print-scale-160');
+
+      if (mode === 'question') document.body.classList.add('print-mode-question');
+      else if (mode === 'checklist') document.body.classList.add('print-mode-checklist');
+
+      document.body.classList.add('print-orientation-' + orient);
+      document.body.classList.add('print-scale-' + scale);
+
+      closeSingleCasePrintModal();
+
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+          document.body.classList.remove('print-mode-question', 'print-mode-checklist', 'print-orientation-portrait', 'print-orientation-landscape', 'print-scale-80', 'print-scale-100', 'print-scale-120', 'print-scale-140', 'print-scale-160');
+        }, 500);
+      }, 150);
+    }
   </script>
+
+  <!-- Single Case Custom Print Modal -->
+  <div id="single-case-print-modal" class="print-modal-overlay no-print" style="display: none;">
+    <div class="print-modal-card">
+      <div class="print-modal-header">
+        <h3 style="margin: 0; font-family: var(--font-title); font-size: 1.15rem; display: flex; align-items: center; gap: 0.5rem;">
+          🖨️ ตัวเลือกสำหรับการพิมพ์เอกสาร & ตัวอย่างก่อนพิมพ์
+        </h3>
+        <button class="btn btn-secondary" onclick="closeSingleCasePrintModal()" style="padding: 4px 10px; font-size: 0.85rem;">✕ ปิด</button>
+      </div>
+
+      <div class="print-modal-body">
+        <div class="print-options-grid">
+          <!-- 1. Content Selection -->
+          <div class="print-option-group">
+            <div class="print-option-title">📑 1. เลือกส่วนเนื้อหาที่ต้องการพิมพ์</div>
+            <div class="print-radio-list">
+              <label class="print-radio-label">
+                <input type="radio" name="single-print-mode" value="full" checked onchange="updateSingleCasePrintPreview()">
+                <span><strong>พิมพ์รวมทั้งหมด (Full Case)</strong><br><small style="color:var(--text-secondary);">โจทย์ + ข้อมูลผู้ป่วย + อุปกรณ์ + Checklist + เฉลย</small></span>
+              </label>
+              <label class="print-radio-label">
+                <input type="radio" name="single-print-mode" value="question" onchange="updateSingleCasePrintPreview()">
+                <span><strong>พิมพ์เฉพาะโจทย์ / คำถาม (Question Only)</strong><br><small style="color:var(--text-secondary);">สถานการณ์ + ข้อมูลผู้ป่วย + สิ่งที่มีให้ (สำหรับแปะหน้าห้องสอบ)</small></span>
+              </label>
+              <label class="print-radio-label">
+                <input type="radio" name="single-print-mode" value="checklist" onchange="updateSingleCasePrintPreview()">
+                <span><strong>พิมพ์เฉพาะ Checklist & เฉลย (Checklist & Answer)</strong><br><small style="color:var(--text-secondary);">ตารางเกณฑ์ประเมิน + เฉลย (สำหรับกรรมการผู้ตรวจ)</small></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 2. Orientation & Scale -->
+          <div class="print-option-group">
+            <div class="print-option-title">📐 2. ทิศทางกระดาษ & ขนาดตัวหนังสือ (Scale)</div>
+            
+            <div style="margin-bottom: 1rem;">
+              <label style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 0.4rem;">ทิศทางหน้ากระดาษ (Orientation):</label>
+              <div style="display: flex; gap: 0.75rem;">
+                <label class="print-radio-label" style="flex:1;">
+                  <input type="radio" name="single-print-orient" value="portrait" checked onchange="updateSingleCasePrintPreview()">
+                  <span>📄 แนวตั้ง (Portrait)</span>
+                </label>
+                <label class="print-radio-label" style="flex:1;">
+                  <input type="radio" name="single-print-orient" value="landscape" onchange="updateSingleCasePrintPreview()">
+                  <span>🖼️ แนวนอน (Landscape)</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 0.4rem;">ขนาดตัวหนังสือ (Scale Zoom):</label>
+              <select id="single-print-scale" class="form-control" style="width:100%; padding:0.5rem; font-size:0.9rem;" onchange="updateSingleCasePrintPreview()">
+                <option value="80">80% (กระทัดรัด - ประหยัดกระดาษ)</option>
+                <option value="100" selected>100% (ขนาดมาตรฐาน)</option>
+                <option value="120">120% (ตัวหนังสือใหญ่ อ่านง่าย)</option>
+                <option value="140">140% (ตัวใหญ่พิเศษ - เหมาะแปะประตูห้องสอบ)</option>
+                <option value="160">160% (ยักษ์ใหญ่ - อ่านชัดระยะไกล)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Live Preview Container -->
+        <div>
+          <div class="print-option-title" style="margin-bottom: 0.5rem;">🔍 ตัวอย่างหน้าเอกสารก่อนพิมพ์ (Live Preview)</div>
+          <div class="print-preview-container">
+            <div id="single-case-print-preview-paper" class="print-preview-paper portrait">
+              <!-- Content rendered dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding: 1rem 1.5rem; background: var(--bg-secondary); border-top: 1px solid var(--border); display: flex; gap: 1rem; justify-content: flex-end;">
+        <button class="btn btn-secondary" onclick="closeSingleCasePrintModal()">ยกเลิก</button>
+        <button class="btn btn-primary" onclick="executeSingleCasePrint()" style="padding: 0.6rem 1.5rem; font-size: 1rem; background: linear-gradient(135deg, var(--primary), #4338ca);">
+          🖨️ ดำเนินการพิมพ์ (Print / Save PDF)
+        </button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

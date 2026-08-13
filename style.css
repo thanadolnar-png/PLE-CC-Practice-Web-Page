@@ -2896,4 +2896,192 @@ body.auth-locked > *:not(#auth-gate-overlay) {
   margin: 0;
 }
 
+/* ══════════════════════════════════════════════════════════════
+   Print Customization & Batch Multi-Case Print System
+   ══════════════════════════════════════════════════════════════ */
+
+.print-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  animation: fadeIn 0.2s forwards ease-out;
+}
+
+.print-modal-card {
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border);
+  width: 100%;
+  max-width: 960px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.print-modal-header {
+  padding: 1.25rem 1.5rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.print-modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.print-options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.print-option-group {
+  background: var(--bg-secondary);
+  padding: 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.print-option-title {
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin-bottom: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.print-radio-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.print-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.85rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  transition: all 0.15s ease;
+}
+
+.print-radio-label:hover {
+  border-color: var(--primary);
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.print-radio-label input[type="radio"],
+.print-radio-label input[type="checkbox"] {
+  accent-color: var(--primary);
+  width: 1.1rem;
+  height: 1.1rem;
+  cursor: pointer;
+}
+
+.print-preview-container {
+  background: #cbd5e1;
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  min-height: 240px;
+  max-height: 380px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+}
+
+.print-preview-paper {
+  background: white;
+  color: black;
+  padding: 1.5rem;
+  border-radius: 4px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  margin: 0 auto;
+  transition: transform 0.2s ease, width 0.2s ease;
+  transform-origin: top center;
+}
+
+.print-preview-paper.landscape {
+  width: 100%;
+  max-width: 850px;
+}
+
+.print-preview-paper.portrait {
+  width: 100%;
+  max-width: 620px;
+}
+
+/* Print Specific Overrides via Body CSS Classes */
+body.print-mode-question .print-hide-question {
+  display: none !important;
+}
+
+body.print-mode-checklist .print-hide-checklist {
+  display: none !important;
+}
+
+@media print {
+  body.print-orientation-portrait {
+    @page { size: A4 portrait !important; margin: 8mm !important; }
+  }
+  
+  body.print-orientation-landscape {
+    @page { size: A4 landscape !important; margin: 8mm !important; }
+  }
+
+  body.print-scale-80 {
+    font-size: 8pt !important;
+    zoom: 80% !important;
+  }
+
+  body.print-scale-100 {
+    font-size: 10pt !important;
+    zoom: 100% !important;
+  }
+
+  body.print-scale-120 {
+    font-size: 12pt !important;
+    zoom: 120% !important;
+  }
+
+  body.print-scale-140 {
+    font-size: 14pt !important;
+    zoom: 140% !important;
+  }
+
+  body.print-scale-160 {
+    font-size: 16pt !important;
+    zoom: 160% !important;
+  }
+
+  .batch-print-case {
+    page-break-after: always !important;
+    break-after: page !important;
+    padding-bottom: 2rem !important;
+  }
+}
+
 
