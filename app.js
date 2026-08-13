@@ -1619,14 +1619,59 @@ function executeBatchPrint() {
     closeBatchPrintModal();
     showGlobalLoader(false);
 
-    setTimeout(() => {
-      window.print();
-      setTimeout(() => {
-        document.body.classList.remove('print-mode-question', 'print-mode-checklist', 'print-orientation-portrait', 'print-orientation-landscape', 'print-scale-80', 'print-scale-100', 'print-scale-120', 'print-scale-140', 'print-scale-160');
-        if (printArea) printArea.innerHTML = '';
-      }, 500);
-    }, 200);
+    triggerNativePrint(orient, scale, mode, 'batch-print-execution-area');
   }, 100);
 }
+
+// ─── Global Universal Print Trigger (iOS Safari & Desktop) ───────────────────
+function triggerNativePrint(orient, scale, mode, printAreaId, onDone) {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  // 1. Lock screen DOM with printing isolation class
+  document.body.classList.add('is-printing');
+  document.body.classList.add('print-orientation-' + orient);
+  document.body.classList.add('print-scale-' + scale);
+  if (mode === 'question') document.body.classList.add('print-mode-question');
+  else if (mode === 'checklist') document.body.classList.add('print-mode-checklist');
+
+  // 2. Apply dynamic @page media query rules
+  if (typeof applyDynamicPrintStyle === 'function') {
+    applyDynamicPrintStyle(orient);
+  }
+
+  // 3. Define safe cleanup method
+  let cleaned = false;
+  const cleanup = () => {
+    if (cleaned) return;
+    cleaned = true;
+    document.body.classList.remove(
+      'is-printing',
+      'print-mode-question', 'print-mode-checklist',
+      'print-orientation-portrait', 'print-orientation-landscape',
+      'print-scale-80', 'print-scale-100', 'print-scale-120', 'print-scale-140', 'print-scale-160'
+    );
+    if (typeof onDone === 'function') onDone();
+
+    // DO NOT wipe print area immediately on iOS (AirPrint renders asynchronously in background)
+    setTimeout(() => {
+      const area = document.getElementById(printAreaId);
+      if (area && !document.body.classList.contains('is-printing')) {
+        area.innerHTML = '';
+      }
+    }, isIOS ? 30000 : 2000);
+  };
+
+  // 4. Listen for desktop/browser native afterprint event
+  window.addEventListener('afterprint', cleanup, { once: true });
+
+  // 5. Call window.print() after layout cycle, with fallback cleanup timer
+  setTimeout(() => {
+    window.print();
+    // Fallback timer: unlock screen UI after 4 seconds on iOS, 1.5 seconds on desktop
+    setTimeout(cleanup, isIOS ? 4000 : 1500);
+  }, isIOS ? 350 : 150);
+}
+
 
 
