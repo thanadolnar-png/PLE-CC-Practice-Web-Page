@@ -1,6 +1,6 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Generated on 2026-08-16 22:12:40
+ * Generated on 2026-08-19 13:00:02
  */
 
 const OFFLINE_DATA = {
@@ -1043,19 +1043,6 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "เพ้นท์",
       "createdDate": "02/08/2026",
-      "isActive": true
-    },
-    {
-      "caseId": "OSPE-CL5803",
-      "title": "ซักประวัติและจ่ายยา",
-      "category": "Clinic",
-      "mainGroup": "การซักประวัติและจ่ายยา",
-      "subTopic": "",
-      "disease": "ยาคุมกำเนิด",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "เพ้นท์",
-      "createdDate": "2/8/2026",
       "isActive": true
     },
     {
