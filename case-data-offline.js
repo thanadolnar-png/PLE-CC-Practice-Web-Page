@@ -1,6 +1,6 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Generated on 2026-08-26 00:55:40
+ * Generated on 2026-08-26 01:08:51
  */
 
 const OFFLINE_DATA = {
@@ -1904,7 +1904,163 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD001",
+      "caseId": "OSPE-PDLQ01",
+      "title": "Lotion",
+      "category": "Product",
+      "mainGroup": "Liquid Dosage Form",
+      "subTopic": "",
+      "disease": "Lotion",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ตอง",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDLQ02",
+      "title": "Solution",
+      "category": "Product",
+      "mainGroup": "Liquid Dosage Form",
+      "subTopic": "",
+      "disease": "Solution",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ตอง",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDLQ03",
+      "title": "Alcohol Solution",
+      "category": "Product",
+      "mainGroup": "Liquid Dosage Form",
+      "subTopic": "",
+      "disease": "Alcohol Solution",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ตอง",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDLQ04",
+      "title": "Syrup",
+      "category": "Product",
+      "mainGroup": "Liquid Dosage Form",
+      "subTopic": "",
+      "disease": "Paracetamol syrup",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ออมสิน",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDLQ05",
+      "title": "Syrup",
+      "category": "Product",
+      "mainGroup": "Liquid Dosage Form",
+      "subTopic": "",
+      "disease": "Ferrous Sulfate Syrup NF XIV",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "นีนนี่",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDLQ06",
+      "title": "Suspension",
+      "category": "Product",
+      "mainGroup": "Liquid Dosage Form",
+      "subTopic": "",
+      "disease": "",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ดับบลิว & โฟ๊คสุดหล่อ",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDSS01",
+      "title": "Cream",
+      "category": "Product",
+      "mainGroup": "Semisolid Dosage Form",
+      "subTopic": "",
+      "disease": "Cream",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "บีเอ็ม",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDSS02",
+      "title": "Cream",
+      "category": "Product",
+      "mainGroup": "Semisolid Dosage Form",
+      "subTopic": "",
+      "disease": "Cream",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "บีเอ็ม",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDSS03",
+      "title": "Cream",
+      "category": "Product",
+      "mainGroup": "Semisolid Dosage Form",
+      "subTopic": "",
+      "disease": "Cream",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "บีเอ็ม",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDSS04",
+      "title": "Cream",
+      "category": "Product",
+      "mainGroup": "Semisolid Dosage Form",
+      "subTopic": "",
+      "disease": "Cream",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "บีเอ็ม",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDSS05",
+      "title": "Cream",
+      "category": "Product",
+      "mainGroup": "Semisolid Dosage Form",
+      "subTopic": "",
+      "disease": "Cream",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ป่าน",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDSS06",
+      "title": "Cream",
+      "category": "Product",
+      "mainGroup": "Semisolid Dosage Form",
+      "subTopic": "",
+      "disease": "Cream",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ป่าน",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDSS07",
       "title": "Ointment",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
@@ -1917,7 +2073,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD002",
+      "caseId": "OSPE-PDSS08",
       "title": "Ointment",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
@@ -1930,7 +2086,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD003",
+      "caseId": "OSPE-PDSS09",
       "title": "ointment",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
@@ -1943,7 +2099,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD004",
+      "caseId": "OSPE-PDSS10",
       "title": "ointment",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
@@ -1956,7 +2112,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD005",
+      "caseId": "OSPE-PDSS11",
       "title": "Ointment",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
@@ -1969,7 +2125,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD006",
+      "caseId": "OSPE-PDSS12",
       "title": "Ointment",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
@@ -1982,7 +2138,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD007",
+      "caseId": "OSPE-PDSS13",
       "title": "Paste",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
@@ -1995,7 +2151,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD008",
+      "caseId": "OSPE-PDSS14",
       "title": "Paste",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
@@ -2008,7 +2164,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD009",
+      "caseId": "OSPE-PDSS15",
       "title": "Gel",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
@@ -2021,7 +2177,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD010",
+      "caseId": "OSPE-PDSS16",
       "title": "Gel",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
@@ -2034,7 +2190,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD011",
+      "caseId": "OSPE-PDSS17",
       "title": "Cream",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
@@ -2047,7 +2203,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD012",
+      "caseId": "OSPE-PDSS18",
       "title": "Cream",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
@@ -2060,7 +2216,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD013",
+      "caseId": "OSPE-PDSS19",
       "title": "Cream",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
@@ -2073,7 +2229,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD014",
+      "caseId": "OSPE-PDSS20",
       "title": "Cream",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
@@ -2086,7 +2242,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD015",
+      "caseId": "OSPE-PDSS21",
       "title": "ointment",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
@@ -2099,7 +2255,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD016",
+      "caseId": "OSPE-PDSS22",
       "title": "ointment",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
@@ -2112,7 +2268,215 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD017",
+      "caseId": "OSPE-PDT01",
+      "title": "testเฉยๆ",
+      "category": "Product",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "การนับเม็ดยา",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ทิว",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDT02",
+      "title": "นับเม็ดยา",
+      "category": "Product",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "นับเม็ดยา",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "วีวี่",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDT03",
+      "title": "การกรอง",
+      "category": "Product",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "การกรอง",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ใบตอง",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDT04",
+      "title": "การกรอง",
+      "category": "Product",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "การกรอง",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ใบตอง",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDT05",
+      "title": "คำนวณยา +  ชั่ง",
+      "category": "Product",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "คำนวณยา+ ชั่ง",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "วีวี่",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDT06",
+      "title": "นับเม็ดยา",
+      "category": "Product",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "นับเม็ดยา",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "วีวี่",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDT07",
+      "title": "นับเม็ดยา",
+      "category": "Product",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "นับเม็ดยา",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "วีวี่",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDT08",
+      "title": "ชั่ง",
+      "category": "Product",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "ชั่ง",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "วีวี่",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDT09",
+      "title": "Calibration",
+      "category": "Product",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Calibration",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "วีวี่",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDT10",
+      "title": "การนับเม็ดยา",
+      "category": "Product",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "การนับเม็ดยา",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ใบตอง",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDT11",
+      "title": "ชั่ง",
+      "category": "Product",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "ชั่ง",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "วีวี่",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDT12",
+      "title": "นับเม็ดยา",
+      "category": "Product",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "นับเม็ดยา",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "วีวี่",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDT13",
+      "title": "ชั่ง",
+      "category": "Product",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "ชั่ง",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "วีวี่",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDT14",
+      "title": "การนับเม็ดยา",
+      "category": "Product",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "การนับเม็ดยา",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ใบตอง",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDT15",
+      "title": "นับเม็ดยา",
+      "category": "Product",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "นับเม็ดยา",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "วีวี่",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDT16",
+      "title": "บดและลดขนาด",
+      "category": "Product",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "บดและลดขนาด",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "วีวี่",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDT17",
       "title": "Untitled Case",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
@@ -2125,7 +2489,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD018",
+      "caseId": "OSPE-PDT18",
       "title": "Untitled Case",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
@@ -2138,7 +2502,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD019",
+      "caseId": "OSPE-PDT19",
       "title": "Untitled Case",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
@@ -2151,7 +2515,20 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD020",
+      "caseId": "OSPE-PDT20",
+      "title": "Untitled Case",
+      "category": "Product",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "ชั่ง",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ทิว",
+      "createdDate": "26/8/2569",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PDT21",
       "title": "Untitled Case",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
@@ -2164,7 +2541,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD021",
+      "caseId": "OSPE-PDT22",
       "title": "การกรอง",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
@@ -2177,7 +2554,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD022",
+      "caseId": "OSPE-PDT23",
       "title": "Untitled Case",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
@@ -2190,7 +2567,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD023",
+      "caseId": "OSPE-PDT24",
       "title": "Calibration",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
@@ -2203,7 +2580,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD024",
+      "caseId": "OSPE-PDT25",
       "title": "พับกระดาษกรอง",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
@@ -2216,7 +2593,7 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-PD025",
+      "caseId": "OSPE-PDT26",
       "title": "การกรอง",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
