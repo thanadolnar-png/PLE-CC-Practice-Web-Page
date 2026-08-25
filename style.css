@@ -766,26 +766,28 @@ a {
 .table-patient-info td {
   padding: 0.75rem 1rem;
   font-size: 0.95rem;
-  white-space: pre-wrap;
-  word-break: break-word;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
   vertical-align: top;
 }
 
 .table-patient-info th p,
 .table-patient-info td p {
-  display: block;
-  margin: 0.35rem 0;
-  line-height: 1.5;
+  display: block !important;
+  clear: both !important;
+  margin: 0.4rem 0 !important;
+  line-height: 1.5 !important;
+  white-space: pre-wrap !important;
 }
 
 .table-patient-info th p:first-child,
 .table-patient-info td p:first-child {
-  margin-top: 0;
+  margin-top: 0 !important;
 }
 
 .table-patient-info th p:last-child,
 .table-patient-info td p:last-child {
-  margin-bottom: 0;
+  margin-bottom: 0 !important;
 }
 
 .table-patient-info th {
@@ -804,6 +806,41 @@ a {
   font-weight: 600;
   width: 30%;
   color: var(--text-secondary);
+}
+
+.table-patient-info th:nth-child(1),
+.table-patient-info td:nth-child(1) {
+  min-width: 120px;
+  white-space: nowrap;
+}
+
+.table-patient-info th:nth-child(2),
+.table-patient-info td:nth-child(2) {
+  min-width: 60px;
+}
+
+/* Equipment List Numbering vs Dot Bullet Fix */
+#case-equipment-content ul.equipment-list.numbered-list,
+#case-equipment-content ol.equipment-list.numbered-list,
+.equipment-list.numbered-list {
+  list-style: none !important;
+  list-style-type: none !important;
+  padding-left: 0 !important;
+  margin: 0.5rem 0;
+}
+
+#case-equipment-content ul.equipment-list.numbered-list li,
+#case-equipment-content ol.equipment-list.numbered-list li,
+.equipment-list.numbered-list li {
+  list-style: none !important;
+  list-style-type: none !important;
+  margin-bottom: 0.4rem;
+  padding-left: 0 !important;
+}
+
+#case-equipment-content ul.equipment-list.numbered-list li::marker,
+.equipment-list.numbered-list li::marker {
+  content: "" !important;
 }
 
 /* Checklist Styling */

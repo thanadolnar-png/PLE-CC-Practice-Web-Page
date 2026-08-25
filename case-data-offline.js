@@ -1,6 +1,6 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Generated on 2026-08-26
+ * Generated on 2026-08-26 01:28:22
  */
 
 const OFFLINE_DATA = {
@@ -2477,7 +2477,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDT17",
-      "title": "เคส PDT17: ชั่ง",
+      "title": "Untitled Case",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
       "subTopic": "",
@@ -2490,7 +2490,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDT18",
-      "title": "เคส PDT18: ชั่ง",
+      "title": "Untitled Case",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
       "subTopic": "",
@@ -2503,7 +2503,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDT19",
-      "title": "เคส PDT19: ชั่ง",
+      "title": "Untitled Case",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
       "subTopic": "",
@@ -2516,7 +2516,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDT20",
-      "title": "เคส PDT20: ชั่ง",
+      "title": "Untitled Case",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
       "subTopic": "",
@@ -2529,7 +2529,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDT21",
-      "title": "เคส PDT21: นับเม็ดยา",
+      "title": "Untitled Case",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
       "subTopic": "",
@@ -2555,7 +2555,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDT23",
-      "title": "เคส PDT23: นับเม็ดยา",
+      "title": "Untitled Case",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
       "subTopic": "",

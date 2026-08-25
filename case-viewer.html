@@ -540,21 +540,102 @@
         <span class="case-card-tag">ผู้เขียน: ${c.author || 'ไม่ระบุ'}</span>
       `;
       
+    function formatCaseHtmlUniversal(htmlStr) {
+      if (!htmlStr) return '';
+      let res = htmlStr;
+      if (res.includes('Rx') || res.includes('Official Formula')) {
+        const rxRegex = /(<p[^>]*>.*?(?:Rx|Official Formula).*?<\/p>(?:\s*<p[^>]*>.*?<\/p>){1,12})/gi;
+        res = res.replace(rxRegex, function(block) {
+          const pMatches = block.match(/<p[^>]*>(.*?)<\/p>/gi);
+          if (!pMatches || pMatches.length < 2) return block;
+          const tableRows = [];
+          for (let i = 0; i < pMatches.length; i++) {
+            const text = pMatches[i].replace(/<[^>]+>/g, '').trim();
+            if (!text) continue;
+            const cols = text.split(/\t+|\s{2,}/).map(s => s.trim()).filter(Boolean);
+            if (cols.length >= 2) tableRows.push(cols);
+          }
+          if (tableRows.length < 2) return block;
+          const maxCols = Math.max(...tableRows.map(r => r.length));
+          let out = '<div class="table-responsive"><table class="table-patient-info rx-table">';
+          for (let r = 0; r < tableRows.length; r++) {
+            out += '<tr>';
+            const tag = r === 0 ? 'th' : 'td';
+            for (let c = 0; c < maxCols; c++) {
+              const val = tableRows[r][c] || '';
+              out += `<${tag}>${val}</${tag}>`;
+            }
+            out += '</tr>';
+          }
+          out += '</table></div>';
+          return out;
+        });
+      }
+      return res;
+    }
+
+    function renderCaseDetail(c) {
+      const displayTitle = c.title.startsWith(`[${c.caseId}]`) ? c.title : `[${c.caseId}] ${c.title}`;
+      document.getElementById('case-title').textContent = displayTitle;
+      
+      // Render Case Meta Tags
+      const metaContainer = document.getElementById('case-meta-tags');
+      metaContainer.innerHTML = '';
+      if (c.category) {
+        metaContainer.innerHTML += `<span class="badge badge-${c.category.toLowerCase()}">${c.category}</span>`;
+      }
+      
+      let groupText = c.mainGroup || "";
+      if (c.subTopic) groupText += " · " + c.subTopic;
+      if (groupText) {
+        metaContainer.innerHTML += `<span class="case-card-tag" style="background-color: var(--primary-light); color: var(--primary);">${groupText}</span>`;
+      }
+      if (c.tags) {
+        const tList = c.tags.split(',').map(t => t.trim()).filter(Boolean);
+        tList.forEach(t => {
+          metaContainer.innerHTML += `<span class="badge tag-badge">#${t}</span>`;
+        });
+      }
+      if (c.linkedNextCase) {
+        metaContainer.innerHTML += `<span class="badge tag-badge" style="background: var(--warning); color: var(--warning-dark);">🔗 มีสถานีต่อเนื่อง</span>`;
+        
+        const nextBtn = document.getElementById('btn-next-linked-station');
+        if (nextBtn) {
+          nextBtn.style.display = 'flex';
+          nextBtn.onclick = () => {
+            window.location.href = `case-viewer.html?id=${encodeURIComponent(c.linkedNextCase)}`;
+          };
+        }
+      } else {
+        const nextBtn = document.getElementById('btn-next-linked-station');
+        if (nextBtn) nextBtn.style.display = 'none';
+      }
+      
+      metaContainer.innerHTML += `
+        <span class="case-card-tag">โรค/หัวข้อ: ${c.disease || 'ความรู้หลัก'}</span>
+        <span class="case-card-tag">ผู้เขียน: ${c.author || 'ไม่ระบุ'}</span>
+      `;
+      
       // Render Scenario & Patient Info
-      document.getElementById('case-scenario-content').innerHTML = c.contentHtml || `<p>${c.scenario}</p>`;
-      document.getElementById('case-patient-content').innerHTML = c.patientInfoHtml || '<p>ไม่มีตารางข้อมูลผู้ป่วย</p>';
+      document.getElementById('case-scenario-content').innerHTML = formatCaseHtmlUniversal(c.contentHtml || `<p>${c.scenario}</p>`);
+      document.getElementById('case-patient-content').innerHTML = formatCaseHtmlUniversal(c.patientInfoHtml || '<p>ไม่มีตารางข้อมูลผู้ป่วย</p>');
       
       // Render Equipment
       if (c.equipmentHtml) {
         document.getElementById('equipment-section-title').style.display = 'block';
         const eqContent = document.getElementById('case-equipment-content');
         eqContent.style.display = 'block';
-        // Wrap with ul if it starts with li but has no ul wrapper
-        if (c.equipmentHtml.startsWith('<li')) {
-          eqContent.innerHTML = `<ul>${c.equipmentHtml}</ul>`;
+        let rawEq = formatCaseHtmlUniversal(c.equipmentHtml).trim();
+        if (rawEq.startsWith('<li')) {
+          const isNumbered = /^\s*<li[^>]*>\s*(\d+[\.\)]|\(\d+\))/i.test(rawEq);
+          const listClass = isNumbered ? 'equipment-list numbered-list' : 'equipment-list bullet-list';
+          eqContent.innerHTML = `<ul class="${listClass}">${rawEq}</ul>`;
         } else {
-          eqContent.innerHTML = c.equipmentHtml;
+          eqContent.innerHTML = rawEq;
         }
+      } else {
+        document.getElementById('equipment-section-title').style.display = 'none';
+        document.getElementById('case-equipment-content').style.display = 'none';
       }
       
       // Setup IFrame Document URL
@@ -578,7 +659,7 @@
       renderChecklist(c);
       
       // Render Note
-      document.getElementById('note-content-area').innerHTML = c.noteHtml || c.note || '<p>ไม่มีหมายเหตุ / เฉลยเพิ่ม</p>';
+      document.getElementById('note-content-area').innerHTML = formatCaseHtmlUniversal(c.noteHtml || c.note || '<p>ไม่มีหมายเหตุ / เฉลยเพิ่ม</p>');
       
       // แสดงเนื้อหาแอปหลัก
       document.getElementById('case-viewer-app').style.display = 'block';

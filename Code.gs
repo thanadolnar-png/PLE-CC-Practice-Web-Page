@@ -1239,25 +1239,27 @@ function parseTableToHtml(table) {
     const row = table.getRow(r);
     html += '<tr>';
     const numCells = row.getNumCells();
+    const tag = (r === 0 && numRows > 1) ? 'th' : 'td';
 
     for (let c = 0; c < numCells; c++) {
       const cell = row.getCell(c);
-      const tag = r === 0 ? 'th' : 'td';
-      // Parse cell paragraphs to support inline images
-      let cellHtml = '';
+      const cellParas = [];
       const numParas = cell.getNumChildren();
       for (let p = 0; p < numParas; p++) {
         const para = cell.getChild(p);
         if (para.getType() === DocumentApp.ElementType.PARAGRAPH) {
           const paraHtml = parseParagraphToHtml(para.asParagraph());
-          // Unwrap outer <p> tags for inline table display
-          cellHtml += paraHtml.replace(/^<p>(.*)<\/p>$/s, '$1');
+          if (paraHtml) cellParas.push(paraHtml);
         } else if (para.getType() === DocumentApp.ElementType.LIST_ITEM) {
           const paraHtml = parseParagraphToHtml(para.asListItem());
-          cellHtml += paraHtml.replace(/^<p>(.*)<\/p>$/s, '$1');
+          if (paraHtml) cellParas.push(paraHtml);
         }
       }
+      let cellHtml = cellParas.join('');
       if (!cellHtml) cellHtml = escapeHtml(cell.getText().trim());
+      if (cellHtml.startsWith('<p>') && cellHtml.endsWith('</p>') && (cellHtml.match(/<p>/g) || []).length === 1) {
+        cellHtml = cellHtml.slice(3, -4);
+      }
       html += `<${tag}>${cellHtml}</${tag}>`;
     }
     html += '</tr>';
