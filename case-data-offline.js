@@ -1,6 +1,6 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Generated on 2026-08-26
+ * Generated on 2026-08-26 00:52:16
  */
 
 const OFFLINE_DATA = {
@@ -2113,7 +2113,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PD017",
-      "title": "เคส PD017: ชั่ง",
+      "title": "Untitled Case",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
       "subTopic": "",
@@ -2126,7 +2126,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PD018",
-      "title": "เคส PD018: ชั่ง",
+      "title": "Untitled Case",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
       "subTopic": "",
@@ -2139,7 +2139,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PD019",
-      "title": "เคส PD019: ชั่ง",
+      "title": "Untitled Case",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
       "subTopic": "",
