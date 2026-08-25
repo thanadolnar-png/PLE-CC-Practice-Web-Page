@@ -762,9 +762,30 @@ a {
   text-align: left;
 }
 
-.table-patient-info th, .table-patient-info td {
+.table-patient-info th, 
+.table-patient-info td {
   padding: 0.75rem 1rem;
   font-size: 0.95rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  vertical-align: top;
+}
+
+.table-patient-info th p,
+.table-patient-info td p {
+  display: block;
+  margin: 0.35rem 0;
+  line-height: 1.5;
+}
+
+.table-patient-info th p:first-child,
+.table-patient-info td p:first-child {
+  margin-top: 0;
+}
+
+.table-patient-info th p:last-child,
+.table-patient-info td p:last-child {
+  margin-bottom: 0;
 }
 
 .table-patient-info th {
@@ -778,7 +799,8 @@ a {
   border-bottom: 1px solid var(--border);
 }
 
-.table-patient-info td:first-child {
+.table-patient-info tr > td:first-child:nth-last-child(2),
+.table-patient-info tr > th:first-child:nth-last-child(2) {
   font-weight: 600;
   width: 30%;
   color: var(--text-secondary);
