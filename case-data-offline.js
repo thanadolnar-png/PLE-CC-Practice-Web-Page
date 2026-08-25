@@ -1,6 +1,6 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Generated on 2026-08-19 15:22:55
+ * Generated on 2026-08-26
  */
 
 const OFFLINE_DATA = {
@@ -1133,7 +1133,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ส้มส้ม",
-      "createdDate": "16/8/2569",
+      "createdDate": "19/8/2569",
       "isActive": true
     },
     {
@@ -1463,7 +1463,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL6214",
-      "title": "วิเคราะห์ใบสั่งยา",
+      "title": "คำนวณขนาดยา",
       "category": "Clinic",
       "mainGroup": "dosing calculation",
       "subTopic": "",
@@ -1911,9 +1911,9 @@ const OFFLINE_DATA = {
       "subTopic": "",
       "disease": "Ointment",
       "difficulty": 2,
-      "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "16/8/2569",
+      "createdDate": "19/8/2569",
       "isActive": true
     },
     {
@@ -1924,9 +1924,9 @@ const OFFLINE_DATA = {
       "subTopic": "",
       "disease": "Ointment",
       "difficulty": 2,
-      "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "16/8/2569",
+      "createdDate": "19/8/2569",
       "isActive": true
     },
     {
@@ -1937,9 +1937,9 @@ const OFFLINE_DATA = {
       "subTopic": "",
       "disease": "ointment",
       "difficulty": 2,
-      "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "16/8/2569",
+      "createdDate": "19/8/2569",
       "isActive": true
     },
     {
@@ -1950,9 +1950,9 @@ const OFFLINE_DATA = {
       "subTopic": "",
       "disease": "ointment",
       "difficulty": 2,
-      "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "16/8/2569",
+      "createdDate": "19/8/2569",
       "isActive": true
     },
     {
@@ -1963,9 +1963,9 @@ const OFFLINE_DATA = {
       "subTopic": "",
       "disease": "Ointment",
       "difficulty": 2,
-      "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "16/8/2569",
+      "createdDate": "19/8/2569",
       "isActive": true
     },
     {
@@ -1976,9 +1976,9 @@ const OFFLINE_DATA = {
       "subTopic": "",
       "disease": "Gel",
       "difficulty": 2,
-      "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "บีเอ็ม",
-      "createdDate": "16/8/2569",
+      "createdDate": "19/8/2569",
       "isActive": true
     },
     {
@@ -1989,9 +1989,9 @@ const OFFLINE_DATA = {
       "subTopic": "",
       "disease": "ointment",
       "difficulty": 2,
-      "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ฟาน่า",
-      "createdDate": "16/8/2569",
+      "createdDate": "19/8/2569",
       "isActive": true
     },
     {
@@ -2002,9 +2002,9 @@ const OFFLINE_DATA = {
       "subTopic": "",
       "disease": "hydrophilic cream",
       "difficulty": 2,
-      "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ฟาน่า",
-      "createdDate": "16/8/2569",
+      "createdDate": "19/8/2569",
       "isActive": true
     },
     {
@@ -2015,9 +2015,9 @@ const OFFLINE_DATA = {
       "subTopic": "",
       "disease": "Cream",
       "difficulty": 2,
-      "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ฟาน่า",
-      "createdDate": "16/8/2569",
+      "createdDate": "19/8/2569",
       "isActive": true
     },
     {
@@ -2028,9 +2028,9 @@ const OFFLINE_DATA = {
       "subTopic": "",
       "disease": "Cream VS Gel",
       "difficulty": 2,
-      "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ฟาน่า",
-      "createdDate": "16/8/2569",
+      "createdDate": "19/8/2569",
       "isActive": true
     },
     {
@@ -2041,9 +2041,9 @@ const OFFLINE_DATA = {
       "subTopic": "",
       "disease": "ชั่ง",
       "difficulty": 2,
-      "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "16/8/2569",
+      "createdDate": "19/8/2569",
       "isActive": true
     },
     {
@@ -2054,9 +2054,9 @@ const OFFLINE_DATA = {
       "subTopic": "",
       "disease": "นับเม็ดยา",
       "difficulty": 2,
-      "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "16/8/2569",
+      "createdDate": "19/8/2569",
       "isActive": true
     },
     {
@@ -2067,9 +2067,9 @@ const OFFLINE_DATA = {
       "subTopic": "",
       "disease": "ชั่ง",
       "difficulty": 2,
-      "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "16/8/2569",
+      "createdDate": "19/8/2569",
       "isActive": true
     },
     {
@@ -2080,9 +2080,9 @@ const OFFLINE_DATA = {
       "subTopic": "",
       "disease": "การนับเม็ดยา",
       "difficulty": 2,
-      "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ใบตอง",
-      "createdDate": "16/8/2569",
+      "createdDate": "19/8/2569",
       "isActive": true
     },
     {
@@ -2093,9 +2093,9 @@ const OFFLINE_DATA = {
       "subTopic": "",
       "disease": "นับเม็ดยา",
       "difficulty": 2,
-      "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "16/8/2569",
+      "createdDate": "19/8/2569",
       "isActive": true
     },
     {
@@ -2106,48 +2106,48 @@ const OFFLINE_DATA = {
       "subTopic": "",
       "disease": "บดและลดขนาด",
       "difficulty": 2,
-      "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "16/8/2569",
+      "createdDate": "19/8/2569",
       "isActive": true
     },
     {
       "caseId": "OSPE-PD017",
-      "title": "Untitled Case",
+      "title": "เคส PD017: ชั่ง",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
       "subTopic": "",
       "disease": "ชั่ง",
       "difficulty": 2,
-      "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ทิว",
-      "createdDate": "16/8/2569",
+      "createdDate": "19/8/2569",
       "isActive": true
     },
     {
       "caseId": "OSPE-PD018",
-      "title": "Untitled Case",
+      "title": "เคส PD018: ชั่ง",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
       "subTopic": "",
       "disease": "ชั่ง",
       "difficulty": 2,
-      "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ทิว",
-      "createdDate": "16/8/2569",
+      "createdDate": "19/8/2569",
       "isActive": true
     },
     {
       "caseId": "OSPE-PD019",
-      "title": "Untitled Case",
+      "title": "เคส PD019: ชั่ง",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
       "subTopic": "",
       "disease": "ชั่ง",
       "difficulty": 2,
-      "docId": "1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw",
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ทิว",
-      "createdDate": "16/8/2569",
+      "createdDate": "19/8/2569",
       "isActive": true
     },
     {

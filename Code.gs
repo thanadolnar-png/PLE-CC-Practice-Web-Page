@@ -22,7 +22,10 @@ const CONFIG = {
     mainGroups: 'MainGroups',
     settings: 'Settings',
     lobbyRooms: 'LobbyRooms',
-    caseReports: 'CaseReports'
+    caseReports: 'CaseReports',
+    // ─── Room Booking System ───────────────────────
+    roomBookings: 'RoomBookings',
+    bookingHistory: 'BookingHistory'
   },
   defaultExamRatio: {
     clinic: 8,
@@ -70,7 +73,7 @@ const DEFAULT_CASES = [
     mainGroup: 'Compounding - Topical',
     disease: 'Dry Skin, Cold Cream',
     difficulty: 2,
-    docId: '1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw',
+    docId: '1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw',
     author: 'Fon',
     createdDate: '15/06/2026',
     isActive: 'TRUE'
@@ -82,7 +85,7 @@ const DEFAULT_CASES = [
     mainGroup: 'Compounding - Liquid',
     disease: 'Pediatric Fever, Paracetamol Suspension',
     difficulty: 3,
-    docId: '1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw',
+    docId: '1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw',
     author: 'Fon',
     createdDate: '15/06/2026',
     isActive: 'TRUE'
@@ -1492,7 +1495,7 @@ function setupSheets() {
 function updateDocsWithSampleContent() {
   const docIds = {
     Clinic: '1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g',
-    Product: '1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw',
+    Product: '1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw',
     SAP: '1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg'
   };
   
@@ -2165,7 +2168,7 @@ function syncCaseLibraryFromDocs() {
   // รายการเอกสารต้นทางและหมวดค่าเริ่มต้น
   const sourceDocs = [
     { docId: '1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g', defaultCat: 'Clinic' },
-    { docId: '1Y0xzOVWiV7kJRJcOIkaflhErEuOtm1gzs-xvTGz22xw', defaultCat: 'Product' },
+    { docId: '1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw', defaultCat: 'Product' },
     { docId: '1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg', defaultCat: 'SAP' }
   ];
   
@@ -2635,3 +2638,591 @@ function getCaseReports(params) {
 
 
 
+// ════════════════════════════════════════════════════════════════════
+//  🏠  ROOM BOOKING SYSTEM — ห้อง 7 ดาว CLINIC OSPE
+//  ────────────────────────────────────────────────────────────────
+//  ฟังก์ชันทั้งหมดในส่วนนี้ใช้สำหรับระบบจองห้อง 7 ดาว
+//  Sheets ที่ใช้: RoomBookings, BookingHistory
+// ════════════════════════════════════════════════════════════════════
+
+/**
+ * setupRoomSheets()
+ * ─────────────────
+ * สร้าง Sheet "RoomBookings" และ "BookingHistory" พร้อม Header row
+ * ใน Spreadsheet เดิม (CONFIG.spreadsheetId)
+ * วิธีใช้: เปิด Apps Script Editor → เลือกฟังก์ชัน setupRoomSheets → กด Run
+ */
+function setupRoomSheets() {
+  const ss = getSpreadsheet();
+
+  // ─── RoomBookings Sheet ───────────────────────────────────────
+  let bookingSheet = ss.getSheetByName(CONFIG.sheets.roomBookings);
+  if (!bookingSheet) {
+    bookingSheet = ss.insertSheet(CONFIG.sheets.roomBookings);
+    Logger.log('✅ Created sheet: ' + CONFIG.sheets.roomBookings);
+  } else {
+    Logger.log('ℹ️  Sheet already exists: ' + CONFIG.sheets.roomBookings);
+  }
+
+  // Set Headers
+  const bookingHeaders = [
+    'bookingId',
+    'date',
+    'timeSlot',
+    'tableType',
+    'studentIds',
+    'bookedBy',
+    'bookedAt',
+    'status',
+    'checkedInAt'    // ← NEW: timestamp เมื่อยืนยันเข้าใช้งาน
+  ];
+  if (bookingSheet.getLastRow() === 0) {
+    bookingSheet.appendRow(bookingHeaders);
+    // Style header row
+    const headerRange = bookingSheet.getRange(1, 1, 1, bookingHeaders.length);
+    headerRange.setFontWeight('bold');
+    headerRange.setBackground('#1d1d1f');
+    headerRange.setFontColor('#ffffff');
+    headerRange.setHorizontalAlignment('center');
+    bookingSheet.setFrozenRows(1);
+    // Set column widths
+    bookingSheet.setColumnWidth(1, 160);  // bookingId
+    bookingSheet.setColumnWidth(2, 120);  // date
+    bookingSheet.setColumnWidth(3, 90);   // timeSlot
+    bookingSheet.setColumnWidth(4, 120);  // tableType
+    bookingSheet.setColumnWidth(5, 280);  // studentIds
+    bookingSheet.setColumnWidth(6, 110);  // bookedBy
+    bookingSheet.setColumnWidth(7, 180);  // bookedAt
+    bookingSheet.setColumnWidth(8, 90);   // status
+    bookingSheet.setColumnWidth(9, 180);  // checkedInAt
+    Logger.log('✅ Added headers to RoomBookings');
+  }
+
+  // ─── BookingHistory Sheet ─────────────────────────────────────
+  let historySheet = ss.getSheetByName(CONFIG.sheets.bookingHistory);
+  if (!historySheet) {
+    historySheet = ss.insertSheet(CONFIG.sheets.bookingHistory);
+    Logger.log('✅ Created sheet: ' + CONFIG.sheets.bookingHistory);
+  } else {
+    Logger.log('ℹ️  Sheet already exists: ' + CONFIG.sheets.bookingHistory);
+  }
+
+  const historyHeaders = [
+    'logId',
+    'bookingId',
+    'action',
+    'date',
+    'timeSlot',
+    'tableType',
+    'studentIds',
+    'actorId',
+    'timestamp'
+  ];
+  if (historySheet.getLastRow() === 0) {
+    historySheet.appendRow(historyHeaders);
+    const headerRange = historySheet.getRange(1, 1, 1, historyHeaders.length);
+    headerRange.setFontWeight('bold');
+    headerRange.setBackground('#1d1d1f');
+    headerRange.setFontColor('#ffffff');
+    headerRange.setHorizontalAlignment('center');
+    historySheet.setFrozenRows(1);
+    historySheet.setColumnWidth(1, 80);   // logId
+    historySheet.setColumnWidth(2, 160);  // bookingId
+    historySheet.setColumnWidth(3, 90);   // action
+    historySheet.setColumnWidth(4, 120);  // date
+    historySheet.setColumnWidth(5, 90);   // timeSlot
+    historySheet.setColumnWidth(6, 120);  // tableType
+    historySheet.setColumnWidth(7, 280);  // studentIds
+    historySheet.setColumnWidth(8, 110);  // actorId
+    historySheet.setColumnWidth(9, 180);  // timestamp
+    Logger.log('✅ Added headers to BookingHistory');
+  }
+
+  Logger.log('🎉 setupRoomSheets() completed successfully!');
+  Logger.log('   RoomBookings rows:    ' + bookingSheet.getLastRow());
+  Logger.log('   BookingHistory rows:  ' + historySheet.getLastRow());
+
+  return {
+    success: true,
+    message: 'สร้าง Sheet เรียบร้อยแล้ว! RoomBookings และ BookingHistory พร้อมใช้งาน'
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────
+//  Booking ID Generator
+// ─────────────────────────────────────────────────────────────────
+function generateBookingId_() {
+  const now  = new Date();
+  const y    = now.getFullYear();
+  const m    = String(now.getMonth()+1).padStart(2,'0');
+  const d    = String(now.getDate()).padStart(2,'0');
+  const rand = String(Math.floor(Math.random() * 9000) + 1000);
+  return `BK-${y}${m}${d}-${rand}`;
+}
+
+// ─────────────────────────────────────────────────────────────────
+//  Log ID Generator
+// ─────────────────────────────────────────────────────────────────
+function generateLogId_(sheet) {
+  return sheet.getLastRow(); // rowCount = logId
+}
+
+// ─────────────────────────────────────────────────────────────────
+//  Internal Date & String Normalizer (Prevents Sheets Date Object Glitches)
+// ─────────────────────────────────────────────────────────────────
+function _normalizeDateStr(val) {
+  if (!val) return '';
+  if (val instanceof Date) {
+    return Utilities.formatDate(val, 'Asia/Bangkok', 'yyyy-MM-dd');
+  }
+  const str = String(val).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+    return str.substring(0, 10);
+  }
+  const parsed = new Date(str);
+  if (!isNaN(parsed.getTime())) {
+    return Utilities.formatDate(parsed, 'Asia/Bangkok', 'yyyy-MM-dd');
+  }
+  return str;
+}
+
+function _dateStr(d) {
+  if (d instanceof Date) {
+    return Utilities.formatDate(d, 'Asia/Bangkok', 'yyyy-MM-dd');
+  }
+  return _normalizeDateStr(d);
+}
+
+// ─────────────────────────────────────────────────────────────────
+/**
+ * getBookingsForWeek(weekStartDate)
+ * ──────────────────────────────────
+ * ดึงข้อมูลการจองทั้งสัปดาห์ (พร้อม auto-expire bookings ที่ไม่ check-in)
+ * @param {string} weekStartDate - วันจันทร์ของสัปดาห์ เช่น "2026-08-17"
+ * @returns {Object} - {
+ *   "2026-08-17_08:00": {
+ *     outside: { bookingId, ids, status, checkedInAt } | null,
+ *     inside:  { bookingId, ids, status, checkedInAt } | null
+ *   }, ...
+ * }
+ */
+function getBookingsForWeek(weekStartDate) {
+  try {
+    const cleanStartDate = _normalizeDateStr(weekStartDate) || _dateStr(new Date());
+
+    // Auto-expire no-show bookings first (non-blocking)
+    try {
+      autoExpireBookings_();
+    } catch (eExp) {
+      Logger.log('autoExpireBookings_ non-blocking error: ' + eExp);
+    }
+
+    const ss = getSpreadsheet();
+    if (!ss) return {};
+    const sheet = ss.getSheetByName(CONFIG.sheets.roomBookings);
+    if (!sheet || sheet.getLastRow() <= 1) return {};
+
+    // Build week date range (Monday to Sunday)
+    const [y, m, d] = cleanStartDate.split('-').map(Number);
+    const startDate = new Date(y, m - 1, d);
+    const endDate   = new Date(y, m - 1, d + 6);
+    const startStr  = cleanStartDate;
+    const endStr    = Utilities.formatDate(endDate, 'Asia/Bangkok', 'yyyy-MM-dd');
+
+    const data   = sheet.getDataRange().getValues();
+    const result = {};
+
+    for (let i = 1; i < data.length; i++) {
+      const row         = data[i];
+      const bId         = row[0] ? String(row[0]).trim() : '';
+      const date        = _normalizeDateStr(row[1]);
+      const time        = row[2] ? String(row[2]).trim() : '';
+      const tType       = row[3] ? String(row[3]).trim() : '';
+      const sIds        = row[4] ? String(row[4]).trim() : '';
+      const status      = row[7] ? String(row[7]).trim() : 'active';
+      const checkedInAt = row[8] ? String(row[8]).trim() : '';
+
+      // Skip cancelled / no_show
+      if (!bId || status === 'cancelled' || status === 'no_show' || !date || !time) continue;
+      if (date < startStr || date > endStr) continue;
+
+      const key = `${date}_${time}`;
+      if (!result[key]) result[key] = { outside: null, inside: null };
+
+      const idList = sIds.split(',').map(s => s.trim()).filter(Boolean);
+      const entry = { bookingId: bId, ids: idList, status, checkedInAt };
+
+      if (tType === 'outside') result[key].outside = entry;
+      else if (tType === 'inside') result[key].inside = entry;
+    }
+
+    return result;
+
+  } catch (e) {
+    Logger.log('getBookingsForWeek error: ' + e.toString());
+    return {};
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+/**
+ * getDayQuota(date, studentId)
+ * ─────────────────────────────
+ * ตรวจสอบจำนวนชั่วโมงที่นิสิตจองไปแล้วในวันนั้น
+ * @returns {number} - จำนวนชั่วโมง (max 2)
+ */
+function getDayQuota(date, studentId) {
+  try {
+    const cleanDate = _normalizeDateStr(date);
+    const ss    = getSpreadsheet();
+    if (!ss) return 0;
+    const sheet = ss.getSheetByName(CONFIG.sheets.roomBookings);
+    if (!sheet || sheet.getLastRow() <= 1) return 0;
+
+    const data  = sheet.getDataRange().getValues();
+    const sidTrim = String(studentId).trim();
+    if (!sidTrim) return 0;
+    let count = 0;
+
+    for (let i = 1; i < data.length; i++) {
+      const row    = data[i];
+      const rDate  = _normalizeDateStr(row[1]);
+      const sIds   = row[4] ? String(row[4]).trim() : '';
+      const status = row[7] ? String(row[7]).trim() : '';
+
+      if (status === 'cancelled' || status === 'no_show') continue;
+      if (rDate !== cleanDate) continue;
+
+      const idList = sIds.split(',').map(s => s.trim());
+      if (idList.includes(sidTrim)) count++;
+    }
+
+    return count; // 1 booking = 1 ชั่วโมง
+
+  } catch (e) {
+    Logger.log('getDayQuota error: ' + e.toString());
+    return 0;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+/**
+ * createBooking(payload)
+ * ──────────────────────
+ * สร้างการจองใหม่ พร้อม validate ทุก rule
+ * @param {Object} payload - { date, timeSlot, tableType, studentIds[], bookedBy }
+ * @returns {Object} - { success, bookingId?, error? }
+ */
+function createBooking(payload) {
+  try {
+    const { date, timeSlot, tableType, studentIds, bookedBy } = payload;
+    const cleanDate = _normalizeDateStr(date);
+
+    // ── Validate required fields ──────────────────────────────
+    if (!cleanDate || !timeSlot || !tableType || !studentIds || !bookedBy) {
+      return { success: false, error: 'ข้อมูลไม่ครบถ้วน กรุณากรอกให้ครบ' };
+    }
+    if (!Array.isArray(studentIds) || studentIds.length < 2) {
+      return { success: false, error: 'ต้องกรอกรหัสนิสิตอย่างน้อย 2 คน' };
+    }
+    if (!['outside','inside'].includes(tableType)) {
+      return { success: false, error: 'ประเภทโต๊ะไม่ถูกต้อง' };
+    }
+
+    // ── Validate date is not in the past ──────────────────────
+    const [y, m, d] = cleanDate.split('-').map(Number);
+    const [slotHour] = timeSlot.split(':').map(Number);
+    const slotDateTime = new Date(y, m - 1, d, slotHour + 1, 0, 0);
+    if (slotDateTime <= new Date()) {
+      return { success: false, error: 'ไม่สามารถจองเวลาที่ผ่านไปแล้ว' };
+    }
+
+    // ── Check quota for all students ─────────────────────────
+    for (const sid of studentIds) {
+      const used = getDayQuota(cleanDate, sid.trim());
+      if (used >= 2) {
+        return { success: false, error: `รหัสนิสิต ${sid.trim()} ใช้ quota 2 ชม./วันครบแล้ว` };
+      }
+    }
+
+    // ── Check slot availability ───────────────────────────────
+    const ss    = getSpreadsheet();
+    if (!ss) return { success: false, error: 'ไม่สามารถเชื่อมต่อ Google Sheet ได้' };
+    const sheet = ss.getSheetByName(CONFIG.sheets.roomBookings);
+    if (!sheet) {
+      return { success: false, error: 'ไม่พบ Sheet RoomBookings กรุณารัน setupRoomSheets() ก่อน' };
+    }
+
+    const data  = sheet.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+      const row    = data[i];
+      const rDate  = _normalizeDateStr(row[1]);
+      const rTime  = row[2] ? String(row[2]).trim() : '';
+      const rType  = row[3] ? String(row[3]).trim() : '';
+      const status = row[7] ? String(row[7]).trim() : '';
+
+      if (status === 'cancelled' || status === 'no_show') continue;
+      if (rDate === cleanDate && rTime === timeSlot && rType === tableType) {
+        const tName = tableType === 'outside' ? 'โต๊ะกลมด้านนอก' : 'โต๊ะในห้อง';
+        return { success: false, error: `${tName} ในช่วงเวลานี้ถูกจองไปแล้ว` };
+      }
+    }
+
+    // ── Create booking ────────────────────────────────────────
+    const bookingId = generateBookingId_();
+    const now       = new Date();
+    const nowStr    = Utilities.formatDate(now, 'Asia/Bangkok', "yyyy-MM-dd'T'HH:mm:ss");
+
+    sheet.appendRow([
+      bookingId,
+      cleanDate,
+      timeSlot,
+      tableType,
+      studentIds.join(', '),
+      String(bookedBy).trim(),
+      nowStr,
+      'active',
+      ''       // checkedInAt — filled by checkInBooking()
+    ]);
+
+    // ── Log to BookingHistory ────────────────────────────────
+    const historySheet = ss.getSheetByName(CONFIG.sheets.bookingHistory);
+    if (historySheet) {
+      const logId = historySheet.getLastRow();
+      historySheet.appendRow([
+        logId,
+        bookingId,
+        'created',
+        cleanDate,
+        timeSlot,
+        tableType,
+        studentIds.join(', '),
+        String(bookedBy).trim(),
+        nowStr
+      ]);
+    }
+
+    Logger.log(`✅ Booking created: ${bookingId} | ${cleanDate} ${timeSlot} | ${tableType} | by ${bookedBy}`);
+    return { success: true, bookingId: bookingId };
+
+  } catch (e) {
+    Logger.log('createBooking error: ' + e.toString());
+    return { success: false, error: 'เกิดข้อผิดพลาดในระบบ: ' + e.message };
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+/**
+ * cancelBooking(bookingId, studentId)
+ * ────────────────────────────────────
+ * ยกเลิกการจอง โดยตรวจสอบว่า studentId เป็นผู้จองหลักหรือสมาชิกในกลุ่ม
+ * @returns {Object} - { success, error? }
+ */
+function cancelBooking(bookingId, studentId) {
+  try {
+    const bIdTrim  = String(bookingId).trim().toUpperCase();
+    const sidTrim  = String(studentId).trim();
+
+    const ss    = getSpreadsheet();
+    if (!ss) return { success: false, error: 'ไม่สามารถเชื่อมต่อ Google Sheet ได้' };
+    const sheet = ss.getSheetByName(CONFIG.sheets.roomBookings);
+    if (!sheet || sheet.getLastRow() <= 1) {
+      return { success: false, error: 'ไม่พบข้อมูลการจอง' };
+    }
+
+    const data = sheet.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+      const row     = data[i];
+      const rId     = row[0] ? String(row[0]).trim().toUpperCase() : '';
+      const rDate   = _normalizeDateStr(row[1]);
+      const rTime   = row[2] ? String(row[2]).trim() : '';
+      const rType   = row[3] ? String(row[3]).trim() : '';
+      const rSids   = row[4] ? String(row[4]).trim() : '';
+      const rBy     = row[5] ? String(row[5]).trim() : '';
+      const status  = row[7] ? String(row[7]).trim() : '';
+
+      if (rId !== bIdTrim) continue;
+
+      // Found booking
+      if (status === 'cancelled') {
+        return { success: false, error: 'การจองนี้ถูกยกเลิกไปแล้ว' };
+      }
+      const idList = rSids.split(',').map(s => s.trim());
+      if (rBy !== sidTrim && !idList.includes(sidTrim)) {
+        return { success: false, error: 'รหัสนิสิตไม่ตรงกับผู้จองหรือสมาชิกในกลุ่ม' };
+      }
+
+      // Cancel it
+      sheet.getRange(i + 1, 8).setValue('cancelled');
+
+      // Log
+      const historySheet = ss.getSheetByName(CONFIG.sheets.bookingHistory);
+      if (historySheet) {
+        const logId = historySheet.getLastRow();
+        const nowStr = Utilities.formatDate(new Date(), 'Asia/Bangkok', "yyyy-MM-dd'T'HH:mm:ss");
+        historySheet.appendRow([
+          logId,
+          bookingId,
+          'cancelled',
+          rDate,
+          rTime,
+          rType,
+          rSids,
+          sidTrim,
+          nowStr
+        ]);
+      }
+
+      Logger.log(`🗑️  Booking cancelled: ${bookingId} by ${sidTrim}`);
+      return { success: true };
+    }
+
+    return { success: false, error: 'ไม่พบ Booking ID นี้ในระบบ' };
+
+  } catch (e) {
+    Logger.log('cancelBooking error: ' + e.toString());
+    return { success: false, error: 'เกิดข้อผิดพลาดในระบบ: ' + e.message };
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+/**
+ * autoExpireBookings_()   [Private — called by getBookingsForWeek]
+ * ─────────────────────────────────────────────────────────────────
+ * สแกนหา bookings ที่ status=active แต่เวลาจอง + 5 นาทีผ่านไปแล้ว
+ * (ไม่ได้ check-in ทัน) → เปลี่ยนเป็น no_show + log
+ */
+function autoExpireBookings_() {
+  try {
+    const ss    = getSpreadsheet();
+    if (!ss) return;
+    const sheet = ss.getSheetByName(CONFIG.sheets.roomBookings);
+    if (!sheet || sheet.getLastRow() <= 1) return;
+
+    const data = sheet.getDataRange().getValues();
+    const now  = new Date();
+    const historySheet = ss.getSheetByName(CONFIG.sheets.bookingHistory);
+
+    for (let i = 1; i < data.length; i++) {
+      const row    = data[i];
+      const bId    = row[0] ? String(row[0]).trim() : '';
+      const date   = _normalizeDateStr(row[1]);
+      const time   = row[2] ? String(row[2]).trim() : '';
+      const tType  = row[3] ? String(row[3]).trim() : '';
+      const sIds   = row[4] ? String(row[4]).trim() : '';
+      const status = row[7] ? String(row[7]).trim() : 'active';
+
+      if (!bId || status !== 'active' || !date || !time) continue;
+
+      const [slotH] = time.split(':').map(Number);
+      if (isNaN(slotH)) continue;
+
+      const [y, m, d] = date.split('-').map(Number);
+      const slotStart = new Date(y, m - 1, d, slotH, 0, 0);
+      const windowEnd = new Date(slotStart.getTime() + 5 * 60 * 1000); // +5 min
+
+      if (now > windowEnd) {
+        sheet.getRange(i + 1, 8).setValue('no_show');
+
+        if (historySheet) {
+          const logId  = historySheet.getLastRow();
+          const nowStr = Utilities.formatDate(now, 'Asia/Bangkok', "yyyy-MM-dd'T'HH:mm:ss");
+          historySheet.appendRow([
+            logId, bId, 'no_show', date, time, tType, sIds, 'SYSTEM', nowStr
+          ]);
+        }
+        Logger.log(`⏰ No-show expire: ${bId} | ${date} ${time}`);
+      }
+    }
+  } catch (e) {
+    Logger.log('autoExpireBookings_ error: ' + e.toString());
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+/**
+ * checkInBooking(bookingId, studentId)
+ * ──────────────────────────────────────
+ * ยืนยันการเข้าใช้งาน — ต้องทำภายใน 5 นาทีหลังเริ่ม slot
+ * studentId ต้องอยู่ในรายชื่อผู้จอง
+ * @returns {Object} - { success, error? }
+ */
+function checkInBooking(bookingId, studentId) {
+  try {
+    const bIdTrim = String(bookingId).trim().toUpperCase();
+    const sidTrim = String(studentId).trim();
+
+    const ss    = getSpreadsheet();
+    if (!ss) return { success: false, error: 'ไม่สามารถเชื่อมต่อ Google Sheet ได้' };
+    const sheet = ss.getSheetByName(CONFIG.sheets.roomBookings);
+    if (!sheet || sheet.getLastRow() <= 1) {
+      return { success: false, error: 'ไม่พบข้อมูลการจอง' };
+    }
+
+    const data = sheet.getDataRange().getValues();
+    const now  = new Date();
+
+    for (let i = 1; i < data.length; i++) {
+      const row    = data[i];
+      const rId    = row[0] ? String(row[0]).trim().toUpperCase() : '';
+      const rDate  = _normalizeDateStr(row[1]);
+      const rTime  = row[2] ? String(row[2]).trim() : '';
+      const rType  = row[3] ? String(row[3]).trim() : '';
+      const rSids  = row[4] ? String(row[4]).trim() : '';
+      const rBy    = row[5] ? String(row[5]).trim() : '';
+      const status = row[7] ? String(row[7]).trim() : 'active';
+
+      if (rId !== bIdTrim) continue;
+
+      if (status === 'checked_in') {
+        return { success: false, error: 'ยืนยันการเข้าใช้งานไปแล้ว' };
+      }
+      if (status !== 'active') {
+        return { success: false, error: 'การจองนี้ไม่สามารถ check-in ได้ (status: ' + status + ')' };
+      }
+
+      const idList = rSids.split(',').map(s => s.trim());
+      if (!idList.includes(sidTrim) && rBy !== sidTrim) {
+        return { success: false, error: 'รหัสนิสิตไม่อยู่ในรายชื่อผู้จอง' };
+      }
+
+      const [slotH] = rTime.split(':').map(Number);
+      const [y, m, d] = rDate.split('-').map(Number);
+      const slotStart = new Date(y, m - 1, d, slotH, 0, 0);
+      const windowEnd = new Date(slotStart.getTime() + 5 * 60 * 1000);
+      if (now > windowEnd) {
+        return { success: false, error: 'หมดเวลายืนยัน (เกิน 5 นาทีแล้ว) การจองถูกยกเลิกอัตโนมัติ' };
+      }
+      if (now < slotStart) {
+        return { success: false, error: 'ยังไม่ถึงเวลาจอง กรุณารอจนถึงเวลา ' + rTime };
+      }
+
+      // ✅ Check-in!
+      const nowStr = Utilities.formatDate(now, 'Asia/Bangkok', "yyyy-MM-dd'T'HH:mm:ss");
+      sheet.getRange(i + 1, 8).setValue('checked_in');
+      sheet.getRange(i + 1, 9).setValue(nowStr);
+
+      // Log
+      const historySheet = ss.getSheetByName(CONFIG.sheets.bookingHistory);
+      if (historySheet) {
+        const logId = historySheet.getLastRow();
+        historySheet.appendRow([
+          logId, bookingId, 'checked_in', rDate, rTime, rType, rSids, sidTrim, nowStr
+        ]);
+      }
+
+      Logger.log(`✅ Check-in: ${bookingId} by ${sidTrim} at ${nowStr}`);
+      return { success: true };
+    }
+
+    return { success: false, error: 'ไม่พบ Booking ID นี้ในระบบ' };
+
+  } catch (e) {
+    Logger.log('checkInBooking error: ' + e.toString());
+    return { success: false, error: 'เกิดข้อผิดพลาดในระบบ: ' + e.message };
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  END OF ROOM BOOKING SYSTEM
+// ════════════════════════════════════════════════════════════════════

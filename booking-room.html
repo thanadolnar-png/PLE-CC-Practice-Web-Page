@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ห้อง 7 ดาว — CLINIC OSPE Booking System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root,[data-theme="light"]{--bg:#f8fafc;--surf:#fff;--surf2:#f1f5f9;--surf3:rgba(255,255,255,.94);--surv:#f8fafc;--bdr:#e2e8f0;--bdr2:#cbd5e1;--bdr3:#6366f1;--txt:#0f172a;--txt2:#475569;--txt3:#94a3b8;--em:#059669;--emb:#ecfdf5;--embd:#a7f3d0;--am:#d97706;--amb:#fffbeb;--ambd:#fde68a;--cr:#e11d48;--crb:#fff1f2;--crbd:#fecdd3;--or:#ea580c;--orb:#fff7ed;--orbd:#fed7aa;--cy:#0284c7;--in:#4f46e5;--ing:rgba(79,70,229,.25);--sh1:0 1px 3px rgba(0,0,0,.05);--sh2:0 4px 16px rgba(0,0,0,.06);--sh3:0 12px 36px rgba(0,0,0,.08)}
+    [data-theme="dark"]{--bg:#070a12;--surf:#0d1322;--surf2:#131b2e;--surf3:rgba(13,19,34,.92);--surv:#182238;--bdr:rgba(255,255,255,.08);--bdr2:rgba(255,255,255,.16);--bdr3:#6366f1;--txt:#f8fafc;--txt2:#94a3b8;--txt3:#64748b;--em:#10b981;--emb:rgba(16,185,129,.1);--embd:rgba(16,185,129,.3);--am:#f59e0b;--amb:rgba(245,158,11,.12);--ambd:rgba(245,158,11,.36);--cr:#f43f5e;--crb:rgba(244,63,94,.1);--crbd:rgba(244,63,94,.3);--or:#ff6b00;--orb:rgba(255,107,0,.14);--orbd:rgba(255,107,0,.4);--cy:#06b6d4;--in:#6366f1;--ing:rgba(99,102,241,.35);--sh1:0 1px 3px rgba(0,0,0,.3);--sh2:0 6px 20px rgba(0,0,0,.4);--sh3:0 16px 48px rgba(0,0,0,.55)}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{font-size:16px;-webkit-font-smoothing:antialiased}
+    body{font-family:'Inter','Bai Jamjuree',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;display:flex;flex-direction:column;line-height:1.5;transition:background .25s,color .25s}
+    
+    /* Navbar */
+    .navbar{position:sticky;top:0;z-index:100;background:var(--surf3);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);padding:0 20px;min-height:60px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .nb-brand{display:flex;align-items:center;gap:10px;flex-shrink:0}
+    .nb-beacon{width:10px;height:10px;border-radius:50%;background:var(--cy);box-shadow:0 0 12px var(--cy);animation:bp 2.4s ease-in-out infinite;flex-shrink:0}
+    @keyframes bp{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.6}}
+    .nb-title{font-family:'Bai Jamjuree',sans-serif;font-weight:700;font-size:.92rem;color:var(--txt);display:flex;align-items:center;gap:6px;white-space:nowrap}
+    .nb-tag{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:600;color:var(--cy);background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.3);padding:1px 6px;border-radius:99px}
+    .nb-sub{font-size:.72rem;color:var(--txt3);white-space:nowrap}
+    .nb-right{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
+    .nb-status{display:flex;align-items:center;gap:12px}
+    .leg{display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--txt2);font-weight:500;white-space:nowrap}
+    .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .dot-g{background:var(--em);box-shadow:0 0 6px var(--em)}.dot-o{background:var(--or);box-shadow:0 0 6px var(--or)}.dot-r{background:var(--cr);box-shadow:0 0 6px var(--cr)}
+    
+    .btn-theme{height:34px;padding:0 12px;border:1px solid var(--bdr);background:var(--surf2);color:var(--txt);border-radius:99px;font-size:.78rem;font-weight:600;font-family:'Bai Jamjuree',sans-serif;cursor:pointer;display:flex;align-items:center;gap:5px;transition:.2s;white-space:nowrap}
+    .btn-theme:hover{background:var(--surv);border-color:var(--bdr2)}
+    .btn-quickbook{background:var(--in);color:#fff;border-color:var(--in);box-shadow:0 2px 8px var(--ing)}
+    .btn-quickbook:hover{background:#4338ca}
+
+    .container{max-width:1420px;width:100%;margin:0 auto;padding:18px 16px 48px;flex:1}
+    
+    /* Week Navigation */
+    .week-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;background:var(--surf);border:1px solid var(--bdr);border-radius:18px;padding:14px 18px;box-shadow:var(--sh1);flex-wrap:wrap;gap:12px}
+    .wk-label{font-family:'Bai Jamjuree',sans-serif;font-size:1.15rem;font-weight:700;color:var(--txt)}
+    .wk-range{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--txt2);margin-top:2px}
+    
+    .nav-btns{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .btn-nav{height:36px;padding:0 14px;border:1px solid var(--bdr);background:var(--surf2);border-radius:10px;font-size:.8rem;font-weight:600;color:var(--txt);cursor:pointer;transition:.2s;font-family:'Bai Jamjuree',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap}
+    .btn-nav:hover{background:var(--surv)}
+    .btn-today{background:var(--in);color:#fff;border-color:var(--in);box-shadow:0 2px 8px var(--ing)}
+    .btn-today:hover{background:#4338ca}
+    
+    .dp-wrap{display:flex;align-items:center}
+    .dp-label{display:flex;align-items:center;gap:6px;height:36px;padding:0 10px;background:var(--surf2);border:1px solid var(--bdr);border-radius:10px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:600;cursor:pointer;transition:.2s;white-space:nowrap}
+    .dp-label:hover{border-color:var(--cy)}
+    .dp-input{background:transparent;border:none;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:600;outline:none;cursor:pointer}
+    
+    /* Calendar Grid Wrapper with Sticky Headers */
+    .cal-wrap{background:var(--surf);border:1px solid var(--bdr);border-radius:20px;overflow:auto;box-shadow:var(--sh2);position:relative;min-height:500px;-webkit-overflow-scrolling:touch}
+    .cal-grid{display:grid;grid-template-columns:76px repeat(16,minmax(84px,1fr));min-width:1440px}
+    
+    .cal-corner{background:var(--surf2);border-bottom:1px solid var(--bdr);border-right:1px solid var(--bdr);padding:10px 4px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--txt3);text-transform:uppercase;position:sticky;left:0;top:0;z-index:25}
+    .cal-th{background:var(--surf2);border-bottom:1px solid var(--bdr);border-right:1px solid var(--bdr);padding:8px 3px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:600;color:var(--txt2);white-space:nowrap;display:flex;flex-direction:column;align-items:center;justify-content:center;position:sticky;top:0;z-index:15}
+    .cal-th span:last-child{font-size:.6rem;color:var(--txt3);margin-top:1px}
+    
+    .cal-dl{background:var(--surf2);border-bottom:1px solid var(--bdr);border-right:1px solid var(--bdr);padding:8px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:76px;position:sticky;left:0;z-index:10;box-shadow:2px 0 6px rgba(0,0,0,.03)}
+    .cal-dn{font-family:'Bai Jamjuree',sans-serif;font-size:.72rem;font-weight:600;color:var(--txt2)}
+    .cal-dd{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;color:var(--txt);line-height:1;margin-top:2px}
+    .cal-dl.today .cal-dd{background:var(--in);color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px var(--ing);font-size:.9rem}
+    .cal-dl.today .cal-dn{color:var(--in)}
+    
+    /* Clean Minimalist Color Pills */
+    .cal-cell{border-bottom:1px solid var(--bdr);border-right:1px solid var(--bdr);min-height:76px;position:relative;transition:.18s;display:flex;flex-direction:column;gap:5px;justify-content:center;padding:4px 5px;background:var(--surf);-webkit-tap-highlight-color:transparent}
+    .cal-cell.past{background:var(--surf2);cursor:not-allowed;opacity:.4}
+    
+    .t-pill{height:30px;width:100%;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:.72rem;font-weight:700;cursor:pointer;transition:.15s;font-family:'Bai Jamjuree',sans-serif;user-select:none;border:1px solid transparent;white-space:nowrap}
+    .t-pill:hover:not(.full):not(.past){filter:brightness(.93);transform:scale(1.02)}
+    
+    /* 🟢 Free (ว่าง - สีเขียว) */
+    .t-pill.free{background:var(--emb);border-color:var(--embd);color:var(--em)}
+    
+    /* 🔴 Booked (จองแล้ว - สีแดง) */
+    .t-pill.full{background:var(--crb);border-color:var(--crbd);color:var(--cr);cursor:default}
+    
+    /* 🟠 Pending Check-in (รอยืนยัน 5 นาที - สีส้มกระพริบ พร้อมนับถอยหลัง) */
+    .t-pill.ci{background:var(--orb);border-color:var(--or);color:var(--or);animation:cip 1.8s ease-in-out infinite;box-shadow:0 0 8px rgba(234,88,12,.3);font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:800}
+    @keyframes cip{0%,100%{box-shadow:0 0 0 0 rgba(234,88,12,0)}50%{box-shadow:0 0 10px 2px rgba(234,88,12,.4)}}
+    
+    .t-pill.past{background:transparent;border-color:transparent;color:var(--txt3);cursor:not-allowed;justify-content:center}
+    .t-pill-cd{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.78rem;font-variant-numeric:tabular-nums}
+    
+    .tip{position:fixed;background:var(--surf);border:1px solid var(--bdr2);color:var(--txt);border-radius:14px;padding:12px 14px;font-size:.75rem;line-height:1.6;max-width:260px;min-width:170px;pointer-events:none;z-index:9999;box-shadow:var(--sh3);transition:opacity .15s;white-space:nowrap}
+    .tip.hidden{opacity:0;pointer-events:none}
+    .tip-title{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.78rem;color:var(--cy);border-bottom:1px solid var(--bdr);padding-bottom:5px;margin-bottom:6px}
+    .tip-row{display:flex;align-items:flex-start;gap:6px}
+    .tip-badge{font-size:.62rem;padding:1px 6px;border-radius:99px;font-weight:600;flex-shrink:0;margin-top:2px;font-family:'Bai Jamjuree',sans-serif}
+    .tip-badge.out{background:var(--amb);color:var(--am);border:1px solid var(--ambd)}
+    .tip-badge.in{background:var(--emb);color:var(--em);border:1px solid var(--embd)}
+    .tip-ids{color:var(--txt2);font-size:.7rem;font-family:'JetBrains Mono',monospace}
+    .tip-empty{color:var(--txt3);font-style:italic;font-size:.72rem}
+    .load-ov{position:absolute;inset:0;background:var(--surf3);display:none;align-items:center;justify-content:center;border-radius:20px;z-index:50}
+    .spinner{width:30px;height:30px;border:3px solid var(--bdr2);border-top-color:var(--cy);border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    
+    .modal-ov{position:fixed;inset:0;z-index:1000;background:rgba(15,23,42,.65);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .25s}
+    .modal-ov.active{opacity:1;pointer-events:all}
+    .modal{background:var(--surf);border:1px solid var(--bdr2);border-radius:22px;padding:24px 20px;width:100%;max-width:460px;box-shadow:var(--sh3);transform:translateY(14px) scale(.98);transition:transform .25s cubic-bezier(.16,1,.3,1);max-height:92vh;overflow-y:auto}
+    .modal-ov.active .modal{transform:translateY(0) scale(1)}
+    .modal-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+    .modal-title{font-family:'Bai Jamjuree',sans-serif;font-size:1.15rem;font-weight:700;color:var(--txt)}
+    .modal-sub{font-size:.78rem;color:var(--txt2);margin-top:2px}
+    .btn-x{width:30px;height:30px;border-radius:50%;border:1px solid var(--bdr);background:var(--surf2);color:var(--txt2);cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0}
+    .btn-x:hover{color:var(--txt);background:var(--surv)}
+    
+    .s-info{background:var(--surf2);border:1px solid var(--bdr);border-radius:12px;padding:12px 16px;margin-bottom:16px;display:flex;gap:16px}
+    .s-info-i{display:flex;flex-direction:column;gap:2px}
+    .s-lbl{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--txt3);font-weight:600;text-transform:uppercase}
+    .s-val{font-family:'JetBrains Mono','Bai Jamjuree',monospace;font-size:.85rem;font-weight:700;color:var(--txt)}
+    
+    .fg{margin-bottom:15px}
+    .fl{display:block;font-size:.76rem;font-weight:600;color:var(--txt2);margin-bottom:5px;font-family:'Bai Jamjuree',sans-serif}
+    .fl span{color:var(--cr);margin-left:2px}
+    .fc{width:100%;padding:10px 12px;border:1px solid var(--bdr2);border-radius:10px;font-size:.85rem;font-family:inherit;color:var(--txt);background:var(--surf2);transition:.2s;outline:none}
+    .fc:focus{border-color:var(--bdr3);background:var(--surf);box-shadow:0 0 0 3px rgba(99,102,241,.15)}
+    .fc::placeholder{color:var(--txt3)}
+    select.fc{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2364748b' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+    .fh{font-size:.68rem;color:var(--txt3);margin-top:4px;line-height:1.4}
+    .fe{font-size:.7rem;color:var(--cr);margin-top:4px;display:none;font-weight:500}
+    .fe.vis{display:block}
+    
+    .sid-name-badge{font-size:.74rem;color:var(--em);background:var(--emb);border:1px solid var(--embd);padding:3px 10px;border-radius:8px;margin-top:5px;display:none;align-items:center;gap:5px;font-weight:600;font-family:'Bai Jamjuree',sans-serif}
+    .sid-name-badge.vis{display:inline-flex}
+
+    .qb{display:inline-flex;align-items:center;gap:8px;background:var(--surf2);border:1px solid var(--bdr);border-radius:99px;padding:5px 12px;font-size:.7rem;color:var(--txt2);margin-bottom:16px}
+    .qb.warn{background:var(--amb);border-color:var(--ambd);color:var(--am)}
+    .q-bar{width:56px;height:4px;background:var(--bdr2);border-radius:99px;overflow:hidden}
+    .q-fill{height:100%;background:var(--in);border-radius:99px;transition:width .3s}
+    .q-fill.warn{background:var(--am)}
+    
+    .btn-row{display:flex;gap:8px;margin-top:20px}
+    .btn{flex:1;height:42px;border-radius:12px;font-size:.82rem;font-weight:600;cursor:pointer;transition:.2s;border:none;display:flex;align-items:center;justify-content:center;gap:6px;font-family:'Bai Jamjuree',sans-serif}
+    .btn-p{background:var(--in);color:#fff;box-shadow:0 2px 8px var(--ing)}.btn-p:hover:not(:disabled){background:#4338ca}.btn-p:disabled{opacity:.35;cursor:not-allowed}
+    .btn-s{background:var(--surf2);color:var(--txt2);border:1px solid var(--bdr)}.btn-s:hover{color:var(--txt);background:var(--surv)}
+    .btn-d{background:var(--crb);color:var(--cr);border:1px solid var(--crbd)}.btn-d:hover{background:var(--cr);color:#fff}
+    .btn-ok{background:var(--emb);color:var(--em);border:1px solid var(--embd)}.btn-ok:hover{background:var(--em);color:#fff}.btn-ok:disabled{opacity:.35;cursor:not-allowed}
+    
+    .ci-banner{background:var(--orb);border:1px solid var(--orbd);border-radius:12px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+    .ci-bl{display:flex;flex-direction:column;gap:2px}
+    .ci-bl-lbl{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;color:var(--or);text-transform:uppercase}
+    .ci-bl-txt{font-size:.74rem;color:var(--txt2);font-weight:500}
+    .ci-cd{font-family:'JetBrains Mono',monospace;font-size:1.45rem;font-weight:800;color:var(--or);font-variant-numeric:tabular-nums}
+    .ci-cd.urg{color:var(--cr);animation:ub .6s step-end infinite}
+    @keyframes ub{0%,100%{opacity:1}50%{opacity:.4}}
+    
+    .rules-sec{margin-top:28px;background:var(--surf);border:1px solid var(--bdr);border-radius:20px;padding:22px 24px;box-shadow:var(--sh1)}
+    .r-hdr{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+    .r-ico{width:28px;height:28px;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.88rem;color:var(--in)}
+    .r-title{font-family:'Bai Jamjuree',sans-serif;font-size:1rem;font-weight:700;color:var(--txt)}
+    .r-list{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+    .r-list li{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--surf2);border:1px solid var(--bdr);border-radius:12px;transition:.2s}
+    .r-list li:hover{border-color:var(--bdr2)}
+    .r-num{width:20px;height:20px;border-radius:50%;background:var(--surf);border:1px solid var(--bdr2);color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+    .r-txt{font-size:.78rem;line-height:1.45;color:var(--txt2)}
+    .r-txt strong{color:var(--txt);font-weight:600}
+    
+    /* My Bookings Card List */
+    .b-card{background:var(--surf2);border:1px solid var(--bdr);border-radius:14px;padding:12px 14px;margin-bottom:10px;display:flex;flex-direction:column;gap:6px;transition:.2s}
+    .b-card:hover{border-color:var(--bdr2)}
+    .b-card-hdr{display:flex;justify-content:space-between;align-items:center}
+    .b-card-date{font-weight:700;font-size:.85rem;color:var(--txt);font-family:'Bai Jamjuree',sans-serif}
+    .b-card-badge{font-size:.68rem;font-weight:600;padding:2px 8px;border-radius:99px}
+    .b-card-badge.out{background:var(--amb);color:var(--am);border:1px solid var(--ambd)}
+    .b-card-badge.in{background:var(--emb);color:var(--em);border:1px solid var(--embd)}
+    .b-card-body{font-size:.76rem;color:var(--txt2);line-height:1.45}
+    .b-card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:2px;padding-top:6px;border-top:1px dashed var(--bdr)}
+    .b-card-id{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--txt3)}
+    .btn-cancel-slot{background:var(--crb);color:var(--cr);border:1px solid var(--crbd);padding:4px 10px;border-radius:8px;font-size:.75rem;font-weight:600;cursor:pointer;transition:.2s;font-family:'Bai Jamjuree',sans-serif}
+    .btn-cancel-slot:hover{background:var(--cr);color:#fff}
+    
+    .cancel-lnk-sec{margin-top:16px;text-align:center;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+    .cancel-lnk{font-size:.8rem;color:var(--txt);font-weight:600;cursor:pointer;background:var(--surf);border:1px solid var(--bdr);font-family:'Bai Jamjuree',sans-serif;transition:.2s;padding:8px 16px;border-radius:99px;box-shadow:var(--sh1)}
+    .cancel-lnk:hover{background:var(--surf2);border-color:var(--bdr2)}
+    
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--surf);border:1px solid var(--bdr2);color:var(--txt);padding:10px 20px;border-radius:99px;font-size:.8rem;font-weight:600;box-shadow:var(--sh3);z-index:9999;opacity:0;transition:opacity .3s,transform .3s;white-space:nowrap;font-family:'Bai Jamjuree',sans-serif}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .toast.success::before{content:'✓  ';color:var(--em)}
+    .toast.info::before{content:'ℹ  ';color:var(--cy)}
+    .toast.error{background:var(--crb);border-color:var(--crbd)}.toast.error::before{content:'✕  ';color:var(--cr)}
+    
+    /* ══════════════════════════════════════════════════════════════
+       RESPONSIVE DESIGN (MOBILE & TABLET ADAPTATION)
+       ══════════════════════════════════════════════════════════════ */
+    @media (max-width: 860px) {
+      .navbar { padding: 8px 14px; min-height: 56px; }
+      .nb-brand { gap: 8px; }
+      .nb-title { font-size: .86rem; }
+      .nb-sub { display: none; }
+      .nb-status { display: none; }
+      .container { padding: 12px 10px 40px; }
+      .week-nav { padding: 12px 14px; gap: 10px; }
+      .nav-btns { width: 100%; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+      .dp-wrap { grid-column: 1 / -1; width: 100%; }
+      .dp-label { width: 100%; justify-content: center; }
+      .btn-nav { width: 100%; padding: 0 8px; font-size: .76rem; }
+      .rules-sec { padding: 16px; }
+      .modal { padding: 20px 16px; border-radius: 18px; }
+      .s-info { flex-direction: column; gap: 8px; }
+      .r-list { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 480px) {
+      .navbar { flex-wrap: wrap; justify-content: space-between; padding: 8px 10px; }
+      .nb-title { font-size: .82rem; }
+      .btn-theme { height: 30px; padding: 0 8px; font-size: .72rem; }
+      .btn-theme span:last-child { font-size: .72rem; }
+      .wk-label { font-size: 1.05rem; }
+      .wk-range { font-size: .74rem; }
+      .cal-grid { grid-template-columns: 66px repeat(16, minmax(72px, 1fr)); min-width: 1220px; }
+      .cal-corner { font-size: .56rem; padding: 6px 2px; }
+      .cal-th { font-size: .64rem; padding: 6px 2px; }
+      .cal-dl { min-height: 72px; padding: 6px 2px; }
+      .cal-dn { font-size: .66rem; }
+      .cal-dd { font-size: .92rem; }
+      .cal-cell { min-height: 72px; padding: 3px 3px; }
+      .t-pill { height: 28px; font-size: .66rem; gap: 3px; }
+      .t-pill.ci { font-size: .7rem; }
+    }
+
+    /* Footer & Credit */
+    .app-footer {
+      margin-top: 36px;
+      padding: 24px 16px 32px;
+      border-top: 1px solid var(--bdr);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .footer-copy {
+      font-size: 0.8rem;
+      color: var(--txt2);
+      font-weight: 500;
+    }
+    .footer-credit {
+      font-size: 0.84rem;
+      color: var(--txt);
+      font-family: 'Bai Jamjuree', sans-serif;
+    }
+    .footer-credit strong {
+      color: var(--in);
+      font-weight: 700;
+    }
+    .footer-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--cy);
+      background: rgba(6,182,212,.12);
+      border: 1px solid rgba(6,182,212,.28);
+      padding: 2px 10px;
+      border-radius: 99px;
+      display: inline-block;
+      margin-bottom: 2px;
+    }
+    .footer-sub {
+      font-size: 0.74rem;
+      color: var(--txt3);
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nb-brand">
+    <div class="nb-beacon"></div>
+    <div>
+      <div class="nb-title">ห้อง 7 ดาว <span class="nb-tag">OSPE</span></div>
+      <div class="nb-sub">คณะเภสัชศาสตร์ จุฬาฯ</div>
+    </div>
+  </div>
+  <div class="nb-right">
+    <div class="nb-status">
+      <div class="leg"><div class="dot dot-g"></div>ว่าง (สีเขียว)</div>
+      <div class="leg"><div class="dot dot-o"></div>รอยืนยัน (สีส้ม)</div>
+      <div class="leg"><div class="dot dot-r"></div>จองแล้ว (สีแดง)</div>
+    </div>
+    <button class="btn-theme btn-quickbook" onclick="openQuickBook()" title="ค้นหาและจองห้องโดยตรงโดยระบุวัน-เวลา">
+      <span>📅</span><span>ระบุวัน-เวลา</span>
+    </button>
+    <button class="btn-theme" onclick="openMyBookings()" title="ดูรายการที่ฉันจองไว้ หรือกดยกเลิก">
+      <span>📋</span><span>การจอง</span>
+    </button>
+    <button class="btn-theme" onclick="refreshData()" title="ดึงข้อมูลล่าสุดจาก Google Sheet">
+      <span>🔄</span><span>อัปเดต</span>
+    </button>
+    <button class="btn-theme" id="btnTheme" onclick="toggleTheme()">
+      <span id="themeIcon">☀️</span><span id="themeLabel">กลางวัน</span>
+    </button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="week-nav">
+    <div>
+      <div class="wk-label" id="weekLabel">กำลังโหลด...</div>
+      <div class="wk-range" id="weekRange"> </div>
+    </div>
+    <div class="nav-btns">
+      <div class="dp-wrap">
+        <label for="dp" class="dp-label">
+          <span>📅 เลือกวันที่:</span>
+          <input type="date" id="dp" class="dp-input" onchange="onDatePick(this.value)">
+        </label>
+      </div>
+      <button class="btn-nav" onclick="navWeek(-1)">&#8592; ก่อนหน้า</button>
+      <button class="btn-nav btn-today" onclick="navToday()">สัปดาห์นี้</button>
+      <button class="btn-nav" onclick="navWeek(1)">ถัดไป &#8594;</button>
+    </div>
+  </div>
+
+  <div style="position:relative">
+    <div class="cal-wrap">
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+    <div class="load-ov" id="loadOv"><div class="spinner"></div></div>
+  </div>
+
+  <!-- Bottom quick actions -->
+  <div class="cancel-lnk-sec">
+    <button class="cancel-lnk" style="background:var(--in);color:#fff;border-color:var(--in);box-shadow:0 2px 8px var(--ing)" onclick="openQuickBook()">📅 จองแบบระบุวัน-เวลา</button>
+    <button class="cancel-lnk" onclick="openMyBookings()">📋 ตรวจสอบ & ยกเลิกการจองของฉัน</button>
+    <button class="cancel-lnk" onclick="refreshData()">🔄 รีเฟรชข้อมูลล่าสุด</button>
+  </div>
+
+  <div class="rules-sec">
+    <div class="r-hdr">
+      <div class="r-ico">📋</div>
+      <div class="r-title">กฎระเบียบและข้อปฏิบัติการใช้ห้อง 7 ดาว</div>
+    </div>
+    <ul class="r-list">
+      <li><div class="r-num">01</div><div class="r-txt"><strong>ปิดห้องให้เรียบร้อยหลังใช้งาน</strong> — ปิดไฟ ปิดเครื่องปรับอากาศ และล็อกประตูทุกครั้งหลังเสร็จสิ้นการซ้อม</div></li>
+      <li><div class="r-num">02</div><div class="r-txt"><strong>ห้ามนำอุปกรณ์ออกนอกห้องเด็ดขาด</strong> — อุปกรณ์จำลองทางการแพทย์ทุกชิ้นเป็นสมบัติส่วนกลางของคณะ</div></li>
+      <li><div class="r-num">03</div><div class="r-txt"><strong>รักษาความสะอาดและความเป็นระเบียบ</strong> — จัดเก็บโต๊ะ เก้าอี้ และขยะส่วนตัวทั้งหมดก่อนออกจากห้อง</div></li>
+      <li><div class="r-num">04</div><div class="r-txt"><strong>ความรับผิดชอบต่อความเสียหาย</strong> — หากเกิดความเสียหาย กลุ่มนิสิตที่เข้าใช้งานล่าสุดจะต้องร่วมรับผิดชอบ</div></li>
+    </ul>
+  </div>
+
+  <!-- Footer & Developer Credit -->
+  <footer class="app-footer">
+    <div><span class="footer-tag">โครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม (PLE-CC)</span></div>
+    <p class="footer-copy">© 2026 คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย · ระบบจองห้อง 7 ดาว OSPE</p>
+    <p class="footer-credit">
+      💻 ออกแบบและพัฒนาโดย: <strong>แม็กนั่ม (Maxnum)</strong> · หัวหน้าชั้นปีที่ 5 ปีการศึกษา 2569 คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย
+    </p>
+    <p class="footer-sub">หากพบปัญหาการใช้งานหรือมีข้อเสนอแนะ สามารถติดต่อแม็กนั่ม (Maxnum) ได้โดยตรง</p>
+  </footer>
+</div>
+
+<div class="tip hidden" id="tip">
+  <div class="tip-title" id="tipT"></div>
+  <div id="tipC"></div>
+</div>
+
+<!-- QUICK BOOK MODAL (DIRECT DATE & TIME SEARCH / BOOKING) -->
+<div class="modal-ov" id="quickBookMod">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title">📅 จองแบบระบุวัน-เวลา</div>
+        <div class="modal-sub">เลือกวันที่ ช่วงเวลา และโต๊ะที่ต้องการจองได้โดยตรง</div>
+      </div>
+      <button class="btn-x" onclick="closeQuickBook()">✕</button>
+    </div>
+
+    <!-- Date & Time Selector -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div>
+        <label class="fl">วันที่ต้องการจอง <span>*</span></label>
+        <input type="date" class="fc" id="qbDate" onchange="onQbDateTimeChange()">
+        <div class="fe" id="eQbDate">กรุณาเลือกวันที่</div>
+      </div>
+      <div>
+        <label class="fl">ช่วงเวลา <span>*</span></label>
+        <select class="fc" id="qbSlot" onchange="onQbDateTimeChange()">
+          <option value="">— เลือกช่วงเวลา —</option>
+        </select>
+        <div class="fe" id="eQbSlot">กรุณาเลือกช่วงเวลา</div>
+      </div>
+    </div>
+
+    <div class="fg">
+      <label class="fl">เลือกประเภทโต๊ะ <span>*</span></label>
+      <select class="fc" id="qbTType" onchange="checkQbAvailability()">
+        <option value="outside">🟡 โต๊ะกลมด้านนอก (5 คน)</option>
+        <option value="inside">🟢 โต๊ะในห้อง (7 คน)</option>
+      </select>
+      <div class="fe" id="eQbTType">กรุณาเลือกประเภทโต๊ะ</div>
+      <div id="qbAvailBadge" style="font-size:0.75rem;margin-top:6px;display:none;padding:5px 12px;border-radius:8px;font-weight:600"></div>
+    </div>
+
+    <!-- Student 1 -->
+    <div class="fg">
+      <label class="fl">รหัสนิสิตคนที่ 1 <span>*</span></label>
+      <input type="text" class="fc" id="qbSid1" placeholder="เช่น 6531034333" maxlength="10" autocomplete="off" oninput="onQbSidChange(1)">
+      <div class="fh">รหัสนิสิต 10 หลัก (ระบบตรวจสอบฐานข้อมูล StudentData อัตโนมัติ)</div>
+      <div class="sid-name-badge" id="qbNameBadge1"></div>
+      <div class="fe" id="eQbSid1">กรุณากรอกรหัสนิสิต 10 หลักให้ถูกต้อง</div>
+      <div class="fe" id="eQbNotFound1">ไม่พบรหัสนิสิตนี้ในฐานข้อมูลรายชื่อคณะ</div>
+      <div class="fe" id="eQbQuota1">รหัสนิสิตนี้ใช้ Quota ครบ 2 ชม./วันแล้ว</div>
+    </div>
+
+    <!-- Student 2 -->
+    <div class="fg">
+      <label class="fl">รหัสนิสิตคนที่ 2 <span>*</span></label>
+      <input type="text" class="fc" id="qbSid2" placeholder="เช่น 6531034333" maxlength="10" autocomplete="off" oninput="onQbSidChange(2)">
+      <div class="fh">รหัสนิสิต 10 หลัก (ต้องไม่ซ้ำกับคนที่ 1)</div>
+      <div class="sid-name-badge" id="qbNameBadge2"></div>
+      <div class="fe" id="eQbSid2">กรุณากรอกรหัสนิสิต 10 หลักให้ถูกต้อง</div>
+      <div class="fe" id="eQbNotFound2">ไม่พบรหัสนิสิตนี้ในฐานข้อมูลรายชื่อคณะ</div>
+      <div class="fe" id="eQbSameSid">รหัสนิสิตคนที่ 2 ต้องไม่ซ้ำกับคนที่ 1</div>
+      <div class="fe" id="eQbQuota2">รหัสนิสิตคนที่ 2 ใช้ Quota ครบ 2 ชม./วันแล้ว</div>
+    </div>
+
+    <!-- PIN 4 Digits -->
+    <div class="fg">
+      <label class="fl">ตั้งรหัส PIN 4 หลักสำหรับยกเลิกการจอง <span>*</span></label>
+      <input type="password" inputmode="numeric" class="fc" id="qbPin" placeholder="เช่น 1234 (ตัวเลข 4 หลัก)" maxlength="4" autocomplete="off" style="font-family:'JetBrains Mono',monospace;letter-spacing:4px;font-size:1.05rem;font-weight:700">
+      <div class="fh">🔒 รหัสนี้ใช้สำหรับยืนยันเมื่อต้องการยกเลิกการจอง ป้องกันผู้อื่นแกล้งลบ</div>
+      <div class="fe" id="eQbPin">กรุณาตั้งรหัส PIN ตัวเลข 4 หลัก</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-s" onclick="closeQuickBook()">ยกเลิก</button>
+      <button class="btn btn-p" id="btnQbSubmit" onclick="submitQuickBook()">✓ ยืนยันการสำรองเวลา</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOOKING MODAL (2 STUDENTS + 4-DIGIT PIN) -->
+<div class="modal-ov" id="bookMod">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title">จองห้อง 7 ดาว</div>
+        <div class="modal-sub" id="modSub">ระบุรหัสนิสิต 2 คนเพื่อสำรองเวลาซ้อม OSPE</div>
+      </div>
+      <button class="btn-x" onclick="closeBook()">✕</button>
+    </div>
+    <div class="s-info">
+      <div class="s-info-i"><span class="s-lbl">วันที่</span><span class="s-val" id="sDate">—</span></div>
+      <div class="s-info-i"><span class="s-lbl">ช่วงเวลา</span><span class="s-val" id="sTime">—</span></div>
+    </div>
+    
+    <div class="fg">
+      <label class="fl">เลือกประเภทโต๊ะ <span>*</span></label>
+      <select class="fc" id="tType">
+        <option value="">— เลือกโต๊ะฝึกซ้อม —</option>
+        <option value="outside">🟡 โต๊ะกลมด้านนอก (5 คน)</option>
+        <option value="inside">🟢 โต๊ะในห้อง (7 คน)</option>
+      </select>
+      <div class="fe" id="eTType">กรุณาเลือกประเภทโต๊ะ</div>
+    </div>
+
+    <!-- Student 1 -->
+    <div class="fg">
+      <label class="fl">รหัสนิสิตคนที่ 1 <span>*</span></label>
+      <input type="text" class="fc" id="sid1" placeholder="เช่น 6531034333" maxlength="10" autocomplete="off" oninput="onSidChange(1)">
+      <div class="fh">รหัสนิสิต 10 หลัก (ระบบตรวจสอบฐานข้อมูล StudentData อัตโนมัติ)</div>
+      <div class="sid-name-badge" id="nameBadge1"></div>
+      <div class="fe" id="eSid1">กรุณากรอกรหัสนิสิต 10 หลักให้ถูกต้อง</div>
+      <div class="fe" id="eNotFound1">ไม่พบรหัสนิสิตนี้ในฐานข้อมูลรายชื่อคณะ</div>
+      <div class="fe" id="eQuota1">รหัสนิสิตนี้ใช้ Quota ครบ 2 ชม./วันแล้ว</div>
+    </div>
+
+    <!-- Student 2 -->
+    <div class="fg">
+      <label class="fl">รหัสนิสิตคนที่ 2 <span>*</span></label>
+      <input type="text" class="fc" id="sid2" placeholder="เช่น 6531034333" maxlength="10" autocomplete="off" oninput="onSidChange(2)">
+      <div class="fh">รหัสนิสิต 10 หลัก (ต้องไม่ซ้ำกับคนที่ 1)</div>
+      <div class="sid-name-badge" id="nameBadge2"></div>
+      <div class="fe" id="eSid2">กรุณากรอกรหัสนิสิต 10 หลักให้ถูกต้อง</div>
+      <div class="fe" id="eNotFound2">ไม่พบรหัสนิสิตนี้ในฐานข้อมูลรายชื่อคณะ</div>
+      <div class="fe" id="eSameSid">รหัสนิสิตคนที่ 2 ต้องไม่ซ้ำกับคนที่ 1</div>
+      <div class="fe" id="eQuota2">รหัสนิสิตคนที่ 2 ใช้ Quota ครบ 2 ชม./วันแล้ว</div>
+    </div>
+
+    <!-- 4-digit PIN for cancellation -->
+    <div class="fg">
+      <label class="fl">ตั้งรหัส PIN 4 หลักสำหรับยกเลิกการจอง <span>*</span></label>
+      <input type="password" inputmode="numeric" class="fc" id="bookPin" placeholder="เช่น 1234 (ตัวเลข 4 หลัก)" maxlength="4" autocomplete="off" style="font-family:'JetBrains Mono',monospace;letter-spacing:4px;font-size:1.05rem;font-weight:700">
+      <div class="fh">🔒 รหัสนี้ใช้สำหรับยืนยันเมื่อต้องการยกเลิกการจอง ป้องกันผู้อื่นแกล้งลบ</div>
+      <div class="fe" id="ePin">กรุณาตั้งรหัส PIN ตัวเลข 4 หลัก</div>
+    </div>
+
+    <!-- Quota Indicator -->
+    <div class="qb" id="qBadge">
+      <div class="q-bar"><div class="q-fill" id="qFill" style="width:0%"></div></div>
+      <span id="qTxt">กรอกรหัสนิสิต 10 หลักทั้ง 2 คนเพื่อตรวจ Quota</span>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-s" onclick="closeBook()">ยกเลิก</button>
+      <button class="btn btn-p" id="btnBook" onclick="submitBook()">ยืนยันการสำรองเวลา</button>
+    </div>
+  </div>
+</div>
+
+<!-- MY BOOKINGS MODAL (SEARCH BY STUDENT ID ONLY) -->
+<div class="modal-ov" id="myBookingsMod">
+  <div class="modal" role="dialog" aria-modal="true" style="max-width:540px">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title">📋 การจองของฉัน</div>
+        <div class="modal-sub">กรอกรหัสนิสิตเพื่อดูรายการที่จองไว้ หรือกดยกเลิก</div>
+      </div>
+      <button class="btn-x" onclick="closeMyBookings()">✕</button>
+    </div>
+    
+    <div class="fg" style="display:flex;gap:8px">
+      <div style="flex:1">
+        <label class="fl">รหัสนิสิตของคุณ (10 หลัก) <span>*</span></label>
+        <input type="text" class="fc" id="mySidInput" placeholder="เช่น 6531034333" maxlength="10" autocomplete="off" onkeyup="if(event.key==='Enter') searchMyBookings()">
+        <div class="fe" id="eMySid">กรุณากรอกรหัสนิสิต 10 หลัก</div>
+      </div>
+      <div style="display:flex;align-items:flex-end">
+        <button class="btn btn-p" style="height:40px;padding:0 18px" onclick="searchMyBookings()">🔍 ค้นหา</button>
+      </div>
+    </div>
+
+    <div id="myBookingsList" style="margin-top:14px;max-height:360px;overflow-y:auto">
+      <div style="text-align:center;color:var(--txt3);padding:24px 0;font-size:0.85rem">
+        กรอกรหัสนิสิตด้านบน แล้วกดปุ่มค้นหา
+      </div>
+    </div>
+
+    <div class="btn-row" style="margin-top:16px">
+      <button class="btn btn-s" onclick="closeMyBookings()">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<!-- PIN CONFIRMATION MODAL FOR CANCEL -->
+<div class="modal-ov" id="pinCancelMod" style="z-index:1100">
+  <div class="modal" role="dialog" aria-modal="true" style="max-width:380px">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title">🔒 ยืนยันรหัส PIN 4 หลัก</div>
+        <div class="modal-sub">กรอกรหัส PIN ที่ตั้งไว้ตอนจองเพื่อยกเลิก</div>
+      </div>
+      <button class="btn-x" onclick="closePinCancel()">✕</button>
+    </div>
+    <div style="background:var(--surf2);border:1px solid var(--bdr);border-radius:12px;padding:12px;margin-bottom:14px;font-size:0.8rem;color:var(--txt2)" id="pinCancelSlotInfo">
+      ...
+    </div>
+    <div class="fg">
+      <label class="fl">รหัส PIN 4 หลัก <span>*</span></label>
+      <input type="password" inputmode="numeric" class="fc" id="inputCancelPin" placeholder="••••" maxlength="4" autocomplete="off" style="font-family:'JetBrains Mono',monospace;letter-spacing:6px;font-size:1.25rem;text-align:center;font-weight:800" onkeyup="if(event.key==='Enter') submitPinCancel()">
+      <div class="fe" id="eCancelPin">กรุณากรอกรหัส PIN ตัวเลข 4 หลัก</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-s" onclick="closePinCancel()">ย้อนกลับ</button>
+      <button class="btn btn-d" id="btnConfirmPinCancel" onclick="submitPinCancel()">ยืนยันยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHECK-IN MODAL (REQUIRES 10-DIGIT SID + 4-DIGIT PIN) -->
+<div class="modal-ov" id="ciMod">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-hdr">
+      <div><div class="modal-title" id="ciTitle">⏰ ยืนยันการเข้าใช้งานห้อง</div><div class="modal-sub" id="ciSub">กรุณายืนยันตัวตนภายใน 5 นาที</div></div>
+      <button class="btn-x" onclick="closeCi()">✕</button>
+    </div>
+    <div class="ci-banner">
+      <div class="ci-bl"><span class="ci-bl-lbl">⚠ เวลาที่เหลือสำหรับการยืนยัน</span><span class="ci-bl-txt">หากไม่ยืนยัน ระบบจะปล่อย Slot อัตโนมัติ</span></div>
+      <div class="ci-cd" id="ciCd">5:00</div>
+    </div>
+    <div class="s-info">
+      <div class="s-info-i"><span class="s-lbl">วันที่</span><span class="s-val" id="ciDate">—</span></div>
+      <div class="s-info-i"><span class="s-lbl">ช่วงเวลา</span><span class="s-val" id="ciTime">—</span></div>
+    </div>
+    <div class="fg">
+      <label class="fl">เลือกโต๊ะของกลุ่มคุณ <span>*</span></label>
+      <select class="fc" id="ciTType"><option value="">— เลือกโต๊ะ —</option></select>
+      <div class="fe" id="eCiT">กรุณาเลือกโต๊ะ</div>
+    </div>
+    <div class="fg">
+      <label class="fl">รหัสนิสิตของคุณ <span>*</span></label>
+      <input type="text" class="fc" id="ciSId" placeholder="เช่น 6531034333" maxlength="10" autocomplete="off">
+      <div class="fh">ต้องเป็นรหัสนิสิตที่มีชื่ออยู่ในกลุ่มที่จอง (10 หลัก)</div>
+      <div class="fe" id="eCiS">กรุณากรอกรหัสนิสิต 10 หลัก</div>
+    </div>
+    <div class="fg">
+      <label class="fl">รหัส PIN 4 หลัก (ที่ตั้งไว้ตอนจอง) <span>*</span></label>
+      <input type="password" inputmode="numeric" class="fc" id="ciPin" placeholder="••••" maxlength="4" autocomplete="off" style="font-family:'JetBrains Mono',monospace;letter-spacing:6px;font-size:1.15rem;text-align:center;font-weight:800">
+      <div class="fh">🔒 ใส่รหัส PIN 4 หลักเพื่อความปลอดภัย ป้องกันผู้อื่นแอบกดยืนยันหรือยกเลิก</div>
+      <div class="fe" id="eCiPin">กรุณากรอกรหัส PIN ตัวเลข 4 หลัก</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-d" id="btnCiCancel" onclick="doCiCancel()">ยกเลิก Slot นี้</button>
+      <button class="btn btn-ok" id="btnCiOk" onclick="doCiConfirm()">✓ ยืนยันเข้าใช้งาน</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Constants ──────────────────────────────────────────────────────────
+var SLOTS  = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00','23:00'];
+var DAYS   = ['จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์','อาทิตย์'];
+var MONTHS = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+// ── State ──────────────────────────────────────────────────────────────
+var wkStart        = monOf(new Date());
+var bkData         = {};
+var selSlot        = null;
+var ciSlot         = null;
+var pendingCancel  = null;
+var studentValid   = { 1: false, 2: false };
+var loadTid        = null;
+var tickInt        = null;
+var themeVal       = 'light';
+
+// ── Storage helpers (safe for GAS iframe) ─────────────────────────────
+function stGet(k) { try { return localStorage.getItem(k); } catch(e) { return null; } }
+function stSet(k,v) { try { localStorage.setItem(k,v); } catch(e) {} }
+
+// ── Theme ──────────────────────────────────────────────────────────────
+function initTheme() {
+  var s = stGet('rxcu_theme') || 'light';
+  applyTheme(s);
+}
+
+function applyTheme(m) {
+  themeVal = m;
+  document.documentElement.setAttribute('data-theme', m);
+  document.body.setAttribute('data-theme', m);
+  stSet('rxcu_theme', m);
+  var ic = document.getElementById('themeIcon');
+  var lb = document.getElementById('themeLabel');
+  if (ic) ic.textContent = m === 'dark' ? '🌙' : '☀️';
+  if (lb) lb.textContent = m === 'dark' ? 'มืด' : 'สว่าง';
+}
+
+function toggleTheme() {
+  applyTheme(themeVal === 'dark' ? 'light' : 'dark');
+}
+
+// ── Date helpers ──────────────────────────────────────────────────────
+function monOf(d) {
+  var dt = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  var day = dt.getDay();
+  var diff = (day === 0) ? -6 : 1 - day;
+  dt.setDate(dt.getDate() + diff);
+  return dt;
+}
+
+function dStr(d) {
+  var y = d.getFullYear();
+  var m = ('0' + (d.getMonth()+1)).slice(-2);
+  var dd = ('0' + d.getDate()).slice(-2);
+  return y + '-' + m + '-' + dd;
+}
+
+function dTH(d) {
+  return d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + (d.getFullYear()+543);
+}
+
+function isToday(d) {
+  var t = new Date();
+  return d.getDate()===t.getDate() && d.getMonth()===t.getMonth() && d.getFullYear()===t.getFullYear();
+}
+
+function isPast(d, slot) {
+  var h = parseInt(slot);
+  var end = new Date(d.getFullYear(), d.getMonth(), d.getDate(), h+1, 0, 0);
+  return end <= new Date();
+}
+
+// ── Check-in Window Calculation (5 mins from slot start OR 5 mins from booking time) ──
+function getCiWindow(ds, slot, sdEntry) {
+  var h = parseInt(slot);
+  var parts = ds.split('-');
+  var slotStart = new Date(+parts[0], +parts[1]-1, +parts[2], h, 0, 0);
+  var slotEnd   = new Date(+parts[0], +parts[1]-1, +parts[2], h + 1, 0, 0);
+  var windowEnd = new Date(slotStart.getTime() + 5 * 60 * 1000);
+
+  if (sdEntry && sdEntry.bookedAt) {
+    var bDate = new Date(sdEntry.bookedAt);
+    if (!isNaN(bDate.getTime())) {
+      var bPlus5 = new Date(bDate.getTime() + 5 * 60 * 1000);
+      if (bPlus5 > windowEnd) windowEnd = bPlus5;
+    }
+  }
+  if (windowEnd > slotEnd) windowEnd = slotEnd;
+  return { start: slotStart, end: windowEnd };
+}
+
+function inCiWin(ds, slot, sdEntry) {
+  if (!sdEntry) return false;
+  var win = getCiWindow(ds, slot, sdEntry);
+  var now = new Date();
+  return now >= win.start && now < win.end;
+}
+
+function ciSecsLeft(ds, slot, sdEntry) {
+  if (!sdEntry) return 0;
+  var win = getCiWindow(ds, slot, sdEntry);
+  return Math.max(0, Math.floor((win.end - new Date()) / 1000));
+}
+
+function fmtCd(s) {
+  return Math.floor(s/60) + ':' + ('0' + (s%60)).slice(-2);
+}
+
+// ── Week Navigation ────────────────────────────────────────────────────
+function navWeek(dir) {
+  wkStart = new Date(wkStart.getFullYear(), wkStart.getMonth(), wkStart.getDate() + dir*7);
+  updateLabel();
+  drawGrid();
+  loadData();
+}
+
+function navToday() {
+  wkStart = monOf(new Date());
+  updateLabel();
+  drawGrid();
+  loadData();
+}
+
+function onDatePick(v) {
+  if (!v) return;
+  var p = v.split('-');
+  wkStart = monOf(new Date(+p[0], +p[1]-1, +p[2]));
+  updateLabel();
+  drawGrid();
+  loadData();
+}
+
+// ── Week Label ────────────────────────────────────────────────────────
+function updateLabel() {
+  var end = new Date(wkStart.getFullYear(), wkStart.getMonth(), wkStart.getDate()+6);
+  var now = new Date();
+  var thisWk = monOf(now).getTime();
+  var isThis = wkStart.getTime() === thisWk;
+
+  var lbl = document.getElementById('weekLabel');
+  if (lbl) lbl.textContent = isThis ? 'สัปดาห์ปัจจุบัน' : (wkStart > now ? 'สัปดาห์ถัดไป' : 'สัปดาห์ย้อนหลัง');
+
+  var rng = document.getElementById('weekRange');
+  if (rng) rng.textContent = dTH(wkStart) + ' — ' + dTH(end);
+
+  var dp = document.getElementById('dp');
+  if (dp) dp.value = dStr(wkStart);
+}
+
+// ── Loading & Refresh ──────────────────────────────────────────────────
+function showLoad(v) {
+  var ov = document.getElementById('loadOv');
+  if (ov) ov.style.display = v ? 'flex' : 'none';
+}
+
+function refreshData() {
+  toast('🔄 กำลังดึงข้อมูลล่าสุดจาก Google Sheet...', 'info');
+  loadData();
+}
+
+// ── Load Data ──────────────────────────────────────────────────────────
+function loadData() {
+  showLoad(true);
+  if (loadTid) clearTimeout(loadTid);
+  loadTid = setTimeout(function() { showLoad(false); }, 4000);
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(function(data) {
+        clearTimeout(loadTid);
+        bkData = data || {};
+        drawGrid();
+        showLoad(false);
+      })
+      .withFailureHandler(function() {
+        clearTimeout(loadTid);
+        showLoad(false);
+      })
+      .getBookingsForWeek(dStr(wkStart));
+  } else {
+    clearTimeout(loadTid);
+    showLoad(false);
+  }
+}
+
+// ── Draw Grid (Pure Color Badges: Green, Red, Orange Countdown) ────────
+function drawGrid() {
+  var grid = document.getElementById('calGrid');
+  if (!grid) return;
+
+  var html = '';
+
+  // Corner
+  html += '<div class="cal-corner">วัน / เวลา</div>';
+
+  // Time headers
+  for (var si = 0; si < SLOTS.length; si++) {
+    var t = SLOTS[si];
+    var t2 = ('0' + (parseInt(t)+1)).slice(-2) + ':00';
+    html += '<div class="cal-th"><span>' + t + '</span><span>' + t2 + '</span></div>';
+  }
+
+  // Day rows
+  for (var di = 0; di < 7; di++) {
+    var dayD = new Date(wkStart.getFullYear(), wkStart.getMonth(), wkStart.getDate() + di);
+    var ds   = dStr(dayD);
+    var todayCls = isToday(dayD) ? ' today' : '';
+
+    // Day label (sticky left column)
+    html += '<div class="cal-dl' + todayCls + '">';
+    html += '<span class="cal-dn">' + DAYS[di] + '</span>';
+    html += '<span class="cal-dd">' + dayD.getDate() + '</span>';
+    html += '</div>';
+
+    // Time cells
+    for (var ti = 0; ti < SLOTS.length; ti++) {
+      var slot = SLOTS[ti];
+      var key  = ds + '_' + slot;
+      var sd   = bkData[key] || { outside: null, inside: null };
+      var ob   = sd.outside !== null;
+      var ib   = sd.inside  !== null;
+      var past = isPast(dayD, slot);
+
+      if (past) {
+        html += '<div class="cal-cell past" data-ds="' + ds + '" data-sl="' + slot + '" data-di="' + di + '">';
+        html += '  <div class="t-pill past"><span>—</span></div>';
+        html += '</div>';
+      } else {
+        // Outside Table Status (free: เขียว | full: แดง | ci: ส้ม countdown)
+        var obCi = ob && sd.outside && sd.outside.status === 'active' && inCiWin(ds, slot, sd.outside);
+        var obFull = ob && !obCi;
+        var obCls = obCi ? 'ci' : (obFull ? 'full' : 'free');
+        var obContent = obCi 
+          ? '<span>🟡</span> <span class="t-pill-cd" data-ds="'+ds+'" data-sl="'+slot+'" data-type="outside">' + fmtCd(ciSecsLeft(ds, slot, sd.outside)) + '</span>'
+          : '<span>🟡 นอก</span>';
+
+        // Inside Table Status (free: เขียว | full: แดง | ci: ส้ม countdown)
+        var ibCi = ib && sd.inside && sd.inside.status === 'active' && inCiWin(ds, slot, sd.inside);
+        var ibFull = ib && !ibCi;
+        var ibCls = ibCi ? 'ci' : (ibFull ? 'full' : 'free');
+        var ibContent = ibCi 
+          ? '<span>🟢</span> <span class="t-pill-cd" data-ds="'+ds+'" data-sl="'+slot+'" data-type="inside">' + fmtCd(ciSecsLeft(ds, slot, sd.inside)) + '</span>'
+          : '<span>🟢 ใน</span>';
+
+        html += '<div class="cal-cell" data-ds="' + ds + '" data-sl="' + slot + '" data-di="' + di + '">';
+        
+        // Pill: Outside Table
+        html += '  <div class="t-pill ' + obCls + '" onclick="onTablePillClick(\'' + ds + '\',\'' + slot + '\',' + di + ',\'outside\',event)" title="โต๊ะกลมนอก: ' + (obFull ? 'จองแล้ว' : (obCi ? 'รอยืนยัน 5 นาที' : 'ว่าง (กดจอง)')) + '">';
+        html += obContent;
+        html += '  </div>';
+
+        // Pill: Inside Table
+        html += '  <div class="t-pill ' + ibCls + '" onclick="onTablePillClick(\'' + ds + '\',\'' + slot + '\',' + di + ',\'inside\',event)" title="โต๊ะในห้อง: ' + (ibFull ? 'จองแล้ว' : (ibCi ? 'รอยืนยัน 5 นาที' : 'ว่าง (กดจอง)')) + '">';
+        html += ibContent;
+        html += '  </div>';
+
+        html += '</div>';
+      }
+    }
+  }
+
+  grid.innerHTML = html;
+
+  // Tooltip hover
+  var cells = grid.querySelectorAll('.cal-cell:not(.past)');
+  for (var ci2 = 0; ci2 < cells.length; ci2++) {
+    (function(cell) {
+      var ds2  = cell.dataset.ds;
+      var sl2  = cell.dataset.sl;
+      var key2 = ds2 + '_' + sl2;
+      var sd2  = bkData[key2] || { outside: null, inside: null };
+      cell.onmouseenter = function(e) { showTip(e, ds2, sl2, sd2); };
+      cell.onmousemove  = function(e) { moveTip(e); };
+      cell.onmouseleave = function() { hideTip(); };
+    })(cells[ci2]);
+  }
+
+  startTick();
+}
+
+// ── Table Pill Click Router ───────────────────────────────────────────
+function onTablePillClick(ds, slot, di, tableType, event) {
+  if (event) event.stopPropagation();
+  var dayD = new Date(wkStart.getFullYear(), wkStart.getMonth(), wkStart.getDate() + di);
+  var key = ds + '_' + slot;
+  var sd  = bkData[key] || { outside: null, inside: null };
+  var targetData = tableType === 'outside' ? sd.outside : sd.inside;
+
+  if (targetData && targetData.status === 'active' && inCiWin(ds, slot, targetData)) {
+    // Open Check-in Modal specifically for this table
+    openCiModal(ds, slot, dayD, sd, tableType, targetData);
+  } else if (!targetData) {
+    // Open Booking Modal with tableType preselected!
+    openBookModal(ds, slot, dayD, tableType);
+  } else {
+    toast('ℹ️ โต๊ะนี้มีผู้จองแล้ว (' + (tableType === 'outside' ? 'โต๊ะกลมนอก' : 'โต๊ะในห้อง') + ')', 'info');
+  }
+}
+
+// ── Ticker ────────────────────────────────────────────────────
+function startTick() {
+  if (tickInt) clearInterval(tickInt);
+  tickInt = setInterval(function() {
+    var cds = document.querySelectorAll('.t-pill-cd');
+    for (var i = 0; i < cds.length; i++) {
+      var el = cds[i];
+      var ds = el.dataset.ds;
+      var sl = el.dataset.sl;
+      var tType = el.dataset.type;
+      var key = ds + '_' + sl;
+      var sd  = bkData[key] || {};
+      var entry = tType === 'outside' ? sd.outside : sd.inside;
+      var s = ciSecsLeft(ds, sl, entry);
+      el.textContent = fmtCd(s);
+      if (s === 0) { clearInterval(tickInt); loadData(); }
+    }
+    if (ciSlot && ciSlot.activeEntry) {
+      var cdEl = document.getElementById('ciCd');
+      var s2 = ciSecsLeft(ciSlot.ds, ciSlot.sl, ciSlot.activeEntry);
+      if (cdEl) {
+        cdEl.textContent = fmtCd(s2);
+        if (s2 <= 60) cdEl.classList.add('urg');
+        else cdEl.classList.remove('urg');
+      }
+      if (s2 === 0) closeCi();
+    }
+  }, 1000);
+}
+
+// ── Tooltip ────────────────────────────────────────────────────────────
+function showTip(e, ds, sl, sd) {
+  var tip = document.getElementById('tip');
+  var tT  = document.getElementById('tipT');
+  var tC  = document.getElementById('tipC');
+  if (!tip || !tT || !tC) return;
+  tT.textContent = ds + ' // ' + sl + '–' + ('0'+(parseInt(sl)+1)).slice(-2) + ':00';
+  var h = '';
+  if (sd.outside) {
+    var ids = (sd.outside.ids || []).join(', ');
+    var ic  = sd.outside.status === 'checked_in' ? ' ✓ ยืนยันแล้ว' : ' (รอยืนยัน)';
+    h += '<div class="tip-row" style="margin-top:4px"><span class="tip-badge out">โต๊ะกลมนอก' + ic + '</span><span class="tip-ids">' + ids + '</span></div>';
+  } else {
+    h += '<div class="tip-row" style="margin-top:4px"><span class="tip-badge out" style="opacity:0.6">โต๊ะกลมนอก: ว่าง</span></div>';
+  }
+  if (sd.inside) {
+    var ids2 = (sd.inside.ids || []).join(', ');
+    var ic2  = sd.inside.status === 'checked_in' ? ' ✓ ยืนยันแล้ว' : ' (รอยืนยัน)';
+    h += '<div class="tip-row" style="margin-top:4px"><span class="tip-badge in">โต๊ะในห้อง' + ic2 + '</span><span class="tip-ids">' + ids2 + '</span></div>';
+  } else {
+    h += '<div class="tip-row" style="margin-top:4px"><span class="tip-badge in" style="opacity:0.6">โต๊ะในห้อง: ว่าง</span></div>';
+  }
+  tC.innerHTML = h;
+  tip.classList.remove('hidden');
+  moveTip(e);
+}
+
+function moveTip(e) {
+  var tip = document.getElementById('tip');
+  if (!tip) return;
+  tip.style.left = Math.min(e.clientX+16, window.innerWidth-280) + 'px';
+  tip.style.top  = Math.min(e.clientY+16, window.innerHeight-120) + 'px';
+}
+
+function hideTip() {
+  var tip = document.getElementById('tip');
+  if (tip) tip.classList.add('hidden');
+}
+
+// ── QUICK BOOK (DIRECT SEARCH & BOOKING) ──────────────────────────────
+function openQuickBook() {
+  var now = new Date();
+  var todayStr = dStr(now);
+  var qbDateInp = document.getElementById('qbDate');
+  if (qbDateInp) {
+    qbDateInp.value = todayStr;
+    qbDateInp.min = todayStr;
+  }
+
+  var slotSel = document.getElementById('qbSlot');
+  if (slotSel) {
+    var sHtml = '<option value="">— เลือกช่วงเวลา —</option>';
+    for (var i = 0; i < SLOTS.length; i++) {
+      var s = SLOTS[i];
+      var sEnd = ('0' + (parseInt(s)+1)).slice(-2) + ':00';
+      sHtml += '<option value="' + s + '">' + s + ' - ' + sEnd + ' น.</option>';
+    }
+    slotSel.innerHTML = sHtml;
+    
+    // Auto-select current/next hour
+    var currentH = now.getHours();
+    for (var j = 0; j < SLOTS.length; j++) {
+      if (parseInt(SLOTS[j]) >= currentH) {
+        slotSel.value = SLOTS[j];
+        break;
+      }
+    }
+    if (!slotSel.value && SLOTS.length > 0) slotSel.value = SLOTS[0];
+  }
+
+  document.getElementById('qbTType').value = 'outside';
+  document.getElementById('qbSid1').value = '';
+  document.getElementById('qbSid2').value = '';
+  document.getElementById('qbPin').value = '';
+
+  ['qbNameBadge1','qbNameBadge2'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) { el.textContent = ''; el.classList.remove('vis'); }
+  });
+
+  ['eQbDate','eQbSlot','eQbTType','eQbSid1','eQbSid2','eQbNotFound1','eQbNotFound2','eQbSameSid','eQbQuota1','eQbQuota2','eQbPin'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('vis');
+  });
+
+  document.getElementById('btnQbSubmit').disabled = false;
+  checkQbAvailability();
+  document.getElementById('quickBookMod').classList.add('active');
+}
+
+function closeQuickBook() {
+  document.getElementById('quickBookMod').classList.remove('active');
+}
+
+function onQbDateTimeChange() {
+  checkQbAvailability();
+  var s1 = document.getElementById('qbSid1').value.trim();
+  var s2 = document.getElementById('qbSid2').value.trim();
+  if (s1.length === 10) onQbSidChange(1);
+  if (s2.length === 10) onQbSidChange(2);
+}
+
+function checkQbAvailability() {
+  var d = document.getElementById('qbDate').value;
+  var s = document.getElementById('qbSlot').value;
+  var tt = document.getElementById('qbTType').value;
+  var badge = document.getElementById('qbAvailBadge');
+  if (!badge) return;
+
+  if (!d || !s || !tt) {
+    badge.style.display = 'none';
+    return;
+  }
+
+  var key = d + '_' + s;
+  var sd = bkData[key] || { outside: null, inside: null };
+  var target = tt === 'outside' ? sd.outside : sd.inside;
+
+  var p = d.split('-');
+  var dObj = new Date(+p[0], +p[1]-1, +p[2]);
+  var past = isPast(dObj, s);
+
+  if (past) {
+    badge.style.display = 'block';
+    badge.style.background = 'var(--surf2)';
+    badge.style.color = 'var(--txt3)';
+    badge.style.border = '1px solid var(--bdr2)';
+    badge.innerHTML = '⚠️ ช่วงเวลานี้ผ่านไปแล้ว ไม่สามารถจองได้';
+    document.getElementById('btnQbSubmit').disabled = true;
+  } else if (target && target.status === 'active') {
+    badge.style.display = 'block';
+    badge.style.background = 'var(--crb)';
+    badge.style.color = 'var(--cr)';
+    badge.style.border = '1px solid var(--crbd)';
+    badge.innerHTML = '❌ โต๊ะนี้ในช่วงเวลานี้มีผู้จองแล้ว กรุณาเลือกโต๊ะอื่นหรือเวลาอื่น';
+    document.getElementById('btnQbSubmit').disabled = true;
+  } else {
+    badge.style.display = 'block';
+    badge.style.background = 'var(--emb)';
+    badge.style.color = 'var(--em)';
+    badge.style.border = '1px solid var(--embd)';
+    badge.innerHTML = '✓ โต๊ะนี้ว่าง สามารถทำการจองได้ทันที';
+    document.getElementById('btnQbSubmit').disabled = false;
+  }
+}
+
+function onQbSidChange(num) {
+  var s1 = document.getElementById('qbSid1').value.trim();
+  var s2 = document.getElementById('qbSid2').value.trim();
+  var d  = document.getElementById('qbDate').value;
+  
+  var isSame = s1 && s2 && s1 === s2;
+  document.getElementById('eQbSameSid').classList.toggle('vis', isSame);
+
+  var targetSid = num === 1 ? s1 : s2;
+  var nameBadge = document.getElementById('qbNameBadge' + num);
+  var notFoundEl = document.getElementById('eQbNotFound' + num);
+  var errFormatEl = document.getElementById('eQbSid' + num);
+
+  if (targetSid.length === 10) {
+    errFormatEl.classList.remove('vis');
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.exists) {
+            notFoundEl.classList.remove('vis');
+            nameBadge.innerHTML = res.name ? ('✓ ' + res.name) : '✓ รหัสนิสิตถูกต้อง';
+            nameBadge.classList.add('vis');
+            if (d) checkSingleQbQuota(d, targetSid, num);
+          } else {
+            nameBadge.classList.remove('vis');
+            notFoundEl.textContent = res && res.error ? res.error : '❌ ไม่พบรหัสนิสิตนี้ในฐานข้อมูล';
+            notFoundEl.classList.add('vis');
+          }
+        })
+        .verifyStudent(targetSid);
+    } else {
+      nameBadge.innerHTML = '✓ นิสิตทดสอบ (' + targetSid + ')';
+      nameBadge.classList.add('vis');
+      notFoundEl.classList.remove('vis');
+    }
+  } else {
+    nameBadge.classList.remove('vis');
+    notFoundEl.classList.remove('vis');
+  }
+}
+
+function checkSingleQbQuota(dateStr, sid, studentNum) {
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(function(used) {
+        used = parseInt(used) || 0;
+        var full = used >= 2;
+        var qErrId = studentNum === 1 ? 'eQbQuota1' : 'eQbQuota2';
+        document.getElementById(qErrId).classList.toggle('vis', full);
+        if (full) document.getElementById('btnQbSubmit').disabled = true;
+      })
+      .getDayQuota(dateStr, sid);
+  }
+}
+
+function submitQuickBook() {
+  var d   = document.getElementById('qbDate').value;
+  var s   = document.getElementById('qbSlot').value;
+  var tt  = document.getElementById('qbTType').value;
+  var s1  = document.getElementById('qbSid1').value.trim();
+  var s2  = document.getElementById('qbSid2').value.trim();
+  var pin = document.getElementById('qbPin').value.trim();
+  var ok  = true;
+
+  document.getElementById('eQbDate').classList.toggle('vis', !d); if (!d) ok=false;
+  document.getElementById('eQbSlot').classList.toggle('vis', !s); if (!s) ok=false;
+  document.getElementById('eQbTType').classList.toggle('vis', !tt); if (!tt) ok=false;
+
+  var validS1 = /^\d{10}$/.test(s1);
+  document.getElementById('eQbSid1').classList.toggle('vis', !validS1); if (!validS1) ok=false;
+
+  var validS2 = /^\d{10}$/.test(s2);
+  document.getElementById('eQbSid2').classList.toggle('vis', !validS2); if (!validS2) ok=false;
+
+  var isSame = s1 && s2 && s1 === s2;
+  document.getElementById('eQbSameSid').classList.toggle('vis', isSame); if (isSame) ok=false;
+
+  var validPin = /^\d{4}$/.test(pin);
+  document.getElementById('eQbPin').classList.toggle('vis', !validPin); if (!validPin) ok=false;
+
+  if (!ok) return;
+
+  var btn = document.getElementById('btnQbSubmit');
+  btn.disabled = true; btn.textContent = 'กำลังบันทึก…';
+
+  var ids = [s1, s2];
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        btn.disabled = false; btn.textContent = '✓ ยืนยันการสำรองเวลา';
+        if (res.success) { 
+          closeQuickBook(); 
+          toast('✅ สำรองเวลาสำเร็จ! (ID: ' + res.bookingId + ')', 'success'); 
+          loadData(); 
+        } else {
+          toast(res.error || 'เกิดข้อผิดพลาดในการจอง', 'error');
+        }
+      })
+      .withFailureHandler(function(e) {
+        btn.disabled = false; btn.textContent = '✓ ยืนยันการสำรองเวลา';
+        toast('ข้อผิดพลาด: ' + (e.message || e), 'error');
+      })
+      .createBooking({ date: d, timeSlot: s, tableType: tt, studentIds: ids, bookedBy: s1, pin: pin });
+  } else {
+    setTimeout(function() {
+      btn.disabled = false; btn.textContent = '✓ ยืนยันการสำรองเวลา';
+      closeQuickBook();
+      toast('จองสำเร็จจำลอง (Local Mode)', 'success');
+    }, 300);
+  }
+}
+
+// ── Standard Calendar Booking Modal (2 Students + PIN + StudentData) ──
+function openBookModal(ds, sl, dayD, preselectedType) {
+  selSlot = { ds: ds, sl: sl };
+  document.getElementById('sDate').textContent = dTH(dayD);
+  document.getElementById('sTime').textContent = sl + ' – ' + ('0'+(parseInt(sl)+1)).slice(-2) + ':00 น.';
+  document.getElementById('modSub').textContent = DAYS[dayD.getDay() === 0 ? 6 : dayD.getDay()-1] + 'ที่ ' + dTH(dayD);
+  document.getElementById('tType').value   = preselectedType || '';
+  document.getElementById('sid1').value    = '';
+  document.getElementById('sid2').value    = '';
+  document.getElementById('bookPin').value = '';
+  studentValid = { 1: false, 2: false };
+  
+  ['nameBadge1','nameBadge2'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) { el.textContent = ''; el.classList.remove('vis'); }
+  });
+
+  ['eTType','eSid1','eSid2','eNotFound1','eNotFound2','eSameSid','eQuota1','eQuota2','ePin'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('vis');
+  });
+
+  document.getElementById('qBadge').className = 'qb';
+  document.getElementById('qTxt').textContent  = 'กรอกรหัสนิสิต 10 หลักทั้ง 2 คนเพื่อตรวจ Quota';
+  document.getElementById('qFill').style.width = '0%';
+  document.getElementById('btnBook').disabled  = false;
+  document.getElementById('bookMod').classList.add('active');
+}
+
+function closeBook() {
+  document.getElementById('bookMod').classList.remove('active');
+  selSlot = null;
+}
+
+function onSidChange(num) {
+  var s1 = document.getElementById('sid1').value.trim();
+  var s2 = document.getElementById('sid2').value.trim();
+  
+  var isSame = s1 && s2 && s1 === s2;
+  document.getElementById('eSameSid').classList.toggle('vis', isSame);
+
+  var targetSid = num === 1 ? s1 : s2;
+  var nameBadge = document.getElementById('nameBadge' + num);
+  var notFoundEl = document.getElementById('eNotFound' + num);
+  var errFormatEl = document.getElementById('eSid' + num);
+
+  if (targetSid.length === 10) {
+    errFormatEl.classList.remove('vis');
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.exists) {
+            studentValid[num] = true;
+            notFoundEl.classList.remove('vis');
+            if (res.name) {
+              nameBadge.innerHTML = '✓ ' + res.name;
+              nameBadge.classList.add('vis');
+            } else {
+              nameBadge.innerHTML = '✓ รหัสนิสิตถูกต้อง';
+              nameBadge.classList.add('vis');
+            }
+            if (selSlot) checkSingleQuota(targetSid, num);
+          } else {
+            studentValid[num] = false;
+            nameBadge.classList.remove('vis');
+            notFoundEl.textContent = res && res.error ? res.error : '❌ ไม่พบรหัสนิสิตนี้ในฐานข้อมูล';
+            notFoundEl.classList.add('vis');
+          }
+        })
+        .verifyStudent(targetSid);
+    } else {
+      studentValid[num] = true;
+      nameBadge.innerHTML = '✓ นิสิตทดสอบ (' + targetSid + ')';
+      nameBadge.classList.add('vis');
+      notFoundEl.classList.remove('vis');
+    }
+  } else {
+    studentValid[num] = false;
+    nameBadge.classList.remove('vis');
+    notFoundEl.classList.remove('vis');
+  }
+}
+
+function checkSingleQuota(sid, studentNum) {
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(function(used) {
+        used = parseInt(used) || 0;
+        var full = used >= 2;
+        var qErrId = studentNum === 1 ? 'eQuota1' : 'eQuota2';
+        document.getElementById(qErrId).classList.toggle('vis', full);
+        if (full) {
+          document.getElementById('btnBook').disabled = true;
+          document.getElementById('qBadge').className = 'qb warn';
+          document.getElementById('qTxt').textContent = 'นิสิต ' + sid + ' ใช้ Quota ครบ 2 ชม./วันแล้ว';
+        } else {
+          document.getElementById('btnBook').disabled = false;
+          document.getElementById('qBadge').className = 'qb';
+          document.getElementById('qTxt').textContent = 'นิสิต ' + sid + ' ใช้ Quota แล้ว ' + used + '/2 ชม.';
+        }
+      })
+      .getDayQuota(selSlot.ds, sid);
+  }
+}
+
+function submitBook() {
+  var tt  = document.getElementById('tType').value;
+  var s1  = document.getElementById('sid1').value.trim();
+  var s2  = document.getElementById('sid2').value.trim();
+  var pin = document.getElementById('bookPin').value.trim();
+  var ok  = true;
+
+  document.getElementById('eTType').classList.toggle('vis', !tt); if (!tt) ok=false;
+  
+  var validS1 = /^\d{10}$/.test(s1);
+  document.getElementById('eSid1').classList.toggle('vis', !validS1); if (!validS1) ok=false;
+
+  var validS2 = /^\d{10}$/.test(s2);
+  document.getElementById('eSid2').classList.toggle('vis', !validS2); if (!validS2) ok=false;
+
+  var isSame = s1 && s2 && s1 === s2;
+  document.getElementById('eSameSid').classList.toggle('vis', isSame); if (isSame) ok=false;
+
+  var validPin = /^\d{4}$/.test(pin);
+  document.getElementById('ePin').classList.toggle('vis', !validPin); if (!validPin) ok=false;
+
+  if (!ok) return;
+
+  var btn = document.getElementById('btnBook');
+  btn.disabled = true; btn.textContent = 'กำลังบันทึก…';
+
+  var ids = [s1, s2];
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        btn.disabled = false; btn.textContent = 'ยืนยันการสำรองเวลา';
+        if (res.success) { 
+          closeBook(); 
+          toast('✅ สำรองเวลาสำเร็จ! (ID: ' + res.bookingId + ')', 'success'); 
+          loadData(); 
+        } else {
+          toast(res.error || 'เกิดข้อผิดพลาดในการจอง', 'error');
+        }
+      })
+      .withFailureHandler(function(e) {
+        btn.disabled = false; btn.textContent = 'ยืนยันการสำรองเวลา';
+        toast('ข้อผิดพลาด: ' + (e.message || e), 'error');
+      })
+      .createBooking({ date: selSlot.ds, timeSlot: selSlot.sl, tableType: tt, studentIds: ids, bookedBy: s1, pin: pin });
+  } else {
+    setTimeout(function() {
+      btn.disabled = false; btn.textContent = 'ยืนยันการสำรองเวลา';
+      closeBook();
+      toast('จองสำเร็จจำลอง (Local Mode)', 'success');
+    }, 300);
+  }
+}
+
+// ── My Bookings Modal (Search by Student ID) ──────────────────────────
+function openMyBookings(defaultSid) {
+  if (defaultSid) {
+    document.getElementById('mySidInput').value = defaultSid;
+  }
+  document.getElementById('eMySid').classList.remove('vis');
+  document.getElementById('myBookingsMod').classList.add('active');
+  
+  var curVal = document.getElementById('mySidInput').value.trim();
+  if (curVal.length === 10) {
+    searchMyBookings();
+  }
+}
+
+function closeMyBookings() {
+  document.getElementById('myBookingsMod').classList.remove('active');
+}
+
+function searchMyBookings() {
+  var sid = document.getElementById('mySidInput').value.trim();
+  var errEl = document.getElementById('eMySid');
+  var listEl = document.getElementById('myBookingsList');
+  
+  if (!/^\d{10}$/.test(sid)) {
+    errEl.classList.add('vis');
+    return;
+  }
+  errEl.classList.remove('vis');
+
+  listEl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--txt2)"><div class="spinner" style="margin:0 auto 8px"></div>กำลังค้นหาข้อมูลการจอง...</div>';
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(function(bookings) {
+        renderMyBookingsList(bookings, sid);
+      })
+      .withFailureHandler(function(err) {
+        listEl.innerHTML = '<div style="text-align:center;color:var(--cr);padding:18px">เกิดข้อผิดพลาด: ' + (err.message || err) + '</div>';
+      })
+      .getMyBookings(sid);
+  } else {
+    setTimeout(function() {
+      renderMyBookingsList([], sid);
+    }, 400);
+  }
+}
+
+function renderMyBookingsList(bookings, sid) {
+  var listEl = document.getElementById('myBookingsList');
+  if (!bookings || bookings.length === 0) {
+    listEl.innerHTML = '<div style="text-align:center;color:var(--txt3);padding:32px 16px;font-size:0.85rem">🎉 ไม่พบรายการจองที่ใช้งานอยู่ของรหัส <strong>' + sid + '</strong></div>';
+    return;
+  }
+
+  var html = '';
+  for (var i = 0; i < bookings.length; i++) {
+    var b = bookings[i];
+    var tName = b.tableType === 'outside' ? '🟡 โต๊ะกลมด้านนอก' : '🟢 โต๊ะในห้อง';
+    var tBadgeCls = b.tableType === 'outside' ? 'out' : 'in';
+    var members = (b.studentIds || []).join(', ');
+    
+    var p = b.date.split('-');
+    var dObj = new Date(+p[0], +p[1]-1, +p[2]);
+    var dateTHStr = DAYS[dObj.getDay() === 0 ? 6 : dObj.getDay()-1] + 'ที่ ' + dTH(dObj);
+    var timeEnd = ('0' + (parseInt(b.timeSlot)+1)).slice(-2) + ':00';
+    var summaryTxt = dateTHStr + ' (' + b.timeSlot + ' น.) ' + tName;
+
+    html += '<div class="b-card">';
+    html += '  <div class="b-card-hdr">';
+    html += '    <div class="b-card-date">' + dateTHStr + ' (' + b.timeSlot + ' - ' + timeEnd + ' น.)</div>';
+    html += '    <span class="b-card-badge ' + tBadgeCls + '">' + tName + '</span>';
+    html += '  </div>';
+    html += '  <div class="b-card-body">';
+    html += '    <div>👥 นิสิตในกลุ่ม: <strong>' + members + '</strong></div>';
+    html += '    <div>📌 สถานะ: ' + (b.status === 'checked_in' ? '<span style="color:var(--em);font-weight:600">✓ ยืนยันเข้าใช้งานแล้ว</span>' : '<span style="color:var(--am);font-weight:600">รอยืนยันเข้าใช้</span>') + '</div>';
+    html += '  </div>';
+    html += '  <div class="b-card-footer">';
+    html += '    <span class="b-card-id">ID: ' + b.bookingId + '</span>';
+    html += '    <button class="btn-cancel-slot" onclick="openPinCancelDialog(\'' + b.bookingId + '\', \'' + sid + '\', \'' + summaryTxt + '\')">🗑️ ยกเลิกการจองนี้</button>';
+    html += '  </div>';
+    html += '</div>';
+  }
+
+  listEl.innerHTML = html;
+}
+
+// ── PIN Cancellation Workflow ─────────────────────────────────────────
+function openPinCancelDialog(bookingId, sid, summaryTxt) {
+  pendingCancel = { bookingId: bookingId, sid: sid };
+  document.getElementById('pinCancelSlotInfo').innerHTML = '<strong>รายการที่ต้องการยกเลิก:</strong><br>' + summaryTxt + '<br><span style="font-family:monospace;font-size:0.75rem;color:var(--txt3)">ID: ' + bookingId + '</span>';
+  document.getElementById('inputCancelPin').value = '';
+  document.getElementById('eCancelPin').classList.remove('vis');
+  document.getElementById('pinCancelMod').classList.add('active');
+  setTimeout(function() {
+    var inp = document.getElementById('inputCancelPin');
+    if (inp) inp.focus();
+  }, 100);
+}
+
+function closePinCancel() {
+  document.getElementById('pinCancelMod').classList.remove('active');
+  pendingCancel = null;
+}
+
+function submitPinCancel() {
+  if (!pendingCancel) return;
+  var pin = document.getElementById('inputCancelPin').value.trim();
+  var errEl = document.getElementById('eCancelPin');
+  
+  if (!/^\d{4}$/.test(pin) && pin !== 'rxcu') {
+    errEl.classList.add('vis');
+    return;
+  }
+  errEl.classList.remove('vis');
+
+  var btn = document.getElementById('btnConfirmPinCancel');
+  btn.disabled = true; btn.textContent = 'กำลังตรวจสอบ PIN…';
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        btn.disabled = false; btn.textContent = 'ยืนยันยกเลิก';
+        if (res.success) {
+          closePinCancel();
+          toast('✅ ยกเลิกการจองสำเร็จ คืน Slot เรียบร้อย', 'success');
+          searchMyBookings();
+          loadData();
+        } else {
+          toast(res.error || 'ยกเลิกไม่สำเร็จ', 'error');
+        }
+      })
+      .withFailureHandler(function(err) {
+        btn.disabled = false; btn.textContent = 'ยืนยันยกเลิก';
+        toast('ข้อผิดพลาด: ' + (err.message || err), 'error');
+      })
+      .cancelBooking(pendingCancel.bookingId, pendingCancel.sid, pin);
+  } else {
+    setTimeout(function() {
+      btn.disabled = false; btn.textContent = 'ยืนยันยกเลิก';
+      closePinCancel();
+      toast('ยกเลิกจำลองสำเร็จ (Local Mode)', 'success');
+    }, 300);
+  }
+}
+
+// ── Check-in Modal (Requires 10-digit SID + 4-digit PIN) ──────────────
+function openCiModal(ds, sl, dayD, sd, specificType, specificEntry) {
+  ciSlot = { ds: ds, sl: sl, outside: sd.outside, inside: sd.inside, activeEntry: specificEntry };
+  document.getElementById('ciDate').textContent = dTH(dayD);
+  document.getElementById('ciTime').textContent = sl + ' – ' + ('0'+(parseInt(sl)+1)).slice(-2) + ':00 น.';
+  document.getElementById('ciSub').textContent  = DAYS[dayD.getDay() === 0 ? 6 : dayD.getDay()-1] + 'ที่ ' + dTH(dayD);
+
+  var sel = document.getElementById('ciTType');
+  sel.innerHTML = '';
+  
+  if (specificType) {
+    var label = specificType === 'outside' ? '🟡 โต๊ะกลมด้านนอก' : '🟢 โต๊ะในห้อง';
+    var ids = specificEntry && specificEntry.ids ? specificEntry.ids.join(', ') : '';
+    sel.innerHTML = '<option value="' + specificType + '">' + label + ' — ' + ids + '</option>';
+  } else {
+    sel.innerHTML = '<option value="">— เลือกโต๊ะ —</option>';
+    if (sd.outside && sd.outside.status === 'active' && inCiWin(ds, sl, sd.outside)) {
+      sel.innerHTML += '<option value="outside">🟡 โต๊ะกลมด้านนอก — ' + sd.outside.ids.join(', ') + '</option>';
+    }
+    if (sd.inside  && sd.inside.status  === 'active' && inCiWin(ds, sl, sd.inside)) {
+      sel.innerHTML += '<option value="inside">🟢 โต๊ะในห้อง — '    + sd.inside.ids.join(', ')  + '</option>';
+    }
+  }
+
+  document.getElementById('ciSId').value = '';
+  document.getElementById('ciPin').value = '';
+  ['eCiT','eCiS','eCiPin'].forEach(function(id) { document.getElementById(id).classList.remove('vis'); });
+
+  var s = ciSecsLeft(ds, sl, specificEntry);
+  var cdEl = document.getElementById('ciCd');
+  cdEl.textContent = fmtCd(s);
+  if (s <= 60) cdEl.classList.add('urg'); else cdEl.classList.remove('urg');
+
+  document.getElementById('ciMod').classList.add('active');
+}
+
+function closeCi() {
+  document.getElementById('ciMod').classList.remove('active');
+  ciSlot = null;
+}
+
+function doCiConfirm() {
+  var tt  = document.getElementById('ciTType').value;
+  var si  = document.getElementById('ciSId').value.trim();
+  var pin = document.getElementById('ciPin').value.trim();
+
+  var validSi  = /^\d{10}$/.test(si);
+  var validPin = /^\d{4}$/.test(pin) || pin === 'rxcu';
+
+  document.getElementById('eCiT').classList.toggle('vis', !tt);
+  document.getElementById('eCiS').classList.toggle('vis', !validSi);
+  document.getElementById('eCiPin').classList.toggle('vis', !validPin);
+
+  if (!tt || !validSi || !validPin) return;
+
+  var td = tt === 'outside' ? ciSlot.outside : ciSlot.inside;
+  if (!td) return;
+
+  var btn = document.getElementById('btnCiOk');
+  btn.disabled = true; btn.textContent = 'กำลังตรวจสอบ PIN…';
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        btn.disabled = false; btn.textContent = '✓ ยืนยันเข้าใช้งาน';
+        if (res.success) { 
+          closeCi(); 
+          toast('✅ ยืนยันการเข้าใช้งานสำเร็จ!', 'success'); 
+          loadData(); 
+        } else {
+          toast(res.error || 'ยืนยันไม่สำเร็จ', 'error');
+        }
+      })
+      .withFailureHandler(function(e) { 
+        btn.disabled = false; btn.textContent = '✓ ยืนยันเข้าใช้งาน'; 
+        toast('ข้อผิดพลาด: ' + (e.message || e), 'error'); 
+      })
+      .checkInBooking(td.bookingId, si, pin);
+  }
+}
+
+function doCiCancel() {
+  var tt  = document.getElementById('ciTType').value;
+  var si  = document.getElementById('ciSId').value.trim();
+  var pin = document.getElementById('ciPin').value.trim();
+
+  var validSi  = /^\d{10}$/.test(si);
+  var validPin = /^\d{4}$/.test(pin) || pin === 'rxcu';
+
+  document.getElementById('eCiT').classList.toggle('vis', !tt);
+  document.getElementById('eCiS').classList.toggle('vis', !validSi);
+  document.getElementById('eCiPin').classList.toggle('vis', !validPin);
+
+  if (!tt || !validSi || !validPin) return;
+
+  var td = tt === 'outside' ? ciSlot.outside : ciSlot.inside;
+  if (!td) return;
+
+  var btn = document.getElementById('btnCiCancel');
+  btn.disabled = true; btn.textContent = 'กำลังตรวจสอบ PIN…';
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        btn.disabled = false; btn.textContent = 'ยกเลิก Slot นี้';
+        if (res.success) { 
+          closeCi(); 
+          toast('✅ ยกเลิกการจองสำเร็จ คืน Slot เรียบร้อย', 'success'); 
+          loadData(); 
+        } else {
+          toast(res.error || 'ยกเลิกไม่สำเร็จ', 'error');
+        }
+      })
+      .withFailureHandler(function(e) { 
+        btn.disabled = false; btn.textContent = 'ยกเลิก Slot นี้'; 
+        toast('ข้อผิดพลาด: ' + (e.message || e), 'error'); 
+      })
+      .cancelBooking(td.bookingId, si, pin);
+  }
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────
+function toast(msg, type) {
+  var t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.className = 'toast ' + (type || 'success');
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3800);
+}
+
+// ── Keyboard & Close on backdrop ──────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeBook(); closeQuickBook(); closeMyBookings(); closePinCancel(); closeCi(); }
+});
+document.getElementById('quickBookMod').addEventListener('click', function(e) { if (e.target===this) closeQuickBook(); });
+document.getElementById('bookMod').addEventListener('click', function(e) { if (e.target===this) closeBook(); });
+document.getElementById('myBookingsMod').addEventListener('click', function(e) { if (e.target===this) closeMyBookings(); });
+document.getElementById('pinCancelMod').addEventListener('click', function(e) { if (e.target===this) closePinCancel(); });
+document.getElementById('ciMod').addEventListener('click', function(e) { if (e.target===this) closeCi(); });
+
+// ── INIT — Run immediately ────────────────────────────────────
+initTheme();
+updateLabel();
+drawGrid();
+loadData();
+</script>
+</body>
+</html>
