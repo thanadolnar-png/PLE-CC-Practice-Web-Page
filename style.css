@@ -961,6 +961,41 @@ a {
   margin-top: 1rem;
 }
 
+/* Content Spacing & Tab-Stop Alignment (Google Docs 100% Alignment & Spacing) */
+#case-scenario-content,
+#case-patient-content,
+#case-equipment-content,
+#note-content-area,
+#exam-scenario-content,
+#exam-patient-content,
+#exam-equipment-content,
+.note-content,
+.exam-note-content-area,
+.viewer-card-body,
+.case-content-body {
+  white-space: pre-wrap;
+  tab-size: 10;
+  -moz-tab-size: 10;
+  word-break: break-word;
+}
+
+#case-scenario-content p,
+#case-patient-content p,
+#case-equipment-content p,
+#note-content-area p,
+#exam-scenario-content p,
+#exam-patient-content p,
+#exam-equipment-content p,
+.note-content p,
+.exam-note-content-area p {
+  white-space: pre-wrap;
+  tab-size: 10;
+  -moz-tab-size: 10;
+  margin-top: 0.2rem;
+  margin-bottom: 0.2rem;
+  line-height: 1.55;
+}
+
 /* --- Exam Simulation Mode --- */
 .setup-panel {
   max-width: 600px;
