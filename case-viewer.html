@@ -387,7 +387,16 @@
                         OFFLINE_CASE_DETAILS[upperOspeId] || 
                         OFFLINE_CASE_DETAILS[upperRawId];
         if (details) {
-          return Object.assign({}, baseCase, details);
+          const merged = Object.assign({}, baseCase);
+          Object.keys(details).forEach(k => {
+            if (details[k] !== null && details[k] !== undefined && details[k] !== '') {
+              merged[k] = details[k];
+            }
+          });
+          if (!merged.title && baseCase.title) merged.title = baseCase.title;
+          if (!merged.docId && baseCase.docId) merged.docId = baseCase.docId;
+          if (!merged.caseId) merged.caseId = baseCase.caseId || ospeId;
+          return merged;
         }
       }
 
@@ -399,9 +408,9 @@
       
       // 1. ตรวจสอบข้อมูลออฟไลน์ในเครื่องก่อน (โหลดทันทีใน 0ms)
       const offlineCase = getOfflineCase(cleanId);
-      const hasOfflineChecklist = offlineCase && offlineCase.checklist && offlineCase.checklist.length > 0;
+      const hasOfflineContent = offlineCase && (offlineCase.scenario || offlineCase.contentHtml || (offlineCase.checklist && offlineCase.checklist.length > 0) || offlineCase.title);
       
-      if (hasOfflineChecklist) {
+      if (hasOfflineContent) {
         // เรนเดอร์ข้อมูลออฟไลน์ขึ้นมาก่อนทันทีเพื่อประสบการณ์ใช้งานที่รวดเร็วแบบ Offline-First
         AppState.currentCase = offlineCase;
         renderCaseDetail(offlineCase);
@@ -421,6 +430,8 @@
                 if (offlineCase) {
                   if (!updatedCase.linkedNextCase && offlineCase.linkedNextCase) updatedCase.linkedNextCase = offlineCase.linkedNextCase;
                   if (!updatedCase.linkedFromCase && offlineCase.linkedFromCase) updatedCase.linkedFromCase = offlineCase.linkedFromCase;
+                  if (!updatedCase.title && offlineCase.title) updatedCase.title = offlineCase.title;
+                  if (!updatedCase.caseId) updatedCase.caseId = offlineCase.caseId;
                 }
                 
                 // เปรียบเทียบข้อมูลเพื่อหลีกเลี่ยงการกะพริบของ UI หากไม่มีอะไรเปลี่ยนแปลง
@@ -450,7 +461,7 @@
         return;
       }
       
-      // 2. Fallback: ถ้าไม่มีข้อมูลออฟไลน์ หรือไม่มี Checklist ให้โหลดจาก API สดแบบปิดกั้นหน้าจอ (Blocking Load)
+      // 2. Fallback: ถ้าไม่มีข้อมูลออฟไลน์ ให้โหลดจาก API สดแบบปิดกั้นหน้าจอ (Blocking Load)
       showGlobalLoader(true);
       let matchedCase = null;
       
@@ -464,6 +475,8 @@
             if (offlineCase) {
               if (!matchedCase.linkedNextCase && offlineCase.linkedNextCase) matchedCase.linkedNextCase = offlineCase.linkedNextCase;
               if (!matchedCase.linkedFromCase && offlineCase.linkedFromCase) matchedCase.linkedFromCase = offlineCase.linkedFromCase;
+              if (!matchedCase.title && offlineCase.title) matchedCase.title = offlineCase.title;
+              if (!matchedCase.caseId) matchedCase.caseId = offlineCase.caseId;
             }
             
             // บันทึกความเปลี่ยนแปลงลง IndexedDB เพื่อให้การเข้าชมครั้งถัดไปเปิดได้ทันทีเป็นข้อมูลล่าสุด (0ms)
@@ -499,7 +512,9 @@
     }
 
     function renderCaseDetail(c) {
-      const displayTitle = c.title.startsWith(`[${c.caseId}]`) ? c.title : `[${c.caseId}] ${c.title}`;
+      const caseId = c.caseId || activeCaseId || '';
+      const rawTitle = (c.title && c.title !== 'undefined') ? c.title : ((c.disease && c.disease !== '-' && c.disease !== 'undefined') ? c.disease : (c.mainGroup || 'เคสข้อสอบ'));
+      const displayTitle = (caseId && !rawTitle.startsWith(`[${caseId}]`)) ? `[${caseId}] ${rawTitle}` : rawTitle;
       document.getElementById('case-title').textContent = displayTitle;
       
       // Render Case Meta Tags
@@ -535,9 +550,11 @@
         if (nextBtn) nextBtn.style.display = 'none';
       }
       
+      const diseaseVal = (c.disease && c.disease !== '-' && c.disease !== 'undefined') ? c.disease : (c.mainGroup || 'ความรู้หลัก');
+      const authorVal = (c.author && c.author !== 'undefined') ? c.author : 'ไม่ระบุ';
       metaContainer.innerHTML += `
-        <span class="case-card-tag">โรค/หัวข้อ: ${c.disease || 'ความรู้หลัก'}</span>
-        <span class="case-card-tag">ผู้เขียน: ${c.author || 'ไม่ระบุ'}</span>
+        <span class="case-card-tag">โรค/หัวข้อ: ${diseaseVal}</span>
+        <span class="case-card-tag">ผู้เขียน: ${authorVal}</span>
       `;
       
       // Render Scenario & Patient Info

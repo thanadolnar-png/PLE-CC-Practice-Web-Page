@@ -338,7 +338,14 @@ async function fetchCaseDetail(caseId, forceLive = false) {
     if (det) {
       const idx = AppState.cases.findIndex(c => c.caseId && (c.caseId.trim() === cleanId || c.caseId.trim() === ospeId || c.caseId.trim() === rawId));
       if (idx !== -1) {
-        AppState.cases[idx] = Object.assign({}, AppState.cases[idx], det);
+        const merged = Object.assign({}, AppState.cases[idx]);
+        Object.keys(det).forEach(k => {
+          if (det[k] !== null && det[k] !== undefined && det[k] !== '') {
+            merged[k] = det[k];
+          }
+        });
+        if (!merged.title && AppState.cases[idx].title) merged.title = AppState.cases[idx].title;
+        AppState.cases[idx] = merged;
         return AppState.cases[idx];
       }
       return Object.assign({ caseId: ospeId }, det);
