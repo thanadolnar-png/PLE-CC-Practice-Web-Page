@@ -819,20 +819,30 @@ a {
   min-width: 60px;
 }
 
-/* Scenario & Patient & Equipment Ordered / Bullet Lists */
+/* Scenario, Patient, Equipment & Exam Lists (Universal Bullet & Numbered Support) */
 ul.bullet-list,
-#case-scenario-content ul.bullet-list,
-#case-patient-content ul.bullet-list,
-#case-equipment-content ul.bullet-list {
+#case-scenario-content ul,
+#case-patient-content ul,
+#case-equipment-content ul,
+#note-content-area ul,
+#exam-scenario-content ul,
+#exam-patient-content ul,
+#exam-equipment-content ul,
+#exam-note-content-area ul {
   list-style-type: disc !important;
   padding-left: 1.5rem !important;
   margin: 0.4rem 0 !important;
 }
 
 ol.ordered-list,
-#case-scenario-content ol.ordered-list,
-#case-patient-content ol.ordered-list,
-#case-equipment-content ol.ordered-list {
+#case-scenario-content ol,
+#case-patient-content ol,
+#case-equipment-content ol,
+#note-content-area ol,
+#exam-scenario-content ol,
+#exam-patient-content ol,
+#exam-equipment-content ol,
+#exam-note-content-area ol {
   list-style-type: decimal !important;
   padding-left: 1.5rem !important;
   margin: 0.4rem 0 !important;
@@ -842,33 +852,15 @@ ul.bullet-list li,
 ol.ordered-list li,
 #case-scenario-content li,
 #case-patient-content li,
-#case-equipment-content li {
+#case-equipment-content li,
+#note-content-area li,
+#exam-scenario-content li,
+#exam-patient-content li,
+#exam-equipment-content li,
+#exam-note-content-area li {
   margin-bottom: 0.25rem !important;
   line-height: 1.6 !important;
-}
-
-/* Equipment List Numbering vs Dot Bullet Fix */
-#case-equipment-content ul.equipment-list.numbered-list,
-#case-equipment-content ol.equipment-list.numbered-list,
-.equipment-list.numbered-list {
-  list-style: none !important;
-  list-style-type: none !important;
-  padding-left: 0 !important;
-  margin: 0.5rem 0;
-}
-
-#case-equipment-content ul.equipment-list.numbered-list li,
-#case-equipment-content ol.equipment-list.numbered-list li,
-.equipment-list.numbered-list li {
-  list-style: none !important;
-  list-style-type: none !important;
-  margin-bottom: 0.4rem;
-  padding-left: 0 !important;
-}
-
-#case-equipment-content ul.equipment-list.numbered-list li::marker,
-.equipment-list.numbered-list li::marker {
-  content: "" !important;
+  list-style: inherit !important;
 }
 
 /* Checklist Styling */

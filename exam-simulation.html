@@ -1545,11 +1545,14 @@
       if (c.equipmentHtml) {
         if (equipAccordion) equipAccordion.style.display = 'block';
         const eqContent = document.getElementById('exam-equipment-content');
-        // Wrap with ul if it starts with li but has no ul wrapper
-        if (c.equipmentHtml.startsWith('<li')) {
-          eqContent.innerHTML = `<ul>${c.equipmentHtml}</ul>`;
+        let rawEq = (c.equipmentHtml || '').trim();
+        if (rawEq.startsWith('<li')) {
+          const isNumbered = /^\s*<li[^>]*>\s*(\d+[\.\)]|\(\d+\))/i.test(rawEq);
+          const tag = isNumbered ? 'ol' : 'ul';
+          const listClass = isNumbered ? 'ordered-list' : 'bullet-list';
+          eqContent.innerHTML = `<${tag} class="${listClass}">${rawEq}</${tag}>`;
         } else {
-          eqContent.innerHTML = c.equipmentHtml;
+          eqContent.innerHTML = rawEq;
         }
         // Reset equipment accordion — expand on every new station
         _equipmentAccordionOpen = false;

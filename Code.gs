@@ -360,14 +360,14 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
   function addTabSec_(tab) {
     const dt = tab.documentTab;
     if (dt && dt.body && dt.body.content) {
-      sections.push({ content: dt.body.content, inlineObjects: dt.inlineObjects || {} });
+      sections.push({ content: dt.body.content, inlineObjects: dt.inlineObjects || {}, lists: dt.lists || docJson.lists || {} });
     }
     (tab.childTabs || []).forEach(addTabSec_);
   }
   if (docJson.tabs && docJson.tabs.length > 0) {
     docJson.tabs.forEach(addTabSec_);
   } else {
-    sections.push({ content: (docJson.body && docJson.body.content) || [], inlineObjects: docJson.inlineObjects || {} });
+    sections.push({ content: (docJson.body && docJson.body.content) || [], inlineObjects: docJson.inlineObjects || {}, lists: docJson.lists || {} });
   }
 
   // Image cache
@@ -428,12 +428,70 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
     return { html: html, hasImg: hasImg };
   }
 
-  function parsePara_(para, inlineObjects) {
+  function wrapListItemsInHtml_(htmlStr) {
+    if (!htmlStr || htmlStr.indexOf('<li') === -1) return htmlStr;
+    const tokens = htmlStr.split(/(<li[^>]*>.*?<\/li>)/);
+    const out = [];
+    let currentListType = null;
+    let currentListItems = [];
+    
+    for (let i = 0; i < tokens.length; i++) {
+      const tok = tokens[i];
+      if (!tok) continue;
+      const m = tok.match(/<li(?:\s+data-list-type="([^"]*)")?[^>]*>(.*?)<\/li>/);
+      if (m) {
+        const lType = m[1] || 'ul';
+        const content = m[2];
+        if (currentListType && currentListType !== lType) {
+          const tag = currentListType === 'ol' ? 'ol' : 'ul';
+          const cls = currentListType === 'ol' ? 'ordered-list' : 'bullet-list';
+          out.push('<' + tag + ' class="' + cls + '">' + currentListItems.join('') + '</' + tag + '>');
+          currentListItems = [];
+        }
+        currentListType = lType;
+        currentListItems.push('<li>' + content + '</li>');
+      } else {
+        if (tok.trim()) {
+          if (currentListItems.length > 0) {
+            const tag = currentListType === 'ol' ? 'ol' : 'ul';
+            const cls = currentListType === 'ol' ? 'ordered-list' : 'bullet-list';
+            out.push('<' + tag + ' class="' + cls + '">' + currentListItems.join('') + '</' + tag + '>');
+            currentListItems = [];
+            currentListType = null;
+          }
+          out.push(tok);
+        }
+      }
+    }
+    if (currentListItems.length > 0) {
+      const tag = currentListType === 'ol' ? 'ol' : 'ul';
+      const cls = currentListType === 'ol' ? 'ordered-list' : 'bullet-list';
+      out.push('<' + tag + ' class="' + cls + '">' + currentListItems.join('') + '</' + tag + '>');
+    }
+    return out.join('');
+  }
+
+  function parsePara_(para, inlineObjects, listsDict) {
     if (!para.elements || para.elements.length === 0) return '';
     const { html, hasImg } = renderEls_(para.elements, inlineObjects);
     const trimmed = html.trim();
     if (!trimmed && !hasImg) return '';
-    return ('<p>' + trimmed + '</p>').replace(/<p><\/p>/g, '').replace(/<p>\s*<\/p>/g, '');
+    
+    if (para.bullet) {
+      const lid = para.bullet.listId;
+      let glyph = 'GLYPH_TYPE_UNSPECIFIED';
+      if (listsDict && listsDict[lid]) {
+        const nestLvl = para.bullet.nestingLevel || 0;
+        const nestLvls = (listsDict[lid].listProperties && listsDict[lid].listProperties.nestingLevels) || [];
+        if (nestLvl < nestLvls.length) {
+          glyph = nestLvls[nestLvl].glyphType || 'GLYPH_TYPE_UNSPECIFIED';
+        }
+      }
+      const lType = (glyph === 'DECIMAL' || glyph === 'DECIMAL_ENCLOSED_PARENTHESIS' || glyph === 'DECIMAL_RAW') ? 'ol' : 'ul';
+      return '<li data-list-type="' + lType + '">' + trimmed + '</li>';
+    } else {
+      return ('<p>' + trimmed + '</p>').replace(/<p><\/p>/g, '').replace(/<p>\s*<\/p>/g, '');
+    }
   }
 
   function parseTable_(table) {
@@ -460,7 +518,7 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
   }
 
   // Parse each tab section
-  for (const { content, inlineObjects } of sections) {
+  for (const { content, inlineObjects, lists } of sections) {
     let recording = false, currentSection = 'SCENARIO';
     let scenario = '', contentHtml = '', patientInfoHtml = '', equipmentHtml = '', noteHtml = '';
     const checklist = []; let currentGroup = '';
@@ -495,13 +553,13 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
         }
 
         if (currentSection === 'SCENARIO') {
-          const ph = parsePara_(para, inlineObjects); if (ph) { contentHtml += ph; scenario += text + '\n'; }
+          const ph = parsePara_(para, inlineObjects, lists); if (ph) { contentHtml += ph; scenario += text + '\n'; }
         } else if (currentSection === 'PATIENT_INFO') {
-          const ph = parsePara_(para, inlineObjects); if (ph) patientInfoHtml += ph;
+          const ph = parsePara_(para, inlineObjects, lists); if (ph) patientInfoHtml += ph;
         } else if (currentSection === 'EQUIPMENT') {
-          const ph = parsePara_(para, inlineObjects); if (ph) equipmentHtml += ph;
+          const ph = parsePara_(para, inlineObjects, lists); if (ph) equipmentHtml += ph;
         } else if (currentSection === 'NOTE') {
-          const ph = parsePara_(para, inlineObjects); if (ph) noteHtml += ph;
+          const ph = parsePara_(para, inlineObjects, lists); if (ph) noteHtml += ph;
         } else if (currentSection === 'CHECKLIST') {
           if (!text) continue;
           let itemText = text;
@@ -533,7 +591,14 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
     }
 
     if (recording) {
-      return { scenario: scenario.trim(), contentHtml, patientInfoHtml, equipmentHtml, checklist, noteHtml };
+      return {
+        scenario: scenario.trim(),
+        contentHtml: wrapListItemsInHtml_(contentHtml),
+        patientInfoHtml: wrapListItemsInHtml_(patientInfoHtml),
+        equipmentHtml: wrapListItemsInHtml_(equipmentHtml),
+        checklist: checklist,
+        noteHtml: wrapListItemsInHtml_(noteHtml)
+      };
     }
   }
 

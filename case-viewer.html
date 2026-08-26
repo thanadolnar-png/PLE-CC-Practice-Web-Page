@@ -435,12 +435,18 @@
               if (result.success && result.data) {
                 const updatedCase = result.data;
                 
-                // รวมค่า linkedNextCase/linkedFromCase จากออฟไลน์เพื่อป้องกัน API เก่าตกหล่น
+                // รวมค่าจากออฟไลน์เพื่อป้องกัน API เก่าตกหล่น
                 if (offlineCase) {
                   if (!updatedCase.linkedNextCase && offlineCase.linkedNextCase) updatedCase.linkedNextCase = offlineCase.linkedNextCase;
                   if (!updatedCase.linkedFromCase && offlineCase.linkedFromCase) updatedCase.linkedFromCase = offlineCase.linkedFromCase;
                   if (!updatedCase.title && offlineCase.title) updatedCase.title = offlineCase.title;
                   if (!updatedCase.caseId) updatedCase.caseId = offlineCase.caseId;
+                  if (!updatedCase.equipmentHtml && offlineCase.equipmentHtml) updatedCase.equipmentHtml = offlineCase.equipmentHtml;
+                  if (!updatedCase.contentHtml && offlineCase.contentHtml) updatedCase.contentHtml = offlineCase.contentHtml;
+                  if (!updatedCase.scenario && offlineCase.scenario) updatedCase.scenario = offlineCase.scenario;
+                  if ((!updatedCase.checklist || updatedCase.checklist.length === 0) && offlineCase.checklist && offlineCase.checklist.length > 0) {
+                    updatedCase.checklist = offlineCase.checklist;
+                  }
                 }
                 
                 // เปรียบเทียบข้อมูลเพื่อหลีกเลี่ยงการกะพริบของ UI หากไม่มีอะไรเปลี่ยนแปลง
@@ -581,8 +587,9 @@
         let rawEq = (c.equipmentHtml || '').trim();
         if (rawEq.startsWith('<li')) {
           const isNumbered = /^\s*<li[^>]*>\s*(\d+[\.\)]|\(\d+\))/i.test(rawEq);
-          const listClass = isNumbered ? 'equipment-list numbered-list' : 'equipment-list bullet-list';
-          eqContent.innerHTML = `<ul class="${listClass}">${rawEq}</ul>`;
+          const tag = isNumbered ? 'ol' : 'ul';
+          const listClass = isNumbered ? 'ordered-list' : 'bullet-list';
+          eqContent.innerHTML = `<${tag} class="${listClass}">${rawEq}</${tag}>`;
         } else {
           eqContent.innerHTML = rawEq;
         }
