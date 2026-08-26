@@ -342,14 +342,18 @@
           loadCaseDetail();
         } else {
           // ถ้ายังโหลดไม่เสร็จ ให้รอตรวจสอบเป็นระยะ (ทุกๆ 30ms)
+          let checkCount = 0;
           const checkInterval = setInterval(() => {
             if (typeof OFFLINE_CASE_DETAILS !== 'undefined') {
               clearInterval(checkInterval);
               loadCaseDetail();
+            } else if (checkCount > 150) { // ~4.5 วินาที
+              clearInterval(checkInterval);
+              console.warn("Offline database not loaded in time. Proceeding with Live API fallback.");
+              loadCaseDetail(); // ยอมให้ไปดึงจาก Live API แทน
             }
+            checkCount++;
           }, 30);
-          // ป้องกันการวนลูปไม่สิ้นสุด ให้เคลียร์หลังจาก 5 วินาที
-          setTimeout(() => clearInterval(checkInterval), 5000);
         }
       } else {
         alert('กรุณาระบุรหัสเคสสอบ');
@@ -408,7 +412,7 @@
       
       // 1. ตรวจสอบข้อมูลออฟไลน์ในเครื่องก่อน (โหลดทันทีใน 0ms)
       const offlineCase = getOfflineCase(cleanId);
-      const hasOfflineContent = offlineCase && (offlineCase.scenario || offlineCase.contentHtml || (offlineCase.checklist && offlineCase.checklist.length > 0) || offlineCase.title);
+      const hasOfflineContent = offlineCase && (offlineCase.scenario || offlineCase.contentHtml || (offlineCase.checklist && offlineCase.checklist.length > 0));
       
       if (hasOfflineContent) {
         // เรนเดอร์ข้อมูลออฟไลน์ขึ้นมาก่อนทันทีเพื่อประสบการณ์ใช้งานที่รวดเร็วแบบ Offline-First
@@ -420,8 +424,13 @@
         
         // รันการดึงข้อมูลเวอร์ชันล่าสุดจาก API สดในเบื้องหลัง (Background Sync)
         if (currentApiUrl) {
-          fetch(`${currentApiUrl}?action=getCase&id=${encodeURIComponent(cleanId)}&_cb=${new Date().getTime()}`)
-            .then(res => res.json())
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
+          fetch(`${currentApiUrl}?action=getCase&id=${encodeURIComponent(cleanId)}&_cb=${new Date().getTime()}`, { signal: controller.signal })
+            .then(res => {
+              clearTimeout(timeoutId);
+              return res.json();
+            })
             .then(result => {
               if (result.success && result.data) {
                 const updatedCase = result.data;
@@ -468,7 +477,10 @@
       if (currentApiUrl) {
         try {
           const cacheBuster = new Date().getTime();
-          const res = await fetch(`${currentApiUrl}?action=getCase&id=${encodeURIComponent(cleanId)}&_cb=${cacheBuster}`);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
+          const res = await fetch(`${currentApiUrl}?action=getCase&id=${encodeURIComponent(cleanId)}&_cb=${cacheBuster}`, { signal: controller.signal });
+          clearTimeout(timeoutId);
           const result = await res.json();
           if (result.success && result.data) {
             matchedCase = result.data;
