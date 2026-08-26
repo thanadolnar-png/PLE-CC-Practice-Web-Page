@@ -819,6 +819,34 @@ a {
   min-width: 60px;
 }
 
+/* Scenario & Patient & Equipment Ordered / Bullet Lists */
+ul.bullet-list,
+#case-scenario-content ul.bullet-list,
+#case-patient-content ul.bullet-list,
+#case-equipment-content ul.bullet-list {
+  list-style-type: disc !important;
+  padding-left: 1.5rem !important;
+  margin: 0.4rem 0 !important;
+}
+
+ol.ordered-list,
+#case-scenario-content ol.ordered-list,
+#case-patient-content ol.ordered-list,
+#case-equipment-content ol.ordered-list {
+  list-style-type: decimal !important;
+  padding-left: 1.5rem !important;
+  margin: 0.4rem 0 !important;
+}
+
+ul.bullet-list li,
+ol.ordered-list li,
+#case-scenario-content li,
+#case-patient-content li,
+#case-equipment-content li {
+  margin-bottom: 0.25rem !important;
+  line-height: 1.6 !important;
+}
+
 /* Equipment List Numbering vs Dot Bullet Fix */
 #case-equipment-content ul.equipment-list.numbered-list,
 #case-equipment-content ol.equipment-list.numbered-list,
