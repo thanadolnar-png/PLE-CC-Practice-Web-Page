@@ -583,16 +583,25 @@
         <span class="case-card-tag">ผู้เขียน: ${authorVal}</span>
       `;
       
+      function stripSectionHeaders(str) {
+        if (!str) return '';
+        return str
+          .replace(/<p[^>]*>\s*#+\s*(?:สถานการณ์|โจทย์|ข้อมูลผู้ป่วย|สิ่งที่มีให้|อุปกรณ์|Checklist|เกณฑ์ประเมิน|ข้อมูลผู้ตรวจ|เฉลย|หมายเหตุ|ข้อมูลเคส)[^<]*<\/p>/gi, '')
+          .replace(/^#+\s*(?:สถานการณ์|โจทย์|ข้อมูลผู้ป่วย|สิ่งที่มีให้|อุปกรณ์|Checklist|เกณฑ์ประเมิน|ข้อมูลผู้ตรวจ|เฉลย|หมายเหตุ|ข้อมูลเคส)[^\n]*\n?/gim, '');
+      }
+
       // Render Scenario & Patient Info
-      document.getElementById('case-scenario-content').innerHTML = c.contentHtml || `<p>${c.scenario}</p>`;
-      document.getElementById('case-patient-content').innerHTML = c.patientInfoHtml || '<p>ไม่มีตารางข้อมูลผู้ป่วย</p>';
+      const cleanScenario = stripSectionHeaders(c.contentHtml || (c.scenario ? `<p>${c.scenario}</p>` : ''));
+      document.getElementById('case-scenario-content').innerHTML = cleanScenario || '<p>ไม่มีข้อมูลสถานการณ์</p>';
+      const cleanPatient = stripSectionHeaders(c.patientInfoHtml);
+      document.getElementById('case-patient-content').innerHTML = cleanPatient || '<p>ไม่มีตารางข้อมูลผู้ป่วย</p>';
       
       // Render Equipment
       if (c.equipmentHtml) {
         document.getElementById('equipment-section-title').style.display = 'block';
         const eqContent = document.getElementById('case-equipment-content');
         eqContent.style.display = 'block';
-        let rawEq = (c.equipmentHtml || '').trim();
+        let rawEq = stripSectionHeaders(c.equipmentHtml).trim();
         if (rawEq.startsWith('<li')) {
           const isNumbered = /^\s*<li[^>]*>\s*(\d+[\.\)]|\(\d+\))/i.test(rawEq);
           const tag = isNumbered ? 'ol' : 'ul';
@@ -605,6 +614,9 @@
         document.getElementById('equipment-section-title').style.display = 'none';
         document.getElementById('case-equipment-content').style.display = 'none';
       }
+      
+      // Render Note/Examiner
+      document.getElementById('note-content-area').innerHTML = stripSectionHeaders(c.noteHtml || '<p>ไม่มีหมายเหตุเพิ่มเติม</p>');
       
       // Setup IFrame Document URL
       const iframe = document.getElementById('doc-embed-iframe');

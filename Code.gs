@@ -579,15 +579,21 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
         }
         if (!recording) continue;
 
-        if (isHeading_(para) && !text.startsWith('(กลุ่ม:') && !text.startsWith('**กลุ่ม:')) {
-          const ct = text.replace(/^#+\s*/, '').trim();
-          if (ct.includes('ข้อมูลเคส')) currentSection = 'METADATA';
-          else if (ct.includes('โจทย์') || ct.includes('สถานการณ์')) currentSection = 'SCENARIO';
-          else if (ct.includes('ข้อมูลผู้ป่วย')) currentSection = 'PATIENT_INFO';
-          else if (ct.includes('สิ่งที่มีให้') || ct.includes('อุปกรณ์')) currentSection = 'EQUIPMENT';
-          else if (ct.toLowerCase().includes('checklist') || ct.includes('ทักษะ') || ct.includes('รายการ') || ct.includes('เกณฑ์') || ct.includes('ประเมิน') || ct.includes('สมรรถนะ')) currentSection = 'CHECKLIST';
-          else if (ct.includes('หมายเหตุ') || ct.includes('เฉลย') || ct.includes('ข้อมูลผู้ตรวจ')) currentSection = 'NOTE';
-          // Preserve current section if it's a minor subheading within scenario (e.g. "ซองที่ 1", "สูตรตำรับ")
+        const cleanHeader = text.replace(/^[*_#\s]+/, '').trim();
+        const isHeaderCandidate = isHeading_(para) || /^#+\s*/.test(text.trim()) || /^\*\*#+/.test(text.trim());
+        if (isHeaderCandidate && cleanHeader && !text.startsWith('(กลุ่ม:') && !text.startsWith('**กลุ่ม:')) {
+          let matchedSec = null;
+          if (cleanHeader.includes('ข้อมูลเคส')) matchedSec = 'METADATA';
+          else if (cleanHeader.includes('โจทย์') || cleanHeader.includes('สถานการณ์')) matchedSec = 'SCENARIO';
+          else if (cleanHeader.includes('ข้อมูลผู้ป่วย')) matchedSec = 'PATIENT_INFO';
+          else if (cleanHeader.includes('สิ่งที่มีให้') || cleanHeader.includes('อุปกรณ์')) matchedSec = 'EQUIPMENT';
+          else if (cleanHeader.toLowerCase().includes('checklist') || cleanHeader.includes('ทักษะ') || cleanHeader.includes('รายการ') || cleanHeader.includes('เกณฑ์') || cleanHeader.includes('ประเมิน') || cleanHeader.includes('สมรรถนะ')) matchedSec = 'CHECKLIST';
+          else if (cleanHeader.includes('หมายเหตุ') || cleanHeader.includes('เฉลย') || cleanHeader.includes('ข้อมูลผู้ตรวจ')) matchedSec = 'NOTE';
+
+          if (matchedSec) {
+            currentSection = matchedSec;
+            continue; // NEVER output section header tag into contentHtml/scenario
+          }
         }
 
         if (currentSection === 'CHECKLIST') {
@@ -967,28 +973,24 @@ function getCaseContentFromDoc(docId, targetCaseId) {
         if (!recording) continue;
         
         // ตรวจสอบหัวข้อหลักย่อย (ต้องไม่ใช่การระบุกลุ่มย่อยของ Checklist เช่น (กลุ่ม: ...))
-        if ((heading === DocumentApp.ParagraphHeading.HEADING1 || 
+        const cleanHeader = text.replace(/^[*_#\s]+/, '').trim();
+        const isHeaderCandidate = (heading === DocumentApp.ParagraphHeading.HEADING1 || 
              heading === DocumentApp.ParagraphHeading.HEADING2 || 
-             text.startsWith('## ') || 
-             text.startsWith('# ')) &&
-            !text.startsWith('(กลุ่ม:') &&
-            !text.startsWith('**กลุ่ม:')) {
-          
-          const cleanText = text.replace(/^#+\s*/, '').trim();
-          if (cleanText.includes('ข้อมูลเคส')) {
-            currentSection = 'METADATA';
-          } else if (cleanText.includes('โจทย์') || cleanText.includes('สถานการณ์')) {
-            currentSection = 'SCENARIO';
-          } else if (cleanText.includes('ข้อมูลผู้ป่วย')) {
-            currentSection = 'PATIENT_INFO';
-          } else if (cleanText.includes('สิ่งที่มีให้') || cleanText.includes('อุปกรณ์')) {
-            currentSection = 'EQUIPMENT';
-          } else if (cleanText.includes('Checklist') || cleanText.toLowerCase().includes('checklist') || cleanText.includes('\u0e17\u0e31\u0e01\u0e29\u0e30') || cleanText.includes('\u0e23\u0e32\u0e22\u0e01\u0e32\u0e23') || cleanText.includes('\u0e40\u0e01\u0e13\u0e11') || cleanText.includes('\u0e1b\u0e23\u0e30\u0e40\u0e21\u0e34\u0e19') || cleanText.includes('\u0e2a\u0e21\u0e23\u0e23\u0e16\u0e19\u0e30')) {
-            currentSection = 'CHECKLIST';
-          } else if (cleanText.includes('หมายเหตุ') || cleanText.includes('เฉลย') || cleanText.includes('ข้อมูลผู้ตรวจ')) {
-            currentSection = 'NOTE';
+             /^#+\s*/.test(text.trim()) || 
+             /^\*\*#+/.test(text.trim()));
+        if (isHeaderCandidate && cleanHeader && !text.startsWith('(กลุ่ม:') && !text.startsWith('**กลุ่ม:')) {
+          let matchedSec = null;
+          if (cleanHeader.includes('ข้อมูลเคส')) matchedSec = 'METADATA';
+          else if (cleanHeader.includes('โจทย์') || cleanHeader.includes('สถานการณ์')) matchedSec = 'SCENARIO';
+          else if (cleanHeader.includes('ข้อมูลผู้ป่วย')) matchedSec = 'PATIENT_INFO';
+          else if (cleanHeader.includes('สิ่งที่มีให้') || cleanHeader.includes('อุปกรณ์')) matchedSec = 'EQUIPMENT';
+          else if (cleanHeader.includes('Checklist') || cleanHeader.toLowerCase().includes('checklist') || cleanHeader.includes('ทักษะ') || cleanHeader.includes('รายการ') || cleanHeader.includes('เกณฑ์') || cleanHeader.includes('ประเมิน') || cleanHeader.includes('สมรรถนะ')) matchedSec = 'CHECKLIST';
+          else if (cleanHeader.includes('หมายเหตุ') || cleanHeader.includes('เฉลย') || cleanHeader.includes('ข้อมูลผู้ตรวจ')) matchedSec = 'NOTE';
+
+          if (matchedSec) {
+            currentSection = matchedSec;
+            continue; // NEVER output section header tag into contentHtml/scenario
           }
-          // Do not switch to 'OTHER' if it's a sub-heading inside scenario or equipment
         }
         
         // ตรวจสอบกลุ่ม Checklist

@@ -1526,10 +1526,17 @@
         document.getElementById('exam-case-id').style.display = 'inline';
       }
       
-      document.getElementById('exam-scenario-content').innerHTML = c.contentHtml || `<p>${c.scenario || ''}</p>`;
+      function stripSectionHeaders(str) {
+        if (!str) return '';
+        return str
+          .replace(/<p[^>]*>\s*#+\s*(?:สถานการณ์|โจทย์|ข้อมูลผู้ป่วย|สิ่งที่มีให้|อุปกรณ์|Checklist|เกณฑ์ประเมิน|ข้อมูลผู้ตรวจ|เฉลย|หมายเหตุ|ข้อมูลเคส)[^<]*<\/p>/gi, '')
+          .replace(/^#+\s*(?:สถานการณ์|โจทย์|ข้อมูลผู้ป่วย|สิ่งที่มีให้|อุปกรณ์|Checklist|เกณฑ์ประเมิน|ข้อมูลผู้ตรวจ|เฉลย|หมายเหตุ|ข้อมูลเคส)[^\n]*\n?/gim, '');
+      }
 
-      // Render patientInfoHtml — convert ##Header markers to styled headings
-      const rawPatient = c.patientInfoHtml || '<p>ไม่มีตารางข้อมูลผู้ป่วย</p>';
+      document.getElementById('exam-scenario-content').innerHTML = stripSectionHeaders(c.contentHtml || (c.scenario ? `<p>${c.scenario}</p>` : ''));
+
+      // Render patientInfoHtml — convert inner ##Header markers to styled headings while stripping section tag
+      const rawPatient = stripSectionHeaders(c.patientInfoHtml) || '<p>ไม่มีตารางข้อมูลผู้ป่วย</p>';
       const processedPatient = rawPatient.replace(
         /<p[^>]*>##([^<]+)<\/p>/gi,
         (match, heading) => `<p style="font-family:var(--font-title);font-weight:700;color:var(--text-primary);margin:1rem 0 0.35rem 0;font-size:0.92rem;border-left:3px solid var(--primary);padding-left:0.6rem;">&#128204; ${heading.trim()}</p>`
