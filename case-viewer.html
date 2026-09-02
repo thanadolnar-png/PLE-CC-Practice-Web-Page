@@ -442,8 +442,16 @@
                   if (!updatedCase.title && offlineCase.title) updatedCase.title = offlineCase.title;
                   if (!updatedCase.caseId) updatedCase.caseId = offlineCase.caseId;
                   if (!updatedCase.equipmentHtml && offlineCase.equipmentHtml) updatedCase.equipmentHtml = offlineCase.equipmentHtml;
-                  if (!updatedCase.contentHtml && offlineCase.contentHtml) updatedCase.contentHtml = offlineCase.contentHtml;
-                  if (!updatedCase.scenario && offlineCase.scenario) updatedCase.scenario = offlineCase.scenario;
+                  const offlineImgCount = ((offlineCase.contentHtml || '').match(/<img/g) || []).length;
+                  const updatedImgCount = ((updatedCase.contentHtml || '').match(/<img/g) || []).length;
+                  if (offlineImgCount > updatedImgCount || (!updatedCase.contentHtml && offlineCase.contentHtml)) {
+                    updatedCase.contentHtml = offlineCase.contentHtml;
+                  }
+                  const offlineScenarioLen = (offlineCase.scenario || '').trim().length;
+                  const updatedScenarioLen = (updatedCase.scenario || '').trim().length;
+                  if ((offlineScenarioLen > updatedScenarioLen && offlineCase.scenario) || (!updatedCase.scenario && offlineCase.scenario)) {
+                    updatedCase.scenario = offlineCase.scenario;
+                  }
                   if ((!updatedCase.checklist || updatedCase.checklist.length === 0) && offlineCase.checklist && offlineCase.checklist.length > 0) {
                     updatedCase.checklist = offlineCase.checklist;
                   }

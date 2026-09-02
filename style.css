@@ -1828,6 +1828,88 @@ ol.ordered-list li,
   background-color: var(--surface);
 }
 
+/* --- Side-by-Side Image Row (for multiple inline images on same line) --- */
+.case-images-row {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin: 1rem 0 !important;
+  width: 100% !important;
+}
+
+.case-images-row .case-image-wrapper {
+  flex: 1 1 0 !important;
+  max-width: 50% !important;
+  width: auto !important;
+  margin: 0 !important;
+}
+
+.case-images-row img,
+.case-images-row .case-image {
+  max-width: 100% !important;
+  max-height: 380px !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  margin: 0 auto !important;
+}
+
+/* --- Table Image Grid (for tables used as side-by-side image layout) --- */
+.table-image-grid {
+  width: 100% !important;
+  table-layout: fixed !important;
+  border-collapse: collapse !important;
+  margin: 1rem 0 !important;
+}
+
+.table-image-grid th,
+.table-image-grid td {
+  vertical-align: middle !important;
+  text-align: center !important;
+  padding: 6px !important;
+  border: 1px solid var(--border) !important;
+  background: transparent !important;
+  word-break: normal !important;
+  white-space: normal !important;
+}
+
+.table-image-grid .case-image-wrapper {
+  margin: 0 auto !important;
+  width: 100% !important;
+}
+
+.table-image-grid img,
+.table-image-grid .case-image {
+  max-width: 100% !important;
+  max-height: 380px !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  margin: 0 auto !important;
+}
+
+/* Overrides for any images inside any table cells */
+.table-patient-info td .case-image-wrapper,
+.table-patient-info th .case-image-wrapper {
+  margin: 0.25rem auto !important;
+  width: 100% !important;
+}
+
+.table-patient-info td img,
+.table-patient-info th img {
+  max-width: 100% !important;
+  max-height: 380px !important;
+  margin: 0 auto !important;
+}
+
+[data-theme="dark"] .table-image-grid td,
+[data-theme="dark"] .table-image-grid th {
+  background-color: var(--surface);
+  border-color: var(--border);
+}
+
 /* --- Examiner Full-Width Layout (Toggled via JS) --- */
 .viewer-grid.examiner-layout #left-pane {
   display: none !important;

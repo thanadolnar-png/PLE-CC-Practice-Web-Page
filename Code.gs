@@ -476,6 +476,15 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
     const { html, hasImg } = renderEls_(para.elements, inlineObjects);
     const trimmed = html.trim();
     if (!trimmed && !hasImg) return '';
+
+    // If paragraph contains 2 or more images side-by-side without substantive text
+    const imgCount = (para.elements || []).filter(el => el.inlineObjectElement).length;
+    const textContent = (para.elements || []).map(el => (el.textRun && el.textRun.content) || '').join('').trim();
+    if (imgCount >= 2 && !textContent) {
+      const rowHtml = '<div class="case-images-row">' + trimmed + '</div>';
+      if (para.bullet) return '<li data-list-type="ul">' + rowHtml + '</li>';
+      return rowHtml;
+    }
     
     if (para.bullet) {
       const lid = para.bullet.listId;
@@ -494,16 +503,51 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
     }
   }
 
-  function parseTable_(table) {
-    let h = '<div class="table-responsive"><table class="table-patient-info" style="width:100%;border-collapse:collapse;">';
+  function parseTable_(table, inlineObjects, listsDict) {
     const rows = table.tableRows || [];
+    if (rows.length === 0) return '';
+
+    // Check if table contains images
+    let hasImages = false;
+    let maxCols = 1;
+    for (let r = 0; r < rows.length; r++) {
+      const cells = rows[r].tableCells || [];
+      if (cells.length > maxCols) maxCols = cells.length;
+      for (let c = 0; c < cells.length; c++) {
+        for (const cnt of (cells[c].content || [])) {
+          if (cnt.paragraph && cnt.paragraph.elements) {
+            for (const el of cnt.paragraph.elements) {
+              if (el.inlineObjectElement) { hasImages = true; break; }
+            }
+          }
+          if (hasImages) break;
+        }
+        if (hasImages) break;
+      }
+      if (hasImages) break;
+    }
+
+    const tblClass = hasImages ? 'table-image-grid' : 'table-patient-info';
+    const colWidthPct = hasImages ? (100.0 / maxCols).toFixed(1) : null;
+    const styleAttr = hasImages ? ' style="width:100%;border-collapse:collapse;table-layout:fixed;"' : ' style="width:100%;border-collapse:collapse;"';
+
+    let h = '<div class="table-responsive"><table class="' + tblClass + '"' + styleAttr + '>';
     for (let r = 0; r < rows.length; r++) {
       h += '<tr>';
-      for (const cell of (rows[r].tableCells || [])) {
-        const tag = r === 0 ? 'th' : 'td';
-        let ct = '';
-        for (const c of (cell.content || [])) { if (c.paragraph) ct += getParaTxt_(c.paragraph); }
-        h += '<' + tag + ' style="border:1px solid #e2e8f0;padding:0.5rem 0.75rem;">' + escapeHtml(ct) + '</' + tag + '>';
+      const cells = rows[r].tableCells || [];
+      for (const cell of cells) {
+        const tag = hasImages ? 'td' : (r === 0 ? 'th' : 'td');
+        let cellHtml = '';
+        for (const cnt of (cell.content || [])) {
+          if (cnt.paragraph) {
+            const pRes = renderEls_(cnt.paragraph.elements, inlineObjects);
+            if (pRes.html) cellHtml += pRes.html;
+          } else if (cnt.table) {
+            cellHtml += parseTable_(cnt.table, inlineObjects, listsDict);
+          }
+        }
+        const cellStyle = colWidthPct ? ' style="width:' + colWidthPct + '%;padding:6px;vertical-align:middle;text-align:center;"' : ' style="border:1px solid #e2e8f0;padding:0.5rem 0.75rem;"';
+        h += '<' + tag + cellStyle + '>' + cellHtml + '</' + tag + '>';
       }
       h += '</tr>';
     }
@@ -543,8 +587,7 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
           else if (ct.includes('สิ่งที่มีให้') || ct.includes('อุปกรณ์')) currentSection = 'EQUIPMENT';
           else if (ct.toLowerCase().includes('checklist') || ct.includes('ทักษะ') || ct.includes('รายการ') || ct.includes('เกณฑ์') || ct.includes('ประเมิน') || ct.includes('สมรรถนะ')) currentSection = 'CHECKLIST';
           else if (ct.includes('หมายเหตุ') || ct.includes('เฉลย') || ct.includes('ข้อมูลผู้ตรวจ')) currentSection = 'NOTE';
-          else currentSection = 'OTHER';
-          continue;
+          // Preserve current section if it's a minor subheading within scenario (e.g. "ซองที่ 1", "สูตรตำรับ")
         }
 
         if (currentSection === 'CHECKLIST') {
@@ -944,10 +987,8 @@ function getCaseContentFromDoc(docId, targetCaseId) {
             currentSection = 'CHECKLIST';
           } else if (cleanText.includes('หมายเหตุ') || cleanText.includes('เฉลย') || cleanText.includes('ข้อมูลผู้ตรวจ')) {
             currentSection = 'NOTE';
-          } else {
-            currentSection = 'OTHER';
           }
-          continue;
+          // Do not switch to 'OTHER' if it's a sub-heading inside scenario or equipment
         }
         
         // ตรวจสอบกลุ่ม Checklist
@@ -973,31 +1014,31 @@ function getCaseContentFromDoc(docId, targetCaseId) {
       
       // 3. สะสมข้อมูลข้อความจากย่อหน้า
       if (currentSection === 'SCENARIO') {
-        if (type === DocumentApp.ElementType.PARAGRAPH) {
-          const paragraphHtml = parseParagraphToHtml(child.asParagraph());
+        if (type === DocumentApp.ElementType.PARAGRAPH || type === DocumentApp.ElementType.LIST_ITEM) {
+          const item = (type === DocumentApp.ElementType.PARAGRAPH) ? child.asParagraph() : child.asListItem();
+          const paragraphHtml = parseParagraphToHtml(item);
           if (paragraphHtml) {
             contentHtml += paragraphHtml;
-            scenario += child.asParagraph().getText().trim() + '\n';
+            scenario += item.getText().trim() + '\n';
           }
         }
       } 
       else if (currentSection === 'PATIENT_INFO') {
-        if (type === DocumentApp.ElementType.PARAGRAPH) {
-          const paragraphHtml = parseParagraphToHtml(child.asParagraph());
+        if (type === DocumentApp.ElementType.PARAGRAPH || type === DocumentApp.ElementType.LIST_ITEM) {
+          const item = (type === DocumentApp.ElementType.PARAGRAPH) ? child.asParagraph() : child.asListItem();
+          const paragraphHtml = parseParagraphToHtml(item);
           if (paragraphHtml) {
             patientInfoHtml += paragraphHtml;
           }
         }
       } 
       else if (currentSection === 'EQUIPMENT') {
-        if (type === DocumentApp.ElementType.PARAGRAPH) {
-          const paragraphHtml = parseParagraphToHtml(child.asParagraph());
+        if (type === DocumentApp.ElementType.PARAGRAPH || type === DocumentApp.ElementType.LIST_ITEM) {
+          const item = (type === DocumentApp.ElementType.PARAGRAPH) ? child.asParagraph() : child.asListItem();
+          const paragraphHtml = parseParagraphToHtml(item);
           if (paragraphHtml) {
             equipmentHtml += paragraphHtml;
           }
-        } else if (type === DocumentApp.ElementType.LIST_ITEM) {
-          const liText = child.asListItem().getText().trim();
-          equipmentHtml += `<li>${escapeHtml(liText)}</li>`;
         }
       } 
       else if (currentSection === 'CHECKLIST') {
@@ -1297,14 +1338,47 @@ function parseParagraphToHtml(paragraph) {
  * ฟังก์ชันแปลงตารางใน Doc เป็น HTML
  */
 function parseTableToHtml(table) {
-  let html = '<div class="table-responsive"><table class="table-patient-info">';
   const numRows = table.getNumRows();
+  if (numRows === 0) return '';
+
+  let hasImages = false;
+  let maxCols = 1;
+  for (let r = 0; r < numRows; r++) {
+    const row = table.getRow(r);
+    const numCells = row.getNumCells();
+    if (numCells > maxCols) maxCols = numCells;
+    for (let c = 0; c < numCells; c++) {
+      const cell = row.getCell(c);
+      const numParas = cell.getNumChildren();
+      for (let p = 0; p < numParas; p++) {
+        const item = cell.getChild(p);
+        if (item.getType() === DocumentApp.ElementType.PARAGRAPH || item.getType() === DocumentApp.ElementType.LIST_ITEM) {
+          const numGrandChildren = item.asParagraph().getNumChildren();
+          for (let gc = 0; gc < numGrandChildren; gc++) {
+            if (item.asParagraph().getChild(gc).getType() === DocumentApp.ElementType.INLINE_IMAGE) {
+              hasImages = true;
+              break;
+            }
+          }
+        }
+        if (hasImages) break;
+      }
+      if (hasImages) break;
+    }
+    if (hasImages) break;
+  }
+
+  const tblClass = hasImages ? 'table-image-grid' : 'table-patient-info';
+  const colWidthPct = hasImages ? (100.0 / maxCols).toFixed(1) : null;
+  const styleAttr = hasImages ? ' style="width:100%;border-collapse:collapse;table-layout:fixed;"' : '';
+
+  let html = `<div class="table-responsive"><table class="${tblClass}"${styleAttr}>`;
 
   for (let r = 0; r < numRows; r++) {
     const row = table.getRow(r);
     html += '<tr>';
     const numCells = row.getNumCells();
-    const tag = (r === 0 && numRows > 1) ? 'th' : 'td';
+    const tag = hasImages ? 'td' : ((r === 0 && numRows > 1) ? 'th' : 'td');
 
     for (let c = 0; c < numCells; c++) {
       const cell = row.getCell(c);
@@ -1325,7 +1399,8 @@ function parseTableToHtml(table) {
       if (cellHtml.startsWith('<p>') && cellHtml.endsWith('</p>') && (cellHtml.match(/<p>/g) || []).length === 1) {
         cellHtml = cellHtml.slice(3, -4);
       }
-      html += `<${tag}>${cellHtml}</${tag}>`;
+      const cellStyle = colWidthPct ? ` style="width:${colWidthPct}%;padding:6px;vertical-align:middle;text-align:center;"` : '';
+      html += `<${tag}${cellStyle}>${cellHtml}</${tag}>`;
     }
     html += '</tr>';
   }
