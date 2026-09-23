@@ -12,7 +12,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbyabU-EfF9Ob4zwi07DvovB
 let currentApiUrl = API_URL;
 
 const AppState = {
-  theme: 'light',
+  theme: localStorage.getItem('theme') || 'light',
   cases: [],
   filteredCases: [],
   currentCase: null,
@@ -142,18 +142,14 @@ document.addEventListener('DOMContentLoaded', () => {
   initViewToggles();
 });
 
-// ตรวจสอบ Theme (Enforce single App Shell light theme)
+// ตรวจสอบ Theme
 function initTheme() {
-  document.documentElement.setAttribute('data-theme', 'light');
-  localStorage.removeItem('theme');
-}
-
-function toggleTheme() {
-  // No-op in App Shell v2.0
-}
-
-function updateThemeButtonIcon(btn) {
-  if (btn) btn.style.display = 'none';
+  document.documentElement.setAttribute('data-theme', AppState.theme);
+  const themeBtn = document.getElementById('theme-toggle');
+  if (themeBtn) {
+    updateThemeButtonIcon(themeBtn);
+    themeBtn.addEventListener('click', toggleTheme);
+  }
 }
 
 // ตรวจสอบและตั้งค่ามุมมอง Grid/List
@@ -198,6 +194,22 @@ function initViewToggles() {
       localStorage.setItem('ple_case_view', 'grid');
     }
   }
+}
+
+function toggleTheme() {
+  AppState.theme = AppState.theme === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', AppState.theme);
+  localStorage.setItem('theme', AppState.theme);
+  
+  const themeBtn = document.getElementById('theme-toggle');
+  if (themeBtn) updateThemeButtonIcon(themeBtn);
+}
+
+function updateThemeButtonIcon(btn) {
+  if (!btn) return;
+  const isLight = AppState.theme === 'light';
+  btn.innerHTML = isLight ? '🌙' : '☀️';
+  btn.setAttribute('title', isLight ? 'สลับเป็นโหมดกลางคืน (Dark Mode)' : 'สลับเป็นโหมดกลางวัน (Light Mode)');
 }
 
 // จัดการ API Input modal/config (Deprecated: API is configured backend-only now)

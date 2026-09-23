@@ -28,32 +28,34 @@
   </script>
 </head>
 <body>
-<div class="app-shell" id="appShell">
-  <div class="phone-notch"></div>
 
-  <!-- Topbar — Exam Simulation -->
-  <div class="topbar" id="main-nav">
-    <div class="topbar-left">
-      <a href="index.html" class="back-btn" id="nav-logo">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        หน้าแรก
+  <!-- Navbar -->
+  <nav class="navbar" id="main-nav">
+    <div class="container">
+      <a href="index.html" class="logo" id="nav-logo">
+        <div class="logo-icon">🥼</div>
+        <span>RxCU OSPE Hub</span>
       </a>
-    </div>
-    <div class="titles">
-      <div class="app-name">🎯 ซ้อมสอบ OSPE 16 สถานี</div>
-      <div class="app-sub">ระบบจำลองสอบเสมือนจริง PLE-CC2</div>
-    </div>
-    <div class="topbar-right">
-      <a href="case-library.html" class="icon-btn" title="คลังเคส">📚</a>
-      <button class="icon-btn" id="toggleViewModeBtn" onclick="toggleAppViewMode()" title="สลับโหมด Desktop / Phone">📱</button>
-      <button class="icon-btn" onclick="toggleFullscreen()" title="เต็มจอ">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+      <!-- Mobile hamburger -->
+      <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle navigation" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
       </button>
+      <ul class="nav-links" id="nav-menu">
+        <li><a href="index.html" class="nav-link" id="nav-home">หน้าแรก</a></li>
+        <li><a href="case-library.html" class="nav-link" id="nav-library">คลังเคสสอบ</a></li>
+        <li><a href="exam-simulation.html" class="nav-link active" id="nav-sim">ระบบซ้อมสอบ 16 สถานี</a></li>
+        <li>
+          <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Dark/Light Mode" title="เปลี่ยนโหมดสี">
+            <!-- Icon filled dynamically by JS -->
+          </button>
+        </li>
+      </ul>
     </div>
-  </div>
-
-  <!-- Page Viewport -->
-  <div class="page-viewport">
+  </nav>
 
   <!-- Global Loader -->
   <div id="global-loader" class="loader-container" style="display: none;">
@@ -529,31 +531,16 @@
   </main>
 
   <!-- Footer -->
-  <footer class="footer" id="main-footer" style="margin-top: 2rem; padding: 1.25rem 0; border-top: 1px solid var(--border); text-align: center; color: var(--ink-soft); font-size: 0.8rem;">
+  <footer class="footer" id="main-footer" style="margin-top: 3rem; padding: 1.5rem 0; border-top: 1px solid var(--border); text-align: center; color: var(--text-muted); font-size: 0.85rem;">
     <div class="container">
-      <p style="margin-bottom: 0.2rem;">© 2026 คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม ปีการศึกษา 2569 | ฝ่ายวิชาการ</p>
-      <p style="font-size: 0.75rem; color: var(--ink-faint); margin-top: 0.2rem;">
-        <strong>Version 2.0</strong> · พัฒนาโดย แม็กนั่ม นิสิตเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย ชั้นปีที่ 5
+      <p style="margin-bottom: 0.25rem;">© 2026 คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม ปีการศึกษา 2569 | ฝ่ายวิชาการ</p>
+      <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.25rem;">
+        <strong>Version 1.3.3</strong> · พัฒนาโดย แม็กนั่ม นิสิตเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย ชั้นปีที่ 5
       </p>
     </div>
   </footer>
 
-  </div><!-- /.page-viewport -->
-</div><!-- /.app-shell -->
-
   <script>
-    // ─ App Shell utility functions ─
-    function toggleAppViewMode() {
-      document.body.classList.toggle('mode-phone');
-      const btn = document.getElementById('toggleViewModeBtn');
-      if (btn) btn.textContent = document.body.classList.contains('mode-phone') ? '🖥️' : '📱';
-    }
-    function toggleFullscreen() {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
-      } else { document.exitFullscreen && document.exitFullscreen(); }
-    }
-
     // ══════════════════════════════════════════════════════════════
     // Exam Simulation Logic — Single clean script block
     // ══════════════════════════════════════════════════════════════

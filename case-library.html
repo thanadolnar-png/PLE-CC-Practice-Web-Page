@@ -8,8 +8,6 @@
   
 </head>
 <body>
-<div class="app-shell" id="appShell">
-  <div class="phone-notch"></div>
 
   <!-- API Connection Status Banner -->
   <div id="api-status-banner" class="api-banner">
@@ -17,26 +15,41 @@
     <span class="banner-text">กำลังตรวจสอบสถานะการเชื่อมต่อ...</span>
   </div>
 
-  <!-- Topbar -->
-  <div class="topbar" id="main-nav">
-    <div class="topbar-left">
-      <a href="index.html" class="back-btn" id="nav-logo">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        หน้าแรก
+  <!-- Navbar -->
+  <nav class="navbar" id="main-nav">
+    <div class="container">
+      <a href="index.html" class="logo" id="nav-logo">
+        <div class="logo-icon">🥼</div>
+        <span>RxCU OSPE Hub</span>
       </a>
+      <!-- Mobile hamburger -->
+      <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle navigation" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <ul class="nav-links" id="nav-menu">
+        <li><a href="index.html" class="nav-link" id="nav-home">หน้าแรก</a></li>
+        <li><a href="case-library.html" class="nav-link active" id="nav-library">คลังเคสสอบ</a></li>
+        <li><a href="exam-simulation.html" class="nav-link" id="nav-sim">ระบบซ้อมสอบ 16 สถานี</a></li>
+        <li>
+          <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Dark/Light Mode" title="เปลี่ยนโหมดสี">
+            <!-- Icon filled dynamically by JS -->
+          </button>
+        </li>
+      </ul>
     </div>
-    <div class="titles">
-      <div class="app-name">📚 คลังเคสข้อสอบ OSPE</div>
-      <div class="app-sub" id="library-subtitle">ค้นหาและติ๊ก Checklist ตามหมวดหมู่</div>
-    </div>
-    <div class="topbar-right">
-      <a href="exam-simulation.html" class="icon-btn" title="ซ้อมสอบ 16 สถานี">🎯</a>
-      <button class="icon-btn" id="toggleViewModeBtn" onclick="toggleAppViewMode()" title="สลับโหมด Desktop / Phone">📱</button>
-    </div>
-  </div>
+  </nav>
 
-  <!-- Page Viewport -->
-  <div class="page-viewport">
+  <!-- Page Header -->
+  <header style="background-color: var(--surface); border-bottom: 1px solid var(--border); padding: 2.5rem 0; margin-bottom: 2rem;">
+    <div class="container">
+      <h1 style="font-size: 2rem; margin-bottom: 0.5rem; font-family: var(--font-title);" id="library-title">คลังเคสข้อสอบวิชาชีพ (OSPE Cases)</h1>
+      <p style="color: var(--text-secondary);" id="library-subtitle">ค้นหา ติ๊ก Checklist และอ่านเฉลยเคสจาก Google Docs ทั้งหมดแยกตามหมวดหมู่</p>
+    </div>
+  </header>
 
   <!-- Global Loader -->
   <div id="global-loader" class="loader-container" style="display: none;">
@@ -45,11 +58,10 @@
   </div>
 
   <!-- Main Content Area -->
-  <main class="main-section" style="padding-top: 1rem;" id="library-content">
+  <main class="main-section" style="padding-top: 0;" id="library-content">
     <div class="container">
       
       <div class="library-layout">
-
         <!-- Filter Bar (Sidebar Console) -->
         <aside class="filter-console" id="filters-section">
           <!-- Search bar -->
@@ -226,30 +238,25 @@
   <!-- Footer -->
   <footer class="footer" id="main-footer" style="margin-top: 3rem; padding: 1.5rem 0; border-top: 1px solid var(--border); text-align: center; color: var(--text-muted); font-size: 0.85rem;">
     <div class="container">
-      <p style="margin-bottom: 0.2rem; font-size: 0.8rem;">© 2026 คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม ปีการศึกษา 2569 | ฝ่ายวิชาการ</p>
-      <p style="font-size: 0.75rem; color: var(--ink-soft); margin-top: 0.2rem;">
-        <strong>Version 2.0</strong> · พัฒนาโดย แม็กนั่ม นิสิตเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย ชั้นปีที่ 5
+      <p style="margin-bottom: 0.25rem;">© 2026 คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม ปีการศึกษา 2569 | ฝ่ายวิชาการ</p>
+      <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.25rem;">
+        <strong>Version 1.3.3</strong> · พัฒนาโดย แม็กนั่ม นิสิตเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย ชั้นปีที่ 5
       </p>
     </div>
   </footer>
 
-  </div><!-- /.page-viewport -->
-</div><!-- /.app-shell -->
-
-  <script src="case-data-offline.js?v=1.3.4"></script>
+  <script src="case-data-offline.js?v=1.3.3"></script>
   <script src="app.js"></script>
 
   <script>
-    // ─ App Shell utility functions ─
-    function toggleAppViewMode() {
-      document.body.classList.toggle('mode-phone');
-      const btn = document.getElementById('toggleViewModeBtn');
-      if (btn) btn.textContent = document.body.classList.contains('mode-phone') ? '🖥️' : '📱';
-    }
-    function toggleFullscreen() {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
-      } else { document.exitFullscreen && document.exitFullscreen(); }
+    // ─ Hamburger toggle ─
+    const _hamburger = document.getElementById('nav-hamburger');
+    const _navMenu = document.getElementById('nav-menu');
+    if (_hamburger && _navMenu) {
+      _hamburger.addEventListener('click', () => {
+        const isOpen = _navMenu.classList.toggle('open');
+        _hamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
     }
 
     // ดึง URL Parameter ถ้าต้องการฟิลเตอร์หมวดมาจากหน้าแรก หรือต้องการแสดง Report Modal ทันที
@@ -279,4 +286,3 @@
   </script>
 </body>
 </html>
-
