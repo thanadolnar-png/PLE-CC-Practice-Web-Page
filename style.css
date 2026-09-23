@@ -859,14 +859,20 @@ body.mode-phone .phone-notch { display: block; }
 /* --- Viewer / Split Layout --- */
 .viewer-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .viewer-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
+}
+
+body.mode-phone .viewer-grid {
+  grid-template-columns: 1fr !important;
 }
 
 .viewer-pane {

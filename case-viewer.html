@@ -369,6 +369,20 @@
         if (modeParam && ['solo', 'examinee', 'examiner'].includes(modeParam)) {
           currentRole = modeParam;
         }
+
+        // แสดงข้อมูลพื้นฐานทันทีใน 0ms จากฐานข้อมูลออฟไลน์ เพื่อไม่ให้ค้างที่ "โหลดชื่อเคส..."
+        const initialCase = getOfflineCase(activeCaseId);
+        if (initialCase) {
+          const caseId = initialCase.caseId || activeCaseId;
+          const rawTitle = (initialCase.title && initialCase.title !== 'undefined') ? initialCase.title : ((initialCase.disease && initialCase.disease !== '-' && initialCase.disease !== 'undefined') ? initialCase.disease : (initialCase.mainGroup || 'เคสข้อสอบ'));
+          const displayTitle = (caseId && !rawTitle.startsWith(`[${caseId}]`)) ? `[${caseId}] ${rawTitle}` : rawTitle;
+          const titleEl = document.getElementById('case-title');
+          if (titleEl) titleEl.textContent = displayTitle;
+          const topbarTitle = document.getElementById('topbar-case-title');
+          if (topbarTitle) topbarTitle.textContent = displayTitle;
+          const topbarMeta = document.getElementById('topbar-case-meta');
+          if (topbarMeta) topbarMeta.textContent = (initialCase.category || '') + (initialCase.subTopic ? ` · ${initialCase.subTopic}` : '');
+        }
         
         // ถ้าโหลดฐานข้อมูลออฟไลน์เสร็จแล้ว ให้รันได้ทันทีเลยโดยไม่ต้องรอหน่วงเวลา 400ms
         if (typeof OFFLINE_CASE_DETAILS !== 'undefined') {
@@ -559,8 +573,20 @@
       
       if (!matchedCase) {
         showGlobalLoader(false);
-        alert('ไม่พบข้อมูลเคสที่ระบุ');
-        window.location.href = 'case-library.html';
+        const appElem = document.getElementById('case-viewer-app');
+        if (appElem) {
+          appElem.innerHTML = `
+            <div class="container" style="padding: 3rem 1rem; text-align: center;">
+              <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+              <h2 style="font-family: var(--font-title); font-weight: 700; margin-bottom: 0.5rem;">ไม่พบข้อมูลเคสที่ระบุ (${escapeHtml(cleanId)})</h2>
+              <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">อาจเกิดจากรหัสเคสไม่ถูกต้อง หรือกำลังอยู่ในระหว่างการจัดทำเนื้อหา</p>
+              <a href="case-library.html" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                ← ย้อนกลับไปคลังเคสสอบ
+              </a>
+            </div>
+          `;
+          appElem.style.display = 'block';
+        }
         return;
       }
       
@@ -573,6 +599,7 @@
     function renderCaseDetail(c) {
       const caseId = c.caseId || activeCaseId || '';
       const rawTitle = (c.title && c.title !== 'undefined') ? c.title : ((c.disease && c.disease !== '-' && c.disease !== 'undefined') ? c.disease : (c.mainGroup || 'เคสข้อสอบ'));
+      const displayTitle = (caseId && !rawTitle.startsWith(`[${caseId}]`)) ? `[${caseId}] ${rawTitle}` : rawTitle;
       document.getElementById('case-title').textContent = displayTitle;
       const topbarTitle = document.getElementById('topbar-case-title');
       if (topbarTitle) topbarTitle.textContent = displayTitle;
