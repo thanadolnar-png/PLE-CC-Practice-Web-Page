@@ -140,7 +140,7 @@ a {
 /* Page-specific optimal max-widths */
 .shell-index { max-width: 1200px; }
 .shell-library { max-width: 1440px; }
-.shell-viewer { max-width: 1560px; }
+.shell-viewer { max-width: 1060px; }
 .shell-sim { max-width: 1600px; }
 
 /* ── Fullscreen Mode: Expands 100% borderless ── */
@@ -856,32 +856,22 @@ body.mode-phone .phone-notch { display: block; }
   font-family: var(--font-title);
 }
 
-/* --- Viewer / Split Layout --- */
+/* --- Viewer / Continuous Single-Column Layout (แนวเดียวกันตลอด) --- */
 .viewer-grid {
-  display: grid;
-  grid-template-columns: 1.25fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
-  align-items: start;
-}
-
-@media (max-width: 1024px) {
-  .viewer-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-}
-
-body.mode-phone .viewer-grid {
-  grid-template-columns: 1fr !important;
+  width: 100%;
 }
 
 .viewer-pane {
   background-color: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 2rem;
+  padding: 1.75rem 2rem;
   box-shadow: var(--shadow-sm);
-  min-height: 500px;
+  min-height: auto;
+  width: 100%;
 }
 
 .viewer-header {
