@@ -141,22 +141,24 @@
   <main class="main-section" id="case-viewer-app">
     <div class="container">
       
-      <!-- Back navigation & Live Sync button -->
-      <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;" class="no-print">
-        <a href="case-library.html" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--font-title); font-weight: 600; color: var(--primary);">
-          ← ย้อนกลับไปคลังเคส
+      <!-- Back navigation & Actions (Single clean header bar) -->
+      <div style="margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;" class="no-print">
+        <a href="case-library.html" style="display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--font-title); font-weight: 600; color: var(--primary); font-size: 0.95rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+          ย้อนกลับไปคลังเคสสอบ
         </a>
-        <button class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.4rem 0.85rem;" onclick="updateCurrentCaseFromDoc()" id="btn-update-doc-top">
-          🔄 Update Data From Google Docs
-        </button>
+        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+          <button class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.35rem 0.75rem; border-color: var(--primary); color: var(--primary);" onclick="updateCurrentCaseFromDoc()" id="btn-update-doc-top">
+            🔄 Update Data From Google Docs
+          </button>
+          <a href="#" class="btn btn-secondary" style="color: #dc2626; border-color: #fca5a5; background: #fef2f2; font-size: 0.82rem; padding: 0.35rem 0.75rem;" onclick="goToReportCase(event)" title="แจ้งปัญหาเคสนี้">
+            🚨 แจ้งปัญหาเคสนี้
+          </a>
+        </div>
       </div>
 
       <!-- Header Information -->
       <header class="viewer-header">
-        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem;" class="no-print">
-          <a href="case-library.html" class="back-link" id="back-to-library-link">← กลับไปคลังเคสสอบ</a>
-          <a href="#" class="back-link" id="report-case-direct-link" style="color: #e53e3e; font-weight: 600;" onclick="goToReportCase(event)">🚨 แจ้งปัญหาเคสนี้</a>
-        </div>
         <h1 class="viewer-title" id="case-title">โหลดชื่อเคส...</h1>
         <div class="viewer-meta-tags no-print" id="case-meta-tags">
           <!-- Filled dynamically by JS -->
@@ -289,9 +291,6 @@
           <div style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;" id="viewer-action-buttons" class="no-print">
             <button id="btn-next-linked-station" class="btn btn-primary" style="display: none; width: 100%; font-size: 1rem; padding: 0.75rem; justify-content: center; background: linear-gradient(135deg, var(--primary), var(--secondary));">
               ⏩ ไปยังสถานีต่อเนื่อง (ถัดไป)
-            </button>
-            <button class="btn btn-secondary" style="width: 100%; border-color: var(--primary); color: var(--primary);" onclick="updateCurrentCaseFromDoc()" id="btn-update-doc">
-              🔄 Update Data From Google Docs
             </button>
             <button class="btn btn-secondary" style="width: 100%;" onclick="openSingleCasePrintModal()">
               🖨️ พิมพ์หน้านี้ / เซฟ PDF (ปรับแต่ง)
