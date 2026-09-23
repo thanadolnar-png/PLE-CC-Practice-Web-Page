@@ -12,7 +12,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbyabU-EfF9Ob4zwi07DvovB
 let currentApiUrl = API_URL;
 
 const AppState = {
-  theme: localStorage.getItem('theme') || 'light',
+  theme: 'light',
   cases: [],
   filteredCases: [],
   currentCase: null,
@@ -108,8 +108,20 @@ function logoutAuth() {
 }
 
 function addLogoutButton() {
+  if (document.getElementById('btn-logout')) return;
+  const topbarRight = document.querySelector('.topbar-right');
+  if (topbarRight) {
+    const btn = document.createElement('button');
+    btn.id = 'btn-logout';
+    btn.className = 'icon-btn';
+    btn.onclick = logoutAuth;
+    btn.title = 'ออกจากระบบ / Logout';
+    btn.innerHTML = '🔒';
+    topbarRight.appendChild(btn);
+    return;
+  }
   const navMenu = document.getElementById('nav-menu');
-  if (navMenu && !document.getElementById('btn-logout')) {
+  if (navMenu) {
     const li = document.createElement('li');
     li.innerHTML = `
       <button id="btn-logout" class="nav-logout-btn" onclick="logoutAuth()" title="ออกจากระบบ / Logout">
@@ -142,14 +154,18 @@ document.addEventListener('DOMContentLoaded', () => {
   initViewToggles();
 });
 
-// ตรวจสอบ Theme
+// ตรวจสอบ Theme (Enforce Light Theme in Sandbox)
 function initTheme() {
-  document.documentElement.setAttribute('data-theme', AppState.theme);
-  const themeBtn = document.getElementById('theme-toggle');
-  if (themeBtn) {
-    updateThemeButtonIcon(themeBtn);
-    themeBtn.addEventListener('click', toggleTheme);
-  }
+  document.documentElement.setAttribute('data-theme', 'light');
+  localStorage.removeItem('theme');
+}
+
+function toggleTheme() {
+  // No-op in single warm theme
+}
+
+function updateThemeButtonIcon(btn) {
+  if (btn) btn.style.display = 'none';
 }
 
 // ตรวจสอบและตั้งค่ามุมมอง Grid/List

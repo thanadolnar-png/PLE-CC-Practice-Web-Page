@@ -13,6 +13,8 @@
   <meta property="og:type" content="website">
 </head>
 <body>
+<div class="app-shell shell-index" id="appShell">
+  <div class="phone-notch"></div>
 
   <!-- API Connection Status Banner -->
   <div id="api-status-banner" class="api-banner">
@@ -20,33 +22,29 @@
     <span class="banner-text">กำลังตรวจสอบสถานะการเชื่อมต่อ...</span>
   </div>
 
-  <!-- Navbar -->
-  <nav class="navbar" id="main-nav">
-    <div class="container">
-      <a href="index.html" class="logo" id="nav-logo">
-        <div class="logo-icon">🥼</div>
-        <span>RxCU OSPE Hub</span>
+  <!-- Topbar -->
+  <div class="topbar" id="main-nav">
+    <div class="topbar-left">
+      <a href="index.html" class="topbar-logo" id="nav-logo">
+        <div class="topbar-logo-badge">🥼</div>
+        <span class="topbar-logo-text">RxCU OSPE Hub</span>
       </a>
-      <!-- Mobile hamburger -->
-      <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle navigation" aria-expanded="false">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <line x1="3" y1="6" x2="21" y2="6"/>
-          <line x1="3" y1="12" x2="21" y2="12"/>
-          <line x1="3" y1="18" x2="21" y2="18"/>
-        </svg>
-      </button>
-      <ul class="nav-links" id="nav-menu">
-        <li><a href="index.html" class="nav-link active" id="nav-home">หน้าแรก</a></li>
-        <li><a href="case-library.html" class="nav-link" id="nav-library">คลังเคสสอบ</a></li>
-        <li><a href="exam-simulation.html" class="nav-link" id="nav-sim">ระบบซ้อมสอบ 16 สถานี</a></li>
-        <li>
-          <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Dark/Light Mode" title="เปลี่ยนโหมดสี">
-            <!-- Icon filled dynamically by JS -->
-          </button>
-        </li>
-      </ul>
     </div>
-  </nav>
+    <div class="topbar-nav-tabs" id="nav-menu">
+      <a href="index.html" class="topbar-nav-tab active" id="nav-home">หน้าแรก</a>
+      <a href="case-library.html" class="topbar-nav-tab" id="nav-library">คลังเคส</a>
+      <a href="exam-simulation.html" class="topbar-nav-tab" id="nav-sim">ซ้อมสอบ</a>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" id="toggleViewModeBtn" onclick="toggleAppViewMode()" title="สลับโหมด Desktop / Phone">📱</button>
+      <button class="icon-btn" onclick="toggleFullscreen()" title="เต็มจอ">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Page Viewport -->
+  <div class="page-viewport">
 
   <!-- Hero Section -->
   <header class="hero" id="home-hero">
@@ -146,29 +144,46 @@
 
   <!-- Footer -->
   <footer class="footer" id="main-footer">
-    <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; padding: 14px 1.5rem;">
       <div>
-        <p style="margin-bottom: 0.25rem;">© 2026 คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม (PLE-CC) ปีการศึกษา 2569</p>
-        <p class="footer-credit" style="font-size: 0.82rem; color: var(--text-secondary);">
-          <strong>Version 1.3.3</strong> · พัฒนาโดย แม็กนั่ม (Maxnum) · หัวหน้าชั้นปีที่ 5 ปีการศึกษา 2569 คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย
+        <p style="margin-bottom: 0.2rem; font-size: 0.82rem;">© 2026 คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม (PLE-CC) ปีการศึกษา 2569</p>
+        <p class="footer-credit" style="font-size: 0.75rem; color: var(--ink-soft);">
+          <strong>Version 2.0 (Theme Sandbox)</strong> · พัฒนาโดย แม็กนั่ม (Maxnum) · หัวหน้าชั้นปีที่ 5 คณะเภสัชศาสตร์ จุฬาฯ
         </p>
       </div>
     </div>
   </footer>
 
-  <script src="case-data-offline.js?v=1.3.3"></script>
+  </div><!-- /.page-viewport -->
+</div><!-- /.app-shell -->
+
+  <script src="case-data-offline.js?v=1.3.4"></script>
   <script src="app.js"></script>
 
   <script>
-    // ─ Hamburger toggle ─
-    const _hamburger = document.getElementById('nav-hamburger');
-    const _navMenu = document.getElementById('nav-menu');
-    if (_hamburger && _navMenu) {
-      _hamburger.addEventListener('click', () => {
-        const isOpen = _navMenu.classList.toggle('open');
-        _hamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-      });
+    // ─ View Mode & Fullscreen helpers ─
+    function toggleAppViewMode() {
+      document.body.classList.toggle('mode-phone');
+      const btn = document.getElementById('toggleViewModeBtn');
+      if (btn) btn.textContent = document.body.classList.contains('mode-phone') ? '🖥️' : '📱';
     }
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+        document.body.classList.toggle('is-fullscreen');
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+        document.body.classList.remove('is-fullscreen');
+      }
+    }
+    document.addEventListener('fullscreenchange', () => {
+      if (document.fullscreenElement) document.body.classList.add('is-fullscreen');
+      else document.body.classList.remove('is-fullscreen');
+    });
 
     // Remove skeleton loading class after cases are loaded
     const _origOnCasesLoadedIndex = typeof onCasesLoaded === 'function' ? onCasesLoaded : null;

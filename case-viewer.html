@@ -104,26 +104,32 @@
     }  </style>
 </head>
 <body>
+<div class="app-shell shell-viewer" id="appShell">
+  <div class="phone-notch"></div>
 
-  <!-- Navbar -->
-  <nav class="navbar no-print" id="main-nav">
-    <div class="container">
-      <a href="index.html" class="logo" id="nav-logo">
-        <div class="logo-icon">🥼</div>
-        <span>RxCU OSPE Hub</span>
+  <!-- Topbar — Case Viewer -->
+  <div class="topbar no-print" id="main-nav">
+    <div class="topbar-left">
+      <a href="case-library.html" class="back-btn" id="nav-logo">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        คลังเคส
       </a>
-      <ul class="nav-links" id="nav-menu">
-        <li><a href="index.html" class="nav-link" id="nav-home">หน้าแรก</a></li>
-        <li><a href="case-library.html" class="nav-link active" id="nav-library">คลังเคสสอบ</a></li>
-        <li><a href="exam-simulation.html" class="nav-link" id="nav-sim">ระบบซ้อมสอบ 16 สถานี</a></li>
-        <li>
-          <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Dark/Light Mode" title="เปลี่ยนโหมดสี">
-            <!-- Icon filled dynamically by JS -->
-          </button>
-        </li>
-      </ul>
     </div>
-  </nav>
+    <div class="titles">
+      <div class="app-name" id="topbar-case-title" style="font-size: 13.5px; max-width: 480px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">โหลดเคส...</div>
+      <div class="app-sub" id="topbar-case-meta"></div>
+    </div>
+    <div class="topbar-right">
+      <a href="#" class="icon-btn" onclick="goToReportCase(event)" title="แจ้งปัญหาเคสนี้" id="report-case-direct-link" style="color: #dc2626; border-color: #fca5a5; background: #fef2f2;">🚨</a>
+      <button class="icon-btn" id="toggleViewModeBtn" onclick="toggleAppViewMode()" title="สลับโหมด Desktop / Phone">📱</button>
+      <button class="icon-btn" onclick="toggleFullscreen()" title="เต็มจอ">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Page Viewport -->
+  <div class="page-viewport">
 
   <!-- Global Loader -->
   <div id="global-loader" class="loader-container" style="display: none;">
@@ -132,7 +138,7 @@
   </div>
 
   <!-- Main Viewer Content -->
-  <main class="main-section" id="case-viewer-app" style="display: none;">
+  <main class="main-section" id="case-viewer-app">
     <div class="container">
       
       <!-- Back navigation & Live Sync button -->
@@ -303,19 +309,46 @@
   </main>
 
   <!-- Footer -->
-  <footer class="footer" id="main-footer" style="margin-top: 3rem; padding: 1.5rem 0; border-top: 1px solid var(--border); text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+  <footer class="footer" id="main-footer" style="margin-top: 2rem; padding: 1.25rem 0; border-top: 1px solid var(--border); text-align: center; color: var(--ink-soft); font-size: 0.82rem;">
     <div class="container">
-      <p style="margin-bottom: 0.25rem;">© 2026 คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม ปีการศึกษา 2569 | ฝ่ายวิชาการ</p>
-      <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.25rem;">
-        <strong>Version 1.3.3</strong> · พัฒนาโดย แม็กนั่ม นิสิตเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย ชั้นปีที่ 5
+      <p style="margin-bottom: 0.2rem;">© 2026 คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม ปีการศึกษา 2569 | ฝ่ายวิชาการ</p>
+      <p style="font-size: 0.75rem; color: var(--ink-faint); margin-top: 0.2rem;">
+        <strong>Version 2.0 (Theme Sandbox)</strong> · พัฒนาโดย แม็กนั่ม นิสิตเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย ชั้นปีที่ 5
       </p>
     </div>
   </footer>
 
-  <script src="case-data-offline.js?v=1.3.3"></script>
+  </div><!-- /.page-viewport -->
+</div><!-- /.app-shell -->
+
+  <script src="case-data-offline.js?v=1.3.4"></script>
   <script src="app.js"></script>
 
   <script>
+    // ─ View Mode & Fullscreen helpers ─
+    function toggleAppViewMode() {
+      document.body.classList.toggle('mode-phone');
+      const btn = document.getElementById('toggleViewModeBtn');
+      if (btn) btn.textContent = document.body.classList.contains('mode-phone') ? '🖥️' : '📱';
+    }
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+        document.body.classList.toggle('is-fullscreen');
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+        document.body.classList.remove('is-fullscreen');
+      }
+    }
+    document.addEventListener('fullscreenchange', () => {
+      if (document.fullscreenElement) document.body.classList.add('is-fullscreen');
+      else document.body.classList.remove('is-fullscreen');
+    });
+
     let activeCaseId = getUrlParam('id');
     let currentRole = 'solo'; // solo, examinee, examiner
 
@@ -540,8 +573,11 @@
     function renderCaseDetail(c) {
       const caseId = c.caseId || activeCaseId || '';
       const rawTitle = (c.title && c.title !== 'undefined') ? c.title : ((c.disease && c.disease !== '-' && c.disease !== 'undefined') ? c.disease : (c.mainGroup || 'เคสข้อสอบ'));
-      const displayTitle = (caseId && !rawTitle.startsWith(`[${caseId}]`)) ? `[${caseId}] ${rawTitle}` : rawTitle;
       document.getElementById('case-title').textContent = displayTitle;
+      const topbarTitle = document.getElementById('topbar-case-title');
+      if (topbarTitle) topbarTitle.textContent = displayTitle;
+      const topbarMeta = document.getElementById('topbar-case-meta');
+      if (topbarMeta) topbarMeta.textContent = (c.category || '') + (c.subTopic ? ` · ${c.subTopic}` : '');
       
       // Render Case Meta Tags
       const metaContainer = document.getElementById('case-meta-tags');
