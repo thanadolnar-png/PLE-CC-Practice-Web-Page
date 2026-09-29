@@ -1,62 +1,71 @@
 @echo off
 setlocal enabledelayedexpansion
-title PLE-CC 2569 -- One-Click Compile & Auto Push to Vercel
+title PLE-CC 2569 -- One-Click Compile & Auto Push
 cls
 
 echo ================================================================
-echo   [PLE-CC 2569 RxCU] -- One-Click Compile & Auto Push
-echo   Owner: Thanadol (Maxnum) | Auto Deploy to GitHub / Vercel
+echo   [PLE-CC 2569 RxCU] -- One-Click Compile ^& Auto Push
+echo   Owner: Thanadol (Maxnum) ^| Auto Deploy to GitHub / Vercel
 echo ================================================================
 echo.
 
-cd /d "%~dp0"
+:: ---- Paths (แก้ตรงนี้ถ้าย้าย folder) ----
+set "REPO_DIR=C:\Users\thana\Desktop\PLE-CC"
+set "WEB_DIR=C:\Users\thana\Desktop\PLE-CC\Website\PLE CC Webpage"
+:: ------------------------------------------
 
-:: 1. Setup Git Identity (Auto configured to thanadolnar-png)
-echo [1/4] Configuring Git Identity (Auto)...
+:: 1. Setup Git Identity
+echo [1/4] Setting Git Identity...
+cd /d "%WEB_DIR%"
 git config user.name "thanadolnar-png"
 git config user.email "thanadol.nar@gmail.com"
 git config credential.helper manager
+echo       Done.
 
-:: 2. Compile Offline Database from Google Docs & Sheets
+:: 2. Compile Offline Database
 echo.
-echo [2/4] Compiling data from Google Docs & Sheets (compressing images)...
-echo       Please wait, this takes ~20-40 seconds...
-cd /d "%~dp0..\.."
+echo [2/4] Compiling data from Google Docs ^& Sheets...
+echo       Please wait, this takes ~1-3 minutes...
+echo.
+cd /d "%REPO_DIR%"
 python "scripts\compile_offline_db_python.py"
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo ================================================================
     echo  [ERROR] Compilation failed!
-    echo  Please check internet connection or Google Service Account.
+    echo  Please check internet connection or Service Account credentials.
     echo ================================================================
+    echo.
     pause
     exit /b 1
 )
 
-:: 3. Sync Backup to Website_Backup_v1.3
+:: 3. Sync Backup
 echo.
-echo [3/4] Syncing to Website_Backup_v1.3...
+echo [3/4] Syncing backup to Website_Backup_v1.3...
 python "scripts\sync_backup.py"
+echo       Done.
 
-:: 4. Auto Git Commit and Push to GitHub & Vercel
+:: 4. Git Commit & Push
 echo.
-echo [4/4] Auto Git Commit & Push to GitHub (Vercel Auto-Deploy)...
-cd /d "%~dp0"
+echo [4/4] Git add, commit, and push to GitHub...
+cd /d "%WEB_DIR%"
 git add -A
+git status
 git commit -m "Auto sync offline DB and UI updates [%DATE% %TIME%]"
 git push origin main
 
 if %ERRORLEVEL% EQU 0 (
     echo.
     echo ================================================================
-    echo  [SUCCESS] Compile and Push to GitHub complete!
-    echo  Vercel is now deploying the latest version automatically!
+    echo  [SUCCESS] Push to GitHub complete!
+    echo  Vercel is now deploying the latest version automatically.
     echo ================================================================
 ) else (
     echo.
     echo ================================================================
-    echo  [WARNING] Git commit succeeded, but push encountered an issue.
+    echo  [WARNING] Push encountered an issue. Please check above.
     echo ================================================================
 )
 
