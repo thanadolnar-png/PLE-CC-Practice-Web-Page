@@ -1,6 +1,6 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Generated on 2026-09-30 01:49:00
+ * Generated on 2026-09-30 02:26:20
  */
 
 const OFFLINE_DATA = {
@@ -1146,7 +1146,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ส้มส้ม",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -1670,6 +1670,253 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
+      "caseId": "OSPE-CLSD01",
+      "title": "Asthma Inhaler  — MDI + Spacer",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Asthma (Pediatric)",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "AI",
+      "createdDate": "04/07/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD02",
+      "title": "Insullin Pen — Lantus SoloSTAR",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Diabetes Mellitus Type 2 (Insuทดสอบ Glargine)",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "AI",
+      "createdDate": "04/07/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD03",
+      "title": "Insullin Pen — Mixtard 30 FlexPen (suspension)",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Diabetes Mellitus Type 2 (Insuทดสอบ Premixed)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD04",
+      "title": "Insullin Vial & Syringe  — การผสมและฉีดยาขุ่น-ใส",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Diabetes Mellitus Type 1 (Insuทดสอบ Vial & Syringe)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD06",
+      "title": "Eye Drops  — ยาหยอดตาชนิดมีหลอดหยดและไม่มีหลอดหยด",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Dry Eyes & Glaucoma",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD07",
+      "title": "Eye Ointment & Gel — ยาขี้ผึ้งและเจลป้ายตา",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Bacterial Conjunctivitis (Chloramphenicol Eye Ointment)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD08",
+      "title": "Ear Drops  — ยาหยอดหู",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Otitis Externa (Ciprofloxacin Ear Drops)",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD09",
+      "title": "Nasal Spray  — ยาพ่นจมูก",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Allergic Rhinitis (Fluticasone Nasal Spray)",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD10",
+      "title": "Nasal Drops  — ยาหยอดจมูก",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Severe Nasal Congestion (Oxymetazoทดสอบe Nasal Drops)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD11",
+      "title": "MDI Inhaler  — ยาสูดกำหนดขนาด",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Asthma (Salbutamol MDI)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD12",
+      "title": "Turbuhaler — ยาสูดชนิดผงแห้ง",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Asthma / COPD (Budesonide/Formoterol Turbuhaler)",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD14",
+      "title": "Handihaler & Easyhaler & Swinghaler — DPI อื่น ๆ",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "COPD (Tiotropium Handihaler / Easyhaler)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD15",
+      "title": "Suppository ทวารหนัก — ยาเหน็บทวาร",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Constipation / Hemorrhoids (Bisacodyl Suppository)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD16",
+      "title": "ยาเหน็บช่องคลอด & ครีมช่องคลอด",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Vaginal Candidiasis (Clotrimazole Vaginal Suppository)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD17",
+      "title": "Alendronate — ยาเม็ดพิเศษ Bisphosphonate",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Osteoporosis (Alendronate)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD18",
+      "title": "Sublingual Nitrate Tablets — ยาอมใต้ลิ้น",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Angina Pectoris (Nitroglycerin Subทดสอบgual)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD20",
+      "title": "ยาเม็ดคุมกำเนิด — การเริ่มกินและการลืมกิน",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Contraception (CDC 2018 Guideทดสอบes)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD21",
+      "title": "หมากฝรั่งช่วยเลิกบุหรี่ — หมากฝรั่งนิโคติน",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Smoking Cessation (Nicotine Gum)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD22",
+      "title": "แผ่นแปะนิโคติน — แผ่นแปะช่วยเลิกบุหรี่",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Smoking Cessation (Nicotine Patch)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "isActive": true
+    },
+    {
       "caseId": "OSPE-CLSP01",
       "title": "Asthma Inhaler  — MDI + Spacer",
       "category": "Clinic",
@@ -1679,7 +1926,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "AI",
-      "createdDate": "04/07/2026",
+      "createdDate": "4/7/2026",
       "isActive": true
     },
     {
@@ -1692,7 +1939,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "AI",
-      "createdDate": "04/07/2026",
+      "createdDate": "4/7/2026",
       "isActive": true
     },
     {
@@ -1705,7 +1952,7 @@ const OFFLINE_DATA = {
       "difficulty": 3,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ทดสอบ",
-      "createdDate": "04/07/2026",
+      "createdDate": "4/7/2026",
       "isActive": true
     },
     {
@@ -1718,7 +1965,7 @@ const OFFLINE_DATA = {
       "difficulty": 3,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ทดสอบ",
-      "createdDate": "04/07/2026",
+      "createdDate": "4/7/2026",
       "isActive": true
     },
     {
@@ -1731,7 +1978,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ทดสอบ",
-      "createdDate": "04/07/2026",
+      "createdDate": "4/7/2026",
       "isActive": true
     },
     {
@@ -1744,7 +1991,7 @@ const OFFLINE_DATA = {
       "difficulty": 3,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ทดสอบ",
-      "createdDate": "04/07/2026",
+      "createdDate": "4/7/2026",
       "isActive": true
     },
     {
@@ -1757,7 +2004,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ทดสอบ",
-      "createdDate": "04/07/2026",
+      "createdDate": "4/7/2026",
       "isActive": true
     },
     {
@@ -1770,7 +2017,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ทดสอบ",
-      "createdDate": "04/07/2026",
+      "createdDate": "4/7/2026",
       "isActive": true
     },
     {
@@ -1783,7 +2030,7 @@ const OFFLINE_DATA = {
       "difficulty": 3,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ทดสอบ",
-      "createdDate": "04/07/2026",
+      "createdDate": "4/7/2026",
       "isActive": true
     },
     {
@@ -1796,7 +2043,7 @@ const OFFLINE_DATA = {
       "difficulty": 3,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ทดสอบ",
-      "createdDate": "04/07/2026",
+      "createdDate": "4/7/2026",
       "isActive": true
     },
     {
@@ -1809,7 +2056,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ทดสอบ",
-      "createdDate": "04/07/2026",
+      "createdDate": "4/7/2026",
       "isActive": true
     },
     {
@@ -1822,7 +2069,7 @@ const OFFLINE_DATA = {
       "difficulty": 3,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ทดสอบ",
-      "createdDate": "04/07/2026",
+      "createdDate": "4/7/2026",
       "isActive": true
     },
     {
@@ -1835,7 +2082,7 @@ const OFFLINE_DATA = {
       "difficulty": 3,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ทดสอบ",
-      "createdDate": "04/07/2026",
+      "createdDate": "4/7/2026",
       "isActive": true
     },
     {
@@ -1848,7 +2095,7 @@ const OFFLINE_DATA = {
       "difficulty": 3,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ทดสอบ",
-      "createdDate": "04/07/2026",
+      "createdDate": "4/7/2026",
       "isActive": true
     },
     {
@@ -1861,7 +2108,7 @@ const OFFLINE_DATA = {
       "difficulty": 3,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ทดสอบ",
-      "createdDate": "04/07/2026",
+      "createdDate": "4/7/2026",
       "isActive": true
     },
     {
@@ -1874,7 +2121,7 @@ const OFFLINE_DATA = {
       "difficulty": 3,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ทดสอบ",
-      "createdDate": "04/07/2026",
+      "createdDate": "4/7/2026",
       "isActive": true
     },
     {
@@ -1887,7 +2134,7 @@ const OFFLINE_DATA = {
       "difficulty": 3,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ทดสอบ",
-      "createdDate": "04/07/2026",
+      "createdDate": "4/7/2026",
       "isActive": true
     },
     {
@@ -1900,7 +2147,7 @@ const OFFLINE_DATA = {
       "difficulty": 3,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ทดสอบ",
-      "createdDate": "04/07/2026",
+      "createdDate": "4/7/2026",
       "isActive": true
     },
     {
@@ -1913,7 +2160,7 @@ const OFFLINE_DATA = {
       "difficulty": 3,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ทดสอบ",
-      "createdDate": "04/07/2026",
+      "createdDate": "4/7/2026",
       "isActive": true
     },
     {
@@ -1926,7 +2173,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ตอง",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -1939,7 +2186,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ตอง",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -1952,7 +2199,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ตอง",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -1965,7 +2212,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ออมสิน",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -1978,7 +2225,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "นีนนี่",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -1991,7 +2238,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ดับบลิว & โฟ๊คสุดหล่อ",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2004,7 +2251,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "บีเอ็ม",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2017,7 +2264,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "บีเอ็ม",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2030,7 +2277,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "บีเอ็ม",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2043,7 +2290,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "บีเอ็ม",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2056,7 +2303,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2069,7 +2316,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2082,7 +2329,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2095,7 +2342,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2108,7 +2355,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2121,7 +2368,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2134,7 +2381,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2147,7 +2394,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2160,7 +2407,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "มิ้นท์",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2173,7 +2420,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "มิ้นท์",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2186,7 +2433,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "บีเอ็ม",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2199,7 +2446,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "บีเอ็ม",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2212,7 +2459,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ไข่มุก",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2225,7 +2472,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ไข่มุก",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2238,7 +2485,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ไข่มุก",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2251,7 +2498,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ไข่มุก",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2264,7 +2511,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ไข่มุก",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2277,7 +2524,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ไข่มุก",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2290,7 +2537,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ทิว",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2303,7 +2550,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2316,7 +2563,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ใบตอง",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2329,7 +2576,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ใบตอง",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2342,7 +2589,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2355,7 +2602,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2368,7 +2615,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2381,7 +2628,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2394,7 +2641,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2407,7 +2654,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ใบตอง",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2420,7 +2667,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2433,7 +2680,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2446,7 +2693,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2459,7 +2706,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ใบตอง",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2472,7 +2719,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2485,7 +2732,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2498,7 +2745,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ทิว",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2511,7 +2758,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ทิว",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2524,7 +2771,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ทิว",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2537,7 +2784,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ทิว",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2550,7 +2797,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ตะวัน",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2563,7 +2810,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ตะวัน",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2576,7 +2823,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ตะวัน",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2589,7 +2836,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ยูจีน",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2602,7 +2849,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ยูจีน",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
@@ -2615,7 +2862,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ยูจีน",
-      "createdDate": "2/9/2569",
+      "createdDate": "30/9/2569",
       "isActive": true
     },
     {
