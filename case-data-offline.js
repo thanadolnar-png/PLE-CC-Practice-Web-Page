@@ -1,6 +1,6 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Generated on 2026-09-30 02:26:20
+ * Generated on 2026-09-30 02:33:10
  */
 
 const OFFLINE_DATA = {
@@ -2516,7 +2516,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDSS22",
-      "title": "ointment",
+      "title": "ointment (ต่อจาก PDSS21)",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
       "subTopic": "",
