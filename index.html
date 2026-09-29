@@ -78,9 +78,30 @@
       </div>
 
       <div class="hero-cta">
-        <a href="exam-simulation.html" class="btn btn-primary" id="btn-start-sim">🎯 เริ่มต้นจำลองการสอบจริง</a>
-        <a href="case-library.html" class="btn btn-secondary" id="btn-goto-library">📚 เปิดดูคลังเคสทั้งหมด</a>
-        <button onclick="openBatchPrintModal()" class="btn btn-secondary" style="border-color: var(--primary); color: var(--primary);">🖨️ เครื่องมือสั่งพิมพ์หลายเคส</button>
+        <a href="exam-simulation.html" class="btn-interactive-hover btn-variant-primary" id="btn-start-sim">
+          <span class="btn-text-default">🎯 เริ่มต้นจำลองการสอบจริง</span>
+          <span class="btn-text-hover">
+            <span>เข้าสู่ห้องสอบ</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </span>
+          <span class="btn-bubble-dot"></span>
+        </a>
+        <a href="case-library.html" class="btn-interactive-hover" id="btn-goto-library">
+          <span class="btn-text-default">📚 เปิดดูคลังเคสทั้งหมด</span>
+          <span class="btn-text-hover">
+            <span>ดูคลังเคส 870+ ข้อ</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </span>
+          <span class="btn-bubble-dot"></span>
+        </a>
+        <button onclick="openBatchPrintModal()" class="btn-interactive-hover" style="border-color: var(--primary); color: var(--primary);">
+          <span class="btn-text-default">🖨️ สั่งพิมพ์หลายเคส</span>
+          <span class="btn-text-hover">
+            <span>พิมพ์ข้อสอบ PDF</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </span>
+          <span class="btn-bubble-dot"></span>
+        </button>
       </div>
     </div>
   </header>

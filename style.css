@@ -586,6 +586,135 @@ body.mode-phone .phone-notch { display: block; }
 }
 .btn-danger:hover { background-color: #dc2626; }
 
+/* ══════════════════════════════════════════════════
+   INTERACTIVE HOVER BUTTON (Magic UI / Modern Aesthetic)
+   ══════════════════════════════════════════════════ */
+.btn-interactive-hover {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 9999px;
+  border: 1.5px solid var(--border);
+  background-color: var(--surface);
+  color: var(--text-primary);
+  padding: 0.75rem 1.75rem;
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s ease;
+  text-decoration: none;
+  user-select: none;
+}
+
+.btn-interactive-hover:hover {
+  border-color: var(--primary);
+  box-shadow: 0 10px 25px -5px rgba(26, 115, 232, 0.25);
+  transform: translateY(-2px);
+}
+
+.btn-interactive-hover .btn-text-default {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transform: translateX(0);
+  opacity: 1;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 2;
+}
+
+.btn-interactive-hover:hover .btn-text-default {
+  transform: translateX(2.5rem);
+  opacity: 0;
+}
+
+.btn-interactive-hover .btn-text-hover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #ffffff !important;
+  opacity: 0;
+  transform: translateX(2rem);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-interactive-hover:hover .btn-text-hover {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.btn-interactive-hover .btn-bubble-dot {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  transform: translateY(-50%) scale(1);
+  transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1;
+}
+
+.btn-interactive-hover:hover .btn-bubble-dot {
+  left: 50%;
+  top: 50%;
+  width: 120%;
+  height: 250%;
+  border-radius: 9999px;
+  transform: translate(-50%, -50%) scale(1.5);
+  background-color: var(--primary);
+}
+
+/* Primary Accent Variant */
+.btn-interactive-hover.btn-variant-primary {
+  border-color: var(--primary);
+  background-color: var(--surface);
+  color: var(--primary);
+}
+.btn-interactive-hover.btn-variant-primary .btn-bubble-dot {
+  background-color: var(--primary);
+}
+
+/* Clinic Accent Variant */
+.btn-interactive-hover.btn-variant-clinic {
+  border-color: var(--clinic);
+  color: var(--clinic);
+}
+.btn-interactive-hover.btn-variant-clinic .btn-bubble-dot {
+  background-color: var(--clinic);
+}
+
+/* Product Accent Variant */
+.btn-interactive-hover.btn-variant-product {
+  border-color: var(--product);
+  color: var(--product);
+}
+.btn-interactive-hover.btn-variant-product .btn-bubble-dot {
+  background-color: var(--product);
+}
+
+/* Dark Mode Adaptation */
+[data-theme="dark"] .btn-interactive-hover {
+  background-color: var(--surface);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+[data-theme="dark"] .btn-interactive-hover:hover {
+  border-color: var(--primary-light, var(--primary));
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
 .btn:disabled {
   background-color: var(--border);
   color: var(--text-muted);
