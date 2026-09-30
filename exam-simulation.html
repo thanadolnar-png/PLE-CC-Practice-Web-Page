@@ -291,23 +291,29 @@
                SHARED EXAM CONFIGURATION (SOLO & LOBBY HOST)
                ═══════════════════════════════════════════ -->
           <div id="shared-exam-config" style="display: block; margin-bottom: 1.5rem;">
-            <!-- Mode Switcher: Mixed Proportion vs Exam Set Mode -->
+            <!-- Mode Switcher: Mixed Proportion vs Exam Set Mode vs Custom Picker -->
             <div class="form-group" style="margin-bottom: 1.25rem;">
               <label class="form-label" style="margin-bottom: 0.5rem; display: block; font-weight: 600;">
                 🎯 รูปแบบการจัดชุดข้อสอบ (Exam Generation Mode)
               </label>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                <label id="mode-opt-proportion" class="exam-mode-card active" onclick="switchExamGenerationMode('proportion')" style="cursor: pointer; border: 2px solid var(--primary); background: rgba(99, 102, 241, 0.08); padding: 0.75rem; border-radius: var(--radius-md); text-align: center; transition: all 0.2s;">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.6rem;">
+                <label id="mode-opt-proportion" class="exam-mode-card active" onclick="switchExamGenerationMode('proportion')" style="cursor: pointer; border: 2px solid var(--primary); background: rgba(99, 102, 241, 0.08); padding: 0.65rem; border-radius: var(--radius-md); text-align: center; transition: all 0.2s;">
                   <input type="radio" name="exam-gen-mode" value="proportion" checked style="display: none;">
-                  <div style="font-size: 1.3rem; margin-bottom: 0.25rem;">🎲</div>
-                  <strong style="display: block; font-size: 0.95rem; color: var(--primary);">สุ่มผสมตามสัดส่วนหมวด</strong>
-                  <span style="font-size: 0.75rem; color: var(--text-muted);">Clinic / Product / SAP</span>
+                  <div style="font-size: 1.2rem; margin-bottom: 0.2rem;">🎲</div>
+                  <strong style="display: block; font-size: 0.88rem; color: var(--primary);">สุ่มผสมตามสัดส่วนหมวด</strong>
+                  <span style="font-size: 0.72rem; color: var(--text-muted);">Clinic / Product / SAP</span>
                 </label>
-                <label id="mode-opt-set" class="exam-mode-card" onclick="switchExamGenerationMode('set')" style="cursor: pointer; border: 2px solid var(--border); background: var(--surface); padding: 0.75rem; border-radius: var(--radius-md); text-align: center; transition: all 0.2s;">
+                <label id="mode-opt-set" class="exam-mode-card" onclick="switchExamGenerationMode('set')" style="cursor: pointer; border: 2px solid var(--border); background: var(--surface); padding: 0.65rem; border-radius: var(--radius-md); text-align: center; transition: all 0.2s;">
                   <input type="radio" name="exam-gen-mode" value="set" style="display: none;">
-                  <div style="font-size: 1.3rem; margin-bottom: 0.25rem;">📦</div>
-                  <strong style="display: block; font-size: 0.95rem; color: var(--text-primary);">สอบเจาะจงเซ็ต / ปี</strong>
-                  <span style="font-size: 0.75rem; color: var(--text-muted);">ข้อสอบจริงรายปี / ชุด Mock</span>
+                  <div style="font-size: 1.2rem; margin-bottom: 0.2rem;">📦</div>
+                  <strong style="display: block; font-size: 0.88rem; color: var(--text-primary);">สอบเจาะจงเซ็ต / ปี</strong>
+                  <span style="font-size: 0.72rem; color: var(--text-muted);">ข้อสอบจริงรายปี / ชุด Mock</span>
+                </label>
+                <label id="mode-opt-custom" class="exam-mode-card" onclick="switchExamGenerationMode('custom')" style="cursor: pointer; border: 2px solid var(--border); background: var(--surface); padding: 0.65rem; border-radius: var(--radius-md); text-align: center; transition: all 0.2s;">
+                  <input type="radio" name="exam-gen-mode" value="custom" style="display: none;">
+                  <div style="font-size: 1.2rem; margin-bottom: 0.2rem;">🎯</div>
+                  <strong style="display: block; font-size: 0.88rem; color: var(--text-primary);">เลือกเคสเอง (Custom)</strong>
+                  <span style="font-size: 0.72rem; color: var(--text-muted);">ค้นหาและเจาะจงข้อจัดห้องสอบ</span>
                 </label>
               </div>
             </div>
@@ -422,8 +428,51 @@
               </p>
             </div>
 
+            <!-- 3. Custom Station Picker Container (Shown in 'custom' mode) -->
+            <div id="config-custom-container" style="display: none; background: var(--surface); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border);">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem; flex-wrap: wrap; gap: 0.5rem;">
+                <strong style="font-size: 0.92rem; color: var(--text-primary);">🎯 เลือกเคสจัดชุดสอบเอง (Custom Station Picker)</strong>
+                <span id="custom-selected-counter" class="badge" style="background: rgba(99, 102, 241, 0.12); color: var(--primary); font-size: 0.78rem; font-weight: 700;">เลือกแล้ว 0 สถานี</span>
+              </div>
+              <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                ค้นหาจากรหัสเคส, ชื่อโรค, ชื่อยา, อุปกรณ์, หรือ Keyword ในโจทย์/เฉลย เพื่อจัดชุดข้อสอบตามใจชอบ (สร้างห้องให้เพื่อนสอบโดยไม่บอกข้อล่วงหน้า)
+              </p>
+
+              <!-- Search Bar & Category Filters -->
+              <div style="display: flex; gap: 0.45rem; margin-bottom: 0.6rem; flex-wrap: wrap;">
+                <input type="text" id="custom-case-search-input" class="select-filter" style="flex: 1; min-width: 220px; padding: 0.45rem 0.65rem; font-size: 0.82rem;" placeholder="🔍 ค้นหารหัสเคส / ชื่อโรค / ยา / อาการ / Keyword ในโจทย์..." oninput="onCustomSearchInput(this.value)">
+                <div style="display: flex; gap: 0.25rem; align-items: center;">
+                  <button type="button" class="sim-btn-xs active" data-cat="all" onclick="setCustomSearchCat('all')">ทั้งหมด</button>
+                  <button type="button" class="sim-btn-xs" data-cat="clinic" onclick="setCustomSearchCat('Clinic')">Clinic</button>
+                  <button type="button" class="sim-btn-xs" data-cat="product" onclick="setCustomSearchCat('Product')">Product</button>
+                  <button type="button" class="sim-btn-xs" data-cat="sap" onclick="setCustomSearchCat('SAP')">SAP</button>
+                </div>
+              </div>
+
+              <!-- Search Results Box -->
+              <div id="custom-search-results" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-primary); padding: 0.4rem; margin-bottom: 0.85rem;">
+                <!-- Filled dynamically by JS -->
+              </div>
+
+              <!-- Selected Stations Tray -->
+              <div style="background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.65rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.35rem;">
+                  <strong style="font-size: 0.82rem; color: var(--text-primary);">📋 ลำดับสถานีที่จัดเตรียมไว้ (Station Sequence)</strong>
+                  <div style="display: flex; gap: 0.3rem;">
+                    <button type="button" class="sim-btn-xs" onclick="quickFillCustomStations(14)">🎲 สุ่มเติมให้ครบ 14 ข้อ</button>
+                    <button type="button" class="sim-btn-xs" onclick="insertCustomRestStation()">🥤 แทรกสถานีพัก</button>
+                    <button type="button" class="sim-btn-xs" onclick="clearCustomStations()">🗑️ ล้างรายการ</button>
+                  </div>
+                </div>
+
+                <div id="custom-selected-stations-list" style="max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.35rem; padding-right: 2px;">
+                  <!-- Filled dynamically by JS -->
+                </div>
+              </div>
+            </div>
+
             <!-- Rest Stations count -->
-            <div class="form-group" style="margin-top: 1rem;">
+            <div id="rest-stations-container" class="form-group" style="margin-top: 1rem;">
               <label class="form-label" for="rest-stations-count">จำนวนสถานีพัก (Rest Stations)</label>
               <input type="number" id="rest-stations-count" class="select-filter" style="width: 100%; border: 1px solid var(--border); padding: 0.5rem;" min="0" max="5" value="0">
             </div>
@@ -873,46 +922,75 @@
       lastServerSyncTime: 0
     };
 
-    // ─── Mode Switching: Proportion vs Exam Set Mode ──────────
+    // ─── Mode Switching: Proportion vs Exam Set Mode vs Custom Mode ───
     function switchExamGenerationMode(mode) {
       SimState.examGenMode = mode;
       const propCard = document.getElementById('mode-opt-proportion');
       const setCard = document.getElementById('mode-opt-set');
+      const customCard = document.getElementById('mode-opt-custom');
       const propBox = document.getElementById('config-proportion-container');
       const setBox = document.getElementById('config-set-container');
+      const customBox = document.getElementById('config-custom-container');
+      const restContainer = document.getElementById('rest-stations-container');
+
+      [propCard, setCard, customCard].forEach(card => {
+        if (card) {
+          card.style.borderColor = 'var(--border)';
+          card.style.background = 'var(--surface)';
+          const strong = card.querySelector('strong');
+          if (strong) strong.style.color = 'var(--text-primary)';
+        }
+      });
 
       if (mode === 'proportion') {
         if (propCard) {
           propCard.style.borderColor = 'var(--primary)';
           propCard.style.background = 'rgba(99, 102, 241, 0.08)';
-        }
-        if (setCard) {
-          setCard.style.borderColor = 'var(--border)';
-          setCard.style.background = 'var(--surface)';
+          const strong = propCard.querySelector('strong');
+          if (strong) strong.style.color = 'var(--primary)';
         }
         if (propBox) propBox.style.display = 'block';
         if (setBox) setBox.style.display = 'none';
-      } else {
+        if (customBox) customBox.style.display = 'none';
+        if (restContainer) restContainer.style.display = 'block';
+      } else if (mode === 'set') {
         if (setCard) {
           setCard.style.borderColor = 'var(--primary)';
           setCard.style.background = 'rgba(99, 102, 241, 0.08)';
-        }
-        if (propCard) {
-          propCard.style.borderColor = 'var(--border)';
-          propCard.style.background = 'var(--surface)';
+          const strong = setCard.querySelector('strong');
+          if (strong) strong.style.color = 'var(--primary)';
         }
         if (propBox) propBox.style.display = 'none';
         if (setBox) setBox.style.display = 'block';
+        if (customBox) customBox.style.display = 'none';
+        if (restContainer) restContainer.style.display = 'block';
         populateExamSetDropdown();
+      } else if (mode === 'custom') {
+        if (customCard) {
+          customCard.style.borderColor = 'var(--primary)';
+          customCard.style.background = 'rgba(99, 102, 241, 0.08)';
+          const strong = customCard.querySelector('strong');
+          if (strong) strong.style.color = 'var(--primary)';
+        }
+        if (propBox) propBox.style.display = 'none';
+        if (setBox) setBox.style.display = 'none';
+        if (customBox) customBox.style.display = 'block';
+        if (restContainer) restContainer.style.display = 'none';
+        renderCustomSearchResults(document.getElementById('custom-case-search-input')?.value || '');
+        renderCustomSelectedTray();
       }
     }
 
-    // ─── Filter State for Sources & Topics ────────────────────
+    // ─── Filter State for Sources, Course Groups & Custom Picker ────────
     SimState.selectedSources = new Set();
     SimState.selectedCourseGroups = new Set();
     SimState.selectedTopics = new Set();
-    SimState.expandedGroups = new Set(); // Empty by default -> all course groups start collapsed!
+    SimState.expandedGroups = new Set(); // Collapsed by default
     SimState.topicSearchQuery = '';
+    SimState.filterSourcesInitialized = false;
+    SimState.filterGroupsInitialized = false;
+    SimState.customSelectedCases = []; // Array of caseId or 'REST'
+    SimState.customSearchCat = 'all';
 
     function toggleSectionCollapse(sectionId) {
       const el = document.getElementById(sectionId);
@@ -944,8 +1022,9 @@
           return a.localeCompare(b, 'th');
         });
 
-        if (SimState.selectedSources.size === 0) {
+        if (!SimState.filterSourcesInitialized) {
           sortedSources.forEach(s => SimState.selectedSources.add(s));
+          SimState.filterSourcesInitialized = true;
         }
 
         const totalSources = sortedSources.length;
@@ -977,35 +1056,49 @@
       if (!container || typeof AppState === 'undefined' || !AppState.cases) return;
 
       const cases = AppState.cases;
-      const groupsMap = {}; // groupName -> { category, count, topics: { topicName: count } }
+      // Key groups by `${category}:::${mainGroup}` so SAP, Clinic, and Product never collide
+      const groupsMap = {};
 
       cases.forEach(c => {
+        const cat = c.category || 'Clinic';
         const grp = c.mainGroup || 'ทั่วไป';
+        const groupKey = `${cat}:::${grp}`;
         const topic = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
-        if (!groupsMap[grp]) {
-          groupsMap[grp] = {
-            category: c.category || 'Clinic',
+        
+        if (!groupsMap[groupKey]) {
+          groupsMap[groupKey] = {
+            key: groupKey,
+            category: cat,
+            groupName: grp,
             count: 0,
             topics: {}
           };
         }
-        groupsMap[grp].count++;
-        groupsMap[grp].topics[topic] = (groupsMap[grp].topics[topic] || 0) + 1;
+        groupsMap[groupKey].count++;
+        groupsMap[groupKey].topics[topic] = (groupsMap[groupKey].topics[topic] || 0) + 1;
       });
 
-      const groupNames = Object.keys(groupsMap).sort((a, b) => a.localeCompare(b, 'th'));
+      // Category sort order: Clinic -> Product -> SAP -> other, then Thai alphabetical
+      const catOrder = { 'Clinic': 1, 'Product': 2, 'SAP': 3 };
+      const groupKeys = Object.keys(groupsMap).sort((a, b) => {
+        const orderA = catOrder[groupsMap[a].category] || 99;
+        const orderB = catOrder[groupsMap[b].category] || 99;
+        if (orderA !== orderB) return orderA - orderB;
+        return groupsMap[a].groupName.localeCompare(groupsMap[b].groupName, 'th');
+      });
 
-      // Default select all if first run
-      if (SimState.selectedCourseGroups.size === 0) {
-        groupNames.forEach(g => {
-          SimState.selectedCourseGroups.add(g);
-          Object.keys(groupsMap[g].topics).forEach(t => {
-            SimState.selectedTopics.add(`${g}::${t}`);
+      // Default select all on first run
+      if (!SimState.filterGroupsInitialized) {
+        groupKeys.forEach(gKey => {
+          SimState.selectedCourseGroups.add(gKey);
+          Object.keys(groupsMap[gKey].topics).forEach(t => {
+            SimState.selectedTopics.add(`${gKey}::${t}`);
           });
         });
+        SimState.filterGroupsInitialized = true;
       }
 
-      const totalGroups = groupNames.length;
+      const totalGroups = groupKeys.length;
       const selectedCount = SimState.selectedCourseGroups.size;
       const badgeEl = document.getElementById('sim-topics-count-badge');
       if (badgeEl) {
@@ -1016,33 +1109,32 @@
 
       const expandBtn = document.getElementById('btn-toggle-expand-all');
       if (expandBtn) {
-        const allExpanded = groupNames.every(g => SimState.expandedGroups.has(g));
+        const allExpanded = groupKeys.every(gKey => SimState.expandedGroups.has(gKey));
         expandBtn.textContent = allExpanded ? 'ยุบทั้งหมด' : 'ขยายทั้งหมด';
       }
 
       const q = (SimState.topicSearchQuery || '').toLowerCase();
       let html = '';
 
-      groupNames.forEach(grp => {
-        const data = groupsMap[grp];
-        const topicList = Object.keys(data.topics).sort();
+      groupKeys.forEach(gKey => {
+        const data = groupsMap[gKey];
+        const topicList = Object.keys(data.topics).sort((a, b) => a.localeCompare(b, 'th'));
 
         // Search filtering
-        const grpMatches = !q || grp.toLowerCase().includes(q) || data.category.toLowerCase().includes(q);
+        const grpMatches = !q || data.groupName.toLowerCase().includes(q) || data.category.toLowerCase().includes(q);
         const matchingTopics = topicList.filter(t => !q || t.toLowerCase().includes(q) || grpMatches);
 
         if (!matchingTopics.length && !grpMatches) return;
 
-        const isGrpChecked = SimState.selectedCourseGroups.has(grp);
-        // If searching, auto-expand matching groups. Otherwise respect SimState.expandedGroups (collapsed by default).
-        const isExpanded = q ? true : SimState.expandedGroups.has(grp);
+        const isGrpChecked = SimState.selectedCourseGroups.has(gKey);
+        const isExpanded = q ? true : SimState.expandedGroups.has(gKey);
 
         const chipsHtml = matchingTopics.map(t => {
-          const key = `${grp}::${t}`;
-          const isChecked = SimState.selectedTopics.has(key);
+          const topicKey = `${gKey}::${t}`;
+          const isChecked = SimState.selectedTopics.has(topicKey);
           return `
             <span class="sim-sub-chip ${isChecked ? 'active' : ''}" 
-                  onclick="toggleTopicChip('${escapeHtml(grp)}', '${escapeHtml(t)}', event)" 
+                  onclick="toggleTopicChip('${escapeHtml(gKey)}', '${escapeHtml(t)}', event)" 
                   title="${escapeHtml(t)} (${data.topics[t]} เคส)">
               ${escapeHtml(t)} (${data.topics[t]})
             </span>
@@ -1052,12 +1144,12 @@
         const catBadgeClass = data.category.toLowerCase();
 
         html += `
-          <div class="sim-group-box ${isExpanded ? '' : 'collapsed'}" id="simGrp_${encodeURIComponent(grp)}">
-            <div class="sim-group-header" onclick="toggleGroupCollapse('${escapeHtml(grp)}', event)">
+          <div class="sim-group-box ${isExpanded ? '' : 'collapsed'}" id="simGrp_${encodeURIComponent(gKey)}">
+            <div class="sim-group-header" onclick="toggleGroupCollapse('${escapeHtml(gKey)}', event)">
               <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; margin:0;" onclick="event.stopPropagation()">
-                <input type="checkbox" ${isGrpChecked ? 'checked' : ''} onchange="toggleCourseGroup('${escapeHtml(grp)}', this.checked)">
+                <input type="checkbox" ${isGrpChecked ? 'checked' : ''} onchange="toggleCourseGroup('${escapeHtml(gKey)}', this.checked)">
                 <span class="badge badge-${catBadgeClass}" style="font-size:0.68rem; padding:0.15rem 0.4rem;">${data.category}</span>
-                <span>${escapeHtml(grp)}</span>
+                <span>${escapeHtml(data.groupName)}</span>
               </label>
               <div style="display:flex; align-items:center; gap:0.4rem; font-size:0.75rem; color:var(--text-muted);">
                 <span>${data.count} เคส (${matchingTopics.length} หัวข้อ)</span>
@@ -1081,14 +1173,18 @@
     function toggleExpandAllGroups() {
       if (typeof AppState === 'undefined' || !AppState.cases) return;
       const groupSet = new Set();
-      AppState.cases.forEach(c => groupSet.add(c.mainGroup || 'ทั่วไป'));
-      const groupNames = Array.from(groupSet);
+      AppState.cases.forEach(c => {
+        const cat = c.category || 'Clinic';
+        const grp = c.mainGroup || 'ทั่วไป';
+        groupSet.add(`${cat}:::${grp}`);
+      });
+      const groupKeys = Array.from(groupSet);
       
-      const allExpanded = groupNames.every(g => SimState.expandedGroups.has(g));
+      const allExpanded = groupKeys.every(g => SimState.expandedGroups.has(g));
       if (allExpanded) {
         SimState.expandedGroups.clear();
       } else {
-        groupNames.forEach(g => SimState.expandedGroups.add(g));
+        groupKeys.forEach(g => SimState.expandedGroups.add(g));
       }
       renderCourseGroupsAccordion();
     }
@@ -1114,51 +1210,54 @@
       SimState.selectedTopics.clear();
       if (checked) {
         AppState.cases.forEach(c => {
-          const g = c.mainGroup || 'ทั่วไป';
-          const t = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
-          SimState.selectedCourseGroups.add(g);
-          SimState.selectedTopics.add(`${g}::${t}`);
+          const cat = c.category || 'Clinic';
+          const grp = c.mainGroup || 'ทั่วไป';
+          const gKey = `${cat}:::${grp}`;
+          const topic = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
+          SimState.selectedCourseGroups.add(gKey);
+          SimState.selectedTopics.add(`${gKey}::${topic}`);
         });
       }
       renderCourseGroupsAccordion();
     }
 
-    function toggleCourseGroup(grp, checked) {
+    function toggleCourseGroup(gKey, checked) {
       if (typeof AppState === 'undefined' || !AppState.cases) return;
+      const [cat, grp] = gKey.split(':::');
       if (checked) {
-        SimState.selectedCourseGroups.add(grp);
-        AppState.cases.filter(c => (c.mainGroup || 'ทั่วไป') === grp).forEach(c => {
+        SimState.selectedCourseGroups.add(gKey);
+        AppState.cases.filter(c => (c.category || 'Clinic') === cat && (c.mainGroup || 'ทั่วไป') === grp).forEach(c => {
           const t = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
-          SimState.selectedTopics.add(`${grp}::${t}`);
+          SimState.selectedTopics.add(`${gKey}::${t}`);
         });
       } else {
-        SimState.selectedCourseGroups.delete(grp);
-        AppState.cases.filter(c => (c.mainGroup || 'ทั่วไป') === grp).forEach(c => {
+        SimState.selectedCourseGroups.delete(gKey);
+        AppState.cases.filter(c => (c.category || 'Clinic') === cat && (c.mainGroup || 'ทั่วไป') === grp).forEach(c => {
           const t = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
-          SimState.selectedTopics.delete(`${grp}::${t}`);
+          SimState.selectedTopics.delete(`${gKey}::${t}`);
         });
       }
       renderCourseGroupsAccordion();
     }
 
-    function toggleTopicChip(grp, topic, ev) {
+    function toggleTopicChip(gKey, topic, ev) {
       if (ev) ev.stopPropagation();
-      const key = `${grp}::${topic}`;
+      const key = `${gKey}::${topic}`;
       if (SimState.selectedTopics.has(key)) {
         SimState.selectedTopics.delete(key);
       } else {
         SimState.selectedTopics.add(key);
-        SimState.selectedCourseGroups.add(grp);
+        SimState.selectedCourseGroups.add(gKey);
       }
       renderCourseGroupsAccordion();
     }
 
-    function toggleGroupCollapse(grp, ev) {
+    function toggleGroupCollapse(gKey, ev) {
       if (ev) ev.stopPropagation();
-      if (SimState.expandedGroups.has(grp)) {
-        SimState.expandedGroups.delete(grp);
+      if (SimState.expandedGroups.has(gKey)) {
+        SimState.expandedGroups.delete(gKey);
       } else {
-        SimState.expandedGroups.add(grp);
+        SimState.expandedGroups.add(gKey);
       }
       renderCourseGroupsAccordion();
     }
@@ -1166,6 +1265,216 @@
     function onFilterTopicSearch(text) {
       SimState.topicSearchQuery = text;
       renderCourseGroupsAccordion();
+    }
+
+    // ─── Custom Station Picker Logic ──────────────────────────────
+    function setCustomSearchCat(cat) {
+      SimState.customSearchCat = cat;
+      const buttons = document.querySelectorAll('#config-custom-container [data-cat]');
+      buttons.forEach(btn => {
+        if (btn.getAttribute('data-cat').toLowerCase() === cat.toLowerCase()) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+      renderCustomSearchResults(document.getElementById('custom-case-search-input')?.value || '');
+    }
+
+    function onCustomSearchInput(query) {
+      renderCustomSearchResults(query);
+    }
+
+    function renderCustomSearchResults(query) {
+      const container = document.getElementById('custom-search-results');
+      if (!container || typeof AppState === 'undefined' || !AppState.cases) return;
+
+      const q = (query || '').trim().toLowerCase();
+      const cat = SimState.customSearchCat || 'all';
+
+      let results = AppState.cases.filter(c => {
+        if (!c || !c.caseId) return false;
+        if (cat !== 'all' && (c.category || 'Clinic').toLowerCase() !== cat.toLowerCase()) return false;
+        
+        if (!q) return true;
+
+        const inId = (c.caseId || '').toLowerCase().includes(q);
+        const inTitle = (c.title || '').toLowerCase().includes(q);
+        const inDisease = (c.disease || '').toLowerCase().includes(q);
+        const inGroup = (c.mainGroup || '').toLowerCase().includes(q);
+        const inSource = (c.source || '').toLowerCase().includes(q);
+        const inScenario = (c.scenario || '').toLowerCase().includes(q);
+        const inPatient = (c.patientInfoHtml || '').toLowerCase().includes(q);
+        const inEquip = (c.equipmentHtml || '').toLowerCase().includes(q);
+        const inNote = (c.noteHtml || '').toLowerCase().includes(q);
+        
+        let inChecklist = false;
+        if (c.checklist && Array.isArray(c.checklist)) {
+          inChecklist = c.checklist.some(chk => 
+            (chk.item || '').toLowerCase().includes(q) || 
+            (chk.title || '').toLowerCase().includes(q) ||
+            (chk.detail || '').toLowerCase().includes(q)
+          );
+        }
+
+        return inId || inTitle || inDisease || inGroup || inSource || inScenario || inPatient || inEquip || inNote || inChecklist;
+      });
+
+      const displayResults = results.slice(0, 50);
+
+      if (displayResults.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:1rem; color:var(--text-muted); font-size:0.8rem;">🔍 ไม่พบเคสที่ตรงกับคำค้นหา "${escapeHtml(query)}"</div>`;
+        return;
+      }
+
+      const selectedSet = new Set(SimState.customSelectedCases.filter(x => x !== 'REST'));
+
+      container.innerHTML = displayResults.map(c => {
+        const isAdded = selectedSet.has(c.caseId);
+        const catClass = (c.category || 'Clinic').toLowerCase();
+        const diseaseText = (c.disease && c.disease !== '-' && c.disease !== 'undefined') ? c.disease : '';
+        
+        return `
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:0.4rem 0.5rem; margin-bottom:0.25rem; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); font-size:0.8rem; gap:0.5rem;">
+            <div style="display:flex; align-items:center; gap:0.4rem; overflow:hidden; flex:1;">
+              <span class="badge badge-${catClass}" style="font-size:0.68rem; padding:0.12rem 0.35rem; flex-shrink:0;">${c.category}</span>
+              <strong style="font-size:0.8rem; flex-shrink:0;">[${escapeHtml(c.caseId)}]</strong>
+              <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text-primary); font-weight:500;" title="${escapeHtml(c.title)}">
+                ${escapeHtml(c.title)}
+              </span>
+              ${diseaseText ? `<span style="font-size:0.72rem; color:var(--text-muted); flex-shrink:0;">(${escapeHtml(diseaseText)})</span>` : ''}
+              <span style="font-size:0.7rem; color:var(--text-muted); flex-shrink:0; background:rgba(0,0,0,0.04); padding:0.1rem 0.3rem; border-radius:3px;">${escapeHtml(c.source || '')}</span>
+            </div>
+            <button type="button" class="sim-btn-xs" style="${isAdded ? 'background:rgba(16,185,129,0.12); color:var(--success); border-color:var(--success); font-weight:bold;' : 'background:var(--primary); color:white;'}" onclick="addCustomCase('${escapeHtml(c.caseId)}')">
+              ${isAdded ? '➕ เพิ่มอีก' : '➕ เพิ่มเข้าชุด'}
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addCustomCase(caseId) {
+      SimState.customSelectedCases.push(caseId);
+      renderCustomSelectedTray();
+      renderCustomSearchResults(document.getElementById('custom-case-search-input')?.value || '');
+    }
+
+    function insertCustomRestStation() {
+      SimState.customSelectedCases.push('REST');
+      renderCustomSelectedTray();
+    }
+
+    function removeCustomStation(idx) {
+      if (idx >= 0 && idx < SimState.customSelectedCases.length) {
+        SimState.customSelectedCases.splice(idx, 1);
+        renderCustomSelectedTray();
+        renderCustomSearchResults(document.getElementById('custom-case-search-input')?.value || '');
+      }
+    }
+
+    function moveCustomStation(idx, dir) {
+      const targetIdx = idx + dir;
+      if (targetIdx < 0 || targetIdx >= SimState.customSelectedCases.length) return;
+      const temp = SimState.customSelectedCases[idx];
+      SimState.customSelectedCases[idx] = SimState.customSelectedCases[targetIdx];
+      SimState.customSelectedCases[targetIdx] = temp;
+      renderCustomSelectedTray();
+    }
+
+    function clearCustomStations() {
+      SimState.customSelectedCases = [];
+      renderCustomSelectedTray();
+      renderCustomSearchResults(document.getElementById('custom-case-search-input')?.value || '');
+    }
+
+    function quickFillCustomStations(targetTotal = 14) {
+      if (typeof AppState === 'undefined' || !AppState.cases || AppState.cases.length === 0) return;
+      const currentCount = SimState.customSelectedCases.length;
+      const needed = targetTotal - currentCount;
+      if (needed <= 0) {
+        alert(`มีสถานีครบหรือเกิน ${targetTotal} สถานีแล้ว`);
+        return;
+      }
+
+      const existingSet = new Set(SimState.customSelectedCases.filter(x => x !== 'REST'));
+      const candidates = shuffle(AppState.cases.filter(c => !existingSet.has(c.caseId) && !c.linkedFromCase));
+      
+      let added = 0;
+      for (const c of candidates) {
+        if (added >= needed) break;
+        SimState.customSelectedCases.push(c.caseId);
+        existingSet.add(c.caseId);
+        added++;
+      }
+
+      renderCustomSelectedTray();
+      renderCustomSearchResults(document.getElementById('custom-case-search-input')?.value || '');
+    }
+
+    function renderCustomSelectedTray() {
+      const listEl = document.getElementById('custom-selected-stations-list');
+      const counterEl = document.getElementById('custom-selected-counter');
+      if (!listEl) return;
+
+      const total = SimState.customSelectedCases.length;
+      if (counterEl) {
+        counterEl.textContent = `เลือกแล้ว ${total} สถานี`;
+      }
+
+      if (total === 0) {
+        listEl.innerHTML = `
+          <div style="text-align:center; padding:1.25rem 0.5rem; color:var(--text-muted); font-size:0.78rem; border:1px dashed var(--border); border-radius:var(--radius-sm);">
+            📥 ยังไม่มีสถานีในรายการ (กดค้นหาด้านบนแล้วคลิก "➕ เพิ่มเข้าชุด" หรือ "🎲 สุ่มเติมให้ครบ 14 ข้อ")
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      SimState.customSelectedCases.forEach((item, idx) => {
+        const isRest = item === 'REST';
+        if (isRest) {
+          html += `
+            <div class="custom-station-item rest">
+              <div style="display:flex; align-items:center; gap:0.45rem;">
+                <span class="custom-st-num">${idx + 1}</span>
+                <span style="font-size:1.1rem;">🥤</span>
+                <strong style="color:var(--text-secondary); font-size:0.8rem;">สถานีพัก (Rest Station)</strong>
+              </div>
+              <div class="custom-st-actions">
+                <button type="button" class="sim-btn-xs" title="เลื่อนขึ้น" onclick="moveCustomStation(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.4"' : ''}>⬆️</button>
+                <button type="button" class="sim-btn-xs" title="เลื่อนลง" onclick="moveCustomStation(${idx}, 1)" ${idx === total - 1 ? 'disabled style="opacity:0.4"' : ''}>⬇️</button>
+                <button type="button" class="sim-btn-xs" style="color:var(--danger); border-color:var(--danger);" onclick="removeCustomStation(${idx})">✕ ลบ</button>
+              </div>
+            </div>
+          `;
+        } else {
+          const matched = AppState.cases.find(c => c.caseId === item);
+          const cat = matched ? (matched.category || 'Clinic') : 'Clinic';
+          const title = matched ? matched.title : item;
+          const catClass = cat.toLowerCase();
+
+          html += `
+            <div class="custom-station-item">
+              <div style="display:flex; align-items:center; gap:0.45rem; overflow:hidden; flex:1;">
+                <span class="custom-st-num">${idx + 1}</span>
+                <span class="badge badge-${catClass}" style="font-size:0.65rem; padding:0.1rem 0.35rem; flex-shrink:0;">${cat}</span>
+                <strong style="font-size:0.78rem; flex-shrink:0;">[${escapeHtml(item)}]</strong>
+                <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:0.78rem; color:var(--text-primary);" title="${escapeHtml(title)}">
+                  ${escapeHtml(title)}
+                </span>
+              </div>
+              <div class="custom-st-actions">
+                <button type="button" class="sim-btn-xs" title="เลื่อนขึ้น" onclick="moveCustomStation(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.4"' : ''}>⬆️</button>
+                <button type="button" class="sim-btn-xs" title="เลื่อนลง" onclick="moveCustomStation(${idx}, 1)" ${idx === total - 1 ? 'disabled style="opacity:0.4"' : ''}>⬇️</button>
+                <button type="button" class="sim-btn-xs" style="color:var(--danger); border-color:var(--danger);" onclick="removeCustomStation(${idx})">✕ ลบ</button>
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      listEl.innerHTML = html;
     }
 
     function populateExamSetDropdown() {
@@ -1420,16 +1729,38 @@
       try {
         if (SimState.lobbyOp === 'create') {
           // Host: create room via Firebase
-          let examSetRaw = null;
-          if (SimState.examGenMode === 'set') {
+          let fullExamSet = [];
+
+          if (SimState.examGenMode === 'custom') {
+            if (SimState.customSelectedCases.length === 0) {
+              alert('กรุณาเลือกอย่างน้อย 1 สถานี หรือกดปุ่ม "🎲 สุ่มเติมให้ครบ 14 ข้อ"');
+              showGlobalLoader(false);
+              return;
+            }
+            fullExamSet = SimState.customSelectedCases.map((item, idx) => ({
+              stationNumber: idx + 1,
+              caseId: item
+            }));
+          } else if (SimState.examGenMode === 'set') {
             const selectedSource = document.getElementById('exam-set-select').value;
             const stationCount = parseInt(document.getElementById('exam-set-station-count').value) || 14;
             const orderMode = document.getElementById('exam-set-order').value;
-            examSetRaw = generateExamSetBySource(selectedSource, stationCount, orderMode);
+            const examSetRaw = generateExamSetBySource(selectedSource, stationCount, orderMode);
             if (!examSetRaw || examSetRaw.length === 0) {
               alert('ไม่พบข้อสอบในชุดที่เลือก');
               showGlobalLoader(false);
               return;
+            }
+            const restCount = parseInt(document.getElementById('rest-stations-count').value) || 0;
+            const restInterval = restCount > 0 ? Math.floor(examSetRaw.length / restCount) : 999;
+            let restInserted = 0;
+            let stationNumCounter = 1;
+            for (let i = 0; i < examSetRaw.length; i++) {
+              fullExamSet.push({ stationNumber: stationNumCounter++, caseId: examSetRaw[i].caseId });
+              if (restCount > 0 && (i + 1) % restInterval === 0 && restInserted < restCount) {
+                restInserted++;
+                fullExamSet.push({ stationNumber: stationNumCounter++, caseId: 'REST' });
+              }
             }
           } else {
             const { clinic, product, sap } = getProportionValues();
@@ -1440,25 +1771,23 @@
               return;
             }
             
-            examSetRaw = generateLocalExamSet(clinic, product, sap);
+            const examSetRaw = generateLocalExamSet(clinic, product, sap);
             if (!examSetRaw || examSetRaw.length === 0) {
               alert('เกิดข้อผิดพลาด: ไม่สามารถสร้างชุดข้อสอบสุ่มได้ กรุณาโหลดเคสก่อน');
               showGlobalLoader(false);
               return;
             }
-          }
-          
-          const restCount = parseInt(document.getElementById('rest-stations-count').value) || 0;
-          const restInterval = restCount > 0 ? Math.floor(examSetRaw.length / restCount) : 999;
-          let restInserted = 0;
-          let stationNumCounter = 1;
-          const fullExamSet = [];
-          
-          for (let i = 0; i < examSetRaw.length; i++) {
-            fullExamSet.push({ stationNumber: stationNumCounter++, caseId: examSetRaw[i].caseId });
-            if (restCount > 0 && (i + 1) % restInterval === 0 && restInserted < restCount) {
-              restInserted++;
-              fullExamSet.push({ stationNumber: stationNumCounter++, caseId: 'REST' });
+
+            const restCount = parseInt(document.getElementById('rest-stations-count').value) || 0;
+            const restInterval = restCount > 0 ? Math.floor(examSetRaw.length / restCount) : 999;
+            let restInserted = 0;
+            let stationNumCounter = 1;
+            for (let i = 0; i < examSetRaw.length; i++) {
+              fullExamSet.push({ stationNumber: stationNumCounter++, caseId: examSetRaw[i].caseId });
+              if (restCount > 0 && (i + 1) % restInterval === 0 && restInserted < restCount) {
+                restInserted++;
+                fullExamSet.push({ stationNumber: stationNumCounter++, caseId: 'REST' });
+              }
             }
           }
           
@@ -1887,11 +2216,44 @@
     // SOLO EXAM START
     // ═══════════════════════════════════════════
     async function startExamSimulation() {
-      const restCount = parseInt(document.getElementById('rest-stations-count').value) || 0;
       SimState.role = 'solo';
       SimState.isLobby = false;
       showGlobalLoader(true);
       
+      if (SimState.examGenMode === 'custom') {
+        if (!SimState.customSelectedCases || SimState.customSelectedCases.length === 0) {
+          showGlobalLoader(false);
+          alert('กรุณาเลือกอย่างน้อย 1 สถานี หรือกดปุ่ม "🎲 สุ่มเติมให้ครบ 14 ข้อ"');
+          return;
+        }
+
+        SimState.stations = [];
+        SimState.studentScores = {};
+        SimState.totalStations = SimState.customSelectedCases.length;
+
+        SimState.customSelectedCases.forEach((item, idx) => {
+          const stNum = idx + 1;
+          SimState.studentScores[stNum] = [];
+          if (item === 'REST') {
+            SimState.stations.push({ stationNumber: stNum, isRest: true, case: getRestCaseData() });
+          } else {
+            let matchedCase = AppState.cases.find(c => c.caseId === item) || AppState.cases[0];
+            SimState.stations.push({ stationNumber: stNum, isRest: false, case: matchedCase });
+          }
+        });
+
+        SimState.currentIdx = 0;
+        showGlobalLoader(false);
+        document.getElementById('exam-setup-view').style.display = 'none';
+        document.getElementById('exam-running-view').style.display = 'block';
+        document.getElementById('exam-lobby-info-bar').style.display = 'none';
+        
+        renderStation(0);
+        startTimer();
+        return;
+      }
+
+      const restCount = parseInt(document.getElementById('rest-stations-count').value) || 0;
       let examSet = null;
 
       if (SimState.examGenMode === 'set') {
@@ -1980,11 +2342,13 @@
         const src = c.source || 'ไม่ระบุ';
         if (SimState.selectedSources && SimState.selectedSources.size > 0 && !SimState.selectedSources.has(src)) return false;
         
+        const cat = c.category || 'Clinic';
         const grp = c.mainGroup || 'ทั่วไป';
-        if (SimState.selectedCourseGroups && SimState.selectedCourseGroups.size > 0 && !SimState.selectedCourseGroups.has(grp)) return false;
+        const gKey = `${cat}:::${grp}`;
+        if (SimState.selectedCourseGroups && SimState.selectedCourseGroups.size > 0 && !SimState.selectedCourseGroups.has(gKey)) return false;
         
         const topic = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
-        const topicKey = `${grp}::${topic}`;
+        const topicKey = `${gKey}::${topic}`;
         if (SimState.selectedTopics && SimState.selectedTopics.size > 0 && !SimState.selectedTopics.has(topicKey)) return false;
 
         return true;
@@ -1992,7 +2356,7 @@
 
       // 2. Separate candidates by Category (only unlinked or head-of-chain cases for random starts)
       const pools = {
-        Clinic: shuffle(candidateCases.filter(c => c.category === 'Clinic' && !c.linkedFromCase)),
+        Clinic: shuffle(candidateCases.filter(c => (c.category || 'Clinic') === 'Clinic' && !c.linkedFromCase)),
         Product: shuffle(candidateCases.filter(c => c.category === 'Product' && !c.linkedFromCase)),
         SAP: shuffle(candidateCases.filter(c => c.category === 'SAP' && !c.linkedFromCase))
       };
@@ -2013,13 +2377,14 @@
           if (addedIds.has(c.caseId)) continue;
 
           const grp = c.mainGroup || 'ทั่วไป';
+          const gKey = `${c.category || 'Clinic'}:::${grp}`;
           const topic = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
-          const grpCount = courseGroupCounts[grp] || 0;
+          const grpCount = courseGroupCounts[gKey] || 0;
 
           if (grpCount < 2 && !usedTopics.has(topic)) {
             selectedCases.push(c);
             addedIds.add(c.caseId);
-            courseGroupCounts[grp] = grpCount + 1;
+            courseGroupCounts[gKey] = grpCount + 1;
             usedTopics.add(topic);
             pickedForCat++;
 
@@ -2031,7 +2396,8 @@
                 selectedCases.push(nextC);
                 addedIds.add(nextC.caseId);
                 const nextGrp = nextC.mainGroup || 'ทั่วไป';
-                courseGroupCounts[nextGrp] = (courseGroupCounts[nextGrp] || 0) + 1;
+                const nextGKey = `${nextC.category || 'Clinic'}:::${nextGrp}`;
+                courseGroupCounts[nextGKey] = (courseGroupCounts[nextGKey] || 0) + 1;
                 curr = nextC;
               } else {
                 break;
@@ -2047,12 +2413,13 @@
             if (addedIds.has(c.caseId)) continue;
 
             const grp = c.mainGroup || 'ทั่วไป';
+            const gKey = `${c.category || 'Clinic'}:::${grp}`;
             const topic = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
 
             if (!usedTopics.has(topic)) {
               selectedCases.push(c);
               addedIds.add(c.caseId);
-              courseGroupCounts[grp] = (courseGroupCounts[grp] || 0) + 1;
+              courseGroupCounts[gKey] = (courseGroupCounts[gKey] || 0) + 1;
               usedTopics.add(topic);
               pickedForCat++;
             }
