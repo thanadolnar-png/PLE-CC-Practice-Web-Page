@@ -1228,6 +1228,12 @@ ol.ordered-list li,
   white-space: nowrap;
 }
 
+.checklist-item-score.zero-score {
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
 .checklist-item-text {
   font-size: 0.95rem;
 }

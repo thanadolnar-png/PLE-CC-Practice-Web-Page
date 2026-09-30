@@ -320,8 +320,8 @@
   </div><!-- /.page-viewport -->
 </div><!-- /.app-shell -->
 
-  <script src="case-data-offline.js?v=v_20260930_202218"></script>
-  <script src="app.js?v=v_20260930_202218"></script>
+  <script src="case-data-offline.js?v=v_20260930_220641"></script>
+  <script src="app.js?v=v_20260930_220641"></script>
 
   <script>
     // ─ View Mode & Fullscreen helpers ─
@@ -831,7 +831,7 @@
             handleChecklistItemClick(c.caseId, item.id, item.score);
           });
           
-          const scoreDisplay = item.score > 0 ? `<span class="checklist-item-score">(${item.score} คะแนน)</span>` : '';
+          const scoreDisplay = (item.score !== undefined && item.score !== null) ? `<span class="checklist-item-score ${item.score === 0 ? 'zero-score' : ''}">(${item.score} คะแนน)</span>` : '';
           el.innerHTML = `
             <div class="checkbox-custom"></div>
             <div style="flex:1; min-width:0;">

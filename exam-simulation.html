@@ -5,8 +5,148 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU</title>
   <link rel="stylesheet" href="style.css">
-  <script src="case-data-offline.js?v=v_20260930_202218"></script>
-  <script src="app.js?v=v_20260930_202218"></script>
+  <script src="case-data-offline.js?v=v_20260930_220641"></script>
+  <script src="case-details-offline.js?v=v_20260930_202218"></script>
+  <script src="app.js?v=v_20260930_220641"></script>
+  <style>
+    /* Simulation Source and Topic Selector */
+    .sim-filter-section {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+    }
+    .sim-filter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .sim-filter-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .sim-filter-actions {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .sim-btn-xs {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.55rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-primary);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 600;
+    }
+    .sim-btn-xs:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--surface);
+    }
+    .source-chips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .source-chip-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.75rem;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      cursor: pointer;
+      user-select: none;
+      transition: var(--transition);
+    }
+    .source-chip-label:hover {
+      border-color: var(--primary);
+    }
+    .source-chip-label input:checked + span {
+      font-weight: 700;
+      color: var(--primary);
+    }
+    
+    /* Course Group Accordion Box (similar to PLE CC Quiz) */
+    .sim-group-box {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-primary);
+      margin-bottom: 0.5rem;
+      overflow: hidden;
+    }
+    .sim-group-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0.75rem;
+      background: var(--surface);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+    }
+    .sim-group-header:hover {
+      background: var(--bg-secondary);
+    }
+    .sim-group-arrow {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      transition: transform 0.2s ease;
+      display: inline-block;
+    }
+    .sim-group-box.collapsed .sim-group-arrow {
+      transform: rotate(-90deg);
+    }
+    .sim-group-box.collapsed .sim-group-chips-grid {
+      display: none !important;
+    }
+    .sim-group-chips-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      padding: 0.6rem 0.75rem;
+      border-top: 1px dashed var(--border);
+      background: var(--bg-primary);
+    }
+    .sim-sub-chip {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.55rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-primary);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+      line-height: 1.35;
+    }
+    .sim-sub-chip:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .sim-sub-chip.active {
+      background: rgba(99, 102, 241, 0.12);
+      border-color: var(--primary);
+      color: var(--primary);
+      font-weight: 700;
+    }
+  </style>
 
   <!-- Firebase SDK (CDN) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -130,7 +270,7 @@
                   <input type="radio" name="exam-gen-mode" value="set" style="display: none;">
                   <div style="font-size: 1.3rem; margin-bottom: 0.25rem;">📦</div>
                   <strong style="display: block; font-size: 0.95rem; color: var(--text-primary);">สอบเจาะจงเซ็ต / ปี</strong>
-                  <span style="font-size: 0.75rem; color: var(--text-muted);">ข้อสอบจริงรายปี หรือเล่มม่วง</span>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">ข้อสอบจริงรายปี / ชุด Mock</span>
                 </label>
               </div>
             </div>
@@ -165,6 +305,40 @@
               <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.75rem; text-align: center; padding: 0.5rem; background: var(--surface); border-radius: var(--radius-sm);" id="proportion-sum-text">
                 รวม: Clinic 8 + Product 6 + SAP 2 = <strong>16 สถานี</strong>
               </p>
+
+              <!-- Multi-Source Selector Block -->
+              <div class="sim-filter-section" id="sim-sources-filter-section">
+                <div class="sim-filter-header">
+                  <span class="sim-filter-title">🏷️ แหล่งที่มาของข้อสอบ (เลือกหลายแหล่งได้)</span>
+                  <div class="sim-filter-actions">
+                    <button type="button" class="sim-btn-xs" onclick="toggleAllSources(true)">เลือกทั้งหมด</button>
+                    <button type="button" class="sim-btn-xs" onclick="toggleAllSources(false)">ล้างทั้งหมด</button>
+                  </div>
+                </div>
+                <div class="source-chips-grid" id="sim-sources-grid">
+                  <!-- Populated dynamically by JS -->
+                </div>
+              </div>
+
+              <!-- Course Group & Topic Selector Block (คล้าย PLE CC Quiz) -->
+              <div class="sim-filter-section" id="sim-topics-filter-section">
+                <div class="sim-filter-header">
+                  <span class="sim-filter-title">📚 ขอบเขตหัวข้อ Course Group &amp; โรค</span>
+                  <div class="sim-filter-actions">
+                    <button type="button" class="sim-btn-xs" onclick="toggleAllCourseGroups(true)">เลือกทั้งหมด</button>
+                    <button type="button" class="sim-btn-xs" onclick="toggleAllCourseGroups(false)">ล้างทั้งหมด</button>
+                  </div>
+                </div>
+                <div style="margin-bottom: 0.6rem;">
+                  <input type="text" id="sim-topic-search-input" class="select-filter" style="width: 100%; padding: 0.4rem 0.65rem; font-size: 0.8rem; border-radius: var(--radius-sm);" placeholder="🔍 ค้นหาหัวข้อ / Course Group / โรค..." oninput="onFilterTopicSearch(this.value)">
+                </div>
+                <div id="sim-course-groups-container">
+                  <!-- Populated dynamically with collapsible accordions and chips -->
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.6rem; padding: 0.4rem 0.6rem; background: var(--bg-primary); border-radius: var(--radius-sm); border: 1px dashed var(--border); line-height: 1.4;">
+                  ✨ <strong>ระบบสุ่มกระจายอัจฉริยะ:</strong> Course Group จะซ้ำไม่เกิน 2 สถานี และโรค/หัวข้อย่อยจะไม่ซ้ำกันเลย เพื่อให้การฝึกฝนครอบคลุมและหลากหลายที่สุด
+                </div>
+              </div>
             </div>
 
             <!-- 2. Exam Set Container (Shown in 'set' mode) -->
@@ -685,6 +859,220 @@
       }
     }
 
+    // ─── Filter State for Sources & Topics ────────────────────
+    SimState.selectedSources = new Set();
+    SimState.selectedCourseGroups = new Set();
+    SimState.selectedTopics = new Set();
+    SimState.collapsedGroups = new Set();
+    SimState.topicSearchQuery = '';
+
+    function initExamFilterControls() {
+      if (typeof AppState === 'undefined' || !AppState.cases || AppState.cases.length === 0) return;
+      
+      const cases = AppState.cases;
+      
+      // 1. Populate Sources Checkboxes
+      const sourceGrid = document.getElementById('sim-sources-grid');
+      if (sourceGrid) {
+        const sourceCounts = {};
+        cases.forEach(c => {
+          const src = c.source || 'ไม่ระบุ';
+          sourceCounts[src] = (sourceCounts[src] || 0) + 1;
+        });
+
+        const sortedSources = Object.keys(sourceCounts).sort((a, b) => {
+          const ma = a.match(/\d{4}/);
+          const mb = b.match(/\d{4}/);
+          if (ma && mb) return parseInt(mb[0]) - parseInt(ma[0]);
+          if (ma) return -1;
+          if (mb) return 1;
+          return a.localeCompare(b, 'th');
+        });
+
+        if (SimState.selectedSources.size === 0) {
+          sortedSources.forEach(s => SimState.selectedSources.add(s));
+        }
+
+        sourceGrid.innerHTML = sortedSources.map(s => {
+          const isChecked = SimState.selectedSources.has(s);
+          return `
+            <label class="source-chip-label">
+              <input type="checkbox" value="${escapeHtml(s)}" ${isChecked ? 'checked' : ''} onchange="toggleSource('${escapeHtml(s)}', this.checked)">
+              <span>${escapeHtml(s)} <small style="color:var(--text-muted);font-weight:normal;">(${sourceCounts[s]})</small></span>
+            </label>
+          `;
+        }).join('');
+      }
+
+      // 2. Populate Course Groups & Topics (PLE CC Quiz Style)
+      renderCourseGroupsAccordion();
+    }
+
+    function renderCourseGroupsAccordion() {
+      const container = document.getElementById('sim-course-groups-container');
+      if (!container || typeof AppState === 'undefined' || !AppState.cases) return;
+
+      const cases = AppState.cases;
+      const groupsMap = {}; // groupName -> { category, count, topics: { topicName: count } }
+
+      cases.forEach(c => {
+        const grp = c.mainGroup || 'ทั่วไป';
+        const topic = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
+        if (!groupsMap[grp]) {
+          groupsMap[grp] = {
+            category: c.category || 'Clinic',
+            count: 0,
+            topics: {}
+          };
+        }
+        groupsMap[grp].count++;
+        groupsMap[grp].topics[topic] = (groupsMap[grp].topics[topic] || 0) + 1;
+      });
+
+      const groupNames = Object.keys(groupsMap).sort((a, b) => a.localeCompare(b, 'th'));
+
+      // Default select all if first run
+      if (SimState.selectedCourseGroups.size === 0) {
+        groupNames.forEach(g => {
+          SimState.selectedCourseGroups.add(g);
+          Object.keys(groupsMap[g].topics).forEach(t => {
+            SimState.selectedTopics.add(`${g}::${t}`);
+          });
+        });
+      }
+
+      const q = (SimState.topicSearchQuery || '').toLowerCase();
+      let html = '';
+
+      groupNames.forEach(grp => {
+        const data = groupsMap[grp];
+        const topicList = Object.keys(data.topics).sort();
+
+        // Search filtering
+        const grpMatches = !q || grp.toLowerCase().includes(q) || data.category.toLowerCase().includes(q);
+        const matchingTopics = topicList.filter(t => !q || t.toLowerCase().includes(q) || grpMatches);
+
+        if (!matchingTopics.length && !grpMatches) return;
+
+        const isGrpChecked = SimState.selectedCourseGroups.has(grp);
+        const isCollapsed = q ? false : SimState.collapsedGroups.has(grp);
+
+        const chipsHtml = matchingTopics.map(t => {
+          const key = `${grp}::${t}`;
+          const isChecked = SimState.selectedTopics.has(key);
+          return `
+            <span class="sim-sub-chip ${isChecked ? 'active' : ''}" 
+                  onclick="toggleTopicChip('${escapeHtml(grp)}', '${escapeHtml(t)}', event)" 
+                  title="${escapeHtml(t)} (${data.topics[t]} เคส)">
+              ${escapeHtml(t)} (${data.topics[t]})
+            </span>
+          `;
+        }).join('');
+
+        const catBadgeClass = data.category.toLowerCase();
+
+        html += `
+          <div class="sim-group-box ${isCollapsed ? 'collapsed' : ''}" id="simGrp_${encodeURIComponent(grp)}">
+            <div class="sim-group-header" onclick="toggleGroupCollapse('${escapeHtml(grp)}', event)">
+              <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; margin:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" ${isGrpChecked ? 'checked' : ''} onchange="toggleCourseGroup('${escapeHtml(grp)}', this.checked)">
+                <span class="badge badge-${catBadgeClass}" style="font-size:0.68rem; padding:0.15rem 0.4rem;">${data.category}</span>
+                <span>${escapeHtml(grp)}</span>
+              </label>
+              <div style="display:flex; align-items:center; gap:0.4rem; font-size:0.75rem; color:var(--text-muted);">
+                <span>${data.count} เคส (${matchingTopics.length} หัวข้อ)</span>
+                <span class="sim-group-arrow">▼</span>
+              </div>
+            </div>
+            <div class="sim-group-chips-grid">
+              ${chipsHtml}
+            </div>
+          </div>
+        `;
+      });
+
+      if (!html) {
+        html = '<div style="padding:1rem; text-align:center; color:var(--text-muted); font-size:0.8rem;">ไม่พบหัวข้อที่ตรงกับคำค้นหา</div>';
+      }
+
+      container.innerHTML = html;
+    }
+
+    function toggleAllSources(checked) {
+      if (typeof AppState === 'undefined' || !AppState.cases) return;
+      SimState.selectedSources.clear();
+      if (checked) {
+        AppState.cases.forEach(c => SimState.selectedSources.add(c.source || 'ไม่ระบุ'));
+      }
+      initExamFilterControls();
+    }
+
+    function toggleSource(src, checked) {
+      if (checked) SimState.selectedSources.add(src);
+      else SimState.selectedSources.delete(src);
+      initExamFilterControls();
+    }
+
+    function toggleAllCourseGroups(checked) {
+      if (typeof AppState === 'undefined' || !AppState.cases) return;
+      SimState.selectedCourseGroups.clear();
+      SimState.selectedTopics.clear();
+      if (checked) {
+        AppState.cases.forEach(c => {
+          const g = c.mainGroup || 'ทั่วไป';
+          const t = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
+          SimState.selectedCourseGroups.add(g);
+          SimState.selectedTopics.add(`${g}::${t}`);
+        });
+      }
+      renderCourseGroupsAccordion();
+    }
+
+    function toggleCourseGroup(grp, checked) {
+      if (typeof AppState === 'undefined' || !AppState.cases) return;
+      if (checked) {
+        SimState.selectedCourseGroups.add(grp);
+        AppState.cases.filter(c => (c.mainGroup || 'ทั่วไป') === grp).forEach(c => {
+          const t = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
+          SimState.selectedTopics.add(`${grp}::${t}`);
+        });
+      } else {
+        SimState.selectedCourseGroups.delete(grp);
+        AppState.cases.filter(c => (c.mainGroup || 'ทั่วไป') === grp).forEach(c => {
+          const t = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
+          SimState.selectedTopics.delete(`${grp}::${t}`);
+        });
+      }
+      renderCourseGroupsAccordion();
+    }
+
+    function toggleTopicChip(grp, topic, ev) {
+      if (ev) ev.stopPropagation();
+      const key = `${grp}::${topic}`;
+      if (SimState.selectedTopics.has(key)) {
+        SimState.selectedTopics.delete(key);
+      } else {
+        SimState.selectedTopics.add(key);
+        SimState.selectedCourseGroups.add(grp);
+      }
+      renderCourseGroupsAccordion();
+    }
+
+    function toggleGroupCollapse(grp, ev) {
+      if (ev) ev.stopPropagation();
+      if (SimState.collapsedGroups.has(grp)) {
+        SimState.collapsedGroups.delete(grp);
+      } else {
+        SimState.collapsedGroups.add(grp);
+      }
+      renderCourseGroupsAccordion();
+    }
+
+    function onFilterTopicSearch(text) {
+      SimState.topicSearchQuery = text;
+      renderCourseGroupsAccordion();
+    }
+
     function populateExamSetDropdown() {
       const select = document.getElementById('exam-set-select');
       if (!select || typeof AppState === 'undefined' || !AppState.cases || AppState.cases.length === 0) return;
@@ -902,7 +1290,18 @@
     const _origOnCasesLoaded = typeof onCasesLoaded === 'function' ? onCasesLoaded : null;
     onCasesLoaded = function() {
       if (_origOnCasesLoaded) _origOnCasesLoaded();
+      initExamFilterControls();
+      populateExamSetDropdown();
     };
+    window.addEventListener('appDataReady', () => {
+      initExamFilterControls();
+      populateExamSetDropdown();
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+      initOtpBoxes();
+      initExamFilterControls();
+      populateExamSetDropdown();
+    });
 
     function getRestCaseData() {
       return {
@@ -1427,25 +1826,7 @@
         SimState.sap = sap;
         SimState.totalStations = total;
         
-        if (typeof currentApiUrl !== 'undefined' && currentApiUrl) {
-          try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 4000); // 4 seconds timeout
-            
-            const res = await fetch(`${currentApiUrl}?action=getExamSet&totalStations=${total}&clinicCount=${clinic}&productCount=${product}&sapCount=${sap}`, { signal: controller.signal });
-            clearTimeout(timeoutId);
-            const result = await res.json();
-            if (result.success && result.data && result.data.stations) {
-              examSet = result.data.stations;
-            }
-          } catch (e) {
-            console.warn('API ดึงชุดข้อสอบสุ่มล้มเหลว ใช้ตัวดึงออฟไลน์:', e);
-          }
-        }
-        
-        if (!examSet) {
-          examSet = generateLocalExamSet(clinic, product, sap);
-        }
+        examSet = generateLocalExamSet(clinic, product, sap);
       }
       
       if (!examSet || examSet.length === 0) {
@@ -1494,59 +1875,115 @@
       startTimer();
     }
 
-    // Generate exam set locally (offline) with Linked Cases support
+    // Generate exam set locally (offline) with Source, Course Group, Topic Filters and Smart Constraints
     function generateLocalExamSet(clinic, product, sap) {
       if (typeof AppState === 'undefined' || !AppState.cases) return [];
-      const list = AppState.cases;
-      const pool = {
-        Clinic: shuffle(list.filter(c => c.category === 'Clinic' && (!c.linkedFromCase))), // Prevent selecting parts of a chain directly if you want, but for now just shuffle all
-        Product: shuffle(list.filter(c => c.category === 'Product')),
-        SAP: shuffle(list.filter(c => c.category === 'SAP'))
+      
+      // 1. Filter candidate cases by user selection
+      const candidateCases = AppState.cases.filter(c => {
+        if (!c || !c.caseId) return false;
+        const src = c.source || 'ไม่ระบุ';
+        if (SimState.selectedSources && SimState.selectedSources.size > 0 && !SimState.selectedSources.has(src)) return false;
+        
+        const grp = c.mainGroup || 'ทั่วไป';
+        if (SimState.selectedCourseGroups && SimState.selectedCourseGroups.size > 0 && !SimState.selectedCourseGroups.has(grp)) return false;
+        
+        const topic = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
+        const topicKey = `${grp}::${topic}`;
+        if (SimState.selectedTopics && SimState.selectedTopics.size > 0 && !SimState.selectedTopics.has(topicKey)) return false;
+
+        return true;
+      });
+
+      // 2. Separate candidates by Category (only unlinked or head-of-chain cases for random starts)
+      const pools = {
+        Clinic: shuffle(candidateCases.filter(c => c.category === 'Clinic' && !c.linkedFromCase)),
+        Product: shuffle(candidateCases.filter(c => c.category === 'Product' && !c.linkedFromCase)),
+        SAP: shuffle(candidateCases.filter(c => c.category === 'SAP' && !c.linkedFromCase))
       };
-      
-      const getFromPool = (cat, count) => {
-        if (count === 0) return [];
-        let items = pool[cat].slice(0, count);
-        let idx = 0;
-        while (items.length < count && pool[cat].length > 0) {
-          items.push(pool[cat][idx % pool[cat].length]);
-          idx++;
-        }
-        return items;
-      };
-      
-      let initialSelected = [
-        ...getFromPool('Clinic', clinic),
-        ...getFromPool('Product', product),
-        ...getFromPool('SAP', sap)
-      ];
-      
-      initialSelected = shuffle(initialSelected);
-      
-      let finalSet = [];
-      let addedIds = new Set();
-      
-      for (let caseObj of initialSelected) {
-        if (!addedIds.has(caseObj.caseId)) {
-          finalSet.push(caseObj);
-          addedIds.add(caseObj.caseId);
-          
-          let current = caseObj;
-          // While there is a linked next case, pull it in immediately after
-          while (current.linkedNextCase) {
-            let nextCase = AppState.cases.find(c => c.caseId === current.linkedNextCase);
-            if (nextCase && !addedIds.has(nextCase.caseId)) {
-              finalSet.push(nextCase);
-              addedIds.add(nextCase.caseId);
-              current = nextCase;
-            } else {
-              break;
+
+      const selectedCases = [];
+      const addedIds = new Set();
+      const courseGroupCounts = {};
+      const usedTopics = new Set();
+
+      function pickFromCategory(cat, targetCount) {
+        if (targetCount <= 0) return;
+        const catPool = pools[cat] || [];
+        let pickedForCat = 0;
+
+        // Pass 1: Strict constraints (Course Group < 2 AND Topic strictly unique)
+        for (const c of catPool) {
+          if (pickedForCat >= targetCount) break;
+          if (addedIds.has(c.caseId)) continue;
+
+          const grp = c.mainGroup || 'ทั่วไป';
+          const topic = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
+          const grpCount = courseGroupCounts[grp] || 0;
+
+          if (grpCount < 2 && !usedTopics.has(topic)) {
+            selectedCases.push(c);
+            addedIds.add(c.caseId);
+            courseGroupCounts[grp] = grpCount + 1;
+            usedTopics.add(topic);
+            pickedForCat++;
+
+            // Handle linked chain cases (e.g. multi-part consecutive stations)
+            let curr = c;
+            while (curr.linkedNextCase) {
+              const nextC = AppState.cases.find(x => x.caseId === curr.linkedNextCase);
+              if (nextC && !addedIds.has(nextC.caseId)) {
+                selectedCases.push(nextC);
+                addedIds.add(nextC.caseId);
+                const nextGrp = nextC.mainGroup || 'ทั่วไป';
+                courseGroupCounts[nextGrp] = (courseGroupCounts[nextGrp] || 0) + 1;
+                curr = nextC;
+              } else {
+                break;
+              }
             }
           }
         }
+
+        // Pass 2: Relax Course Group limit if pool has limited groups, but maintain 0 duplicate topics!
+        if (pickedForCat < targetCount) {
+          for (const c of catPool) {
+            if (pickedForCat >= targetCount) break;
+            if (addedIds.has(c.caseId)) continue;
+
+            const grp = c.mainGroup || 'ทั่วไป';
+            const topic = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
+
+            if (!usedTopics.has(topic)) {
+              selectedCases.push(c);
+              addedIds.add(c.caseId);
+              courseGroupCounts[grp] = (courseGroupCounts[grp] || 0) + 1;
+              usedTopics.add(topic);
+              pickedForCat++;
+            }
+          }
+        }
+
+        // Pass 3: Fallback if total distinct topics is less than requested count
+        if (pickedForCat < targetCount) {
+          for (const c of catPool) {
+            if (pickedForCat >= targetCount) break;
+            if (addedIds.has(c.caseId)) continue;
+            selectedCases.push(c);
+            addedIds.add(c.caseId);
+            pickedForCat++;
+          }
+        }
       }
-      
-      return finalSet.map((c, idx) => ({
+
+      pickFromCategory('Clinic', clinic);
+      pickFromCategory('Product', product);
+      pickFromCategory('SAP', sap);
+
+      // Return shuffled stations
+      const finalShuffled = shuffle(selectedCases);
+
+      return finalShuffled.map((c, idx) => ({
         stationNumber: idx + 1,
         caseId: c.caseId,
         title: c.title,
@@ -1883,6 +2320,74 @@
       return '';
     }
 
+    function calculateStationScore(checklist, checkedIds) {
+      if (!checklist || checklist.length === 0) return { currentScore: 0, totalScore: 0 };
+      const checkedSet = new Set(checkedIds || []);
+      
+      const groups = [];
+      let currentGroup = null;
+      
+      checklist.forEach(item => {
+        const rawScore = parseFloat(item.score);
+        const score = isNaN(rawScore) ? 1.0 : rawScore;
+        const isSubset = !!item.isSubset;
+        
+        if (!isSubset) {
+          if (currentGroup) groups.push(currentGroup);
+          currentGroup = {
+            parentId: item.id,
+            parentScore: score,
+            subsets: []
+          };
+        } else {
+          if (currentGroup) {
+            currentGroup.subsets.push({ id: item.id, score: score });
+          } else {
+            groups.push({
+              parentId: item.id,
+              parentScore: score,
+              subsets: []
+            });
+          }
+        }
+      });
+      if (currentGroup) groups.push(currentGroup);
+      
+      let currentScore = 0;
+      let totalScore = 0;
+      
+      groups.forEach(g => {
+        totalScore += g.parentScore;
+        
+        if (g.subsets.length === 0) {
+          if (checkedSet.has(g.parentId)) {
+            currentScore += g.parentScore;
+          }
+        } else {
+          const isRubric = g.subsets.some(s => s.score === 0 || s.score === g.parentScore);
+          if (isRubric) {
+            const checkedSubsets = g.subsets.filter(s => checkedSet.has(s.id));
+            if (checkedSubsets.length > 0) {
+              const maxEarned = Math.max(...checkedSubsets.map(s => s.score));
+              currentScore += Math.min(maxEarned, g.parentScore);
+            } else if (checkedSet.has(g.parentId)) {
+              currentScore += g.parentScore;
+            }
+          } else {
+            if (checkedSet.has(g.parentId)) {
+              currentScore += g.parentScore;
+            } else {
+              const checkedSubsets = g.subsets.filter(s => checkedSet.has(s.id));
+              const subsetsScore = checkedSubsets.reduce((sum, s) => sum + s.score, 0);
+              currentScore += Math.min(subsetsScore, g.parentScore);
+            }
+          }
+        }
+      });
+      
+      return { currentScore, totalScore };
+    }
+
     function renderExamChecklist(stationNum, c) {
       const chkContainer = document.getElementById('exam-checklist-container');
       chkContainer.innerHTML = '';
@@ -1914,14 +2419,21 @@
           const globalIdx = itemGlobalIndices.get(item) || 0;
           const isChecked = checkedList.includes(item.id);
           const imgHtml = getExamChecklistItemImage(item, globalIdx, c);
+          const isSubset = !!item.isSubset;
           const el = document.createElement('div');
-          el.className = `checklist-item ${isChecked ? 'checked' : ''}`;
+          el.className = `checklist-item ${isChecked ? 'checked' : ''} ${isSubset ? 'is-subset' : ''}`;
           el.setAttribute('data-id', item.id);
+          el.setAttribute('data-score', item.score);
           el.addEventListener('click', () => toggleExamChecklistItem(stationNum, item.id, item.score));
+          
+          const scoreDisplay = (item.score !== undefined && item.score !== null) 
+            ? `<span class="checklist-item-score ${item.score === 0 ? 'zero-score' : ''}">(${item.score} คะแนน)</span>` 
+            : '';
+            
           el.innerHTML = `
             <div class="checkbox-custom"></div>
             <div style="flex:1; min-width:0;">
-              <span class="checklist-item-score">(${item.score} คะแนน)</span>
+              ${scoreDisplay}
               <span class="checklist-item-text">${item.textHtml || escapeHtml(item.text)}</span>
               ${imgHtml ? `<div class="checklist-item-image" style="margin-top:0.5rem; pointer-events:none;">${imgHtml}</div>` : ''}
             </div>
@@ -1935,45 +2447,144 @@
 
     function toggleExamChecklistItem(stationNum, itemId, itemScore) {
       if (!SimState.studentScores[stationNum]) SimState.studentScores[stationNum] = [];
-      const idx = SimState.studentScores[stationNum].indexOf(itemId);
-      if (idx > -1) {
-        SimState.studentScores[stationNum].splice(idx, 1);
+      const currentChecked = SimState.studentScores[stationNum];
+      const clickedEl = document.querySelector(`.checklist-item[data-id="${itemId}"]`);
+      if (!clickedEl) return;
+      
+      const isSubset = clickedEl.classList.contains('is-subset');
+      const index = currentChecked.indexOf(itemId);
+      const isChecking = index === -1;
+      
+      if (isSubset) {
+        // Find parent and sibling subsets
+        let parentEl = null;
+        let prev = clickedEl.previousElementSibling;
+        while (prev && prev.classList.contains('checklist-item')) {
+          if (!prev.classList.contains('is-subset')) {
+            parentEl = prev;
+            break;
+          }
+          prev = prev.previousElementSibling;
+        }
+        
+        let siblingSubsets = [];
+        if (parentEl) {
+          let n = parentEl.nextElementSibling;
+          while (n && n.classList.contains('is-subset')) {
+            siblingSubsets.push(n);
+            n = n.nextElementSibling;
+          }
+        }
+        
+        const parentScore = parentEl ? (parseFloat(parentEl.getAttribute('data-score')) || 1.0) : 1.0;
+        const hasRubricScores = siblingSubsets.some(s => {
+          const sc = parseFloat(s.getAttribute('data-score'));
+          return sc === 0 || sc === parentScore;
+        });
+        
+        if (isChecking) {
+          if (hasRubricScores) {
+            // Rubric single-choice: uncheck other sibling subsets first
+            siblingSubsets.forEach(sib => {
+              const sId = sib.getAttribute('data-id');
+              const sIdx = currentChecked.indexOf(sId);
+              if (sIdx > -1) currentChecked.splice(sIdx, 1);
+            });
+          }
+          currentChecked.push(itemId);
+          
+          if (parentEl) {
+            const pId = parentEl.getAttribute('data-id');
+            const pIdx = currentChecked.indexOf(pId);
+            if (itemScore >= parentScore) {
+              if (pIdx === -1) currentChecked.push(pId);
+            } else {
+              if (pIdx > -1) currentChecked.splice(pIdx, 1);
+            }
+          }
+        } else {
+          currentChecked.splice(index, 1);
+          if (parentEl) {
+            const pId = parentEl.getAttribute('data-id');
+            const pIdx = currentChecked.indexOf(pId);
+            if (pIdx > -1) currentChecked.splice(pIdx, 1);
+          }
+        }
       } else {
-        SimState.studentScores[stationNum].push(itemId);
+        // Clicking Parent item
+        if (isChecking) {
+          currentChecked.push(itemId);
+          let nextEl = clickedEl.nextElementSibling;
+          let subsets = [];
+          while (nextEl && nextEl.classList.contains('is-subset')) {
+            subsets.push(nextEl);
+            nextEl = nextEl.nextElementSibling;
+          }
+          const parentScore = parseFloat(clickedEl.getAttribute('data-score')) || 1.0;
+          const isRubric = subsets.some(s => {
+            const sc = parseFloat(s.getAttribute('data-score'));
+            return sc === 0 || sc === parentScore;
+          });
+          if (isRubric) {
+            let bestSubset = subsets[0];
+            let bestScore = -1;
+            subsets.forEach(s => {
+              const sc = parseFloat(s.getAttribute('data-score')) || 0;
+              if (sc > bestScore) {
+                bestScore = sc;
+                bestSubset = s;
+              }
+              const sId = s.getAttribute('data-id');
+              const sIdx = currentChecked.indexOf(sId);
+              if (sIdx > -1) currentChecked.splice(sIdx, 1);
+            });
+            if (bestSubset) currentChecked.push(bestSubset.getAttribute('data-id'));
+          } else {
+            subsets.forEach(s => {
+              const sId = s.getAttribute('data-id');
+              if (!currentChecked.includes(sId)) currentChecked.push(sId);
+            });
+          }
+        } else {
+          currentChecked.splice(index, 1);
+          let nextEl = clickedEl.nextElementSibling;
+          while (nextEl && nextEl.classList.contains('is-subset')) {
+            const subId = nextEl.getAttribute('data-id');
+            const subIdx = currentChecked.indexOf(subId);
+            if (subIdx > -1) currentChecked.splice(subIdx, 1);
+            nextEl = nextEl.nextElementSibling;
+          }
+        }
       }
       
       document.querySelectorAll('.checklist-item').forEach(el => {
-        if (el.getAttribute('data-id') === itemId) {
-          el.classList.toggle('checked', SimState.studentScores[stationNum].includes(itemId));
-        }
+        const id = el.getAttribute('data-id');
+        el.classList.toggle('checked', currentChecked.includes(id));
       });
       
       const currentCase = SimState.stations[SimState.currentIdx].case;
       updateExamProgressUI(stationNum, currentCase);
-      
-      renderMiniMap(); // Always render minimap
+      renderMiniMap();
       
       if (SimState.isLobby) {
-        // Sync checklist directly when toggled (Firebase)
-        const checkedIds = SimState.studentScores[stationNum] || [];
-        _fbDb.ref('rooms/' + SimState.roomId).update({ checklistProgress: checkedIds.join(',') });
+        _fbDb.ref('rooms/' + SimState.roomId).update({ checklistProgress: currentChecked.join(',') });
       }
     }
 
     function updateExamProgressUI(stationNum, c) {
       const checked = SimState.studentScores[stationNum] || [];
-      let score = 0, total = 0;
-      c.checklist.forEach(item => {
-        total += item.score;
-        if (checked.includes(item.id)) score += item.score;
-      });
-      document.getElementById('exam-score').textContent = `${score} / ${total}`;
-      if (total > 0) {
-        const pct = Math.round((score / total) * 100);
+      const { currentScore, totalScore } = calculateStationScore(c.checklist, checked);
+      
+      const formatScore = (num) => Number.isInteger(num) ? num.toString() : num.toFixed(2);
+      document.getElementById('exam-score').textContent = `${formatScore(currentScore)} / ${formatScore(totalScore)}`;
+      if (totalScore > 0) {
+        const pct = Math.round((currentScore / totalScore) * 100);
         document.getElementById('exam-pct').textContent = `${pct}%`;
         const fill = document.getElementById('exam-bar-fill');
-        fill.style.width = `${pct}%`;
-        fill.classList.toggle('pass', pct >= 80);
+        if (fill) {
+          fill.style.width = `${pct}%`;
+          fill.classList.toggle('pass', pct >= 80);
+        }
       }
     }
 
@@ -2065,16 +2676,14 @@
         const stationsList = SimState.stations || [];
         const totalStationsCount = stationsList.length || SimState.totalStations || 0;
         
+        const formatScore = (num) => Number.isInteger(num) ? num.toString() : num.toFixed(2);
+        
         stationsList.forEach(st => {
           const c = st.case || {};
           const checked = SimState.studentScores[st.stationNumber] || [];
-          let earned = 0, max = 0;
           const checklist = Array.isArray(c.checklist) ? c.checklist : [];
-          checklist.forEach(item => {
-            const itemScore = parseInt(item.score) || 0;
-            max += itemScore;
-            if (checked.includes(item.id)) earned += itemScore;
-          });
+          const { currentScore: earned, totalScore: max } = calculateStationScore(checklist, checked);
+          
           totalMaxScore += max;
           totalEarnedScore += earned;
           const isRest = st.isRest || ((c.category || '').toUpperCase() === 'REST');
@@ -2095,7 +2704,7 @@
               <td>สถานี ${st.stationNumber}</td>
               <td><a href="case-viewer.html?id=${caseIdText}" target="_blank" style="color:var(--primary);font-weight:700;">${titleText}</a></td>
               <td><span class="badge badge-${catText.toLowerCase()}">${catText}</span></td>
-              <td>${isRest ? '-' : earned + ' / ' + max}</td>
+              <td>${isRest ? '-' : formatScore(earned) + ' / ' + formatScore(max)}</td>
               <td>${isRest ? '-' : pct + '%'}</td>
               <td>${statusHtml}</td>
             `;
@@ -2104,7 +2713,7 @@
         });
         
         const scoreValEl = document.getElementById('results-score-val');
-        if (scoreValEl) scoreValEl.textContent = `${totalEarnedScore}/${totalMaxScore}`;
+        if (scoreValEl) scoreValEl.textContent = `${formatScore(totalEarnedScore)}/${formatScore(totalMaxScore)}`;
         
         const totalPct = totalMaxScore > 0 ? Math.round((totalEarnedScore / totalMaxScore) * 100) : 0;
         const scorePctEl = document.getElementById('results-score-pct');

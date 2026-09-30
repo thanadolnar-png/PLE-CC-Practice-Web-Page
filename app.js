@@ -817,25 +817,113 @@ function handleChecklistItemClick(caseId, itemId, itemScore) {
   const index = currentChecked.indexOf(itemId);
   const isChecking = (index === -1);
   
-  if (isChecking) {
-    currentChecked.push(itemId);
-  } else {
-    currentChecked.splice(index, 1);
-  }
-  
-  // 2-Way Master Sync: If parent checklist item, toggle all following subset items
   const clickedEl = document.querySelector(`.checklist-item[data-id="${itemId}"]`);
-  if (clickedEl && !clickedEl.classList.contains('is-subset')) {
-    let nextEl = clickedEl.nextElementSibling;
-    while (nextEl && nextEl.classList.contains('is-subset')) {
-      const subId = nextEl.getAttribute('data-id');
-      const subIdx = currentChecked.indexOf(subId);
-      if (isChecking && subIdx === -1) {
-        currentChecked.push(subId);
-      } else if (!isChecking && subIdx > -1) {
-        currentChecked.splice(subIdx, 1);
+  const isSubset = clickedEl && clickedEl.classList.contains('is-subset');
+  const allItems = Array.from(document.querySelectorAll('.checklist-item'));
+  const clickedIdx = allItems.indexOf(clickedEl);
+
+  if (isSubset) {
+    // Find parent element (the closest preceding non-subset)
+    let parentEl = null;
+    let siblingSubsets = [];
+    for (let i = clickedIdx - 1; i >= 0; i--) {
+      if (!allItems[i].classList.contains('is-subset')) {
+        parentEl = allItems[i];
+        break;
       }
-      nextEl = nextEl.nextElementSibling;
+    }
+    if (parentEl) {
+      const parentIdx = allItems.indexOf(parentEl);
+      for (let i = parentIdx + 1; i < allItems.length; i++) {
+        if (allItems[i].classList.contains('is-subset')) {
+          siblingSubsets.push(allItems[i]);
+        } else {
+          break;
+        }
+      }
+    }
+
+    const parentScore = parentEl ? (parseFloat(parentEl.getAttribute('data-score')) || 1.0) : 1.0;
+    const hasRubricScores = siblingSubsets.some(s => {
+      const sc = parseFloat(s.getAttribute('data-score'));
+      return sc === 0 || sc === parentScore;
+    });
+
+    if (isChecking) {
+      if (hasRubricScores) {
+        // Rubric single-choice (Radio style): uncheck other sibling subsets first
+        siblingSubsets.forEach(sib => {
+          const sId = sib.getAttribute('data-id');
+          const sIdx = currentChecked.indexOf(sId);
+          if (sIdx > -1) currentChecked.splice(sIdx, 1);
+        });
+      }
+      currentChecked.push(itemId);
+
+      // Auto-check parent ONLY IF this subset awards full parent score
+      if (parentEl) {
+        const pId = parentEl.getAttribute('data-id');
+        const pIdx = currentChecked.indexOf(pId);
+        if (itemScore >= parentScore) {
+          if (pIdx === -1) currentChecked.push(pId);
+        } else {
+          if (pIdx > -1) currentChecked.splice(pIdx, 1);
+        }
+      }
+    } else {
+      currentChecked.splice(index, 1);
+      if (parentEl) {
+        const pId = parentEl.getAttribute('data-id');
+        const pIdx = currentChecked.indexOf(pId);
+        if (pIdx > -1) currentChecked.splice(pIdx, 1);
+      }
+    }
+  } else {
+    // Clicking a Parent item:
+    if (isChecking) {
+      currentChecked.push(itemId);
+      let nextEl = clickedEl.nextElementSibling;
+      let subsets = [];
+      while (nextEl && nextEl.classList.contains('is-subset')) {
+        subsets.push(nextEl);
+        nextEl = nextEl.nextElementSibling;
+      }
+      const parentScore = parseFloat(clickedEl.getAttribute('data-score')) || 1.0;
+      const isRubric = subsets.some(s => {
+        const sc = parseFloat(s.getAttribute('data-score'));
+        return sc === 0 || sc === parentScore;
+      });
+
+      if (isRubric) {
+        // Select highest scoring subset option
+        let bestSubset = subsets[0];
+        let bestScore = -1;
+        subsets.forEach(s => {
+          const sc = parseFloat(s.getAttribute('data-score')) || 0;
+          if (sc > bestScore) {
+            bestScore = sc;
+            bestSubset = s;
+          }
+          const sId = s.getAttribute('data-id');
+          const sIdx = currentChecked.indexOf(sId);
+          if (sIdx > -1) currentChecked.splice(sIdx, 1);
+        });
+        if (bestSubset) currentChecked.push(bestSubset.getAttribute('data-id'));
+      } else {
+        subsets.forEach(s => {
+          const sId = s.getAttribute('data-id');
+          if (!currentChecked.includes(sId)) currentChecked.push(sId);
+        });
+      }
+    } else {
+      currentChecked.splice(index, 1);
+      let nextEl = clickedEl.nextElementSibling;
+      while (nextEl && nextEl.classList.contains('is-subset')) {
+        const subId = nextEl.getAttribute('data-id');
+        const subIdx = currentChecked.indexOf(subId);
+        if (subIdx > -1) currentChecked.splice(subIdx, 1);
+        nextEl = nextEl.nextElementSibling;
+      }
     }
   }
   
@@ -885,29 +973,8 @@ function updateChecklistUI(caseId) {
     groups.push(currentGroup);
   }
   
-  // 2. Perform 2-way master sync checking logic
+  // 2. Perform master sync checking logic
   const finalChecked = new Set(checkedItems);
-  
-  groups.forEach(g => {
-    // If subsets checked score >= parent score or all subsets checked, auto-check parent
-    const checkedSubsets = g.subsets.filter(s => finalChecked.has(s.id));
-    const subsetsScore = checkedSubsets.reduce((sum, s) => sum + s.score, 0);
-    const shouldAutoCheckParent = g.subsets.length > 0 && 
-      (subsetsScore >= g.parentScore || checkedSubsets.length === g.subsets.length);
-      
-    if (shouldAutoCheckParent) {
-      finalChecked.add(g.parentId);
-    }
-    
-    // If parent is checked, auto-check all subsets
-    if (finalChecked.has(g.parentId)) {
-      g.subsets.forEach(s => finalChecked.add(s.id));
-    }
-  });
-  
-  // Sync back to AppState and persist
-  AppState.checklistProgress[caseId] = Array.from(finalChecked);
-  localStorage.setItem('ospe_checklist_progress', JSON.stringify(AppState.checklistProgress));
   
   // 3. Update DOM classes for checkboxes
   items.forEach(el => {
@@ -919,20 +986,38 @@ function updateChecklistUI(caseId) {
     }
   });
   
-  // 4. Calculate total score and current score with parent caps
+  // 4. Calculate total score and current score with rubric logic
   let currentScore = 0;
   let totalScore = 0;
   
   groups.forEach(g => {
     totalScore += g.parentScore;
     
-    if (finalChecked.has(g.parentId)) {
-      currentScore += g.parentScore;
+    if (g.subsets.length === 0) {
+      if (finalChecked.has(g.parentId)) {
+        currentScore += g.parentScore;
+      }
     } else {
-      const checkedSubsets = g.subsets.filter(s => finalChecked.has(s.id));
-      const subsetsScore = checkedSubsets.reduce((sum, s) => sum + s.score, 0);
-      currentScore += Math.min(subsetsScore, g.parentScore);
+      const isRubric = g.subsets.some(s => s.score === 0 || s.score === g.parentScore);
+      if (isRubric) {
+        const checkedSubsets = g.subsets.filter(s => finalChecked.has(s.id));
+        if (checkedSubsets.length > 0) {
+          const maxEarned = Math.max(...checkedSubsets.map(s => s.score));
+          currentScore += Math.min(maxEarned, g.parentScore);
+        } else if (finalChecked.has(g.parentId)) {
+          currentScore += g.parentScore;
+        }
+      } else {
+        if (finalChecked.has(g.parentId)) {
+          currentScore += g.parentScore;
+        } else {
+          const checkedSubsets = g.subsets.filter(s => finalChecked.has(s.id));
+          const subsetsScore = checkedSubsets.reduce((sum, s) => sum + s.score, 0);
+          currentScore += Math.min(subsetsScore, g.parentScore);
+        }
+      }
     }
+  });
   });
   
   // 5. Update score displays in UI
@@ -1220,7 +1305,7 @@ if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
 const DB_NAME = 'RxCU_OSPE_DB';
 const DB_VERSION = 1;
 const STORE_NAME = 'case_details';
-const DB_VERSION_STR = 'v_20260930_202218'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
+const DB_VERSION_STR = 'v_20260930_220641'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
 
 function openIndexedDB() {
   return new Promise((resolve, reject) => {
@@ -1308,6 +1393,17 @@ function hideSplashOverlay() {
 }
 
 async function loadOfflineDetailsWithProgress() {
+  // 0. หากมี OFFLINE_CASE_DETAILS ใน Memory จากไฟล์ script อยู่แล้ว -> ใช้ทันที 0ms ไม่ต้องดาวน์โหลดซ้ำ!
+  if (typeof OFFLINE_CASE_DETAILS !== 'undefined' && Object.keys(OFFLINE_CASE_DETAILS).length > 0) {
+    console.log(`[Database Preloader] OFFLINE_CASE_DETAILS is ready in memory (${Object.keys(OFFLINE_CASE_DETAILS).length} cases). 0ms instant load!`);
+    mergeOfflineDetails();
+    removeSplashOverlay();
+    try {
+      openIndexedDB().then(db => saveCasesToDB(db, OFFLINE_CASE_DETAILS)).catch(() => {});
+    } catch(e) {}
+    return;
+  }
+
   const url = 'case-details-offline.js';
   
   try {
