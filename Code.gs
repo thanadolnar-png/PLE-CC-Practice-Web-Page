@@ -251,12 +251,7 @@ function formatSourceName(caseId, rawSource) {
   const cid = String(caseId || '').toUpperCase();
   const m = cid.match(/OSPE-CL(\d{2})/);
   if (m) return 'ข้อสอบจริงปี 25' + m[1];
-  if (cid.includes('CLSP')) return 'เล่มม่วง (Pharma Plus)';
-  if (cid.includes('PDLQ')) return 'คลังผลิต: ยาน้ำ (Liquid)';
-  if (cid.includes('PDSS')) return 'คลังผลิต: ยากึ่งแข็ง (Semisolid)';
-  if (cid.includes('PDT')) return 'คลังผลิต: ยาเม็ด/ยาผง (Tablet & Powder)';
-  if (cid.includes('SP')) return 'คลังกฎหมายและสังคม (SAP)';
-  return 'คลังข้อสอบทั่วไป';
+  return 'ไม่ระบุ';
 }
 
 function getCaseList(params = {}) {
