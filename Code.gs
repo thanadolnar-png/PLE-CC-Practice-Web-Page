@@ -241,6 +241,24 @@ function getSpreadsheet() {
  * 2. Case Library Functions
  * ──────────────────────────────────────────────────────────────
  */
+function formatSourceName(caseId, rawSource) {
+  if (rawSource && String(rawSource).trim()) {
+    const s = String(rawSource).replace(/\*/g, '').trim();
+    if (/^25\d{2}$/.test(s)) return 'ข้อสอบจริงปี ' + s;
+    if (/^\d{2}$/.test(s)) return 'ข้อสอบจริงปี 25' + s;
+    return s;
+  }
+  const cid = String(caseId || '').toUpperCase();
+  const m = cid.match(/OSPE-CL(\d{2})/);
+  if (m) return 'ข้อสอบจริงปี 25' + m[1];
+  if (cid.includes('CLSP')) return 'เล่มม่วง (Pharma Plus)';
+  if (cid.includes('PDLQ')) return 'คลังผลิต: ยาน้ำ (Liquid)';
+  if (cid.includes('PDSS')) return 'คลังผลิต: ยากึ่งแข็ง (Semisolid)';
+  if (cid.includes('PDT')) return 'คลังผลิต: ยาเม็ด/ยาผง (Tablet & Powder)';
+  if (cid.includes('SP')) return 'คลังกฎหมายและสังคม (SAP)';
+  return 'คลังข้อสอบทั่วไป';
+}
+
 function getCaseList(params = {}) {
   let cases = [];
   let loadedFromSheet = false;
@@ -252,6 +270,8 @@ function getCaseList(params = {}) {
       const data = sheet.getDataRange().getValues();
       if (data.length > 1) {
         const headers = ['caseId', 'title', 'category', 'mainGroup', 'subTopic', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive', 'linkedNextCase', 'linkedFromCase'];
+        const actualHeaders = data[1] || [];
+        const sourceColIdx = actualHeaders.indexOf('source') !== -1 ? actualHeaders.indexOf('source') : actualHeaders.indexOf('แหล่งที่มา');
         const rows = data.length > 2 ? data.slice(2) : [];
         
         cases = rows.map(row => {
@@ -259,6 +279,8 @@ function getCaseList(params = {}) {
           headers.forEach((header, index) => {
             item[header] = row[index];
           });
+          const rawSource = sourceColIdx !== -1 ? row[sourceColIdx] : '';
+          item.source = formatSourceName(item.caseId, rawSource);
           return item;
         }).filter(c => c.caseId && c.isActive !== false && c.isActive !== 'FALSE' && String(c.isActive).toUpperCase() !== 'FALSE');
         loadedFromSheet = true;
@@ -331,6 +353,7 @@ function getCase(caseId) {
     matchedCase.patientInfoHtml = docData.patientInfoHtml;
     matchedCase.equipmentHtml  = docData.equipmentHtml;
     matchedCase.scenario       = docData.scenario;
+    matchedCase.source         = (docData && docData.source) || matchedCase.source || formatSourceName(matchedCase.caseId);
   } else {
     matchedCase.contentHtml = '<p>ไม่มีลิงก์เอกสาร Google Doc กำหนดไว้</p>';
     matchedCase.checklist = [];
@@ -563,7 +586,7 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
 
   // Parse each tab section
   for (const { content, inlineObjects, lists } of sections) {
-    let recording = false, currentSection = 'SCENARIO';
+    let recording = false, currentSection = 'METADATA', caseSource = '';
     let scenario = '', contentHtml = '', patientInfoHtml = '', equipmentHtml = '', noteHtml = '';
     const checklist = []; let currentGroup = '';
 
@@ -573,11 +596,18 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
         const text = getParaTxt_(para);
         const cm = text.match(/^#+\s*[\[{]([A-Z0-9\-]+)[\]}]/) || text.match(/^[\[{]([A-Z0-9\-]+)[\]}]/);
         if (cm) {
-          if (cm[1].trim() === cleanTarget) { recording = true; currentSection = 'SCENARIO'; }
+          if (cm[1].trim() === cleanTarget) { recording = true; currentSection = 'METADATA'; caseSource = ''; }
           else if (recording) break;
           continue;
         }
         if (!recording) continue;
+
+        if (currentSection === 'METADATA') {
+          if (text.includes('แหล่งที่มา')) {
+            const mSrc = text.match(/แหล่งที่มา\s*:\s*(.*)$/);
+            if (mSrc) caseSource = mSrc[1].replace(/\*/g, '').trim();
+          }
+        }
 
         const cleanHeader = text.replace(/^[*_#\s]+/, '').trim();
         const isHeaderCandidate = isHeading_(para) || /^#+\s*/.test(text.trim()) || /^\*\*#+/.test(text.trim());
@@ -646,7 +676,8 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
         patientInfoHtml: wrapListItemsInHtml_(patientInfoHtml),
         equipmentHtml: wrapListItemsInHtml_(equipmentHtml),
         checklist: checklist,
-        noteHtml: wrapListItemsInHtml_(noteHtml)
+        noteHtml: wrapListItemsInHtml_(noteHtml),
+        source: formatSourceName(cleanTarget, caseSource)
       };
     }
   }

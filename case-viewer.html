@@ -640,8 +640,10 @@
       
       const diseaseVal = (c.disease && c.disease !== '-' && c.disease !== 'undefined') ? c.disease : (c.mainGroup || 'ความรู้หลัก');
       const authorVal = (c.author && c.author !== 'undefined') ? c.author : 'ไม่ระบุ';
+      const sourceVal = c.source ? `<span class="case-card-tag" style="background: rgba(99, 102, 241, 0.12); color: var(--primary); font-weight: 600; border: 1px solid rgba(99, 102, 241, 0.25);">🏷️ แหล่งที่มา: ${c.source}</span>` : '';
       metaContainer.innerHTML += `
         <span class="case-card-tag">โรค/หัวข้อ: ${diseaseVal}</span>
+        ${sourceVal}
         <span class="case-card-tag">ผู้เขียน: ${authorVal}</span>
       `;
       

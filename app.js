@@ -20,6 +20,7 @@ const AppState = {
     category: 'All',
     mainGroup: 'All',
     disease: 'All',
+    source: 'All',
     search: ''
   },
   checklistProgress: {}, // { caseId: [checked_id1, checked_id2] }
@@ -619,7 +620,7 @@ function updateStatsDashboard() {
 // ──────────────────────────────────────────────────────────────
 function applyFilters() {
   let list = Array.isArray(AppState.cases) ? [...AppState.cases] : [];
-  const { category, mainGroup, disease, search } = AppState.activeFilters;
+  const { category, mainGroup, disease, source, search } = AppState.activeFilters;
   
   if (category && category !== 'All') {
     list = list.filter(c => c && c.category === category);
@@ -631,6 +632,10 @@ function applyFilters() {
 
   if (disease && disease !== 'All') {
     list = list.filter(c => c && (c.disease === disease || c.subTopic === disease));
+  }
+
+  if (source && source !== 'All') {
+    list = list.filter(c => c && c.source === source);
   }
   
   if (search) {
@@ -708,6 +713,28 @@ function renderFilterSelectOptions() {
       selectDisease.appendChild(opt);
     });
   }
+
+  // 3. Populate Source Options
+  const selectSource = document.getElementById('filter-source');
+  if (selectSource) {
+    const sources = new Set();
+    AppState.cases.forEach(c => {
+      if (c && c.source) sources.add(c.source);
+    });
+
+    const currentSource = AppState.activeFilters.source;
+    const preservedSource = sources.has(currentSource) ? currentSource : 'All';
+    AppState.activeFilters.source = preservedSource;
+
+    selectSource.innerHTML = '<option value="All">ทุกแหล่งที่มา (All Sources)</option>';
+    Array.from(sources).sort((a, b) => a.localeCompare(b, 'th')).forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s;
+      opt.textContent = s;
+      if (s === preservedSource) opt.selected = true;
+      selectSource.appendChild(opt);
+    });
+  }
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -737,14 +764,17 @@ function renderCaseList() {
       window.location.href = `case-viewer.html?id=${c.caseId}`;
     });
     
+    const sourceBadge = c.source ? `<span class="case-card-tag" style="background: rgba(99, 102, 241, 0.12); color: var(--primary); font-weight: 600; border: 1px solid rgba(99, 102, 241, 0.25);">🏷️ ${c.source}</span>` : '';
+
     card.innerHTML = `
       <div class="case-card-header">
         <span class="badge badge-${c.category.toLowerCase()}">${c.category}</span>
         <span class="case-card-id">${c.caseId}</span>
       </div>
       <h3 class="case-card-title">${c.title}</h3>
-      <div style="margin-bottom: 0.5rem;">
+      <div style="margin-bottom: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.35rem;">
         <span class="case-card-tag">${c.mainGroup || ""}${c.subTopic ? " · " + c.subTopic : ""}</span>
+        ${sourceBadge}
       </div>
       <div class="case-card-meta">
         <span>ผู้เขียน: ${c.author || 'ไม่ระบุ'}</span>
@@ -970,6 +1000,15 @@ function detectCurrentPage() {
     if (selectDisease) {
       selectDisease.addEventListener('change', (e) => {
         AppState.activeFilters.disease = e.target.value;
+        applyFilters();
+        renderCaseList();
+      });
+    }
+
+    const selectSource = document.getElementById('filter-source');
+    if (selectSource) {
+      selectSource.addEventListener('change', (e) => {
+        AppState.activeFilters.source = e.target.value;
         applyFilters();
         renderCaseList();
       });

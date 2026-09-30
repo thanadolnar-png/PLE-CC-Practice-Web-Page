@@ -114,8 +114,29 @@
                SHARED EXAM CONFIGURATION (SOLO & LOBBY HOST)
                ═══════════════════════════════════════════ -->
           <div id="shared-exam-config" style="display: block; margin-bottom: 1.5rem;">
-            <!-- Proportion Checkboxes + Number Inputs -->
-            <div class="form-group">
+            <!-- Mode Switcher: Mixed Proportion vs Exam Set Mode -->
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label class="form-label" style="margin-bottom: 0.5rem; display: block; font-weight: 600;">
+                🎯 รูปแบบการจัดชุดข้อสอบ (Exam Generation Mode)
+              </label>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <label id="mode-opt-proportion" class="exam-mode-card active" onclick="switchExamGenerationMode('proportion')" style="cursor: pointer; border: 2px solid var(--primary); background: rgba(99, 102, 241, 0.08); padding: 0.75rem; border-radius: var(--radius-md); text-align: center; transition: all 0.2s;">
+                  <input type="radio" name="exam-gen-mode" value="proportion" checked style="display: none;">
+                  <div style="font-size: 1.3rem; margin-bottom: 0.25rem;">🎲</div>
+                  <strong style="display: block; font-size: 0.95rem; color: var(--primary);">สุ่มผสมตามสัดส่วนหมวด</strong>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">Clinic / Product / SAP</span>
+                </label>
+                <label id="mode-opt-set" class="exam-mode-card" onclick="switchExamGenerationMode('set')" style="cursor: pointer; border: 2px solid var(--border); background: var(--surface); padding: 0.75rem; border-radius: var(--radius-md); text-align: center; transition: all 0.2s;">
+                  <input type="radio" name="exam-gen-mode" value="set" style="display: none;">
+                  <div style="font-size: 1.3rem; margin-bottom: 0.25rem;">📦</div>
+                  <strong style="display: block; font-size: 0.95rem; color: var(--text-primary);">สอบเจาะจงเซ็ต / ปี</strong>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">ข้อสอบจริงรายปี หรือเล่มม่วง</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 1. Proportion Checkboxes + Number Inputs Container -->
+            <div id="config-proportion-container" class="form-group">
               <label class="form-label" style="margin-bottom: 0.75rem; display: block;">
                 📊 สัดส่วนหมวดวิชา (เลือกหมวดที่ต้องการ &amp; ระบุจำนวนฐาน)
               </label>
@@ -143,6 +164,39 @@
 
               <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.75rem; text-align: center; padding: 0.5rem; background: var(--surface); border-radius: var(--radius-sm);" id="proportion-sum-text">
                 รวม: Clinic 8 + Product 6 + SAP 2 = <strong>16 สถานี</strong>
+              </p>
+            </div>
+
+            <!-- 2. Exam Set Container (Shown in 'set' mode) -->
+            <div id="config-set-container" style="display: none; background: var(--surface); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border);">
+              <div class="form-group" style="margin-bottom: 1rem;">
+                <label class="form-label" for="exam-set-select" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">
+                  📑 เลือกชุดข้อสอบ / ปีที่ต้องการสอบ (Exam Set)
+                </label>
+                <select id="exam-set-select" class="select-filter" style="width: 100%; padding: 0.6rem; font-size: 0.95rem; border: 1.5px solid var(--primary); border-radius: var(--radius-sm);" onchange="onExamSetSelected(this.value)">
+                  <!-- Filled dynamically by JS -->
+                </select>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <div class="form-group">
+                  <label class="form-label" style="font-size: 0.82rem; margin-bottom: 0.35rem; display: block;">
+                    🔢 ลำดับสถานี
+                  </label>
+                  <select id="exam-set-order" class="select-filter" style="width: 100%; padding: 0.5rem; font-size: 0.85rem;">
+                    <option value="sequential">เรียงตามข้อสอบจริง (1..N)</option>
+                    <option value="shuffle">สุ่มสลับข้อ (Shuffle)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="exam-set-station-count" style="font-size: 0.82rem; margin-bottom: 0.35rem; display: block;">
+                    📊 จำนวนข้อสอบ
+                  </label>
+                  <input type="number" id="exam-set-station-count" class="select-filter" style="width: 100%; border: 1px solid var(--border); padding: 0.5rem; font-size: 0.85rem;" min="1" max="60" value="14">
+                </div>
+              </div>
+              <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.5rem; margin-bottom: 0;" id="exam-set-info-text">
+                💡 ข้อสอบจริงจะจำลองลำดับสถานีและการไหลของโจทย์ตามชุดข้อสอบจริง
               </p>
             </div>
 
@@ -572,6 +626,7 @@
 
     // State object
     const SimState = {
+      examGenMode: 'proportion', // 'proportion' or 'set'
       totalStations: 16,
       clinic: 8,
       product: 6,
@@ -595,6 +650,109 @@
       lobbyPollInterval: null,
       lastServerSyncTime: 0
     };
+
+    // ─── Mode Switching: Proportion vs Exam Set Mode ──────────
+    function switchExamGenerationMode(mode) {
+      SimState.examGenMode = mode;
+      const propCard = document.getElementById('mode-opt-proportion');
+      const setCard = document.getElementById('mode-opt-set');
+      const propBox = document.getElementById('config-proportion-container');
+      const setBox = document.getElementById('config-set-container');
+
+      if (mode === 'proportion') {
+        if (propCard) {
+          propCard.style.borderColor = 'var(--primary)';
+          propCard.style.background = 'rgba(99, 102, 241, 0.08)';
+        }
+        if (setCard) {
+          setCard.style.borderColor = 'var(--border)';
+          setCard.style.background = 'var(--surface)';
+        }
+        if (propBox) propBox.style.display = 'block';
+        if (setBox) setBox.style.display = 'none';
+      } else {
+        if (setCard) {
+          setCard.style.borderColor = 'var(--primary)';
+          setCard.style.background = 'rgba(99, 102, 241, 0.08)';
+        }
+        if (propCard) {
+          propCard.style.borderColor = 'var(--border)';
+          propCard.style.background = 'var(--surface)';
+        }
+        if (propBox) propBox.style.display = 'none';
+        if (setBox) setBox.style.display = 'block';
+        populateExamSetDropdown();
+      }
+    }
+
+    function populateExamSetDropdown() {
+      const select = document.getElementById('exam-set-select');
+      if (!select || typeof AppState === 'undefined' || !AppState.cases || AppState.cases.length === 0) return;
+
+      const sourceMap = {};
+      AppState.cases.forEach(c => {
+        if (!c || !c.source) return;
+        sourceMap[c.source] = (sourceMap[c.source] || 0) + 1;
+      });
+
+      const currentVal = select.value;
+      select.innerHTML = '';
+
+      const sortedSources = Object.keys(sourceMap).sort((a, b) => {
+        const mYearA = a.match(/\d{4}/);
+        const mYearB = b.match(/\d{4}/);
+        if (mYearA && mYearB) return parseInt(mYearB[0]) - parseInt(mYearA[0]);
+        if (mYearA) return -1;
+        if (mYearB) return 1;
+        return a.localeCompare(b, 'th');
+      });
+
+      sortedSources.forEach(src => {
+        const opt = document.createElement('option');
+        opt.value = src;
+        opt.textContent = `${src} (${sourceMap[src]} สถานี)`;
+        select.appendChild(opt);
+      });
+
+      if (currentVal && sourceMap[currentVal]) {
+        select.value = currentVal;
+      }
+      onExamSetSelected(select.value);
+    }
+
+    function onExamSetSelected(src) {
+      if (!src || typeof AppState === 'undefined' || !AppState.cases) return;
+      const count = AppState.cases.filter(c => c && c.source === src).length;
+      const countInput = document.getElementById('exam-set-station-count');
+      if (countInput) {
+        countInput.max = count;
+        countInput.value = count;
+      }
+      const infoText = document.getElementById('exam-set-info-text');
+      if (infoText) {
+        infoText.innerHTML = `💡 ชุด <strong>${src}</strong> มีข้อสอบทั้งหมด <strong>${count} สถานี</strong> (สามารถเลือกจำนวนข้อหรือสอบครบทุกข้อได้)`;
+      }
+    }
+
+    function generateExamSetBySource(sourceName, count, orderMode) {
+      if (typeof AppState === 'undefined' || !AppState.cases) return [];
+      let casesInSet = AppState.cases.filter(c => c && c.source === sourceName);
+      if (casesInSet.length === 0) return [];
+
+      if (orderMode === 'shuffle') {
+        casesInSet = shuffle([...casesInSet]);
+      } else {
+        casesInSet = [...casesInSet].sort((a, b) => (a.caseId || '').localeCompare(b.caseId || '', undefined, { numeric: true }));
+      }
+
+      const takeCount = count > 0 ? Math.min(count, casesInSet.length) : casesInSet.length;
+      const selected = casesInSet.slice(0, takeCount);
+
+      return selected.map((c, idx) => ({
+        stationNumber: idx + 1,
+        caseId: c.caseId
+      }));
+    }
 
     // ─── UI: Tab switching Solo ↔ Lobby ───────────────────────
     function toggleSetupView(mode) {
@@ -768,19 +926,32 @@
       try {
         if (SimState.lobbyOp === 'create') {
           // Host: create room via Firebase
-          const { clinic, product, sap } = getProportionValues();
-          const total = clinic + product + sap;
-          if (total === 0) {
-            alert('กรุณาเลือกอย่างน้อย 1 หมวดวิชาและระบุจำนวนมากกว่า 0');
-            showGlobalLoader(false);
-            return;
-          }
-          
-          let examSetRaw = generateLocalExamSet(clinic, product, sap);
-          if (!examSetRaw || examSetRaw.length === 0) {
-            alert('เกิดข้อผิดพลาด: ไม่สามารถสร้างชุดข้อสอบสุ่มได้ กรุณาโหลดเคสก่อน');
-            showGlobalLoader(false);
-            return;
+          let examSetRaw = null;
+          if (SimState.examGenMode === 'set') {
+            const selectedSource = document.getElementById('exam-set-select').value;
+            const stationCount = parseInt(document.getElementById('exam-set-station-count').value) || 14;
+            const orderMode = document.getElementById('exam-set-order').value;
+            examSetRaw = generateExamSetBySource(selectedSource, stationCount, orderMode);
+            if (!examSetRaw || examSetRaw.length === 0) {
+              alert('ไม่พบข้อสอบในชุดที่เลือก');
+              showGlobalLoader(false);
+              return;
+            }
+          } else {
+            const { clinic, product, sap } = getProportionValues();
+            const total = clinic + product + sap;
+            if (total === 0) {
+              alert('กรุณาเลือกอย่างน้อย 1 หมวดวิชาและระบุจำนวนมากกว่า 0');
+              showGlobalLoader(false);
+              return;
+            }
+            
+            examSetRaw = generateLocalExamSet(clinic, product, sap);
+            if (!examSetRaw || examSetRaw.length === 0) {
+              alert('เกิดข้อผิดพลาด: ไม่สามารถสร้างชุดข้อสอบสุ่มได้ กรุณาโหลดเคสก่อน');
+              showGlobalLoader(false);
+              return;
+            }
           }
           
           const restCount = parseInt(document.getElementById('rest-stations-count').value) || 0;
@@ -1222,44 +1393,59 @@
     // SOLO EXAM START
     // ═══════════════════════════════════════════
     async function startExamSimulation() {
-      const { clinic, product, sap } = getProportionValues();
-      const total = clinic + product + sap;
-      
-      if (total === 0) {
-        alert('กรุณาเลือกอย่างน้อย 1 หมวดวิชาและระบุจำนวนมากกว่า 0');
-        return;
-      }
-      
       const restCount = parseInt(document.getElementById('rest-stations-count').value) || 0;
-      SimState.clinic = clinic;
-      SimState.product = product;
-      SimState.sap = sap;
-      SimState.totalStations = total;
       SimState.role = 'solo';
       SimState.isLobby = false;
-      
       showGlobalLoader(true);
       
       let examSet = null;
-      
-      if (typeof currentApiUrl !== 'undefined' && currentApiUrl) {
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 4000); // 4 seconds timeout
-          
-          const res = await fetch(`${currentApiUrl}?action=getExamSet&totalStations=${total}&clinicCount=${clinic}&productCount=${product}&sapCount=${sap}`, { signal: controller.signal });
-          clearTimeout(timeoutId);
-          const result = await res.json();
-          if (result.success && result.data && result.data.stations) {
-            examSet = result.data.stations;
-          }
-        } catch (e) {
-          console.warn('API ดึงชุดข้อสอบสุ่มล้มเหลว ใช้ตัวดึงออฟไลน์:', e);
+
+      if (SimState.examGenMode === 'set') {
+        const selectedSource = document.getElementById('exam-set-select').value;
+        const stationCount = parseInt(document.getElementById('exam-set-station-count').value) || 14;
+        const orderMode = document.getElementById('exam-set-order').value;
+        
+        examSet = generateExamSetBySource(selectedSource, stationCount, orderMode);
+        if (!examSet || examSet.length === 0) {
+          showGlobalLoader(false);
+          alert('ไม่พบข้อสอบในชุดที่เลือก');
+          return;
         }
-      }
-      
-      if (!examSet) {
-        examSet = generateLocalExamSet(clinic, product, sap);
+        SimState.totalStations = examSet.length;
+      } else {
+        const { clinic, product, sap } = getProportionValues();
+        const total = clinic + product + sap;
+        
+        if (total === 0) {
+          showGlobalLoader(false);
+          alert('กรุณาเลือกอย่างน้อย 1 หมวดวิชาและระบุจำนวนมากกว่า 0');
+          return;
+        }
+        
+        SimState.clinic = clinic;
+        SimState.product = product;
+        SimState.sap = sap;
+        SimState.totalStations = total;
+        
+        if (typeof currentApiUrl !== 'undefined' && currentApiUrl) {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4000); // 4 seconds timeout
+            
+            const res = await fetch(`${currentApiUrl}?action=getExamSet&totalStations=${total}&clinicCount=${clinic}&productCount=${product}&sapCount=${sap}`, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            const result = await res.json();
+            if (result.success && result.data && result.data.stations) {
+              examSet = result.data.stations;
+            }
+          } catch (e) {
+            console.warn('API ดึงชุดข้อสอบสุ่มล้มเหลว ใช้ตัวดึงออฟไลน์:', e);
+          }
+        }
+        
+        if (!examSet) {
+          examSet = generateLocalExamSet(clinic, product, sap);
+        }
       }
       
       if (!examSet || examSet.length === 0) {
@@ -2055,6 +2241,8 @@
         setDataReadyBar('loading', '🔄 กำลังโหลดข้อมูลเคส — รอสักครู่ก่อนใช้งาน Lobby...');
       }
 
+      populateExamSetDropdown();
+
       // ─ Listen for appDataReady event from app.js ─
       window.addEventListener('appDataReady', (e) => {
         const count = e.detail && e.detail.count ? e.detail.count : '';
@@ -2063,6 +2251,7 @@
         } else {
           setDataReadyBar('ready', `✅ ข้อมูลพร้อมแล้ว — ${count} เคส (พร้อมใช้งาน Lobby ได้เลย)`);
         }
+        populateExamSetDropdown();
       });
 
       // ─ Hamburger toggle ─
