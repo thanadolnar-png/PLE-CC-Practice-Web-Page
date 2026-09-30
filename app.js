@@ -564,27 +564,59 @@ async function forceSyncDatabase() {
     btn.textContent = '⌛ กำลังซิงก์...';
   }
   
-  showApiStatusBanner(true, '🔄 กำลังดึงข้อมูลล่าสุดจาก Google Sheets และ Docs...');
-  
-  // ล้างแคชใน LocalStorage และลบข้อมูลแคช DB เพื่อบังคับให้ดึงใหม่ทั้งหมด
-  localStorage.removeItem('ospe_cached_case_list');
-  localStorage.removeItem('ospe_db_version');
+  showApiStatusBanner(true, '🔄 กำลังเชื่อมต่อ Google Sheets เพื่อดึงข้อมูลล่าสุด...');
   
   try {
-    // บังคับดาวน์โหลดข้อมูลทั้งหมดใหม่แบบล้างแคช
-    await loadOfflineDetailsWithProgress();
-    await loadCasesData();
-    showApiStatusBanner(true, '✅ ซิงก์ข้อมูลล่าสุดสำเร็จแล้ว!');
+    if (currentApiUrl) {
+      const cacheBuster = Date.now();
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout for GAS
+      
+      const response = await fetch(`${currentApiUrl}?action=getCaseList&_cb=${cacheBuster}`, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      
+      const result = await response.json();
+      
+      if (result.success && result.data && result.data.cases && result.data.cases.length > 0) {
+        let fetchedCases = result.data.cases;
+        if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+          fetchedCases = fetchedCases.map(apiCase => {
+            const offlineMatch = OFFLINE_DATA.cases.find(o => o.caseId === apiCase.caseId);
+            return offlineMatch ? Object.assign({}, offlineMatch, apiCase) : apiCase;
+          });
+        }
+        
+        localStorage.setItem('ospe_cached_case_list', JSON.stringify(fetchedCases));
+        AppState.cases = fetchedCases;
+        AppState.dataReady = true;
+        AppState.dataReadyCount = fetchedCases.length;
+        showApiStatusBanner(true, `✅ ซิงก์ข้อมูลล่าสุดกับ Google Sheet สำเร็จ (${fetchedCases.length} เคส)`);
+        window.dispatchEvent(new CustomEvent('appDataReady', { detail: { count: fetchedCases.length } }));
+        onCasesLoaded();
+        return;
+      }
+    }
     
-    // รีโหลดหน้าจอเพื่อแสดงผลกรณีอยู่ในหน้าดูเคส
-    if (window.location.pathname.includes('case-viewer.html')) {
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+    // Fallback: หาก API ไม่คืนข้อมูล ให้ใช้ฐานข้อมูลในเครื่อง
+    if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+      AppState.cases = OFFLINE_DATA.cases;
+      AppState.dataReady = true;
+      AppState.dataReadyCount = AppState.cases.length;
+      showApiStatusBanner(true, `⚡ พร้อมใช้งาน (ฐานข้อมูลในเครื่อง ${AppState.cases.length} เคส 0ms)`);
+      window.dispatchEvent(new CustomEvent('appDataReady', { detail: { count: AppState.cases.length, isOffline: true } }));
+      onCasesLoaded();
     }
   } catch (err) {
-    console.error('Force sync failed:', err);
-    showApiStatusBanner(false, '⚠️ ไม่สามารถซิงก์ได้ชั่วคราว (ใช้ข้อมูลเดิมในเครื่อง)');
+    console.warn('Force sync fallback to offline cache:', err);
+    if (AppState.cases && AppState.cases.length > 0) {
+      showApiStatusBanner(true, `⚡ พร้อมใช้งาน (ฐานข้อมูลในเครื่อง ${AppState.cases.length} เคส 0ms)`);
+    } else if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+      AppState.cases = OFFLINE_DATA.cases;
+      showApiStatusBanner(true, `⚡ พร้อมใช้งาน (ฐานข้อมูลในเครื่อง ${AppState.cases.length} เคส 0ms)`);
+      onCasesLoaded();
+    } else {
+      showApiStatusBanner(false, '⚠️ ไม่สามารถซิงก์ได้ชั่วคราว (กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต)');
+    }
   } finally {
     if (btn) {
       btn.disabled = false;
