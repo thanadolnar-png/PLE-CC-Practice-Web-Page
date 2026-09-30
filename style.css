@@ -182,17 +182,23 @@ body.mode-phone .app-shell {
 body.mode-phone .phone-notch { display: block; }
 
 /* ── Mobile Devices (Auto Full-Bleed) ── */
-@media (max-width: 768px) {
-  body {
+@media (max-width: 860px) {
+  html, body {
     padding: 0 !important;
+    margin: 0 !important;
     background: var(--bg) !important;
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    width: 100% !important;
   }
   .app-shell {
-    max-width: 100% !important;
+    max-width: 100vw !important;
+    width: 100% !important;
     border-radius: 0 !important;
     border: none !important;
     box-shadow: none !important;
     min-height: 100dvh !important;
+    overflow-x: hidden !important;
   }
   .phone-notch { display: none !important; }
 }
