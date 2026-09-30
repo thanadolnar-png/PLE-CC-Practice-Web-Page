@@ -704,33 +704,33 @@
           <div id="lobby-countdown-number" style="font-size: 8rem; font-weight: 900; color: var(--primary-light);">3</div>
         </div>
 
-        <!-- ALWAYS STICKY TIMER BAR (Pinned at top: 4.5rem throughout entire scroll) -->
-        <div id="exam-sticky-timer-bar" style="position: sticky; top: 4.5rem; z-index: 999; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 8px 14px; margin-bottom: 0.75rem; box-shadow: var(--shadow-md);">
-          <div class="timer-row" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin: 0;">
+        <!-- ALWAYS STICKY TIMER BAR (Pinned at top) -->
+        <div id="exam-sticky-timer-bar" class="exam-sticky-timer-bar">
+          <div class="timer-row">
             
             <!-- Left: Timer Display + Attached Controls + Multi-color Fuse Bar -->
-            <div style="display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 260px;">
-              <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <div class="timer-readout" style="display: flex; align-items: baseline; gap: 8px;">
-                  <span id="exam-timer" style="font-family: var(--font-mono); font-size: 28px; font-weight: 700; line-height: 1; color: var(--primary);">04:00</span>
-                  <small id="exam-timer-label" style="font-size: 11px; color: var(--text-muted);">เวลาที่เหลือ · สถานีนี้</small>
+            <div class="timer-fuse-col">
+              <div class="timer-readout-wrap">
+                <div class="timer-readout">
+                  <span id="exam-timer">04:00</span>
+                  <small id="exam-timer-label">เวลาที่เหลือ · สถานีนี้</small>
                 </div>
 
                 <!-- Attached controls right next to timer -->
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <button class="btn ghost" id="timer-toggle-btn" onclick="toggleTimer()" style="padding: 4px 10px; font-size: 12px;">⏸ พักตัวจับเวลา</button>
-                  <button class="btn outline" onclick="resetTimer()" style="padding: 4px 10px; font-size: 12px;">🔄 เริ่มต้นใหม่</button>
+                <div class="timer-action-btns">
+                  <button class="btn ghost btn-sm" id="timer-toggle-btn" onclick="toggleTimer()">⏸ พักตัวจับเวลา</button>
+                  <button class="btn outline btn-sm" onclick="resetTimer()">🔄 เริ่มต้นใหม่</button>
                 </div>
               </div>
 
               <!-- Multi-color Fuse/Bomb Progress Bar Strip ("ชนวนระเบิด") -->
-              <div class="timer-fuse-track" style="width: 100%; height: 6px; background: var(--bg-secondary); border-radius: 4px; overflow: hidden; margin-top: 2px;">
-                <div id="timer-fuse-fill" style="height: 100%; width: 100%; background: linear-gradient(90deg, #6366f1, #8b5cf6, #3b82f6, #06b6d4); border-radius: 4px; transition: width 0.3s linear, background 0.4s ease; box-shadow: 0 0 8px rgba(99, 102, 241, 0.4);"></div>
+              <div class="timer-fuse-track">
+                <div id="timer-fuse-fill"></div>
               </div>
             </div>
 
             <!-- Right: Score Chip Indicator -->
-            <div class="score-chip" id="exam-progress-card" style="margin: 0; padding: 5px 12px;">
+            <div class="score-chip" id="exam-progress-card">
               <span>คะแนน</span>
               <strong id="exam-score">0 / 0</strong>
               <em id="exam-pct">0%</em>
@@ -740,7 +740,7 @@
         </div>
 
         <!-- Header Container: Control Tab + Station Preview Banner -->
-        <div id="exam-sticky-top-header" style="background: var(--bg); margin-bottom: 1.25rem;">
+        <div id="exam-sticky-top-header" class="exam-sticky-top-header">
           
           <!-- 1. Control Tab Component -->
           <section class="control-tab">
