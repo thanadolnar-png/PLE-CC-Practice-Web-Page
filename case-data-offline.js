@@ -1,9 +1,13 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Generated on 2026-09-30 19:49:05
+ * Version: v_20260930_202218
+ * Generated on 2026-09-30 20:22:18
  */
 
 const OFFLINE_DATA = {
+  "version": "v_20260930_202218",
+  "generatedAt": "2026-09-30 20:22:18",
+  "totalCases": 278,
   "cases": [
     {
       "caseId": "OSPE-CL4801",

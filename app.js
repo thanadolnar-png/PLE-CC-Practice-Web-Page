@@ -238,31 +238,36 @@ function initApiConfig() {
 // 2. Data Fetching & State
 // ──────────────────────────────────────────────────────────────
 async function loadCasesData() {
-  // 1. ดึงข้อมูลรายการเคสจาก LocalStorage (Cache) มาเรนเดอร์ก่อนทันที 0ms เพื่อความเร็ว
+  // 1. ดึงข้อมูลออฟไลน์ที่โหลดมาพร้อมหน้าเว็บทันที 0ms เพื่อความเร็วสูงสุด
   let initialCases = [];
-  const cachedListStr = localStorage.getItem('ospe_cached_case_list');
-  if (cachedListStr) {
-    try {
-      initialCases = JSON.parse(cachedListStr);
-    } catch (e) {
-      initialCases = [];
-    }
-  }
+  const hasFreshOfflineData = typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases && OFFLINE_DATA.cases.length > 0;
   
-  // หากยังไม่มี Cache ให้ใช้สคริปต์ Offline ตั้งต้น
-  if (initialCases.length === 0 && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+  if (hasFreshOfflineData) {
     initialCases = OFFLINE_DATA.cases;
+    // ซิงก์เก็บลง LocalStorage ให้ตรงกับไฟล์คอมไพล์ล่าสุดเสมอ
+    try {
+      localStorage.setItem('ospe_cached_case_list', JSON.stringify(initialCases));
+    } catch (e) { /* ignore quota */ }
+  } else {
+    const cachedListStr = localStorage.getItem('ospe_cached_case_list');
+    if (cachedListStr) {
+      try {
+        initialCases = JSON.parse(cachedListStr);
+      } catch (e) {
+        initialCases = [];
+      }
+    }
   }
   
   if (initialCases.length > 0) {
     AppState.cases = initialCases;
     onCasesLoaded();
-    showApiStatusBanner(true, '⚡ ใช้งานข้อมูลในเครื่อง (กำลังตรวจสอบการซิงก์กับ Google Sheet...)');
+    showApiStatusBanner(true, '⚡ ฐานข้อมูลในเครื่อง (พร้อมใช้งานทันที 0ms)');
   } else {
     showGlobalLoader(true);
   }
   
-  // 2. Background Sync with Google Apps Script API (Extended Timeout 25s for Cold Starts)
+  // 2. Background Sync กับ Google Apps Script API (ทำงานเบื้องหลัง ไม่บล็อกผู้ใช้)
   if (currentApiUrl) {
     try {
       const cacheBuster = new Date().getTime();
@@ -1215,7 +1220,7 @@ if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
 const DB_NAME = 'RxCU_OSPE_DB';
 const DB_VERSION = 1;
 const STORE_NAME = 'case_details';
-const DB_VERSION_STR = 'v1.3.4'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
+const DB_VERSION_STR = 'v_20260930_202218'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
 
 function openIndexedDB() {
   return new Promise((resolve, reject) => {
@@ -1308,10 +1313,11 @@ async function loadOfflineDetailsWithProgress() {
   try {
     const db = await openIndexedDB();
     const cachedVersion = localStorage.getItem('ospe_db_version');
+    const targetVersion = (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.version) ? OFFLINE_DATA.version : DB_VERSION_STR;
     
-    // A. หากเคยโหลดและบันทึกลง IndexedDB เวอร์ชันล่าสุดตรงกันแล้ว ให้ดึงมาใช้ได้เลย (0ms)
-    if (cachedVersion === DB_VERSION_STR) {
-      console.log('[Database Preloader] Database matches DB_VERSION_STR in IndexedDB.');
+    // A. หากเคยโหลดและบันทึกลง IndexedDB เวอร์ชันตรงกัน -> ดึงมาใช้ทันที 0ms
+    if (cachedVersion === targetVersion) {
+      console.log(`[Database Preloader] Database matches targetVersion (${targetVersion}) in IndexedDB.`);
       const allDetails = await getCasesFromDB(db);
       if (allDetails && Object.keys(allDetails).length > 0) {
         window.OFFLINE_CASE_DETAILS = allDetails;
@@ -1321,15 +1327,31 @@ async function loadOfflineDetailsWithProgress() {
       }
     }
     
-    // B. หากเป็นครั้งแรก หรือมีการเปลี่ยนเวอร์ชัน ให้โหลดข้อมูลใหม่พร้อม Progress Bar
-    let showOverlayTimeout = setTimeout(() => {
-      injectSplashOverlay();
-    }, 100); // ป้องกันภาพกระพริบหากโหลดเสร็จเร็วมาก
+    // B. หากเป็นเวอร์ชันใหม่ (เพิ่ง compile มาเพิ่มเคส):
+    // 1) ดึงแคชเดิมที่มีอยู่แล้วขึ้นมาแสดงก่อนทันที 0ms เพื่อไม่ให้ผู้ใช้ต้องรอ!
+    const existingDetails = await getCasesFromDB(db);
+    if (existingDetails && Object.keys(existingDetails).length > 0) {
+      window.OFFLINE_CASE_DETAILS = existingDetails;
+      mergeOfflineDetails();
+      console.log('[Database Preloader] Previous cache loaded instantly (0ms); updating new cases in background...');
+    }
     
-    const response = await fetch(url + '?v=' + DB_VERSION_STR);
+    // 2) แสดง Splash Overlay เฉพาะเมื่อ "ไม่มีแคชเลยสักเคส" และ "อยู่หน้า case-viewer" เท่านั้น
+    const isViewer = window.location.pathname.includes('case-viewer');
+    const shouldShowSplash = (!existingDetails || Object.keys(existingDetails).length === 0) && isViewer;
+    
+    let showOverlayTimeout = null;
+    if (shouldShowSplash) {
+      showOverlayTimeout = setTimeout(() => {
+        injectSplashOverlay();
+      }, 150);
+    }
+    
+    // 3) ดาวน์โหลดไฟล์รายละเอียดเวอร์ชันใหม่
+    const response = await fetch(url + '?v=' + encodeURIComponent(targetVersion));
     if (!response.ok) throw new Error('Network response was not ok');
     
-    const contentLength = +response.headers.get('Content-Length') || 1860000;
+    const contentLength = +response.headers.get('Content-Length') || 28000000;
     const reader = response.body.getReader();
     
     let receivedLength = 0;
@@ -1341,10 +1363,11 @@ async function loadOfflineDetailsWithProgress() {
       chunks.push(value);
       receivedLength += value.length;
       
-      let pct = Math.round((receivedLength / contentLength) * 100);
-      if (pct > 99) pct = 99; // ค้างที่ 99% จนกว่าจะประกอบร่างเสร็จ
-      
-      updateSplashProgress(pct, receivedLength, contentLength);
+      if (shouldShowSplash) {
+        let pct = Math.round((receivedLength / contentLength) * 100);
+        if (pct > 99) pct = 99;
+        updateSplashProgress(pct, receivedLength, contentLength);
+      }
     }
     
     // รวมเศษส่วนของไบต์
@@ -1364,21 +1387,24 @@ async function loadOfflineDetailsWithProgress() {
     script.textContent = scriptText;
     document.head.appendChild(script);
     
-    updateSplashProgress(100, receivedLength, receivedLength);
-    console.log('[Database Preloader] Database downloaded and evaluated.');
+    if (shouldShowSplash) {
+      updateSplashProgress(100, receivedLength, receivedLength);
+    }
+    console.log('[Database Preloader] New database downloaded and evaluated.');
     
     // บันทึกลง IndexedDB เพื่อใช้งานครั้งต่อไป
     if (typeof OFFLINE_CASE_DETAILS !== 'undefined') {
       await saveCasesToDB(db, OFFLINE_CASE_DETAILS);
-      localStorage.setItem('ospe_db_version', DB_VERSION_STR);
-      console.log('[Database Preloader] Database stored in IndexedDB.');
+      localStorage.setItem('ospe_db_version', targetVersion);
+      console.log(`[Database Preloader] Database stored in IndexedDB (version: ${targetVersion}).`);
     }
     
     mergeOfflineDetails();
-    clearTimeout(showOverlayTimeout);
-    mergeOfflineDetails();
-    clearTimeout(showOverlayTimeout);
+    if (showOverlayTimeout) clearTimeout(showOverlayTimeout);
     hideSplashOverlay();
+    
+    // ส่งอีเวนต์แจ้งเตือนหน้าอื่นว่าแคชเวอร์ชันใหม่พร้อมสมบูรณ์แล้ว
+    window.dispatchEvent(new CustomEvent('offlineDetailsReady', { detail: { version: targetVersion } }));
   } catch (err) {
     console.warn('[Database Preloader] IndexedDB cache load failed. Falling back to static script:', err);
     // กรณีฉุกเฉิน: แทรกสคริปต์ตรงๆ
