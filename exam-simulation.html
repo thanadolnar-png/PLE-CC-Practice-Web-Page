@@ -2155,16 +2155,40 @@
             // Host (examiner) does NOT sync timer from Firebase - it is the source of truth
           }
 
-          if (SimState.role === 'examinee') {
+          if (room.scoresByStation) {
+            try {
+              const parsedScores = typeof room.scoresByStation === 'string' ? JSON.parse(room.scoresByStation) : room.scoresByStation;
+              if (parsedScores && typeof parsedScores === 'object') {
+                SimState.studentScores = parsedScores;
+              }
+            } catch (e) {}
+          } else if (SimState.role === 'examinee') {
             // Sync checklist progress continuously during exam for the examinee
             if (SimState.stations[SimState.currentIdx]) {
               const currStationNum = SimState.stations[SimState.currentIdx].stationNumber;
-              SimState.studentScores[currStationNum] = room.checklistProgress || [];
+              let progress = room.checklistProgress;
+              if (typeof progress === 'string') {
+                progress = progress ? progress.split(',') : [];
+              } else if (!Array.isArray(progress)) {
+                progress = [];
+              }
+              SimState.studentScores[currStationNum] = progress;
             }
           }
         } else if (room.status === 'results') {
           if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
           if (SimState.timerInterval) clearInterval(SimState.timerInterval);
+          
+          if (room.scoresByStation) {
+            try {
+              const parsedScores = typeof room.scoresByStation === 'string' ? JSON.parse(room.scoresByStation) : room.scoresByStation;
+              if (parsedScores && typeof parsedScores === 'object') {
+                SimState.studentScores = parsedScores;
+              }
+            } catch (e) {
+              console.warn('Error parsing room scores on results:', e);
+            }
+          }
           
           if (SimState.stations.length === 0) {
             // Just a fallback
@@ -2271,7 +2295,10 @@
       if (timestamp - SimState.lastServerSyncTime < 500) return;
       SimState.lastServerSyncTime = timestamp;
       try {
-        _fbDb.ref('rooms/' + SimState.roomId).update({ checklistProgress: checkedIds.join(',') });
+        _fbDb.ref('rooms/' + SimState.roomId).update({
+          checklistProgress: checkedIds,
+          scoresByStation: JSON.stringify(SimState.studentScores)
+        });
       } catch (e) {
         console.warn('Error syncing checklist:', e);
       }
@@ -2687,49 +2714,75 @@
       }
     }
 
-    function renderMiniMap() {
+    function renderMiniMap(shouldCenter = false) {
       const railMini = document.getElementById('exam-minimap-grid');
       const railFull = document.getElementById('railFull');
       if (!railMini) return;
       
-      railMini.innerHTML = '';
-      if (railFull) railFull.innerHTML = '';
-      let completedCount = 0;
-      
-      SimState.stations.forEach((st, idx) => {
-        const isCurrent = idx === SimState.currentIdx;
-        const checked = SimState.studentScores[st.stationNumber] || [];
-        const isDone = checked.length > 0;
-        if (isDone) completedCount++;
-        
-        [railMini, railFull].forEach(container => {
-          if (!container) return;
-          const cell = document.createElement('div');
-          cell.className = 'station-cell';
-          if (isCurrent) cell.classList.add('current');
-          if (isDone) cell.classList.add('done');
-          if (st.isRest) cell.classList.add('rest');
+      const existingMiniCells = railMini.querySelectorAll('.station-cell');
+      if (existingMiniCells.length === SimState.stations.length && existingMiniCells.length > 0) {
+        SimState.stations.forEach((st, idx) => {
+          const isCurrent = idx === SimState.currentIdx;
+          const checked = SimState.studentScores[st.stationNumber] || [];
+          const isDone = checked.length > 0;
           
-          const cat = st.case && st.case.category ? st.case.category.toLowerCase() : '';
-          if (cat && !st.isRest) cell.setAttribute('data-cat', cat);
-          
-          cell.textContent = isDone && !isCurrent ? '✓' : st.stationNumber;
-          cell.title = st.isRest ? 'พักระหว่างสถานี' : (st.case && st.case.title ? st.case.title : 'สถานี ' + st.stationNumber);
-          
-          const canClick = SimState.role !== 'examinee';
-          if (canClick) {
-            cell.style.cursor = 'pointer';
-            cell.addEventListener('click', () => renderStation(idx));
-          } else {
-            cell.style.cursor = 'default';
-            cell.style.opacity = '0.85';
+          const miniCell = existingMiniCells[idx];
+          if (miniCell) {
+            miniCell.classList.toggle('current', isCurrent);
+            miniCell.classList.toggle('done', isDone);
+            miniCell.textContent = isDone && !isCurrent ? '✓' : st.stationNumber;
           }
-          container.appendChild(cell);
+          
+          if (railFull && railFull.children[idx]) {
+            const fullCell = railFull.children[idx];
+            fullCell.classList.toggle('current', isCurrent);
+            fullCell.classList.toggle('done', isDone);
+            fullCell.textContent = isDone && !isCurrent ? '✓' : st.stationNumber;
+          }
         });
-      });
+      } else {
+        railMini.innerHTML = '';
+        if (railFull) railFull.innerHTML = '';
+        
+        SimState.stations.forEach((st, idx) => {
+          const isCurrent = idx === SimState.currentIdx;
+          const checked = SimState.studentScores[st.stationNumber] || [];
+          const isDone = checked.length > 0;
+          
+          [railMini, railFull].forEach(container => {
+            if (!container) return;
+            const cell = document.createElement('div');
+            cell.className = 'station-cell';
+            if (isCurrent) cell.classList.add('current');
+            if (isDone) cell.classList.add('done');
+            if (st.isRest) cell.classList.add('rest');
+            
+            const cat = st.case && st.case.category ? st.case.category.toLowerCase() : '';
+            if (cat && !st.isRest) cell.setAttribute('data-cat', cat);
+            
+            cell.textContent = isDone && !isCurrent ? '✓' : st.stationNumber;
+            cell.title = st.isRest ? 'พักระหว่างสถานี' : (st.case && st.case.title ? st.case.title : 'สถานี ' + st.stationNumber);
+            
+            const canClick = SimState.role !== 'examinee';
+            if (canClick) {
+              cell.style.cursor = 'pointer';
+              cell.addEventListener('click', () => renderStation(idx));
+            } else {
+              cell.style.cursor = 'default';
+              cell.style.opacity = '0.85';
+            }
+            container.appendChild(cell);
+          });
+        });
+      }
       
-      const activeInMini = railMini.querySelector('.station-cell.current');
-      if (activeInMini) activeInMini.scrollIntoView({ inline: 'center', block: 'nearest' });
+      if (shouldCenter) {
+        const activeInMini = railMini.querySelector('.station-cell.current');
+        if (activeInMini) {
+          const scrollOffset = activeInMini.offsetLeft - (railMini.clientWidth / 2) + (activeInMini.clientWidth / 2);
+          railMini.scrollTo({ left: scrollOffset, behavior: 'smooth' });
+        }
+      }
       
       const curEl = document.getElementById('curNum');
       if (curEl) curEl.textContent = SimState.currentIdx + 1;
@@ -2850,7 +2903,7 @@
       // Minimap — แสดงทุก mode (solo + lobby)
       const minimapCard = document.getElementById('minimap-card-el');
       if (minimapCard) minimapCard.style.display = 'flex';
-      renderMiniMap();
+      renderMiniMap(true);
       
       // Nav buttons
       document.getElementById('btn-prev-station').disabled = idx === 0;
@@ -3144,10 +3197,13 @@
       
       const currentCase = SimState.stations[SimState.currentIdx].case;
       updateExamProgressUI(stationNum, currentCase);
-      renderMiniMap();
+      renderMiniMap(false);
       
-      if (SimState.isLobby) {
-        _fbDb.ref('rooms/' + SimState.roomId).update({ checklistProgress: currentChecked.join(',') });
+      if (SimState.isLobby && SimState.role === 'examiner') {
+        _fbDb.ref('rooms/' + SimState.roomId).update({
+          checklistProgress: currentChecked,
+          scoresByStation: JSON.stringify(SimState.studentScores)
+        });
       }
     }
 
@@ -3197,7 +3253,8 @@
             caseId: SimState.stations[nextIdx].case.caseId,
             timerValue: 240,
             timerRunning: true,
-            status: 'running'
+            status: 'running',
+            scoresByStation: JSON.stringify(SimState.studentScores)
           });
         }
         renderStation(nextIdx);
@@ -3219,7 +3276,8 @@
             caseId: SimState.stations[prevIdx].case.caseId,
             timerValue: 240,
             timerRunning: true,
-            status: 'running'
+            status: 'running',
+            scoresByStation: JSON.stringify(SimState.studentScores)
           });
         }
         renderStation(prevIdx);
@@ -3234,7 +3292,10 @@
       
       if (typeof _fbDb !== 'undefined' && _fbDb && SimState.isLobby && SimState.role === 'examiner') {
         try {
-          _fbDb.ref('rooms/' + SimState.roomId).update({ status: 'results' });
+          _fbDb.ref('rooms/' + SimState.roomId).update({
+            status: 'results',
+            scoresByStation: JSON.stringify(SimState.studentScores)
+          });
         } catch (e) {
           console.warn('Firebase status update error:', e);
         }
