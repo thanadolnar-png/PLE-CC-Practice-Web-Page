@@ -209,6 +209,58 @@
       grid-template-columns: 1.15fr 1fr;
       gap: 1.25rem;
       align-items: start;
+      min-width: 0;
+      width: 100%;
+    }
+    .custom-station-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.45rem;
+      padding: 0.4rem 0.55rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      min-width: 0;
+      width: 100%;
+      box-sizing: border-box;
+      transition: background 0.15s ease;
+    }
+    .custom-station-item.rest {
+      background: rgba(245, 158, 11, 0.06);
+      border-color: rgba(245, 158, 11, 0.35);
+    }
+    .custom-st-info {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      overflow: hidden;
+      flex: 1 1 0%;
+      min-width: 0;
+    }
+    .custom-st-title {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 0.78rem;
+      color: var(--text-primary);
+      flex: 1 1 0%;
+      min-width: 0;
+    }
+    .custom-st-num {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      width: 18px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .custom-st-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      flex-shrink: 0;
     }
     @media (max-width: 860px) {
       .exam-modes-grid {
@@ -1381,17 +1433,17 @@
         const diseaseText = (c.disease && c.disease !== '-' && c.disease !== 'undefined') ? c.disease : '';
         
         return `
-          <div style="display:flex; align-items:center; justify-content:space-between; padding:0.4rem 0.5rem; margin-bottom:0.25rem; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); font-size:0.8rem; gap:0.5rem;">
-            <div style="display:flex; align-items:center; gap:0.4rem; overflow:hidden; flex:1;">
-              <span class="badge badge-${catClass}" style="font-size:0.68rem; padding:0.12rem 0.35rem; flex-shrink:0;">${c.category}</span>
-              <strong style="font-size:0.8rem; flex-shrink:0;">[${escapeHtml(c.caseId)}]</strong>
-              <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text-primary); font-weight:500;" title="${escapeHtml(c.title)}">
+          <div class="custom-station-item" style="margin-bottom:0.3rem;">
+            <div class="custom-st-info">
+              <span class="badge badge-${catClass}" style="font-size:0.65rem; padding:0.12rem 0.35rem; flex-shrink:0;">${c.category}</span>
+              <strong style="font-size:0.78rem; flex-shrink:0;">[${escapeHtml(c.caseId)}]</strong>
+              <span class="custom-st-title" title="${escapeHtml(c.title)}">
                 ${escapeHtml(c.title)}
               </span>
-              ${diseaseText ? `<span style="font-size:0.72rem; color:var(--text-muted); flex-shrink:0;">(${escapeHtml(diseaseText)})</span>` : ''}
-              <span style="font-size:0.7rem; color:var(--text-muted); flex-shrink:0; background:rgba(0,0,0,0.04); padding:0.1rem 0.3rem; border-radius:3px;">${escapeHtml(c.source || '')}</span>
+              ${diseaseText ? `<span style="font-size:0.7rem; color:var(--text-muted); flex-shrink:0;">(${escapeHtml(diseaseText)})</span>` : ''}
+              <span style="font-size:0.68rem; color:var(--text-muted); flex-shrink:0; background:rgba(0,0,0,0.04); padding:0.1rem 0.25rem; border-radius:3px;">${escapeHtml(c.source || '')}</span>
             </div>
-            <button type="button" class="sim-btn-xs" style="${isAdded ? 'background:rgba(16,185,129,0.12); color:var(--success); border-color:var(--success); font-weight:bold;' : 'background:var(--primary); color:white;'}" onclick="addCustomCase('${escapeHtml(c.caseId)}')">
+            <button type="button" class="sim-btn-xs" style="flex-shrink:0; ${isAdded ? 'background:rgba(16,185,129,0.12); color:var(--success); border-color:var(--success); font-weight:bold;' : 'background:var(--primary); color:white;'}" onclick="addCustomCase('${escapeHtml(c.caseId)}')">
               ${isAdded ? '➕ เพิ่มอีก' : '➕ เพิ่มเข้าชุด'}
             </button>
           </div>
@@ -1481,16 +1533,16 @@
         const isRest = item === 'REST';
         if (isRest) {
           html += `
-            <div class="custom-station-item rest">
-              <div style="display:flex; align-items:center; gap:0.45rem;">
+            <div class="custom-station-item rest" style="margin-bottom:0.3rem;">
+              <div class="custom-st-info">
                 <span class="custom-st-num">${idx + 1}</span>
-                <span style="font-size:1.1rem;">🥤</span>
-                <strong style="color:var(--text-secondary); font-size:0.8rem;">สถานีพัก (Rest Station)</strong>
+                <span style="font-size:1rem; flex-shrink:0;">🥤</span>
+                <strong style="color:var(--text-secondary); font-size:0.78rem;" class="custom-st-title">สถานีพัก (Rest Station)</strong>
               </div>
               <div class="custom-st-actions">
-                <button type="button" class="sim-btn-xs" title="เลื่อนขึ้น" onclick="moveCustomStation(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.4"' : ''}>⬆️</button>
-                <button type="button" class="sim-btn-xs" title="เลื่อนลง" onclick="moveCustomStation(${idx}, 1)" ${idx === total - 1 ? 'disabled style="opacity:0.4"' : ''}>⬇️</button>
-                <button type="button" class="sim-btn-xs" style="color:var(--danger); border-color:var(--danger);" onclick="removeCustomStation(${idx})">✕ ลบ</button>
+                <button type="button" class="sim-btn-xs" title="เลื่อนขึ้น" onclick="moveCustomStation(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''}>⬆️</button>
+                <button type="button" class="sim-btn-xs" title="เลื่อนลง" onclick="moveCustomStation(${idx}, 1)" ${idx === total - 1 ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''}>⬇️</button>
+                <button type="button" class="sim-btn-xs" style="color:var(--danger); border-color:var(--danger); padding:0.15rem 0.4rem;" onclick="removeCustomStation(${idx})">✕ ลบ</button>
               </div>
             </div>
           `;
@@ -1501,19 +1553,19 @@
           const catClass = cat.toLowerCase();
 
           html += `
-            <div class="custom-station-item">
-              <div style="display:flex; align-items:center; gap:0.45rem; overflow:hidden; flex:1;">
+            <div class="custom-station-item" style="margin-bottom:0.3rem;">
+              <div class="custom-st-info">
                 <span class="custom-st-num">${idx + 1}</span>
                 <span class="badge badge-${catClass}" style="font-size:0.65rem; padding:0.1rem 0.35rem; flex-shrink:0;">${cat}</span>
                 <strong style="font-size:0.78rem; flex-shrink:0;">[${escapeHtml(item)}]</strong>
-                <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:0.78rem; color:var(--text-primary);" title="${escapeHtml(title)}">
+                <span class="custom-st-title" title="${escapeHtml(title)}">
                   ${escapeHtml(title)}
                 </span>
               </div>
               <div class="custom-st-actions">
-                <button type="button" class="sim-btn-xs" title="เลื่อนขึ้น" onclick="moveCustomStation(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.4"' : ''}>⬆️</button>
-                <button type="button" class="sim-btn-xs" title="เลื่อนลง" onclick="moveCustomStation(${idx}, 1)" ${idx === total - 1 ? 'disabled style="opacity:0.4"' : ''}>⬇️</button>
-                <button type="button" class="sim-btn-xs" style="color:var(--danger); border-color:var(--danger);" onclick="removeCustomStation(${idx})">✕ ลบ</button>
+                <button type="button" class="sim-btn-xs" title="เลื่อนขึ้น" onclick="moveCustomStation(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''}>⬆️</button>
+                <button type="button" class="sim-btn-xs" title="เลื่อนลง" onclick="moveCustomStation(${idx}, 1)" ${idx === total - 1 ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''}>⬇️</button>
+                <button type="button" class="sim-btn-xs" style="color:var(--danger); border-color:var(--danger); padding:0.15rem 0.4rem;" onclick="removeCustomStation(${idx})">✕ ลบ</button>
               </div>
             </div>
           `;
@@ -1913,6 +1965,10 @@
       document.getElementById('exam-setup-view').style.display = 'none';
       document.getElementById('exam-running-view').style.display = 'block';
       document.querySelector('.exam-layout').style.display = 'none';
+      const stickyTimer = document.getElementById('exam-sticky-timer-bar');
+      if (stickyTimer) stickyTimer.style.display = 'none';
+      const stickyHeader = document.getElementById('exam-sticky-top-header');
+      if (stickyHeader) stickyHeader.style.display = 'none';
       document.getElementById('lobby-waiting-screen').style.display = 'block';
       document.getElementById('exam-lobby-info-bar').style.display = 'flex';
       document.getElementById('lobby-room-id-display').textContent = SimState.roomId;
@@ -1967,6 +2023,10 @@
           document.getElementById('lobby-waiting-screen').style.display = 'block';
           document.getElementById('lobby-countdown-screen').style.display = 'none';
           document.querySelector('.exam-layout').style.display = 'none';
+          const stickyTimer = document.getElementById('exam-sticky-timer-bar');
+          if (stickyTimer) stickyTimer.style.display = 'none';
+          const stickyHeader = document.getElementById('exam-sticky-top-header');
+          if (stickyHeader) stickyHeader.style.display = 'none';
           
           // Update UI with names
           const examinerEl = document.getElementById('lobby-status-examiner');
@@ -2014,6 +2074,10 @@
           
           if (!SimState.hasDoneCountdown) {
             document.querySelector('.exam-layout').style.display = 'none';
+            const stickyTimer = document.getElementById('exam-sticky-timer-bar');
+            if (stickyTimer) stickyTimer.style.display = 'none';
+            const stickyHeader = document.getElementById('exam-sticky-top-header');
+            if (stickyHeader) stickyHeader.style.display = 'none';
             document.getElementById('lobby-countdown-screen').style.display = 'flex';
             
             if (!SimState.countdownInterval) {
@@ -2029,6 +2093,10 @@
                   SimState.hasDoneCountdown = true;
                   document.getElementById('lobby-countdown-screen').style.display = 'none';
                   document.querySelector('.exam-layout').style.display = 'flex';
+                  const stickyTimer = document.getElementById('exam-sticky-timer-bar');
+                  if (stickyTimer) stickyTimer.style.display = 'block';
+                  const stickyHeader = document.getElementById('exam-sticky-top-header');
+                  if (stickyHeader) stickyHeader.style.display = 'block';
                   
                   let targetIdx = SimState.stations.findIndex(st => st.case && st.case.caseId === room.caseId);
                   renderStation(targetIdx !== -1 ? targetIdx : 0);
@@ -2045,6 +2113,10 @@
           
           document.getElementById('lobby-countdown-screen').style.display = 'none';
           document.querySelector('.exam-layout').style.display = 'flex';
+          const stickyTimer = document.getElementById('exam-sticky-timer-bar');
+          if (stickyTimer) stickyTimer.style.display = 'block';
+          const stickyHeader = document.getElementById('exam-sticky-top-header');
+          if (stickyHeader) stickyHeader.style.display = 'block';
           
           // Find current station index by matching caseId
           let targetIdx = SimState.stations.findIndex(st => st.case && st.case.caseId === room.caseId);
