@@ -183,6 +183,47 @@
       color: var(--primary);
       font-weight: 700;
     }
+
+    /* Wide & Fullscreen Desktop Layout Optimizations */
+    .setup-panel {
+      max-width: 1140px !important;
+      width: 100% !important;
+      margin: 1rem auto !important;
+      padding: 2.25rem 2.75rem !important;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+    }
+    .exam-modes-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.85rem;
+    }
+    .proportion-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.85rem;
+      margin-bottom: 0.85rem;
+    }
+    .custom-picker-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 1.25rem;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .exam-modes-grid {
+        grid-template-columns: 1fr;
+      }
+      .proportion-grid {
+        grid-template-columns: 1fr;
+      }
+      .custom-picker-grid {
+        grid-template-columns: 1fr;
+      }
+      .setup-panel {
+        padding: 1.25rem 1rem !important;
+      }
+    }
   </style>
 
   <!-- Firebase SDK (CDN) -->
@@ -292,60 +333,62 @@
                ═══════════════════════════════════════════ -->
           <div id="shared-exam-config" style="display: block; margin-bottom: 1.5rem;">
             <!-- Mode Switcher: Mixed Proportion vs Exam Set Mode vs Custom Picker -->
-            <div class="form-group" style="margin-bottom: 1.25rem;">
-              <label class="form-label" style="margin-bottom: 0.5rem; display: block; font-weight: 600;">
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label class="form-label" style="margin-bottom: 0.6rem; display: block; font-weight: 600; font-size: 0.95rem;">
                 🎯 รูปแบบการจัดชุดข้อสอบ (Exam Generation Mode)
               </label>
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.6rem;">
-                <label id="mode-opt-proportion" class="exam-mode-card active" onclick="switchExamGenerationMode('proportion')" style="cursor: pointer; border: 2px solid var(--primary); background: rgba(99, 102, 241, 0.08); padding: 0.65rem; border-radius: var(--radius-md); text-align: center; transition: all 0.2s;">
+              <div class="exam-modes-grid">
+                <label id="mode-opt-proportion" class="exam-mode-card active" onclick="switchExamGenerationMode('proportion')" style="cursor: pointer; border: 2px solid var(--primary); background: rgba(99, 102, 241, 0.08); padding: 0.85rem; border-radius: var(--radius-md); text-align: center; transition: all 0.2s;">
                   <input type="radio" name="exam-gen-mode" value="proportion" checked style="display: none;">
-                  <div style="font-size: 1.2rem; margin-bottom: 0.2rem;">🎲</div>
-                  <strong style="display: block; font-size: 0.88rem; color: var(--primary);">สุ่มผสมตามสัดส่วนหมวด</strong>
-                  <span style="font-size: 0.72rem; color: var(--text-muted);">Clinic / Product / SAP</span>
+                  <div style="font-size: 1.4rem; margin-bottom: 0.25rem;">🎲</div>
+                  <strong style="display: block; font-size: 0.95rem; color: var(--primary);">สุ่มผสมตามสัดส่วนหมวด</strong>
+                  <span style="font-size: 0.76rem; color: var(--text-muted);">Clinic / Product / SAP</span>
                 </label>
-                <label id="mode-opt-set" class="exam-mode-card" onclick="switchExamGenerationMode('set')" style="cursor: pointer; border: 2px solid var(--border); background: var(--surface); padding: 0.65rem; border-radius: var(--radius-md); text-align: center; transition: all 0.2s;">
+                <label id="mode-opt-set" class="exam-mode-card" onclick="switchExamGenerationMode('set')" style="cursor: pointer; border: 2px solid var(--border); background: var(--surface); padding: 0.85rem; border-radius: var(--radius-md); text-align: center; transition: all 0.2s;">
                   <input type="radio" name="exam-gen-mode" value="set" style="display: none;">
-                  <div style="font-size: 1.2rem; margin-bottom: 0.2rem;">📦</div>
-                  <strong style="display: block; font-size: 0.88rem; color: var(--text-primary);">สอบเจาะจงเซ็ต / ปี</strong>
-                  <span style="font-size: 0.72rem; color: var(--text-muted);">ข้อสอบจริงรายปี / ชุด Mock</span>
+                  <div style="font-size: 1.4rem; margin-bottom: 0.25rem;">📦</div>
+                  <strong style="display: block; font-size: 0.95rem; color: var(--text-primary);">สอบเจาะจงเซ็ต / ปี</strong>
+                  <span style="font-size: 0.76rem; color: var(--text-muted);">ข้อสอบจริงรายปี / ชุด Mock</span>
                 </label>
-                <label id="mode-opt-custom" class="exam-mode-card" onclick="switchExamGenerationMode('custom')" style="cursor: pointer; border: 2px solid var(--border); background: var(--surface); padding: 0.65rem; border-radius: var(--radius-md); text-align: center; transition: all 0.2s;">
+                <label id="mode-opt-custom" class="exam-mode-card" onclick="switchExamGenerationMode('custom')" style="cursor: pointer; border: 2px solid var(--border); background: var(--surface); padding: 0.85rem; border-radius: var(--radius-md); text-align: center; transition: all 0.2s;">
                   <input type="radio" name="exam-gen-mode" value="custom" style="display: none;">
-                  <div style="font-size: 1.2rem; margin-bottom: 0.2rem;">🎯</div>
-                  <strong style="display: block; font-size: 0.88rem; color: var(--text-primary);">เลือกเคสเอง (Custom)</strong>
-                  <span style="font-size: 0.72rem; color: var(--text-muted);">ค้นหาและเจาะจงข้อจัดห้องสอบ</span>
+                  <div style="font-size: 1.4rem; margin-bottom: 0.25rem;">🎯</div>
+                  <strong style="display: block; font-size: 0.95rem; color: var(--text-primary);">เลือกเคสเอง (Custom)</strong>
+                  <span style="font-size: 0.76rem; color: var(--text-muted);">ค้นหาและเจาะจงข้อจัดห้องสอบ</span>
                 </label>
               </div>
             </div>
 
             <!-- 1. Proportion Checkboxes + Number Inputs Container -->
             <div id="config-proportion-container" class="form-group">
-              <label class="form-label" style="margin-bottom: 0.75rem; display: block;">
+              <label class="form-label" style="margin-bottom: 0.75rem; display: block; font-weight: 600;">
                 📊 สัดส่วนหมวดวิชา (เลือกหมวดที่ต้องการ &amp; ระบุจำนวนฐาน)
               </label>
               
-              <div class="proportion-row" id="proportion-row-clinic">
-                <input type="checkbox" id="chk-clinic" checked onchange="toggleProportionCategory('clinic')">
-                <span class="proportion-label clinic">Clinic</span>
-                <input type="number" id="num-clinic" class="proportion-num-input" min="0" max="50" value="8" oninput="updateProportionSumText()">
-                <span class="proportion-hint">ฐาน</span>
+              <div class="proportion-grid">
+                <div class="proportion-row" id="proportion-row-clinic" style="margin-bottom: 0;">
+                  <input type="checkbox" id="chk-clinic" checked onchange="toggleProportionCategory('clinic')">
+                  <span class="proportion-label clinic">Clinic</span>
+                  <input type="number" id="num-clinic" class="proportion-num-input" min="0" max="50" value="8" oninput="updateProportionSumText()">
+                  <span class="proportion-hint">ฐาน</span>
+                </div>
+
+                <div class="proportion-row" id="proportion-row-product" style="margin-bottom: 0;">
+                  <input type="checkbox" id="chk-product" checked onchange="toggleProportionCategory('product')">
+                  <span class="proportion-label product">Product</span>
+                  <input type="number" id="num-product" class="proportion-num-input" min="0" max="50" value="6" oninput="updateProportionSumText()">
+                  <span class="proportion-hint">ฐาน</span>
+                </div>
+
+                <div class="proportion-row" id="proportion-row-sap" style="margin-bottom: 0;">
+                  <input type="checkbox" id="chk-sap" checked onchange="toggleProportionCategory('sap')">
+                  <span class="proportion-label sap">SAP</span>
+                  <input type="number" id="num-sap" class="proportion-num-input" min="0" max="50" value="2" oninput="updateProportionSumText()">
+                  <span class="proportion-hint">ฐาน</span>
+                </div>
               </div>
 
-              <div class="proportion-row" id="proportion-row-product">
-                <input type="checkbox" id="chk-product" checked onchange="toggleProportionCategory('product')">
-                <span class="proportion-label product">Product</span>
-                <input type="number" id="num-product" class="proportion-num-input" min="0" max="50" value="6" oninput="updateProportionSumText()">
-                <span class="proportion-hint">ฐาน</span>
-              </div>
-
-              <div class="proportion-row" id="proportion-row-sap">
-                <input type="checkbox" id="chk-sap" checked onchange="toggleProportionCategory('sap')">
-                <span class="proportion-label sap">SAP</span>
-                <input type="number" id="num-sap" class="proportion-num-input" min="0" max="50" value="2" oninput="updateProportionSumText()">
-                <span class="proportion-hint">ฐาน</span>
-              </div>
-
-              <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.75rem; text-align: center; padding: 0.5rem; background: var(--surface); border-radius: var(--radius-sm);" id="proportion-sum-text">
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; text-align: center; padding: 0.6rem; background: var(--surface); border-radius: var(--radius-sm); border: 1px solid var(--border);" id="proportion-sum-text">
                 รวม: Clinic 8 + Product 6 + SAP 2 = <strong>16 สถานี</strong>
               </p>
 
@@ -383,12 +426,12 @@
                 </div>
                 <div class="sim-filter-body">
                   <div style="margin-bottom: 0.5rem;">
-                    <input type="text" id="sim-topic-search-input" class="select-filter" style="width: 100%; padding: 0.4rem 0.65rem; font-size: 0.8rem; border-radius: var(--radius-sm);" placeholder="🔍 ค้นหาหัวข้อ / Course Group / โรค..." oninput="onFilterTopicSearch(this.value)">
+                    <input type="text" id="sim-topic-search-input" class="select-filter" style="width: 100%; padding: 0.45rem 0.75rem; font-size: 0.82rem; border-radius: var(--radius-sm);" placeholder="🔍 ค้นหาหัวข้อ / Course Group / โรค..." oninput="onFilterTopicSearch(this.value)">
                   </div>
                   <div id="sim-course-groups-container">
                     <!-- Populated dynamically with collapsible accordions and chips -->
                   </div>
-                  <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 0.5rem; padding: 0.4rem 0.6rem; background: var(--surface); border-radius: var(--radius-sm); border: 1px dashed var(--border); line-height: 1.4;">
+                  <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.6rem; padding: 0.45rem 0.75rem; background: var(--surface); border-radius: var(--radius-sm); border: 1px dashed var(--border); line-height: 1.4;">
                     ✨ <strong>ระบบสุ่มกระจายอัจฉริยะ:</strong> Course Group จะซ้ำไม่เกิน 2 สถานี และโรค/หัวข้อย่อยจะไม่ซ้ำกันเลย เพื่อให้การฝึกฝนครอบคลุมและหลากหลายที่สุด
                   </div>
                 </div>
@@ -396,77 +439,80 @@
             </div>
 
             <!-- 2. Exam Set Container (Shown in 'set' mode) -->
-            <div id="config-set-container" style="display: none; background: var(--surface); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border);">
+            <div id="config-set-container" style="display: none; background: var(--surface); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border);">
               <div class="form-group" style="margin-bottom: 1rem;">
                 <label class="form-label" for="exam-set-select" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">
                   📑 เลือกชุดข้อสอบ / ปีที่ต้องการสอบ (Exam Set)
                 </label>
-                <select id="exam-set-select" class="select-filter" style="width: 100%; padding: 0.6rem; font-size: 0.95rem; border: 1.5px solid var(--primary); border-radius: var(--radius-sm);" onchange="onExamSetSelected(this.value)">
+                <select id="exam-set-select" class="select-filter" style="width: 100%; padding: 0.65rem; font-size: 0.95rem; border: 1.5px solid var(--primary); border-radius: var(--radius-sm);" onchange="onExamSetSelected(this.value)">
                   <!-- Filled dynamically by JS -->
                 </select>
               </div>
 
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.5rem;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.5rem;">
                 <div class="form-group">
-                  <label class="form-label" style="font-size: 0.82rem; margin-bottom: 0.35rem; display: block;">
+                  <label class="form-label" style="font-size: 0.85rem; margin-bottom: 0.35rem; display: block;">
                     🔢 ลำดับสถานี
                   </label>
-                  <select id="exam-set-order" class="select-filter" style="width: 100%; padding: 0.5rem; font-size: 0.85rem;">
+                  <select id="exam-set-order" class="select-filter" style="width: 100%; padding: 0.55rem; font-size: 0.88rem;">
                     <option value="sequential">เรียงตามข้อสอบจริง (1..N)</option>
                     <option value="shuffle">สุ่มสลับข้อ (Shuffle)</option>
                   </select>
                 </div>
                 <div class="form-group">
-                  <label class="form-label" for="exam-set-station-count" style="font-size: 0.82rem; margin-bottom: 0.35rem; display: block;">
+                  <label class="form-label" for="exam-set-station-count" style="font-size: 0.85rem; margin-bottom: 0.35rem; display: block;">
                     📊 จำนวนข้อสอบ
                   </label>
-                  <input type="number" id="exam-set-station-count" class="select-filter" style="width: 100%; border: 1px solid var(--border); padding: 0.5rem; font-size: 0.85rem;" min="1" max="60" value="14">
+                  <input type="number" id="exam-set-station-count" class="select-filter" style="width: 100%; border: 1px solid var(--border); padding: 0.55rem; font-size: 0.88rem;" min="1" max="60" value="14">
                 </div>
               </div>
-              <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.5rem; margin-bottom: 0;" id="exam-set-info-text">
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; margin-bottom: 0;" id="exam-set-info-text">
                 💡 ข้อสอบจริงจะจำลองลำดับสถานีและการไหลของโจทย์ตามชุดข้อสอบจริง
               </p>
             </div>
 
             <!-- 3. Custom Station Picker Container (Shown in 'custom' mode) -->
-            <div id="config-custom-container" style="display: none; background: var(--surface); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border);">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem; flex-wrap: wrap; gap: 0.5rem;">
-                <strong style="font-size: 0.92rem; color: var(--text-primary);">🎯 เลือกเคสจัดชุดสอบเอง (Custom Station Picker)</strong>
-                <span id="custom-selected-counter" class="badge" style="background: rgba(99, 102, 241, 0.12); color: var(--primary); font-size: 0.78rem; font-weight: 700;">เลือกแล้ว 0 สถานี</span>
+            <div id="config-custom-container" style="display: none; background: var(--surface); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border);">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
+                <strong style="font-size: 1rem; color: var(--text-primary);">🎯 เลือกเคสจัดชุดสอบเอง (Custom Station Picker)</strong>
+                <span id="custom-selected-counter" class="badge" style="background: rgba(99, 102, 241, 0.12); color: var(--primary); font-size: 0.82rem; font-weight: 700; padding: 0.25rem 0.6rem;">เลือกแล้ว 0 สถานี</span>
               </div>
-              <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.85rem;">
                 ค้นหาจากรหัสเคส, ชื่อโรค, ชื่อยา, อุปกรณ์, หรือ Keyword ในโจทย์/เฉลย เพื่อจัดชุดข้อสอบตามใจชอบ (สร้างห้องให้เพื่อนสอบโดยไม่บอกข้อล่วงหน้า)
               </p>
 
-              <!-- Search Bar & Category Filters -->
-              <div style="display: flex; gap: 0.45rem; margin-bottom: 0.6rem; flex-wrap: wrap;">
-                <input type="text" id="custom-case-search-input" class="select-filter" style="flex: 1; min-width: 220px; padding: 0.45rem 0.65rem; font-size: 0.82rem;" placeholder="🔍 ค้นหารหัสเคส / ชื่อโรค / ยา / อาการ / Keyword ในโจทย์..." oninput="onCustomSearchInput(this.value)">
-                <div style="display: flex; gap: 0.25rem; align-items: center;">
-                  <button type="button" class="sim-btn-xs active" data-cat="all" onclick="setCustomSearchCat('all')">ทั้งหมด</button>
-                  <button type="button" class="sim-btn-xs" data-cat="clinic" onclick="setCustomSearchCat('Clinic')">Clinic</button>
-                  <button type="button" class="sim-btn-xs" data-cat="product" onclick="setCustomSearchCat('Product')">Product</button>
-                  <button type="button" class="sim-btn-xs" data-cat="sap" onclick="setCustomSearchCat('SAP')">SAP</button>
-                </div>
-              </div>
+              <div class="custom-picker-grid">
+                <!-- Left: Search & Search Results -->
+                <div style="display: flex; flex-direction: column;">
+                  <div style="display: flex; gap: 0.45rem; margin-bottom: 0.6rem; flex-wrap: wrap;">
+                    <input type="text" id="custom-case-search-input" class="select-filter" style="flex: 1; min-width: 180px; padding: 0.45rem 0.65rem; font-size: 0.82rem;" placeholder="🔍 ค้นหารหัสเคส / ชื่อโรค / ยา / Keyword ในโจทย์..." oninput="onCustomSearchInput(this.value)">
+                    <div style="display: flex; gap: 0.25rem; align-items: center;">
+                      <button type="button" class="sim-btn-xs active" data-cat="all" onclick="setCustomSearchCat('all')">ทั้งหมด</button>
+                      <button type="button" class="sim-btn-xs" data-cat="clinic" onclick="setCustomSearchCat('Clinic')">Clinic</button>
+                      <button type="button" class="sim-btn-xs" data-cat="product" onclick="setCustomSearchCat('Product')">Product</button>
+                      <button type="button" class="sim-btn-xs" data-cat="sap" onclick="setCustomSearchCat('SAP')">SAP</button>
+                    </div>
+                  </div>
 
-              <!-- Search Results Box -->
-              <div id="custom-search-results" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-primary); padding: 0.4rem; margin-bottom: 0.85rem;">
-                <!-- Filled dynamically by JS -->
-              </div>
-
-              <!-- Selected Stations Tray -->
-              <div style="background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.65rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.35rem;">
-                  <strong style="font-size: 0.82rem; color: var(--text-primary);">📋 ลำดับสถานีที่จัดเตรียมไว้ (Station Sequence)</strong>
-                  <div style="display: flex; gap: 0.3rem;">
-                    <button type="button" class="sim-btn-xs" onclick="quickFillCustomStations(14)">🎲 สุ่มเติมให้ครบ 14 ข้อ</button>
-                    <button type="button" class="sim-btn-xs" onclick="insertCustomRestStation()">🥤 แทรกสถานีพัก</button>
-                    <button type="button" class="sim-btn-xs" onclick="clearCustomStations()">🗑️ ล้างรายการ</button>
+                  <div id="custom-search-results" style="max-height: 380px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-primary); padding: 0.4rem;">
+                    <!-- Filled dynamically by JS -->
                   </div>
                 </div>
 
-                <div id="custom-selected-stations-list" style="max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.35rem; padding-right: 2px;">
-                  <!-- Filled dynamically by JS -->
+                <!-- Right: Selected Stations Sequence -->
+                <div style="background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.75rem; display: flex; flex-direction: column;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.35rem;">
+                    <strong style="font-size: 0.85rem; color: var(--text-primary);">📋 ลำดับสถานีที่จัดเตรียมไว้</strong>
+                    <div style="display: flex; gap: 0.3rem;">
+                      <button type="button" class="sim-btn-xs" onclick="quickFillCustomStations(14)">🎲 สุ่มเติมครบ 14</button>
+                      <button type="button" class="sim-btn-xs" onclick="insertCustomRestStation()">🥤 แทรกพัก</button>
+                      <button type="button" class="sim-btn-xs" onclick="clearCustomStations()">🗑️ ล้าง</button>
+                    </div>
+                  </div>
+
+                  <div id="custom-selected-stations-list" style="max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.35rem; padding-right: 2px;">
+                    <!-- Filled dynamically by JS -->
+                  </div>
                 </div>
               </div>
             </div>

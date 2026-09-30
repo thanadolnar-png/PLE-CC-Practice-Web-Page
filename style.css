@@ -1345,9 +1345,10 @@ ol.ordered-list li,
 
 /* --- Exam Simulation Mode --- */
 .setup-panel {
-  max-width: 600px;
-  margin: 2.5rem auto;
-  padding: 2.5rem 3rem;
+  max-width: 1120px;
+  width: 100%;
+  margin: 1.5rem auto;
+  padding: 2rem 2.5rem;
 }
 
 .form-group {
