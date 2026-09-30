@@ -1018,7 +1018,6 @@ function updateChecklistUI(caseId) {
       }
     }
   });
-  });
   
   // 5. Update score displays in UI
   const scoreDisplay = document.getElementById('score-display');
