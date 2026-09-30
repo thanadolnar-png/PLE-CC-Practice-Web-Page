@@ -1,13 +1,13 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Version: v_20261001_000116
- * Generated on 2026-10-01 00:01:16
+ * Version: v_20261001_001439
+ * Generated on 2026-10-01 00:14:39
  */
 
 const OFFLINE_DATA = {
-  "version": "v_20261001_000116",
-  "generatedAt": "2026-10-01 00:01:16",
-  "totalCases": 316,
+  "version": "v_20261001_001439",
+  "generatedAt": "2026-10-01 00:14:39",
+  "totalCases": 341,
   "cases": [
     {
       "caseId": "OSPE-CL4801",
@@ -20,7 +20,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มิ้นท์",
       "createdDate": "01/08/2026",
-      "source": "ข้อสอบจริง ปี 2548",
+      "source": "ข้อสอบจริงปี 2548",
       "isActive": true
     },
     {
@@ -34,7 +34,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มิ้นท์",
       "createdDate": "01/08/2026",
-      "source": "ข้อสอบจริง ปี 2548",
+      "source": "ข้อสอบจริงปี 2548",
       "isActive": true
     },
     {
@@ -48,7 +48,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มิ้นท์",
       "createdDate": "01/08/2026",
-      "source": "ข้อสอบจริง ปี 2548",
+      "source": "ข้อสอบจริงปี 2548",
       "isActive": true
     },
     {
@@ -62,7 +62,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มิ้นท์",
       "createdDate": "01/08/2026",
-      "source": "ข้อสอบจริง ปี 2548",
+      "source": "ข้อสอบจริงปี 2548",
       "isActive": true
     },
     {
@@ -76,7 +76,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มิ้นท์",
       "createdDate": "01/08/2026",
-      "source": "ข้อสอบจริง ปี 2548",
+      "source": "ข้อสอบจริงปี 2548",
       "isActive": true
     },
     {
@@ -90,7 +90,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มิ้นท์",
       "createdDate": "01/08/2026",
-      "source": "ข้อสอบจริง ปี 2548",
+      "source": "ข้อสอบจริงปี 2548",
       "isActive": true
     },
     {
@@ -104,7 +104,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มิ้นท์",
       "createdDate": "01/08/2026",
-      "source": "ข้อสอบจริง ปี 2548",
+      "source": "ข้อสอบจริงปี 2548",
       "isActive": true
     },
     {
@@ -118,7 +118,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มิ้นท์",
       "createdDate": "01/08/2026",
-      "source": "ข้อสอบจริง ปี 2548",
+      "source": "ข้อสอบจริงปี 2548",
       "isActive": true
     },
     {
@@ -132,7 +132,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มดเขียว",
       "createdDate": "01/08/2026",
-      "source": "ข้อสอบจริง ปี 2552",
+      "source": "ข้อสอบจริงปี 2552",
       "isActive": true
     },
     {
@@ -146,7 +146,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มดเขียว",
       "createdDate": "01/08/2026",
-      "source": "ข้อสอบจริง ปี 2552",
+      "source": "ข้อสอบจริงปี 2552",
       "isActive": true
     },
     {
@@ -160,7 +160,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มดเขียว",
       "createdDate": "01/08/2026",
-      "source": "ข้อสอบจริง ปี 2552",
+      "source": "ข้อสอบจริงปี 2552",
       "isActive": true
     },
     {
@@ -174,7 +174,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มดเขียว",
       "createdDate": "01/08/2026",
-      "source": "ข้อสอบจริง ปี 2552",
+      "source": "ข้อสอบจริงปี 2552",
       "isActive": true
     },
     {
@@ -188,7 +188,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มดเขียว",
       "createdDate": "01/08/2026",
-      "source": "ข้อสอบจริง ปี 2552",
+      "source": "ข้อสอบจริงปี 2552",
       "isActive": true
     },
     {
@@ -202,7 +202,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มดเขียว",
       "createdDate": "01/08/2026",
-      "source": "ข้อสอบจริง ปี 2552",
+      "source": "ข้อสอบจริงปี 2552",
       "isActive": true
     },
     {
@@ -216,7 +216,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มดเขียว",
       "createdDate": "01/08/2026",
-      "source": "ข้อสอบจริง ปี 2552",
+      "source": "ข้อสอบจริงปี 2552",
       "isActive": true
     },
     {
@@ -230,7 +230,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มดเขียว",
       "createdDate": "01/08/2026",
-      "source": "ข้อสอบจริง ปี 2552",
+      "source": "ข้อสอบจริงปี 2552",
       "isActive": true
     },
     {
@@ -244,7 +244,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มดเขียว",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2552",
+      "source": "ข้อสอบจริงปี 2552",
       "isActive": true
     },
     {
@@ -258,7 +258,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มดเขียว",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2552",
+      "source": "ข้อสอบจริงปี 2552",
       "isActive": true
     },
     {
@@ -272,7 +272,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มดเขียว",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2552",
+      "source": "ข้อสอบจริงปี 2552",
       "isActive": true
     },
     {
@@ -286,7 +286,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มดเขียว",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2552",
+      "source": "ข้อสอบจริงปี 2552",
       "isActive": true
     },
     {
@@ -300,7 +300,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ดิว",
       "createdDate": "29/07/2026",
-      "source": "ข้อสอบจริง ปี 2553",
+      "source": "ข้อสอบจริงปี 2553",
       "isActive": true
     },
     {
@@ -314,7 +314,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ดิว",
       "createdDate": "29/07/2026",
-      "source": "ข้อสอบจริง ปี 2553",
+      "source": "ข้อสอบจริงปี 2553",
       "isActive": true
     },
     {
@@ -328,7 +328,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ดิว",
       "createdDate": "29/07/2026",
-      "source": "ข้อสอบจริง ปี 2553",
+      "source": "ข้อสอบจริงปี 2553",
       "isActive": true
     },
     {
@@ -342,7 +342,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ดิว",
       "createdDate": "29/07/2026",
-      "source": "ข้อสอบจริง ปี 2553",
+      "source": "ข้อสอบจริงปี 2553",
       "isActive": true
     },
     {
@@ -356,7 +356,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ดิว",
       "createdDate": "29/07/2026",
-      "source": "ข้อสอบจริง ปี 2553",
+      "source": "ข้อสอบจริงปี 2553",
       "isActive": true
     },
     {
@@ -370,7 +370,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ดิว",
       "createdDate": "29/07/2026",
-      "source": "ข้อสอบจริง ปี 2553",
+      "source": "ข้อสอบจริงปี 2553",
       "isActive": true
     },
     {
@@ -384,7 +384,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ดิว",
       "createdDate": "29/07/2026",
-      "source": "ข้อสอบจริง ปี 2553",
+      "source": "ข้อสอบจริงปี 2553",
       "isActive": true
     },
     {
@@ -398,7 +398,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ดิว",
       "createdDate": "29/07/2026",
-      "source": "ข้อสอบจริง ปี 2553",
+      "source": "ข้อสอบจริงปี 2553",
       "isActive": true
     },
     {
@@ -412,7 +412,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ดิว",
       "createdDate": "29/07/2026",
-      "source": "ข้อสอบจริง ปี 2553",
+      "source": "ข้อสอบจริงปี 2553",
       "isActive": true
     },
     {
@@ -426,7 +426,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ดิว",
       "createdDate": "29/07/2026",
-      "source": "ข้อสอบจริง ปี 2553",
+      "source": "ข้อสอบจริงปี 2553",
       "isActive": true
     },
     {
@@ -440,7 +440,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ดิว",
       "createdDate": "29/07/2026",
-      "source": "ข้อสอบจริง ปี 2553",
+      "source": "ข้อสอบจริงปี 2553",
       "isActive": true
     },
     {
@@ -454,7 +454,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "เมย์",
       "createdDate": "26/07/2026",
-      "source": "ข้อสอบจริง ปี 2554",
+      "source": "ข้อสอบจริงปี 2554",
       "isActive": true
     },
     {
@@ -468,7 +468,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "เมย์",
       "createdDate": "26/07/2026",
-      "source": "ข้อสอบจริง ปี 2554",
+      "source": "ข้อสอบจริงปี 2554",
       "isActive": true
     },
     {
@@ -482,7 +482,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "เมย์",
       "createdDate": "26/07/2026",
-      "source": "ข้อสอบจริง ปี 2554",
+      "source": "ข้อสอบจริงปี 2554",
       "isActive": true
     },
     {
@@ -496,7 +496,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "เมย์",
       "createdDate": "26/07/2026",
-      "source": "ข้อสอบจริง ปี 2554",
+      "source": "ข้อสอบจริงปี 2554",
       "isActive": true
     },
     {
@@ -510,7 +510,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "เมย์",
       "createdDate": "26/07/2026",
-      "source": "ข้อสอบจริง ปี 2554",
+      "source": "ข้อสอบจริงปี 2554",
       "isActive": true
     },
     {
@@ -524,7 +524,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "เมย์",
       "createdDate": "26/07/2026",
-      "source": "ข้อสอบจริง ปี 2554",
+      "source": "ข้อสอบจริงปี 2554",
       "isActive": true
     },
     {
@@ -538,7 +538,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "เมย์",
       "createdDate": "26/07/2026",
-      "source": "ข้อสอบจริง ปี 2554",
+      "source": "ข้อสอบจริงปี 2554",
       "isActive": true
     },
     {
@@ -552,7 +552,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "เมย์",
       "createdDate": "26/07/2026",
-      "source": "ข้อสอบจริง ปี 2554",
+      "source": "ข้อสอบจริงปี 2554",
       "isActive": true
     },
     {
@@ -566,7 +566,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "เมย์",
       "createdDate": "26/07/2026",
-      "source": "ข้อสอบจริง ปี 2554",
+      "source": "ข้อสอบจริงปี 2554",
       "isActive": true
     },
     {
@@ -580,7 +580,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "เมย์",
       "createdDate": "26/07/2026",
-      "source": "ข้อสอบจริง ปี 2554",
+      "source": "ข้อสอบจริงปี 2554",
       "isActive": true
     },
     {
@@ -594,7 +594,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "เมย์",
       "createdDate": "26/07/2026",
-      "source": "ข้อสอบจริง ปี 2554",
+      "source": "ข้อสอบจริงปี 2554",
       "isActive": true
     },
     {
@@ -608,7 +608,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "เมย์",
       "createdDate": "26/07/2026",
-      "source": "ข้อสอบจริง ปี 2554",
+      "source": "ข้อสอบจริงปี 2554",
       "isActive": true
     },
     {
@@ -622,7 +622,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้าใส",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2555",
+      "source": "ข้อสอบจริงปี 2555",
       "isActive": true
     },
     {
@@ -636,7 +636,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้าใส",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2555",
+      "source": "ข้อสอบจริงปี 2555",
       "isActive": true
     },
     {
@@ -650,7 +650,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้าใส",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2555",
+      "source": "ข้อสอบจริงปี 2555",
       "isActive": true
     },
     {
@@ -664,7 +664,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้าใส",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2555",
+      "source": "ข้อสอบจริงปี 2555",
       "isActive": true
     },
     {
@@ -678,7 +678,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้าใส",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2555",
+      "source": "ข้อสอบจริงปี 2555",
       "isActive": true
     },
     {
@@ -692,7 +692,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้าใส",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2555",
+      "source": "ข้อสอบจริงปี 2555",
       "isActive": true
     },
     {
@@ -706,7 +706,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้าใส",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2555",
+      "source": "ข้อสอบจริงปี 2555",
       "isActive": true
     },
     {
@@ -734,7 +734,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้าใส",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2555",
+      "source": "ข้อสอบจริงปี 2555",
       "isActive": true
     },
     {
@@ -748,7 +748,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้าใส",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2555",
+      "source": "ข้อสอบจริงปี 2555",
       "isActive": true
     },
     {
@@ -762,7 +762,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้าใส",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2555",
+      "source": "ข้อสอบจริงปี 2555",
       "isActive": true
     },
     {
@@ -776,7 +776,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้าใส",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2555",
+      "source": "ข้อสอบจริงปี 2555",
       "isActive": true
     },
     {
@@ -790,7 +790,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "หยก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2555",
+      "source": "ข้อสอบจริงปี 2555",
       "isActive": true
     },
     {
@@ -804,7 +804,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "หยก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2555",
+      "source": "ข้อสอบจริงปี 2555",
       "isActive": true
     },
     {
@@ -818,7 +818,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "หยก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2556",
+      "source": "ข้อสอบจริงปี 2556",
       "isActive": true
     },
     {
@@ -832,7 +832,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "หยก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2556",
+      "source": "ข้อสอบจริงปี 2556",
       "isActive": true
     },
     {
@@ -846,7 +846,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "หยก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2556",
+      "source": "ข้อสอบจริงปี 2556",
       "isActive": true
     },
     {
@@ -860,7 +860,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "หยก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2556",
+      "source": "ข้อสอบจริงปี 2556",
       "isActive": true
     },
     {
@@ -874,7 +874,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "หยก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2556",
+      "source": "ข้อสอบจริงปี 2556",
       "isActive": true
     },
     {
@@ -888,7 +888,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "หยก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2556",
+      "source": "ข้อสอบจริงปี 2556",
       "isActive": true
     },
     {
@@ -902,7 +902,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "หยก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2556",
+      "source": "ข้อสอบจริงปี 2556",
       "isActive": true
     },
     {
@@ -916,7 +916,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กิ๊ฟ",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2556",
+      "source": "ข้อสอบจริงปี 2556",
       "isActive": true
     },
     {
@@ -930,7 +930,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "หยก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2556",
+      "source": "ข้อสอบจริงปี 2556",
       "isActive": true
     },
     {
@@ -944,7 +944,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "หยก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2556",
+      "source": "ข้อสอบจริงปี 2556",
       "isActive": true
     },
     {
@@ -958,7 +958,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กิ๊ฟ",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2557",
+      "source": "ข้อสอบจริงปี 2557",
       "isActive": true
     },
     {
@@ -972,7 +972,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กิ๊ฟ",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2557",
+      "source": "ข้อสอบจริงปี 2557",
       "isActive": true
     },
     {
@@ -986,7 +986,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กิ๊ฟ",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2557",
+      "source": "ข้อสอบจริงปี 2557",
       "isActive": true
     },
     {
@@ -1000,7 +1000,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กิ๊ฟ",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2557",
+      "source": "ข้อสอบจริงปี 2557",
       "isActive": true
     },
     {
@@ -1014,7 +1014,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กิ๊ฟ",
       "createdDate": "04/07/2026",
-      "source": "ข้อสอบจริง ปี 2557",
+      "source": "ข้อสอบจริงปี 2557",
       "isActive": true
     },
     {
@@ -1028,7 +1028,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กิ๊ฟ",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2557",
+      "source": "ข้อสอบจริงปี 2557",
       "isActive": true
     },
     {
@@ -1042,7 +1042,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กิ๊ฟ",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2557",
+      "source": "ข้อสอบจริงปี 2557",
       "isActive": true
     },
     {
@@ -1056,7 +1056,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กิ๊ฟ",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2557",
+      "source": "ข้อสอบจริงปี 2557",
       "isActive": true
     },
     {
@@ -1070,7 +1070,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กิ๊ฟ",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2557",
+      "source": "ข้อสอบจริงปี 2557",
       "isActive": true
     },
     {
@@ -1084,7 +1084,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กิ๊ฟ",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2557",
+      "source": "ข้อสอบจริงปี 2557",
       "isActive": true
     },
     {
@@ -1098,7 +1098,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กิ๊ฟ",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2557",
+      "source": "ข้อสอบจริงปี 2557",
       "isActive": true
     },
     {
@@ -1112,7 +1112,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กิ๊ฟ",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2557",
+      "source": "ข้อสอบจริงปี 2557",
       "isActive": true
     },
     {
@@ -1126,7 +1126,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กิ๊ฟ",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2557",
+      "source": "ข้อสอบจริงปี 2557",
       "isActive": true
     },
     {
@@ -1140,7 +1140,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "เพ้นท์",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2558",
+      "source": "ข้อสอบจริงปี 2558",
       "isActive": true
     },
     {
@@ -1154,7 +1154,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "เพ้นท์",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2558",
+      "source": "ข้อสอบจริงปี 2558",
       "isActive": true
     },
     {
@@ -1168,7 +1168,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "เพ้นท์",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2558",
+      "source": "ข้อสอบจริงปี 2558",
       "isActive": true
     },
     {
@@ -1182,7 +1182,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "เพ้นท์",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2558",
+      "source": "ข้อสอบจริงปี 2558",
       "isActive": true
     },
     {
@@ -1196,7 +1196,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "เพ้นท์",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2558",
+      "source": "ข้อสอบจริงปี 2558",
       "isActive": true
     },
     {
@@ -1210,7 +1210,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "เพ้นท์",
       "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2558",
+      "source": "ข้อสอบจริงปี 2558",
       "isActive": true
     },
     {
@@ -1237,7 +1237,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ส้มส้ม",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ข้อสอบจริงปี 2559",
       "isActive": true
     },
@@ -1252,7 +1252,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ไอ",
       "createdDate": "01/08/2026",
-      "source": "ข้อสอบจริง ปี 2559",
+      "source": "ข้อสอบจริงปี 2559",
       "isActive": true
     },
     {
@@ -1266,7 +1266,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มีน",
       "createdDate": "13/07/2026",
-      "source": "ข้อสอบจริง ปี 2560",
+      "source": "ข้อสอบจริงปี 2560",
       "isActive": true
     },
     {
@@ -1280,7 +1280,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มีน",
       "createdDate": "16/07/2026 (วันที่เขียน)",
-      "source": "ข้อสอบจริง ปี 2560",
+      "source": "ข้อสอบจริงปี 2560",
       "isActive": true
     },
     {
@@ -1294,7 +1294,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มีน",
       "createdDate": "16/07/2026",
-      "source": "ข้อสอบจริง ปี 2560",
+      "source": "ข้อสอบจริงปี 2560",
       "isActive": true
     },
     {
@@ -1308,7 +1308,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มีน",
       "createdDate": "16/07/2026",
-      "source": "ข้อสอบจริง ปี 2560",
+      "source": "ข้อสอบจริงปี 2560",
       "isActive": true
     },
     {
@@ -1322,7 +1322,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มีน",
       "createdDate": "16/07/2026",
-      "source": "ข้อสอบจริง ปี 2560",
+      "source": "ข้อสอบจริงปี 2560",
       "isActive": true
     },
     {
@@ -1336,7 +1336,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มีน",
       "createdDate": "16/07/2026",
-      "source": "ข้อสอบจริง ปี 2560",
+      "source": "ข้อสอบจริงปี 2560",
       "isActive": true
     },
     {
@@ -1350,7 +1350,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กุ๊กกุ๊ก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2561",
+      "source": "ข้อสอบจริงปี 2561",
       "isActive": true
     },
     {
@@ -1364,7 +1364,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กุ๊กกุ๊ก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2561",
+      "source": "ข้อสอบจริงปี 2561",
       "isActive": true
     },
     {
@@ -1378,7 +1378,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กุ๊กกุ๊ก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2561",
+      "source": "ข้อสอบจริงปี 2561",
       "isActive": true
     },
     {
@@ -1392,7 +1392,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กุ๊กกุ๊ก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2561",
+      "source": "ข้อสอบจริงปี 2561",
       "isActive": true
     },
     {
@@ -1406,7 +1406,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กุ๊กกุ๊ก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2561",
+      "source": "ข้อสอบจริงปี 2561",
       "isActive": true
     },
     {
@@ -1420,7 +1420,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กุ๊กกุ๊ก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2561",
+      "source": "ข้อสอบจริงปี 2561",
       "isActive": true
     },
     {
@@ -1434,7 +1434,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กุ๊กกุ๊ก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2561",
+      "source": "ข้อสอบจริงปี 2561",
       "isActive": true
     },
     {
@@ -1448,7 +1448,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กุ๊กกุ๊ก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2561",
+      "source": "ข้อสอบจริงปี 2561",
       "isActive": true
     },
     {
@@ -1462,7 +1462,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กุ๊กกุ๊ก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2561",
+      "source": "ข้อสอบจริงปี 2561",
       "isActive": true
     },
     {
@@ -1476,7 +1476,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กุ๊กกุ๊ก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2561",
+      "source": "ข้อสอบจริงปี 2561",
       "isActive": true
     },
     {
@@ -1490,7 +1490,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กุ๊กกุ๊ก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2561",
+      "source": "ข้อสอบจริงปี 2561",
       "isActive": true
     },
     {
@@ -1504,7 +1504,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กุ๊กกุ๊ก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2561",
+      "source": "ข้อสอบจริงปี 2561",
       "isActive": true
     },
     {
@@ -1518,7 +1518,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กุ๊กกุ๊ก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2561",
+      "source": "ข้อสอบจริงปี 2561",
       "isActive": true
     },
     {
@@ -1532,7 +1532,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กุ๊กกุ๊ก",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2561",
+      "source": "ข้อสอบจริงปี 2561",
       "isActive": true
     },
     {
@@ -1546,7 +1546,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "มีน",
       "createdDate": "13/07/2026",
-      "source": "ข้อสอบจริง ปี 2562",
+      "source": "ข้อสอบจริงปี 2562",
       "isActive": true
     },
     {
@@ -1560,7 +1560,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "บอล",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2562",
+      "source": "ข้อสอบจริงปี 2562",
       "isActive": true
     },
     {
@@ -1574,7 +1574,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "บอล",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2562",
+      "source": "ข้อสอบจริงปี 2562",
       "isActive": true
     },
     {
@@ -1588,7 +1588,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "บอล",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2562",
+      "source": "ข้อสอบจริงปี 2562",
       "isActive": true
     },
     {
@@ -1602,7 +1602,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "บอล",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2562",
+      "source": "ข้อสอบจริงปี 2562",
       "isActive": true
     },
     {
@@ -1616,7 +1616,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "3/8/69",
-      "source": "ข้อสอบจริง ปี 2566",
+      "source": "ข้อสอบจริงปี 2566",
       "isActive": true
     },
     {
@@ -1630,7 +1630,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "3/8/69",
-      "source": "ข้อสอบจริง ปี 2566",
+      "source": "ข้อสอบจริงปี 2566",
       "isActive": true
     },
     {
@@ -1644,7 +1644,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "3/8/69",
-      "source": "ข้อสอบจริง ปี 2566",
+      "source": "ข้อสอบจริงปี 2566",
       "isActive": true
     },
     {
@@ -1658,7 +1658,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "3/8/69",
-      "source": "ข้อสอบจริง ปี 2566",
+      "source": "ข้อสอบจริงปี 2566",
       "isActive": true
     },
     {
@@ -1672,7 +1672,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "3/8/69",
-      "source": "ข้อสอบจริง ปี 2566",
+      "source": "ข้อสอบจริงปี 2566",
       "isActive": true
     },
     {
@@ -1686,7 +1686,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2566",
+      "source": "ข้อสอบจริงปี 2566",
       "isActive": true
     },
     {
@@ -1700,7 +1700,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "3/8/69",
-      "source": "ข้อสอบจริง ปี 2566",
+      "source": "ข้อสอบจริงปี 2566",
       "isActive": true
     },
     {
@@ -1714,7 +1714,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "3/8/69",
-      "source": "ข้อสอบจริง ปี 2566",
+      "source": "ข้อสอบจริงปี 2566",
       "isActive": true
     },
     {
@@ -1728,7 +1728,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "3/8/69",
-      "source": "ข้อสอบจริง ปี 2568",
+      "source": "ข้อสอบจริงปี 2568",
       "isActive": true
     },
     {
@@ -1742,7 +1742,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "3/8/69",
-      "source": "ข้อสอบจริง ปี 2568",
+      "source": "ข้อสอบจริงปี 2568",
       "isActive": true
     },
     {
@@ -1756,7 +1756,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "3/8/69",
-      "source": "ข้อสอบจริง ปี 2568",
+      "source": "ข้อสอบจริงปี 2568",
       "isActive": true
     },
     {
@@ -1770,7 +1770,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "3/8/69",
-      "source": "ข้อสอบจริง ปี 2568",
+      "source": "ข้อสอบจริงปี 2568",
       "isActive": true
     },
     {
@@ -1784,7 +1784,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "3/8/69",
-      "source": "ข้อสอบจริง ปี 2568",
+      "source": "ข้อสอบจริงปี 2568",
       "isActive": true
     },
     {
@@ -1798,7 +1798,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "3/8/69",
-      "source": "ข้อสอบจริง ปี 2568",
+      "source": "ข้อสอบจริงปี 2568",
       "isActive": true
     },
     {
@@ -2157,7 +2157,7 @@ const OFFLINE_DATA = {
       "category": "Clinic",
       "mainGroup": "การซักประวัติและจ่ายยาในร้านยา (Community Pharmacy Dispensing)",
       "subTopic": "",
-      "disease": "ต่อมทอนซิลอักเสบจากเชื้อแบคทีเรีย (GAS Tonsillopharyngitis), Centor Score , การจัดการ Severe Penicillin Anaphylaxis",
+      "disease": "ต่อมทอนซิลอักเสบจากเชื้อแบคทีเรีย (GAS Tonsillopharyngitis), Centor Score 3, การจัดการ Severe Penicillin Anaphylaxis",
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "คณะทำงานคลังข้อสอบร่วมสมรรถนะเภสัชกรรม (ระบบกลาง)",
@@ -2712,45 +2712,269 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
-      "caseId": "OSPE-CLSP10",
-      "title": "การบริหารยาและความปลอดภัยของยาฉีด Dopamine และ Dobutamine (Inotropic Agents)",
+      "caseId": "OSPE-CLSD01",
+      "title": "Asthma Inhaler  — MDI + Spacer",
       "category": "Clinic",
-      "mainGroup": "คำแนะนำสำหรับยาที่ต้องระมัดระวังในการใช้เป็นพิเศษ / High-Alert Drugs (ภาคผนวก ข)",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
       "subTopic": "",
-      "disease": "",
+      "disease": "Asthma (Pediatric)",
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "คณะทำงานคลังข้อสอบร่วมสมรรถนะเภสัชกรรม (ระบบกลาง)",
-      "createdDate": "30/09/2026",
-      "source": "Mock RxCU84 Clinic ครั้งที่ 1",
+      "author": "AI",
+      "createdDate": "04/07/2026",
+      "source": "ไม่ระบุ",
       "isActive": true
     },
     {
-      "caseId": "OSPE-CLSP11",
-      "title": "การบริหารยาและความปลอดภัยของยาฉีด Heparin (Anticoagulant High-Alert Drug)",
+      "caseId": "OSPE-CLSD02",
+      "title": "Insullin Pen — Lantus SoloSTAR",
       "category": "Clinic",
-      "mainGroup": "คำแนะนำสำหรับยาที่ต้องระมัดระวังในการใช้เป็นพิเศษ / High-Alert Drugs (ภาคผนวก ข)",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
       "subTopic": "",
-      "disease": "",
+      "disease": "Diabetes Mellitus Type 2 (Insuทดสอบ Glargine)",
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "คณะทำงานคลังข้อสอบร่วมสมรรถนะเภสัชกรรม (ระบบกลาง)",
-      "createdDate": "30/09/2026",
-      "source": "Mock RxCU84 Clinic ครั้งที่ 1",
+      "author": "AI",
+      "createdDate": "04/07/2026",
+      "source": "ไม่ระบุ",
       "isActive": true
     },
     {
-      "caseId": "OSPE-CLSP12",
-      "title": "การบริหารยาและความปลอดภัยของยาฉีด Potassium Chloride ชนิดเข้มข้น (ข้อควรระวังเพิ่มเติมและการเตรียมทางคลินิก) - ทางเลือกเสริมวิกฤต",
+      "caseId": "OSPE-CLSD03",
+      "title": "Insullin Pen — Mixtard 30 FlexPen (suspension)",
       "category": "Clinic",
-      "mainGroup": "คำแนะนำสำหรับยาที่ต้องระมัดระวังในการใช้เป็นพิเศษ / High-Alert Drugs (ภาคผนวก ข)",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
       "subTopic": "",
-      "disease": "ภาวะโพแทสเซียมในเลือดต่ำวิกฤต, กฎเหล็กการผสมยาห้ามตั้งทิ้งไว้โดยไม่เขย่า, และข้อจำกัดความเข้มข้นสูงสุดทาง Peripheral Line",
+      "disease": "Diabetes Mellitus Type 2 (Insuทดสอบ Premixed)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "source": "ไม่ระบุ",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD04",
+      "title": "Insullin Vial & Syringe  — การผสมและฉีดยาขุ่น-ใส",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Diabetes Mellitus Type 1 (Insuทดสอบ Vial & Syringe)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "source": "ไม่ระบุ",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD06",
+      "title": "Eye Drops  — ยาหยอดตาชนิดมีหลอดหยดและไม่มีหลอดหยด",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Dry Eyes & Glaucoma",
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "คณะทำงานคลังข้อสอบร่วมสมรรถนะเภสัชกรรม (ระบบกลาง)",
-      "createdDate": "30/09/2026",
-      "source": "Mock RxCU84 Clinic ครั้งที่ 2",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "source": "ไม่ระบุ",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD07",
+      "title": "Eye Ointment & Gel — ยาขี้ผึ้งและเจลป้ายตา",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Bacterial Conjunctivitis (Chloramphenicol Eye Ointment)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "source": "ไม่ระบุ",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD08",
+      "title": "Ear Drops  — ยาหยอดหู",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Otitis Externa (Ciprofloxacin Ear Drops)",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "source": "ไม่ระบุ",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD09",
+      "title": "Nasal Spray  — ยาพ่นจมูก",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Allergic Rhinitis (Fluticasone Nasal Spray)",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "source": "ไม่ระบุ",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD10",
+      "title": "Nasal Drops  — ยาหยอดจมูก",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Severe Nasal Congestion (Oxymetazoทดสอบe Nasal Drops)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "source": "ไม่ระบุ",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD11",
+      "title": "MDI Inhaler  — ยาสูดกำหนดขนาด",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Asthma (Salbutamol MDI)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "source": "ไม่ระบุ",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD12",
+      "title": "Turbuhaler — ยาสูดชนิดผงแห้ง",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Asthma / COPD (Budesonide/Formoterol Turbuhaler)",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "source": "ไม่ระบุ",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD14",
+      "title": "Handihaler & Easyhaler & Swinghaler — DPI อื่น ๆ",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "COPD (Tiotropium Handihaler / Easyhaler)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "source": "ไม่ระบุ",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD15",
+      "title": "Suppository ทวารหนัก — ยาเหน็บทวาร",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Constipation / Hemorrhoids (Bisacodyl Suppository)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "source": "ไม่ระบุ",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD16",
+      "title": "ยาเหน็บช่องคลอด & ครีมช่องคลอด",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Vaginal Candidiasis (Clotrimazole Vaginal Suppository)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "source": "ไม่ระบุ",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD17",
+      "title": "Alendronate — ยาเม็ดพิเศษ Bisphosphonate",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Osteoporosis (Alendronate)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "source": "ไม่ระบุ",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD18",
+      "title": "Sublingual Nitrate Tablets — ยาอมใต้ลิ้น",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Angina Pectoris (Nitroglycerin Subทดสอบgual)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "source": "ไม่ระบุ",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD20",
+      "title": "ยาเม็ดคุมกำเนิด — การเริ่มกินและการลืมกิน",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Contraception (CDC 2018 Guideทดสอบes)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "source": "ไม่ระบุ",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD21",
+      "title": "หมากฝรั่งช่วยเลิกบุหรี่ — หมากฝรั่งนิโคติน",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Smoking Cessation (Nicotine Gum)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "source": "ไม่ระบุ",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-CLSD22",
+      "title": "แผ่นแปะนิโคติน — แผ่นแปะช่วยเลิกบุหรี่",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Smoking Cessation (Nicotine Patch)",
+      "difficulty": 3,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ทดสอบ",
+      "createdDate": "04/07/2026",
+      "source": "ไม่ระบุ",
       "isActive": true
     },
     {
@@ -3155,7 +3379,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ตอง",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3169,7 +3393,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ตอง",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3183,7 +3407,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ตอง",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3197,7 +3421,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ออมสิน",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3211,7 +3435,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "นีนนี่",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3225,7 +3449,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ดับบลิว & โฟ๊คสุดหล่อ",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3239,7 +3463,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "บีเอ็ม",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3253,7 +3477,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "บีเอ็ม",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3267,7 +3491,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "บีเอ็ม",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3281,7 +3505,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "บีเอ็ม",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3295,7 +3519,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3309,7 +3533,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3323,7 +3547,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3337,7 +3561,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3351,7 +3575,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3365,7 +3589,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3379,7 +3603,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3393,7 +3617,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3407,7 +3631,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "มิ้นท์",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3421,7 +3645,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "มิ้นท์",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3435,7 +3659,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "บีเอ็ม",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3449,7 +3673,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "บีเอ็ม",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3463,7 +3687,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ไข่มุก",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3477,7 +3701,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ไข่มุก",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3491,7 +3715,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ไข่มุก",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3505,7 +3729,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ไข่มุก",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3519,7 +3743,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ไข่มุก",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3533,7 +3757,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ไข่มุก",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3547,7 +3771,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ทิว",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3561,7 +3785,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3575,7 +3799,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ใบตอง",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3589,7 +3813,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ใบตอง",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3603,7 +3827,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3617,7 +3841,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3631,7 +3855,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3645,7 +3869,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3659,7 +3883,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3673,7 +3897,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ใบตอง",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3687,7 +3911,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3701,7 +3925,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3715,7 +3939,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3729,7 +3953,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ใบตอง",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3743,7 +3967,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3757,7 +3981,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3771,7 +3995,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ทิว",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3785,7 +4009,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ทิว",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3799,7 +4023,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ทิว",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3813,7 +4037,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ทิว",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3827,7 +4051,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ตะวัน",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3841,7 +4065,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ตะวัน",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3855,7 +4079,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ตะวัน",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3869,7 +4093,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ยูจีน",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3883,7 +4107,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ยูจีน",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -3897,7 +4121,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ยูจีน",
-      "createdDate": "30/9/2569",
+      "createdDate": "1/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true
     },
@@ -4431,6 +4655,132 @@ const OFFLINE_DATA = {
       "author": "RxCU",
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2559",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-SP6001",
+      "title": "จรรยาบรรณวิชาชีพกรณีการส่งมอบยาผิดและการปฏิบัติตามเกณฑ์มาตรฐานวิชาชีพ",
+      "category": "SAP",
+      "mainGroup": "การค้นข้อมูลและประสานงาน",
+      "subTopic": "",
+      "disease": "Pharmacy Ethics Violation (Medication Dispensing Error & Professional Standards)",
+      "difficulty": 2,
+      "docId": "1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg",
+      "author": "RxCU",
+      "createdDate": "01/10/2026",
+      "source": "ข้อสอบจริง ปี 2560",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-SP6101",
+      "title": "ข้อกำหนดทางกฎหมายการนำเข้ายาแผนปัจจุบันติดตัวเข้ามาในราชอาณาจักร",
+      "category": "SAP",
+      "mainGroup": "การค้นข้อมูลและประสานงาน",
+      "subTopic": "",
+      "disease": "Drug Importation Regulations & Personal Use Exemption (Section 12, 13)",
+      "difficulty": 2,
+      "docId": "1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg",
+      "author": "RxCU",
+      "createdDate": "01/10/2026",
+      "source": "ข้อสอบจริง ปี 2561",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-SP6201",
+      "title": "การควบคุมการขายยาชุดและความผิดตามพระราชบัญญัติยา",
+      "category": "SAP",
+      "mainGroup": "การค้นข้อมูลและประสานงาน",
+      "subTopic": "",
+      "disease": "Combination Drug Pack Prohibition (Section 75 bis / ยาชุด)",
+      "difficulty": 2,
+      "docId": "1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg",
+      "author": "RxCU",
+      "createdDate": "01/10/2026",
+      "source": "ข้อสอบจริง ปี 2562",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-SP6301",
+      "title": "การจำแนกประเภทคุณภาพยาตามกฎหมาย (ยาปลอม ยาผิดมาตรฐาน ยาเสื่อมคุณภาพ ยาไม่ขึ้นทะเบียน)",
+      "category": "SAP",
+      "mainGroup": "การค้นข้อมูลและประสานงาน",
+      "subTopic": "",
+      "disease": "Quality-Defective Drug Classification (Section 72, 73, 74, 75)",
+      "difficulty": 2,
+      "docId": "1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg",
+      "author": "RxCU",
+      "createdDate": "01/10/2026",
+      "source": "ข้อสอบจริง ปี 2563",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-SP6401",
+      "title": "กฎหมายประมวลกฎหมายยาเสพติด พ.ศ. 2564 กับการจัดการวัตถุออกฤทธิ์ประเภท 2 (Alprazolam & Pseudoephedrine)",
+      "category": "SAP",
+      "mainGroup": "การซักประวัติและจ่ายยา",
+      "subTopic": "",
+      "disease": "Schedule II Psychotropic Substance Dispensing Prohibition",
+      "difficulty": 2,
+      "docId": "1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg",
+      "author": "RxCU",
+      "createdDate": "01/10/2026",
+      "source": "ข้อสอบจริง ปี 2564",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-SP6501",
+      "title": "การตรวจสอบใบอนุญาตและหน้าที่ผู้มีหน้าที่ปฏิบัติการประจำร้านขายยา (ข.ย.1)",
+      "category": "SAP",
+      "mainGroup": "การค้นข้อมูลและประสานงาน",
+      "subTopic": "",
+      "disease": "Attending Pharmacist Duties & Substitute Pharmacist Regulations",
+      "difficulty": 2,
+      "docId": "1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg",
+      "author": "RxCU",
+      "createdDate": "01/10/2026",
+      "source": "ข้อสอบจริง ปี 2565",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-SP6601",
+      "title": "ข้อกำหนดการควบคุมการจำหน่ายยา Tramadol และ Paracetamol (กรณีเด็กอายุ 15 ปี ขอซื้อให้บิดา)",
+      "category": "SAP",
+      "mainGroup": "การซักประวัติและจ่ายยา",
+      "subTopic": "",
+      "disease": "Tramadol Age Restriction & Dangerous Drug Dispensing Limits",
+      "difficulty": 2,
+      "docId": "1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg",
+      "author": "RxCU",
+      "createdDate": "01/10/2026",
+      "source": "ข้อสอบจริง ปี 2566",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-SP6701",
+      "title": "การตรวจจับยาอันตรายควบคุมพิเศษ (Dextromethorphan, Tramadol, Antihistamines syrup) และบัญชี ขย.11",
+      "category": "SAP",
+      "mainGroup": "การค้นข้อมูลและประสานงาน",
+      "subTopic": "",
+      "disease": "High-Risk Abused Drugs Control & Dangerous Drug Register (ขย.11)",
+      "difficulty": 2,
+      "docId": "1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg",
+      "author": "RxCU",
+      "createdDate": "01/10/2026",
+      "source": "ข้อสอบจริง ปี 2567",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-SP6801",
+      "title": "การตรวจจับร้านยาและจรรยาบรรณวิชาชีพ (กรณีครอบครอง Lorazepam, ยาชุด, และจ่ายยาแพ้กลุ่มเดียวกัน)",
+      "category": "SAP",
+      "mainGroup": "การค้นข้อมูลและประสานงาน",
+      "subTopic": "",
+      "disease": "Pharmacy Regulatory Compliance & Code of Ethics Enforcement",
+      "difficulty": 2,
+      "docId": "1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg",
+      "author": "RxCU",
+      "createdDate": "01/10/2026",
+      "source": "ข้อสอบจริง ปี 2568",
       "isActive": true
     }
   ]
