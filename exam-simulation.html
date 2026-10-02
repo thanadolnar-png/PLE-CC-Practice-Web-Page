@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU</title>
-  <link rel="stylesheet" href="style.css?v=20261002_230000">
-  <script src="case-data-offline.js?v=v_20261002_230000"></script>
-  <script src="case-details-offline.js?v=v_20261002_230000"></script>
-  <script src="app.js?v=v_20261002_224500"></script>
-  <script src="scratchpad.js?v=v_20261002_224500"></script>
+  <link rel="stylesheet" href="style.css?v=20261002_231500">
+  <script src="case-data-offline.js?v=v_20261002_231500"></script>
+  <script src="case-details-offline.js?v=v_20261002_231500"></script>
+  <script src="app.js?v=v_20261002_231500"></script>
+  <script src="scratchpad.js?v=v_20261002_231500"></script>
   <style>
     /* Simulation Source and Topic Selector */
     .sim-filter-section {
@@ -3737,10 +3737,29 @@
                     renderStation(initialTargetIdx);
                   }
                   
-                  SimState.timerRunning = room.timerRunning !== undefined ? room.timerRunning : true;
-                  SimState.timerValue = room.timerValue || 240;
-                  updateTimerDisplay();
-                  if (SimState.timerRunning) startLocalCountdown();
+                  // Compute initial timer immediately from Super Host's timerStartedAt
+                  SimState.cachedRoom = room;
+                  if (room.timerRunning) {
+                    SimState.timerRunning = true;
+                    if (room.timerStartedAt) {
+                      const now = Date.now();
+                      if (now < room.timerStartedAt) {
+                        SimState.timerValue = room.timerDuration || 240;
+                      } else {
+                        const elapsed = Math.floor((now - room.timerStartedAt) / 1000);
+                        const totalDur = room.timerDuration || 240;
+                        SimState.timerValue = Math.max(0, totalDur - elapsed);
+                      }
+                    } else {
+                      SimState.timerValue = room.timerValue !== undefined ? room.timerValue : 240;
+                    }
+                    updateTimerDisplay();
+                    startLocalCountdown();
+                  } else {
+                    SimState.timerRunning = false;
+                    SimState.timerValue = room.timerValue !== undefined ? room.timerValue : 240;
+                    updateTimerDisplay();
+                  }
                 }
               }, 1000);
             }
@@ -3748,6 +3767,28 @@
           }
           
           document.getElementById('lobby-countdown-screen').style.display = 'none';
+
+          // ── Synchronize timer from Super Host (Absolute Source of Truth) ──
+          SimState.cachedRoom = room;
+          if (room.timerRunning) {
+            SimState.timerRunning = true;
+            if (room.timerStartedAt) {
+              const now = Date.now();
+              if (now < room.timerStartedAt) {
+                SimState.timerValue = room.timerDuration || 240;
+              } else {
+                const elapsed = Math.floor((now - room.timerStartedAt) / 1000);
+                const totalDur = room.timerDuration || 240;
+                SimState.timerValue = Math.max(0, totalDur - elapsed);
+              }
+            } else {
+              SimState.timerValue = room.timerValue !== undefined ? room.timerValue : 240;
+            }
+          } else {
+            SimState.timerRunning = false;
+            SimState.timerValue = room.timerValue !== undefined ? room.timerValue : 240;
+          }
+          updateTimerDisplay();
 
           // ── Super Host Monitor View (Big Projector Screen, after countdown) ──
           if (room.isSuperHost && SimState.isHost) {
@@ -3760,11 +3801,11 @@
             SimState.currentIdx = room.currentStationIdx !== undefined ? room.currentStationIdx : (SimState.currentIdx || 0);
             renderSuperHostMonitor(room);
             
-            SimState.timerRunning = room.timerRunning !== undefined ? room.timerRunning : true;
-            SimState.timerValue = room.timerValue !== undefined ? room.timerValue : 240;
-            updateTimerDisplay();
             if (SimState.timerRunning && !SimState.timerInterval) {
               startLocalCountdown();
+            } else if (!SimState.timerRunning && SimState.timerInterval) {
+              clearInterval(SimState.timerInterval);
+              SimState.timerInterval = null;
             }
             return;
           }
@@ -3825,29 +3866,13 @@
             if (stationChanged) {
               playStationTimeoutAlarm('bell');
             }
-            // Station changed — force timer reset for everyone
-            SimState.timerValue = room.timerValue || 240;
-            updateTimerDisplay();
-            SimState.timerRunning = room.timerRunning !== undefined ? room.timerRunning : true;
-            if (SimState.timerInterval) clearInterval(SimState.timerInterval);
-            if (SimState.timerRunning) startLocalCountdown();
-          } else {
-            // Same station — Host is timer source of truth, other participants sync from Firebase
-            if (!SimState.isHost && SimState.role !== 'examiner') {
-              if (SimState.timerRunning !== room.timerRunning) {
-                SimState.timerRunning = room.timerRunning;
-                if (room.timerRunning) {
-                  SimState.timerValue = room.timerValue; 
-                  updateTimerDisplay();
-                  startLocalCountdown();
-                } else {
-                  if (SimState.timerInterval) clearInterval(SimState.timerInterval);
-                }
-              } else if (!SimState.timerRunning && SimState.timerValue !== room.timerValue) {
-                SimState.timerValue = room.timerValue;
-                updateTimerDisplay();
-              }
-            }
+          }
+
+          if (SimState.timerRunning && !SimState.timerInterval) {
+            startLocalCountdown();
+          } else if (!SimState.timerRunning && SimState.timerInterval) {
+            clearInterval(SimState.timerInterval);
+            SimState.timerInterval = null;
           }
 
           if (room.scoresByStation) {
@@ -4285,10 +4310,14 @@
       showGlobalLoader(true);
       try {
         const firstCaseId = SimState.stations[0]?.case?.caseId || null;
+        const now = Date.now();
         await _fbDb.ref('rooms/' + SimState.roomId).update({
           status: 'running',
           timerRunning: true,
           timerValue: 240,
+          timerDuration: 240,
+          timerStartedAt: now + 3000, // Sync timer to start at the exact end of 3s countdown!
+          currentStationIdx: 0,
           caseId: firstCaseId
         });
         // Firebase listener will automatically trigger applyRoomState for all clients
@@ -4422,15 +4451,38 @@
       }, 3000);
     }
 
-    // --- Start Digital Timer for Lobby ---
+    // ─── Start Digital Timer for Lobby / Exam (Synchronized via Server Epoch Timestamp) ───
     function startLocalCountdown() {
       if (SimState.timerInterval) clearInterval(SimState.timerInterval);
-      SimState.timerInterval = setInterval(() => {
+      
+      const tick = () => {
         if (!SimState.timerRunning) return;
-        SimState.timerValue--;
+        
+        if (SimState.isLobby && SimState.cachedRoom) {
+          const room = SimState.cachedRoom;
+          if (room.timerRunning && room.timerStartedAt) {
+            const now = Date.now();
+            if (now < room.timerStartedAt) {
+              SimState.timerValue = room.timerDuration || 240;
+            } else {
+              const elapsed = Math.floor((now - room.timerStartedAt) / 1000);
+              const totalDur = room.timerDuration || 240;
+              SimState.timerValue = Math.max(0, totalDur - elapsed);
+            }
+          } else if (!room.timerRunning) {
+            SimState.timerValue = room.timerValue !== undefined ? room.timerValue : 240;
+          } else {
+            SimState.timerValue = Math.max(0, SimState.timerValue - 1);
+          }
+        } else {
+          SimState.timerValue = Math.max(0, SimState.timerValue - 1);
+        }
+        
         updateTimerDisplay();
+        
         if (SimState.timerValue <= 0) {
           clearInterval(SimState.timerInterval);
+          SimState.timerInterval = null;
           if (SimState.timeoutTransitionMode === 'manual') {
             showManualTimeoutPopup();
           } else {
@@ -4446,7 +4498,10 @@
             });
           }
         }
-      }, 1000);
+      };
+
+      tick();
+      SimState.timerInterval = setInterval(tick, 500);
     }
 
     // ═══════════════════════════════════════════
@@ -4787,18 +4842,57 @@
       if (shToggleBtn) shToggleBtn.textContent = SimState.timerRunning ? '⏸️ พักตัวจับเวลา' : '▶️ เล่นตัวจับเวลาต่อ';
 
       if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
-        _fbDb.ref('rooms/' + SimState.roomId).update({
-          timerRunning: SimState.timerRunning,
-          timerValue: SimState.timerValue
-        });
+        if (SimState.timerRunning) {
+          // Resumed: compute timerStartedAt from now
+          const now = Date.now();
+          const remaining = SimState.timerValue;
+          _fbDb.ref('rooms/' + SimState.roomId).update({
+            timerRunning: true,
+            timerValue: remaining,
+            timerDuration: remaining,
+            timerStartedAt: now
+          });
+          startLocalCountdown();
+        } else {
+          // Paused: save remaining seconds and clear startedAt
+          const remaining = SimState.timerValue;
+          _fbDb.ref('rooms/' + SimState.roomId).update({
+            timerRunning: false,
+            timerValue: remaining,
+            timerStartedAt: null
+          });
+          if (SimState.timerInterval) {
+            clearInterval(SimState.timerInterval);
+            SimState.timerInterval = null;
+          }
+        }
+      } else {
+        if (SimState.timerRunning) {
+          startLocalCountdown();
+        } else {
+          if (SimState.timerInterval) {
+            clearInterval(SimState.timerInterval);
+            SimState.timerInterval = null;
+          }
+        }
       }
     }
 
     function resetTimer() {
       SimState.timerValue = 240;
+      SimState.timerRunning = false;
       updateTimerDisplay();
+      if (SimState.timerInterval) {
+        clearInterval(SimState.timerInterval);
+        SimState.timerInterval = null;
+      }
       if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
-        _fbDb.ref('rooms/' + SimState.roomId).update({ timerValue: 240, timerRunning: false });
+        _fbDb.ref('rooms/' + SimState.roomId).update({
+          timerValue: 240,
+          timerDuration: 240,
+          timerStartedAt: null,
+          timerRunning: false
+        });
       }
     }
 
@@ -5432,16 +5526,27 @@
         const nextIdx = SimState.currentIdx + 1;
         playStationTimeoutAlarm('bell');
         if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
+          const now = Date.now();
           SimState.timerValue = 240;
           SimState.timerRunning = true;
           if (SimState.timerInterval) clearInterval(SimState.timerInterval);
           updateTimerDisplay();
+          
+          if (SimState.cachedRoom) {
+            SimState.cachedRoom.currentStationIdx = nextIdx;
+            SimState.cachedRoom.timerValue = 240;
+            SimState.cachedRoom.timerDuration = 240;
+            SimState.cachedRoom.timerStartedAt = now;
+            SimState.cachedRoom.timerRunning = true;
+          }
           startLocalCountdown();
           
           const updatePayload = {
             currentStationIdx: nextIdx,
             caseId: SimState.stations[nextIdx]?.case?.caseId || SimState.stations[nextIdx]?.caseId,
             timerValue: 240,
+            timerDuration: 240,
+            timerStartedAt: now,
             timerRunning: true,
             status: 'running'
           };
@@ -5464,16 +5569,27 @@
         const prevIdx = SimState.currentIdx - 1;
         playStationTimeoutAlarm('bell');
         if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
+          const now = Date.now();
           SimState.timerValue = 240;
           SimState.timerRunning = true;
           if (SimState.timerInterval) clearInterval(SimState.timerInterval);
           updateTimerDisplay();
+          
+          if (SimState.cachedRoom) {
+            SimState.cachedRoom.currentStationIdx = prevIdx;
+            SimState.cachedRoom.timerValue = 240;
+            SimState.cachedRoom.timerDuration = 240;
+            SimState.cachedRoom.timerStartedAt = now;
+            SimState.cachedRoom.timerRunning = true;
+          }
           startLocalCountdown();
           
           const updatePayload = {
             currentStationIdx: prevIdx,
             caseId: SimState.stations[prevIdx]?.case?.caseId || SimState.stations[prevIdx]?.caseId,
             timerValue: 240,
+            timerDuration: 240,
+            timerStartedAt: now,
             timerRunning: true,
             status: 'running'
           };

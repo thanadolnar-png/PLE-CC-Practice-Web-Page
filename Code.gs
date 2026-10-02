@@ -327,7 +327,7 @@ function getCaseList(params = {}) {
     if (sheet) {
       const data = sheet.getDataRange().getValues();
       if (data.length > 1) {
-        const headers = ['caseId', 'title', 'category', 'mainGroup', 'subTopic', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive', 'linkedNextCase', 'linkedFromCase'];
+        const headers = ['caseId', 'title', 'category', 'mainGroup', 'subTopic', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive', 'linkedNextCase', 'linkedFromCase', 'source'];
         const actualHeaders = data[1] || [];
         const sourceColIdx = actualHeaders.indexOf('source') !== -1 ? actualHeaders.indexOf('source') : actualHeaders.indexOf('แหล่งที่มา');
         const rows = data.length > 2 ? data.slice(2) : [];
@@ -337,7 +337,7 @@ function getCaseList(params = {}) {
           headers.forEach((header, index) => {
             item[header] = row[index];
           });
-          const rawSource = sourceColIdx !== -1 ? row[sourceColIdx] : '';
+          const rawSource = sourceColIdx !== -1 ? row[sourceColIdx] : (item.source || '');
           item.source = formatSourceName(item.caseId, rawSource);
           return item;
         }).filter(c => c.caseId && c.isActive !== false && c.isActive !== 'FALSE' && String(c.isActive).toUpperCase() !== 'FALSE');
@@ -2453,14 +2453,14 @@ function syncCaseLibraryFromDocs() {
   let sheetLib = ss.getSheetByName(CONFIG.sheets.caseLibrary);
   if (!sheetLib) {
     sheetLib = ss.insertSheet(CONFIG.sheets.caseLibrary);
-    const headers = ['caseId', 'title', 'category', 'mainGroup', 'subTopic', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive', 'linkedNextCase', 'linkedFromCase'];
+    const headers = ['caseId', 'title', 'category', 'mainGroup', 'subTopic', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive', 'linkedNextCase', 'linkedFromCase', 'source'];
     sheetLib.appendRow(headers);
   }
   
   // โหลดรายการเดิมที่มีอยู่ใน Sheet
   const existingCasesMap = {};
   const data = sheetLib.getDataRange().getValues();
-  const headers = ['caseId', 'title', 'category', 'mainGroup', 'subTopic', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive', 'linkedNextCase', 'linkedFromCase'];
+  const headers = ['caseId', 'title', 'category', 'mainGroup', 'subTopic', 'disease', 'difficulty', 'docId', 'author', 'createdDate', 'isActive', 'linkedNextCase', 'linkedFromCase', 'source'];
   const rows = data.length > 2 ? data.slice(2) : []; // อ่านข้อมูลจากแถว 3 เป็นต้นไป
   rows.forEach(row => {
     const caseId = row[0];
@@ -2508,7 +2508,8 @@ function syncCaseLibraryFromDocs() {
       createdDate: c.createdDate || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].createdDate : ''),
       isActive: (existingCasesMap[c.caseId] && existingCasesMap[c.caseId].isActive !== undefined) ? existingCasesMap[c.caseId].isActive : 'TRUE',
       linkedFromCase: c.linkedFromCase || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].linkedFromCase : ''),
-      linkedNextCase: existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].linkedNextCase : ''
+      linkedNextCase: existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].linkedNextCase : '',
+      source: c.source || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].source : '')
     };
   });
   
@@ -2548,7 +2549,8 @@ function syncCaseLibraryFromDocs() {
       c.createdDate,
       c.isActive,
       c.linkedNextCase || '',
-      c.linkedFromCase || ''
+      c.linkedFromCase || '',
+      c.source || ''
     ]);
   });
   
