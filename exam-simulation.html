@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU</title>
-  <link rel="stylesheet" href="style.css?v=20261002_222500">
-  <script src="case-data-offline.js?v=v_20261002_222519"></script>
-  <script src="case-details-offline.js?v=v_20261002_222519"></script>
-  <script src="app.js?v=v_20261002_222519"></script>
-  <script src="scratchpad.js?v=v_20261002_165840"></script>
+  <link rel="stylesheet" href="style.css?v=20261002_224500">
+  <script src="case-data-offline.js?v=v_20261002_224500"></script>
+  <script src="case-details-offline.js?v=v_20261002_224500"></script>
+  <script src="app.js?v=v_20261002_224500"></script>
+  <script src="scratchpad.js?v=v_20261002_224500"></script>
   <style>
     /* Simulation Source and Topic Selector */
     .sim-filter-section {
@@ -1004,105 +1004,108 @@
           </div>
         </div>
 
-        <!-- Lobby Waiting Screen (Only shown during Lobby Setup) -->
-        <div id="lobby-waiting-screen" style="display: none; padding: 2.25rem 1.25rem; text-align: center; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); margin-bottom: 2rem;">
-          <span style="font-size: 3.25rem; display: block; margin-bottom: 0.5rem;">⏳</span>
-          <h3 style="font-family: var(--font-title); font-size: 1.4rem; color: var(--text-primary); margin-bottom: 0.35rem;" id="lobby-waiting-title">กำลังรอการเตรียมพร้อม...</h3>
-          <p style="color: var(--text-secondary); margin-bottom: 1.25rem; font-size: 0.9rem;" id="lobby-waiting-desc">รอผู้เข้าร่วมการจำลองซ้อมสอบเข้ามาเชื่อมต่อที่ห้องนี้</p>
+        <!-- Modern Minimalist Lobby Screen -->
+        <div id="lobby-waiting-screen" class="lobby-waiting-card" style="display: none;">
           
-          <!-- 2-Column Lobby Dashboard (Left: Room Code & Host & Profile | Right: Participants Panel) -->
-          <div class="lobby-header-layout" style="display: grid; grid-template-columns: 280px 1fr; gap: 1rem; max-width: 860px; margin: 1.25rem auto; text-align: left;">
+          <div style="text-align: center; margin-bottom: 1.5rem;">
+            <h3 style="font-family: var(--font-title); font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;" id="lobby-waiting-title">
+              ห้องซ้อมสอบออนไลน์
+            </h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem;" id="lobby-waiting-desc">
+              ระบบจำลองสอบ OSPE ร่วมกันแบบเรียลไทม์
+            </p>
+          </div>
+          
+          <!-- 2-Column Responsive Layout -->
+          <div class="lobby-main-grid">
             
-            <!-- Left Column -->
-            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-              <!-- Room ID display for Host to share -->
-              <div id="lobby-room-code-share" style="display: none; padding: 0.85rem 1.25rem; background: var(--surface); border: 2px solid var(--primary); border-radius: var(--radius-lg); text-align: center; box-shadow: var(--shadow-sm);">
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.2rem;" id="lobby-waiting-msg">แชร์รหัสห้องนี้ให้เพื่อนๆ:</p>
-                <div style="font-size: 2.5rem; font-weight: 900; letter-spacing: 0.35rem; color: var(--primary); font-family: var(--font-title); line-height: 1.1;" id="lobby-share-code-display">----</div>
+            <!-- Left Column: Controls & Settings -->
+            <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+              
+              <!-- Room Code Box (Host Share) -->
+              <div id="lobby-room-code-share" class="lobby-code-box" style="display: none;">
+                <div class="lobby-code-label">รหัสห้องสอบ</div>
+                <div class="lobby-code-digits" id="lobby-share-code-display">----</div>
+                <button type="button" class="lobby-code-copy" onclick="copyRoomCode()">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  คัดลอกรหัส
+                </button>
               </div>
 
-              <!-- Personal Avatar / Profile Card -->
-              <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 0.85rem 1rem; box-shadow: var(--shadow-sm);">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.45rem;">
-                  <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">โปรไฟล์ของคุณ</span>
-                  <button type="button" class="sim-btn-xs" onclick="toggleEmojiPicker(event)">🎨 เปลี่ยน Emoji</button>
+              <!-- Personal Profile Card -->
+              <div class="lobby-box">
+                <div class="lobby-box-header">
+                  <span>โปรไฟล์ของคุณ</span>
+                  <button type="button" class="sim-btn-xs" style="background:transparent; border:none; color:var(--primary); font-weight:600; cursor:pointer;" onclick="toggleEmojiPicker(event)">เปลี่ยน Avatar</button>
                 </div>
-                <div style="display: flex; align-items: center; gap: 0.65rem;">
-                  <button type="button" id="btn-lobby-my-avatar" onclick="toggleEmojiPicker(event)" style="font-size: 2rem; width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--primary); background: var(--bg); cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06); flex-shrink: 0;" title="คลิกเพื่อเปลี่ยน Emoji">
-                    <span id="lobby-my-avatar-preview">💊</span>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <button type="button" id="btn-lobby-my-avatar" onclick="toggleEmojiPicker(event)" style="font-size: 1.6rem; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;" title="เปลี่ยน Avatar">
+                    <span id="lobby-my-avatar-preview">👤</span>
                   </button>
                   <div style="flex: 1; min-width: 0;">
-                    <div style="font-weight: 700; color: var(--text-primary); font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="lobby-my-name-display">ผู้เข้าสอบ</div>
-                    <div style="display: flex; align-items: center; gap: 0.4rem; margin-top: 0.15rem;">
-                      <span id="lobby-my-role-badge" class="badge" style="font-size: 0.7rem; padding: 0.1rem 0.45rem; background: rgba(99,102,241,0.12); color: var(--primary);">คุณ</span>
-                      <button type="button" class="sim-btn-xs" style="padding: 0.1rem 0.35rem; font-size: 0.7rem;" onclick="openLobbyRoleSelectModal()">🔄 สลับบทบาท</button>
+                    <div style="font-weight: 700; color: var(--text-primary); font-size: 0.92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="lobby-my-name-display">ผู้เข้าสอบ</div>
+                    <div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.2rem;">
+                      <span id="lobby-my-role-badge" class="badge" style="font-size: 0.72rem; padding: 0.15rem 0.5rem; background: var(--primary-light); color: var(--primary); font-weight:600; border-radius:4px;">คุณ</span>
+                      <button type="button" class="sim-btn-xs" style="padding: 0.15rem 0.45rem; font-size: 0.7rem; border-radius:4px;" onclick="openLobbyRoleSelectModal()">สลับบทบาท</button>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Host Info Card (Hidden for Host to avoid redundancy, shown only for guest participants) -->
-              <div id="lobby-host-card" style="display: none; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 0.65rem 1rem; justify-content: space-between; align-items: center; font-size: 0.85rem; box-shadow: var(--shadow-sm);">
-                <span style="color: var(--text-secondary); display: flex; align-items: center; gap: 0.4rem; font-weight: 600;">👨‍🏫 Host:</span>
-                <span id="lobby-host-display" style="font-weight: 700; color: var(--primary);">Maxnum</span>
+              <!-- Host Info Card (For guest participants) -->
+              <div id="lobby-host-card" class="lobby-box" style="display: none; justify-content: space-between; align-items: center; padding: 0.75rem 1rem;">
+                <span style="color: var(--text-muted); font-size: 0.82rem; font-weight: 600;">Host ผู้คุมห้อง:</span>
+                <span id="lobby-host-display" style="font-weight: 700; color: var(--text-primary); font-size: 0.85rem;">Maxnum</span>
               </div>
 
-              <!-- Alarm Sound Selector (Host configures for the room) -->
-              <div id="lobby-alarm-sound-box" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 0.75rem 0.95rem; box-shadow: var(--shadow-sm);">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
-                  <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 700;">🔔 เสียงกริ่งหมดเวลา</span>
-                  <button type="button" class="sim-btn-xs" onclick="previewCurrentAlarmSound()" title="คลิกเพื่อทดลองฟังเสียงกริ่ง">🔊 ลองฟัง</button>
+              <!-- Alarm Sound Selector -->
+              <div id="lobby-alarm-sound-box" class="lobby-box">
+                <div class="lobby-box-header">
+                  <span>เสียงกริ่งหมดเวลา</span>
+                  <button type="button" class="sim-btn-xs" style="padding: 0.15rem 0.45rem; font-size: 0.72rem; border-radius:4px;" onclick="previewCurrentAlarmSound()">ทดลองฟัง</button>
                 </div>
-                <select id="lobby-alarm-sound-select" class="select-filter" style="width: 100%; font-size: 0.82rem; padding: 0.35rem 0.5rem; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text-primary); font-weight: 600;" onchange="updateRoomAlarmSound(this.value)">
-                  <option value="school-bell">🔔 กระดิ่งโรงเรียนมาตรฐาน (Standard)</option>
-                  <option value="plaahm">🐟 เพลงปลาหมอสีเหลือง</option>
-                  <option value="chicken">🐔 ไก่กรีดร้องบนต้นไม้</option>
-                  <option value="black-panther">🐆 เสือดำเด้าหน่อย</option>
-                  <option value="cafe-comedy">🎪 เปิดตัวตลกคาเฟ่</option>
+                <select id="lobby-alarm-sound-select" class="select-filter" style="width: 100%; font-size: 0.82rem; padding: 0.4rem 0.5rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text-primary); font-weight: 500;" onchange="updateRoomAlarmSound(this.value)">
+                  <option value="school-bell">กระดิ่งมาตรฐาน (Standard Bell)</option>
+                  <option value="plaahm">เพลงปลาหมอสีเหลือง</option>
+                  <option value="chicken">ไก่กรีดร้องบนต้นไม้</option>
+                  <option value="black-panther">เสือดำเด้าหน่อย</option>
+                  <option value="cafe-comedy">เปิดตัวตลกคาเฟ่</option>
                 </select>
-                <div id="lobby-sound-role-note" style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.3rem; line-height: 1.3;">
-                  🔊 เสียงกริ่งจะดังพร้อมกันทุกคนเมื่อหมดเวลา (ดังประมาณ 10 วินาที)
-                </div>
+                <div id="lobby-sound-role-note" style="display:none;"></div>
               </div>
 
-              <!-- Timeout Behavior Selector (Host configures for the room) -->
-              <div id="lobby-timeout-mode-box" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 0.65rem 0.85rem; box-shadow: var(--shadow-sm); margin-top: 0.65rem;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
-                  <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 700;">⏱️ เมื่อหมดเวลา 04:00</span>
+              <!-- Timeout Transition Mode -->
+              <div id="lobby-timeout-mode-box" class="lobby-box">
+                <div class="lobby-box-header">
+                  <span>การเปลี่ยนข้อเมื่อครบ 04:00</span>
                 </div>
-                <div style="display: flex; gap: 0.35rem; margin-top: 0.25rem;">
-                  <button type="button" id="lobby-btn-timeout-auto" class="sim-btn-xs" style="flex: 1; padding: 0.25rem 0.45rem; font-size: 0.78rem; font-weight: 700; background: var(--primary); color: #fff; border: 1px solid var(--primary);" onclick="updateRoomTimeoutMode('auto')">⚡ Auto</button>
-                  <button type="button" id="lobby-btn-timeout-manual" class="sim-btn-xs" style="flex: 1; padding: 0.25rem 0.45rem; font-size: 0.78rem; font-weight: 600; background: transparent; color: var(--text-secondary); border: 1px solid var(--border);" onclick="updateRoomTimeoutMode('manual')">⏸️ Manual</button>
+                <div class="lobby-seg-control">
+                  <button type="button" id="lobby-btn-timeout-auto" class="lobby-seg-btn active" onclick="updateRoomTimeoutMode('auto')">Auto</button>
+                  <button type="button" id="lobby-btn-timeout-manual" class="lobby-seg-btn" onclick="updateRoomTimeoutMode('manual')">Manual</button>
                 </div>
-                <div id="lobby-timeout-mode-note" style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem; line-height: 1.3;">
-                  ⏱️ เมื่อหมดเวลา 04:00 จะเปลี่ยนฐานทันทีหรือรอ Host กด
-                </div>
+                <div id="lobby-timeout-mode-note" style="display:none;"></div>
               </div>
 
-              <!-- Dissolve Room Button (Host) / Leave Room Button (Participant) -->
-              <div id="lobby-room-exit-actions" style="margin-top: 0.65rem;">
-                <button type="button" id="btn-lobby-dissolve-room" class="btn btn-sm" style="display: none; width: 100%; background: rgba(239, 68, 68, 0.08); color: #ef4444; border: 1.5px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); font-weight: 700; padding: 0.45rem 0.75rem; font-size: 0.82rem; cursor: pointer; transition: all 0.2s;" onclick="dissolveExamRoom()">
-                  🗑️ ยุบห้องสอบนี้ (Dissolve Room)
+              <!-- Dissolve Room / Leave Room -->
+              <div id="lobby-room-exit-actions" style="margin-top: 0.25rem;">
+                <button type="button" id="btn-lobby-dissolve-room" style="display: none; width: 100%; background: transparent; color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: var(--radius-sm); font-weight: 600; padding: 0.45rem; font-size: 0.8rem; cursor: pointer; transition: all 0.15s ease;" onclick="dissolveExamRoom()">
+                  ยุบห้องสอบนี้ (Dissolve)
                 </button>
-                <button type="button" id="btn-lobby-leave-room" class="btn btn-sm" style="display: none; width: 100%; background: var(--surface); color: var(--text-secondary); border: 1.5px solid var(--border); border-radius: var(--radius-md); font-weight: 600; padding: 0.45rem 0.75rem; font-size: 0.82rem; cursor: pointer; transition: all 0.2s;" onclick="leaveExamRoom()">
-                  🚪 ออกจากห้องสอบ (Leave Room)
+                <button type="button" id="btn-lobby-leave-room" style="display: none; width: 100%; background: transparent; color: var(--text-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); font-weight: 600; padding: 0.45rem; font-size: 0.8rem; cursor: pointer; transition: all 0.15s ease;" onclick="leaveExamRoom()">
+                  ออกจากห้องสอบ (Leave)
                 </button>
               </div>
             </div>
 
-            <!-- Right Column: Dedicated Participants Panel -->
-            <div id="lobby-players-status" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; display: flex; flex-direction: column; box-shadow: var(--shadow-sm); min-height: 200px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.6rem; margin-bottom: 0.65rem;">
-                <div style="display: flex; align-items: center; gap: 0.45rem;">
-                  <span style="font-size: 1.15rem;">👥</span>
-                  <strong style="color: var(--text-primary); font-size: 0.95rem;">สมาชิกในห้องสอบ (Participants)</strong>
-                </div>
-                <span id="lobby-player-count-badge" class="badge" style="background: rgba(99, 102, 241, 0.12); color: var(--primary); font-size: 0.78rem; font-weight: 700;">0 คน</span>
+            <!-- Right Column: Member List -->
+            <div id="lobby-players-status" class="lobby-members-panel">
+              <div class="lobby-members-header">
+                <strong style="color: var(--text-primary); font-size: 0.9rem; font-weight: 700;">สมาชิกในห้องสอบ</strong>
+                <span id="lobby-player-count-badge" class="badge" style="background: var(--bg-secondary); color: var(--text-secondary); font-size: 0.75rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 9999px;">0 คน</span>
               </div>
 
-              <!-- Clean vertical scrollable list of participants on the right side -->
-              <div id="lobby-participants-list" style="display: flex; flex-direction: column; gap: 0.45rem; max-height: 260px; overflow-y: auto; padding-right: 2px;">
-                <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 2rem 0;">กำลังรอเพื่อนๆ เชื่อมต่อเข้าร่วมห้อง...</div>
+              <div id="lobby-participants-list" style="display: flex; flex-direction: column; gap: 0.4rem; max-height: 320px; overflow-y: auto; padding-right: 2px;">
+                <div style="text-align: center; color: var(--text-muted); font-size: 0.82rem; padding: 3rem 0;">กำลังรอสมาชิกเข้าร่วมห้อง...</div>
               </div>
               
               <!-- Hidden backward-compatible spans -->
@@ -1112,28 +1115,27 @@
             </div>
           </div>
 
-          <!-- Standard Mode Role Selector Bar (Shown when examMode === 'standard') -->
-          <div id="standard-mode-role-selector" style="display: none; margin: 1rem auto 1.25rem auto; max-width: 440px; text-align: center;">
-            <div style="display: flex; gap: 0.65rem; justify-content: center;">
-              <button type="button" id="btn-set-role-examiner" class="btn btn-sm" style="flex: 1; border-radius: var(--radius-md); padding: 0.65rem 1rem; font-weight: 700; font-size: 0.92rem; transition: all 0.2s ease;" onclick="switchMyLobbyRole('examiner')">
-                👨‍🏫 ผู้ประเมิน (Examiner)
+          <!-- Standard Mode Role Selector Bar -->
+          <div id="standard-mode-role-selector" style="display: none; margin: 1.25rem auto 0; max-width: 400px; text-align: center;">
+            <div class="lobby-seg-control" style="padding: 4px;">
+              <button type="button" id="btn-set-role-examiner" class="lobby-seg-btn active" style="padding: 0.55rem 1rem; font-size: 0.86rem;" onclick="switchMyLobbyRole('examiner')">
+                ผู้ประเมิน (Examiner)
               </button>
-              <button type="button" id="btn-set-role-examinee" class="btn btn-sm" style="flex: 1; border-radius: var(--radius-md); padding: 0.65rem 1rem; font-weight: 700; font-size: 0.92rem; transition: all 0.2s ease;" onclick="switchMyLobbyRole('examinee')">
-                ✍️ ผู้เข้าสอบ (Participant)
+              <button type="button" id="btn-set-role-examinee" class="lobby-seg-btn" style="padding: 0.55rem 1rem; font-size: 0.86rem;" onclick="switchMyLobbyRole('examinee')">
+                ผู้เข้าสอบ (Candidate)
               </button>
             </div>
           </div>
 
-          <!-- Cohort Breakout Tables Panel (Shown when examMode === 'cohort_breakout') -->
-          <div id="lobby-cohort-breakout-panel" style="display: none; margin: 1.5rem auto 1rem auto; max-width: 720px; text-align: left;">
+          <!-- Cohort Breakout Tables Panel -->
+          <div id="lobby-cohort-breakout-panel" style="display: none; margin: 1.5rem 0 0; text-align: left;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
               <div>
-                <strong style="font-size: 1rem; color: var(--text-primary); font-family: var(--font-title);">👥 โต๊ะสอบย่อย (Breakout Tables)</strong>
-                <div style="font-size: 0.78rem; color: var(--text-muted);">จับคู่ 1 Examiner + 1 Participant ต่อโต๊ะ เพื่อสอบโจทย์เดียวกันพร้อมกันทั้งห้อง</div>
+                <strong style="font-size: 0.95rem; color: var(--text-primary); font-family: var(--font-title); font-weight: 700;">โต๊ะสอบย่อย (Breakout Tables)</strong>
               </div>
-              <div style="display: flex; gap: 0.5rem; align-items: center;" id="cohort-table-btn-group">
-                <button type="button" class="btn btn-sm btn-outline" style="color: var(--danger, #ef4444); border-color: rgba(239,68,68,0.3); padding: 0.35rem 0.65rem; font-size: 0.82rem; border-radius: 6px;" onclick="removeLastBreakoutTable()" title="ลบโต๊ะสอบตัวล่าสุด">➖ ลบโต๊ะ</button>
-                <button type="button" class="btn btn-sm btn-primary" style="padding: 0.35rem 0.85rem; font-size: 0.85rem; font-weight: 700; border-radius: 6px;" onclick="addBreakoutTable()">➕ เพิ่มโต๊ะสอบ</button>
+              <div style="display: flex; gap: 0.4rem; align-items: center;" id="cohort-table-btn-group">
+                <button type="button" class="btn btn-sm btn-outline" style="padding: 0.3rem 0.65rem; font-size: 0.78rem; border-radius: 6px;" onclick="removeLastBreakoutTable()">- ลบโต๊ะ</button>
+                <button type="button" class="btn btn-sm btn-primary" style="padding: 0.3rem 0.85rem; font-size: 0.78rem; font-weight: 600; border-radius: 6px;" onclick="addBreakoutTable()">+ เพิ่มโต๊ะสอบ</button>
               </div>
             </div>
             <div id="cohort-tables-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem;">
@@ -1141,35 +1143,30 @@
             </div>
           </div>
 
-          <!-- Carousel Circuit Rotation Panel (Shown when examMode === 'carousel_rotation') -->
-          <div id="lobby-carousel-rotation-panel" style="display: none; margin: 1.5rem auto 1rem auto; max-width: 860px; text-align: left;">
+          <!-- Carousel Circuit Rotation Panel -->
+          <div id="lobby-carousel-rotation-panel" style="display: none; margin: 1.5rem 0 0; text-align: left;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
               <div>
-                <strong style="font-size: 1.05rem; color: var(--text-primary); font-family: var(--font-title);">🔄 ผังการวนสถานี (OSPE Carousel Circuit Diagram)</strong>
-                <div style="font-size: 0.78rem; color: var(--text-muted);">Examiner ประจำฐานถาวร ส่วน Participant เลือกสถานีเริ่มต้น (Blinded) และจะวนรอบวงจรตามลูกศร</div>
+                <strong style="font-size: 0.95rem; color: var(--text-primary); font-family: var(--font-title); font-weight: 700;">ผังการวนสถานี (Carousel Circuit)</strong>
               </div>
-              <span id="carousel-rotation-summary" class="badge" style="background: rgba(99, 102, 241, 0.12); color: var(--primary); font-size: 0.82rem; font-weight: 700;">16 สถานี (วนตามเข็ม)</span>
+              <span id="carousel-rotation-summary" class="badge" style="background: var(--bg-secondary); color: var(--text-secondary); font-size: 0.78rem; font-weight: 600;">16 สถานี</span>
             </div>
-            
-            <!-- Circuit Diagram Container with overflow-x auto for responsive scroll -->
-            <div id="carousel-circuit-wrapper" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem 1rem; overflow-x: auto; box-shadow: var(--shadow-sm);">
+            <div id="carousel-circuit-wrapper" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; overflow-x: auto;">
               <div id="carousel-stations-grid" style="min-width: 680px; display: flex; flex-direction: column; gap: 0.25rem;">
-                <!-- Filled dynamically by JS into serpentine rows with directional arrows -->
+                <!-- Filled dynamically by JS -->
               </div>
             </div>
           </div>
           
-          <!-- Participant / Examiner Ready Status Toggle -->
-          <div id="lobby-ready-toggle-container" style="display: none; margin: 1.25rem auto 0.75rem auto; text-align: center;">
-            <button type="button" id="btn-lobby-toggle-ready" class="btn" style="min-width: 240px; font-size: 1.05rem; padding: 0.75rem 2rem; font-weight: 700; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); cursor: pointer;" onclick="toggleMyReadyStatus()">
-              🟢 แจ้งว่าพร้อมสอบ (Ready)
+          <!-- Ready / Start Buttons -->
+          <div id="lobby-ready-toggle-container" style="display: none; margin: 1.5rem auto 0; text-align: center;">
+            <button type="button" id="btn-lobby-toggle-ready" class="btn btn-primary" style="min-width: 220px; font-size: 0.95rem; padding: 0.65rem 1.75rem; font-weight: 600; border-radius: var(--radius-sm); cursor: pointer;" onclick="toggleMyReadyStatus()">
+              พร้อมสอบ (Ready)
             </button>
-            <p id="lobby-ready-status-hint" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.45rem;">กดเพื่อส่งสัญญาณให้ Host ทราบว่าคุณพร้อมเริ่มการสอบแล้ว</p>
           </div>
           
-          <!-- Examiner / Super Host Start button -->
-          <button id="lobby-start-exam-btn" class="btn btn-secondary" style="display: none; margin: 1.25rem auto 0 auto; padding: 0.75rem 2rem; font-size: 1.05rem; box-shadow: var(--shadow-sm); min-width: 220px;" onclick="startLobbyExamOnServer()">
-            รอผู้เข้าสอบเชื่อมต่อ...
+          <button id="lobby-start-exam-btn" class="btn btn-primary" style="display: none; margin: 1.5rem auto 0; padding: 0.65rem 2rem; font-size: 0.95rem; font-weight: 700; border-radius: var(--radius-sm); min-width: 220px;" onclick="startLobbyExamOnServer()">
+            เริ่มการสอบ
           </button>
         </div>
 
@@ -3434,40 +3431,34 @@
                   }
                 }
 
-                const roleBadgeText = p.role === 'examiner' ? '👨‍⚖️ ผู้ประเมิน' : '✍️ ผู้เข้าสอบ';
-                const roleBadgeColor = p.role === 'examiner' ? '#2563eb' : '#16a34a';
-                const roleBadgeBg = p.role === 'examiner' ? 'rgba(59,130,246,0.12)' : 'rgba(16,185,129,0.12)';
+                const roleBadgeText = p.role === 'examiner' ? 'Examiner' : 'Candidate';
+                const roleBadgeColor = p.role === 'examiner' ? '#0369a1' : '#15803d';
+                const roleBadgeBg = p.role === 'examiner' ? '#e0f2fe' : '#dcfce7';
 
                 const item = document.createElement('div');
-                item.style.cssText = `
-                  display: flex;
-                  justify-content: space-between;
-                  align-items: center;
-                  background: var(--bg);
-                  border: 1px solid ${isMe ? 'var(--primary)' : 'var(--border)'};
-                  border-radius: var(--radius-sm);
-                  padding: 0.45rem 0.75rem;
-                  font-size: 0.84rem;
-                  transition: all 0.2s;
-                `;
+                item.className = 'lobby-member-row';
+                if (isMe) {
+                  item.style.borderColor = 'var(--primary)';
+                  item.style.background = 'var(--primary-light)';
+                }
 
                 item.innerHTML = `
-                  <div style="display: flex; align-items: center; gap: 0.55rem; min-width: 0;">
-                    <span style="font-size: 1.35rem; line-height: 1;">${escapeHtml(pEmoji)}</span>
+                  <div style="display: flex; align-items: center; gap: 0.5rem; min-width: 0;">
+                    <span style="font-size: 1.15rem; line-height: 1;">${escapeHtml(pEmoji)}</span>
                     <div style="min-width: 0;">
-                      <div style="font-weight: 700; color: var(--text-primary); font-size: 0.88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                      <div style="font-weight: 700; color: var(--text-primary); font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                         ${escapeHtml(p.name)} ${isMe ? '<span style="font-size: 0.72rem; color: var(--primary); font-weight: 700;">(คุณ)</span>' : ''}
                       </div>
-                      <div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.1rem; flex-wrap: wrap;">
-                        <span style="font-size: 0.7rem; background: ${roleBadgeBg}; color: ${roleBadgeColor}; font-weight: 700; padding: 0.05rem 0.35rem; border-radius: 4px;">${roleBadgeText}</span>
+                      <div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.05rem; flex-wrap: wrap;">
+                        <span style="font-size: 0.68rem; background: ${roleBadgeBg}; color: ${roleBadgeColor}; font-weight: 700; padding: 0.05rem 0.35rem; border-radius: 4px;">${roleBadgeText}</span>
                         ${stationInfoHtml}
                       </div>
                     </div>
                   </div>
                   <div>
                     ${isReady 
-                      ? '<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-weight: 700; font-size: 0.74rem; padding: 0.2rem 0.55rem; border-radius: 999px;">🟢 พร้อม</span>' 
-                      : '<span class="badge" style="background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); font-size: 0.74rem; padding: 0.2rem 0.55rem; border-radius: 999px;">⚪ ไม่พร้อม</span>'}
+                      ? '<span style="display:inline-flex; align-items:center; gap:0.25rem; font-size: 0.72rem; color: #16a34a; font-weight: 700; background: #dcfce7; padding: 0.15rem 0.5rem; border-radius: 999px;">● พร้อม</span>' 
+                      : '<span style="display:inline-flex; align-items:center; gap:0.25rem; font-size: 0.72rem; color: var(--text-muted); background: var(--bg-secondary); padding: 0.15rem 0.5rem; border-radius: 999px;">○ รอ</span>'}
                   </div>
                 `;
                 partListEl.appendChild(item);
@@ -3556,25 +3547,25 @@
                 startBtn.style.display = 'block';
                 startBtn.disabled = false;
                 if (!hasExaminee) {
-                  startBtn.textContent = '🚀 เริ่มการสอบ (ในฐานะผู้ประเมิน)';
+                  startBtn.textContent = 'เริ่มการสอบ (ในฐานะ Examiner)';
                   startBtn.className = 'btn btn-primary';
                   startBtn.style.background = '';
                   startBtn.style.borderColor = '';
                 } else if (isExamineeReady) {
-                  startBtn.textContent = `🚀 เริ่มการสอบ (ผู้เข้าสอบ ${escapeHtml(examineePlayer.name)} พร้อมแล้ว!)`;
+                  startBtn.textContent = `เริ่มการสอบ (${escapeHtml(examineePlayer.name)} พร้อมแล้ว)`;
                   startBtn.className = 'btn btn-primary';
                   startBtn.style.background = '#10b981';
                   startBtn.style.borderColor = '#10b981';
                 } else {
-                  startBtn.textContent = `🚀 เริ่มการสอบ (รอ ${escapeHtml(examineePlayer.name)} กดพร้อม)`;
+                  startBtn.textContent = `เริ่มการสอบ (รอ ${escapeHtml(examineePlayer.name)} กดพร้อม)`;
                   startBtn.className = 'btn btn-secondary';
                   startBtn.style.background = '';
                   startBtn.style.borderColor = '';
                 }
               }
-              if (waitingTitle) waitingTitle.textContent = 'คุณอยู่ในสถานะ: 👨‍🏫 ผู้ประเมิน (Examiner)';
-              if (waitingDesc) waitingDesc.textContent = 'คุณเป็นผู้ควบคุมการประเมิน ให้คะแนน และเปลี่ยนสถานี เมื่อพร้อมแล้วกดปุ่มเริ่มสอบด้านล่าง';
-              if (waitingMsg) waitingMsg.textContent = hasExaminee ? `ผู้เข้าสอบ: ${escapeHtml(examineePlayer.name)}` : 'แชร์รหัสห้อง 4 หลักด้านบนให้ผู้เข้าสอบเข้ามาร่วม...';
+              if (waitingTitle) waitingTitle.textContent = 'บทบาท: ผู้ประเมิน (Examiner)';
+              if (waitingDesc) waitingDesc.textContent = 'ควบคุมการประเมิน ให้คะแนน และสั่งเปลี่ยนสถานี';
+              if (waitingMsg) waitingMsg.textContent = hasExaminee ? `ผู้เข้าสอบ: ${escapeHtml(examineePlayer.name)}` : 'รหัสห้อง 4 หลักด้านบนสำหรับให้เพื่อนเข้าร่วม';
             } else {
               // Examinee (Participant) CANNOT start exam!
               if (readyContainer) readyContainer.style.display = 'block';
@@ -3590,22 +3581,22 @@
                   readyBtn.style.background = 'var(--surface)';
                   readyBtn.style.borderColor = 'var(--border)';
                   readyBtn.style.color = 'var(--text-secondary)';
-                  readyBtn.innerHTML = '⚪ ยกเลิกความพร้อม (Not Ready)';
+                  readyBtn.innerHTML = 'ยกเลิกความพร้อม';
                 } else {
                   readyBtn.className = 'btn btn-primary';
                   readyBtn.style.background = '#10b981';
                   readyBtn.style.borderColor = '#10b981';
                   readyBtn.style.color = '#ffffff';
-                  readyBtn.innerHTML = '🟢 กดเพื่อแจ้งว่าพร้อม (Ready)';
+                  readyBtn.innerHTML = 'พร้อมสอบ (Ready)';
                 }
               }
 
-              if (waitingTitle) waitingTitle.textContent = 'คุณอยู่ในสถานะ: ✍️ ผู้เข้าสอบ (Participant)';
-              if (waitingDesc) waitingDesc.textContent = 'คุณจะเห็นโจทย์สถานการณ์และข้อมูลผู้ป่วยเมื่อผู้ประเมินกดเริ่มสอบ';
+              if (waitingTitle) waitingTitle.textContent = 'บทบาท: ผู้เข้าสอบ (Candidate)';
+              if (waitingDesc) waitingDesc.textContent = 'โจทย์สถานการณ์และข้อมูลผู้ป่วยจะแสดงเมื่อเริ่มการสอบ';
               if (examinerPlayer) {
-                waitingMsg.textContent = `กรุณารอผู้ประเมิน (${escapeHtml(examinerPlayer.name)}) กดเริ่มการสอบ...`;
+                waitingMsg.textContent = `รอผู้ประเมิน (${escapeHtml(examinerPlayer.name)}) กดเริ่มการสอบ`;
               } else {
-                waitingMsg.innerHTML = '<span style="color:var(--danger, #ef4444);font-weight:700;">⚠️ ยังไม่มีผู้ประเมิน (Examiner) ในห้อง</span> — กรุณารอผู้ประเมินเข้าร่วม หรือสลับบทบาทของคุณ';
+                waitingMsg.innerHTML = '<span style="color:var(--danger, #ef4444);font-weight:600;">ยังไม่มีผู้ประเมินในห้อง</span>';
               }
             }
 
@@ -3622,25 +3613,25 @@
                 const allReady = totalPart > 0 && readyCount === totalPart;
 
                 if (totalPart === 0) {
-                  startBtn.textContent = '🚀 เริ่มการสอบทันที (รอเพื่อนเข้าร่วมได้ตลอดเวลา)';
+                  startBtn.textContent = 'เริ่มการสอบ (Start Exam)';
                   startBtn.className = 'btn btn-primary';
                   startBtn.style.background = '';
                   startBtn.style.borderColor = '';
                 } else if (allReady) {
-                  startBtn.textContent = `🚀 เริ่มการสอบ (ทุกคนพร้อมแล้ว ${readyCount}/${totalPart})`;
+                  startBtn.textContent = `เริ่มการสอบ (ทุกคนพร้อมแล้ว ${readyCount}/${totalPart})`;
                   startBtn.className = 'btn btn-primary';
                   startBtn.style.background = '#10b981';
                   startBtn.style.borderColor = '#10b981';
                 } else {
-                  startBtn.textContent = `🚀 เริ่มการสอบ (${readyCount}/${totalPart} คนพร้อม)`;
+                  startBtn.textContent = `เริ่มการสอบ (${readyCount}/${totalPart} พร้อม)`;
                   startBtn.className = 'btn btn-secondary';
                   startBtn.style.background = '';
                   startBtn.style.borderColor = '';
                 }
               }
-              if (waitingTitle) waitingTitle.textContent = 'ห้องซ้อมสอบพร้อมแล้ว!';
-              if (waitingDesc) waitingDesc.textContent = 'แชร์รหัสห้อง 4 หลักด้านบนให้เพื่อนเพื่อเข้าร่วมซ้อมสอบด้วยกันได้ไม่จำกัดจำนวนคน';
-              if (waitingMsg) waitingMsg.textContent = 'แชร์รหัสห้องนี้ให้เพื่อนๆ:';
+              if (waitingTitle) waitingTitle.textContent = 'ห้องสอบพร้อมใช้งาน';
+              if (waitingDesc) waitingDesc.textContent = 'แชร์รหัส 4 หลักให้สมาชิกเพื่อเริ่มการซ้อมสอบ';
+              if (waitingMsg) waitingMsg.textContent = 'รหัสห้องสอบ:';
             } else {
               if (readyContainer) readyContainer.style.display = 'block';
               if (startBtn) startBtn.style.display = 'none';
@@ -6820,18 +6811,18 @@
         let examinerSlotHtml = '';
         if (hasExaminer) {
           if (t.examinerId === SimState.myPlayerId) {
-            examinerSlotHtml = `<button type="button" class="sim-btn-xs" style="background:var(--primary);color:#fff;" onclick="leaveBreakoutTable('${tKey}')">✓ คุณ (คลิกออก)</button>`;
+            examinerSlotHtml = `<button type="button" class="sim-btn-xs" style="background:var(--primary);color:#fff;border-radius:4px;" onclick="leaveBreakoutTable('${tKey}')">✓ คุณ (ออก)</button>`;
           } else {
-            examinerSlotHtml = `<strong style="color:var(--primary);display:inline-flex;align-items:center;">${exEmoji}${escapeHtml(t.examinerName)}</strong>`;
+            examinerSlotHtml = `<strong style="color:var(--primary);font-size:0.84rem;">${escapeHtml(t.examinerName)}</strong>`;
           }
         } else {
           if (isHostUser || !isExaminerRole) {
-            examinerSlotHtml = `<span style="font-size:0.78rem;color:var(--text-muted);">(ว่าง)</span>`;
+            examinerSlotHtml = `<span style="font-size:0.75rem;color:var(--text-muted);">(ว่าง)</span>`;
           } else {
             if (myCurrentBreakoutTable && myCurrentBreakoutTable !== tKey) {
-              examinerSlotHtml = `<button type="button" class="sim-btn-xs" style="opacity:0.9;" onclick="joinBreakoutTable('${tKey}', 'examiner')">ย้ายมาโต๊ะนี้</button>`;
+              examinerSlotHtml = `<button type="button" class="sim-btn-xs" style="border-radius:4px;" onclick="joinBreakoutTable('${tKey}', 'examiner')">ย้ายมาโต๊ะนี้</button>`;
             } else {
-              examinerSlotHtml = `<button type="button" class="sim-btn-xs" onclick="joinBreakoutTable('${tKey}', 'examiner')">+ เป็นผู้ประเมิน</button>`;
+              examinerSlotHtml = `<button type="button" class="sim-btn-xs" style="border-radius:4px;" onclick="joinBreakoutTable('${tKey}', 'examiner')">+ เป็น Examiner</button>`;
             }
           }
         }
@@ -6839,57 +6830,68 @@
         let participantSlotHtml = '';
         if (hasParticipant) {
           if (t.participantId === SimState.myPlayerId) {
-            participantSlotHtml = `<button type="button" class="sim-btn-xs" style="background:#16a34a;color:#fff;" onclick="leaveBreakoutTable('${tKey}')">✓ คุณ (คลิกออก)</button>`;
+            participantSlotHtml = `<button type="button" class="sim-btn-xs" style="background:#16a34a;color:#fff;border-radius:4px;" onclick="leaveBreakoutTable('${tKey}')">✓ คุณ (ออก)</button>`;
           } else {
-            participantSlotHtml = `<strong style="color:#16a34a;display:inline-flex;align-items:center;">${partEmoji}${escapeHtml(t.participantName)}</strong>`;
+            participantSlotHtml = `<strong style="color:#16a34a;font-size:0.84rem;">${escapeHtml(t.participantName)}</strong>`;
           }
         } else {
           if (isHostUser || !isParticipantRole) {
-            participantSlotHtml = `<span style="font-size:0.78rem;color:var(--text-muted);">(ว่าง)</span>`;
+            participantSlotHtml = `<span style="font-size:0.75rem;color:var(--text-muted);">(ว่าง)</span>`;
           } else {
             if (myCurrentBreakoutTable && myCurrentBreakoutTable !== tKey) {
-              participantSlotHtml = `<button type="button" class="sim-btn-xs" style="opacity:0.9;" onclick="joinBreakoutTable('${tKey}', 'participant')">ย้ายมาโต๊ะนี้</button>`;
+              participantSlotHtml = `<button type="button" class="sim-btn-xs" style="border-radius:4px;" onclick="joinBreakoutTable('${tKey}', 'participant')">ย้ายมาโต๊ะนี้</button>`;
             } else {
-              participantSlotHtml = `<button type="button" class="sim-btn-xs" onclick="joinBreakoutTable('${tKey}', 'participant')">+ เป็นผู้เข้าสอบ</button>`;
+              participantSlotHtml = `<button type="button" class="sim-btn-xs" style="border-radius:4px;" onclick="joinBreakoutTable('${tKey}', 'participant')">+ เป็น Candidate</button>`;
             }
           }
         }
 
         const card = document.createElement('div');
-        card.style.cssText = `background:var(--surface);border:1.5px solid ${isMyTable ? 'var(--primary)' : 'var(--border)'};border-radius:var(--radius-md);padding:0.75rem;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:0.4rem;font-size:0.86rem;position:relative;`;
+        card.className = 'lobby-breakout-card' + (isMyTable ? ' is-active' : '');
 
         card.innerHTML = `
-          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:0.35rem;margin-bottom:0.25rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:0.35rem;margin-bottom:0.15rem;">
             <div style="display:flex;align-items:center;gap:0.35rem;">
-              <strong style="color:var(--text-primary);">${escapeHtml(t.name || tKey)}</strong>
+              <strong style="color:var(--text-primary);font-size:0.88rem;">${escapeHtml(t.name || tKey)}</strong>
               ${SimState.isHost ? `
-                <button type="button" class="sim-btn-xs" style="padding:0.1rem 0.35rem;font-size:0.72rem;color:#ef4444;background:transparent;border:1px solid rgba(239,68,68,0.25);border-radius:4px;cursor:pointer;" title="ลบโต๊ะสอบนี้" onclick="deleteBreakoutTable('${tKey}')">🗑️ ลบ</button>
+                <button type="button" class="sim-btn-xs" style="padding:0.1rem 0.35rem;font-size:0.7rem;color:var(--danger);background:transparent;border:1px solid rgba(239,68,68,0.2);border-radius:4px;cursor:pointer;" title="ลบโต๊ะ" onclick="deleteBreakoutTable('${tKey}')">ลบ</button>
               ` : ''}
             </div>
-            <span style="font-size:0.75rem;color:${hasExaminer && hasParticipant ? 'var(--success)' : 'var(--text-muted)'};font-weight:600;">
-              ${hasExaminer && hasParticipant ? '🟢 พร้อมสอบ' : '⚪ รอคน'}
+            <span style="font-size:0.72rem;color:${hasExaminer && hasParticipant ? 'var(--success)' : 'var(--text-muted)'};font-weight:600;">
+              ${hasExaminer && hasParticipant ? '● พร้อม' : '○ รอคน'}
             </span>
           </div>
           
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.2rem 0;">
-            <span style="color:var(--text-secondary);font-size:0.8rem;">👨‍🏫 Examiner:</span>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.15rem 0;">
+            <span style="color:var(--text-muted);font-size:0.78rem;">Examiner:</span>
             ${examinerSlotHtml}
           </div>
 
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.2rem 0;">
-            <span style="color:var(--text-secondary);font-size:0.8rem;">✍️ Participant:</span>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.15rem 0;">
+            <span style="color:var(--text-muted);font-size:0.78rem;">Candidate:</span>
             ${participantSlotHtml}
           </div>
 
           ${isMyTable ? `
-            <div style="margin-top:0.4rem;text-align:right;">
-              <button type="button" class="sim-btn-xs" style="color:var(--danger);" onclick="leaveBreakoutTable('${tKey}')">ออกจากโต๊ะนี้</button>
+            <div style="margin-top:0.25rem;text-align:right;">
+              <button type="button" class="sim-btn-xs" style="color:var(--danger);border-radius:4px;" onclick="leaveBreakoutTable('${tKey}')">ออกจากโต๊ะ</button>
             </div>
           ` : ''}
         `;
         container.appendChild(card);
       });
     }
+
+    function copyRoomCode() {
+      if (!SimState.roomId) return;
+      navigator.clipboard.writeText(SimState.roomId).then(() => {
+        if (typeof showToast === 'function') showToast(`คัดลอกรหัสห้อง ${SimState.roomId} แล้ว`, 'success');
+        else alert(`คัดลอกรหัสห้อง ${SimState.roomId} แล้ว`);
+      }).catch(() => {
+        prompt('คัดลอกรหัสห้องสอบ:', SimState.roomId);
+      });
+    }
+    window.copyRoomCode = copyRoomCode;
 
     // ── Carousel Rotation Diagram & Assignment ──
     async function assignCarouselStation(stationNum, role) {

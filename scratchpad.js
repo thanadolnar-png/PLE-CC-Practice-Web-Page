@@ -93,10 +93,10 @@
       const fab = document.createElement('button');
       fab.id = 'scratchpad-fab-btn';
       fab.className = 'scratchpad-fab no-print';
-      fab.setAttribute('title', 'เปิด/ปิด กระดาษทด (Scratchpad)');
+      fab.setAttribute('title', 'กระดาษทด (Scratchpad)');
       fab.setAttribute('type', 'button');
       fab.innerHTML = `
-        <span class="scratchpad-fab-icon">📝</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
         <span class="scratchpad-fab-text">กระดาษทด</span>
         <span id="scratchpad-badge" class="scratchpad-badge" style="display: none;">•</span>
       `;
@@ -133,17 +133,16 @@
         <div class="sp-header" id="sp-header" title="คลิกลากเพื่อย้ายหน้าต่าง | ดับเบิ้ลคลิกเพื่อย่อ/ขยาย">
           <div class="sp-header-left">
             <span class="sp-drag-indicator" title="แถบจับย้ายตำแหน่ง">⋮⋮</span>
-            <span class="sp-icon">📝</span>
             <span class="sp-title" id="sp-station-title">กระดาษทด</span>
           </div>
 
           <!-- Mode Tabs -->
           <div class="sp-tabs">
             <button type="button" class="sp-tab-btn active" id="sp-tab-draw" data-tab="draw">
-              ✍️ วาดเขียน
+              วาดเขียน
             </button>
             <button type="button" class="sp-tab-btn" id="sp-tab-type" data-tab="type">
-              ⌨️ พิมพ์โน้ต
+              พิมพ์โน้ต
             </button>
           </div>
 
