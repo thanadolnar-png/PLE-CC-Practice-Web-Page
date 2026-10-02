@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU</title>
   <link rel="stylesheet" href="style.css">
-  <script src="case-data-offline.js?v=v_20261002_165840"></script>
+  <script src="case-data-offline.js?v=v_20261002_201440"></script>
   <script src="case-details-offline.js?v=v_20261002_165840"></script>
-  <script src="app.js?v=v_20261002_165840"></script>
+  <script src="app.js?v=v_20261002_201440"></script>
   <script src="scratchpad.js?v=v_20261002_165840"></script>
   <style>
     /* Simulation Source and Topic Selector */
@@ -946,16 +946,16 @@
                 <span style="font-size: 0.74rem; color: var(--text-muted);">เลือกรูปแบบการเปลี่ยนไปยังสถานีถัดไป</span>
               </div>
               <div style="display: inline-flex; gap: 0.35rem; background: var(--surface); padding: 0.2rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
-                <label style="cursor: pointer; margin: 0;">
-                  <input type="radio" name="global-timeout-behavior" value="auto" checked style="display: none;" onchange="setGlobalTimeoutMode(this.value)">
-                  <span id="timeout-btn-opt-auto" class="badge" style="padding: 0.35rem 0.65rem; font-size: 0.8rem; font-weight: 700; border-radius: var(--radius-sm); background: var(--primary); color: #fff; cursor: pointer; transition: all 0.2s;">
-                    ⚡ อัตโนมัติ (Auto)
+                <label style="cursor: pointer; margin: 0;" onclick="setGlobalTimeoutMode('auto')">
+                  <input type="radio" name="global-timeout-behavior" value="auto" checked style="display: none;">
+                  <span id="timeout-btn-opt-auto" class="badge" style="padding: 0.25rem 0.55rem; font-size: 0.78rem; font-weight: 700; border-radius: var(--radius-sm); background: var(--primary); color: #fff; cursor: pointer; transition: all 0.2s;">
+                    ⚡ Auto
                   </span>
                 </label>
-                <label style="cursor: pointer; margin: 0;">
-                  <input type="radio" name="global-timeout-behavior" value="manual" style="display: none;" onchange="setGlobalTimeoutMode(this.value)">
-                  <span id="timeout-btn-opt-manual" class="badge" style="padding: 0.35rem 0.65rem; font-size: 0.8rem; font-weight: 600; border-radius: var(--radius-sm); background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.2s;">
-                    ⏸️ รอ Host/กดเอง (Manual)
+                <label style="cursor: pointer; margin: 0;" onclick="setGlobalTimeoutMode('manual')">
+                  <input type="radio" name="global-timeout-behavior" value="manual" style="display: none;">
+                  <span id="timeout-btn-opt-manual" class="badge" style="padding: 0.25rem 0.55rem; font-size: 0.78rem; font-weight: 600; border-radius: var(--radius-sm); background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.2s;">
+                    ⏸️ Manual
                   </span>
                 </label>
               </div>
@@ -6464,41 +6464,51 @@
 
     async function joinBreakoutTable(tableId, role) {
       if (!SimState.roomId || typeof _fbDb === 'undefined') return;
-      if (SimState.isHost && (SimState.isSuperHost || SimState.examMode === 'cohort_breakout')) {
-        alert('Super Host มีหน้าที่คุมการสอบจากจอภาพรวม ไม่สามารถลงประจำโต๊ะย่อยได้ครับ');
+      if (SimState.isHost) {
+        alert('Host ผู้คุมสอบใหญ่มีหน้าที่คุมการสอบจากจอภาพรวม ไม่สามารถลงประจำโต๊ะย่อยได้ครับ');
         return;
       }
       
       const isExaminerRole = (SimState.role === 'examiner');
       if (role === 'examiner' && !isExaminerRole) {
-        alert('คุณอยู่ในบทบาทผู้เข้าสอบ ไม่สามารถเลือกเป็นผู้ประเมินได้ หากต้องการเปลี่ยนหน้าที่กรุณากด "สลับบทบาท"');
+        alert('คุณอยู่ในบทบาทผู้เข้าสอบ สามารถเลือกได้เฉพาะโต๊ะผู้เข้าสอบเท่านั้น หากต้องการเป็นผู้ประเมินกรุณาสลับบทบาท');
         return;
       }
       if (role === 'participant' && isExaminerRole) {
-        alert('คุณอยู่ในบทบาทผู้ประเมิน ไม่สามารถเลือกเป็นผู้เข้าสอบได้ หากต้องการเปลี่ยนหน้าที่กรุณากด "สลับบทบาท"');
+        alert('คุณอยู่ในบทบาทผู้ประเมิน สามารถเลือกได้เฉพาะโต๊ะผู้ประเมินเท่านั้น หากต้องการเป็นผู้เข้าสอบกรุณาสลับบทบาท');
         return;
       }
 
       const myId = SimState.myPlayerId;
       const myName = SimState.lobbyPlayerName;
       try {
+        const snap = await _fbDb.ref(`rooms/${SimState.roomId}/breakouts`).get();
+        const allBreakouts = snap.val() || {};
+        const targetTable = allBreakouts[tableId] || {};
+
+        // Check if slot is already occupied by someone else
+        if (role === 'examiner' && targetTable.examinerId && targetTable.examinerId !== myId) {
+          alert(`⚠️ โต๊ะ "${targetTable.name || tableId}" มีผู้ประเมิน (${targetTable.examinerName}) ประจำอยู่แล้ว โปรดเลือกโต๊ะอื่น`);
+          return;
+        }
+        if (role === 'participant' && targetTable.participantId && targetTable.participantId !== myId) {
+          alert(`⚠️ โต๊ะ "${targetTable.name || tableId}" มีผู้เข้าสอบ (${targetTable.participantName}) ประจำอยู่แล้ว โปรดเลือกโต๊ะอื่น`);
+          return;
+        }
+
         const updateData = {};
 
-        // If player is already sitting at another table, clear their old seat
-        if (SimState.myBreakoutTableId && SimState.myBreakoutTableId !== tableId) {
-          const oldSnap = await _fbDb.ref(`rooms/${SimState.roomId}/breakouts/${SimState.myBreakoutTableId}`).get();
-          const oldT = oldSnap.val();
-          if (oldT) {
-            if (oldT.examinerId === myId) {
-              updateData[`rooms/${SimState.roomId}/breakouts/${SimState.myBreakoutTableId}/examinerId`] = '';
-              updateData[`rooms/${SimState.roomId}/breakouts/${SimState.myBreakoutTableId}/examinerName`] = '';
-            }
-            if (oldT.participantId === myId) {
-              updateData[`rooms/${SimState.roomId}/breakouts/${SimState.myBreakoutTableId}/participantId`] = '';
-              updateData[`rooms/${SimState.roomId}/breakouts/${SimState.myBreakoutTableId}/participantName`] = '';
-            }
+        // Atomically clear myId from ALL breakout tables (both examiner & participant slots)
+        Object.keys(allBreakouts).forEach(k => {
+          if (allBreakouts[k].examinerId === myId) {
+            updateData[`rooms/${SimState.roomId}/breakouts/${k}/examinerId`] = '';
+            updateData[`rooms/${SimState.roomId}/breakouts/${k}/examinerName`] = '';
           }
-        }
+          if (allBreakouts[k].participantId === myId) {
+            updateData[`rooms/${SimState.roomId}/breakouts/${k}/participantId`] = '';
+            updateData[`rooms/${SimState.roomId}/breakouts/${k}/participantName`] = '';
+          }
+        });
 
         if (role === 'examiner') {
           updateData[`rooms/${SimState.roomId}/breakouts/${tableId}/examinerId`] = myId;
@@ -6557,9 +6567,17 @@
       }
 
       const playersList = room.players ? Object.values(room.players) : [];
-      const isSuperHost = SimState.isHost && (SimState.isSuperHost || room.examMode === 'cohort_breakout');
+      const isHostUser = Boolean(SimState.isHost);
       const isExaminerRole = (SimState.role === 'examiner');
       const isParticipantRole = (SimState.role === 'participant' || SimState.role === 'examinee');
+
+      // Check if user already sits at ANY breakout table
+      let myCurrentBreakoutTable = null;
+      tableKeys.forEach(k => {
+        if (breakouts[k].examinerId === SimState.myPlayerId || breakouts[k].participantId === SimState.myPlayerId) {
+          myCurrentBreakoutTable = k;
+        }
+      });
 
       tableKeys.forEach(tKey => {
         const t = breakouts[tKey];
@@ -6580,10 +6598,14 @@
             examinerSlotHtml = `<strong style="color:var(--primary);display:inline-flex;align-items:center;">${exEmoji}${escapeHtml(t.examinerName)}</strong>`;
           }
         } else {
-          if (isSuperHost || isParticipantRole) {
+          if (isHostUser || !isExaminerRole) {
             examinerSlotHtml = `<span style="font-size:0.78rem;color:var(--text-muted);">(ว่าง)</span>`;
           } else {
-            examinerSlotHtml = `<button type="button" class="sim-btn-xs" onclick="joinBreakoutTable('${tKey}', 'examiner')">+ เป็นผู้ประเมิน</button>`;
+            if (myCurrentBreakoutTable && myCurrentBreakoutTable !== tKey) {
+              examinerSlotHtml = `<button type="button" class="sim-btn-xs" style="opacity:0.9;" onclick="joinBreakoutTable('${tKey}', 'examiner')">ย้ายมาโต๊ะนี้</button>`;
+            } else {
+              examinerSlotHtml = `<button type="button" class="sim-btn-xs" onclick="joinBreakoutTable('${tKey}', 'examiner')">+ เป็นผู้ประเมิน</button>`;
+            }
           }
         }
 
@@ -6595,10 +6617,14 @@
             participantSlotHtml = `<strong style="color:#16a34a;display:inline-flex;align-items:center;">${partEmoji}${escapeHtml(t.participantName)}</strong>`;
           }
         } else {
-          if (isSuperHost || isExaminerRole) {
+          if (isHostUser || !isParticipantRole) {
             participantSlotHtml = `<span style="font-size:0.78rem;color:var(--text-muted);">(ว่าง)</span>`;
           } else {
-            participantSlotHtml = `<button type="button" class="sim-btn-xs" onclick="joinBreakoutTable('${tKey}', 'participant')">+ เป็นผู้เข้าสอบ</button>`;
+            if (myCurrentBreakoutTable && myCurrentBreakoutTable !== tKey) {
+              participantSlotHtml = `<button type="button" class="sim-btn-xs" style="opacity:0.9;" onclick="joinBreakoutTable('${tKey}', 'participant')">ย้ายมาโต๊ะนี้</button>`;
+            } else {
+              participantSlotHtml = `<button type="button" class="sim-btn-xs" onclick="joinBreakoutTable('${tKey}', 'participant')">+ เป็นผู้เข้าสอบ</button>`;
+            }
           }
         }
 
