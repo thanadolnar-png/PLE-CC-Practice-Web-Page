@@ -571,7 +571,7 @@
         padding: 0.2rem 0.55rem;
       }
 
-      /* Theater Modal on Mobile - Full Viewport App Modal */
+      /* Theater Modal on Mobile - Full Viewport App Modal (with dynamic dvh) */
       .theater-modal-overlay {
         padding: 0 !important;
         align-items: flex-end;
@@ -579,8 +579,10 @@
       .theater-modal-card {
         max-width: 100% !important;
         width: 100% !important;
-        height: 100% !important;
+        height: 100vh !important;
+        height: 100dvh !important;
         max-height: 100vh !important;
+        max-height: 100dvh !important;
         border-radius: 0 !important;
         border: none !important;
       }
@@ -591,7 +593,7 @@
         z-index: 10;
       }
       .theater-title {
-        font-size: 0.86rem;
+        font-size: clamp(0.82rem, 0.75rem + 0.4vw, 0.95rem);
         font-weight: 700;
         max-width: calc(100vw - 120px);
         white-space: nowrap;
@@ -607,6 +609,7 @@
         padding: 0.85rem;
         gap: 0.65rem;
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
         flex: 1;
       }
       .theater-nav-row {
