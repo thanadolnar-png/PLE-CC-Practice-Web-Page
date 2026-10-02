@@ -5721,8 +5721,14 @@
             const stScore = t.scores ? (t.scores[st.stationNumber] || t.scores[String(st.stationNumber)]) : null;
             let earned = 0, max = 0;
             if (stScore) {
-              earned = stScore.score || 0;
-              max = stScore.maxScore || 0;
+              if (stScore.earnedScore !== undefined) {
+                earned = stScore.earnedScore;
+              } else if (stScore.score !== undefined) {
+                earned = stScore.score;
+              } else if (c.checklist && (stScore.checkedProgress || stScore.checkedIds)) {
+                earned = calculateStationScore(c.checklist, stScore.checkedProgress || stScore.checkedIds).currentScore;
+              }
+              max = stScore.maxScore || (c.checklist ? calculateStationScore(c.checklist, []).totalScore : 0);
             } else if (c.checklist) {
               const { currentScore, totalScore } = calculateStationScore(c.checklist, []);
               max = totalScore;
@@ -6005,6 +6011,8 @@
                   const s = myTable.scores[stNum];
                   if (s && s.checkedProgress) {
                     SimState.studentScores[stNum] = s.checkedProgress;
+                  } else if (s && s.checkedIds) {
+                    SimState.studentScores[stNum] = s.checkedIds;
                   } else if (Array.isArray(s)) {
                     SimState.studentScores[stNum] = s;
                   }
