@@ -1,13 +1,13 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Version: v_20261002_045854
- * Generated on 2026-10-02 04:58:54
+ * Version: v_20261002_140844
+ * Generated on 2026-10-02 14:08:44
  */
 
 const OFFLINE_DATA = {
-  "version": "v_20261002_045854",
-  "generatedAt": "2026-10-02 04:58:54",
-  "totalCases": 350,
+  "version": "v_20261002_140844",
+  "generatedAt": "2026-10-02 14:08:44",
+  "totalCases": 358,
   "cases": [
     {
       "caseId": "OSPE-CL4801",
@@ -3493,6 +3493,118 @@ const OFFLINE_DATA = {
       "author": "ทีม CC2-Product RxCU83",
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 4",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PD84W101",
+      "title": "Alcohol Dilution: 70% v/v Alcohol from 95% v/v Alcohol",
+      "category": "Product",
+      "mainGroup": "Liquid Dosage Form",
+      "subTopic": "",
+      "disease": "การเจือจางแอลกอฮอล์ (Alcohol Dilution), การคำนวณ C1V1=C2V2, การเลือกกระบอกตวง, การอ่าน Meniscus ที่ระดับสายตา, การอ่านฉลาก 3 ครั้ง",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ทีม CC2-Product RxCU84",
+      "createdDate": "02/10/2026",
+      "source": "โจทย์ซ้อม Week 1 (RxCU84)",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PD84W102",
+      "title": "Dropper Calibration: Water Measurement 0.8 mL",
+      "category": "Product",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "การเทียบหยด (Dropper Calibration), การตวงของเหลวปริมาณน้อย, การคำนวณจำนวนหยด, การปัดเศษทศนิยม",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ทีม CC2-Product RxCU84",
+      "createdDate": "02/10/2026",
+      "source": "โจทย์ซ้อม Week 1 (RxCU84)",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PD84W103",
+      "title": "Filtration & Funnel Assembly: Compound Sodium Bicarbonate Solution",
+      "category": "Product",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "การกรอง (Filtration), การพับกระดาษกรองแบบจีบ (Plaited Filter Paper), การเลือกวัสดุช่วยกรอง, การติดตั้งชุดกรองสารให้ได้สารละลายใส",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ทีม CC2-Product RxCU84",
+      "createdDate": "02/10/2026",
+      "source": "โจทย์ซ้อม Week 1 (RxCU84)",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PD84W104",
+      "title": "Solution Preparation: Sodium Bicarbonate Solution 2% w/v 50 mL",
+      "category": "Product",
+      "mainGroup": "Liquid Dosage Form",
+      "subTopic": "",
+      "disease": "ยาน้ำใส (Oral Solution), การคำนวณ % w/v, การคำนวณ Approximate Volume, การบดลดขนาดผลึกยาก่อนชั่ง, การละลายสารด้วยแท่งแก้ว, การ Rinse ภาชนะ 2 รอบ, การปรับปริมาตร",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ทีม CC2-Product RxCU84",
+      "createdDate": "02/10/2026",
+      "source": "โจทย์ซ้อม Week 1 (RxCU84)",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PD84W201",
+      "title": "Pulverization by Intervention: Camphor Particle Size Reduction",
+      "category": "Product",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "การบดลดขนาดโดยการบดแทรก (Pulverization by Intervention), Camphor, การเลือกใช้โกร่งแก้ว, การระเหยของ Intervening Agent",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ทีม CC2-Product RxCU84",
+      "createdDate": "09/10/2026",
+      "source": "โจทย์ซ้อม Week 2 (RxCU84)",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PD84W202",
+      "title": "Cream Preparation Part 1: Calamine Cream Calculation & Paper Folding",
+      "category": "Product",
+      "mainGroup": "Semisolid Dosage Form",
+      "subTopic": "",
+      "disease": "การคำนวณสูตรตำรับครีม, Master Formula vs Working Formula, การพับกระทงชั่งสารกึ่งแข็ง (กระดาษไขซ้อนกระดาษขาว)",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ทีม CC2-Product RxCU84",
+      "createdDate": "09/10/2026",
+      "source": "โจทย์ซ้อม Week 2 (RxCU84)",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PD84W203",
+      "title": "Cream Preparation Part 2: Cream Base Weighing Technique",
+      "category": "Product",
+      "mainGroup": "Semisolid Dosage Form",
+      "subTopic": "",
+      "disease": "ทักษะการชั่งสารกึ่งแข็ง (Semisolid Weighing), การใช้ Spatula คู่, การปรับสมดุล Tare, เกณฑ์ความคลาดเคลื่อน $\\pm 5\\%$",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ทีม CC2-Product RxCU84",
+      "createdDate": "09/10/2026",
+      "source": "โจทย์ซ้อม Week 2 (RxCU84)",
+      "isActive": true
+    },
+    {
+      "caseId": "OSPE-PD84W204",
+      "title": "Cream Preparation Part 3: Incorporation on Slab & Levigation",
+      "category": "Product",
+      "mainGroup": "Semisolid Dosage Form",
+      "subTopic": "",
+      "disease": "การผสมยาบน Ointment Slab, การเลือก Levigating Agent (Glycerol vs Mineral Oil), การทำ Smooth Paste, Geometric Dilution, Homogeneity Test",
+      "difficulty": 2,
+      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
+      "author": "ทีม CC2-Product RxCU84",
+      "createdDate": "09/10/2026",
+      "source": "โจทย์ซ้อม Week 2 (RxCU84)",
       "isActive": true
     },
     {
