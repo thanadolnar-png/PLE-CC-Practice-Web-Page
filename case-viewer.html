@@ -292,6 +292,9 @@
             <button id="btn-next-linked-station" class="btn btn-primary" style="display: none; width: 100%; font-size: 1rem; padding: 0.75rem; justify-content: center; background: linear-gradient(135deg, var(--primary), var(--secondary));">
               ⏩ ไปยังสถานีต่อเนื่อง (ถัดไป)
             </button>
+            <button class="btn btn-primary" style="width: 100%; font-weight: 700; background: var(--primary); color: #fff;" onclick="toggleViewerScratchpad()">
+              📝 เปิดกระดาษทด (เขียน / พิมพ์)
+            </button>
             <button class="btn btn-secondary" style="width: 100%;" onclick="openSingleCasePrintModal()">
               🖨️ พิมพ์หน้านี้ / เซฟ PDF (ปรับแต่ง)
             </button>
@@ -322,6 +325,7 @@
 
   <script src="case-data-offline.js?v=v_20261002_045854"></script>
   <script src="app.js?v=v_20261002_045854"></script>
+  <script src="scratchpad.js?v=v_20261002_045854"></script>
 
   <script>
     // ─ View Mode & Fullscreen helpers ─
@@ -621,6 +625,10 @@
       if (topbarTitle) topbarTitle.textContent = displayTitle;
       const topbarMeta = document.getElementById('topbar-case-meta');
       if (topbarMeta) topbarMeta.textContent = (c.category || '') + (c.subTopic ? ` · ${c.subTopic}` : '');
+
+      if (window.Scratchpad && caseId) {
+        Scratchpad.setStation('case-' + caseId, displayTitle);
+      }
       
       // Render Case Meta Tags
       const metaContainer = document.getElementById('case-meta-tags');
@@ -1236,6 +1244,16 @@
       closeSingleCasePrintModal();
 
       triggerNativePrint(orient, scale, mode, 'single-case-print-execution-area');
+    }
+
+    // Toggle Scratchpad in Case Viewer
+    function toggleViewerScratchpad() {
+      if (window.Scratchpad) {
+        const caseId = (AppState.currentCase && AppState.currentCase.caseId) || activeCaseId || 'default';
+        const titleEl = document.getElementById('case-title');
+        const label = titleEl ? titleEl.textContent : `เคส ${caseId}`;
+        Scratchpad.toggle('case-' + caseId, label);
+      }
     }
   </script>
 

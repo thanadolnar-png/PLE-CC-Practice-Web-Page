@@ -8,6 +8,7 @@
   <script src="case-data-offline.js?v=v_20261002_045854"></script>
   <script src="case-details-offline.js?v=v_20260930_202218"></script>
   <script src="app.js?v=v_20261002_045854"></script>
+  <script src="scratchpad.js?v=v_20261002_045854"></script>
   <style>
     /* Simulation Source and Topic Selector */
     .sim-filter-section {
@@ -917,6 +918,7 @@
                 <div class="timer-action-btns">
                   <button class="btn ghost btn-sm" id="timer-toggle-btn" onclick="toggleTimer()">⏸ พักตัวจับเวลา</button>
                   <button class="btn outline btn-sm" onclick="resetTimer()">🔄 เริ่มต้นใหม่</button>
+                  <button type="button" class="btn primary btn-sm" id="btn-exam-scratchpad" onclick="toggleSimScratchpad()" style="font-weight: 700; background: var(--primary); color: #fff;">📝 กระดาษทด</button>
                 </div>
               </div>
 
@@ -2566,6 +2568,7 @@
     async function startExamSimulation() {
       SimState.role = 'solo';
       SimState.isLobby = false;
+      if (window.Scratchpad) Scratchpad.resetAll();
       showGlobalLoader(true);
       
       if (SimState.examGenMode === 'custom') {
@@ -3008,6 +3011,11 @@
         document.getElementById('exam-case-title').textContent = c.title;
         document.getElementById('exam-case-id').textContent = c.caseId;
         document.getElementById('exam-case-id').style.display = 'inline';
+      }
+
+      if (window.Scratchpad) {
+        const titleText = (c && c.title) ? c.title : (st.isRest ? 'สถานีพัก' : ('โจทย์สถานีที่ ' + st.stationNumber));
+        Scratchpad.setStation('station-' + st.stationNumber, `สถานีที่ ${st.stationNumber}: ${titleText}`);
       }
       
       function stripSectionHeaders(str) {
@@ -3489,6 +3497,7 @@
 
     // ─── Finish exam ──────────────────────────────────────────
     function finishExamSimulation() {
+      if (window.Scratchpad) Scratchpad.close();
       if (SimState.timerInterval) clearInterval(SimState.timerInterval);
       if (SimState.timerSyncInterval) clearInterval(SimState.timerSyncInterval);
       if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
@@ -3588,6 +3597,16 @@
         if (resultsView) resultsView.style.display = 'block';
         
         window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    // Toggle Scratchpad in exam simulation
+    function toggleSimScratchpad() {
+      if (window.Scratchpad) {
+        const st = SimState.stations && SimState.stations[SimState.currentIdx];
+        const key = st ? ('station-' + st.stationNumber) : 'station-1';
+        const label = st ? (`สถานีที่ ${st.stationNumber}${st.case?.title ? ': ' + st.case.title : ''}`) : 'กระดาษทด';
+        Scratchpad.toggle(key, label);
       }
     }
 
