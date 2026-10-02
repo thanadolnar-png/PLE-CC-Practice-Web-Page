@@ -233,8 +233,10 @@ function renderRichNoteContent(rawHtml) {
               src="${previewUrl}" 
               title="วิดีโอสาธิตเทคนิค / เฉลยสถานี (Google Drive)" 
               frameborder="0" 
-              allow="autoplay" 
-              allowfullscreen 
+              allow="autoplay; fullscreen" 
+              allowfullscreen="true" 
+              webkitallowfullscreen="true" 
+              mozallowfullscreen="true" 
               loading="lazy">
             </iframe>
           </div>

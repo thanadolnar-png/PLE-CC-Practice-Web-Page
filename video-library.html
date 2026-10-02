@@ -451,18 +451,42 @@
       align-items: center;
       gap: 0.5rem;
     }
-    .theater-close-btn {
+    .theater-close-btn,
+    .theater-btn-tool {
       background: transparent;
       border: none;
-      font-size: 1.35rem;
+      font-size: 1.15rem;
       cursor: pointer;
       color: var(--text-muted);
-      padding: 0.2rem 0.5rem;
+      padding: 0.3rem 0.5rem;
       border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+    .theater-btn-tool:hover {
+      color: var(--primary);
+      background: var(--bg-primary);
+    }
+    .theater-close-btn {
+      font-size: 1.35rem;
     }
     .theater-close-btn:hover {
       color: var(--danger);
       background: rgba(239, 68, 68, 0.1);
+    }
+    /* Theater Fullscreen Mode */
+    .theater-modal-card.is-maximized {
+      max-width: 98vw;
+      width: 98vw;
+      max-height: 98vh;
+      height: 98vh;
+    }
+    .theater-modal-card.is-maximized .theater-video-wrapper {
+      flex: 1;
+      padding-top: 0;
+      min-height: 70vh;
     }
     .theater-video-wrapper {
       position: relative;
@@ -653,7 +677,15 @@
         <span>🎬</span>
         <span id="theater-title-text">กำลังโหลดคลิปวิดีโอ...</span>
       </h3>
-      <button class="theater-close-btn" onclick="closeTheaterModal()" title="ปิดหน้าต่าง (Esc)">✕</button>
+      <div style="display: flex; align-items: center; gap: 0.35rem;">
+        <button class="theater-btn-tool" id="theater-maximize-btn" onclick="toggleTheaterMaximize()" title="ขยายเต็มขนาดหน้าต่าง (Maximize)">
+          ⛶
+        </button>
+        <button class="theater-btn-tool" id="theater-fullscreen-btn" onclick="toggleTheaterNativeFullscreen()" title="โหมดเต็มหน้าจอ (Fullscreen F11)">
+          📺
+        </button>
+        <button class="theater-close-btn" onclick="closeTheaterModal()" title="ปิดหน้าต่าง (Esc)">✕</button>
+      </div>
     </div>
     
     <div class="theater-video-wrapper" id="theater-player-box">
@@ -970,8 +1002,10 @@
         <iframe 
           src="https://www.youtube-nocookie.com/embed/${v.videoId}?autoplay=1&rel=0&modestbranding=1" 
           title="${v.title}" 
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-          allowfullscreen>
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" 
+          allowfullscreen="true"
+          webkitallowfullscreen="true"
+          mozallowfullscreen="true">
         </iframe>
       `;
     } else if (v.driveId) {
@@ -979,7 +1013,10 @@
         <iframe 
           src="https://drive.google.com/file/d/${v.driveId}/preview" 
           title="${v.title}" 
-          allow="autoplay; fullscreen">
+          allow="autoplay; fullscreen" 
+          allowfullscreen="true"
+          webkitallowfullscreen="true"
+          mozallowfullscreen="true">
         </iframe>
       `;
     } else {
@@ -1046,9 +1083,40 @@
     }
   }
 
+  function toggleTheaterMaximize() {
+    const card = document.querySelector('.theater-modal-card');
+    const maxBtn = document.getElementById('theater-maximize-btn');
+    if (!card) return;
+    const isMax = card.classList.toggle('is-maximized');
+    if (maxBtn) {
+      maxBtn.textContent = isMax ? '🗗' : '⛶';
+      maxBtn.title = isMax ? 'ย่อขนาดลงเป็นขนาดปกติ' : 'ขยายเต็มขนาดหน้าต่าง (Maximize)';
+    }
+  }
+
+  function toggleTheaterNativeFullscreen() {
+    const modal = document.getElementById('theater-modal');
+    if (!modal) return;
+    if (!document.fullscreenElement) {
+      modal.requestFullscreen().catch(err => {
+        console.warn('Fullscreen request failed:', err);
+        toggleTheaterMaximize();
+      });
+    } else {
+      document.exitFullscreen().catch(err => console.warn(err));
+    }
+  }
+
   function closeTheaterModal() {
     const modal = document.getElementById('theater-modal');
     const playerBox = document.getElementById('theater-player-box');
+    const card = document.querySelector('.theater-modal-card');
+    const maxBtn = document.getElementById('theater-maximize-btn');
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+    if (card) card.classList.remove('is-maximized');
+    if (maxBtn) maxBtn.textContent = '⛶';
     if (playerBox) playerBox.innerHTML = ''; // Stop video playback
     if (modal) modal.classList.remove('show');
     document.body.style.overflow = '';
