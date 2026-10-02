@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>คลังคู่มือทักษะสภาฯ & เอกสารสอบ (PDF Reader) | RxCU OSPE</title>
+  <meta name="description" content="คลังคู่มือทักษะวิชาชีพสภาเภสัชกรรมและเอกสารทางการสำหรับการเตรียมสอบ PLE-CC1 & PLE-CC2 สำหรับนิสิตเภสัชฯ จุฬาฯ">
+  <link rel="stylesheet" href="style.css?v=20261003_044000">
+  <script src="app.js?v=20261003_044000"></script>
+
+  <style>
+    /* ─── Handbook Reader Specific Styles ─── */
+    .handbook-hero-banner {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(59, 130, 246, 0.06) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .handbook-hero-left {
+      flex: 1;
+      min-width: 280px;
+    }
+    .handbook-hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(16, 185, 129, 0.12);
+      color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.2rem 0.65rem;
+      margin-bottom: 0.45rem;
+    }
+    .handbook-hero-title {
+      font-family: var(--font-title);
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin: 0 0 0.35rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .handbook-hero-sub {
+      font-size: 0.86rem;
+      color: var(--text-secondary);
+      margin: 0;
+      line-height: 1.45;
+    }
+
+    /* Document Selector Shelf */
+    .doc-shelf-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 0.85rem 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+    .doc-shelf-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .doc-tabs-list {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: nowrap;
+    }
+    .doc-tab-btn {
+      background: var(--bg-secondary);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.45rem 0.85rem;
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .doc-tab-btn:hover {
+      border-color: var(--primary-light, #93c5fd);
+      color: var(--text-primary);
+    }
+    .doc-tab-btn.active {
+      background: #eff6ff;
+      border-color: #3b82f6;
+      color: #1d4ed8;
+      font-weight: 700;
+      box-shadow: 0 2px 6px rgba(59, 130, 246, 0.15);
+    }
+
+    /* Main Reader Layout */
+    .reader-grid-container {
+      display: grid;
+      grid-template-columns: 310px 1fr;
+      gap: 1rem;
+      align-items: start;
+    }
+
+    @media (max-width: 960px) {
+      .reader-grid-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* TOC Sidebar */
+    .reader-toc-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      position: sticky;
+      top: 75px;
+      max-height: calc(100vh - 90px);
+      overflow-y: auto;
+    }
+    .reader-toc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+    .reader-toc-title {
+      font-family: var(--font-title);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .reader-toc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .toc-item-btn {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.55rem 0.75rem;
+      text-align: left;
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      transition: all 0.15s ease;
+    }
+    .toc-item-btn:hover {
+      background: #f8fafc;
+      border-color: #3b82f6;
+      transform: translateX(2px);
+    }
+    .toc-item-btn.active {
+      background: #f0fdf4;
+      border-color: #10b981;
+      border-left: 4px solid #10b981;
+    }
+    .toc-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .toc-item-page {
+      font-size: 0.72rem;
+      background: rgba(0,0,0,0.06);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--text-secondary);
+      font-family: var(--font-pixel, monospace);
+    }
+    .toc-item-desc {
+      font-size: 0.73rem;
+      color: var(--text-secondary);
+      line-height: 1.35;
+    }
+
+    /* PDF Viewer Area */
+    .reader-main-viewer {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+    }
+    .reader-toolbar {
+      background: #1e293b;
+      color: #f8fafc;
+      padding: 0.65rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      border-bottom: 1px solid #334155;
+    }
+    .reader-toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+    .reader-doc-title-badge {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .reader-page-jump-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.78rem;
+      color: #cbd5e1;
+    }
+    .reader-page-input {
+      width: 55px;
+      padding: 0.25rem 0.4rem;
+      border-radius: 4px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: #fff;
+      font-size: 0.8rem;
+      text-align: center;
+    }
+    .reader-jump-btn {
+      background: #3b82f6;
+      border: none;
+      color: white;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .reader-jump-btn:hover {
+      background: #2563eb;
+    }
+    .reader-toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .reader-tool-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f8fafc;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .reader-tool-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+    .reader-tool-btn-primary {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-color: #059669;
+      color: #ffffff;
+    }
+    .reader-tool-btn-primary:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+    }
+
+    /* Embedded Frame Container */
+    .reader-frame-wrapper {
+      position: relative;
+      width: 100%;
+      height: 780px;
+      background: #525659;
+    }
+    .reader-frame-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+    .reader-frame-wrapper.is-fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 99999;
+    }
+
+    @media (max-width: 640px) {
+      .reader-frame-wrapper {
+        height: 540px;
+      }
+      .reader-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .reader-toolbar-right {
+        width: 100%;
+        justify-content: flex-end;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell shell-handbook" id="appShell">
+
+  <!-- API Connection Status Banner -->
+  <div id="api-status-banner" class="api-banner">
+    <span class="banner-icon">🌐</span>
+    <span class="banner-text">กำลังตรวจสอบสถานะการเชื่อมต่อ...</span>
+  </div>
+
+  <!-- Topbar -->
+  <div class="topbar" id="main-nav">
+    <div class="topbar-left">
+      <a href="index.html" class="topbar-logo" id="nav-logo">
+        <div class="topbar-logo-badge">🥼</div>
+        <span class="topbar-logo-text">RxCU OSPE Hub</span>
+      </a>
+    </div>
+    <div class="topbar-nav-tabs" id="nav-menu">
+      <a href="index.html" class="topbar-nav-tab" id="nav-home">หน้าแรก</a>
+      <a href="case-library.html" class="topbar-nav-tab" id="nav-library">คลังเคส</a>
+      <a href="exam-simulation.html" class="topbar-nav-tab" id="nav-sim">ซ้อมสอบ</a>
+      <a href="video-library.html" class="topbar-nav-tab" id="nav-videos">🎬 คลิปเทคนิค (Product)</a>
+      <a href="handbook-library.html" class="topbar-nav-tab active" id="nav-handbook">📖 คู่มือทักษะสภาฯ</a>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" onclick="toggleFullscreen()" title="เต็มจอ">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Page Viewport -->
+  <div class="page-viewport">
+    <div class="container" style="max-width: 1240px; padding-top: 1rem; padding-bottom: 2.5rem;">
+
+      <!-- Hero Banner -->
+      <div class="handbook-hero-banner">
+        <div class="handbook-hero-left">
+          <div class="handbook-hero-badge">
+            <span>📚</span>
+            <span>Official Pharmacy Council Handbooks & Regulations</span>
+          </div>
+          <h1 class="handbook-hero-title">
+            <span>📖</span>
+            <span>คลังคู่มือทักษะสภาฯ & เอกสารสอบ (PDF Reader)</span>
+          </h1>
+          <p class="handbook-hero-sub">
+            เปิดอ่านหนังสือคู่มือทักษะตามเกณฑ์ความรู้ความสามารถทางวิชาชีพของผู้ประกอบวิชาชีพเภสัชกรรม (สมรรถนะร่วม) พ.ศ. 2562 และเอกสารทางการสำหรับการเตรียมสอบ PLE-CC
+          </p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <a href="./docs/pharmacy-skill-handbook-2562.pdf" target="_blank" class="btn btn-secondary" style="font-size:0.84rem; padding:0.45rem 0.9rem;" title="เปิดดูในแท็บใหม่">
+            ↗️ เปิดในแท็บใหม่
+          </a>
+          <a href="./docs/pharmacy-skill-handbook-2562.pdf" download="คู่มือทักษะสภาเภสัชกรรม2562.pdf" class="btn btn-primary" style="font-size:0.84rem; padding:0.45rem 0.9rem; background: linear-gradient(135deg, #10b981, #059669);" title="ดาวน์โหลดไฟล์ PDF เก็บไว้">
+            ⬇️ ดาวน์โหลด PDF
+          </a>
+        </div>
+      </div>
+
+      <!-- Document Selector Shelf -->
+      <div class="doc-shelf-card">
+        <div class="doc-shelf-label">
+          <span>📑</span> เลือกเอกสาร:
+        </div>
+        <div class="doc-tabs-list" id="doc-tabs-list">
+          <button type="button" class="doc-tab-btn active" onclick="selectDocument('handbook2562')" id="tab-doc-handbook2562">
+            <span>📘</span> คู่มือทักษะวิชาชีพสภาฯ (2562) · 200 หน้า
+          </button>
+          <button type="button" class="doc-tab-btn" onclick="selectDocument('calendar2569')" id="tab-doc-calendar2569">
+            <span>📅</span> ปฏิทินสอบ PLE 2569
+          </button>
+          <button type="button" class="doc-tab-btn" onclick="selectDocument('cc2reg')" id="tab-doc-cc2reg">
+            <span>📋</span> ระเบียบสอบ PLE-CC2 OSPE
+          </button>
+          <button type="button" class="doc-tab-btn" onclick="selectDocument('faqs')" id="tab-doc-faqs">
+            <span>💡</span> คู่มือ FAQs สภาเภสัชกรรม
+          </button>
+        </div>
+      </div>
+
+      <!-- Reader Grid Container -->
+      <div class="reader-grid-container">
+
+        <!-- Table of Contents Sidebar -->
+        <div class="reader-toc-card" id="reader-toc-card">
+          <div class="reader-toc-header">
+            <div class="reader-toc-title">
+              <span>📑</span>
+              <span>สารบัญ & ทางลัดบทเรียน</span>
+            </div>
+            <span style="font-size: 0.72rem; color: var(--text-secondary);" id="toc-item-count">9 หมวด</span>
+          </div>
+
+          <!-- Dynamic Chapter Jump List -->
+          <div class="reader-toc-list" id="reader-toc-list">
+            <!-- Will be injected by JS -->
+          </div>
+        </div>
+
+        <!-- Main PDF Viewer -->
+        <div class="reader-main-viewer">
+          <div class="reader-toolbar">
+            <div class="reader-toolbar-left">
+              <div class="reader-doc-title-badge" id="current-doc-badge">
+                <span>📘</span>
+                <span id="current-doc-name">คู่มือทักษะตามเกณฑ์ความรู้ความสามารถทางวิชาชีพฯ พ.ศ. 2562</span>
+              </div>
+              <div class="reader-page-jump-wrap" id="page-jump-controller">
+                <span>หน้า:</span>
+                <input type="number" id="reader-jump-input" class="reader-page-input" min="1" max="200" value="1" onkeydown="if(event.key==='Enter') jumpToCustomPage()">
+                <button type="button" class="reader-jump-btn" onclick="jumpToCustomPage()">ไป</button>
+              </div>
+            </div>
+
+            <div class="reader-toolbar-right">
+              <button type="button" class="reader-tool-btn" onclick="toggleViewerFullscreen()" title="เปิดตัวอ่านเต็มจอ">
+                <span>🔲</span> เต็มจอ
+              </button>
+              <a href="./docs/pharmacy-skill-handbook-2562.pdf" target="_blank" class="reader-tool-btn" id="reader-ext-link" title="เปิดดูภายนอก">
+                <span>↗️</span> เปิดแยก
+              </a>
+              <a href="./docs/pharmacy-skill-handbook-2562.pdf" download id="reader-download-link" class="reader-tool-btn reader-tool-btn-primary" title="ดาวน์โหลด">
+                <span>⬇️</span> ดาวน์โหลด
+              </a>
+            </div>
+          </div>
+
+          <!-- Embedded PDF Viewer Frame -->
+          <div class="reader-frame-wrapper" id="reader-frame-wrapper">
+            <iframe id="pdf-viewer-frame" src="./docs/pharmacy-skill-handbook-2562.pdf#page=1&zoom=page-width" title="PDF Viewer" allowfullscreen></iframe>
+          </div>
+        </div>
+
+      </div><!-- /.reader-grid-container -->
+
+    </div><!-- /.container -->
+
+    <!-- Footer -->
+    <footer class="footer" id="main-footer" style="margin-top: 2rem; padding: 18px 1.5rem; border-top: 1px solid var(--border); text-align: center;">
+      <div class="container" style="text-align: center;">
+        <p style="margin-bottom: 0.35rem; font-size: 0.82rem; color: var(--text-secondary);">© 2026 คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม (PLE-CC) ปีการศึกษา 2569</p>
+        <p class="footer-credit" style="font-size: 0.78rem; color: var(--ink-soft); margin: 0;">
+          <strong>RxCU OSPE Hub</strong> · พัฒนาโดย คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพฯ นิสิตเภสัชฯ จุฬาฯ
+        </p>
+      </div>
+    </footer>
+
+  </div><!-- /.page-viewport -->
+</div><!-- /.app-shell -->
+
+<script>
+  // ─── DOCUMENT CATALOG CONFIGURATION ───
+  const DOCUMENTS_CONFIG = {
+    handbook2562: {
+      id: 'handbook2562',
+      name: 'คู่มือทักษะตามเกณฑ์ความรู้ความสามารถทางวิชาชีพฯ พ.ศ. 2562 (สภาเภสัชกรรม)',
+      shortName: 'คู่มือทักษะสภาฯ 2562',
+      src: './docs/pharmacy-skill-handbook-2562.pdf',
+      downloadName: 'คู่มือทักษะตามเกณฑ์ความรู้ความสามารถทางวิชาชีพ_2562.pdf',
+      totalPages: 200,
+      toc: [
+        { title: '📖 หน้าปก & สารบัญ', page: 1, desc: 'ข้อมูลการจัดทำ คณะผู้เรียบเรียง คำนำ และโครงสร้างเล่ม' },
+        { title: '⚖️ มิติที่ 1: วิชาชีพ คุณธรรม จรรยาบรรณ', page: 13, desc: 'กฎหมายยา จรรยาบรรณวิชาชีพ การจำแนกประเภท และการตรวจฉลาก' },
+        { title: '📢 มิติที่ 3: สารสนเทศ & การสื่อสาร', page: 19, desc: 'การตอบคำถามทางยา แหล่งข้อมูลปฐมภูมิ-ตติยภูมิ และหลักการสื่อสาร' },
+        { title: '🔬 มิติที่ 4: เภสัชภัณฑ์ & เคมีภัณฑ์', page: 32, desc: 'การระบุรูปแบบยา ยาเสื่อมสภาพ วันสิ้นอายุยา บรรจุภัณฑ์ และรายชื่อยาเก็บพ้นแสง' },
+        { title: '🧪 มิติที่ 5: การจัดหา & การเตรียมยาเฉพาะราย', page: 59, desc: 'เทคนิคการชั่งตวง การผสม การเตรียมยาน้ำ/กึ่งแข็ง และ Aliquot' },
+        { title: '🗣️ มิติที่ 6: การบริบาลเบื้องต้น & การจ่ายยา', page: 88, desc: 'การสัมภาษณ์ผู้ป่วย การตรวจใบสั่งยา การเลือกฉลากช่วย และการประเมิน ADR' },
+        { title: '🎯 ภาคผนวก ก: ยาที่มีเทคนิคพิเศษ', page: 130, desc: 'ยาพ่น MDI, Accuhaler, Turbuhaler, Handihaler, Easyhaler, Swinghaler, ยาหยอดตา/หู/จมูก, ยาเหน็บ, ยาฉีดอินซูลิน, ยาคุมกำเนิด' },
+        { title: '⚠️ ภาคผนวก ข: ยาที่ต้องระมัดระวังเป็นพิเศษ', page: 164, desc: 'Narrow therapeutic & High alert drugs (Digoxin, Phenytoin, Theophylline, Warfarin, Methotrexate, Dopamine, KCl ฯลฯ)' },
+        { title: '📋 ภาคผนวก ค: แบบฟอร์มรายงาน ADR', page: 185, desc: 'การกรอกแบบฟอร์ม อย., WHO Criteria และ Naranjo’s Algorithm' },
+        { title: '📚 บรรณานุกรม', page: 198, desc: 'รายการเอกสารอ้างอิงและตำรับยามาตรฐาน' }
+      ]
+    },
+    calendar2569: {
+      id: 'calendar2569',
+      name: 'ปฏิทินการสอบความรู้เพื่อขอขึ้นทะเบียนฯ ประจำปีการศึกษา 2569',
+      shortName: 'ปฏิทินสอบ 2569',
+      src: './docs/ple-calendar-2569.pdf',
+      downloadName: 'ปฏิทินสอบ_PLE_2569.pdf',
+      totalPages: 2,
+      toc: [
+        { title: '📅 ปฏิทินสอบ PLE-CC1 & PLE-CC2 ประจำปี 2569', page: 1, desc: 'กำหนดการรับสมัคร วันสอบ และการประกาศผลสอบ' }
+      ]
+    },
+    cc2reg: {
+      id: 'cc2reg',
+      name: 'ระเบียบและข้อปฏิบัติการสอบทักษะวิชาชีพ PLE-CC2 (OSPE)',
+      shortName: 'ระเบียบสอบ CC2',
+      src: './docs/ple-cc2-regulations.pdf',
+      downloadName: 'ระเบียบข้อปฏิบัติการสอบ_CC2.pdf',
+      totalPages: 4,
+      toc: [
+        { title: '📋 ข้อปฏิบัติการสอบ PLE-CC2', page: 1, desc: 'แนวทางการเข้าห้องสอบ กฎการแต่งกาย และเกณฑ์ประเมิน' }
+      ]
+    },
+    faqs: {
+      id: 'faqs',
+      name: 'คู่มือและคำถามที่พบบ่อย (FAQs) สภาเภสัชกรรม',
+      shortName: 'FAQs สภาเภสัชกรรม',
+      src: './docs/ple-faqs.pdf',
+      downloadName: 'FAQs_สภาเภสัชกรรม.pdf',
+      totalPages: 25,
+      toc: [
+        { title: '💡 FAQs ข้อสงสัยการสอบใบประกอบวิชาชีพ', page: 1, desc: 'รวมคำถาม-คำตอบที่พบบ่อยเกี่ยวกับการสอบและการขึ้นทะเบียน' }
+      ]
+    }
+  };
+
+  let currentDocKey = 'handbook2562';
+  let currentPage = 1;
+
+  function selectDocument(docKey) {
+    const doc = DOCUMENTS_CONFIG[docKey];
+    if (!doc) return;
+    currentDocKey = docKey;
+    currentPage = 1;
+
+    // Update Doc Tabs
+    document.querySelectorAll('.doc-tab-btn').forEach(btn => btn.classList.remove('active'));
+    const activeTab = document.getElementById(`tab-doc-${docKey}`);
+    if (activeTab) activeTab.classList.add('active');
+
+    // Update Toolbar
+    const badge = document.getElementById('current-doc-name');
+    if (badge) badge.textContent = doc.name;
+
+    const extLink = document.getElementById('reader-ext-link');
+    if (extLink) extLink.href = doc.src;
+
+    const dlLink = document.getElementById('reader-download-link');
+    if (dlLink) {
+      dlLink.href = doc.src;
+      dlLink.download = doc.downloadName || 'document.pdf';
+    }
+
+    const jumpInp = document.getElementById('reader-jump-input');
+    if (jumpInp) {
+      jumpInp.max = doc.totalPages;
+      jumpInp.value = 1;
+    }
+
+    // Render TOC
+    renderTOC(doc);
+
+    // Load PDF in iframe
+    loadPdfPage(doc.src, 1);
+  }
+
+  function renderTOC(doc) {
+    const tocList = document.getElementById('reader-toc-list');
+    const tocCount = document.getElementById('toc-item-count');
+    if (!tocList) return;
+
+    if (tocCount) tocCount.textContent = `${doc.toc.length} รายการ`;
+    tocList.innerHTML = '';
+
+    doc.toc.forEach((item, idx) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `toc-item-btn ${idx === 0 ? 'active' : ''}`;
+      btn.onclick = () => jumpToChapter(item.page, btn);
+      btn.innerHTML = `
+        <div class="toc-item-top">
+          <span>${item.title}</span>
+          <span class="toc-item-page">p.${item.page}</span>
+        </div>
+        <div class="toc-item-desc">${item.desc}</div>
+      `;
+      tocList.appendChild(btn);
+    });
+  }
+
+  function jumpToChapter(pageNumber, btnEl) {
+    currentPage = pageNumber;
+    const doc = DOCUMENTS_CONFIG[currentDocKey];
+    if (!doc) return;
+
+    // Update active state in TOC list
+    document.querySelectorAll('.toc-item-btn').forEach(b => b.classList.remove('active'));
+    if (btnEl) btnEl.classList.add('active');
+
+    // Update Jump input
+    const jumpInp = document.getElementById('reader-jump-input');
+    if (jumpInp) jumpInp.value = pageNumber;
+
+    loadPdfPage(doc.src, pageNumber);
+  }
+
+  function jumpToCustomPage() {
+    const jumpInp = document.getElementById('reader-jump-input');
+    const pageNum = parseInt(jumpInp ? jumpInp.value : '1', 10);
+    const doc = DOCUMENTS_CONFIG[currentDocKey];
+    if (!doc) return;
+
+    if (isNaN(pageNum) || pageNum < 1) return;
+    currentPage = Math.min(pageNum, doc.totalPages);
+    if (jumpInp) jumpInp.value = currentPage;
+
+    loadPdfPage(doc.src, currentPage);
+  }
+
+  function loadPdfPage(pdfSrc, pageNum) {
+    const iframe = document.getElementById('pdf-viewer-frame');
+    if (!iframe) return;
+    iframe.src = `${pdfSrc}#page=${pageNum}&zoom=page-width`;
+  }
+
+  function toggleViewerFullscreen() {
+    const wrapper = document.getElementById('reader-frame-wrapper');
+    if (!wrapper) return;
+    wrapper.classList.toggle('is-fullscreen');
+    if (wrapper.classList.contains('is-fullscreen')) {
+      // Add Escape listener
+      const handleEsc = (e) => {
+        if (e.key === 'Escape') {
+          wrapper.classList.remove('is-fullscreen');
+          document.removeEventListener('keydown', handleEsc);
+        }
+      };
+      document.addEventListener('keydown', handleEsc);
+    }
+  }
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+      document.body.classList.toggle('is-fullscreen');
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+      document.body.classList.remove('is-fullscreen');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Check URL Param e.g. ?doc=handbook2562&page=130
+    const urlParams = new URLSearchParams(window.location.search);
+    const docParam = urlParams.get('doc');
+    const pageParam = parseInt(urlParams.get('page') || '1', 10);
+
+    const initialDoc = (docParam && DOCUMENTS_CONFIG[docParam]) ? docParam : 'handbook2562';
+    selectDocument(initialDoc);
+
+    if (pageParam && pageParam > 1) {
+      setTimeout(() => {
+        const jumpInp = document.getElementById('reader-jump-input');
+        if (jumpInp) jumpInp.value = pageParam;
+        jumpToCustomPage();
+      }, 300);
+    }
+  });
+</script>
+</body>
+</html>
