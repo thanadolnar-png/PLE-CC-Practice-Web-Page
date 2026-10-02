@@ -5226,3 +5226,9 @@ body.is-printing #batch-print-execution-area {
   font-weight: 700;
   font-size: 0.84rem;
 }
+
+@media (max-width: 680px) {
+  .lobby-header-layout {
+    grid-template-columns: 1fr !important;
+  }
+}
