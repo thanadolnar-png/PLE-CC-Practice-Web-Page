@@ -189,19 +189,34 @@ window.extractYouTubeVideoId = extractYouTubeVideoId;
 window.renderRichNoteContent = renderRichNoteContent;
 
 // ──────────────────────────────────────────────────────────────
-// 🎵 BACKGROUND MUSIC PLAYER (ดนตรีให้กำลังใจม่วนๆ)
+// 🎵 BACKGROUND MUSIC PLAYER (Multi-track BGM Playlist)
 // ──────────────────────────────────────────────────────────────
 const BgmManager = {
   audio: null,
   isPlaying: false,
   volume: 0.35,
-  trackName: 'ดนตรีให้กำลังใจม่วนๆ',
-  src: './bgm-muan-muan.mp3',
+  currentTrackIndex: 0,
+  tracks: [
+    { id: 'muan', name: 'ดนตรีให้กำลังใจม่วนๆ', src: './bgm-muan-muan.mp3' },
+    { id: 'susu', name: 'OSPE SUSU', src: './bgm-ospe-susu.mp3' }
+  ],
+
+  get currentTrack() {
+    return this.tracks[this.currentTrackIndex] || this.tracks[0];
+  },
 
   init() {
     if (this.audio) return;
     try {
-      this.audio = new Audio(this.src);
+      const savedTrack = localStorage.getItem('ple_bgm_track_index');
+      if (savedTrack !== null) {
+        const idx = parseInt(savedTrack, 10);
+        if (!isNaN(idx) && idx >= 0 && idx < this.tracks.length) {
+          this.currentTrackIndex = idx;
+        }
+      }
+
+      this.audio = new Audio(this.currentTrack.src);
       this.audio.loop = true;
       this.audio.preload = 'auto';
 
@@ -262,6 +277,31 @@ const BgmManager = {
     }
   },
 
+  switchTrack(index) {
+    if (index < 0 || index >= this.tracks.length) return;
+    const wasPlaying = this.isPlaying;
+    this.currentTrackIndex = index;
+    localStorage.setItem('ple_bgm_track_index', index.toString());
+
+    if (this.audio) {
+      this.audio.pause();
+      this.audio.src = this.currentTrack.src;
+      this.audio.currentTime = 0;
+      this.audio.volume = this.volume;
+    }
+
+    if (wasPlaying) {
+      this.play().catch(() => {});
+    } else {
+      this.updateUI();
+    }
+  },
+
+  nextTrack() {
+    const nextIdx = (this.currentTrackIndex + 1) % this.tracks.length;
+    this.switchTrack(nextIdx);
+  },
+
   setVolume(val) {
     this.volume = Math.max(0, Math.min(1, parseFloat(val) || 0));
     if (this.audio) this.audio.volume = this.volume;
@@ -278,16 +318,23 @@ const BgmManager = {
     pill.className = 'ple-bgm-pill';
     pill.innerHTML = `
       <div class="ple-bgm-inner">
-        <button type="button" class="ple-bgm-toggle-btn" id="ple-bgm-toggle-btn" onclick="BgmManager.toggle()" title="เปิด/ปิด ${this.trackName}">
+        <button type="button" class="ple-bgm-toggle-btn" id="ple-bgm-toggle-btn" onclick="BgmManager.toggle()" title="เปิด/ปิดเพลง">
           <span class="ple-bgm-icon" id="ple-bgm-icon">🎵</span>
           <span class="ple-bgm-waves" id="ple-bgm-waves">
             <span></span><span></span><span></span>
           </span>
         </button>
-        <div class="ple-bgm-info" onclick="BgmManager.toggle()">
-          <span class="ple-bgm-title">${this.trackName}</span>
-          <span class="ple-bgm-status" id="ple-bgm-status">คลิกเพื่อเปิดเพลง</span>
+        <div class="ple-bgm-info">
+          <div class="ple-bgm-title-row">
+            <span class="ple-bgm-title" id="ple-bgm-title" onclick="BgmManager.toggle()">${this.currentTrack.name}</span>
+          </div>
+          <div class="ple-bgm-sub-row">
+            <span class="ple-bgm-status" id="ple-bgm-status" onclick="BgmManager.toggle()">คลิกเพื่อเปิดเพลง</span>
+          </div>
         </div>
+        <button type="button" class="ple-bgm-next-btn" id="ple-bgm-next-btn" onclick="BgmManager.nextTrack()" title="เปลี่ยนเพลง (Switch Track)">
+          ⏭️
+        </button>
         <div class="ple-bgm-vol-wrap">
           <input type="range" class="ple-bgm-slider" id="ple-bgm-slider" min="0" max="1" step="0.05" value="${this.volume}" oninput="BgmManager.setVolume(this.value)" title="ปรับระดับเสียงดนตรี">
         </div>
@@ -296,14 +343,14 @@ const BgmManager = {
     `;
     document.body.appendChild(pill);
 
-    // 2. Also inject Topbar Music button if topbar-right exists
+    // 2. Inject Topbar Music button if topbar-right exists
     const topbarRight = document.querySelector('.topbar .topbar-right');
     if (topbarRight && !document.getElementById('topbar-bgm-btn')) {
       const topBtn = document.createElement('button');
       topBtn.type = 'button';
       topBtn.id = 'topbar-bgm-btn';
       topBtn.className = 'icon-btn topbar-bgm-icon-btn';
-      topBtn.title = `🎵 ${this.trackName} (เปิด/ปิดเพลง)`;
+      topBtn.title = `🎵 ${this.currentTrack.name} (เปิด/ปิดเพลง)`;
       topBtn.onclick = () => BgmManager.toggle();
       topBtn.innerHTML = `<span>🎵</span>`;
       topbarRight.insertBefore(topBtn, topbarRight.firstChild);
@@ -311,29 +358,34 @@ const BgmManager = {
   },
 
   updateUI() {
-    const toggleBtn = document.getElementById('ple-bgm-toggle-btn');
     const pill = document.getElementById('ple-bgm-floating-bar');
     const icon = document.getElementById('ple-bgm-icon');
+    const title = document.getElementById('ple-bgm-title');
     const status = document.getElementById('ple-bgm-status');
     const slider = document.getElementById('ple-bgm-slider');
     const topBtn = document.getElementById('topbar-bgm-btn');
+    const nextBtn = document.getElementById('ple-bgm-next-btn');
 
+    if (title) title.textContent = this.currentTrack.name;
     if (slider) slider.value = this.volume;
+    if (nextBtn) nextBtn.title = `เปลี่ยนเพลง (แทร็กที่ ${this.currentTrackIndex + 1}/${this.tracks.length})`;
 
     if (this.isPlaying) {
       if (pill) pill.classList.add('is-playing');
       if (icon) icon.textContent = '🎶';
-      if (status) status.textContent = `กำลังเล่น · ${Math.round(this.volume * 100)}%`;
+      if (status) status.textContent = `กำลังเล่น [${this.currentTrackIndex + 1}/${this.tracks.length}] · ${Math.round(this.volume * 100)}%`;
       if (topBtn) {
         topBtn.classList.add('is-active-music');
+        topBtn.title = `🎶 กำลังเล่น: ${this.currentTrack.name} (คลิกเพื่อหยุด)`;
         topBtn.innerHTML = '<span style="animation: pulse 1s infinite; display: inline-block;">🎶</span>';
       }
     } else {
       if (pill) pill.classList.remove('is-playing');
       if (icon) icon.textContent = '🎵';
-      if (status) status.textContent = 'ปิดเพลงอยู่ (คลิกเพื่อเล่น)';
+      if (status) status.textContent = `ปิดเพลงอยู่ [${this.currentTrackIndex + 1}/${this.tracks.length}] (คลิกเล่น)`;
       if (topBtn) {
         topBtn.classList.remove('is-active-music');
+        topBtn.title = `🎵 ${this.currentTrack.name} (คลิกเพื่อเปิดเพลง)`;
         topBtn.innerHTML = '<span>🎵</span>';
       }
     }

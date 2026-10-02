@@ -5866,6 +5866,24 @@ body.is-printing #batch-print-execution-area {
   line-height: 1.1;
 }
 
+.ple-bgm-next-btn {
+  background: transparent;
+  border: none;
+  font-size: 0.82rem;
+  padding: 0.2rem 0.3rem;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.ple-bgm-next-btn:hover {
+  background: #e2e8f0;
+  transform: scale(1.1);
+}
+
 .ple-bgm-vol-wrap {
   display: flex;
   align-items: center;
@@ -5898,6 +5916,7 @@ body.is-printing #batch-print-execution-area {
 }
 
 .ple-bgm-pill.is-minimized .ple-bgm-info,
+.ple-bgm-pill.is-minimized .ple-bgm-next-btn,
 .ple-bgm-pill.is-minimized .ple-bgm-vol-wrap,
 .ple-bgm-pill.is-minimized .ple-bgm-close-btn {
   display: none;
