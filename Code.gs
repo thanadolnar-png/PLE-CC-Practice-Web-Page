@@ -184,6 +184,10 @@ function doGet(e) {
           
         case 'getReports':
           return buildResponse(getCaseReports(e.parameter));
+
+        case 'testEquation':
+        case 'getDocEquations':
+          return buildResponse(getDocEquations(e.parameter.docId));
           
         default:
           return buildResponse({ error: 'Invalid action parameter' }, 400);
@@ -377,15 +381,29 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
   const sections = [];
   function addTabSec_(tab) {
     const dt = tab.documentTab;
+    const title = (tab.tabProperties && tab.tabProperties.title) || '';
     if (dt && dt.body && dt.body.content) {
-      sections.push({ content: dt.body.content, inlineObjects: dt.inlineObjects || {}, lists: dt.lists || docJson.lists || {} });
+      sections.push({ title: title, content: dt.body.content, inlineObjects: dt.inlineObjects || {}, lists: dt.lists || docJson.lists || {} });
     }
     (tab.childTabs || []).forEach(addTabSec_);
   }
   if (docJson.tabs && docJson.tabs.length > 0) {
     docJson.tabs.forEach(addTabSec_);
   } else {
-    sections.push({ content: (docJson.body && docJson.body.content) || [], inlineObjects: docJson.inlineObjects || {}, lists: docJson.lists || {} });
+    sections.push({ title: 'Root', content: (docJson.body && docJson.body.content) || [], inlineObjects: docJson.inlineObjects || {}, lists: docJson.lists || {} });
+  }
+
+  let docEquationsMap = null;
+  function getTabEquations_(tabTitle) {
+    if (docEquationsMap === null) {
+      try {
+        docEquationsMap = getDocEquations(docId) || {};
+      } catch(e) {
+        Logger.log('Could not load doc equations: ' + e);
+        docEquationsMap = {};
+      }
+    }
+    return (docEquationsMap && docEquationsMap[tabTitle]) ? docEquationsMap[tabTitle] : [];
   }
 
   // Image cache
@@ -424,13 +442,25 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
     return s;
   }
 
-  function getParaTxt_(para) {
-    return (para.elements || []).map(el => (el.textRun && el.textRun.content) || '').join('').trim();
+  function getParaTxt_(para, tabEquations) {
+    return (para.elements || []).map(function(el) {
+      if (el.textRun) return el.textRun.content || '';
+      if (el.equation && tabEquations && tabEquations.length > 0) {
+        const unused = tabEquations.find(function(e) { return !e.usedTxt; });
+        if (unused) {
+          unused.usedTxt = true;
+          return unused.directText || '';
+        }
+      }
+      return '';
+    }).join('').trim();
   }
 
-  function renderEls_(elements, inlineObjects) {
+  function renderEls_(elements, inlineObjects, tabEquations) {
     let html = ''; let hasImg = false;
-    for (const el of (elements || [])) {
+    const els = elements || [];
+    for (let elIdx = 0; elIdx < els.length; elIdx++) {
+      const el = els[elIdx];
       if (el.textRun) {
         const t = el.textRun.content || '';
         if (t === '\n') continue;
@@ -441,6 +471,35 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
           hasImg = true;
           html += '</p><div class="case-image-wrapper" style="text-align:center;margin:12px 0;"><img src="' + dataUri + '" class="case-image" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);" alt="รูปภาพประกอบเคส"/></div><p>';
         }
+      } else if (el.equation) {
+        let eqHtml = '<span class="doc-equation">[สมการ]</span>';
+        if (tabEquations && tabEquations.length > 0) {
+          const prevRun = elIdx > 0 && els[elIdx - 1].textRun ? (els[elIdx - 1].textRun.content || '') : '';
+          const nextRun = elIdx < els.length - 1 && els[elIdx + 1].textRun ? (els[elIdx + 1].textRun.content || '') : '';
+          const prevEnd = prevRun.slice(-20);
+          const nextStart = nextRun.slice(0, 20);
+          
+          let matchedIdx = -1;
+          for (let m = 0; m < tabEquations.length; m++) {
+            const candidate = tabEquations[m];
+            if (!candidate.used) {
+              const preMatch = prevEnd && candidate.preText && (candidate.preText.indexOf(prevEnd) !== -1 || prevEnd.indexOf(candidate.preText) !== -1);
+              const postMatch = nextStart && candidate.postText && (candidate.postText.indexOf(nextStart) !== -1 || nextStart.indexOf(candidate.postText) !== -1);
+              if (preMatch || postMatch) {
+                matchedIdx = m;
+                break;
+              }
+            }
+          }
+          if (matchedIdx === -1) {
+            matchedIdx = tabEquations.findIndex(function(e) { return !e.used; });
+          }
+          if (matchedIdx !== -1) {
+            tabEquations[matchedIdx].used = true;
+            eqHtml = tabEquations[matchedIdx].html;
+          }
+        }
+        html += eqHtml;
       }
     }
     return { html: html, hasImg: hasImg };
@@ -489,9 +548,9 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
     return out.join('');
   }
 
-  function parsePara_(para, inlineObjects, listsDict) {
+  function parsePara_(para, inlineObjects, listsDict, tabEqs) {
     if (!para.elements || para.elements.length === 0) return '';
-    const { html, hasImg } = renderEls_(para.elements, inlineObjects);
+    const { html, hasImg } = renderEls_(para.elements, inlineObjects, tabEqs);
     const trimmed = html.trim();
     if (!trimmed && !hasImg) return '';
 
@@ -521,7 +580,7 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
     }
   }
 
-  function parseTable_(table, inlineObjects, listsDict) {
+  function parseTable_(table, inlineObjects, listsDict, tabEqs) {
     const rows = table.tableRows || [];
     if (rows.length === 0) return '';
 
@@ -558,10 +617,10 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
         let cellHtml = '';
         for (const cnt of (cell.content || [])) {
           if (cnt.paragraph) {
-            const pRes = renderEls_(cnt.paragraph.elements, inlineObjects);
+            const pRes = renderEls_(cnt.paragraph.elements, inlineObjects, tabEqs);
             if (pRes.html) cellHtml += pRes.html;
           } else if (cnt.table) {
-            cellHtml += parseTable_(cnt.table, inlineObjects, listsDict);
+            cellHtml += parseTable_(cnt.table, inlineObjects, listsDict, tabEqs);
           }
         }
         const cellStyle = colWidthPct ? ' style="width:' + colWidthPct + '%;padding:6px;vertical-align:middle;text-align:center;"' : ' style="border:1px solid #e2e8f0;padding:0.5rem 0.75rem;"';
@@ -580,15 +639,33 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
   }
 
   // Parse each tab section
-  for (const { content, inlineObjects, lists } of sections) {
+  for (const { title, content, inlineObjects, lists } of sections) {
     let recording = false, currentSection = 'METADATA', caseSource = '';
     let scenario = '', contentHtml = '', patientInfoHtml = '', equipmentHtml = '', noteHtml = '';
     const checklist = []; let currentGroup = '';
 
+    // Check if section contains equations
+    let currentTabEqs = null;
+    const hasEq = content.some(function(se) {
+      return (se.paragraph && (se.paragraph.elements || []).some(function(el) { return !!el.equation; })) ||
+             (se.table && (se.table.tableRows || []).some(function(row) {
+               return (row.tableCells || []).some(function(cell) {
+                 return (cell.content || []).some(function(cnt) {
+                   return cnt.paragraph && (cnt.paragraph.elements || []).some(function(el) { return !!el.equation; });
+                 });
+               });
+             }));
+    });
+    if (hasEq) {
+      currentTabEqs = getTabEquations_(title).map(function(e) {
+        return Object.assign({}, e, { used: false, usedTxt: false });
+      });
+    }
+
     for (const se of content) {
       if (se.paragraph) {
         const para = se.paragraph;
-        const text = getParaTxt_(para);
+        const text = getParaTxt_(para, currentTabEqs);
         const cm = text.match(/^#+\s*[\[{]([A-Z0-9\-]+)[\]}]/) || text.match(/^[\[{]([A-Z0-9\-]+)[\]}]/);
         if (cm) {
           if (cm[1].trim() === cleanTarget) { recording = true; currentSection = 'METADATA'; caseSource = ''; }
@@ -627,13 +704,13 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
         }
 
         if (currentSection === 'SCENARIO') {
-          const ph = parsePara_(para, inlineObjects, lists); if (ph) { contentHtml += ph; scenario += text + '\n'; }
+          const ph = parsePara_(para, inlineObjects, lists, currentTabEqs); if (ph) { contentHtml += ph; scenario += text + '\n'; }
         } else if (currentSection === 'PATIENT_INFO') {
-          const ph = parsePara_(para, inlineObjects, lists); if (ph) patientInfoHtml += ph;
+          const ph = parsePara_(para, inlineObjects, lists, currentTabEqs); if (ph) patientInfoHtml += ph;
         } else if (currentSection === 'EQUIPMENT') {
-          const ph = parsePara_(para, inlineObjects, lists); if (ph) equipmentHtml += ph;
+          const ph = parsePara_(para, inlineObjects, lists, currentTabEqs); if (ph) equipmentHtml += ph;
         } else if (currentSection === 'NOTE') {
-          const ph = parsePara_(para, inlineObjects, lists); if (ph) noteHtml += ph;
+          const ph = parsePara_(para, inlineObjects, lists, currentTabEqs); if (ph) noteHtml += ph;
         } else if (currentSection === 'CHECKLIST') {
           if (!text) continue;
           let itemText = text;
@@ -656,7 +733,7 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
 
       } else if (se.table) {
         if (!recording) continue;
-        const th = parseTable_(se.table);
+        const th = parseTable_(se.table, inlineObjects, lists, currentTabEqs);
         if (currentSection === 'PATIENT_INFO') patientInfoHtml += th;
         else if (currentSection === 'NOTE') noteHtml += th;
         else if (currentSection === 'EQUIPMENT') equipmentHtml += th;
@@ -1356,6 +1433,8 @@ function parseParagraphToHtml(paragraph) {
       } catch (e) {
         html += `<span class="image-error" style="color: red; font-size: 0.8rem;">[ไม่สามารถแสดงรูปภาพได้: ${e.toString()}]</span>`;
       }
+    } else if (type === DocumentApp.ElementType.EQUATION) {
+      html += renderEquationElementToHtml_(child);
     }
   }
   
@@ -3396,3 +3475,242 @@ function checkInBooking(bookingId, studentId) {
 // ════════════════════════════════════════════════════════════════════
 //  END OF ROOM BOOKING SYSTEM
 // ════════════════════════════════════════════════════════════════════
+
+// ============================================================
+// Google Docs Equation Rendering Subsystem
+// Converts DocumentApp Equation AST into clean, standards-compliant HTML
+// ============================================================
+
+const MATH_SYMBOLS_MAP = {
+  // Greek Lowercase
+  '\\alpha': '&alpha;', '\\beta': '&beta;', '\\gamma': '&gamma;', '\\delta': '&delta;',
+  '\\epsilon': '&epsilon;', '\\zeta': '&zeta;', '\\eta': '&eta;', '\\theta': '&theta;',
+  '\\iota': '&iota;', '\\kappa': '&kappa;', '\\lambda': '&lambda;', '\\mu': '&mu;',
+  '\\nu': '&nu;', '\\xi': '&xi;', '\\pi': '&pi;', '\\rho': '&rho;',
+  '\\sigma': '&sigma;', '\\tau': '&tau;', '\\upsilon': '&upsilon;', '\\phi': '&phi;',
+  '\\chi': '&chi;', '\\psi': '&psi;', '\\omega': '&omega;',
+  // Greek Uppercase
+  '\\Gamma': '&Gamma;', '\\Delta': '&Delta;', '\\Theta': '&Theta;', '\\Lambda': '&Lambda;',
+  '\\Xi': '&Xi;', '\\Pi': '&Pi;', '\\Sigma': '&Sigma;', '\\Phi': '&Phi;',
+  '\\Psi': '&Psi;', '\\Omega': '&Omega;',
+  // Math Relations & Operators
+  '\\geq': '&ge;', '\\ge': '&ge;', '\\leq': '&le;', '\\le': '&le;',
+  '\\neq': '&ne;', '\\ne': '&ne;', '\\approx': '&asymp;', '\\equiv': '&equiv;',
+  '\\sim': '&sim;', '\\pm': '&plusmn;', '\\mp': '&#8723;',
+  '\\times': '&times;', '\\div': '&divide;', '\\cdot': '&middot;', '\\ast': '&lowast;',
+  '\\circ': '&deg;', '\\degree': '&deg;',
+  // Set theory & Logic
+  '\\in': '&isin;', '\\notin': '&notin;', '\\subset': '&sub;', '\\supset': '&sup;',
+  '\\cup': '&cup;', '\\cap': '&cap;', '\\forall': '&forall;', '\\exists': '&exist;',
+  '\\infty': '&infin;', '\\partial': '&part;', '\\nabla': '&nabla;',
+  // Arrows
+  '\\to': '&rarr;', '\\rightarrow': '&rarr;', '\\leftarrow': '&larr;',
+  '\\Rightarrow': '&rArr;', '\\Leftarrow': '&lArr;', '\\leftrightarrow': '&harr;',
+  '\\Leftrightarrow': '&hArr;'
+};
+
+function formatMathSymbol_(code) {
+  if (!code) return '';
+  if (MATH_SYMBOLS_MAP[code]) return MATH_SYMBOLS_MAP[code];
+  if (code.startsWith('\\')) {
+    return escapeHtml(code.substring(1));
+  }
+  return escapeHtml(code);
+}
+
+function renderEquationElementToHtml_(elem) {
+  if (!elem) return '';
+  const type = elem.getType();
+  
+  if (type === DocumentApp.ElementType.TEXT) {
+    const txt = elem.asText().getText() || '';
+    return escapeHtml(txt);
+  }
+  
+  if (type === DocumentApp.ElementType.EQUATION_SYMBOL) {
+    const sym = elem.asEquationSymbol();
+    const code = sym.getCode ? sym.getCode() : '';
+    if (code) return formatMathSymbol_(code);
+    return escapeHtml(elem.asText ? elem.asText().getText() : '');
+  }
+  
+  if (type === DocumentApp.ElementType.EQUATION_FUNCTION) {
+    const fn = elem.asEquationFunction();
+    const code = fn.getCode ? fn.getCode() : '';
+    const numChildren = fn.getNumChildren ? fn.getNumChildren() : 0;
+    
+    // Group children by arguments (separated by EQUATION_FUNCTION_ARGUMENT_SEPARATOR)
+    const args = [];
+    let curArg = [];
+    for (let i = 0; i < numChildren; i++) {
+      const c = fn.getChild(i);
+      if (c.getType() === DocumentApp.ElementType.EQUATION_FUNCTION_ARGUMENT_SEPARATOR) {
+        args.push(curArg);
+        curArg = [];
+      } else {
+        curArg.push(c);
+      }
+    }
+    if (curArg.length > 0 || args.length === 0) {
+      args.push(curArg);
+    }
+    
+    const renderArgList = function(list) {
+      return list.map(function(c) { return renderEquationElementToHtml_(c); }).join('');
+    };
+    
+    if (code === '\\subscript') {
+      const baseHtml = args.length > 0 ? renderArgList(args[0]) : '';
+      const subHtml = args.length > 1 ? renderArgList(args[1]) : '';
+      return `${baseHtml}<sub>${subHtml}</sub>`;
+    }
+    
+    if (code === '\\superscript') {
+      const baseHtml = args.length > 0 ? renderArgList(args[0]) : '';
+      const supHtml = args.length > 1 ? renderArgList(args[1]) : '';
+      return `${baseHtml}<sup>${supHtml}</sup>`;
+    }
+    
+    if (code === '\\frac') {
+      const numHtml = args.length > 0 ? renderArgList(args[0]) : '';
+      const denHtml = args.length > 1 ? renderArgList(args[1]) : '';
+      return `<span class="equation-fraction"><span class="equation-num">${numHtml}</span><span class="equation-denom">${denHtml}</span></span>`;
+    }
+    
+    if (code === '\\sqrt') {
+      const radicand = args.length > 0 ? renderArgList(args[0]) : '';
+      return `<span class="equation-sqrt">&radic;<span class="equation-radicand" style="text-decoration:overline;">${radicand}</span></span>`;
+    }
+    
+    // Default for other functions: render all arguments
+    return args.map(renderArgList).join(' ');
+  }
+  
+  if (type === DocumentApp.ElementType.EQUATION) {
+    const eq = elem.asEquation();
+    let innerHtml = '';
+    const numChildren = eq.getNumChildren();
+    for (let i = 0; i < numChildren; i++) {
+      innerHtml += renderEquationElementToHtml_(eq.getChild(i));
+    }
+    if (!innerHtml && eq.asText) {
+      innerHtml = escapeHtml(eq.asText().getText() || '');
+    }
+    return `<span class="doc-equation">${innerHtml}</span>`;
+  }
+  
+  if (elem.getNumChildren) {
+    let out = '';
+    const n = elem.getNumChildren();
+    for (let i = 0; i < n; i++) {
+      out += renderEquationElementToHtml_(elem.getChild(i));
+    }
+    return out;
+  }
+  
+  return '';
+}
+
+function getDocEquations(docId) {
+  if (!docId) docId = '1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g';
+  const doc = DocumentApp.openById(docId);
+  const result = {};
+  
+  let tabs = [];
+  try {
+    if (doc.getTabs) tabs = doc.getTabs();
+  } catch(e) {
+    Logger.log('doc.getTabs error: ' + e);
+  }
+  
+  let bodies = [];
+  if (tabs && tabs.length > 0) {
+    for (let t = 0; t < tabs.length; t++) {
+      try {
+        const dTab = tabs[t].asDocumentTab();
+        if (dTab) {
+          bodies.push({ name: tabs[t].getTitle ? tabs[t].getTitle() : ('Tab ' + t), body: dTab.getBody() });
+        }
+      } catch(e) {
+        Logger.log('Tab error: ' + e);
+      }
+    }
+  }
+  if (bodies.length === 0) {
+    bodies.push({ name: 'RootBody', body: doc.getBody() });
+  }
+  
+  for (let b = 0; b < bodies.length; b++) {
+    const item = bodies[b];
+    const eqList = [];
+    scanElementForEquationsWithContext_(item.body, eqList);
+    if (eqList.length > 0) {
+      result[item.name] = eqList;
+    }
+  }
+  
+  return result;
+}
+
+function scanElementForEquationsWithContext_(elem, eqList) {
+  if (!elem) return;
+  const type = elem.getType();
+  
+  if (type === DocumentApp.ElementType.PARAGRAPH || type === DocumentApp.ElementType.LIST_ITEM) {
+    const p = elem;
+    const num = p.getNumChildren();
+    for (let i = 0; i < num; i++) {
+      const child = p.getChild(i);
+      if (child.getType() === DocumentApp.ElementType.EQUATION) {
+        let preText = '';
+        if (i > 0) {
+          const prev = p.getChild(i - 1);
+          if (prev.asText) {
+            preText = (prev.asText().getText() || '').slice(-30);
+          }
+        }
+        let postText = '';
+        if (i < num - 1) {
+          const next = p.getChild(i + 1);
+          if (next.asText) {
+            postText = (next.asText().getText() || '').slice(0, 30);
+          }
+        }
+        const renderedHtml = renderEquationElementToHtml_(child);
+        let directText = '';
+        try { directText = child.asText ? child.asText().getText() : ''; } catch(e){}
+        eqList.push({
+          index: eqList.length,
+          preText: preText,
+          postText: postText,
+          directText: directText,
+          html: renderedHtml
+        });
+      }
+    }
+    return;
+  }
+  
+  if (type === DocumentApp.ElementType.TABLE) {
+    const tbl = elem.asTable();
+    const rNum = tbl.getNumRows();
+    for (let r = 0; r < rNum; r++) {
+      const row = tbl.getRow(r);
+      const cNum = row.getNumCells();
+      for (let c = 0; c < cNum; c++) {
+        scanElementForEquationsWithContext_(row.getCell(c), eqList);
+      }
+    }
+    return;
+  }
+  
+  if (elem.getNumChildren) {
+    const num = elem.getNumChildren();
+    for (let c = 0; c < num; c++) {
+      scanElementForEquationsWithContext_(elem.getChild(c), eqList);
+    }
+  }
+}
+
+
+

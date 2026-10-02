@@ -1,12 +1,12 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Version: v_20261002_140844
- * Generated on 2026-10-02 14:08:44
+ * Version: v_20261002_155328
+ * Generated on 2026-10-02 15:53:28
  */
 
 const OFFLINE_DATA = {
-  "version": "v_20261002_140844",
-  "generatedAt": "2026-10-02 14:08:44",
+  "version": "v_20261002_155328",
+  "generatedAt": "2026-10-02 15:53:28",
   "totalCases": 358,
   "cases": [
     {
@@ -1728,7 +1728,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "3/8/69",
-      "source": "ข้อสอบจริงปี 2568",
+      "source": "ข้อสอบจริง ปี 2568",
       "isActive": true
     },
     {
@@ -1742,7 +1742,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "3/8/69",
-      "source": "ข้อสอบจริงปี 2568",
+      "source": "ข้อสอบจริง ปี 2568",
       "isActive": true
     },
     {
@@ -1756,7 +1756,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "3/8/69",
-      "source": "ข้อสอบจริงปี 2568",
+      "source": "ข้อสอบจริง ปี 2568",
       "isActive": true
     },
     {
@@ -1784,7 +1784,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "3/8/69",
-      "source": "ข้อสอบจริงปี 2568",
+      "source": "ข้อสอบจริง ปี 2568",
       "isActive": true
     },
     {
@@ -1798,7 +1798,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
       "createdDate": "3/8/69",
-      "source": "ข้อสอบจริงปี 2568",
+      "source": "ข้อสอบจริง ปี 2568",
       "isActive": true
     },
     {
@@ -1910,7 +1910,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "RxCU83",
       "createdDate": "30/09/2026",
-      "source": "Mock RxCU83 Clinic ครั้งที่ 1",
+      "source": "ข้อสอบจริงปี 2583",
       "isActive": true
     },
     {
@@ -3044,7 +3044,7 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "คณะทำงานคลังข้อสอบร่วมสมรรถนะเภสัชกรรม (ระบบกลาง)",
       "createdDate": "30/09/2026",
-      "source": "ไม่ระบุ",
+      "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true
     },
     {
