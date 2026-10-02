@@ -4446,9 +4446,9 @@ body.is-printing #batch-print-execution-area {
   right: 24px;
   z-index: 1060;
   width: 480px;
-  max-width: calc(100vw - 32px);
+  max-width: calc(100vw - 20px);
   height: 540px;
-  max-height: calc(100vh - 110px);
+  max-height: calc(100vh - 20px);
   background: var(--surface);
   border: 1px solid var(--border-dark);
   border-radius: var(--radius-lg);
@@ -4456,8 +4456,21 @@ body.is-printing #batch-print-execution-area {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: width 0.2s ease, height 0.2s ease, transform 0.2s ease;
+  transition: width 0.18s ease, height 0.18s ease, transform 0.18s ease;
   animation: spSlideUp 0.25s cubic-bezier(0.2, 0.9, 0.3, 1);
+  touch-action: none;
+}
+
+.scratchpad-panel.resizing,
+.scratchpad-panel.dragging {
+  transition: none !important;
+  user-select: none !important;
+}
+.scratchpad-panel.resizing .sp-canvas-wrapper,
+.scratchpad-panel.dragging .sp-canvas-wrapper,
+.scratchpad-panel.resizing .sp-textarea,
+.scratchpad-panel.dragging .sp-textarea {
+  pointer-events: none !important;
 }
 
 @keyframes spSlideUp {
@@ -4476,7 +4489,8 @@ body.is-printing #batch-print-execution-area {
   max-height: 48px !important;
   overflow: hidden;
 }
-.scratchpad-panel.minimized .sp-body {
+.scratchpad-panel.minimized .sp-body,
+.scratchpad-panel.minimized .sp-resizer {
   display: none !important;
 }
 
@@ -4491,8 +4505,129 @@ body.is-printing #batch-print-execution-area {
   max-height: none !important;
   border-radius: var(--radius-md) !important;
 }
+.scratchpad-panel.maximized .sp-resizer {
+  display: none !important;
+}
 
-/* Header */
+/* 8-Direction Dynamic Resizers */
+.sp-resizer {
+  position: absolute;
+  z-index: 40;
+  touch-action: none;
+}
+.sp-resizer-t {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  cursor: ns-resize;
+}
+.sp-resizer-b {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  cursor: ns-resize;
+}
+.sp-resizer-l {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 8px;
+  cursor: ew-resize;
+}
+.sp-resizer-r {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 8px;
+  cursor: ew-resize;
+}
+.sp-resizer-tl {
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  cursor: nwse-resize;
+  z-index: 42;
+}
+.sp-resizer-tr {
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  cursor: nesw-resize;
+  z-index: 42;
+}
+.sp-resizer-bl {
+  bottom: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  cursor: nesw-resize;
+  z-index: 42;
+}
+.sp-resizer-br {
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  cursor: nwse-resize;
+  z-index: 42;
+}
+
+/* Visual Corner Grips */
+.sp-corner-grip {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+  opacity: 0.6;
+  transition: opacity 0.15s ease, border-color 0.15s ease;
+}
+.sp-resizer:hover .sp-corner-grip,
+.scratchpad-panel.resizing .sp-corner-grip {
+  opacity: 1;
+}
+.sp-corner-grip.tl {
+  top: 3px;
+  left: 3px;
+  border-top: 2.5px solid var(--text-secondary);
+  border-left: 2.5px solid var(--text-secondary);
+  border-top-left-radius: 4px;
+}
+.sp-corner-grip.br {
+  bottom: 3px;
+  right: 3px;
+  border-bottom: 2.5px solid var(--text-secondary);
+  border-right: 2.5px solid var(--text-secondary);
+  border-bottom-right-radius: 4px;
+}
+.sp-resizer:hover .sp-corner-grip.tl,
+.sp-resizer:hover .sp-corner-grip.br {
+  border-color: var(--primary);
+}
+
+/* Mobile Pull Handle */
+.sp-mobile-drag-handle {
+  display: none;
+  width: 100%;
+  padding: 6px 0 3px 0;
+  cursor: grab;
+  touch-action: none;
+  text-align: center;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-light);
+}
+.sp-mobile-drag-handle span {
+  display: inline-block;
+  width: 44px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--border-dark);
+}
+
+/* Header (Draggable) */
 .sp-header {
   display: flex;
   align-items: center;
@@ -4503,6 +4638,21 @@ body.is-printing #batch-print-execution-area {
   gap: 0.5rem;
   user-select: none;
   flex-shrink: 0;
+  cursor: grab;
+}
+.scratchpad-panel.dragging .sp-header {
+  cursor: grabbing;
+}
+.sp-drag-indicator {
+  font-size: 0.85rem;
+  color: #94A3B8;
+  margin-right: 2px;
+  cursor: grab;
+  opacity: 0.7;
+}
+.sp-header:hover .sp-drag-indicator {
+  opacity: 1;
+  color: var(--primary);
 }
 .sp-header-left {
   display: flex;
@@ -4788,10 +4938,19 @@ body.is-printing #batch-print-execution-area {
     left: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
-    height: 72vh !important;
-    max-height: 80vh !important;
+    height: 72vh;
+    max-height: 94vh !important;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
     border-bottom: none !important;
+  }
+  .sp-mobile-drag-handle {
+    display: block;
+  }
+  .sp-resizer {
+    display: none !important;
+  }
+  .sp-drag-indicator {
+    display: none;
   }
   .scratchpad-panel.minimized {
     height: 48px !important;

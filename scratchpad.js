@@ -7,7 +7,12 @@
  * - Freehand drawing with stylus/touch/mouse (Black, Red, Green, Blue, Pen sizes)
  * - Text typing notepad with auto-save
  * - Per-station state memory (station notes persist across station switches)
- * - Undo, Eraser, Clear, Minimize, Maximize, and Mobile Bottom-Sheet support.
+ * - Dynamic Resizing: Drag any border or corner to resize dynamically
+ * - Dynamic Drag & Drop: Drag header to move scratchpad anywhere on screen
+ * - Mobile pull-to-resize dynamic bottom sheet
+ * - Visual corner grips and double-click to minimize/restore
+ * - LocalStorage layout memory (restores user preferred size & position)
+ * - High-DPI canvas buffer scaling preserving handwriting without distortion
  */
 
 (function (window) {
@@ -25,6 +30,8 @@
     medium: 4,
     large: 8
   };
+
+  const LAYOUT_STORAGE_KEY = 'ple_ospe_scratchpad_layout_v2';
 
   const Scratchpad = {
     initialized: false,
@@ -79,7 +86,7 @@
     },
 
     /**
-     * Create floating button and modal/drawer panel
+     * Create floating button and modal/drawer panel with dynamic resize handles
      */
     createDOM: function () {
       // 1. Floating Action Button (FAB)
@@ -103,9 +110,29 @@
       panel.style.display = 'none';
 
       panel.innerHTML = `
-        <!-- Panel Header -->
-        <div class="sp-header">
+        <!-- Mobile Pull Handle -->
+        <div class="sp-mobile-drag-handle" id="sp-mobile-handle" title="รูดขึ้น-ลงเพื่อปรับขนาด">
+          <span></span>
+        </div>
+
+        <!-- 8 Dynamic Resizer Handles for Desktop / Tablet -->
+        <div class="sp-resizer sp-resizer-t" data-direction="t"></div>
+        <div class="sp-resizer sp-resizer-b" data-direction="b"></div>
+        <div class="sp-resizer sp-resizer-l" data-direction="l"></div>
+        <div class="sp-resizer sp-resizer-r" data-direction="r"></div>
+        <div class="sp-resizer sp-resizer-tl" data-direction="tl" title="คลิกลากเพื่อย่อ-ขยายขนาด (Resize)">
+          <div class="sp-corner-grip tl"></div>
+        </div>
+        <div class="sp-resizer sp-resizer-tr" data-direction="tr"></div>
+        <div class="sp-resizer sp-resizer-bl" data-direction="bl"></div>
+        <div class="sp-resizer sp-resizer-br" data-direction="br" title="คลิกลากเพื่อย่อ-ขยายขนาด (Resize)">
+          <div class="sp-corner-grip br"></div>
+        </div>
+
+        <!-- Panel Header (Draggable) -->
+        <div class="sp-header" id="sp-header" title="คลิกลากเพื่อย้ายหน้าต่าง | ดับเบิ้ลคลิกเพื่อย่อ/ขยาย">
           <div class="sp-header-left">
+            <span class="sp-drag-indicator" title="แถบจับย้ายตำแหน่ง">⋮⋮</span>
             <span class="sp-icon">📝</span>
             <span class="sp-title" id="sp-station-title">กระดาษทด</span>
           </div>
@@ -122,7 +149,10 @@
 
           <!-- Window Controls -->
           <div class="sp-window-actions">
-            <button type="button" class="sp-win-btn" id="sp-btn-minimize" title="ย่อหน้าต่าง" aria-label="ย่อ">
+            <button type="button" class="sp-win-btn" id="sp-btn-reset-layout" title="คืนค่าขนาดและตำแหน่งเริ่มต้น (Reset Layout)" aria-label="รีเซ็ต">
+              <span>↺</span>
+            </button>
+            <button type="button" class="sp-win-btn" id="sp-btn-minimize" title="ย่อหน้าต่าง (ดับเบิ้ลคลิกแถบหัวเรื่องได้)" aria-label="ย่อ">
               <span id="sp-minimize-icon">➖</span>
             </button>
             <button type="button" class="sp-win-btn" id="sp-btn-maximize" title="ขยายเต็มจอ" aria-label="ขยาย">
@@ -242,6 +272,9 @@
       const maxBtn = this.dom.panel.querySelector('#sp-btn-maximize');
       if (maxBtn) maxBtn.addEventListener('click', () => self.toggleMaximize());
 
+      const resetBtn = this.dom.panel.querySelector('#sp-btn-reset-layout');
+      if (resetBtn) resetBtn.addEventListener('click', () => self.resetLayout());
+
       // Tabs
       this.dom.tabDrawBtn.addEventListener('click', () => self.switchTab('draw'));
       this.dom.tabTypeBtn.addEventListener('click', () => self.switchTab('type'));
@@ -324,12 +357,264 @@
       // Canvas Pointer Events (Touch, Stylus, Mouse unified)
       this.setupCanvasEvents();
 
+      // Dynamic Resizers, Window Dragging, and Mobile Pull-Handle
+      this.setupHeaderDrag();
+      this.setupResizers();
+      this.setupMobileDrag();
+
       // Window resize observer to adapt canvas resolution
       window.addEventListener('resize', () => {
         if (self.isOpen && !self.isMinimized) {
-          self.resizeCanvas();
+          self.resizeCanvas(true);
         }
       });
+    },
+
+    /**
+     * Setup Header Drag-to-Move floating window
+     */
+    setupHeaderDrag: function () {
+      const self = this;
+      const header = this.dom.panel.querySelector('#sp-header');
+      const panel = this.dom.panel;
+      if (!header || !panel) return;
+
+      let isDragging = false;
+      let startX = 0;
+      let startY = 0;
+      let startLeft = 0;
+      let startTop = 0;
+
+      header.addEventListener('pointerdown', function (e) {
+        // Ignore if clicking on interactive children (buttons, tabs, inputs)
+        if (e.target.closest('button, input, textarea, .sp-tabs, .sp-win-btn, .sp-tab-btn')) {
+          return;
+        }
+        if (self.isMaximized) return;
+        if (window.innerWidth <= 768) return; // on mobile, use bottom sheet
+
+        e.preventDefault();
+        try { header.setPointerCapture(e.pointerId); } catch (_) {}
+
+        isDragging = true;
+        panel.classList.add('dragging');
+
+        // Normalize positioning from bottom/right to left/top/width/height
+        const rect = panel.getBoundingClientRect();
+        panel.style.bottom = 'auto';
+        panel.style.right = 'auto';
+        panel.style.left = rect.left + 'px';
+        panel.style.top = rect.top + 'px';
+        panel.style.width = rect.width + 'px';
+        panel.style.height = rect.height + 'px';
+
+        startX = e.clientX;
+        startY = e.clientY;
+        startLeft = rect.left;
+        startTop = rect.top;
+      });
+
+      header.addEventListener('pointermove', function (e) {
+        if (!isDragging) return;
+        e.preventDefault();
+
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        const maxLeft = Math.max(10, window.innerWidth - panel.offsetWidth - 8);
+        const maxTop = Math.max(10, window.innerHeight - 48);
+
+        const newLeft = Math.max(8, Math.min(maxLeft, startLeft + dx));
+        const newTop = Math.max(8, Math.min(maxTop, startTop + dy));
+
+        panel.style.left = Math.round(newLeft) + 'px';
+        panel.style.top = Math.round(newTop) + 'px';
+      });
+
+      const stopDrag = function (e) {
+        if (!isDragging) return;
+        isDragging = false;
+        panel.classList.remove('dragging');
+        try { header.releasePointerCapture(e.pointerId); } catch (_) {}
+        self.saveCustomLayout();
+      };
+
+      header.addEventListener('pointerup', stopDrag);
+      header.addEventListener('pointercancel', stopDrag);
+
+      // Double-click header to quickly toggle minimize/restore
+      header.addEventListener('dblclick', function (e) {
+        if (e.target.closest('button, input, textarea, .sp-tabs, .sp-win-btn, .sp-tab-btn')) return;
+        self.toggleMinimize();
+      });
+    },
+
+    /**
+     * Setup 8-Direction Dynamic Resizer Handles
+     */
+    setupResizers: function () {
+      const self = this;
+      const panel = this.dom.panel;
+      const resizers = panel.querySelectorAll('.sp-resizer');
+      if (!resizers || !panel) return;
+
+      let isResizing = false;
+      let activeDir = null;
+      let startX = 0;
+      let startY = 0;
+      let startLeft = 0;
+      let startTop = 0;
+      let startWidth = 0;
+      let startHeight = 0;
+
+      resizers.forEach(resizer => {
+        resizer.addEventListener('pointerdown', function (e) {
+          if (self.isMaximized || self.isMinimized) return;
+          if (window.innerWidth <= 768) return;
+
+          e.preventDefault();
+          e.stopPropagation();
+          try { resizer.setPointerCapture(e.pointerId); } catch (_) {}
+
+          isResizing = true;
+          activeDir = this.getAttribute('data-direction');
+          panel.classList.add('resizing');
+
+          // Normalize positioning to left/top/width/height
+          const rect = panel.getBoundingClientRect();
+          panel.style.bottom = 'auto';
+          panel.style.right = 'auto';
+          panel.style.left = rect.left + 'px';
+          panel.style.top = rect.top + 'px';
+          panel.style.width = rect.width + 'px';
+          panel.style.height = rect.height + 'px';
+
+          startX = e.clientX;
+          startY = e.clientY;
+          startLeft = rect.left;
+          startTop = rect.top;
+          startWidth = rect.width;
+          startHeight = rect.height;
+        });
+
+        resizer.addEventListener('pointermove', function (e) {
+          if (!isResizing || !activeDir) return;
+          e.preventDefault();
+
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+
+          const minW = 320;
+          const minH = 240;
+          const maxW = window.innerWidth - 20;
+          const maxH = window.innerHeight - 20;
+
+          let newWidth = startWidth;
+          let newHeight = startHeight;
+          let newLeft = startLeft;
+          let newTop = startTop;
+
+          // Horizontal resize
+          if (activeDir.includes('r')) {
+            newWidth = Math.max(minW, Math.min(maxW - startLeft, startWidth + dx));
+          } else if (activeDir.includes('l')) {
+            const proposedW = startWidth - dx;
+            if (proposedW >= minW && startLeft + dx >= 8) {
+              newWidth = proposedW;
+              newLeft = startLeft + dx;
+            } else if (proposedW < minW) {
+              newWidth = minW;
+              newLeft = startLeft + (startWidth - minW);
+            }
+          }
+
+          // Vertical resize
+          if (activeDir.includes('b')) {
+            newHeight = Math.max(minH, Math.min(maxH - startTop, startHeight + dy));
+          } else if (activeDir.includes('t')) {
+            const proposedH = startHeight - dy;
+            if (proposedH >= minH && startTop + dy >= 8) {
+              newHeight = proposedH;
+              newTop = startTop + dy;
+            } else if (proposedH < minH) {
+              newHeight = minH;
+              newTop = startTop + (startHeight - minH);
+            }
+          }
+
+          panel.style.width = Math.round(newWidth) + 'px';
+          panel.style.height = Math.round(newHeight) + 'px';
+          panel.style.left = Math.round(newLeft) + 'px';
+          panel.style.top = Math.round(newTop) + 'px';
+        });
+
+        const stopResize = function (e) {
+          if (!isResizing) return;
+          isResizing = false;
+          panel.classList.remove('resizing');
+          try { resizer.releasePointerCapture(e.pointerId); } catch (_) {}
+
+          // Finalize canvas dimensions without blurriness
+          if (self.activeTab === 'draw') {
+            self.resizeCanvas(true);
+          }
+
+          self.saveCustomLayout();
+        };
+
+        resizer.addEventListener('pointerup', stopResize);
+        resizer.addEventListener('pointercancel', stopResize);
+      });
+    },
+
+    /**
+     * Setup Mobile Bottom Sheet Pull-to-Resize
+     */
+    setupMobileDrag: function () {
+      const self = this;
+      const handle = this.dom.panel.querySelector('#sp-mobile-handle');
+      const panel = this.dom.panel;
+      if (!handle || !panel) return;
+
+      let isDraggingMobile = false;
+      let startY = 0;
+      let startHeight = 0;
+
+      handle.addEventListener('pointerdown', function (e) {
+        e.preventDefault();
+        try { handle.setPointerCapture(e.pointerId); } catch (_) {}
+        isDraggingMobile = true;
+        panel.classList.add('resizing');
+        startY = e.clientY;
+        startHeight = panel.offsetHeight;
+      });
+
+      handle.addEventListener('pointermove', function (e) {
+        if (!isDraggingMobile) return;
+        e.preventDefault();
+        const dy = e.clientY - startY;
+        const minH = 160;
+        const maxH = window.innerHeight * 0.94;
+        const newH = Math.max(minH, Math.min(maxH, startHeight - dy));
+        panel.style.height = Math.round(newH) + 'px';
+      });
+
+      const stopMobileDrag = function (e) {
+        if (!isDraggingMobile) return;
+        isDraggingMobile = false;
+        panel.classList.remove('resizing');
+        try { handle.releasePointerCapture(e.pointerId); } catch (_) {}
+
+        const h = panel.offsetHeight;
+        if (h < 180) {
+          self.toggleMinimize();
+        } else {
+          if (self.activeTab === 'draw') self.resizeCanvas(true);
+        }
+      };
+
+      handle.addEventListener('pointerup', stopMobileDrag);
+      handle.addEventListener('pointercancel', stopMobileDrag);
     },
 
     /**
@@ -457,6 +742,7 @@
 
     /**
      * Adjust canvas pixel buffer to match layout size with High-DPI support
+     * Preserves handwriting without stretching/distortion.
      */
     resizeCanvas: function (preserveContent = true) {
       const canvas = this.dom.canvas;
@@ -465,12 +751,16 @@
 
       const rect = wrapper.getBoundingClientRect();
       const width = Math.max(rect.width, 280);
-      const height = Math.max(rect.height, 240);
+      const height = Math.max(rect.height, 200);
 
-      // Save previous content if needed
+      // Save previous content & dimensions before resizing buffer
       let prevImg = null;
+      let prevWidth = 0;
+      let prevHeight = 0;
       if (preserveContent && canvas.width > 0 && canvas.height > 0) {
         prevImg = canvas.toDataURL();
+        prevWidth = parseFloat(canvas.style.width) || (canvas.width / (window.devicePixelRatio || 1));
+        prevHeight = parseFloat(canvas.style.height) || (canvas.height / (window.devicePixelRatio || 1));
       }
 
       const dpr = window.devicePixelRatio || 1;
@@ -485,11 +775,11 @@
       this.dom.ctx.fillStyle = '#FFFFFF';
       this.dom.ctx.fillRect(0, 0, width, height);
 
-      // Restore image if preserved
+      // Restore image if preserved at 1:1 scale (gives more blank paper when enlarged)
       if (prevImg) {
         const img = new Image();
         img.onload = () => {
-          this.dom.ctx.drawImage(img, 0, 0, width, height);
+          this.dom.ctx.drawImage(img, 0, 0, prevWidth || width, prevHeight || height);
         };
         img.src = prevImg;
       }
@@ -606,6 +896,102 @@
     },
 
     /**
+     * Save custom position & size to localStorage
+     */
+    saveCustomLayout: function () {
+      if (this.isMinimized || this.isMaximized) return;
+      if (window.innerWidth <= 768) return; // don't persist mobile bottom-sheet sizes
+      try {
+        const panel = this.dom.panel;
+        if (!panel) return;
+        const layout = {
+          width: panel.offsetWidth,
+          height: panel.offsetHeight,
+          left: panel.offsetLeft,
+          top: panel.offsetTop
+        };
+        localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layout));
+      } catch (_) {}
+    },
+
+    /**
+     * Load custom position & size from localStorage
+     */
+    loadCustomLayout: function () {
+      try {
+        const raw = localStorage.getItem(LAYOUT_STORAGE_KEY);
+        if (!raw) return null;
+        const layout = JSON.parse(raw);
+        if (layout && layout.width && layout.height) {
+          return layout;
+        }
+      } catch (_) {}
+      return null;
+    },
+
+    /**
+     * Apply stored custom layout to panel
+     */
+    applyStoredLayout: function () {
+      if (window.innerWidth <= 768) return;
+      const layout = this.loadCustomLayout();
+      if (!layout) return;
+
+      const panel = this.dom.panel;
+      if (!panel) return;
+
+      const minW = 320;
+      const minH = 240;
+      const w = Math.max(minW, Math.min(window.innerWidth - 32, layout.width || 480));
+      const h = Math.max(minH, Math.min(window.innerHeight - 32, layout.height || 540));
+
+      panel.style.width = w + 'px';
+      panel.style.height = h + 'px';
+
+      if (layout.left !== undefined && layout.top !== undefined) {
+        const maxLeft = Math.max(10, window.innerWidth - w - 8);
+        const maxTop = Math.max(10, window.innerHeight - 48);
+        const left = Math.max(8, Math.min(maxLeft, layout.left));
+        const top = Math.max(8, Math.min(maxTop, layout.top));
+
+        panel.style.left = left + 'px';
+        panel.style.top = top + 'px';
+        panel.style.right = 'auto';
+        panel.style.bottom = 'auto';
+      }
+    },
+
+    /**
+     * Reset size and position back to default floating corner
+     */
+    resetLayout: function () {
+      try {
+        localStorage.removeItem(LAYOUT_STORAGE_KEY);
+      } catch (_) {}
+
+      const panel = this.dom.panel;
+      if (!panel) return;
+
+      panel.style.left = '';
+      panel.style.top = '';
+      panel.style.right = '';
+      panel.style.bottom = '';
+      panel.style.width = '';
+      panel.style.height = '';
+
+      this.isMinimized = false;
+      this.isMaximized = false;
+      panel.classList.remove('minimized', 'maximized');
+      this.updateMinimizeIcon();
+      const maxIcon = panel.querySelector('#sp-maximize-icon');
+      if (maxIcon) maxIcon.textContent = '⛶';
+
+      setTimeout(() => {
+        if (this.activeTab === 'draw') this.resizeCanvas(true);
+      }, 100);
+    },
+
+    /**
      * Open scratchpad
      */
     open: function (stationKey, stationLabel) {
@@ -617,6 +1003,9 @@
       this.dom.panel.classList.remove('minimized');
       this.isMinimized = false;
       this.updateMinimizeIcon();
+
+      // Apply saved position & size on desktop
+      this.applyStoredLayout();
 
       if (this.dom.fabBtn) this.dom.fabBtn.classList.add('active');
 
@@ -658,6 +1047,9 @@
       this.isMinimized = !this.isMinimized;
       this.dom.panel.classList.toggle('minimized', this.isMinimized);
       this.updateMinimizeIcon();
+      if (!this.isMinimized && this.activeTab === 'draw') {
+        setTimeout(() => this.resizeCanvas(true), 100);
+      }
     },
 
     updateMinimizeIcon: function () {
@@ -677,9 +1069,15 @@
       if (icon) {
         icon.textContent = this.isMaximized ? '🗗' : '⛶';
       }
+
+      if (!this.isMaximized) {
+        // Restore custom layout if available
+        this.applyStoredLayout();
+      }
+
       setTimeout(() => {
         if (this.activeTab === 'draw') this.resizeCanvas(true);
-      }, 200);
+      }, 150);
     },
 
     /**
