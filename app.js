@@ -189,6 +189,164 @@ window.extractYouTubeVideoId = extractYouTubeVideoId;
 window.renderRichNoteContent = renderRichNoteContent;
 
 // ──────────────────────────────────────────────────────────────
+// 🎵 BACKGROUND MUSIC PLAYER (ดนตรีให้กำลังใจม่วนๆ)
+// ──────────────────────────────────────────────────────────────
+const BgmManager = {
+  audio: null,
+  isPlaying: false,
+  volume: 0.35,
+  trackName: 'ดนตรีให้กำลังใจม่วนๆ',
+  src: './bgm-muan-muan.mp3',
+
+  init() {
+    if (this.audio) return;
+    try {
+      this.audio = new Audio(this.src);
+      this.audio.loop = true;
+      this.audio.preload = 'auto';
+
+      const savedVol = localStorage.getItem('ple_bgm_volume');
+      if (savedVol !== null) {
+        this.volume = parseFloat(savedVol) || 0.35;
+      }
+      this.audio.volume = this.volume;
+
+      const shouldPlay = localStorage.getItem('ple_bgm_enabled') === 'true';
+      this.renderWidget();
+      this.updateUI();
+
+      if (shouldPlay) {
+        const tryPlay = () => {
+          this.play().catch(() => {});
+          document.removeEventListener('click', tryPlay);
+          document.removeEventListener('touchstart', tryPlay);
+        };
+        document.addEventListener('click', tryPlay, { once: true });
+        document.addEventListener('touchstart', tryPlay, { once: true });
+      }
+    } catch (e) {
+      console.warn('BGM Init error:', e);
+    }
+  },
+
+  async play() {
+    if (!this.audio) return;
+    try {
+      await this.audio.play();
+      this.isPlaying = true;
+      localStorage.setItem('ple_bgm_enabled', 'true');
+      this.updateUI();
+    } catch (e) {
+      console.warn('BGM Play prevented:', e);
+      this.isPlaying = false;
+      this.updateUI();
+      throw e;
+    }
+  },
+
+  pause() {
+    if (!this.audio) return;
+    try {
+      this.audio.pause();
+      this.isPlaying = false;
+      localStorage.setItem('ple_bgm_enabled', 'false');
+      this.updateUI();
+    } catch (e) {}
+  },
+
+  toggle() {
+    if (this.isPlaying) {
+      this.pause();
+    } else {
+      this.play().catch(() => {});
+    }
+  },
+
+  setVolume(val) {
+    this.volume = Math.max(0, Math.min(1, parseFloat(val) || 0));
+    if (this.audio) this.audio.volume = this.volume;
+    localStorage.setItem('ple_bgm_volume', this.volume.toString());
+    this.updateUI();
+  },
+
+  renderWidget() {
+    if (document.getElementById('ple-bgm-floating-bar')) return;
+
+    // 1. Floating Pill Widget
+    const pill = document.createElement('div');
+    pill.id = 'ple-bgm-floating-bar';
+    pill.className = 'ple-bgm-pill';
+    pill.innerHTML = `
+      <div class="ple-bgm-inner">
+        <button type="button" class="ple-bgm-toggle-btn" id="ple-bgm-toggle-btn" onclick="BgmManager.toggle()" title="เปิด/ปิด ${this.trackName}">
+          <span class="ple-bgm-icon" id="ple-bgm-icon">🎵</span>
+          <span class="ple-bgm-waves" id="ple-bgm-waves">
+            <span></span><span></span><span></span>
+          </span>
+        </button>
+        <div class="ple-bgm-info" onclick="BgmManager.toggle()">
+          <span class="ple-bgm-title">${this.trackName}</span>
+          <span class="ple-bgm-status" id="ple-bgm-status">คลิกเพื่อเปิดเพลง</span>
+        </div>
+        <div class="ple-bgm-vol-wrap">
+          <input type="range" class="ple-bgm-slider" id="ple-bgm-slider" min="0" max="1" step="0.05" value="${this.volume}" oninput="BgmManager.setVolume(this.value)" title="ปรับระดับเสียงดนตรี">
+        </div>
+        <button type="button" class="ple-bgm-close-btn" onclick="BgmManager.minimize()" title="ย่อแถบเพลง">✕</button>
+      </div>
+    `;
+    document.body.appendChild(pill);
+
+    // 2. Also inject Topbar Music button if topbar-right exists
+    const topbarRight = document.querySelector('.topbar .topbar-right');
+    if (topbarRight && !document.getElementById('topbar-bgm-btn')) {
+      const topBtn = document.createElement('button');
+      topBtn.type = 'button';
+      topBtn.id = 'topbar-bgm-btn';
+      topBtn.className = 'icon-btn topbar-bgm-icon-btn';
+      topBtn.title = `🎵 ${this.trackName} (เปิด/ปิดเพลง)`;
+      topBtn.onclick = () => BgmManager.toggle();
+      topBtn.innerHTML = `<span>🎵</span>`;
+      topbarRight.insertBefore(topBtn, topbarRight.firstChild);
+    }
+  },
+
+  updateUI() {
+    const toggleBtn = document.getElementById('ple-bgm-toggle-btn');
+    const pill = document.getElementById('ple-bgm-floating-bar');
+    const icon = document.getElementById('ple-bgm-icon');
+    const status = document.getElementById('ple-bgm-status');
+    const slider = document.getElementById('ple-bgm-slider');
+    const topBtn = document.getElementById('topbar-bgm-btn');
+
+    if (slider) slider.value = this.volume;
+
+    if (this.isPlaying) {
+      if (pill) pill.classList.add('is-playing');
+      if (icon) icon.textContent = '🎶';
+      if (status) status.textContent = `กำลังเล่น · ${Math.round(this.volume * 100)}%`;
+      if (topBtn) {
+        topBtn.classList.add('is-active-music');
+        topBtn.innerHTML = '<span style="animation: pulse 1s infinite; display: inline-block;">🎶</span>';
+      }
+    } else {
+      if (pill) pill.classList.remove('is-playing');
+      if (icon) icon.textContent = '🎵';
+      if (status) status.textContent = 'ปิดเพลงอยู่ (คลิกเพื่อเล่น)';
+      if (topBtn) {
+        topBtn.classList.remove('is-active-music');
+        topBtn.innerHTML = '<span>🎵</span>';
+      }
+    }
+  },
+
+  minimize() {
+    const pill = document.getElementById('ple-bgm-floating-bar');
+    if (pill) pill.classList.toggle('is-minimized');
+  }
+};
+window.BgmManager = BgmManager;
+
+// ──────────────────────────────────────────────────────────────
 // 1. Initializer & Event Listeners
 // ──────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -196,6 +354,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   initApiConfig();
   loadChecklistProgress();
+  
+  // เริ่มต้นเครื่องเล่นเพลงประกอบพื้นหลัง
+  BgmManager.init();
   
   // โหลดฐานข้อมูลรายละเอียดออฟไลน์พร้อม Progress Bar แบบ Asynchronous
   loadOfflineDetailsWithProgress();

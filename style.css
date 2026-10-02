@@ -5746,4 +5746,184 @@ body.is-printing #batch-print-execution-area {
   color: #ffffff;
 }
 
+/* ══════════════════════════════════════════════════
+   BACKGROUND MUSIC PLAYER (ดนตรีให้กำลังใจม่วนๆ)
+   ══════════════════════════════════════════════════ */
+.ple-bgm-pill {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 900;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  border-radius: 9999px;
+  padding: 0.35rem 0.65rem 0.35rem 0.45rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: inherit;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.ple-bgm-pill:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+  border-color: var(--primary-light, #93c5fd);
+}
+
+.ple-bgm-pill.is-playing {
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+.ple-bgm-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.ple-bgm-toggle-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: #e2e8f0;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.ple-bgm-toggle-btn:hover {
+  transform: scale(1.05);
+}
+
+.ple-bgm-pill.is-playing .ple-bgm-toggle-btn {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+}
+
+.ple-bgm-waves {
+  display: none;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+  position: absolute;
+  right: -2px;
+  bottom: 0px;
+}
+
+.ple-bgm-pill.is-playing .ple-bgm-waves {
+  display: flex;
+}
+
+.ple-bgm-waves span {
+  display: block;
+  width: 3px;
+  height: 100%;
+  background: #10b981;
+  border-radius: 2px;
+  animation: bgmEqualizer 0.8s ease-in-out infinite alternate;
+}
+
+.ple-bgm-waves span:nth-child(1) { animation-delay: 0.1s; height: 60%; }
+.ple-bgm-waves span:nth-child(2) { animation-delay: 0.3s; height: 100%; }
+.ple-bgm-waves span:nth-child(3) { animation-delay: 0.2s; height: 80%; }
+
+@keyframes bgmEqualizer {
+  0% { transform: scaleY(0.3); }
+  100% { transform: scaleY(1); }
+}
+
+.ple-bgm-info {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  max-width: 140px;
+}
+
+.ple-bgm-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.ple-bgm-status {
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  line-height: 1.1;
+}
+
+.ple-bgm-vol-wrap {
+  display: flex;
+  align-items: center;
+  padding-right: 0.25rem;
+}
+
+.ple-bgm-slider {
+  width: 55px;
+  height: 4px;
+  accent-color: #10b981;
+  cursor: pointer;
+}
+
+.ple-bgm-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.72rem;
+  padding: 0.2rem 0.35rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ple-bgm-close-btn:hover {
+  background: #f1f5f9;
+  color: var(--text-primary);
+}
+
+.ple-bgm-pill.is-minimized .ple-bgm-info,
+.ple-bgm-pill.is-minimized .ple-bgm-vol-wrap,
+.ple-bgm-pill.is-minimized .ple-bgm-close-btn {
+  display: none;
+}
+
+.ple-bgm-pill.is-minimized {
+  padding: 0.25rem;
+}
+
+.topbar-bgm-icon-btn.is-active-music {
+  color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+@media (max-width: 640px) {
+  .ple-bgm-pill {
+    bottom: 16px;
+    left: 16px;
+  }
+  .ple-bgm-info {
+    max-width: 100px;
+  }
+  .ple-bgm-slider {
+    width: 42px;
+  }
+}
+
 
