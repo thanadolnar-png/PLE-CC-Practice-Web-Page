@@ -5509,7 +5509,7 @@ body.is-printing #batch-print-execution-area {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 1rem;
+  padding: 0.9rem 1rem;
   transition: var(--transition);
 }
 
@@ -5517,7 +5517,7 @@ body.is-printing #batch-print-execution-area {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.65rem;
+  margin-bottom: 0.5rem;
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--text-secondary);
@@ -5527,7 +5527,7 @@ body.is-printing #batch-print-execution-area {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: var(--radius-md);
-  padding: 1rem;
+  padding: 0.85rem 1rem;
   text-align: center;
 }
 
@@ -5542,7 +5542,7 @@ body.is-printing #batch-print-execution-area {
 
 .lobby-code-digits {
   font-family: var(--font-mono);
-  font-size: 2.4rem;
+  font-size: 2.2rem;
   font-weight: 800;
   letter-spacing: 0.25rem;
   color: #0f172a;
@@ -5603,7 +5603,7 @@ body.is-printing #batch-print-execution-area {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 1.15rem;
+  padding: 0.9rem 1rem;
   display: flex;
   flex-direction: column;
 }
@@ -5612,8 +5612,8 @@ body.is-printing #batch-print-execution-area {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 0.75rem;
-  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
   border-bottom: 1px solid var(--border);
 }
 
@@ -5621,32 +5621,34 @@ body.is-printing #batch-print-execution-area {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.55rem 0.75rem;
+  padding: 0.45rem 0.65rem;
   background: #f8fafc;
   border: 1px solid #f1f5f9;
   border-radius: var(--radius-sm);
-  margin-bottom: 0.4rem;
-  font-size: 0.85rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.82rem;
 }
 
 .lobby-breakout-card {
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 0.85rem 1rem;
+  padding: 1rem 1.15rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.65rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
   transition: var(--transition);
 }
 
 .lobby-breakout-card:hover {
-  border-color: var(--border-dark);
+  border-color: var(--primary-light, #93c5fd);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .lobby-breakout-card.is-active {
   border-color: var(--primary);
-  box-shadow: 0 0 0 1px var(--primary);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
 .scratchpad-fab {

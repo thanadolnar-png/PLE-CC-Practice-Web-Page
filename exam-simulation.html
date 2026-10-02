@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU</title>
-  <link rel="stylesheet" href="style.css?v=20261002_224500">
-  <script src="case-data-offline.js?v=v_20261002_224500"></script>
-  <script src="case-details-offline.js?v=v_20261002_224500"></script>
+  <link rel="stylesheet" href="style.css?v=20261002_230000">
+  <script src="case-data-offline.js?v=v_20261002_230000"></script>
+  <script src="case-details-offline.js?v=v_20261002_230000"></script>
   <script src="app.js?v=v_20261002_224500"></script>
   <script src="scratchpad.js?v=v_20261002_224500"></script>
   <style>
@@ -1133,14 +1133,15 @@
           <div id="lobby-cohort-breakout-panel" style="display: none; margin: 1.5rem 0 0; text-align: left;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
               <div>
-                <strong style="font-size: 0.95rem; color: var(--text-primary); font-family: var(--font-title); font-weight: 700;">โต๊ะสอบย่อย (Breakout Tables)</strong>
+                <strong style="font-size: 1.05rem; color: var(--text-primary); font-family: var(--font-title); font-weight: 700;">โต๊ะสอบย่อย (Breakout Examination Tables)</strong>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.1rem;">เลือกโต๊ะสอบเพื่อจับคู่ผู้ประเมินและผู้เข้าสอบ</div>
               </div>
               <div style="display: flex; gap: 0.4rem; align-items: center;" id="cohort-table-btn-group">
-                <button type="button" class="btn btn-sm btn-outline" style="padding: 0.3rem 0.65rem; font-size: 0.78rem; border-radius: 6px;" onclick="removeLastBreakoutTable()">- ลบโต๊ะ</button>
-                <button type="button" class="btn btn-sm btn-primary" style="padding: 0.3rem 0.85rem; font-size: 0.78rem; font-weight: 600; border-radius: 6px;" onclick="addBreakoutTable()">+ เพิ่มโต๊ะสอบ</button>
+                <button type="button" class="btn btn-sm btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; border-radius: 6px;" onclick="removeLastBreakoutTable()">- ลบโต๊ะ</button>
+                <button type="button" class="btn btn-sm btn-primary" style="padding: 0.35rem 0.95rem; font-size: 0.8rem; font-weight: 600; border-radius: 6px;" onclick="addBreakoutTable()">+ เพิ่มโต๊ะสอบ</button>
               </div>
             </div>
-            <div id="cohort-tables-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem;">
+            <div id="cohort-tables-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
               <!-- Filled dynamically by JS -->
             </div>
           </div>
@@ -1149,11 +1150,12 @@
           <div id="lobby-carousel-rotation-panel" style="display: none; margin: 1.5rem 0 0; text-align: left;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
               <div>
-                <strong style="font-size: 0.95rem; color: var(--text-primary); font-family: var(--font-title); font-weight: 700;">ผังการวนสถานี (Carousel Circuit)</strong>
+                <strong style="font-size: 1.05rem; color: var(--text-primary); font-family: var(--font-title); font-weight: 700;">ผังการวนสถานี (Carousel Rotation Circuit)</strong>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.1rem;">ระบบแลปกริ๊งหมุนเวียนฐานสอบตามเข็มนาฬิกา</div>
               </div>
-              <span id="carousel-rotation-summary" class="badge" style="background: var(--bg-secondary); color: var(--text-secondary); font-size: 0.78rem; font-weight: 600;">16 สถานี</span>
+              <span id="carousel-rotation-summary" class="badge" style="background: var(--bg-secondary); color: var(--text-secondary); font-size: 0.8rem; font-weight: 600;">16 สถานี</span>
             </div>
-            <div id="carousel-circuit-wrapper" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; overflow-x: auto;">
+            <div id="carousel-circuit-wrapper" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.25rem; overflow-x: auto;">
               <div id="carousel-stations-grid" style="min-width: 680px; display: flex; flex-direction: column; gap: 0.25rem;">
                 <!-- Filled dynamically by JS -->
               </div>
@@ -1186,16 +1188,17 @@
           </div>
           
           <!-- Giant Timer and Master Controls -->
-          <div style="background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem 1rem; margin-bottom: 1.25rem;">
-            <div id="sh-timer-display" style="font-size: 5rem; font-weight: 900; color: var(--primary); font-family: var(--font-mono, monospace); line-height: 1; letter-spacing: 2px;">04:00</div>
-            <div style="margin-top: 0.75rem; display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
+          <div style="background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius-lg); padding: 1.75rem 1rem; margin-bottom: 1.25rem;">
+            <div id="sh-round-indicator" style="font-size: 1.15rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem; letter-spacing: 0.05em;">รอบที่ 1 / 14</div>
+            <div id="sh-timer-display" style="font-size: 5.5rem; font-weight: 900; color: var(--primary); font-family: var(--font-mono, monospace); line-height: 1; letter-spacing: 2px;">04:00</div>
+            <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
               <button type="button" class="btn btn-primary" id="sh-timer-toggle-btn" onclick="toggleTimer()">⏸️ พักตัวจับเวลา</button>
               <button type="button" class="btn btn-secondary" onclick="resetTimer()">🔄 รีเซ็ตเวลา</button>
             </div>
           </div>
           
-          <!-- Large Station Title & Scenario Overview for Big Screen -->
-          <div style="text-align: left; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.25rem;">
+          <!-- Large Station Title & Scenario Overview for Big Screen (Cohort Breakout Mode Only) -->
+          <div id="sh-scenario-card" style="text-align: left; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.25rem;">
             <div style="font-size: 0.88rem; color: var(--primary); font-weight: 700; text-transform: uppercase;" id="sh-station-number-label">สถานีที่ 1 / 14</div>
             <h2 style="font-family: var(--font-title); font-size: 1.5rem; margin: 0.35rem 0 0.75rem 0; color: var(--text-primary);" id="sh-station-title">...</h2>
             <div id="sh-scenario-content" style="font-size: 1.05rem; line-height: 1.6; color: var(--text-secondary); max-height: 240px; overflow-y: auto; background: var(--bg); padding: 1rem; border-radius: var(--radius-sm); border-left: 4px solid var(--primary);">
@@ -1205,15 +1208,15 @@
           
           <!-- Master Station Switching Controls -->
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; padding: 0.75rem 1rem; background: var(--bg); border-radius: var(--radius-md); border: 1px solid var(--border); flex-wrap: wrap; gap: 0.5rem;">
-            <button type="button" class="btn btn-secondary" id="sh-prev-btn" onclick="prevStation()">⏮️ สถานีก่อนหน้า (ย้อนทุกคน)</button>
-            <span style="font-size: 0.85rem; color: var(--text-muted);">Super Host เป็นผู้เปลี่ยนสถานีของทั้งห้องพร้อมกัน</span>
-            <button type="button" class="btn btn-primary" id="sh-next-btn" onclick="nextStation()">⏭️ สถานีถัดไป (เปลี่ยนทุกคนพร้อมกัน)</button>
+            <button type="button" class="btn btn-secondary" id="sh-prev-btn" onclick="prevStation()">⏮️ ย้อนรอบก่อนหน้า</button>
+            <span style="font-size: 0.85rem; color: var(--text-muted);" id="sh-nav-hint">Super Host เป็นผู้เปลี่ยนสถานีของทั้งห้องพร้อมกัน</span>
+            <button type="button" class="btn btn-primary" id="sh-next-btn" onclick="nextStation()">⏭️ สั่นกริ่งเปลี่ยนรอบถัดไป</button>
           </div>
           
           <!-- Live Breakout / Station Progress Matrix -->
           <div style="text-align: left;">
-            <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--text-primary);" id="sh-matrix-title">📊 ความคืบหน้าการประเมินสด (Live Grading Matrix)</div>
-            <div id="sh-live-matrix" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.65rem;">
+            <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--text-primary);" id="sh-matrix-title">📊 ผังสถานีสด (Live Station Status)</div>
+            <div id="sh-live-matrix" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem;">
               <!-- Populated dynamically -->
             </div>
           </div>
@@ -6854,31 +6857,41 @@
         card.className = 'lobby-breakout-card' + (isMyTable ? ' is-active' : '');
 
         card.innerHTML = `
-          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:0.35rem;margin-bottom:0.15rem;">
-            <div style="display:flex;align-items:center;gap:0.35rem;">
-              <strong style="color:var(--text-primary);font-size:0.88rem;">${escapeHtml(t.name || tKey)}</strong>
+          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:0.4rem;margin-bottom:0.4rem;">
+            <div style="display:flex;align-items:center;gap:0.4rem;">
+              <strong style="color:var(--text-primary);font-size:0.95rem;font-weight:700;">${escapeHtml(t.name || tKey)}</strong>
               ${SimState.isHost ? `
-                <button type="button" class="sim-btn-xs" style="padding:0.1rem 0.35rem;font-size:0.7rem;color:var(--danger);background:transparent;border:1px solid rgba(239,68,68,0.2);border-radius:4px;cursor:pointer;" title="ลบโต๊ะ" onclick="deleteBreakoutTable('${tKey}')">ลบ</button>
+                <button type="button" class="sim-btn-xs" style="padding:0.1rem 0.4rem;font-size:0.7rem;color:var(--danger);background:transparent;border:1px solid rgba(239,68,68,0.2);border-radius:4px;cursor:pointer;" title="ลบโต๊ะ" onclick="deleteBreakoutTable('${tKey}')">ลบ</button>
               ` : ''}
             </div>
-            <span style="font-size:0.72rem;color:${hasExaminer && hasParticipant ? 'var(--success)' : 'var(--text-muted)'};font-weight:600;">
-              ${hasExaminer && hasParticipant ? '● พร้อม' : '○ รอคน'}
+            <span style="font-size:0.74rem;color:${hasExaminer && hasParticipant ? '#15803d' : '#d97706'};font-weight:700;background:${hasExaminer && hasParticipant ? '#dcfce7' : '#fef3c7'};padding:0.15rem 0.5rem;border-radius:999px;">
+              ${hasExaminer && hasParticipant ? '🟢 พร้อมสอบ' : '🟡 รอคนเข้าโต๊ะ'}
             </span>
           </div>
           
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.15rem 0;">
-            <span style="color:var(--text-muted);font-size:0.78rem;">Examiner:</span>
-            ${examinerSlotHtml}
-          </div>
+          <div style="display:flex;flex-direction:column;gap:0.45rem;">
+            <!-- Examiner Slot -->
+            <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:var(--radius-sm);padding:0.55rem 0.75rem;display:flex;justify-content:space-between;align-items:center;">
+              <div style="display:flex;align-items:center;gap:0.35rem;">
+                <span style="font-size:0.75rem;font-weight:700;color:#0369a1;">👨‍🏫 ผู้ประเมิน:</span>
+                ${exEmoji}
+              </div>
+              <div>${examinerSlotHtml}</div>
+            </div>
 
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.15rem 0;">
-            <span style="color:var(--text-muted);font-size:0.78rem;">Candidate:</span>
-            ${participantSlotHtml}
+            <!-- Participant Slot -->
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius-sm);padding:0.55rem 0.75rem;display:flex;justify-content:space-between;align-items:center;">
+              <div style="display:flex;align-items:center;gap:0.35rem;">
+                <span style="font-size:0.75rem;font-weight:700;color:#15803d;">✍️ ผู้เข้าสอบ:</span>
+                ${partEmoji}
+              </div>
+              <div>${participantSlotHtml}</div>
+            </div>
           </div>
 
           ${isMyTable ? `
-            <div style="margin-top:0.25rem;text-align:right;">
-              <button type="button" class="sim-btn-xs" style="color:var(--danger);border-radius:4px;" onclick="leaveBreakoutTable('${tKey}')">ออกจากโต๊ะ</button>
+            <div style="margin-top:0.4rem;text-align:right;">
+              <button type="button" class="sim-btn-xs" style="color:var(--danger);border-radius:4px;background:transparent;border:1px solid rgba(239,68,68,0.3);padding:0.2rem 0.5rem;" onclick="leaveBreakoutTable('${tKey}')">ออกจากโต๊ะนี้</button>
             </div>
           ` : ''}
         `;
@@ -7255,9 +7268,19 @@
       if (!monitorView) return;
       monitorView.style.display = 'block';
 
+      const isCarousel = room.examMode === 'carousel_rotation';
+      const N = SimState.stations.length || 1;
+      const r = SimState.currentIdx || 0;
+
       const modeTitleEl = document.getElementById('sh-mode-title');
       if (modeTitleEl) {
-        modeTitleEl.textContent = room.examMode === 'carousel_rotation' ? 'โหมดแลปกิ๊งหมุนเวียนสถานี' : 'โหมด Breakout สอบพร้อมกันทั้งห้อง';
+        modeTitleEl.textContent = isCarousel ? 'โหมดแลปกริ๊งหมุนเวียนสถานี (Carousel Rotation)' : 'โหมด Breakout สอบพร้อมกันทั้งห้อง';
+      }
+
+      // Update Round Indicator above giant timer
+      const roundIndicatorEl = document.getElementById('sh-round-indicator');
+      if (roundIndicatorEl) {
+        roundIndicatorEl.textContent = isCarousel ? `🔄 รอบการสอบที่ ${r + 1} / ${N} (กริ๊งรอบที่ ${r + 1})` : `สถานีที่ ${r + 1} / ${N}`;
       }
 
       // Update Large Timer Display
@@ -7270,41 +7293,60 @@
         timerDisplayEl.style.color = SimState.timerValue < 10 ? 'var(--danger)' : (SimState.timerValue < 60 ? 'var(--warning)' : 'var(--primary)');
       }
 
-      // Update Current Station Info
-      const currSt = SimState.stations[SimState.currentIdx] || {};
-      const currCase = currSt.case || {};
-      const numLabel = document.getElementById('sh-station-number-label');
-      if (numLabel) numLabel.textContent = `สถานีที่ ${SimState.currentIdx + 1} / ${SimState.stations.length}`;
+      // Scenario Question Card: Completely HIDE in Carousel Mode, Show only in Cohort Breakout Mode
+      const scenarioCard = document.getElementById('sh-scenario-card');
+      if (scenarioCard) {
+        if (isCarousel) {
+          scenarioCard.style.display = 'none';
+        } else {
+          scenarioCard.style.display = 'block';
+          const currSt = SimState.stations[SimState.currentIdx] || {};
+          const currCase = currSt.case || {};
+          const numLabel = document.getElementById('sh-station-number-label');
+          if (numLabel) numLabel.textContent = `สถานีที่ ${SimState.currentIdx + 1} / ${SimState.stations.length}`;
 
-      const titleEl = document.getElementById('sh-station-title');
-      if (titleEl) titleEl.textContent = currCase.title || currSt.caseId || 'สถานีพัก';
+          const titleEl = document.getElementById('sh-station-title');
+          if (titleEl) titleEl.textContent = currCase.title || currSt.caseId || 'สถานีพัก';
 
-      const scenarioEl = document.getElementById('sh-scenario-content');
-      if (scenarioEl) {
-        const cleanScenario = (currCase.scenario || currCase.contentHtml || 'ไม่มีโจทย์สำหรับสถานีนี้').replace(/<[^>]*>/g, ' ').trim();
-        scenarioEl.textContent = cleanScenario.slice(0, 320) + (cleanScenario.length > 320 ? '...' : '');
+          const scenarioEl = document.getElementById('sh-scenario-content');
+          if (scenarioEl) {
+            const cleanScenario = (currCase.scenario || currCase.contentHtml || 'ไม่มีโจทย์สำหรับสถานีนี้').replace(/<[^>]*>/g, ' ').trim();
+            scenarioEl.textContent = cleanScenario.slice(0, 320) + (cleanScenario.length > 320 ? '...' : '');
+          }
+        }
       }
 
       // Master Navigation Buttons Update
       const prevBtn = document.getElementById('sh-prev-btn');
-      if (prevBtn) prevBtn.disabled = SimState.currentIdx <= 0;
+      if (prevBtn) {
+        prevBtn.disabled = SimState.currentIdx <= 0;
+        prevBtn.textContent = isCarousel ? '⏮️ ย้อนรอบก่อนหน้า' : '⏮️ สถานีก่อนหน้า';
+      }
+
       const nextBtn = document.getElementById('sh-next-btn');
       if (nextBtn) {
         if (SimState.currentIdx >= SimState.stations.length - 1) {
           nextBtn.textContent = '🏁 จบการสอบ (Finish Exam)';
           nextBtn.onclick = () => finishExamSimulation();
         } else {
-          nextBtn.textContent = '⏭️ สถานีถัดไป (เปลี่ยนทุกคนพร้อมกัน)';
+          nextBtn.textContent = isCarousel ? `⏭️ สั่นกริ่งเปลี่ยนสถานี (ขึ้นรอบที่ ${r + 2})` : `⏭️ สถานีถัดไป (สถานีที่ ${r + 2})`;
           nextBtn.onclick = () => nextStation();
         }
       }
 
-      // Render Live Progress Matrix
+      const navHintEl = document.getElementById('sh-nav-hint');
+      if (navHintEl) {
+        navHintEl.textContent = isCarousel ? 'สั่นกริ่งและเปลี่ยนผู้เข้าสอบทุกคนไปยังสถานีถัดไปพร้อมกัน' : 'Super Host เป็นผู้เปลี่ยนสถานีของทั้งห้องพร้อมกัน';
+      }
+
+      // Render Live Progress Matrix / Station Occupancy Map
+      const matrixTitleEl = document.getElementById('sh-matrix-title');
       const matrixEl = document.getElementById('sh-live-matrix');
       if (!matrixEl) return;
       matrixEl.innerHTML = '';
 
       if (room.examMode === 'cohort_breakout') {
+        if (matrixTitleEl) matrixTitleEl.textContent = '📊 ความคืบหน้าการประเมินสดรายโต๊ะสอบ (Live Breakout Matrix)';
         const breakouts = room.breakouts || {};
         Object.keys(breakouts).forEach(k => {
           const t = breakouts[k];
@@ -7312,39 +7354,54 @@
           const scoreText = currScoreObj ? ` · ให้คะแนนแล้ว (${currScoreObj.score || 0}/${currScoreObj.maxScore || 0})` : '';
 
           const item = document.createElement('div');
-          item.style.cssText = 'background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.6rem;font-size:0.84rem;';
+          item.style.cssText = 'background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.75rem;font-size:0.84rem;';
           item.innerHTML = `
-            <div style="font-weight:700;color:var(--text-primary);border-bottom:1px solid var(--border);padding-bottom:0.25rem;margin-bottom:0.25rem;">
-              ${escapeHtml(t.name || k)}
+            <div style="font-weight:700;color:var(--text-primary);border-bottom:1px solid var(--border);padding-bottom:0.35rem;margin-bottom:0.35rem;display:flex;justify-content:space-between;">
+              <span>${escapeHtml(t.name || k)}</span>
+              <span style="font-size:0.72rem;color:var(--text-muted);">สถานีที่ ${r + 1}</span>
             </div>
-            <div>👨‍🏫 Examiner: <strong>${escapeHtml(t.examinerName || 'ยังไม่มี')}</strong></div>
-            <div>✍️ Participant: <strong>${escapeHtml(t.participantName || 'ยังไม่มี')}</strong></div>
-            ${scoreText ? `<div style="color:var(--success);font-size:0.75rem;margin-top:0.2rem;">${scoreText}</div>` : ''}
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.2rem;">
+              <span style="color:var(--text-muted);">Examiner:</span>
+              <strong style="color:var(--primary);">${escapeHtml(t.examinerName || 'ยังไม่มี')}</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+              <span style="color:var(--text-muted);">Candidate:</span>
+              <strong style="color:#16a34a;">${escapeHtml(t.participantName || 'ยังไม่มี')}</strong>
+            </div>
+            ${scoreText ? `<div style="color:var(--success);font-size:0.75rem;margin-top:0.35rem;font-weight:600;text-align:right;">${scoreText}</div>` : ''}
           `;
           matrixEl.appendChild(item);
         });
       } else if (room.examMode === 'carousel_rotation') {
+        if (matrixTitleEl) matrixTitleEl.textContent = `👥 ผังผู้เข้าสอบและผู้ประเมินสดประจำสถานี — รอบที่ ${r + 1} / ${N}`;
         const posts = room.carouselPosts || {};
-        const postKeys = Object.keys(posts);
-        const N = SimState.stations.length || postKeys.length || 1;
-        const r = SimState.currentIdx || 0;
+        const postKeys = Object.keys(posts).sort((a,b) => (parseInt(a.replace('st_','')) || 0) - (parseInt(b.replace('st_','')) || 0));
 
         postKeys.forEach((k, i) => {
           const p = posts[k];
-          const stNum = p.stationNumber || (i + 1);
+          const stNum = p.stationNumber || (parseInt(k.replace('st_','')) || (i + 1));
           const startNum = ((stNum - 1 - r + N) % N) + 1;
-          const currentPartName = posts['st_' + startNum]?.startParticipantName || 'ไม่มี';
+          const currentPartName = posts['st_' + startNum]?.startParticipantName || 'ไม่มีผู้สอบ';
+          const isRest = (p.caseId === 'REST');
 
           const item = document.createElement('div');
-          item.style.cssText = 'background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.6rem;font-size:0.84rem;';
+          item.style.cssText = 'background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-md);padding:0.75rem 0.85rem;font-size:0.84rem;box-shadow:var(--shadow-sm);';
           item.innerHTML = `
-            <div style="font-weight:700;color:var(--primary);border-bottom:1px solid var(--border);padding-bottom:0.25rem;margin-bottom:0.25rem;">
-              สถานีที่ ${stNum}
+            <div style="font-weight:700;color:var(--primary);border-bottom:1px solid var(--border);padding-bottom:0.35rem;margin-bottom:0.35rem;display:flex;justify-content:space-between;align-items:center;">
+              <span>สถานีที่ ${stNum}</span>
+              <span style="font-size:0.72rem;color:var(--text-muted);font-weight:600;">${isRest ? '🥤 สถานีพัก' : `ฐาน #${stNum}`}</span>
             </div>
-            <div>👨‍🏫 Examiner: <strong>${escapeHtml(p.examinerName || 'ไม่มี')}</strong></div>
-            <div>📍 เริ่มต้น: <strong>${escapeHtml(p.startParticipantName || 'ไม่มี')}</strong></div>
-            <div style="margin-top:0.25rem;font-size:0.8rem;border-top:1px dashed var(--border);padding-top:0.2rem;">
-              🔄 รอบนี้: <strong style="color:#16a34a;">${escapeHtml(currentPartName)}</strong>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
+              <span style="color:var(--text-muted);font-size:0.76rem;">ผู้ประเมิน:</span>
+              <strong style="color:var(--text-primary);">${escapeHtml(p.examinerName || 'ไม่มี')}</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius-sm);padding:0.35rem 0.5rem;margin:0.35rem 0;">
+              <span style="font-size:0.74rem;color:#15803d;font-weight:700;">🏃‍♂️ สอบรอบนี้:</span>
+              <strong style="color:#15803d;font-size:0.88rem;">${escapeHtml(currentPartName)}</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.74rem;color:var(--text-muted);margin-top:0.2rem;">
+              <span>จุดเริ่มต้น:</span>
+              <span>${escapeHtml(p.startParticipantName || 'ไม่มี')}</span>
             </div>
           `;
           matrixEl.appendChild(item);
