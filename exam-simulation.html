@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU</title>
-  <link rel="stylesheet" href="style.css?v=20261002_235500">
-  <script src="case-data-offline.js?v=v_20261002_235500"></script>
-  <script src="case-details-offline.js?v=v_20261002_235500"></script>
-  <script src="app.js?v=v_20261002_235500"></script>
-  <script src="scratchpad.js?v=v_20261002_235500"></script>
+  <link rel="stylesheet" href="style.css?v=20261003_001000">
+  <script src="case-data-offline.js?v=v_20261003_001000"></script>
+  <script src="case-details-offline.js?v=v_20261003_001000"></script>
+  <script src="app.js?v=v_20261003_001000"></script>
+  <script src="scratchpad.js?v=v_20261003_001000"></script>
   <style>
     /* Simulation Source and Topic Selector */
     .sim-filter-section {
@@ -986,6 +986,40 @@
                 <button type="button" id="solo-timeout-btn-manual" class="sim-btn-xs" style="padding: 0.2rem 0.5rem; font-size: 0.75rem; font-weight: 600; background: transparent; color: var(--text-secondary); border: 1px solid var(--border);" onclick="setGlobalTimeoutMode('manual')">⏸️ Manual</button>
               </div>
             </div>
+
+            <!-- Alarm Sound Selector for Solo Mode -->
+            <div style="margin-bottom: 0.75rem; padding: 0.55rem 0.75rem; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">🔔 เสียงกริ่งหมดเวลา:</span>
+                <button type="button" class="sim-btn-xs" style="padding: 0.15rem 0.45rem; font-size: 0.72rem; border-radius:4px;" onclick="previewCurrentAlarmSound('solo')">ทดลองฟัง</button>
+              </div>
+              <select id="solo-alarm-sound-select" class="select-filter" style="width: 100%; font-size: 0.82rem; padding: 0.4rem 0.5rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text-primary); font-weight: 500;" onchange="updateRoomAlarmSound(this.value)">
+                <option value="school-bell">🔔 กระดิ่งมาตรฐาน (Standard Bell)</option>
+                <option value="random">🎲 สุ่มเสียงอัตโนมัติทุกรอบ (Random Alarm)</option>
+                <optgroup label="🎵 เสียงเอฟเฟกต์ & เพลงยอดฮิต">
+                  <option value="khon-khee-lang-kwai">คนขี่หลังควาย</option>
+                  <option value="nan-jang-nee-jang-see">นั้นจังนี้จังสี้ ชุปมานังจัมรี้</option>
+                  <option value="em-all-new-rak-pupe">เอมออนิวรักปูเป้</option>
+                  <option value="weew-hor-weew-weew">หวีวห้อวิ้ววิ้ว</option>
+                  <option value="ngaen-pee-jazz">แง้นพี่แจ็ส</option>
+                  <option value="id-a-tid-tai">อิดอะติดไตชิ้กกะเด้วอิดอะติดไต</option>
+                  <option value="lok-thang-bai-plian-see">โลกทั้งใบเปลี่ยนสีไปเพราะเธอ</option>
+                  <option value="skoy-scan">สก้อยสแก้น</option>
+                  <option value="ngern-tee-yoo-nai-mue">เงินที่อยู่ในมือ</option>
+                  <option value="okay-1-2-3-tew">okay 1 23 ติ้วๆๆๆ</option>
+                  <option value="brazil-slow">Brazil ช้าๆ</option>
+                  <option value="aa-sak-doong-sading">เอเอสักดุ้งสะดิ้ง</option>
+                  <option value="brazil-faad-sae">Brazil ฟาดแซ่</option>
+                  <option value="nene">เนเน่นายแน่มาก</option>
+                  <option value="brazil">เพลง Brazil</option>
+                  <option value="plaahm">เพลงปลาหมอสีเหลือง</option>
+                  <option value="chicken">ไก่กรีดร้องบนต้นไม้</option>
+                  <option value="black-panther">เสือดำเด้าหน่อย</option>
+                  <option value="cafe-comedy">เปิดตัวตลกคาเฟ่</option>
+                </optgroup>
+              </select>
+            </div>
+
             <form id="setup-form" onsubmit="event.preventDefault(); startExamSimulation();">
               <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 1rem;">
                 🎲 สุ่มสถานีและเริ่มสอบทันที
@@ -1674,7 +1708,8 @@
       lobbyOp: 'create',
       lobbyPollInterval: null,
       lastServerSyncTime: 0,
-      timeoutTransitionMode: 'auto' // 'auto' or 'manual'
+      timeoutTransitionMode: 'auto', // 'auto' or 'manual'
+      alarmSound: localStorage.getItem('ple_ospe_alarm_sound') || 'school-bell'
     };
 
     // ─── Mode Switching: Proportion vs Exam Set Mode vs Custom Mode ───
@@ -2639,13 +2674,19 @@
       initExamFilterControls();
       populateExamSetDropdown();
 
-      // Restore saved display name
+      // Restore saved display name and alarm sound
       try {
         const savedName = localStorage.getItem('ple_player_name');
         if (savedName) {
           const nameInput = document.getElementById('lobby-player-name');
           if (nameInput && !nameInput.value) nameInput.value = savedName;
         }
+        const savedAlarm = localStorage.getItem('ple_ospe_alarm_sound') || 'school-bell';
+        SimState.alarmSound = savedAlarm;
+        const soloSelect = document.getElementById('solo-alarm-sound-select');
+        if (soloSelect) soloSelect.value = savedAlarm;
+        const lobbySelect = document.getElementById('lobby-alarm-sound-select');
+        if (lobbySelect) lobbySelect.value = savedAlarm;
       } catch (e) {}
 
       // Handle direct URL params for room joining (?room=1234 or ?join=1234)
@@ -2862,7 +2903,7 @@
             participantScores: {},
             checklistProgress: '',
             scoresByStation: '{}',
-            alarmSound: document.getElementById('lobby-alarm-sound-select')?.value || 'school-bell',
+            alarmSound: SimState.alarmSound || document.getElementById('solo-alarm-sound-select')?.value || document.getElementById('lobby-alarm-sound-select')?.value || localStorage.getItem('ple_ospe_alarm_sound') || 'school-bell',
             timeoutTransitionMode: document.querySelector('input[name="global-timeout-behavior"]:checked')?.value || SimState.timeoutTransitionMode || 'auto',
             createdAt: Date.now()
           };
@@ -3321,6 +3362,18 @@
         // CRITICAL FIX: Initialize isHost at top of applyRoomState to eliminate TDZ ReferenceError
         const isHost = Boolean(SimState.isHost || (room.players && room.players[SimState.myPlayerId]?.isHost) || (room.hostId && room.hostId === SimState.myPlayerId) || (room.hostRole === SimState.role && playersList[0] && playersList[0].name === SimState.lobbyPlayerName));
         SimState.isHost = isHost;
+
+        // Synchronize Alarm Sound & Timeout Transition Mode across all participants in real time
+        if (room.alarmSound) {
+          SimState.alarmSound = room.alarmSound;
+          const lobbySelect = document.getElementById('lobby-alarm-sound-select');
+          if (lobbySelect && lobbySelect.value !== room.alarmSound) lobbySelect.value = room.alarmSound;
+          const soloSelect = document.getElementById('solo-alarm-sound-select');
+          if (soloSelect && soloSelect.value !== room.alarmSound) soloSelect.value = room.alarmSound;
+        }
+        if (room.timeoutTransitionMode) {
+          SimState.timeoutTransitionMode = room.timeoutTransitionMode;
+        }
 
         // Auto-detect breakout table membership for current player
         let foundInBreakout = false;
@@ -4531,8 +4584,8 @@
       } catch(e) {}
     }
 
-    function closeManualTimeoutOverlay() {
-      stopTimeoutAlarmSound();
+    function closeManualTimeoutOverlay(stopAudio = true) {
+      if (stopAudio) stopTimeoutAlarmSound();
       const existing = document.getElementById('manual-timeout-overlay');
       if (existing && existing.parentNode) {
         existing.parentNode.removeChild(existing);
@@ -4541,8 +4594,8 @@
     window.closeManualTimeoutOverlay = closeManualTimeoutOverlay;
 
     function showManualTimeoutPopup() {
+      closeManualTimeoutOverlay(false);
       playTimeoutSound();
-      closeManualTimeoutOverlay();
 
       const canAdvance = (!SimState.isLobby) || SimState.isHost || (SimState.examMode === 'standard' && SimState.role === 'examiner');
       const isLast = (SimState.currentIdx >= SimState.stations.length - 1);
@@ -4679,6 +4732,10 @@
       SimState.isLobby = false;
       const soloTimeoutMode = document.querySelector('input[name="global-timeout-behavior"]:checked')?.value || SimState.timeoutTransitionMode || 'auto';
       SimState.timeoutTransitionMode = soloTimeoutMode;
+      const soloAlarm = document.getElementById('solo-alarm-sound-select')?.value || SimState.alarmSound || localStorage.getItem('ple_ospe_alarm_sound') || 'school-bell';
+      SimState.alarmSound = soloAlarm;
+      localStorage.setItem('ple_ospe_alarm_sound', soloAlarm);
+      if (typeof unlockAudioContext === 'function') unlockAudioContext();
       if (window.Scratchpad) Scratchpad.resetAll();
       showGlobalLoader(true);
       
@@ -6548,9 +6605,36 @@
     };
     window.ALARM_SOUND_MAP = ALARM_SOUND_MAP;
 
+    let _unlockedAudioCtx = null;
+    function unlockAudioContext() {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass && !_unlockedAudioCtx) {
+          _unlockedAudioCtx = new AudioContextClass();
+        }
+        if (_unlockedAudioCtx && _unlockedAudioCtx.state === 'suspended') {
+          _unlockedAudioCtx.resume().catch(() => {});
+        }
+      } catch (e) {}
+    }
+    window.unlockAudioContext = unlockAudioContext;
+    document.addEventListener('click', () => unlockAudioContext(), { once: true });
+    document.addEventListener('touchstart', () => unlockAudioContext(), { once: true });
+
     async function updateRoomAlarmSound(soundKey) {
+      if (!soundKey) return;
       SimState.alarmSound = soundKey;
-      if (SimState.roomId && typeof _fbDb !== 'undefined') {
+      try {
+        localStorage.setItem('ple_ospe_alarm_sound', soundKey);
+      } catch (e) {}
+
+      // Keep all sound selectors in sync across views
+      const soloSelect = document.getElementById('solo-alarm-sound-select');
+      if (soloSelect && soloSelect.value !== soundKey) soloSelect.value = soundKey;
+      const lobbySelect = document.getElementById('lobby-alarm-sound-select');
+      if (lobbySelect && lobbySelect.value !== soundKey) lobbySelect.value = soundKey;
+
+      if (SimState.roomId && typeof _fbDb !== 'undefined' && SimState.isHost) {
         try {
           await _fbDb.ref('rooms/' + SimState.roomId).update({ alarmSound: soundKey });
         } catch (e) {
@@ -6559,6 +6643,7 @@
       }
     }
     window.updateRoomAlarmSound = updateRoomAlarmSound;
+    window.setAlarmSound = updateRoomAlarmSound;
 
     function applyTimeoutModeUI(mode, isHost) {
       const autoBtn = document.getElementById('lobby-btn-timeout-auto');
@@ -6620,9 +6705,18 @@
     }
     window.updateRoomTimeoutMode = updateRoomTimeoutMode;
 
-    function previewCurrentAlarmSound() {
-      const soundSelect = document.getElementById('lobby-alarm-sound-select');
-      const soundKey = soundSelect ? soundSelect.value : (SimState.alarmSound || 'school-bell');
+    function previewCurrentAlarmSound(source = null) {
+      unlockAudioContext();
+      let soundKey = SimState.alarmSound || localStorage.getItem('ple_ospe_alarm_sound') || 'school-bell';
+      if (source === 'solo') {
+        const soloSelect = document.getElementById('solo-alarm-sound-select');
+        if (soloSelect && soloSelect.value) soundKey = soloSelect.value;
+      } else {
+        const lobbySelect = document.getElementById('lobby-alarm-sound-select');
+        const soloSelect = document.getElementById('solo-alarm-sound-select');
+        if (lobbySelect && lobbySelect.value) soundKey = lobbySelect.value;
+        else if (soloSelect && soloSelect.value) soundKey = soloSelect.value;
+      }
       playStationTimeoutAlarm('alarm', soundKey);
     }
     window.previewCurrentAlarmSound = previewCurrentAlarmSound;
@@ -6642,7 +6736,7 @@
       try {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         if (!AudioContextClass) return;
-        const ctx = new AudioContextClass();
+        const ctx = _unlockedAudioCtx || new AudioContextClass();
         if (ctx.state === 'suspended') ctx.resume().catch(() => {});
         const now = ctx.currentTime;
         const osc = ctx.createOscillator();
@@ -6663,12 +6757,13 @@
         // Stop any running sound first
         stopTimeoutAlarmSound();
         try {
-          let soundKey = soundOverride || SimState.alarmSound || 'school-bell';
+          let soundKey = soundOverride || SimState.alarmSound || localStorage.getItem('ple_ospe_alarm_sound') || 'school-bell';
           
           // Random mode: dynamically pick one of the available meme tracks
           if (soundKey === 'random') {
             const playableKeys = Object.keys(ALARM_SOUND_MAP).filter(k => k !== 'random' && ALARM_SOUND_MAP[k]?.file);
             soundKey = playableKeys[Math.floor(Math.random() * playableKeys.length)] || 'school-bell';
+            console.log('[OSPE Timeout Alarm] 🎲 Random alarm selected:', soundKey, ALARM_SOUND_MAP[soundKey]?.title);
           }
 
           const soundObj = ALARM_SOUND_MAP[soundKey] || ALARM_SOUND_MAP['school-bell'];
@@ -6677,7 +6772,9 @@
             return;
           }
 
+          console.log('[OSPE Timeout Alarm] 🔔 Playing track:', soundKey, soundObj.title, soundObj.file);
           const audio = new Audio(soundObj.file);
+          audio.currentTime = 0;
           audio.volume = 1.0;
           _activeTimeoutAudio = audio;
           audio.play().catch(err => {
