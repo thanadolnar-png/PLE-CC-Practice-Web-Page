@@ -1,12 +1,12 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Version: v_20261002_220055
- * Generated on 2026-10-02 22:00:55
+ * Version: v_20261002_222519
+ * Generated on 2026-10-02 22:25:19
  */
 
 const OFFLINE_DATA = {
-  "version": "v_20261002_220055",
-  "generatedAt": "2026-10-02 22:00:55",
+  "version": "v_20261002_222519",
+  "generatedAt": "2026-10-02 22:25:19",
   "totalCases": 364,
   "cases": [
     {
@@ -3496,6 +3496,102 @@ const OFFLINE_DATA = {
       "isActive": true
     },
     {
+      "caseId": "OSPE-PD84M1W101A",
+      "title": "OSPE-PD84M1W101A",
+      "category": "Product",
+      "mainGroup": "Mock Exam 2569",
+      "subTopic": "🔒 ข้อสอบลับ (ต้องใช้รหัสผ่าน)",
+      "disease": "🔒 ล็อกด้วยรหัสผ่าน (Secret Mock)",
+      "difficulty": 2,
+      "docId": "1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24",
+      "author": "RxCU84",
+      "createdDate": "2/10/2569",
+      "source": "Mock Exam 2569 (Week 1) ชุด A",
+      "isActive": true,
+      "isProtected": true,
+      "hasPassword": true
+    },
+    {
+      "caseId": "OSPE-PD84M1W101B",
+      "title": "OSPE-PD84M1W101B",
+      "category": "Product",
+      "mainGroup": "Mock Exam 2569",
+      "subTopic": "🔒 ข้อสอบลับ (ต้องใช้รหัสผ่าน)",
+      "disease": "🔒 ล็อกด้วยรหัสผ่าน (Secret Mock)",
+      "difficulty": 2,
+      "docId": "1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24",
+      "author": "RxCU84",
+      "createdDate": "2/10/2569",
+      "source": "Mock Exam 2569 (Week 1) ชุด B",
+      "isActive": true,
+      "isProtected": true,
+      "hasPassword": true
+    },
+    {
+      "caseId": "OSPE-PD84M1W102A",
+      "title": "OSPE-PD84M1W102A",
+      "category": "Product",
+      "mainGroup": "Mock Exam 2569",
+      "subTopic": "🔒 ข้อสอบลับ (ต้องใช้รหัสผ่าน)",
+      "disease": "🔒 ล็อกด้วยรหัสผ่าน (Secret Mock)",
+      "difficulty": 2,
+      "docId": "1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24",
+      "author": "RxCU84",
+      "createdDate": "2/10/2569",
+      "source": "Mock Exam 2569 (Week 1) ชุด A",
+      "isActive": true,
+      "isProtected": true,
+      "hasPassword": true
+    },
+    {
+      "caseId": "OSPE-PD84M1W102B",
+      "title": "OSPE-PD84M1W102B",
+      "category": "Product",
+      "mainGroup": "Mock Exam 2569",
+      "subTopic": "🔒 ข้อสอบลับ (ต้องใช้รหัสผ่าน)",
+      "disease": "🔒 ล็อกด้วยรหัสผ่าน (Secret Mock)",
+      "difficulty": 2,
+      "docId": "1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24",
+      "author": "RxCU84",
+      "createdDate": "2/10/2569",
+      "source": "Mock Exam 2569 (Week 1) ชุด B",
+      "isActive": true,
+      "isProtected": true,
+      "hasPassword": true
+    },
+    {
+      "caseId": "OSPE-PD84M1W103A",
+      "title": "OSPE-PD84M1W103A",
+      "category": "Product",
+      "mainGroup": "Mock Exam 2569",
+      "subTopic": "🔒 ข้อสอบลับ (ต้องใช้รหัสผ่าน)",
+      "disease": "🔒 ล็อกด้วยรหัสผ่าน (Secret Mock)",
+      "difficulty": 2,
+      "docId": "1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24",
+      "author": "RxCU84",
+      "createdDate": "2/10/2569",
+      "source": "Mock Exam 2569 (Week 1) ชุด A",
+      "isActive": true,
+      "isProtected": true,
+      "hasPassword": true
+    },
+    {
+      "caseId": "OSPE-PD84M1W103B",
+      "title": "OSPE-PD84M1W103B",
+      "category": "Product",
+      "mainGroup": "Mock Exam 2569",
+      "subTopic": "🔒 ข้อสอบลับ (ต้องใช้รหัสผ่าน)",
+      "disease": "🔒 ล็อกด้วยรหัสผ่าน (Secret Mock)",
+      "difficulty": 2,
+      "docId": "1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24",
+      "author": "RxCU84",
+      "createdDate": "2/10/2569",
+      "source": "Mock Exam 2569 (Week 1) ชุด B",
+      "isActive": true,
+      "isProtected": true,
+      "hasPassword": true
+    },
+    {
       "caseId": "OSPE-PD84W101",
       "title": "Alcohol Dilution: 70% v/v Alcohol from 95% v/v Alcohol",
       "category": "Product",
@@ -5020,102 +5116,6 @@ const OFFLINE_DATA = {
       "createdDate": "01/10/2026",
       "source": "ข้อสอบจริง ปี 2568",
       "isActive": true
-    },
-    {
-      "caseId": "OSPE-PD84M1W101A",
-      "title": "OSPE-PD84M1W101A",
-      "category": "Product",
-      "mainGroup": "Mock Exam 2569",
-      "subTopic": "🔒 ข้อสอบลับ (ต้องใช้รหัสผ่าน)",
-      "disease": "🔒 ล็อกด้วยรหัสผ่าน (Secret Mock)",
-      "difficulty": 2,
-      "docId": "1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24",
-      "author": "RxCU84",
-      "createdDate": "02/10/2026",
-      "source": "Mock Exam 2569 (Week 1)",
-      "isActive": true,
-      "isProtected": true,
-      "hasPassword": true
-    },
-    {
-      "caseId": "OSPE-PD84M1W101B",
-      "title": "OSPE-PD84M1W101B",
-      "category": "Product",
-      "mainGroup": "Mock Exam 2569",
-      "subTopic": "🔒 ข้อสอบลับ (ต้องใช้รหัสผ่าน)",
-      "disease": "🔒 ล็อกด้วยรหัสผ่าน (Secret Mock)",
-      "difficulty": 2,
-      "docId": "1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24",
-      "author": "RxCU84",
-      "createdDate": "02/10/2026",
-      "source": "Mock Exam 2569 (Week 1)",
-      "isActive": true,
-      "isProtected": true,
-      "hasPassword": true
-    },
-    {
-      "caseId": "OSPE-PD84M1W102A",
-      "title": "OSPE-PD84M1W102A",
-      "category": "Product",
-      "mainGroup": "Mock Exam 2569",
-      "subTopic": "🔒 ข้อสอบลับ (ต้องใช้รหัสผ่าน)",
-      "disease": "🔒 ล็อกด้วยรหัสผ่าน (Secret Mock)",
-      "difficulty": 2,
-      "docId": "1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24",
-      "author": "RxCU84",
-      "createdDate": "02/10/2026",
-      "source": "Mock Exam 2569 (Week 1)",
-      "isActive": true,
-      "isProtected": true,
-      "hasPassword": true
-    },
-    {
-      "caseId": "OSPE-PD84M1W102B",
-      "title": "OSPE-PD84M1W102B",
-      "category": "Product",
-      "mainGroup": "Mock Exam 2569",
-      "subTopic": "🔒 ข้อสอบลับ (ต้องใช้รหัสผ่าน)",
-      "disease": "🔒 ล็อกด้วยรหัสผ่าน (Secret Mock)",
-      "difficulty": 2,
-      "docId": "1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24",
-      "author": "RxCU84",
-      "createdDate": "02/10/2026",
-      "source": "Mock Exam 2569 (Week 1)",
-      "isActive": true,
-      "isProtected": true,
-      "hasPassword": true
-    },
-    {
-      "caseId": "OSPE-PD84M1W103A",
-      "title": "OSPE-PD84M1W103A",
-      "category": "Product",
-      "mainGroup": "Mock Exam 2569",
-      "subTopic": "🔒 ข้อสอบลับ (ต้องใช้รหัสผ่าน)",
-      "disease": "🔒 ล็อกด้วยรหัสผ่าน (Secret Mock)",
-      "difficulty": 2,
-      "docId": "1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24",
-      "author": "RxCU84",
-      "createdDate": "02/10/2026",
-      "source": "Mock Exam 2569 (Week 1)",
-      "isActive": true,
-      "isProtected": true,
-      "hasPassword": true
-    },
-    {
-      "caseId": "OSPE-PD84M1W103B",
-      "title": "OSPE-PD84M1W103B",
-      "category": "Product",
-      "mainGroup": "Mock Exam 2569",
-      "subTopic": "🔒 ข้อสอบลับ (ต้องใช้รหัสผ่าน)",
-      "disease": "🔒 ล็อกด้วยรหัสผ่าน (Secret Mock)",
-      "difficulty": 2,
-      "docId": "1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24",
-      "author": "RxCU84",
-      "createdDate": "02/10/2026",
-      "source": "Mock Exam 2569 (Week 1)",
-      "isActive": true,
-      "isProtected": true,
-      "hasPassword": true
     }
   ]
 };
