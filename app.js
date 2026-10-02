@@ -653,8 +653,59 @@ function updateStatsDashboard() {
 }
 
 // ──────────────────────────────────────────────────────────────
-// 4. Filtering Logic
+// 4. Filtering Logic & Session Persistence
 // ──────────────────────────────────────────────────────────────
+function saveFilterState() {
+  try {
+    sessionStorage.setItem('ple_case_library_filters', JSON.stringify(AppState.activeFilters));
+  } catch (e) {}
+}
+
+function restoreFilterState() {
+  try {
+    const saved = sessionStorage.getItem('ple_case_library_filters');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && typeof parsed === 'object') {
+        AppState.activeFilters.category = parsed.category || 'All';
+        AppState.activeFilters.mainGroup = parsed.mainGroup || 'All';
+        AppState.activeFilters.disease = parsed.disease || 'All';
+        AppState.activeFilters.source = parsed.source || 'All';
+        AppState.activeFilters.search = parsed.search || '';
+        return true;
+      }
+    }
+  } catch (e) {
+    console.warn('Could not restore filter state:', e);
+  }
+  return false;
+}
+
+function resetAllFilters() {
+  AppState.activeFilters = {
+    category: 'All',
+    mainGroup: 'All',
+    disease: 'All',
+    source: 'All',
+    search: ''
+  };
+  try {
+    sessionStorage.removeItem('ple_case_library_filters');
+    sessionStorage.removeItem('ple_case_library_scroll');
+  } catch (e) {}
+
+  const searchInput = document.getElementById('search-case');
+  if (searchInput) searchInput.value = '';
+
+  const selectCat = document.getElementById('filter-category');
+  if (selectCat) selectCat.value = 'All';
+
+  renderFilterSelectOptions();
+  applyFilters();
+  renderCaseList();
+}
+window.resetAllFilters = resetAllFilters;
+
 function applyFilters() {
   let list = Array.isArray(AppState.cases) ? [...AppState.cases] : [];
   const { category, mainGroup, disease, source, search } = AppState.activeFilters;
@@ -692,12 +743,17 @@ function applyFilters() {
 }
 
 function renderFilterSelectOptions() {
+  const selectCat = document.getElementById('filter-category');
   const selectGroup = document.getElementById('filter-course-group');
   const selectDisease = document.getElementById('filter-disease');
   if (!selectGroup) return;
 
-  const currentCategory = AppState.activeFilters.category;
-  const currentMainGroup = AppState.activeFilters.mainGroup;
+  const currentCategory = AppState.activeFilters.category || 'All';
+  const currentMainGroup = AppState.activeFilters.mainGroup || 'All';
+
+  if (selectCat && currentCategory) {
+    selectCat.value = currentCategory;
+  }
 
   // 1. Filter Cases for Main Group options based on Category
   let availableCasesForGroup = AppState.cases;
@@ -798,7 +854,10 @@ function renderCaseList() {
     const card = document.createElement('div');
     card.className = 'case-card';
     card.addEventListener('click', () => {
-      window.location.href = `case-viewer.html?id=${c.caseId}`;
+      try {
+        sessionStorage.setItem('ple_case_library_scroll', window.scrollY.toString());
+      } catch (e) {}
+      window.location.href = `case-viewer.html?id=${encodeURIComponent(c.caseId)}`;
     });
     
     const sourceBadge = c.source ? `<span class="case-card-tag" style="background: rgba(99, 102, 241, 0.12); color: var(--primary); font-weight: 600; border: 1px solid rgba(99, 102, 241, 0.25);">🏷️ ${c.source}</span>` : '';
@@ -820,6 +879,19 @@ function renderCaseList() {
     
     container.appendChild(card);
   });
+
+  // Restore scroll position if returning from case viewer
+  try {
+    const savedScroll = sessionStorage.getItem('ple_case_library_scroll');
+    if (savedScroll) {
+      const targetScroll = parseInt(savedScroll, 10);
+      if (!isNaN(targetScroll) && targetScroll > 0) {
+        setTimeout(() => {
+          window.scrollTo({ top: targetScroll, behavior: 'instant' });
+        }, 60);
+      }
+    }
+  } catch (e) {}
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -1083,35 +1155,48 @@ function detectCurrentPage() {
   
   // หน้ารายการคลังเคส
   if (document.getElementById('case-list-container')) {
+    // กู้คืนตัวกรองที่เคยเลือกไว้จาก SessionStorage
+    restoreFilterState();
+
     // ดักจับตัวเลือกการกรอง
     const searchInput = document.getElementById('search-case');
     const selectCat = document.getElementById('filter-category');
     const selectGroup = document.getElementById('filter-course-group');
     const selectDisease = document.getElementById('filter-disease');
-    
+    const selectSource = document.getElementById('filter-source');
+
     if (searchInput) {
+      if (AppState.activeFilters.search) {
+        searchInput.value = AppState.activeFilters.search;
+      }
       searchInput.addEventListener('input', (e) => {
         AppState.activeFilters.search = e.target.value;
+        saveFilterState();
         applyFilters();
         renderCaseList();
       });
     }
-    
+
     if (selectCat) {
+      if (AppState.activeFilters.category) {
+        selectCat.value = AppState.activeFilters.category;
+      }
       selectCat.addEventListener('change', (e) => {
         AppState.activeFilters.category = e.target.value;
         AppState.activeFilters.mainGroup = 'All';
         AppState.activeFilters.disease = 'All';
+        saveFilterState();
         renderFilterSelectOptions();
         applyFilters();
         renderCaseList();
       });
     }
-    
+
     if (selectGroup) {
       selectGroup.addEventListener('change', (e) => {
         AppState.activeFilters.mainGroup = e.target.value;
         AppState.activeFilters.disease = 'All';
+        saveFilterState();
         renderFilterSelectOptions();
         applyFilters();
         renderCaseList();
@@ -1121,15 +1206,16 @@ function detectCurrentPage() {
     if (selectDisease) {
       selectDisease.addEventListener('change', (e) => {
         AppState.activeFilters.disease = e.target.value;
+        saveFilterState();
         applyFilters();
         renderCaseList();
       });
     }
 
-    const selectSource = document.getElementById('filter-source');
     if (selectSource) {
       selectSource.addEventListener('change', (e) => {
         AppState.activeFilters.source = e.target.value;
+        saveFilterState();
         applyFilters();
         renderCaseList();
       });

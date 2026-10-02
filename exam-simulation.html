@@ -474,6 +474,41 @@
         padding: 0.75rem !important;
       }
     }
+
+    /* Multiplayer Lobby & Results Chips */
+    .lobby-player-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.28rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      line-height: 1.3;
+    }
+    .lobby-player-chip.host {
+      background: #eff6ff;
+      border: 1.5px solid #60a5fa;
+      color: #1d4ed8;
+    }
+    .lobby-player-chip.examiner {
+      background: #f5f3ff;
+      border: 1.5px solid #c4b5fd;
+      color: #6d28d9;
+    }
+    .lobby-player-chip.examinee {
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+      color: #15803d;
+    }
+    .lobby-player-chip .me-badge {
+      font-size: 0.7rem;
+      background: rgba(0, 0, 0, 0.08);
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      margin-left: 0.2rem;
+    }
   </style>
 
   <!-- Firebase SDK (CDN) -->
@@ -789,8 +824,8 @@
                LOBBY MULTIPLAYER SETUP CONTAINER
                ═══════════════════════════════════════════ -->
           <div id="setup-lobby-container" style="display: none;">
-            <div style="padding: 0.75rem 1rem; background: var(--primary-light); border-radius: var(--radius-md); margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--primary);">
-              <strong>📡 โหมดออนไลน์แบบจับคู่:</strong> ผู้เข้าสอบ + ผู้ประเมิน เห็นหน้าจอเดียวกันแบบเรียลไทม์
+            <div style="padding: 0.75rem 1rem; background: var(--primary-light); border-radius: var(--radius-md); margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--primary); line-height: 1.45;">
+              <strong>📡 โหมดออนไลน์ (Multiplayer):</strong> รองรับผู้เข้าร่วมไม่จำกัดจำนวนคน เพื่อนๆ สามารถเข้าร่วมห้องเดียวกัน ซ้อมพร้อมกัน หรือช่วยกันประเมิน และสรุปผลคะแนนร่วมกันแบบ Real-time
             </div>
 
             <form id="lobby-setup-form" onsubmit="event.preventDefault(); submitLobbySetup();">
@@ -855,43 +890,56 @@
       <section class="exam-screen" id="exam-running-view" style="display: none;">
         
         <!-- Lobby Info Panel (Only shown in Lobby Mode) -->
-        <div id="exam-lobby-info-bar" class="exam-lobby-info-bar" style="display: none; background: var(--primary-light); color: var(--primary); padding: 0.75rem 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; font-family: var(--font-title); font-size: 0.9rem; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm);">
-          <div>
-            <span>📍 รหัสห้องซ้อม: <strong id="lobby-room-id-display" style="font-size: 1.1rem; color: var(--primary);">----</strong></span>
-            <span style="margin-left: 1.5rem;">✍️ ผู้เข้าสอบ: <span id="lobby-examinee-display" style="font-weight: bold;">กำลังรอ...</span></span>
-            <span style="margin-left: 1.5rem;">🔎 ผู้ประเมิน: <span id="lobby-examiner-display" style="font-weight: bold;">กำลังรอ...</span></span>
+        <div id="exam-lobby-info-bar" class="exam-lobby-info-bar" style="display: none; background: var(--primary-light); color: var(--primary); padding: 0.65rem 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; font-family: var(--font-title); font-size: 0.88rem; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); flex-wrap: wrap; gap: 0.5rem;">
+          <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+            <span>📍 รหัสห้อง: <strong id="lobby-room-id-display" style="font-size: 1.05rem; color: var(--primary); letter-spacing: 1px;">----</strong></span>
+            <span>👥 สมาชิก (<strong id="lobby-active-count">0</strong> คน): <span id="lobby-participants-names" style="font-weight: 600; color: var(--text-primary);">กำลังโหลด...</span></span>
+            <!-- Hidden backward-compatible spans -->
+            <span id="lobby-examinee-display" style="display: none;"></span>
+            <span id="lobby-examiner-display" style="display: none;"></span>
           </div>
-          <div id="lobby-status-indicator" style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; font-weight: bold; background: white; padding: 0.25rem 0.5rem; border-radius: var(--radius-sm);">
+          <div id="lobby-status-indicator" style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; font-weight: bold; background: white; padding: 0.25rem 0.6rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
             <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--warning); display: inline-block;" id="lobby-dot"></span>
             <span id="lobby-status-text">CONNECTING</span>
           </div>
         </div>
 
         <!-- Lobby Waiting Screen (Only shown during Lobby Setup) -->
-        <div id="lobby-waiting-screen" style="display: none; padding: 3rem 1.5rem; text-align: center; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); margin-bottom: 2rem;">
-          <span style="font-size: 4rem; display: block; margin-bottom: 1rem;">⏳</span>
-          <h3 style="font-family: var(--font-title); font-size: 1.5rem; color: var(--text-primary); margin-bottom: 0.5rem;" id="lobby-waiting-title">กำลังรอการเตรียมพร้อม...</h3>
-          <p style="color: var(--text-secondary); margin-bottom: 2rem;" id="lobby-waiting-desc">รอผู้เข้าร่วมการจำลองซ้อมสอบเข้ามาเชื่อมต่อที่ห้องนี้</p>
-          
-          <div id="lobby-players-status" style="margin: 1.5rem auto; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius-md); max-width: 400px; text-align: left; background: var(--bg); font-size: 1.1rem;">
-            <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border); padding-bottom: 0.5rem;">
-              <span>👨‍🏫 ผู้ประเมิน (Host):</span>
-              <strong id="lobby-status-examiner" style="color: var(--text-muted);">รอการเชื่อมต่อ...</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span>👨‍🎓 ผู้เข้าสอบ (Examinee):</span>
-              <strong id="lobby-status-examinee" style="color: var(--text-muted);">รอการเชื่อมต่อ...</strong>
-            </div>
-          </div>
+        <div id="lobby-waiting-screen" style="display: none; padding: 2.5rem 1.25rem; text-align: center; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); margin-bottom: 2rem;">
+          <span style="font-size: 3.5rem; display: block; margin-bottom: 0.75rem;">⏳</span>
+          <h3 style="font-family: var(--font-title); font-size: 1.45rem; color: var(--text-primary); margin-bottom: 0.5rem;" id="lobby-waiting-title">กำลังรอเพื่อนๆ เข้าห้องซ้อม...</h3>
+          <p style="color: var(--text-secondary); margin-bottom: 1.25rem; font-size: 0.92rem;" id="lobby-waiting-desc">สามารถชวนเพื่อนเข้าร่วมห้องนี้ได้ไม่จำกัดจำนวนคน เพื่อซ้อมและสรุปคะแนนร่วมกัน</p>
           
           <!-- Room ID display for Host to share -->
-          <div id="lobby-room-code-share" style="display: none; margin: 1.5rem auto; padding: 1rem 2rem; background: var(--bg); border: 2px solid var(--primary); border-radius: var(--radius-lg); max-width: 300px;">
-            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;" id="lobby-waiting-msg">แชร์รหัสห้องนี้ให้ผู้เข้าสอบ:</p>
+          <div id="lobby-room-code-share" style="display: none; margin: 0 auto 1.25rem auto; padding: 0.85rem 1.5rem; background: var(--bg); border: 2px dashed var(--primary); border-radius: var(--radius-lg); max-width: 320px;">
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.35rem;" id="lobby-waiting-msg">แชร์รหัสห้อง 4 หลักนี้ให้เพื่อน:</p>
             <div style="font-size: 2.5rem; font-weight: 900; letter-spacing: 0.5rem; color: var(--primary); font-family: var(--font-title);" id="lobby-share-code-display">----</div>
+          </div>
+
+          <!-- Dynamic Multi-player Status Box -->
+          <div id="lobby-players-status" style="margin: 1.25rem auto; padding: 1.2rem; border: 1px solid var(--border); border-radius: var(--radius-md); max-width: 480px; text-align: left; background: var(--bg); font-size: 0.95rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
+              <span style="font-weight: 700; color: var(--text-primary); font-family: var(--font-title);">👥 สมาชิกในห้องซ้อม (<span id="lobby-player-count">0</span> คน)</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">Real-time Sync</span>
+            </div>
+            
+            <div style="margin-bottom: 0.85rem;">
+              <div style="font-size: 0.82rem; font-weight: 700; color: var(--primary); margin-bottom: 0.35rem;">👨‍🏫 ผู้สร้างห้อง / ผู้ประเมิน (Host &amp; Examiners):</div>
+              <div id="lobby-examiners-list" style="display: flex; flex-wrap: wrap; gap: 0.4rem; min-height: 28px;">
+                <span id="lobby-status-examiner" style="color: var(--text-muted); font-size: 0.85rem;">รอการเชื่อมต่อ...</span>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size: 0.82rem; font-weight: 700; color: #16a34a; margin-bottom: 0.35rem;">✍️ ผู้เข้าสอบ / สมาชิกร่วมซ้อม (Examinees / Participants):</div>
+              <div id="lobby-examinees-list" style="display: flex; flex-wrap: wrap; gap: 0.4rem; min-height: 28px;">
+                <span id="lobby-status-examinee" style="color: var(--text-muted); font-size: 0.85rem;">รอเพื่อนๆ เข้าร่วม...</span>
+              </div>
+            </div>
           </div>
           
           <!-- Examiner Start button -->
-          <button id="lobby-start-exam-btn" class="btn btn-primary" style="display: none; margin: 0 auto; padding: 0.75rem 2rem; font-size: 1.1rem;" onclick="startLobbyExamOnServer()">
+          <button id="lobby-start-exam-btn" class="btn btn-primary" style="display: none; margin: 1.25rem auto 0 auto; padding: 0.75rem 2rem; font-size: 1.1rem; box-shadow: var(--shadow-md);" onclick="startLobbyExamOnServer()">
             🚀 เริ่มการซ้อมจำลองสอบร่วมกัน
           </button>
         </div>
@@ -1121,6 +1169,18 @@
       <section class="results-screen" id="exam-results-view" style="display:none;">
         <div class="results-card card">
           <h2 style="text-align: center; margin-bottom: 1.5rem; font-family: var(--font-title);">📋 รายงานสรุปผลการสอบ OSPE</h2>
+          
+          <!-- Multi-player participant banner in results -->
+          <div id="results-participants-bar" style="display: none; margin-bottom: 1.5rem; padding: 1rem 1.25rem; border-radius: var(--radius-md); background: var(--bg-secondary); border: 1px solid var(--border); text-align: left;">
+            <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 0.65rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; font-family: var(--font-title);">
+              <span>👥 ผู้ร่วมซ้อมสอบในห้องนี้ (<span id="results-participants-count">0</span> คน)</span>
+              <span id="results-room-id-tag" style="font-size: 0.8rem; background: var(--primary-light); color: var(--primary); padding: 0.2rem 0.6rem; border-radius: var(--radius-sm); font-weight: 800;">ห้อง: ----</span>
+            </div>
+            <div id="results-participants-chips" style="display: flex; flex-wrap: wrap; gap: 0.45rem;">
+              <!-- Filled dynamically by JS -->
+            </div>
+          </div>
+
           <div class="results-score-display">
             <div class="results-score-circle">
               <span class="results-score-num" id="results-score-val">0/0</span>
@@ -1211,6 +1271,9 @@
       
       // Lobby fields
       isLobby: false,
+      isHost: false,
+      myPlayerId: '',
+      cachedPlayersList: [],
       roomId: '',
       lobbyPlayerName: '',
       lobbyRole: 'examiner',
@@ -1910,18 +1973,8 @@
       SimState.lobbyRole = role;
       const joinRadio = document.querySelector('input[name="lobby-op"][value="join"]');
       const createRadio = document.querySelector('input[name="lobby-op"][value="create"]');
-      
-      if (role === 'examinee') {
-        if (joinRadio) joinRadio.checked = true;
-        if (createRadio) createRadio.disabled = true;
-        toggleLobbyOp('join');
-      } else {
-        if (createRadio) {
-          createRadio.disabled = false;
-          createRadio.checked = true;
-        }
-        toggleLobbyOp('create');
-      }
+      if (createRadio) createRadio.disabled = false;
+      if (joinRadio) joinRadio.disabled = false;
     }
 
     // Toggle Lobby operations: Create Room vs Join Room
@@ -2098,18 +2151,36 @@
           const randomRoomId = String(Math.floor(1000 + Math.random() * 9000));
           const examSetJson = JSON.stringify(fullExamSet);
           
+          const myPlayerId = 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+          SimState.myPlayerId = myPlayerId;
+          SimState.isHost = true;
+          SimState.isLobby = true;
+          
+          const initialPlayers = {};
+          initialPlayers[myPlayerId] = {
+            id: myPlayerId,
+            name: playerName,
+            role: SimState.lobbyRole,
+            isHost: true,
+            joinedAt: Date.now()
+          };
+
           // Write room to Firebase
           const roomData = {
             roomId: randomRoomId,
+            hostId: myPlayerId,
+            hostName: playerName,
             hostRole: SimState.lobbyRole,
             examineeName: SimState.lobbyRole === 'examinee' ? playerName : '',
             examinerName: SimState.lobbyRole === 'examiner' ? playerName : '',
+            players: initialPlayers,
             caseId: fullExamSet[0].caseId,
             timerValue: 240,
             timerRunning: false,
             status: 'setup',
             examSet: examSetJson,
             checklistProgress: '',
+            scoresByStation: '{}',
             createdAt: Date.now()
           };
           await _fbDb.ref('rooms/' + randomRoomId).set(roomData);
@@ -2134,7 +2205,7 @@
           setupLobbyRoomUI();
 
         } else {
-          // Examinee: Join Room via Firebase
+          // Join Room via Firebase (Multiplayer: unlimited participants)
           const roomIdInput = document.getElementById('lobby-room-id-input').value.trim();
           if (!roomIdInput) { alert('กรุณากรอกรหัสห้อง 4 หลัก'); showGlobalLoader(false); return; }
           
@@ -2145,14 +2216,32 @@
           }
           
           const roomData = snapshot.val();
-          // Register player name based on role
-          const updateData = {};
-          if (SimState.lobbyRole === 'examinee') {
-            updateData.examineeName = playerName;
-          } else {
-            updateData.examinerName = playerName;
-          }
-          await _fbDb.ref('rooms/' + roomIdInput).update(updateData);
+          const myPlayerId = 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+          SimState.myPlayerId = myPlayerId;
+          SimState.isHost = false;
+          SimState.isLobby = true;
+          
+          const newPlayer = {
+            id: myPlayerId,
+            name: playerName,
+            role: SimState.lobbyRole,
+            isHost: false,
+            joinedAt: Date.now()
+          };
+          
+          // Add this player into players collection
+          await _fbDb.ref(`rooms/${roomIdInput}/players/${myPlayerId}`).set(newPlayer);
+          
+          // Update summary strings for backward compatibility
+          const existingPlayers = Object.values(roomData.players || {});
+          existingPlayers.push(newPlayer);
+          const examiners = existingPlayers.filter(p => p.role === 'examiner' || p.isHost).map(p => p.name);
+          const examinees = existingPlayers.filter(p => p.role === 'examinee' && !p.isHost).map(p => p.name);
+          
+          await _fbDb.ref('rooms/' + roomIdInput).update({
+            examinerName: examiners.join(', '),
+            examineeName: examinees.join(', ')
+          });
           
           SimState.roomId = roomIdInput;
           SimState.role = SimState.lobbyRole;
@@ -2180,7 +2269,7 @@
       
       // Show room code share for Host
       const shareEl = document.getElementById('lobby-room-code-share');
-      if (SimState.role === 'examiner') {
+      if (SimState.isHost) {
         if (shareEl) {
           shareEl.style.display = 'block';
           document.getElementById('lobby-share-code-display').textContent = SimState.roomId;
@@ -2210,18 +2299,40 @@
 
     async function applyRoomState(room) {
       try {
-        document.getElementById('lobby-examinee-display').textContent = room.examineeName || 'กำลังรอ...';
-        document.getElementById('lobby-examiner-display').textContent = room.examinerName || 'กำลังรอ...';
+        // Parse all connected players
+        let playersList = [];
+        if (room.players && typeof room.players === 'object') {
+          playersList = Object.values(room.players);
+        }
+        if (playersList.length === 0) {
+          if (room.examinerName) playersList.push({ name: room.examinerName, role: 'examiner', isHost: true });
+          if (room.examineeName) playersList.push({ name: room.examineeName, role: 'examinee', isHost: false });
+        }
+        SimState.cachedPlayersList = playersList;
+
+        const totalPlayers = playersList.length;
+        const activeCountEl = document.getElementById('lobby-active-count');
+        if (activeCountEl) activeCountEl.textContent = totalPlayers;
+        
+        const participantsNamesEl = document.getElementById('lobby-participants-names');
+        if (participantsNamesEl) {
+          const namesStr = playersList.map(p => {
+            const isMe = p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName;
+            return `${escapeHtml(p.name)}${p.isHost ? ' (Host)' : ''}${isMe ? ' (คุณ)' : ''}`;
+          }).join(', ');
+          participantsNamesEl.innerHTML = namesStr || 'ยังไม่มีผู้เข้าร่วม';
+        }
         
         const dot = document.getElementById('lobby-dot');
         const statusText = document.getElementById('lobby-status-text');
-        
-        if (room.examineeName && room.examinerName) {
-          dot.style.background = 'var(--success)';
-          statusText.textContent = room.status.toUpperCase();
-        } else {
-          dot.style.background = 'var(--warning)';
-          statusText.textContent = 'WAITING';
+        if (dot && statusText) {
+          if (totalPlayers >= 1) {
+            dot.style.background = 'var(--success)';
+            statusText.textContent = room.status.toUpperCase();
+          } else {
+            dot.style.background = 'var(--warning)';
+            statusText.textContent = 'WAITING';
+          }
         }
         
         if (room.status === 'setup') {
@@ -2233,41 +2344,69 @@
           const stickyHeader = document.getElementById('exam-sticky-top-header');
           if (stickyHeader) stickyHeader.style.display = 'none';
           
-          // Update UI with names
-          const examinerEl = document.getElementById('lobby-status-examiner');
-          const examineeEl = document.getElementById('lobby-status-examinee');
-          
-          if (room.examinerName) {
-            examinerEl.textContent = room.examinerName;
-            examinerEl.style.color = 'var(--primary)';
-          }
-          if (room.examineeName) {
-            examineeEl.textContent = room.examineeName;
-            examineeEl.style.color = 'var(--primary)';
-          }
-          
-          if (SimState.role === 'examiner') {
-            const startBtn = document.getElementById('lobby-start-exam-btn');
-            startBtn.style.display = 'block';
-            const waitingMsg = document.getElementById('lobby-waiting-msg');
-            
-            if (room.examineeName && room.examinerName) {
-              startBtn.disabled = false;
-              startBtn.textContent = '🚀 เริ่มการสอบทันที';
-              startBtn.classList.add('btn-primary');
-              if (waitingMsg) waitingMsg.textContent = 'ผู้เข้าสอบเชื่อมต่อแล้ว สามารถกดเริ่มสอบได้เลย';
+          // Update dynamic player chips in Waiting Room
+          const examinersListEl = document.getElementById('lobby-examiners-list');
+          const examineesListEl = document.getElementById('lobby-examinees-list');
+          const playerCountEl = document.getElementById('lobby-player-count');
+          if (playerCountEl) playerCountEl.textContent = totalPlayers;
+
+          const examiners = playersList.filter(p => p.role === 'examiner' || p.isHost);
+          const examinees = playersList.filter(p => p.role === 'examinee' && !p.isHost);
+
+          if (examinersListEl) {
+            examinersListEl.innerHTML = '';
+            if (examiners.length === 0) {
+              examinersListEl.innerHTML = '<span style="color: var(--text-muted); font-size: 0.85rem;">รอการเชื่อมต่อ...</span>';
             } else {
-              startBtn.disabled = true;
-              startBtn.textContent = 'รอผู้เข้าสอบเชื่อมต่อ...';
-              startBtn.classList.remove('btn-primary');
-              if (waitingMsg) waitingMsg.textContent = 'แชร์รหัสห้องนี้ให้ผู้เข้าสอบ:';
+              examiners.forEach(p => {
+                const isMe = p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName;
+                const chip = document.createElement('span');
+                chip.className = 'lobby-player-chip ' + (p.isHost ? 'host' : 'examiner');
+                chip.innerHTML = `${p.isHost ? '👑 Host' : '👨‍🏫 ผู้ประเมิน'}: <strong>${escapeHtml(p.name)}</strong>${isMe ? ' <span class="me-badge">คุณ</span>' : ''}`;
+                examinersListEl.appendChild(chip);
+              });
             }
+          }
+
+          if (examineesListEl) {
+            examineesListEl.innerHTML = '';
+            if (examinees.length === 0) {
+              examineesListEl.innerHTML = '<span style="color: var(--text-muted); font-size: 0.85rem;">รอเพื่อนๆ เข้าร่วม...</span>';
+            } else {
+              examinees.forEach(p => {
+                const isMe = p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName;
+                const chip = document.createElement('span');
+                chip.className = 'lobby-player-chip examinee';
+                chip.innerHTML = `✍️ ผู้เข้าสอบ: <strong>${escapeHtml(p.name)}</strong>${isMe ? ' <span class="me-badge">คุณ</span>' : ''}`;
+                examineesListEl.appendChild(chip);
+              });
+            }
+          }
+
+          const isHost = SimState.isHost || (room.hostRole === SimState.role && playersList[0] && playersList[0].name === SimState.lobbyPlayerName);
+          const startBtn = document.getElementById('lobby-start-exam-btn');
+          const waitingMsg = document.getElementById('lobby-waiting-msg');
+          const waitingTitle = document.getElementById('lobby-waiting-title');
+          const waitingDesc = document.getElementById('lobby-waiting-desc');
+
+          if (isHost) {
+            if (startBtn) {
+              startBtn.style.display = 'block';
+              startBtn.disabled = false;
+              startBtn.textContent = totalPlayers > 1 
+                ? `🚀 เริ่มการซ้อมจำลองสอบร่วมกัน (${totalPlayers} คนพร้อมสอบ)` 
+                : '🚀 เริ่มการสอบทันที (รอเพื่อนเข้าร่วมได้ตลอดเวลา)';
+              startBtn.classList.add('btn-primary');
+            }
+            if (waitingTitle) waitingTitle.textContent = 'ห้องซ้อมสอบพร้อมแล้ว!';
+            if (waitingDesc) waitingDesc.textContent = 'แชร์รหัสห้อง 4 หลักด้านบนให้เพื่อนเพื่อเข้าร่วมซ้อมสอบด้วยกันได้ไม่จำกัดจำนวนคน';
+            if (waitingMsg) waitingMsg.textContent = 'แชร์รหัสห้องนี้ให้เพื่อนๆ:';
           } else {
-            document.getElementById('lobby-waiting-msg').textContent = 'เชื่อมต่อสำเร็จ! รอผู้ประเมินกดเริ่มการสอบ...';
-            document.getElementById('lobby-waiting-msg').style.color = 'var(--primary)';
-            document.getElementById('lobby-start-exam-btn').style.display = 'none';
-            document.getElementById('lobby-waiting-title').textContent = 'เชื่อมต่อสำเร็จ!';
-            document.getElementById('lobby-waiting-desc').textContent = 'กรุณารอผู้ประเมินกดเริ่มการสอบ...';
+            if (startBtn) startBtn.style.display = 'none';
+            const hostPlayer = playersList.find(p => p.isHost) || { name: 'Host' };
+            if (waitingTitle) waitingTitle.textContent = 'เชื่อมต่อห้องซ้อมสำเร็จ!';
+            if (waitingDesc) waitingDesc.textContent = `เชื่อมต่อกับห้อง ${SimState.roomId} เรียบร้อยแล้ว (มีผู้ร่วมซ้อม ${totalPlayers} คน)`;
+            if (waitingMsg) waitingMsg.textContent = `กรุณารอ Host (${escapeHtml(hostPlayer.name)}) กดเริ่มการสอบ...`;
           }
         } else if (room.status === 'running' || room.status === 'countdown') {
           document.getElementById('lobby-waiting-screen').style.display = 'none';
@@ -2337,14 +2476,11 @@
             if (SimState.timerInterval) clearInterval(SimState.timerInterval);
             startLocalCountdown();
           } else {
-            // Same station — Host is timer source of truth, only Examinee syncs from Firebase
-            if (SimState.role === 'examinee') {
-              // Only sync pause/play state, DO NOT sync timerValue continuously 
-              // because room.timerValue in Firebase is stagnant and only updates on pause/reset.
+            // Same station — Host is timer source of truth, other participants sync from Firebase
+            if (!SimState.isHost && SimState.role !== 'examiner') {
               if (SimState.timerRunning !== room.timerRunning) {
                 SimState.timerRunning = room.timerRunning;
                 if (room.timerRunning) {
-                  // Resync the value only when toggling play/pause
                   SimState.timerValue = room.timerValue; 
                   updateTimerDisplay();
                   startLocalCountdown();
@@ -2352,33 +2488,34 @@
                   if (SimState.timerInterval) clearInterval(SimState.timerInterval);
                 }
               } else if (!SimState.timerRunning && SimState.timerValue !== room.timerValue) {
-                // If it's paused and the value changed (e.g. Examiner hit Reset)
                 SimState.timerValue = room.timerValue;
                 updateTimerDisplay();
               }
             }
-            // Host (examiner) does NOT sync timer from Firebase - it is the source of truth
           }
 
           if (room.scoresByStation) {
             try {
               const parsedScores = typeof room.scoresByStation === 'string' ? JSON.parse(room.scoresByStation) : room.scoresByStation;
               if (parsedScores && typeof parsedScores === 'object') {
-                SimState.studentScores = parsedScores;
+                SimState.studentScores = Object.assign({}, SimState.studentScores, parsedScores);
               }
             } catch (e) {}
-          } else if (SimState.role === 'examinee') {
-            // Sync checklist progress continuously during exam for the examinee
-            if (SimState.stations[SimState.currentIdx]) {
-              const currStationNum = SimState.stations[SimState.currentIdx].stationNumber;
-              let progress = room.checklistProgress;
-              if (typeof progress === 'string') {
-                progress = progress ? progress.split(',') : [];
-              } else if (!Array.isArray(progress)) {
-                progress = [];
-              }
-              SimState.studentScores[currStationNum] = progress;
+          }
+          
+          // Live sync checklist items across ALL participants in real time
+          if (SimState.stations && SimState.stations[SimState.currentIdx]) {
+            const currStationNum = SimState.stations[SimState.currentIdx].stationNumber;
+            const currentChecked = SimState.studentScores[currStationNum] || SimState.studentScores[String(currStationNum)] || [];
+            document.querySelectorAll('.checklist-item').forEach(el => {
+              const id = el.getAttribute('data-id');
+              el.classList.toggle('checked', currentChecked.includes(id));
+            });
+            const currentCase = SimState.stations[SimState.currentIdx].case;
+            if (currentCase) {
+              updateExamProgressUI(currStationNum, currentCase);
             }
+            renderMiniMap(false);
           }
         } else if (room.status === 'results') {
           if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
@@ -2388,7 +2525,7 @@
             try {
               const parsedScores = typeof room.scoresByStation === 'string' ? JSON.parse(room.scoresByStation) : room.scoresByStation;
               if (parsedScores && typeof parsedScores === 'object') {
-                SimState.studentScores = parsedScores;
+                SimState.studentScores = Object.assign({}, SimState.studentScores, parsedScores);
               }
             } catch (e) {
               console.warn('Error parsing room scores on results:', e);
@@ -2554,7 +2691,7 @@
         if (SimState.timerValue <= 0) {
           clearInterval(SimState.timerInterval);
           showTimeoutPopup(() => {
-            if (SimState.role === 'examiner') {
+            if (SimState.isHost || SimState.role === 'examiner') {
               if (SimState.currentIdx < SimState.stations.length - 1) {
                 nextStation();
               } else {
@@ -2826,7 +2963,7 @@
       updateTimerDisplay();
       
       if (SimState.isLobby) {
-        if (SimState.role === 'examiner') {
+        if (SimState.isHost || SimState.role === 'examiner') {
           _fbDb.ref('rooms/' + SimState.roomId).update({ timerRunning: true, timerValue: 240 });
         }
         startLocalCountdown();
@@ -2853,7 +2990,7 @@
     function toggleTimer() {
       SimState.timerRunning = !SimState.timerRunning;
       document.getElementById('timer-toggle-btn').textContent = SimState.timerRunning ? '⏸️ พักตัวจับเวลา' : '▶️ เล่นตัวจับเวลาต่อ';
-      if (SimState.isLobby && SimState.role === 'examiner') {
+      if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
         _fbDb.ref('rooms/' + SimState.roomId).update({
           timerRunning: SimState.timerRunning,
           timerValue: SimState.timerValue
@@ -2864,7 +3001,7 @@
     function resetTimer() {
       SimState.timerValue = 240;
       updateTimerDisplay();
-      if (SimState.isLobby && SimState.role === 'examiner') {
+      if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
         _fbDb.ref('rooms/' + SimState.roomId).update({ timerValue: 240, timerRunning: false });
       }
     }
@@ -3415,7 +3552,7 @@
       updateExamProgressUI(stationNum, currentCase);
       renderMiniMap(false);
       
-      if (SimState.isLobby && SimState.role === 'examiner') {
+      if (SimState.isLobby && SimState.roomId && typeof _fbDb !== 'undefined') {
         _fbDb.ref('rooms/' + SimState.roomId).update({
           checklistProgress: currentChecked,
           scoresByStation: JSON.stringify(SimState.studentScores)
@@ -3440,8 +3577,6 @@
       }
     }
 
-
-
     function toggleExamNote() {
       const area = document.getElementById('exam-note-content-area');
       const btn = document.getElementById('exam-toggle-note-btn');
@@ -3457,14 +3592,14 @@
     function nextStation() {
       if (SimState.currentIdx < SimState.stations.length - 1) {
         const nextIdx = SimState.currentIdx + 1;
-        if (SimState.isLobby && SimState.role === 'examiner') {
+        if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
           // Reset timer locally
           SimState.timerValue = 240;
           SimState.timerRunning = true;
           if (SimState.timerInterval) clearInterval(SimState.timerInterval);
           updateTimerDisplay();
           startLocalCountdown();
-          // Push to Firebase — Examinee will react in real-time
+          // Push to Firebase — All participants react in real-time
           _fbDb.ref('rooms/' + SimState.roomId).update({
             caseId: SimState.stations[nextIdx].case.caseId,
             timerValue: 240,
@@ -3480,14 +3615,14 @@
     function prevStation() {
       if (SimState.currentIdx > 0) {
         const prevIdx = SimState.currentIdx - 1;
-        if (SimState.isLobby && SimState.role === 'examiner') {
+        if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
           // Reset timer locally
           SimState.timerValue = 240;
           SimState.timerRunning = true;
           if (SimState.timerInterval) clearInterval(SimState.timerInterval);
           updateTimerDisplay();
           startLocalCountdown();
-          // Push to Firebase — Examinee will react in real-time
+          // Push to Firebase — All participants react in real-time
           _fbDb.ref('rooms/' + SimState.roomId).update({
             caseId: SimState.stations[prevIdx].case.caseId,
             timerValue: 240,
@@ -3501,20 +3636,36 @@
     }
 
     // ─── Finish exam ──────────────────────────────────────────
-    function finishExamSimulation() {
+    async function finishExamSimulation() {
       if (window.Scratchpad) Scratchpad.close();
       if (SimState.timerInterval) clearInterval(SimState.timerInterval);
       if (SimState.timerSyncInterval) clearInterval(SimState.timerSyncInterval);
       if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
       
-      if (typeof _fbDb !== 'undefined' && _fbDb && SimState.isLobby && SimState.role === 'examiner') {
+      showGlobalLoader(true, 'กำลังสรุปผลคะแนนการสอบร่วมกัน...');
+      
+      let latestRoom = null;
+      if (typeof _fbDb !== 'undefined' && _fbDb && SimState.isLobby && SimState.roomId) {
         try {
-          _fbDb.ref('rooms/' + SimState.roomId).update({
-            status: 'results',
-            scoresByStation: JSON.stringify(SimState.studentScores)
-          });
+          if (SimState.isHost || SimState.role === 'examiner') {
+            await _fbDb.ref('rooms/' + SimState.roomId).update({
+              status: 'results',
+              scoresByStation: JSON.stringify(SimState.studentScores)
+            });
+          }
+          // Fetch the definitive shared scores from Firebase so everyone has 100% matching results
+          const snap = await _fbDb.ref('rooms/' + SimState.roomId).get();
+          if (snap.exists()) {
+            latestRoom = snap.val();
+            if (latestRoom.scoresByStation) {
+              const parsed = typeof latestRoom.scoresByStation === 'string' ? JSON.parse(latestRoom.scoresByStation) : latestRoom.scoresByStation;
+              if (parsed && typeof parsed === 'object') {
+                SimState.studentScores = Object.assign({}, SimState.studentScores, parsed);
+              }
+            }
+          }
         } catch (e) {
-          console.warn('Firebase status update error:', e);
+          console.warn('Firebase finish/sync error:', e);
         }
       }
       
@@ -3523,8 +3674,6 @@
         try { _fbRoomRef.off(); } catch (e) {}
         _fbRoomRef = null;
       }
-      
-      showGlobalLoader(true, 'กำลังสรุปผลคะแนนการสอบ...');
       
       try {
         let passedStations = 0, totalMaxScore = 0, totalEarnedScore = 0;
@@ -3538,7 +3687,7 @@
         
         stationsList.forEach(st => {
           const c = st.case || {};
-          const checked = SimState.studentScores[st.stationNumber] || [];
+          const checked = SimState.studentScores[st.stationNumber] || SimState.studentScores[String(st.stationNumber)] || [];
           const checklist = Array.isArray(c.checklist) ? c.checklist : [];
           const { currentScore: earned, totalScore: max } = calculateStationScore(checklist, checked);
           
@@ -3588,6 +3737,41 @@
         if (summaryDescEl) {
           summaryDescEl.textContent = `ผ่านการประเมินวิชาชีพทั้งหมด ${passedStations} จาก ${totalStationsCount} สถานีสอบ (ผ่านเมื่อสอบได้คะแนนตั้งแต่ร้อยละ 80 ขึ้นไปต่อสถานี)`;
         }
+
+        // Render participants in the results screen
+        const rosterBar = document.getElementById('results-participants-bar');
+        const rosterCount = document.getElementById('results-participants-count');
+        const rosterChips = document.getElementById('results-participants-chips');
+        const roomTag = document.getElementById('results-room-id-tag');
+        
+        if (SimState.isLobby) {
+          if (rosterBar) rosterBar.style.display = 'block';
+          if (roomTag) roomTag.textContent = 'ห้องสอบ: ' + SimState.roomId;
+          
+          let pList = [];
+          if (latestRoom && latestRoom.players) {
+            pList = Object.values(latestRoom.players);
+          }
+          if (pList.length === 0 && SimState.cachedPlayersList) {
+            pList = SimState.cachedPlayersList;
+          }
+          
+          if (rosterCount) rosterCount.textContent = pList.length;
+          if (rosterChips) {
+            rosterChips.innerHTML = '';
+            pList.forEach(p => {
+              const chip = document.createElement('span');
+              const isHost = p.isHost;
+              const isMe = p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName;
+              chip.className = 'lobby-player-chip ' + (isHost ? 'host' : (p.role === 'examiner' ? 'examiner' : 'examinee'));
+              const roleIcon = isHost ? '👑 Host' : (p.role === 'examiner' ? '👨‍🏫 ผู้ประเมิน' : '✍️ ผู้เข้าสอบ');
+              chip.innerHTML = `${roleIcon}: <strong>${escapeHtml(p.name)}</strong>${isMe ? ' <span class="me-badge">คุณ</span>' : ''}`;
+              rosterChips.appendChild(chip);
+            });
+          }
+        } else {
+          if (rosterBar) rosterBar.style.display = 'none';
+        }
       } catch (err) {
         console.error('Error generating exam results:', err);
       } finally {
@@ -3619,10 +3803,15 @@
       if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
       if (SimState.timerSyncInterval) clearInterval(SimState.timerSyncInterval);
       SimState.isLobby = false;
+      SimState.isHost = false;
       SimState.roomId = '';
+      SimState.myPlayerId = '';
+      SimState.cachedPlayersList = [];
       SimState.stations = [];
       // Detach Firebase listener on reset
       if (_fbRoomRef) { _fbRoomRef.off(); _fbRoomRef = null; }
+      const rosterBar = document.getElementById('results-participants-bar');
+      if (rosterBar) rosterBar.style.display = 'none';
       document.getElementById('exam-results-view').style.display = 'none';
       document.getElementById('exam-setup-view').style.display = 'block';
     }
