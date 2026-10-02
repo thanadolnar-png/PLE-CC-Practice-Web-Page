@@ -5168,3 +5168,61 @@ body.is-printing #batch-print-execution-area {
   }
 }
 
+
+/* ─── Serpentine OSPE Carousel Circuit ─── */
+.circuit-station-card {
+  flex: 1;
+  min-width: 190px;
+  max-width: 230px;
+  background: var(--bg-primary);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 0.85rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  position: relative;
+  transition: all 0.2s ease;
+}
+.circuit-station-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.12);
+}
+.circuit-station-card.my-station {
+  border-color: var(--primary) !important;
+  background: rgba(99, 102, 241, 0.06) !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25) !important;
+}
+.circuit-station-card.is-rest {
+  background: rgba(100, 116, 139, 0.05);
+  border-style: dashed;
+}
+.circuit-arrow-h {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  flex-shrink: 0;
+  user-select: none;
+}
+.circuit-connector-row {
+  display: flex;
+  margin: 0.2rem 0;
+  user-select: none;
+}
+.circuit-loopback-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 0.85rem;
+  padding: 0.65rem 1rem;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1.5px dashed var(--primary);
+  border-radius: var(--radius-md);
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.84rem;
+}
