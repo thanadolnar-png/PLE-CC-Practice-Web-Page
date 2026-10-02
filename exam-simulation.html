@@ -84,6 +84,28 @@
       color: var(--primary);
       background: var(--bg-secondary);
     }
+    .emoji-select-btn {
+      font-size: 1.65rem;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 0.35rem 0.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+      user-select: none;
+    }
+    .emoji-select-btn:hover {
+      transform: scale(1.22);
+      background: var(--bg-secondary);
+      border-color: var(--primary);
+      z-index: 2;
+    }
+    .emoji-select-btn:active {
+      transform: scale(0.95);
+    }
     .source-chips-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -940,6 +962,97 @@
           <h3 style="font-family: var(--font-title); font-size: 1.4rem; color: var(--text-primary); margin-bottom: 0.35rem;" id="lobby-waiting-title">กำลังรอการเตรียมพร้อม...</h3>
           <p style="color: var(--text-secondary); margin-bottom: 1.25rem; font-size: 0.9rem;" id="lobby-waiting-desc">รอผู้เข้าร่วมการจำลองซ้อมสอบเข้ามาเชื่อมต่อที่ห้องนี้</p>
           
+          <!-- Personal Avatar / Emoji Customizer -->
+          <div id="lobby-avatar-customizer" style="margin: 0 auto 1.15rem auto; padding: 0.85rem 1.25rem; border: 1.5px solid var(--border); border-radius: var(--radius-lg); max-width: 440px; background: var(--surface); box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+              <button type="button" id="btn-lobby-my-avatar" onclick="toggleEmojiPicker(event)" style="font-size: 2.1rem; width: 52px; height: 52px; border-radius: 50%; border: 2.5px solid var(--primary); background: var(--bg); cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.15s ease;" title="คลิกเพื่อเปลี่ยน Emoji ตัวแทนของคุณ">
+                <span id="lobby-my-avatar-preview">💊</span>
+              </button>
+              <div style="text-align: left;">
+                <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 500;">ไอคอนตัวแทนของคุณ (My Avatar)</div>
+                <div style="font-size: 0.98rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.35rem;">
+                  <span id="lobby-my-name-display">ผู้เข้าสอบ</span>
+                  <span id="lobby-my-role-badge" class="badge" style="font-size: 0.7rem; padding: 0.1rem 0.45rem; background: rgba(99,102,241,0.12); color: var(--primary);">คุณ</span>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="sim-btn-xs" onclick="toggleEmojiPicker(event)" style="padding: 0.4rem 0.85rem; font-size: 0.82rem; background: var(--bg-secondary); border: 1px solid var(--border); color: var(--primary); font-weight: 600; border-radius: 6px; cursor: pointer;">
+              🎨 เปลี่ยน Emoji
+            </button>
+          </div>
+
+          <!-- Emoji Palette Popover Modal -->
+          <div id="lobby-emoji-picker-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1090; background: rgba(0,0,0,0.45); backdrop-filter: blur(3px); align-items: center; justify-content: center; padding: 1rem;" onclick="if(event.target === this) closeEmojiPicker();">
+            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); width: 100%; max-width: 440px; box-shadow: var(--shadow-lg); overflow: hidden; animation: spSlideUp 0.2s ease;">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); background: var(--bg-secondary);">
+                <strong style="font-size: 0.95rem; color: var(--text-primary); font-family: var(--font-title);">🎨 เลือกไอคอน Emoji ตัวแทนตัวเอง</strong>
+                <button type="button" class="sp-win-btn sp-win-close" onclick="closeEmojiPicker()" style="font-size: 1rem; cursor: pointer;">✕</button>
+              </div>
+              
+              <div style="padding: 1rem; max-height: 65vh; overflow-y: auto; text-align: left;">
+                <!-- Category 1 -->
+                <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.4rem;">💊 หมวดวิชาการ & เภสัชกรรม</div>
+                <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.4rem; margin-bottom: 0.85rem;">
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('💊')">💊</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🩺')">🩺</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🧪')">🧪</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('💉')">💉</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🔬')">🔬</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🧬')">🧬</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('📚')">📚</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🎓')">🎓</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('📋')">📋</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('👨‍⚕️')">👨‍⚕️</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('👩‍⚕️')">👩‍⚕️</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🧑‍🔬')">🧑‍🔬</button>
+                </div>
+
+                <!-- Category 2 -->
+                <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.4rem;">🐾 หมวดสัตว์นำโชคสุดคิ้วท์</div>
+                <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.4rem; margin-bottom: 0.85rem;">
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🦊')">🦊</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🐱')">🐱</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🐶')">🐶</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🐰')">🐰</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🐼')">🐼</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🐨')">🐨</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🦁')">🦁</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🐯')">🐯</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🐻')">🐻</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🦉')">🦉</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🦄')">🦄</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🐥')">🐥</button>
+                </div>
+
+                <!-- Category 3 -->
+                <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.4rem;">✨ หมวดพลัง & ชัยชนะ</div>
+                <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.4rem; margin-bottom: 0.85rem;">
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🚀')">🚀</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('⚡')">⚡</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🔥')">🔥</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🎯')">🎯</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🌟')">🌟</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🏆')">🏆</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🥇')">🥇</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🍀')">🍀</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('🌸')">🌸</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('☕')">☕</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('💡')">💡</button>
+                  <button type="button" class="emoji-select-btn" onclick="selectMyEmoji('👑')">👑</button>
+                </div>
+
+                <!-- Custom Input -->
+                <div style="border-top: 1px solid var(--border); padding-top: 0.75rem; margin-top: 0.5rem;">
+                  <label style="display: block; font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.35rem; font-weight: 600;">หรือพิมพ์ Emoji หรือสัญลักษณ์ที่ต้องการ:</label>
+                  <div style="display: flex; gap: 0.4rem;">
+                    <input type="text" id="custom-emoji-input" maxlength="4" placeholder="เช่น 🦥 หรือ ☕" style="flex: 1; padding: 0.4rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 1.1rem; text-align: center; background: var(--bg);" onkeydown="if(event.key==='Enter') applyCustomEmoji()">
+                    <button type="button" class="btn primary btn-sm" onclick="applyCustomEmoji()">ใช้ Emoji นี้</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Modern Minimalist Status Box (as in Image 1) -->
           <div id="lobby-players-status" style="margin: 1.25rem auto; padding: 1.1rem 1.4rem; border: 1px solid var(--border); border-radius: var(--radius-md); max-width: 440px; text-align: left; background: var(--bg); font-size: 0.92rem; box-shadow: var(--shadow-sm);">
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.45rem 0; border-bottom: 1px dashed var(--border);">
@@ -2372,10 +2485,14 @@
             });
           }
           
+          const savedEmoji = localStorage.getItem('ple_player_emoji') || (isSuperHost ? '👑' : '👨‍🏫');
+          SimState.myEmoji = savedEmoji;
+
           const initialPlayers = {};
           initialPlayers[myPlayerId] = {
             id: myPlayerId,
             name: playerName,
+            emoji: savedEmoji,
             role: SimState.lobbyRole,
             isHost: true,
             joinedAt: Date.now()
@@ -2388,6 +2505,7 @@
             isSuperHost: isSuperHost,
             hostId: myPlayerId,
             hostName: playerName,
+            hostEmoji: savedEmoji,
             hostRole: SimState.lobbyRole,
             examineeName: SimState.lobbyRole === 'examinee' ? playerName : '',
             examinerName: SimState.lobbyRole === 'examiner' ? playerName : '',
@@ -2443,9 +2561,13 @@
           SimState.isHost = false;
           SimState.isLobby = true;
           
+          const savedEmoji = localStorage.getItem('ple_player_emoji') || '💊';
+          SimState.myEmoji = savedEmoji;
+
           const newPlayer = {
             id: myPlayerId,
             name: playerName,
+            emoji: savedEmoji,
             role: SimState.lobbyRole,
             isHost: false,
             joinedAt: Date.now()
@@ -2498,6 +2620,20 @@
         }
       } else {
         if (shareEl) shareEl.style.display = 'none';
+      }
+
+      // Initialize Personal Avatar display
+      const mySavedEmoji = SimState.myEmoji || localStorage.getItem('ple_player_emoji') || (SimState.isHost ? '👑' : '💊');
+      SimState.myEmoji = mySavedEmoji;
+      const preview = document.getElementById('lobby-my-avatar-preview');
+      if (preview) preview.textContent = mySavedEmoji;
+      const nameDisp = document.getElementById('lobby-my-name-display');
+      if (nameDisp) nameDisp.textContent = SimState.lobbyPlayerName || 'ผู้เข้าสอบ';
+      const roleBadge = document.getElementById('lobby-my-role-badge');
+      if (roleBadge) {
+        roleBadge.textContent = SimState.isHost ? 'Host' : (SimState.role === 'examiner' ? 'Examiner' : 'Participant');
+        roleBadge.style.background = SimState.isHost ? 'rgba(99,102,241,0.18)' : (SimState.role === 'examiner' ? 'rgba(59,130,246,0.15)' : 'rgba(16,185,129,0.15)');
+        roleBadge.style.color = SimState.isHost ? 'var(--primary)' : (SimState.role === 'examiner' ? '#2563eb' : '#16a34a');
       }
       
       // Detach any old listener first
@@ -2563,7 +2699,8 @@
         if (participantsNamesEl) {
           const namesStr = playersList.map(p => {
             const isMe = p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName;
-            return `${escapeHtml(p.name)}${p.isHost ? ' (Host)' : ''}${isMe ? ' (คุณ)' : ''}`;
+            const pEmoji = p.emoji || (p.isHost ? '👑' : '👤');
+            return `${pEmoji} ${escapeHtml(p.name)}${p.isHost ? ' (Host)' : ''}${isMe ? ' (คุณ)' : ''}`;
           }).join(', ');
           participantsNamesEl.innerHTML = namesStr || 'ยังไม่มีผู้เข้าร่วม';
         }
@@ -2591,10 +2728,21 @@
           const stickyHeader = document.getElementById('exam-sticky-top-header');
           if (stickyHeader) stickyHeader.style.display = 'none';
           
+          // Sync current player's avatar in customizer
+          const mePlayer = playersList.find(p => p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName);
+          if (mePlayer && mePlayer.emoji) {
+            SimState.myEmoji = mePlayer.emoji;
+            const preview = document.getElementById('lobby-my-avatar-preview');
+            if (preview) preview.textContent = mePlayer.emoji;
+          }
+
           // Modern Minimalist Status Box update
           const hostEl = document.getElementById('lobby-host-display');
           if (hostEl) {
-            hostEl.textContent = room.hostName || (playersList.find(p => p.isHost)?.name) || 'ยังไม่มี Host';
+            const hostObj = playersList.find(p => p.isHost);
+            const hostEmoji = room.hostEmoji || hostObj?.emoji || '👨‍🏫';
+            const hostName = room.hostName || hostObj?.name || 'ยังไม่มี Host';
+            hostEl.innerHTML = `<span style="font-size:1.15rem;margin-right:0.35rem;">${escapeHtml(hostEmoji)}</span><span style="font-weight:700;color:var(--primary);">${escapeHtml(hostName)}</span>`;
           }
           const partListEl = document.getElementById('lobby-participants-list');
           if (partListEl) {
@@ -2606,12 +2754,13 @@
               participants.forEach(p => {
                 const isMe = p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName;
                 const isReady = !!p.isReady;
+                const pEmoji = p.emoji || '👤';
                 const tag = document.createElement('span');
-                tag.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.2rem 0.55rem;font-size:0.83rem;color:var(--text-primary);display:inline-flex;align-items:center;gap:0.35rem;';
+                tag.style.cssText = 'background:var(--surface);border:1.5px solid ' + (isMe ? 'var(--primary)' : 'var(--border)') + ';border-radius:var(--radius-sm);padding:0.25rem 0.6rem;font-size:0.84rem;color:var(--text-primary);display:inline-flex;align-items:center;gap:0.4rem;box-shadow:0 1px 3px rgba(0,0,0,0.04);';
                 const readyIcon = isReady 
-                  ? '<span style="color:#10b981;font-weight:700;">🟢 พร้อม</span>' 
-                  : '<span style="color:var(--text-muted);">⚪ ยังไม่พร้อม</span>';
-                tag.innerHTML = `${readyIcon} <span>${escapeHtml(p.name)}</span>${isMe ? ' <span style="font-size:0.72rem;color:var(--primary);font-weight:700;">(คุณ)</span>' : ''}`;
+                  ? '<span style="color:#10b981;font-weight:700;font-size:0.75rem;">🟢 พร้อม</span>' 
+                  : '<span style="color:var(--text-muted);font-size:0.75rem;">⚪ ยังไม่พร้อม</span>';
+                tag.innerHTML = `${readyIcon} <span style="font-size:1.15rem;line-height:1;">${escapeHtml(pEmoji)}</span> <strong>${escapeHtml(p.name)}</strong>${isMe ? ' <span style="font-size:0.72rem;color:var(--primary);font-weight:700;">(คุณ)</span>' : ''}`;
                 partListEl.appendChild(tag);
               });
             }
@@ -2999,6 +3148,73 @@
       }
       showGlobalLoader(false);
     }
+
+    // ── Lobby Emoji Avatar Functions ──
+    function toggleEmojiPicker(e) {
+      if (e) e.stopPropagation();
+      const modal = document.getElementById('lobby-emoji-picker-modal');
+      if (!modal) return;
+      const isOpen = modal.style.display === 'flex';
+      modal.style.display = isOpen ? 'none' : 'flex';
+      if (!isOpen) {
+        const inp = document.getElementById('custom-emoji-input');
+        if (inp) {
+          inp.value = '';
+          setTimeout(() => inp.focus(), 50);
+        }
+      }
+    }
+    window.toggleEmojiPicker = toggleEmojiPicker;
+
+    function closeEmojiPicker() {
+      const modal = document.getElementById('lobby-emoji-picker-modal');
+      if (modal) modal.style.display = 'none';
+    }
+    window.closeEmojiPicker = closeEmojiPicker;
+
+    async function selectMyEmoji(emoji) {
+      if (!emoji) return;
+      SimState.myEmoji = emoji;
+      try {
+        localStorage.setItem('ple_player_emoji', emoji);
+      } catch (_) {}
+
+      const preview = document.getElementById('lobby-my-avatar-preview');
+      if (preview) {
+        preview.textContent = emoji;
+        const btn = document.getElementById('btn-lobby-my-avatar');
+        if (btn) {
+          btn.style.transform = 'scale(1.25)';
+          setTimeout(() => { btn.style.transform = 'scale(1)'; }, 200);
+        }
+      }
+
+      // Sync to Firebase room if in lobby
+      if (SimState.isLobby && SimState.roomId && typeof _fbDb !== 'undefined' && SimState.myPlayerId) {
+        try {
+          const updates = {};
+          updates[`rooms/${SimState.roomId}/players/${SimState.myPlayerId}/emoji`] = emoji;
+          if (SimState.isHost) {
+            updates[`rooms/${SimState.roomId}/hostEmoji`] = emoji;
+          }
+          await _fbDb.ref().update(updates);
+        } catch (e) {
+          console.error('Update emoji failed:', e);
+        }
+      }
+
+      closeEmojiPicker();
+    }
+    window.selectMyEmoji = selectMyEmoji;
+
+    function applyCustomEmoji() {
+      const inp = document.getElementById('custom-emoji-input');
+      if (!inp) return;
+      const val = inp.value.trim();
+      if (!val) return;
+      selectMyEmoji(val);
+    }
+    window.applyCustomEmoji = applyCustomEmoji;
 
     // Participant / Examiner toggles ready status in lobby
     async function toggleMyReadyStatus() {
@@ -4170,10 +4386,14 @@
             if (isRest || pct >= 80) passedStations++;
           });
 
+          const pObj = Object.values(room.players || {}).find(p => p.id === partId || p.name === partName);
+          const pEmoji = pObj?.emoji || '👤';
+
           const overallPct = totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0;
           leaderboard.push({
             id: partId || tableId,
             name: partName,
+            emoji: pEmoji,
             detail: `โต๊ะ ${tableId} (ผู้ประเมิน: ${examinerName})`,
             earned: Number.isInteger(totalEarned) ? totalEarned : totalEarned.toFixed(2),
             max: Number.isInteger(totalMax) ? totalMax : totalMax.toFixed(2),
@@ -4225,10 +4445,14 @@
             if (isRest || pct >= 80) passedStations++;
           });
 
+          const pObj = Object.values(room.players || {}).find(p => p.id === pId || p.name === pData.name);
+          const pEmoji = pObj?.emoji || '👤';
+
           const overallPct = totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0;
           leaderboard.push({
             id: pId,
             name: pData.name,
+            emoji: pEmoji,
             detail: pData.startStation ? `เริ่มต้นที่สถานี ${pData.startStation}` : 'แลปกิ๊งหมุนเวียน',
             earned: Number.isInteger(totalEarned) ? totalEarned : totalEarned.toFixed(2),
             max: Number.isInteger(totalMax) ? totalMax : totalMax.toFixed(2),
@@ -4259,6 +4483,7 @@
             leaderboard.push({
               id: p.id || p.name,
               name: p.name,
+              emoji: p.emoji || '👤',
               detail: 'ผู้เข้าสอบ',
               earned: Number.isInteger(totalEarned) ? totalEarned : totalEarned.toFixed(2),
               max: Number.isInteger(totalMax) ? totalMax : totalMax.toFixed(2),
@@ -4296,7 +4521,10 @@
           <div style="background: var(--surface); border: 2px solid ${borderCol}; border-radius: var(--radius-md) var(--radius-md) 0 0; padding: 0.75rem 0.4rem; box-shadow: 0 4px 12px rgba(0,0,0,0.06); position: relative;">
             ${isMe ? '<span style="position: absolute; top: -10px; right: 8px; background: var(--primary); color: white; font-size: 0.68rem; font-weight: 800; padding: 0.1rem 0.45rem; border-radius: 10px;">คุณ</span>' : ''}
             <div style="font-size: ${rank === 1 ? '2.3rem' : '1.8rem'}; line-height: 1.1; margin-bottom: 0.25rem;">${medal}</div>
-            <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>
+            <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; justify-content: center; gap: 0.25rem;" title="${escapeHtml(item.name)}">
+              <span style="font-size: 1.1rem;">${escapeHtml(item.emoji || '👤')}</span>
+              <span>${escapeHtml(item.name)}</span>
+            </div>
             <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.35rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(item.detail || '')}</div>
             <div style="font-size: ${rank === 1 ? '1.25rem' : '1.1rem'}; font-weight: 900; color: ${color}; line-height: 1;">${item.percent}%</div>
             <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 0.2rem;">${item.earned} / ${item.max} คะแนน</div>
@@ -4328,7 +4556,7 @@
           
           tr.innerHTML = `
             <td style="text-align: center; font-weight: 800; color: ${rank <= 3 ? 'var(--primary)' : 'var(--text-muted)'};">${medal}#${rank}</td>
-            <td><strong>${escapeHtml(item.name)}</strong>${isMe ? ' <span style="font-size:0.72rem;background:var(--primary);color:white;padding:0.1rem 0.35rem;border-radius:4px;">คุณ</span>' : ''}</td>
+            <td><span style="font-size:1.15rem;margin-right:0.35rem;">${escapeHtml(item.emoji || '👤')}</span><strong>${escapeHtml(item.name)}</strong>${isMe ? ' <span style="font-size:0.72rem;background:var(--primary);color:white;padding:0.1rem 0.35rem;border-radius:4px;">คุณ</span>' : ''}</td>
             <td style="color: var(--text-secondary); font-size: 0.84rem;">${escapeHtml(item.detail || '-')}</td>
             <td style="text-align: right; font-weight: 700;">${item.earned} / ${item.max}</td>
             <td style="text-align: center; font-weight: 800; color: ${item.percent >= 80 ? 'var(--success)' : 'var(--danger)'};">${item.percent}%</td>
@@ -5236,11 +5464,18 @@
         return;
       }
 
+      const playersList = room.players ? Object.values(room.players) : [];
+
       tableKeys.forEach(tKey => {
         const t = breakouts[tKey];
         const hasExaminer = Boolean(t.examinerId && t.examinerName);
         const hasParticipant = Boolean(t.participantId && t.participantName);
         const isMyTable = (t.examinerId === SimState.myPlayerId || t.participantId === SimState.myPlayerId);
+
+        const exPlayer = playersList.find(p => p.id === t.examinerId || (p.name && p.name === t.examinerName));
+        const exEmoji = exPlayer?.emoji ? `<span style="font-size:1.05rem;margin-right:0.25rem;">${escapeHtml(exPlayer.emoji)}</span>` : '';
+        const partPlayer = playersList.find(p => p.id === t.participantId || (p.name && p.name === t.participantName));
+        const partEmoji = partPlayer?.emoji ? `<span style="font-size:1.05rem;margin-right:0.25rem;">${escapeHtml(partPlayer.emoji)}</span>` : '';
 
         const card = document.createElement('div');
         card.style.cssText = `background:var(--surface);border:1.5px solid ${isMyTable ? 'var(--primary)' : 'var(--border)'};border-radius:var(--radius-md);padding:0.75rem;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:0.4rem;font-size:0.86rem;position:relative;`;
@@ -5260,12 +5495,12 @@
           
           <div style="display:flex;justify-content:space-between;align-items:center;padding:0.2rem 0;">
             <span style="color:var(--text-secondary);font-size:0.8rem;">👨‍🏫 Examiner:</span>
-            ${hasExaminer ? `<strong style="color:var(--primary);">${escapeHtml(t.examinerName)}</strong>` : `<button type="button" class="sim-btn-xs" onclick="joinBreakoutTable('${tKey}', 'examiner')">+ เป็นผู้ประเมิน</button>`}
+            ${hasExaminer ? `<strong style="color:var(--primary);display:inline-flex;align-items:center;">${exEmoji}${escapeHtml(t.examinerName)}</strong>` : `<button type="button" class="sim-btn-xs" onclick="joinBreakoutTable('${tKey}', 'examiner')">+ เป็นผู้ประเมิน</button>`}
           </div>
 
           <div style="display:flex;justify-content:space-between;align-items:center;padding:0.2rem 0;">
             <span style="color:var(--text-secondary);font-size:0.8rem;">✍️ Participant:</span>
-            ${hasParticipant ? `<strong style="color:#16a34a;">${escapeHtml(t.participantName)}</strong>` : `<button type="button" class="sim-btn-xs" onclick="joinBreakoutTable('${tKey}', 'participant')">+ เป็นผู้เข้าสอบ</button>`}
+            ${hasParticipant ? `<strong style="color:#16a34a;display:inline-flex;align-items:center;">${partEmoji}${escapeHtml(t.participantName)}</strong>` : `<button type="button" class="sim-btn-xs" onclick="joinBreakoutTable('${tKey}', 'participant')">+ เป็นผู้เข้าสอบ</button>`}
           </div>
 
           ${isMyTable ? `
