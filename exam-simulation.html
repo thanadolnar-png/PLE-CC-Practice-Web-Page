@@ -725,6 +725,23 @@
                   </label>
                 </div>
               </div>
+
+              <!-- Timeout Behavior Setting (For Host) -->
+              <div class="form-group" style="margin-top: 0.85rem; padding: 0.75rem 0.95rem; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md);">
+                <label class="form-label" style="font-size: 0.88rem; font-weight: 700; margin-bottom: 0.45rem; display: block; color: var(--text-primary);">
+                  ⏱️ เมื่อหมดเวลาสถานี (Timeout Behavior)
+                </label>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                  <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.86rem; cursor: pointer;">
+                    <input type="radio" name="lobby-timeout-behavior" value="auto" checked>
+                    <span>⚡ ไปฐานถัดไปทันที (Auto)</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.86rem; cursor: pointer;">
+                    <input type="radio" name="lobby-timeout-behavior" value="manual">
+                    <span>⏸️ ให้ Host กดไปต่อ (Manual)</span>
+                  </label>
+                </div>
+              </div>
             </form>
           </div>
 
@@ -1053,6 +1070,20 @@
                 </select>
                 <div id="lobby-sound-role-note" style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.3rem; line-height: 1.3;">
                   👑 Host กำหนดเสียงกริ่งหมดเวลา (ดังประมาณ 10 วินาที)
+                </div>
+              </div>
+
+              <!-- Timeout Behavior Selector (Host configures for the room) -->
+              <div id="lobby-timeout-mode-box" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 0.75rem 0.95rem; box-shadow: var(--shadow-sm); margin-top: 0.65rem;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+                  <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 700;">⏱️ การเปลี่ยนสถานีเมื่อหมดเวลา</span>
+                </div>
+                <select id="lobby-timeout-mode-select" class="select-filter" style="width: 100%; font-size: 0.82rem; padding: 0.38rem 0.5rem; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text-primary); font-weight: 600;" onchange="updateRoomTimeoutMode(this.value)">
+                  <option value="auto">⚡ หมดเวลาแล้วไปฐานถัดไปทันที (Auto)</option>
+                  <option value="manual">⏸️ หมดเวลาแล้วให้ Host กดไปต่อ (Manual)</option>
+                </select>
+                <div id="lobby-timeout-mode-note" style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.3rem; line-height: 1.3;">
+                  👑 กำหนดว่าเมื่อเวลา 00:00 จะเปลี่ยนฐานทันทีหรือรอ Host กด
                 </div>
               </div>
             </div>
@@ -1583,7 +1614,8 @@
       lobbyRole: 'examiner',
       lobbyOp: 'create',
       lobbyPollInterval: null,
-      lastServerSyncTime: 0
+      lastServerSyncTime: 0,
+      timeoutTransitionMode: 'auto' // 'auto' or 'manual'
     };
 
     // ─── Mode Switching: Proportion vs Exam Set Mode vs Custom Mode ───
@@ -2735,6 +2767,7 @@
             checklistProgress: '',
             scoresByStation: '{}',
             alarmSound: document.getElementById('lobby-alarm-sound-select')?.value || 'school-bell',
+            timeoutTransitionMode: document.querySelector('input[name="lobby-timeout-behavior"]:checked')?.value || 'auto',
             createdAt: Date.now()
           };
           await _fbDb.ref('rooms/' + randomRoomId).set(roomData);
@@ -2742,6 +2775,7 @@
           SimState.roomId = randomRoomId;
           SimState.role = hostInitialRole;
           SimState.alarmSound = roomData.alarmSound;
+          SimState.timeoutTransitionMode = roomData.timeoutTransitionMode;
           
           // Set up local stations
           SimState.stations = [];
@@ -3170,6 +3204,26 @@
             }
           }
 
+          // Sync Timeout Transition Mode select and note
+          if (room.timeoutTransitionMode) {
+            SimState.timeoutTransitionMode = room.timeoutTransitionMode;
+            const timeoutSelect = document.getElementById('lobby-timeout-mode-select');
+            if (timeoutSelect && timeoutSelect.value !== room.timeoutTransitionMode) {
+              timeoutSelect.value = room.timeoutTransitionMode;
+            }
+          }
+          const timeoutSelect = document.getElementById('lobby-timeout-mode-select');
+          const timeoutNote = document.getElementById('lobby-timeout-mode-note');
+          if (timeoutSelect) {
+            timeoutSelect.disabled = !isHost;
+            if (!isHost && timeoutNote) {
+              const modeLabel = (SimState.timeoutTransitionMode === 'manual') 
+                ? '⏸️ ให้ Host กดไปต่อ (Manual)' 
+                : '⚡ ไปฐานถัดไปทันที (Auto)';
+              timeoutNote.textContent = `กำหนดโดย Host: ${modeLabel}`;
+            }
+          }
+
           const isStandardMode = (room.examMode === 'standard' || !room.examMode);
 
           if (isStandardMode) {
@@ -3458,6 +3512,7 @@
 
           if (stationChanged || isFirstLoad) {
             SimState.hasRenderedFirstStation = true;
+            if (typeof closeManualTimeoutOverlay === 'function') closeManualTimeoutOverlay();
             renderStation(stationChanged ? targetIdx : 0);
             if (stationChanged) {
               playStationTimeoutAlarm('bell');
@@ -3511,6 +3566,7 @@
             renderMiniMap(false);
           }
         } else if (room.status === 'results') {
+          if (typeof closeManualTimeoutOverlay === 'function') closeManualTimeoutOverlay();
           if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
           if (SimState.timerInterval) clearInterval(SimState.timerInterval);
           
@@ -3762,6 +3818,77 @@
       } catch(e) {}
     }
 
+    function closeManualTimeoutOverlay() {
+      stopTimeoutAlarmSound();
+      const existing = document.getElementById('manual-timeout-overlay');
+      if (existing && existing.parentNode) {
+        existing.parentNode.removeChild(existing);
+      }
+    }
+    window.closeManualTimeoutOverlay = closeManualTimeoutOverlay;
+
+    function showManualTimeoutPopup() {
+      playTimeoutSound();
+      closeManualTimeoutOverlay();
+
+      const canAdvance = (!SimState.isLobby) || SimState.isHost || (SimState.examMode === 'standard' && SimState.role === 'examiner');
+      const isLast = (SimState.currentIdx >= SimState.stations.length - 1);
+      const nextStationNum = SimState.currentIdx + 2;
+
+      const overlay = document.createElement('div');
+      overlay.id = 'manual-timeout-overlay';
+      overlay.className = 'fullscreen-overlay';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.88);backdrop-filter:blur(6px);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1.5rem;animation:fadeIn 0.25s ease;';
+
+      let innerContent = '';
+      if (canAdvance) {
+        innerContent = `
+          <div style="background:var(--surface);border:2px solid var(--border);border-radius:var(--radius-lg);padding:2.2rem 2rem;max-width:480px;width:100%;text-align:center;box-shadow:0 25px 50px -12px rgba(0,0,0,0.4);position:relative;">
+            <div style="font-size:4.5rem;margin-bottom:0.75rem;animation:pulse 1s infinite;">⏰</div>
+            <h2 style="font-size:1.85rem;color:var(--danger);font-family:var(--font-title);font-weight:800;margin-bottom:0.5rem;">หมดเวลาสถานีนี้แล้ว!</h2>
+            <div style="display:inline-block;padding:0.3rem 0.8rem;background:rgba(239,68,68,0.12);color:var(--danger);border-radius:9999px;font-size:0.82rem;font-weight:700;margin-bottom:1rem;">
+              ⏱️ หมดเวลา 04:00 นาที · รอ Host/ผู้ประเมิน สั่งไปต่อ
+            </div>
+            <p style="font-size:0.95rem;color:var(--text-secondary);margin-bottom:1.5rem;line-height:1.5;">
+              ท่านสามารถตรวจให้คะแนนหรือสรุปประเด็นเพิ่มเติมได้ เมื่อพร้อมแล้วให้กดปุ่มด้านล่างเพื่อเริ่มสถานีถัดไป
+            </p>
+            <div style="display:flex;flex-direction:column;gap:0.75rem;">
+              <button class="btn btn-primary" style="padding:0.85rem 1.5rem;font-size:1.05rem;font-weight:700;box-shadow:var(--shadow-md);border-radius:var(--radius-md);" onclick="closeManualTimeoutOverlay(); ${isLast ? 'finishExamSimulation();' : 'nextStation();'}">
+                ${isLast ? '🏁 สรุปผลการสอบ (Finish Exam)' : `⏭️ ไปยังสถานีถัดไป (สถานีที่ ${nextStationNum})`}
+              </button>
+              <button class="btn btn-secondary" style="padding:0.6rem 1rem;font-size:0.88rem;color:var(--text-muted);" onclick="closeManualTimeoutOverlay();">
+                ✕ ปิดหน้าต่างนี้ชั่วคราว (ตรวจคะแนนต่อบนจอ)
+              </button>
+            </div>
+          </div>
+        `;
+      } else {
+        innerContent = `
+          <div style="background:var(--surface);border:2px solid var(--border);border-radius:var(--radius-lg);padding:2.2rem 2rem;max-width:480px;width:100%;text-align:center;box-shadow:0 25px 50px -12px rgba(0,0,0,0.4);position:relative;">
+            <div style="font-size:4.5rem;margin-bottom:0.75rem;animation:pulse 1s infinite;">⏰</div>
+            <h2 style="font-size:1.85rem;color:var(--danger);font-family:var(--font-title);font-weight:800;margin-bottom:0.5rem;">หมดเวลาสถานีนี้แล้ว!</h2>
+            <div style="display:inline-block;padding:0.3rem 0.8rem;background:rgba(239,68,68,0.12);color:var(--danger);border-radius:9999px;font-size:0.82rem;font-weight:700;margin-bottom:1rem;">
+              ⏱️ หมดเวลา 04:00 นาที · รอกรรมการประเมิน
+            </div>
+            <p style="font-size:0.95rem;color:var(--text-secondary);margin-bottom:1.5rem;line-height:1.5;">
+              กรุณารอ Host หรือผู้ประเมินตรวจประเมินคะแนน ระบบจะนำท่านไปยังสถานีถัดไปอัตโนมัติเมื่อกรรมการกดสั่งเปลี่ยนฐาน
+            </p>
+            <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;color:var(--primary);font-weight:600;font-size:0.9rem;margin-bottom:1.25rem;">
+              <span class="spinner" style="width:1.1rem;height:1.1rem;border-width:2px;display:inline-block;"></span>
+              <span>กำลังรอกรรมการส่งสัญญาณ...</span>
+            </div>
+            <button class="btn btn-secondary" style="padding:0.55rem 1rem;font-size:0.85rem;color:var(--text-muted);width:100%;" onclick="closeManualTimeoutOverlay();">
+              ✕ ปิดหน้าต่างนี้เพื่อดูหน้าจอรอ
+            </button>
+          </div>
+        `;
+      }
+
+      overlay.innerHTML = innerContent;
+      document.body.appendChild(overlay);
+    }
+    window.showManualTimeoutPopup = showManualTimeoutPopup;
+
     function showTimeoutPopup(callback) {
       playTimeoutSound();
       const overlay = document.createElement('div');
@@ -3787,15 +3914,19 @@
         updateTimerDisplay();
         if (SimState.timerValue <= 0) {
           clearInterval(SimState.timerInterval);
-          showTimeoutPopup(() => {
-            if (SimState.isHost || SimState.role === 'examiner') {
-              if (SimState.currentIdx < SimState.stations.length - 1) {
-                nextStation();
-              } else {
-                finishExamSimulation();
+          if (SimState.timeoutTransitionMode === 'manual') {
+            showManualTimeoutPopup();
+          } else {
+            showTimeoutPopup(() => {
+              if (SimState.isHost || SimState.role === 'examiner') {
+                if (SimState.currentIdx < SimState.stations.length - 1) {
+                  nextStation();
+                } else {
+                  finishExamSimulation();
+                }
               }
-            }
-          });
+            });
+          }
         }
       }, 1000);
     }
@@ -4097,13 +4228,17 @@
         updateTimerDisplay();
         if (SimState.timerValue <= 0) {
           clearInterval(SimState.timerInterval);
-          showTimeoutPopup(() => {
-            if (SimState.currentIdx < SimState.stations.length - 1) {
-              nextStation();
-            } else {
-              finishExamSimulation();
-            }
-          });
+          if (SimState.timeoutTransitionMode === 'manual') {
+            showManualTimeoutPopup();
+          } else {
+            showTimeoutPopup(() => {
+              if (SimState.currentIdx < SimState.stations.length - 1) {
+                nextStation();
+              } else {
+                finishExamSimulation();
+              }
+            });
+          }
         }
       }, 1000);
     }
@@ -4754,6 +4889,7 @@
 
     function nextStation() {
       stopTimeoutAlarmSound();
+      if (typeof closeManualTimeoutOverlay === 'function') closeManualTimeoutOverlay();
       if (SimState.currentIdx < SimState.stations.length - 1) {
         const nextIdx = SimState.currentIdx + 1;
         playStationTimeoutAlarm('bell');
@@ -4785,6 +4921,7 @@
 
     function prevStation() {
       stopTimeoutAlarmSound();
+      if (typeof closeManualTimeoutOverlay === 'function') closeManualTimeoutOverlay();
       if (SimState.currentIdx > 0) {
         const prevIdx = SimState.currentIdx - 1;
         playStationTimeoutAlarm('bell');
@@ -5077,6 +5214,8 @@
 
     // ─── Finish exam ──────────────────────────────────────────
     async function finishExamSimulation() {
+      stopTimeoutAlarmSound();
+      if (typeof closeManualTimeoutOverlay === 'function') closeManualTimeoutOverlay();
       if (window.Scratchpad) Scratchpad.close();
       if (SimState.timerInterval) clearInterval(SimState.timerInterval);
       if (SimState.timerSyncInterval) clearInterval(SimState.timerSyncInterval);
@@ -5547,6 +5686,18 @@
       }
     }
     window.updateRoomAlarmSound = updateRoomAlarmSound;
+
+    async function updateRoomTimeoutMode(mode) {
+      SimState.timeoutTransitionMode = mode;
+      if (SimState.roomId && typeof _fbDb !== 'undefined') {
+        try {
+          await _fbDb.ref('rooms/' + SimState.roomId).update({ timeoutTransitionMode: mode });
+        } catch (e) {
+          console.warn('Error updating timeoutTransitionMode in Firebase:', e);
+        }
+      }
+    }
+    window.updateRoomTimeoutMode = updateRoomTimeoutMode;
 
     function previewCurrentAlarmSound() {
       const soundSelect = document.getElementById('lobby-alarm-sound-select');
