@@ -205,7 +205,7 @@ body.mode-phone .phone-notch { display: block; }
 
 .page-viewport {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: visible;
   display: flex;
   flex-direction: column;
 }
@@ -5444,10 +5444,7 @@ body.is-printing #batch-print-execution-area {
   }
 }
 
-/* Smooth Touch Scrolling across viewports */
-.page-viewport,
-.case-list-container,
-.exam-station-scroll,
+/* Smooth Touch Scrolling across viewports (modals & isolated dialogs only) */
 .theater-body,
 .modal-body {
   -webkit-overflow-scrolling: touch;
