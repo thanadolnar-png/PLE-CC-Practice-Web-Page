@@ -1,13 +1,13 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Version: v_20261003_021957
- * Generated on 2026-10-03 02:19:57
+ * Version: v_20261003_030040
+ * Generated on 2026-10-03 03:00:40
  */
 
 const OFFLINE_DATA = {
-  "version": "v_20261003_021957",
-  "generatedAt": "2026-10-03 02:19:57",
-  "totalCases": 364,
+  "version": "v_20261003_030040",
+  "generatedAt": "2026-10-03 03:00:40",
+  "totalCases": 361,
   "cases": [
     {
       "caseId": "OSPE-CL4801",
@@ -1870,57 +1870,12 @@ const OFFLINE_DATA = {
       "caseStatus": "Active"
     },
     {
-      "caseId": "OSPE-CL6807",
-      "title": "ซักประวัติและจ่ายยาในร้านยา",
-      "category": "Clinic",
-      "mainGroup": "การซักประวัติและจ่ายยา",
-      "subTopic": "",
-      "disease": "ADR",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "ฟ้า เร้กเก้",
-      "createdDate": "3/8/69",
-      "source": "ข้อสอบจริง ปี 2568",
-      "isActive": true,
-      "caseStatus": "Active"
-    },
-    {
-      "caseId": "OSPE-CL6808",
-      "title": "จ่ายยาตามใบสั่งยาและสอนยาเทคนิคพิเศษ",
-      "category": "Clinic",
-      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
-      "subTopic": "",
-      "disease": "จ่ายยาเทคนิคพิเศษและสอนยาเทคนิคพิเศษ",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "ฟ้า เร้กเก้",
-      "createdDate": "3/8/69",
-      "source": "ข้อสอบจริง ปี 2568",
-      "isActive": true,
-      "caseStatus": "Active"
-    },
-    {
       "caseId": "OSPE-CL6814",
       "title": "จับผิดใบสั่งยา",
       "category": "Clinic",
       "mainGroup": "การตรวจสอบใบสั่งยา",
       "subTopic": "",
       "disease": "จับผิดใบสั่งยา",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "ฟ้า เร้กเก้",
-      "createdDate": "3/8/69",
-      "source": "ข้อสอบจริง ปี 2568",
-      "isActive": true,
-      "caseStatus": "Active"
-    },
-    {
-      "caseId": "OSPE-CL6816",
-      "title": "ซักประวัติและจ่ายยา",
-      "category": "Clinic",
-      "mainGroup": "การซักประวัติและจ่ายยา",
-      "subTopic": "",
-      "disease": "แผลในปาก",
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
