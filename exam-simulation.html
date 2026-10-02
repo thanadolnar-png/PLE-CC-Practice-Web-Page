@@ -1066,6 +1066,8 @@
                 </div>
                 <select id="lobby-alarm-sound-select" class="select-filter" style="width: 100%; font-size: 0.82rem; padding: 0.4rem 0.5rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text-primary); font-weight: 500;" onchange="updateRoomAlarmSound(this.value)">
                   <option value="school-bell">กระดิ่งมาตรฐาน (Standard Bell)</option>
+                  <option value="nene">เนเน่นายแน่มาก</option>
+                  <option value="brazil">เพลง Brazil</option>
                   <option value="plaahm">เพลงปลาหมอสีเหลือง</option>
                   <option value="chicken">ไก่กรีดร้องบนต้นไม้</option>
                   <option value="black-panther">เสือดำเด้าหน่อย</option>
@@ -6200,11 +6202,13 @@
     let _activeTimeoutAudio = null;
 
     const ALARM_SOUND_MAP = {
-      'school-bell': { title: '🔔 กระดิ่งโรงเรียนมาตรฐาน (Standard)', file: './freesound_community-school-bell-37445.mp3' },
-      'plaahm': { title: '🐟 เพลงปลาหมอสีเหลือง', file: './plaahm-siiehluue-ng.mp3' },
-      'chicken': { title: '🐔 ไก่กรีดร้องบนต้นไม้', file: './chicken-on-tree-screaming.mp3' },
-      'black-panther': { title: '🐆 เสือดำเด้าหน่อย', file: './esuue-damedaahn-y.mp3' },
-      'cafe-comedy': { title: '🎪 เปิดตัวตลกคาเฟ่', file: './7-epidtawtlkkhaaef.mp3' }
+      'school-bell': { title: 'กระดิ่งมาตรฐาน (Standard Bell)', file: './freesound_community-school-bell-37445.mp3' },
+      'nene': { title: 'เนเน่นายแน่มาก', file: './nene-nai-nae-mak.mp3' },
+      'brazil': { title: 'เพลง Brazil', file: './brazil.mp3' },
+      'plaahm': { title: 'เพลงปลาหมอสีเหลือง', file: './plaahm-siiehluue-ng.mp3' },
+      'chicken': { title: 'ไก่กรีดร้องบนต้นไม้', file: './chicken-on-tree-screaming.mp3' },
+      'black-panther': { title: 'เสือดำเด้าหน่อย', file: './esuue-damedaahn-y.mp3' },
+      'cafe-comedy': { title: 'เปิดตัวตลกคาเฟ่', file: './7-epidtawtlkkhaaef.mp3' }
     };
     window.ALARM_SOUND_MAP = ALARM_SOUND_MAP;
 
