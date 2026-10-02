@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU</title>
-  <link rel="stylesheet" href="style.css?v=20261002_233000">
-  <script src="case-data-offline.js?v=v_20261002_233000"></script>
-  <script src="case-details-offline.js?v=v_20261002_233000"></script>
-  <script src="app.js?v=v_20261002_233000"></script>
-  <script src="scratchpad.js?v=v_20261002_233000"></script>
+  <link rel="stylesheet" href="style.css?v=20261002_234500">
+  <script src="case-data-offline.js?v=v_20261002_234500"></script>
+  <script src="case-details-offline.js?v=v_20261002_234500"></script>
+  <script src="app.js?v=v_20261002_234500"></script>
+  <script src="scratchpad.js?v=v_20261002_234500"></script>
   <style>
     /* Simulation Source and Topic Selector */
     .sim-filter-section {
@@ -1009,11 +1009,12 @@
           
           <div style="text-align: center; margin-bottom: 1.5rem;">
             <h3 style="font-family: var(--font-title); font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;" id="lobby-waiting-title">
-              ห้องซ้อมสอบออนไลน์
+              ห้องซ้อมสอบออนไลน์ (Standard Practice Room)
             </h3>
             <p style="color: var(--text-muted); font-size: 0.85rem;" id="lobby-waiting-desc">
               ระบบจำลองสอบ OSPE ร่วมกันแบบเรียลไทม์
             </p>
+            <div id="lobby-waiting-msg" style="margin-top: 0.45rem; font-size: 0.82rem; color: var(--primary); font-weight: 600;"></div>
           </div>
           
           <!-- 2-Column Responsive Layout -->
@@ -1260,7 +1261,7 @@
                 <!-- Attached controls right next to timer -->
                 <div class="timer-action-btns">
                   <button class="btn ghost btn-sm" id="timer-toggle-btn" onclick="toggleTimer()">⏸ พักตัวจับเวลา</button>
-                  <button class="btn outline btn-sm" onclick="resetTimer()">🔄 เริ่มต้นใหม่</button>
+                  <button class="btn outline btn-sm" id="timer-reset-btn" onclick="resetTimer()">🔄 เริ่มต้นใหม่</button>
                   <button type="button" class="btn primary btn-sm" id="btn-exam-scratchpad" onclick="toggleSimScratchpad()" style="font-weight: 700; background: var(--primary); color: #fff;">📝 กระดาษทด</button>
                 </div>
               </div>
@@ -3382,18 +3383,21 @@
           }
           const partListEl = document.getElementById('lobby-participants-list');
           if (partListEl) {
-            const participants = playersList.filter(p => !p.isHost);
+            // Show all participants including Host (sorted with Host first)
+            const sortedPlayers = [...playersList].sort((a, b) => (b.isHost ? 1 : 0) - (a.isHost ? 1 : 0));
             const countBadge = document.getElementById('lobby-player-count-badge');
-            if (countBadge) countBadge.textContent = `${participants.length} คน`;
+            if (countBadge) countBadge.textContent = `${playersList.length} คน`;
 
-            if (participants.length === 0) {
+            if (sortedPlayers.length === 0) {
               partListEl.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1.5rem 0;">กำลังรอเพื่อนๆ เชื่อมต่อเข้าร่วมห้อง...</div>';
             } else {
               partListEl.innerHTML = '';
-              participants.forEach(p => {
+              sortedPlayers.forEach(p => {
                 const isMe = p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName;
-                const isReady = !!p.isReady;
+                const isReady = Boolean(p.isReady);
                 const pEmoji = p.emoji || '👤';
+                const isPlayerHost = Boolean(p.isHost);
+                const isPlayerSuperHost = Boolean(p.isSuperHost);
                 
                 // Find assigned station in Carousel or Breakout
                 let stationInfoHtml = '';
@@ -3445,11 +3449,35 @@
                   }
                 }
 
-                const isHost = Boolean(p.isHost);
-                const hostTag = isHost ? '<span style="font-size: 0.65rem; background: #fef3c7; color: #b45309; font-weight: 700; padding: 0.08rem 0.35rem; border-radius: 4px; border: 1px solid #fde68a;">👑 Host</span>' : '';
-                const roleBadgeText = p.role === 'examiner' ? '👨‍🏫 ผู้ประเมิน' : '✍️ ผู้เข้าสอบ';
-                const roleBadgeColor = p.role === 'examiner' ? '#0369a1' : '#15803d';
-                const roleBadgeBg = p.role === 'examiner' ? '#e0f2fe' : '#dcfce7';
+                // Determine badges
+                let roleBadgeText = '✍️ ผู้เข้าสอบ';
+                let roleBadgeBg = '#dcfce7';
+                let roleBadgeColor = '#15803d';
+                let roleBadgeBorder = '#bbf7d0';
+
+                if (isPlayerSuperHost) {
+                  roleBadgeText = '👑 Super Host';
+                  roleBadgeBg = '#fef3c7';
+                  roleBadgeColor = '#b45309';
+                  roleBadgeBorder = '#fde68a';
+                } else if (p.role === 'examiner') {
+                  roleBadgeText = '👨‍🏫 ผู้ประเมิน';
+                  roleBadgeBg = '#e0f2fe';
+                  roleBadgeColor = '#0369a1';
+                  roleBadgeBorder = '#bae6fd';
+                }
+
+                const hostTag = isPlayerHost ? '<span style="font-size: 0.65rem; background: #fef3c7; color: #b45309; font-weight: 700; padding: 0.08rem 0.35rem; border-radius: 4px; border: 1px solid #fde68a;">👑 Host</span>' : '';
+
+                // Ready or Host / Examiner status tag
+                let statusTagHtml = '';
+                if (isPlayerSuperHost || p.role === 'examiner') {
+                  statusTagHtml = '<span style="display:inline-flex; align-items:center; gap:0.25rem; font-size: 0.72rem; color: #0369a1; font-weight: 700; background: #e0f2fe; padding: 0.15rem 0.5rem; border-radius: 999px; border: 1px solid #bae6fd;">👑 ผู้คุม / ผู้ประเมิน</span>';
+                } else {
+                  statusTagHtml = isReady 
+                    ? '<span style="display:inline-flex; align-items:center; gap:0.25rem; font-size: 0.72rem; color: #16a34a; font-weight: 700; background: #dcfce7; padding: 0.15rem 0.5rem; border-radius: 999px; border: 1px solid #bbf7d0;">● พร้อม</span>' 
+                    : '<span style="display:inline-flex; align-items:center; gap:0.25rem; font-size: 0.72rem; color: var(--text-muted); background: var(--bg-secondary); padding: 0.15rem 0.5rem; border-radius: 999px; border: 1px solid var(--border);">○ รอ</span>';
+                }
 
                 const item = document.createElement('div');
                 item.className = 'lobby-member-row';
@@ -3468,15 +3496,13 @@
                         ${hostTag}
                       </div>
                       <div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.15rem; flex-wrap: wrap;">
-                        <span style="font-size: 0.68rem; background: ${roleBadgeBg}; color: ${roleBadgeColor}; font-weight: 700; padding: 0.08rem 0.4rem; border-radius: 4px;">${roleBadgeText}</span>
+                        <span style="font-size: 0.68rem; background: ${roleBadgeBg}; color: ${roleBadgeColor}; font-weight: 700; padding: 0.08rem 0.4rem; border-radius: 4px; border: 1px solid ${roleBadgeBorder};">${roleBadgeText}</span>
                         ${stationInfoHtml}
                       </div>
                     </div>
                   </div>
                   <div>
-                    ${isReady 
-                      ? '<span style="display:inline-flex; align-items:center; gap:0.25rem; font-size: 0.72rem; color: #16a34a; font-weight: 700; background: #dcfce7; padding: 0.15rem 0.5rem; border-radius: 999px;">● พร้อม</span>' 
-                      : '<span style="display:inline-flex; align-items:center; gap:0.25rem; font-size: 0.72rem; color: var(--text-muted); background: var(--bg-secondary); padding: 0.15rem 0.5rem; border-radius: 999px;">○ รอ</span>'}
+                    ${statusTagHtml}
                   </div>
                 `;
                 partListEl.appendChild(item);
@@ -3548,44 +3574,52 @@
 
           if (isStandardMode) {
             updateStandardRoleSelectorUI();
-            // ── Standard Pair Mode ──
-            // ONLY the Examiner can start the exam! Participant must wait.
+            // ── Standard Practice Mode (1 Examiner + Multiple Candidates) ──
             const mePlayer = playersList.find(p => p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName);
             const myRole = mePlayer?.role || SimState.role || 'examinee';
             const isExaminer = (myRole === 'examiner');
 
-            const examineePlayer = playersList.find(p => p.role === 'examinee' && !p.isHost) || playersList.find(p => p.role === 'examinee');
+            const examineePlayers = playersList.filter(p => p.role === 'examinee' && !p.isSuperHost);
+            const totalCandidates = examineePlayers.length;
+            const readyCount = examineePlayers.filter(p => p.isReady).length;
+            const allCandidatesReady = totalCandidates > 0 && readyCount === totalCandidates;
             const examinerPlayer = playersList.find(p => p.role === 'examiner');
-            const hasExaminee = Boolean(examineePlayer);
-            const isExamineeReady = examineePlayer ? Boolean(examineePlayer.isReady) : false;
 
             if (isExaminer) {
               if (readyContainer) readyContainer.style.display = 'none';
               if (startBtn) {
                 startBtn.style.display = 'block';
                 startBtn.disabled = false;
-                if (!hasExaminee) {
+                if (totalCandidates === 0) {
                   startBtn.textContent = 'เริ่มการสอบ (ในฐานะ Examiner)';
                   startBtn.className = 'btn btn-primary';
                   startBtn.style.background = '';
                   startBtn.style.borderColor = '';
-                } else if (isExamineeReady) {
-                  startBtn.textContent = `เริ่มการสอบ (${escapeHtml(examineePlayer.name)} พร้อมแล้ว)`;
+                } else if (allCandidatesReady) {
+                  startBtn.textContent = totalCandidates === 1
+                    ? `เริ่มการสอบ (${escapeHtml(examineePlayers[0].name)} พร้อมแล้ว)`
+                    : `เริ่มการสอบ (ผู้เข้าสอบทุกคนพร้อมแล้ว ${readyCount}/${totalCandidates})`;
                   startBtn.className = 'btn btn-primary';
                   startBtn.style.background = '#10b981';
                   startBtn.style.borderColor = '#10b981';
                 } else {
-                  startBtn.textContent = `เริ่มการสอบ (รอ ${escapeHtml(examineePlayer.name)} กดพร้อม)`;
+                  startBtn.textContent = totalCandidates === 1
+                    ? `เริ่มการสอบ (รอ ${escapeHtml(examineePlayers[0].name)} กดพร้อม)`
+                    : `เริ่มการสอบ (${readyCount}/${totalCandidates} คนพร้อม)`;
                   startBtn.className = 'btn btn-secondary';
                   startBtn.style.background = '';
                   startBtn.style.borderColor = '';
                 }
               }
-              if (waitingTitle) waitingTitle.textContent = 'ห้องซ้อมสอบออนไลน์ (1:1 Exam Room)';
+              if (waitingTitle) waitingTitle.textContent = 'ห้องซ้อมสอบออนไลน์ (Standard Practice Room)';
               if (waitingDesc) waitingDesc.textContent = 'คุณทำหน้าที่เป็นผู้ประเมิน ให้คะแนน และควบคุมสถานีสอบ';
-              if (waitingMsg) waitingMsg.textContent = hasExaminee ? `ผู้เข้าสอบ: ${escapeHtml(examineePlayer.name)}` : 'รหัสห้อง 4 หลักด้านบนสำหรับให้เพื่อนเข้าร่วม';
+              if (waitingMsg) {
+                waitingMsg.textContent = totalCandidates > 0
+                  ? `ผู้เข้าสอบ (${totalCandidates} คน): ${examineePlayers.map(p => escapeHtml(p.name)).join(', ')}`
+                  : 'รหัสห้อง 4 หลักด้านบนสำหรับให้เพื่อนเข้าร่วม';
+              }
             } else {
-              // Examinee (Participant) CANNOT start exam!
+              // Examinee (Candidate) CANNOT start exam!
               if (readyContainer) readyContainer.style.display = 'block';
               if (startBtn) startBtn.style.display = 'none';
 
@@ -3609,12 +3643,14 @@
                 }
               }
 
-              if (waitingTitle) waitingTitle.textContent = 'ห้องซ้อมสอบออนไลน์ (1:1 Exam Room)';
+              if (waitingTitle) waitingTitle.textContent = 'ห้องซ้อมสอบออนไลน์ (Standard Practice Room)';
               if (waitingDesc) waitingDesc.textContent = 'โจทย์สถานการณ์และข้อมูลผู้ป่วยจะแสดงเมื่อเริ่มการสอบ';
-              if (examinerPlayer) {
-                waitingMsg.textContent = `รอผู้ประเมิน (${escapeHtml(examinerPlayer.name)}) กดเริ่มการสอบ`;
-              } else {
-                waitingMsg.innerHTML = '<span style="color:var(--danger, #ef4444);font-weight:600;">ยังไม่มีผู้ประเมินในห้อง</span>';
+              if (waitingMsg) {
+                if (examinerPlayer) {
+                  waitingMsg.textContent = `รอผู้ประเมิน (${escapeHtml(examinerPlayer.name)}) กดเริ่มการสอบ`;
+                } else {
+                  waitingMsg.innerHTML = '<span style="color:var(--danger, #ef4444);font-weight:600;">ยังไม่มีผู้ประเมินในห้อง</span>';
+                }
               }
             }
 
@@ -4759,13 +4795,9 @@
       const candidateCases = AppState.cases.filter(c => {
         if (!c || !c.caseId) return false;
 
-        // Exclude password-protected / secret mock cases from random simulation by default
+        // Strictly exclude password-protected / confidential mock cases from random simulation
         const isProtected = Boolean(c.isProtected || c.hasPassword || c.isEncrypted);
-        if (isProtected) {
-          const src = c.source || 'ไม่ระบุ';
-          const srcExplicitlySelected = SimState.selectedSources && SimState.selectedSources.size > 0 && SimState.selectedSources.has(src);
-          if (!srcExplicitlySelected) return false;
-        }
+        if (isProtected) return false;
 
         const src = c.source || 'ไม่ระบุ';
         if (SimState.selectedSources && SimState.selectedSources.size > 0 && !SimState.selectedSources.has(src)) return false;
@@ -4928,13 +4960,17 @@
     }
 
     function toggleTimer() {
+      if (SimState.isLobby && !SimState.isHost) {
+        alert('เฉพาะ Host / Super Host เท่านั้นที่สามารถควบคุมตัวจับเวลาส่วนกลางได้');
+        return;
+      }
       SimState.timerRunning = !SimState.timerRunning;
       const toggleBtn = document.getElementById('timer-toggle-btn');
       if (toggleBtn) toggleBtn.textContent = SimState.timerRunning ? '⏸️ พักตัวจับเวลา' : '▶️ เล่นตัวจับเวลาต่อ';
       const shToggleBtn = document.getElementById('sh-timer-toggle-btn');
       if (shToggleBtn) shToggleBtn.textContent = SimState.timerRunning ? '⏸️ พักตัวจับเวลา' : '▶️ เล่นตัวจับเวลาต่อ';
 
-      if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
+      if (SimState.isLobby && SimState.isHost) {
         if (SimState.timerRunning) {
           // Resumed: compute timerStartedAt from now
           const now = Date.now();
@@ -4972,6 +5008,10 @@
     }
 
     function resetTimer() {
+      if (SimState.isLobby && !SimState.isHost) {
+        alert('เฉพาะ Host / Super Host เท่านั้นที่สามารถรีเซ็ตตัวจับเวลาส่วนกลางได้');
+        return;
+      }
       SimState.timerValue = 240;
       SimState.timerRunning = false;
       updateTimerDisplay();
@@ -4979,7 +5019,7 @@
         clearInterval(SimState.timerInterval);
         SimState.timerInterval = null;
       }
-      if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
+      if (SimState.isLobby && SimState.isHost) {
         _fbDb.ref('rooms/' + SimState.roomId).update({
           timerValue: 240,
           timerDuration: 240,
@@ -5223,9 +5263,14 @@
         chkContainer.style.display = 'none';
         noteContainer.style.display = 'none';
         if (SimState.isLobby) {
-          document.getElementById('timer-toggle-btn').style.display = 'none';
-          document.querySelector('.exam-nav').style.display = 'none';
-          document.getElementById('btn-finish-exam').style.display = 'none';
+          const toggleBtn = document.getElementById('timer-toggle-btn');
+          if (toggleBtn) toggleBtn.style.display = 'none';
+          const resetBtn = document.getElementById('timer-reset-btn');
+          if (resetBtn) resetBtn.style.display = 'none';
+          const examNav = document.querySelector('.exam-nav');
+          if (examNav) examNav.style.display = 'none';
+          const finishBtn = document.getElementById('btn-finish-exam');
+          if (finishBtn) finishBtn.style.display = 'none';
         }
       } else if (SimState.role === 'examiner') {
         progressCard.style.display = 'flex';
@@ -5238,9 +5283,17 @@
         document.getElementById('exam-toggle-note-btn').textContent = '🔒 ซ่อนบทบาทคนไข้จำลอง / เฉลย';
         renderExamChecklist(st.stationNumber, c);
         if (SimState.isLobby) {
-          document.getElementById('timer-toggle-btn').style.display = 'inline-block';
-          document.querySelector('.exam-nav').style.display = 'flex';
-          document.getElementById('btn-finish-exam').style.display = 'block';
+          const canControlTimer = Boolean(SimState.isHost);
+          const toggleBtn = document.getElementById('timer-toggle-btn');
+          if (toggleBtn) toggleBtn.style.display = canControlTimer ? 'inline-flex' : 'none';
+          const resetBtn = document.getElementById('timer-reset-btn');
+          if (resetBtn) resetBtn.style.display = canControlTimer ? 'inline-flex' : 'none';
+
+          const isStandardRoom = (SimState.examMode === 'standard' || !SimState.examMode);
+          const examNav = document.querySelector('.exam-nav');
+          if (examNav) examNav.style.display = (isStandardRoom || SimState.isHost) ? 'flex' : 'none';
+          const finishBtn = document.getElementById('btn-finish-exam');
+          if (finishBtn) finishBtn.style.display = (isStandardRoom || SimState.isHost) ? 'block' : 'none';
         }
       }
       
