@@ -34,6 +34,7 @@
       <a href="index.html" class="topbar-nav-tab active" id="nav-home">หน้าแรก</a>
       <a href="case-library.html" class="topbar-nav-tab" id="nav-library">คลังเคส</a>
       <a href="exam-simulation.html" class="topbar-nav-tab" id="nav-sim">ซ้อมสอบ</a>
+      <a href="video-library.html" class="topbar-nav-tab" id="nav-videos">🎬 คลิปเทคนิค (Product)</a>
     </div>
     <div class="topbar-right">
       <button class="icon-btn" id="toggleViewModeBtn" onclick="toggleAppViewMode()" title="สลับโหมด Desktop / Phone">📱</button>
@@ -94,6 +95,9 @@
           </span>
           <span class="btn-bubble-dot"></span>
         </a>
+        <a href="video-library.html" class="btn btn-secondary" style="border-color: #10b981; color: #10b981; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem;">
+          🎬 คลิปเทคนิคเตรียมยา (46 คลิป)
+        </a>
         <button onclick="openBatchPrintModal()" class="btn btn-secondary" style="border-color: var(--primary); color: var(--primary);">🖨️ สั่งพิมพ์หลายเคส</button>
       </div>
     </div>
@@ -136,7 +140,10 @@
           </div>
           <div class="card-body">
             <p class="card-desc">ฝึกฝนทักษะการคำนวณตำรับยาและขนาดยา การเตรียมยาเฉพาะราย (Compounding) เช่น ยาน้ำ ยาขี้ผึง ครีม หรือยาปราศจากเชื้อ (Sterile) รวมถึงการเขียนฉลากยาอย่างถูกต้อง</p>
-            <a href="case-library.html?cat=Product" class="btn btn-secondary btn-product" id="btn-cat-product">ฝึกหมวดผลิตภัณฑ์</a>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <a href="case-library.html?cat=Product" class="btn btn-secondary btn-product" id="btn-cat-product" style="flex: 1;">ฝึกเคส Product</a>
+              <a href="video-library.html" class="btn btn-secondary" style="border-color: #10b981; color: #10b981; font-weight: 700; flex: 1.2; text-align: center;">🎬 ดูคลิปเทคนิคเตรียมยา</a>
+            </div>
           </div>
         </article>
 

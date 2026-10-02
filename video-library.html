@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>คลังคลิปวิดีโอเทคนิคการเตรียมยา (Product) | RxCU OSPE</title>
+  <meta name="description" content="คลังคลิปวิดีโอสาธิตเทคนิคทางเภสัชกรรมและการเตรียมเภสัชภัณฑ์รูปแบบต่างๆ ภาควิชาวิทยาการเภสัชกรรม คณะเภสัชศาสตร์ จุฬาฯ สำหรับเตรียมสอบ PLE-CC2 OSPE">
+  <link rel="stylesheet" href="style.css">
+  <script src="video-data.js?v=20261002"></script>
+  <script src="app.js?v=20261002"></script>
+
+  <style>
+    /* ─── Video Library Layout & Components ─── */
+    .video-hero-banner {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(59, 130, 246, 0.05) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .video-hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: rgba(99, 102, 241, 0.12);
+      color: var(--primary);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.25rem 0.75rem;
+      margin-bottom: 0.65rem;
+    }
+    .video-hero-title {
+      font-family: var(--font-title);
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin: 0 0 0.4rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .video-hero-sub {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin: 0 0 1rem 0;
+      max-width: 820px;
+    }
+    .video-stats-bar {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1.1rem;
+    }
+    .video-stat-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+    }
+    .video-stat-num {
+      font-family: var(--font-title);
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: var(--primary);
+    }
+    .video-progress-container {
+      flex: 1;
+      min-width: 220px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .video-progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .video-progress-track {
+      height: 8px;
+      background: var(--bg-secondary);
+      border-radius: 9999px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .video-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #059669);
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 9999px;
+    }
+
+    /* ─── Controls & Filter Toolbar ─── */
+    .video-filter-console {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.1rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+    .video-search-row {
+      display: flex;
+      gap: 0.65rem;
+      align-items: center;
+    }
+    .video-search-input-wrap {
+      flex: 1;
+      position: relative;
+    }
+    .video-search-input {
+      width: 100%;
+      padding: 0.65rem 1rem 0.65rem 2.35rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .video-search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+      outline: none;
+    }
+    .video-search-icon {
+      position: absolute;
+      left: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .video-filter-group-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .video-group-btn {
+      padding: 0.4rem 0.85rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--bg-primary);
+      color: var(--text-secondary);
+      font-family: var(--font-title);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .video-group-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--bg-secondary);
+    }
+    .video-group-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+    .video-chips-row {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      border-top: 1px dashed var(--border);
+      padding-top: 0.75rem;
+    }
+    .video-chip-btn {
+      font-size: 0.76rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      border: 1px solid var(--border);
+      background: var(--bg-primary);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .video-chip-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .video-chip-btn.active {
+      background: rgba(99, 102, 241, 0.12);
+      border-color: var(--primary);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    /* ─── Video Cards Grid ─── */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 1.15rem;
+      margin-bottom: 2rem;
+    }
+    .video-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      position: relative;
+    }
+    .video-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      border-color: var(--primary);
+    }
+    .video-card.watched {
+      border-color: rgba(16, 185, 129, 0.35);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.02) 0%, var(--surface) 100%);
+    }
+    .video-thumb-container {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%; /* 16:9 Aspect Ratio */
+      background: #0f172a;
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .video-thumb-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    .video-card:hover .video-thumb-img {
+      transform: scale(1.05);
+    }
+    .video-thumb-drive-banner {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      color: #94a3b8;
+      text-align: center;
+      padding: 1rem;
+    }
+    .video-play-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.35rem;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(4px);
+    }
+    .video-card:hover .video-play-overlay {
+      background: #ef4444;
+      border-color: #ef4444;
+      transform: translate(-50%, -50%) scale(1.15);
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+    }
+    .video-platform-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(15, 23, 42, 0.82);
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .video-watched-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #10b981;
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      display: none;
+    }
+    .video-card.watched .video-watched-badge {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .video-card-body {
+      padding: 1rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .video-card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+    .video-chapter-pill {
+      font-family: var(--font-title);
+      font-weight: 700;
+      color: var(--primary);
+      background: rgba(99, 102, 241, 0.09);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+    .video-card-title {
+      font-family: var(--font-title);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.4;
+      margin: 0;
+      flex: 1;
+      cursor: pointer;
+    }
+    .video-card-title:hover {
+      color: var(--primary);
+    }
+    .video-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 0.65rem;
+      margin-top: 0.35rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.78rem;
+    }
+    .video-action-btn {
+      padding: 0.32rem 0.65rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-primary);
+      color: var(--text-secondary);
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.15s ease;
+    }
+    .video-action-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .video-action-btn.active {
+      background: rgba(16, 185, 129, 0.12);
+      border-color: #10b981;
+      color: #059669;
+    }
+    .video-play-btn-primary {
+      background: var(--primary);
+      color: #fff !important;
+      border-color: var(--primary);
+    }
+    .video-play-btn-primary:hover {
+      background: var(--primary-hover, #4338ca);
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    }
+
+    /* ─── Theater Modal ─── */
+    .theater-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.85);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      backdrop-filter: blur(6px);
+    }
+    .theater-modal-overlay.show {
+      display: flex;
+    }
+    .theater-modal-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 920px;
+      max-height: 94vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+    }
+    .theater-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-secondary);
+    }
+    .theater-title {
+      font-family: var(--font-title);
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .theater-close-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.35rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-sm);
+    }
+    .theater-close-btn:hover {
+      color: var(--danger);
+      background: rgba(239, 68, 68, 0.1);
+    }
+    .theater-video-wrapper {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%; /* 16:9 ratio */
+      background: #000;
+    }
+    .theater-video-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+    .theater-body {
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .theater-nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      padding-bottom: 0.65rem;
+      border-bottom: 1px dashed var(--border);
+    }
+    .empty-video-state {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell shell-library" id="appShell">
+  <div class="phone-notch"></div>
+
+  <!-- API Connection Status Banner -->
+  <div id="api-status-banner" class="api-banner">
+    <span class="banner-icon">🌐</span>
+    <span class="banner-text">กำลังตรวจสอบสถานะการเชื่อมต่อ...</span>
+  </div>
+
+  <!-- Topbar -->
+  <div class="topbar" id="main-nav">
+    <div class="topbar-left">
+      <a href="index.html" class="topbar-logo" id="nav-logo">
+        <div class="topbar-logo-badge">🥼</div>
+        <span class="topbar-logo-text">RxCU OSPE Hub</span>
+      </a>
+    </div>
+    <div class="topbar-nav-tabs" id="nav-menu">
+      <a href="index.html" class="topbar-nav-tab" id="nav-home">หน้าแรก</a>
+      <a href="case-library.html" class="topbar-nav-tab" id="nav-library">คลังเคส</a>
+      <a href="exam-simulation.html" class="topbar-nav-tab" id="nav-sim">ซ้อมสอบ</a>
+      <a href="video-library.html" class="topbar-nav-tab active" id="nav-videos">🎬 คลิปเทคนิค (Product)</a>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" id="toggleViewModeBtn" onclick="toggleAppViewMode()" title="สลับโหมด Desktop / Phone">📱</button>
+      <button class="icon-btn" onclick="toggleFullscreen()" title="เต็มจอ">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Page Viewport -->
+  <div class="page-viewport">
+    <main class="main-section" style="padding-top: 1rem;">
+      <div class="container">
+        
+        <!-- Hero Banner -->
+        <header class="video-hero-banner">
+          <div class="video-hero-badge">
+            <span>🧪 หมวดวิชา: Product (เทคนิคเภสัชกรรมและการเตรียมยา)</span>
+          </div>
+          <h1 class="video-hero-title">
+            🎬 คลังคลิปวิดีโอเทคนิคการเตรียมยา (Compounding Video Hub)
+          </h1>
+          <p class="video-hero-sub">
+            สื่อการเรียนการสอนทางการจาก <strong>ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย</strong> 
+            รวบรวมเทคนิคพื้นฐานในห้องปฏิบัติการและขั้นตอนการเตรียมเภสัชภัณฑ์รูปแบบต่างๆ สำหรับทบทวนก่อนสอบ PLE-CC2 (OSPE)
+          </p>
+
+          <!-- Stats & Watched Tracker -->
+          <div class="video-stats-bar">
+            <div class="video-stat-item">
+              <span class="video-stat-num" id="stat-total-videos">46</span>
+              <span>คลิปวิดีโอทั้งหมด</span>
+            </div>
+            <div class="video-stat-item">
+              <span class="video-stat-num" id="stat-watched-count" style="color: #10b981;">0</span>
+              <span>ดูแล้ว</span>
+            </div>
+            <div class="video-progress-container">
+              <div class="video-progress-labels">
+                <span>ความก้าวหน้าการทบทวน</span>
+                <span id="stat-progress-pct">0%</span>
+              </div>
+              <div class="video-progress-track">
+                <div class="video-progress-fill" id="stat-progress-fill"></div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- Filter Console -->
+        <aside class="video-filter-console">
+          <!-- Search Row -->
+          <div class="video-search-row">
+            <div class="video-search-input-wrap">
+              <svg class="video-search-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              <input type="text" id="video-search-input" class="video-search-input" placeholder="ค้นหาชื่อเทคนิค, Aliquot, ยาน้ำ, ยาแขวนตะกอน, ครีม, ขี้ผึ้ง, แคปซูล...">
+            </div>
+            <button class="btn btn-secondary" onclick="resetVideoFilters()" style="padding: 0.65rem 1rem; font-size: 0.85rem;">
+              🔄 รีเซ็ต
+            </button>
+          </div>
+
+          <!-- Group Buttons (Major Categories) -->
+          <div class="video-filter-group-row">
+            <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); margin-right: 0.25rem;">หมวดหลัก:</span>
+            <button class="video-group-btn active" data-group="all" onclick="setMajorGroup('all', this)">
+              <span>ทั้งหมด (46)</span>
+            </button>
+            <button class="video-group-btn" data-group="fundamental" onclick="setMajorGroup('fundamental', this)">
+              <span>🧪 หมวด 1: เทคนิคพื้นฐานสำคัญ (19)</span>
+            </button>
+            <button class="video-group-btn" data-group="courses" onclick="setMajorGroup('courses', this)">
+              <span>📦 หมวด 2: เภสัชภัณฑ์รูปแบบต่างๆ (27)</span>
+            </button>
+          </div>
+
+          <!-- Dosage Form Chips -->
+          <div class="video-chips-row">
+            <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); align-self: center; margin-right: 0.2rem;">รูปแบบยา/ทักษะ:</span>
+            <button class="video-chip-btn active" data-form="all" onclick="setDosageForm('all', this)">ทั้งหมด</button>
+            <button class="video-chip-btn" data-form="การชั่งตวง & Aliquot" onclick="setDosageForm('การชั่งตวง & Aliquot', this)">⚖️ ชั่งตวง & Aliquot</button>
+            <button class="video-chip-btn" data-form="การบด ผสม & หลอม" onclick="setDosageForm('การบด ผสม & หลอม', this)">🥣 บด ผสม & หลอม</button>
+            <button class="video-chip-btn" data-form="การกรอง & พับกระดาษกรอง" onclick="setDosageForm('การกรอง & พับกระดาษกรอง', this)">📄 กรอง & พับกระทง</button>
+            <button class="video-chip-btn" data-form="ยาน้ำใส & สารละลาย" onclick="setDosageForm('ยาน้ำใส & สารละลาย', this)">💧 ยาน้ำใส & สารละลาย</button>
+            <button class="video-chip-btn" data-form="ยาน้ำแขวนตะกอน (Suspensions)" onclick="setDosageForm('ยาน้ำแขวนตะกอน (Suspensions)', this)">🧪 ยาน้ำแขวนตะกอน</button>
+            <button class="video-chip-btn" data-form="ยาอิมัลชัน (Emulsions)" onclick="setDosageForm('ยาอิมัลชัน (Emulsions)', this)">🥛 ยาอิมัลชัน</button>
+            <button class="video-chip-btn" data-form="ยาครีม ขี้ผึ้ง & เพสต์" onclick="setDosageForm('ยาครีม ขี้ผึ้ง & เพสต์', this)">🧴 ครีม ขี้ผึ้ง & เพสต์</button>
+            <button class="video-chip-btn" data-form="ยาเจล (Gels)" onclick="setDosageForm('ยาเจล (Gels)', this)">🧫 ยาเจล</button>
+            <button class="video-chip-btn" data-form="ยาแคปซูล & ผงยา" onclick="setDosageForm('ยาแคปซูล & ผงยา', this)">💊 แคปซูล & ผงยา</button>
+            <button class="video-chip-btn" data-form="ยาปราศจากเชื้อ (Sterile & Aseptic)" onclick="setDosageForm('ยาปราศจากเชื้อ (Sterile & Aseptic)', this)">💉 ยาปราศจากเชื้อ</button>
+          </div>
+        </aside>
+
+        <!-- Video Count Indicator -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-secondary);">
+            แสดง <span id="video-display-count" style="color: var(--primary);">46</span> รายการ
+          </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <label style="font-size: 0.82rem; display: flex; align-items: center; gap: 0.35rem; cursor: pointer; user-select: none;">
+              <input type="checkbox" id="filter-unwatched-only" onchange="applyFilters()">
+              <span>เฉพาะที่ยังไม่ได้ดู</span>
+            </label>
+            <label style="font-size: 0.82rem; display: flex; align-items: center; gap: 0.35rem; cursor: pointer; user-select: none;">
+              <input type="checkbox" id="filter-favorites-only" onchange="applyFilters()">
+              <span>เฉพาะรายการโปรด ⭐</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Video Grid Container -->
+        <section class="video-grid" id="video-grid-container">
+          <!-- Rendered dynamically by JS -->
+        </section>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Theater Modal (Direct Video Player) -->
+<div id="theater-modal" class="theater-modal-overlay" onclick="handleTheaterOverlayClick(event)">
+  <div class="theater-modal-card">
+    <div class="theater-header">
+      <h3 class="theater-title" id="theater-video-title">
+        <span>🎬</span>
+        <span id="theater-title-text">กำลังโหลดคลิปวิดีโอ...</span>
+      </h3>
+      <button class="theater-close-btn" onclick="closeTheaterModal()" title="ปิดหน้าต่าง (Esc)">✕</button>
+    </div>
+    
+    <div class="theater-video-wrapper" id="theater-player-box">
+      <!-- Iframe player injected dynamically -->
+    </div>
+
+    <div class="theater-body">
+      <div class="theater-nav-row">
+        <button class="video-action-btn" id="btn-prev-video" onclick="navigateVideo(-1)">
+          ⏮ คลิปก่อนหน้า
+        </button>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <button class="video-action-btn" id="theater-watched-toggle" onclick="toggleCurrentVideoWatched()">
+            ✔️ ทำเครื่องหมายว่าดูแล้ว
+          </button>
+          <button class="video-action-btn" id="theater-fav-toggle" onclick="toggleCurrentVideoFav()">
+            ⭐ บันทึกรายการโปรด
+          </button>
+          <a href="#" target="_blank" rel="noopener noreferrer" class="video-action-btn video-play-btn-primary" id="theater-external-link">
+            เปิดดูภายนอก ↗
+          </a>
+        </div>
+        <button class="video-action-btn" id="btn-next-video" onclick="navigateVideo(1)">
+          คลิปถัดไป ⏭
+        </button>
+      </div>
+
+      <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
+        <span id="theater-video-faculty" style="font-weight: 600;">ภาควิชาวิทยาการเภสัชกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย</span>
+        <div id="theater-video-meta" style="margin-top: 0.25rem; font-size: 0.8rem; color: var(--text-muted);"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── Video Library Application Controller ───
+  let currentActiveVideos = (typeof COMPOUNDING_VIDEOS !== 'undefined') ? COMPOUNDING_VIDEOS : [];
+  let currentFilteredList = [];
+  let currentPlayingIndex = -1;
+
+  let activeMajorGroup = 'all';
+  let activeDosageForm = 'all';
+  let searchQuery = '';
+
+  // LocalStorage Keys
+  const LS_WATCHED_KEY = 'ospe_watched_videos_v1';
+  const LS_FAV_KEY = 'ospe_fav_videos_v1';
+
+  function getWatchedSet() {
+    try {
+      const data = JSON.parse(localStorage.getItem(LS_WATCHED_KEY) || '[]');
+      return new Set(data);
+    } catch (e) {
+      return new Set();
+    }
+  }
+
+  function getFavSet() {
+    try {
+      const data = JSON.parse(localStorage.getItem(LS_FAV_KEY) || '[]');
+      return new Set(data);
+    } catch (e) {
+      return new Set();
+    }
+  }
+
+  function saveWatchedSet(s) {
+    try {
+      localStorage.setItem(LS_WATCHED_KEY, JSON.stringify(Array.from(s)));
+      updateProgressStats();
+    } catch (e) {}
+  }
+
+  function saveFavSet(s) {
+    try {
+      localStorage.setItem(LS_FAV_KEY, JSON.stringify(Array.from(s)));
+    } catch (e) {}
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Setup Search Event
+    const searchInput = document.getElementById('video-search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value.trim().toLowerCase();
+        applyFilters();
+      });
+    }
+
+    // Keyboard support for theater modal (Esc to close, Left/Right arrow to navigate)
+    document.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('theater-modal');
+      if (modal && modal.classList.contains('show')) {
+        if (e.key === 'Escape') closeTheaterModal();
+        else if (e.key === 'ArrowLeft') navigateVideo(-1);
+        else if (e.key === 'ArrowRight') navigateVideo(1);
+      }
+    });
+
+    applyFilters();
+    updateProgressStats();
+  });
+
+  function setMajorGroup(group, btn) {
+    activeMajorGroup = group;
+    document.querySelectorAll('.video-group-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    applyFilters();
+  }
+
+  function setDosageForm(form, btn) {
+    activeDosageForm = form;
+    document.querySelectorAll('.video-chip-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    applyFilters();
+  }
+
+  function resetVideoFilters() {
+    activeMajorGroup = 'all';
+    activeDosageForm = 'all';
+    searchQuery = '';
+    const searchInput = document.getElementById('video-search-input');
+    if (searchInput) searchInput.value = '';
+
+    const unwatchedChk = document.getElementById('filter-unwatched-only');
+    if (unwatchedChk) unwatchedChk.checked = false;
+
+    const favChk = document.getElementById('filter-favorites-only');
+    if (favChk) favChk.checked = false;
+
+    document.querySelectorAll('.video-group-btn').forEach((b, idx) => {
+      b.classList.toggle('active', idx === 0);
+    });
+    document.querySelectorAll('.video-chip-btn').forEach((b, idx) => {
+      b.classList.toggle('active', idx === 0);
+    });
+
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const watchedSet = getWatchedSet();
+    const favSet = getFavSet();
+    const unwatchedOnly = document.getElementById('filter-unwatched-only')?.checked || false;
+    const favOnly = document.getElementById('filter-favorites-only')?.checked || false;
+
+    currentFilteredList = currentActiveVideos.filter(v => {
+      // 1. Major Group filter
+      if (activeMajorGroup === 'fundamental' && !v.majorGroup.includes('หมวด 1')) return false;
+      if (activeMajorGroup === 'courses' && !v.majorGroup.includes('หมวด 2')) return false;
+
+      // 2. Dosage Form filter
+      if (activeDosageForm !== 'all' && v.dosageForm !== activeDosageForm) return false;
+
+      // 3. Search query filter
+      if (searchQuery) {
+        const text = (v.title + ' ' + v.chapter + ' ' + v.dosageForm + ' ' + v.majorGroup + ' ' + (v.tags || []).join(' ')).toLowerCase();
+        if (!text.includes(searchQuery)) return false;
+      }
+
+      // 4. Status filters
+      if (unwatchedOnly && watchedSet.has(v.id)) return false;
+      if (favOnly && !favSet.has(v.id)) return false;
+
+      return true;
+    });
+
+    renderVideoGrid();
+  }
+
+  function renderVideoGrid() {
+    const container = document.getElementById('video-grid-container');
+    const countEl = document.getElementById('video-display-count');
+    if (!container) return;
+
+    if (countEl) countEl.textContent = currentFilteredList.length;
+
+    if (currentFilteredList.length === 0) {
+      container.innerHTML = `
+        <div class="empty-video-state" style="grid-column: 1 / -1;">
+          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🔍</div>
+          <h3 style="font-family: var(--font-title); color: var(--text-primary); margin: 0 0 0.5rem 0;">ไม่พบคลิปวิดีโอที่ตรงกับเงื่อนไข</h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 1rem 0;">ลองเปลี่ยนคำค้นหา หรือกดรีเซ็ตตัวกรองเพื่อดูคลิปทั้งหมด</p>
+          <button class="btn btn-secondary" onclick="resetVideoFilters()">🔄 แสดงคลิปทั้งหมด</button>
+        </div>
+      `;
+      return;
+    }
+
+    const watchedSet = getWatchedSet();
+    const favSet = getFavSet();
+
+    container.innerHTML = currentFilteredList.map((v, idx) => {
+      const isWatched = watchedSet.has(v.id);
+      const isFav = favSet.has(v.id);
+
+      // Thumbnail Image
+      let thumbHtml = '';
+      if (v.type === 'youtube' && v.videoId) {
+        thumbHtml = `
+          <img src="https://img.youtube.com/vi/${v.videoId}/hqdefault.jpg" class="video-thumb-img" alt="${v.title}" loading="lazy">
+          <div class="video-play-overlay">▶</div>
+          <div class="video-platform-badge">🔴 YouTube</div>
+        `;
+      } else {
+        thumbHtml = `
+          <div class="video-thumb-drive-banner">
+            <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🧪📹</div>
+            <div style="font-size: 0.78rem; font-weight: 700; color: #e2e8f0;">${v.chapter}</div>
+            <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 2px;">Google Drive Video</div>
+          </div>
+          <div class="video-play-overlay">▶</div>
+          <div class="video-platform-badge" style="background: rgba(30, 41, 59, 0.9);">📁 Google Drive</div>
+        `;
+      }
+
+      return `
+        <article class="video-card ${isWatched ? 'watched' : ''}" id="vcard-${v.id}">
+          <div class="video-thumb-container" onclick="openTheaterModal(${idx})">
+            ${thumbHtml}
+            <div class="video-watched-badge">✓ ดูแล้ว</div>
+          </div>
+          
+          <div class="video-card-body">
+            <div class="video-card-meta">
+              <span class="video-chapter-pill">${v.chapter}</span>
+              <span style="font-weight: 600; color: var(--text-muted);">${v.dosageForm}</span>
+            </div>
+
+            <h4 class="video-card-title" onclick="openTheaterModal(${idx})" title="${v.title}">
+              ${v.title}
+            </h4>
+
+            <div class="video-card-footer">
+              <div style="display: flex; gap: 0.35rem;">
+                <button class="video-action-btn ${isWatched ? 'active' : ''}" onclick="toggleVideoWatched('${v.id}')" title="ทำเครื่องหมายว่าดูแล้ว">
+                  ${isWatched ? '✓ ดูแล้ว' : '◯ ยังไม่ดู'}
+                </button>
+                <button class="video-action-btn" onclick="toggleVideoFav('${v.id}')" title="รายการโปรด" style="${isFav ? 'color: #f59e0b; border-color: #f59e0b;' : ''}">
+                  ${isFav ? '⭐' : '☆'}
+                </button>
+              </div>
+
+              <button class="video-action-btn video-play-btn-primary" onclick="openTheaterModal(${idx})">
+                ▶ เล่นวิดีโอ
+              </button>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join('');
+  }
+
+  function updateProgressStats() {
+    const total = currentActiveVideos.length || 46;
+    const watchedSet = getWatchedSet();
+    const count = watchedSet.size;
+    const pct = Math.round((count / total) * 100);
+
+    const totalEl = document.getElementById('stat-total-videos');
+    const countEl = document.getElementById('stat-watched-count');
+    const pctEl = document.getElementById('stat-progress-pct');
+    const fillEl = document.getElementById('stat-progress-fill');
+
+    if (totalEl) totalEl.textContent = total;
+    if (countEl) countEl.textContent = count;
+    if (pctEl) pctEl.textContent = `${pct}%`;
+    if (fillEl) fillEl.style.width = `${pct}%`;
+  }
+
+  function toggleVideoWatched(id) {
+    const watchedSet = getWatchedSet();
+    if (watchedSet.has(id)) {
+      watchedSet.delete(id);
+    } else {
+      watchedSet.add(id);
+    }
+    saveWatchedSet(watchedSet);
+    applyFilters();
+  }
+
+  function toggleVideoFav(id) {
+    const favSet = getFavSet();
+    if (favSet.has(id)) {
+      favSet.delete(id);
+    } else {
+      favSet.add(id);
+    }
+    saveFavSet(favSet);
+    applyFilters();
+  }
+
+  // ─── Theater Modal Controller ───
+  function openTheaterModal(filteredIndex) {
+    if (filteredIndex < 0 || filteredIndex >= currentFilteredList.length) return;
+    currentPlayingIndex = filteredIndex;
+    const v = currentFilteredList[filteredIndex];
+    if (!v) return;
+
+    const modal = document.getElementById('theater-modal');
+    const titleEl = document.getElementById('theater-title-text');
+    const playerBox = document.getElementById('theater-player-box');
+    const extLink = document.getElementById('theater-external-link');
+    const metaEl = document.getElementById('theater-video-meta');
+
+    if (titleEl) titleEl.textContent = `${v.chapter} • ${v.title}`;
+    if (extLink) extLink.href = v.url;
+    if (metaEl) metaEl.textContent = `${v.majorGroup} • รูปแบบ: ${v.dosageForm}`;
+
+    // Update Embed Iframe Player
+    if (v.type === 'youtube' && v.videoId) {
+      playerBox.innerHTML = `
+        <iframe 
+          src="https://www.youtube-nocookie.com/embed/${v.videoId}?autoplay=1&rel=0&modestbranding=1" 
+          title="${v.title}" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+          allowfullscreen>
+        </iframe>
+      `;
+    } else if (v.driveId) {
+      playerBox.innerHTML = `
+        <iframe 
+          src="https://drive.google.com/file/d/${v.driveId}/preview" 
+          title="${v.title}" 
+          allow="autoplay; fullscreen">
+        </iframe>
+      `;
+    } else {
+      playerBox.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#fff; padding:2rem; text-align:center;">
+          <p>เปิดดูวิดีโอผ่านลิงก์ต้นทางภายนอก:</p>
+          <a href="${v.url}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="margin-top:1rem;">↗️ เปิดดูคลิปวิดีโอ</a>
+        </div>
+      `;
+    }
+
+    updateTheaterControls(v);
+
+    if (modal) {
+      modal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function updateTheaterControls(v) {
+    const watchedSet = getWatchedSet();
+    const favSet = getFavSet();
+    const isWatched = watchedSet.has(v.id);
+    const isFav = favSet.has(v.id);
+
+    const watchedBtn = document.getElementById('theater-watched-toggle');
+    const favBtn = document.getElementById('theater-fav-toggle');
+    const prevBtn = document.getElementById('btn-prev-video');
+    const nextBtn = document.getElementById('btn-next-video');
+
+    if (watchedBtn) {
+      watchedBtn.textContent = isWatched ? '✓ ดูแล้ว (Watched)' : '◯ ทำเครื่องหมายว่าดูแล้ว';
+      watchedBtn.classList.toggle('active', isWatched);
+    }
+    if (favBtn) {
+      favBtn.textContent = isFav ? '⭐ รายการโปรด' : '☆ เพิ่มเป็นรายการโปรด';
+      favBtn.style.color = isFav ? '#f59e0b' : '';
+    }
+
+    if (prevBtn) prevBtn.disabled = (currentPlayingIndex <= 0);
+    if (nextBtn) nextBtn.disabled = (currentPlayingIndex >= currentFilteredList.length - 1);
+  }
+
+  function toggleCurrentVideoWatched() {
+    if (currentPlayingIndex < 0 || currentPlayingIndex >= currentFilteredList.length) return;
+    const v = currentFilteredList[currentPlayingIndex];
+    toggleVideoWatched(v.id);
+    updateTheaterControls(v);
+  }
+
+  function toggleCurrentVideoFav() {
+    if (currentPlayingIndex < 0 || currentPlayingIndex >= currentFilteredList.length) return;
+    const v = currentPlayingIndex >= 0 ? currentFilteredList[currentPlayingIndex] : null;
+    if (v) {
+      toggleVideoFav(v.id);
+      updateTheaterControls(v);
+    }
+  }
+
+  function navigateVideo(direction) {
+    const newIdx = currentPlayingIndex + direction;
+    if (newIdx >= 0 && newIdx < currentFilteredList.length) {
+      openTheaterModal(newIdx);
+    }
+  }
+
+  function closeTheaterModal() {
+    const modal = document.getElementById('theater-modal');
+    const playerBox = document.getElementById('theater-player-box');
+    if (playerBox) playerBox.innerHTML = ''; // Stop video playback
+    if (modal) modal.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  function handleTheaterOverlayClick(e) {
+    if (e.target.id === 'theater-modal') {
+      closeTheaterModal();
+    }
+  }
+</script>
+</body>
+</html>
