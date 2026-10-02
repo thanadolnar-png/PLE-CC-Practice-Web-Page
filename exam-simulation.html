@@ -224,9 +224,15 @@
     }
     .proportion-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.85rem;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
       margin-bottom: 0.85rem;
+    }
+    @media (max-width: 860px) and (min-width: 581px) {
+      .proportion-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.65rem !important;
+      }
     }
     .custom-picker-grid {
       display: grid;
@@ -693,6 +699,13 @@
                   <input type="number" id="num-sap" class="proportion-num-input" min="0" max="50" value="2" oninput="updateProportionSumText()">
                   <span class="proportion-hint">ฐาน</span>
                 </div>
+
+                <div class="proportion-row disabled-row" id="proportion-row-rest" style="margin-bottom: 0;">
+                  <input type="checkbox" id="chk-rest" onchange="toggleProportionCategory('rest')">
+                  <span class="proportion-label rest" title="สถานีพัก (Rest Station)">พัก (Rest)</span>
+                  <input type="number" id="rest-stations-count" class="proportion-num-input" min="0" max="10" value="0" disabled oninput="onRestStationsInput()">
+                  <span class="proportion-hint">ฐาน</span>
+                </div>
               </div>
 
               <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; text-align: center; padding: 0.6rem; background: var(--surface); border-radius: var(--radius-sm); border: 1px solid var(--border);" id="proportion-sum-text">
@@ -761,7 +774,7 @@
                 </select>
               </div>
 
-              <div class="exam-set-controls-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.5rem;">
+              <div class="exam-set-controls-grid" style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 0.85rem; margin-bottom: 0.5rem;">
                 <div class="form-group">
                   <label class="form-label" style="font-size: 0.85rem; margin-bottom: 0.35rem; display: block;">
                     🔢 ลำดับสถานี
@@ -776,6 +789,12 @@
                     📊 จำนวนข้อสอบ
                   </label>
                   <input type="number" id="exam-set-station-count" class="select-filter" style="width: 100%; border: 1px solid var(--border); padding: 0.55rem; font-size: 0.88rem;" min="1" max="60" value="14">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="exam-set-rest-count" style="font-size: 0.85rem; margin-bottom: 0.35rem; display: block;">
+                    ☕ สถานีพัก
+                  </label>
+                  <input type="number" id="exam-set-rest-count" class="select-filter" style="width: 100%; border: 1px solid var(--border); padding: 0.55rem; font-size: 0.88rem;" min="0" max="5" value="0" oninput="syncRestCount(this.value)">
                 </div>
               </div>
               <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; margin-bottom: 0;" id="exam-set-info-text">
@@ -827,12 +846,6 @@
                   </div>
                 </div>
               </div>
-            </div>
-
-            <!-- Rest Stations count -->
-            <div id="rest-stations-container" class="form-group" style="margin-top: 1rem;">
-              <label class="form-label" for="rest-stations-count">จำนวนสถานีพัก (Rest Stations)</label>
-              <input type="number" id="rest-stations-count" class="select-filter" style="width: 100%; border: 1px solid var(--border); padding: 0.5rem;" min="0" max="5" value="0">
             </div>
           </div>
 
@@ -1589,7 +1602,6 @@
       const propBox = document.getElementById('config-proportion-container');
       const setBox = document.getElementById('config-set-container');
       const customBox = document.getElementById('config-custom-container');
-      const restContainer = document.getElementById('rest-stations-container');
 
       [propCard, setCard, customCard].forEach(card => {
         if (card) {
@@ -1610,7 +1622,6 @@
         if (propBox) propBox.style.display = 'block';
         if (setBox) setBox.style.display = 'none';
         if (customBox) customBox.style.display = 'none';
-        if (restContainer) restContainer.style.display = 'block';
       } else if (mode === 'set') {
         if (setCard) {
           setCard.style.borderColor = 'var(--primary)';
@@ -1621,7 +1632,6 @@
         if (propBox) propBox.style.display = 'none';
         if (setBox) setBox.style.display = 'block';
         if (customBox) customBox.style.display = 'none';
-        if (restContainer) restContainer.style.display = 'block';
         populateExamSetDropdown();
       } else if (mode === 'custom') {
         if (customCard) {
@@ -2238,16 +2248,64 @@
     // ─── Proportion helpers ───────────────────
     function toggleProportionCategory(cat) {
       const chk = document.getElementById(`chk-${cat}`);
-      const numInput = document.getElementById(`num-${cat}`);
+      const numInput = cat === 'rest' 
+        ? document.getElementById('rest-stations-count') 
+        : document.getElementById(`num-${cat}`);
       const row = document.getElementById(`proportion-row-${cat}`);
       
+      if (!chk || !numInput || !row) return;
+
       if (chk.checked) {
         numInput.disabled = false;
+        if (cat === 'rest' && (parseInt(numInput.value) || 0) === 0) {
+          numInput.value = 2;
+        }
         row.classList.remove('disabled-row');
       } else {
         numInput.disabled = true;
         numInput.value = 0;
         row.classList.add('disabled-row');
+      }
+
+      if (cat === 'rest') {
+        const setRest = document.getElementById('exam-set-rest-count');
+        if (setRest) setRest.value = numInput.value;
+      }
+      updateProportionSumText();
+    }
+
+    function onRestStationsInput() {
+      const input = document.getElementById('rest-stations-count');
+      const chk = document.getElementById('chk-rest');
+      const row = document.getElementById('proportion-row-rest');
+      const val = parseInt(input?.value) || 0;
+      if (chk) chk.checked = val > 0;
+      if (row) {
+        if (val > 0) {
+          row.classList.remove('disabled-row');
+          if (input) input.disabled = false;
+        } else {
+          row.classList.add('disabled-row');
+        }
+      }
+      const setRest = document.getElementById('exam-set-rest-count');
+      if (setRest) setRest.value = val;
+      updateProportionSumText();
+    }
+
+    function syncRestCount(val) {
+      const input = document.getElementById('rest-stations-count');
+      const chk = document.getElementById('chk-rest');
+      const row = document.getElementById('proportion-row-rest');
+      const num = parseInt(val) || 0;
+      if (input) {
+        input.value = num;
+        input.disabled = (num === 0);
+      }
+      if (chk) chk.checked = (num > 0);
+      if (row) {
+        if (num > 0) row.classList.remove('disabled-row');
+        else row.classList.add('disabled-row');
       }
       updateProportionSumText();
     }
@@ -2261,9 +2319,19 @@
 
     function updateProportionSumText() {
       const { clinic, product, sap } = getProportionValues();
-      const total = clinic + product + sap;
-      document.getElementById('proportion-sum-text').innerHTML =
-        `รวม: Clinic ${clinic} + Product ${product} + SAP ${sap} = <strong>${total} สถานี</strong>`;
+      const rest = parseInt(document.getElementById('rest-stations-count')?.value) || 0;
+      const examTotal = clinic + product + sap;
+      const grandTotal = examTotal + rest;
+      let text = `รวม: Clinic ${clinic} + Product ${product} + SAP ${sap}`;
+      if (rest > 0) {
+        text += ` + พัก ${rest}`;
+      }
+      text += ` = <strong>${grandTotal} สถานี</strong>`;
+      if (rest > 0) {
+        text += ` <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal;">(สอบ ${examTotal} + พัก ${rest})</span>`;
+      }
+      const elem = document.getElementById('proportion-sum-text');
+      if (elem) elem.innerHTML = text;
     }
 
     // ─── Lobby role toggle ─────
