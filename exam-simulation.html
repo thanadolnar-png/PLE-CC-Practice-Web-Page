@@ -642,6 +642,86 @@
           </div>
 
           <!-- ═══════════════════════════════════════════
+               LOBBY MULTIPLAYER SETUP CONTAINER (TOP PRIORITY)
+               ═══════════════════════════════════════════ -->
+          <div id="setup-lobby-container" style="display: none; margin-bottom: 1.5rem;">
+            <div style="padding: 0.75rem 1rem; background: var(--primary-light); border-radius: var(--radius-md); margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--primary); line-height: 1.45;">
+              <strong>📡 โหมดออนไลน์ (Multiplayer):</strong> รองรับผู้เข้าร่วมไม่จำกัดจำนวนคน เพื่อนๆ สามารถเข้าร่วมห้องเดียวกัน ซ้อมพร้อมกัน หรือช่วยกันประเมิน และสรุปผลคะแนนร่วมกันแบบ Real-time
+            </div>
+
+            <form id="lobby-setup-form" onsubmit="event.preventDefault(); submitLobbySetup();">
+              <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label class="form-label" for="lobby-player-name" style="font-weight: 600;">ชื่อผู้ใช้งาน (Display Name)</label>
+                <input type="text" id="lobby-player-name" class="select-filter" style="width: 100%; border: 1px solid var(--border); padding: 0.55rem; font-size: 0.95rem; border-radius: var(--radius-sm);" placeholder="ระบุชื่อของคุณ..." required>
+              </div>
+
+              <!-- Role selection is chosen dynamically inside the Lobby for all modes -->
+              <input type="hidden" id="lobby-role-select" value="examinee">
+
+              <!-- Mode Choice: Create vs Join -->
+              <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label class="form-label" style="font-weight: 600;">เลือกรูปแบบการเชื่อมต่อ</label>
+                <div style="display: flex; gap: 1.25rem; margin-top: 0.5rem;">
+                  <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.95rem;">
+                    <input type="radio" name="lobby-op" value="create" checked onchange="toggleLobbyOp(this.value)">
+                    <span>สร้างห้องซ้อมสอบใหม่ (Host)</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.95rem;">
+                    <input type="radio" name="lobby-op" value="join" onchange="toggleLobbyOp(this.value)">
+                    <span>เข้าร่วมห้องที่มีอยู่</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Join fields (Shown only when 'join' is selected) -->
+              <div id="lobby-join-fields" style="display: none; margin-top: 1rem; padding: 1.25rem; background: var(--surface); border: 2px dashed var(--primary); border-radius: var(--radius-md);">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                  <label class="form-label" style="text-align: center; display: block; margin-bottom: 0.75rem; font-weight: 600; font-size: 1rem;">🔑 กรอกรหัสห้องสอบ 4 หลัก</label>
+                  <div style="display: flex; gap: 0.75rem; justify-content: center; margin-bottom: 0.5rem;">
+                    <input type="text" class="otp-box" id="otp-0" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" class="otp-box" id="otp-1" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" class="otp-box" id="otp-2" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" class="otp-box" id="otp-3" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                  </div>
+                  <!-- Hidden input that holds the combined value -->
+                  <input type="hidden" id="lobby-room-id-input">
+                </div>
+                <button type="button" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 1rem;" id="lobby-join-btn" onclick="submitLobbySetup()">
+                  📡 เข้าร่วมห้องสอบ
+                </button>
+              </div>
+
+              <!-- Multiplayer Exam Mode Selector (For Host) -->
+              <div id="lobby-mode-selector-group" class="form-group" style="margin-top: 1rem; padding: 0.85rem; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md);">
+                <label class="form-label" style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.5rem; display: block; color: var(--text-primary);">🎯 รูปแบบห้องสอบออนไลน์</label>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                  <label style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.86rem; cursor: pointer; background: var(--surface); padding: 0.5rem 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                    <input type="radio" name="lobby-exam-mode" value="standard" checked style="margin-top: 0.15rem;">
+                    <div>
+                      <strong style="color: var(--text-primary);">1. ซ้อมคู่มาตรฐาน (Standard Room)</strong>
+                      <div style="font-size: 0.76rem; color: var(--text-muted);">สอบคู่กันหรือช่วยกันประเมินข้อสอบตามปกติ</div>
+                    </div>
+                  </label>
+                  <label style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.86rem; cursor: pointer; background: var(--surface); padding: 0.5rem 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                    <input type="radio" name="lobby-exam-mode" value="cohort_breakout" style="margin-top: 0.15rem;">
+                    <div>
+                      <strong style="color: var(--text-primary);">2. กลุ่มใหญ่: ห้องย่อยสอบพร้อมกันทั้งห้อง (Cohort Breakouts)</strong>
+                      <div style="font-size: 0.76rem; color: var(--text-muted);">Super Host คุมจอใหญ่และสั่งเปลี่ยนข้อพร้อมกัน ทุกคู่ได้โจทย์เดียวกัน</div>
+                    </div>
+                  </label>
+                  <label style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.86rem; cursor: pointer; background: var(--surface); padding: 0.5rem 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                    <input type="radio" name="lobby-exam-mode" value="carousel_rotation" style="margin-top: 0.15rem;">
+                    <div>
+                      <strong style="color: var(--text-primary);">3. กลุ่มใหญ่: แลปกิ๊งหมุนเวียนสถานี (OSPE Carousel Rotation)</strong>
+                      <div style="font-size: 0.76rem; color: var(--text-muted);">Examiner ประจำฐาน Participant วนฐานตามเข็มนาฬิกา</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- ═══════════════════════════════════════════
                SHARED EXAM CONFIGURATION (SOLO & LOBBY HOST)
                ═══════════════════════════════════════════ -->
           <div id="shared-exam-config" style="display: block; margin-bottom: 1.5rem;">
@@ -861,85 +941,12 @@
           </div>
 
           <!-- ═══════════════════════════════════════════
-               LOBBY MULTIPLAYER SETUP CONTAINER
+               LOBBY HOST ACTION BUTTON
                ═══════════════════════════════════════════ -->
-          <div id="setup-lobby-container" style="display: none;">
-            <div style="padding: 0.75rem 1rem; background: var(--primary-light); border-radius: var(--radius-md); margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--primary); line-height: 1.45;">
-              <strong>📡 โหมดออนไลน์ (Multiplayer):</strong> รองรับผู้เข้าร่วมไม่จำกัดจำนวนคน เพื่อนๆ สามารถเข้าร่วมห้องเดียวกัน ซ้อมพร้อมกัน หรือช่วยกันประเมิน และสรุปผลคะแนนร่วมกันแบบ Real-time
-            </div>
-
-            <form id="lobby-setup-form" onsubmit="event.preventDefault(); submitLobbySetup();">
-              
-              <div class="form-group">
-                <label class="form-label" for="lobby-player-name">ชื่อผู้ใช้งาน (Display Name)</label>
-                <input type="text" id="lobby-player-name" class="select-filter" style="width: 100%; border: 1px solid var(--border); padding: 0.5rem;" placeholder="ระบุชื่อของคุณ..." required>
-              </div>
-
-              <!-- Role selection is chosen dynamically inside the Lobby for all modes -->
-              <input type="hidden" id="lobby-role-select" value="examinee">
-
-              <!-- Mode Choice: Create vs Join -->
-              <div class="form-group" style="margin-top: 1.5rem;">
-                <label class="form-label">เลือกรูปแบบการเชื่อมต่อ</label>
-                <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
-                  <label style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
-                    <input type="radio" name="lobby-op" value="create" checked onchange="toggleLobbyOp(this.value)">
-                    <span>สร้างห้องซ้อมสอบใหม่ (Host)</span>
-                  </label>
-                  <label style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
-                    <input type="radio" name="lobby-op" value="join" onchange="toggleLobbyOp(this.value)">
-                    <span>เข้าร่วมห้องที่มีอยู่</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Multiplayer Exam Mode Selector (For Host) -->
-              <div id="lobby-mode-selector-group" class="form-group" style="margin-top: 1rem; padding: 0.85rem; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md);">
-                <label class="form-label" style="font-size: 0.85rem; font-weight: 700; margin-bottom: 0.5rem; display: block; color: var(--text-primary);">🎯 รูปแบบห้องสอบออนไลน์</label>
-                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                  <label style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.86rem; cursor: pointer; background: var(--surface); padding: 0.5rem 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
-                    <input type="radio" name="lobby-exam-mode" value="standard" checked style="margin-top: 0.15rem;">
-                    <div>
-                      <strong style="color: var(--text-primary);">1. ซ้อมคู่มาตรฐาน (Standard Room)</strong>
-                      <div style="font-size: 0.76rem; color: var(--text-muted);">สอบคู่กันหรือช่วยกันประเมินข้อสอบตามปกติ</div>
-                    </div>
-                  </label>
-                  <label style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.86rem; cursor: pointer; background: var(--surface); padding: 0.5rem 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
-                    <input type="radio" name="lobby-exam-mode" value="cohort_breakout" style="margin-top: 0.15rem;">
-                    <div>
-                      <strong style="color: var(--text-primary);">2. กลุ่มใหญ่: ห้องย่อยสอบพร้อมกันทั้งห้อง (Cohort Breakouts)</strong>
-                      <div style="font-size: 0.76rem; color: var(--text-muted);">Super Host คุมจอใหญ่และสั่งเปลี่ยนข้อพร้อมกัน ทุกคู่ได้โจทย์เดียวกัน</div>
-                    </div>
-                  </label>
-                  <label style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.86rem; cursor: pointer; background: var(--surface); padding: 0.5rem 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
-                    <input type="radio" name="lobby-exam-mode" value="carousel_rotation" style="margin-top: 0.15rem;">
-                    <div>
-                      <strong style="color: var(--text-primary);">3. กลุ่มใหญ่: แลปกิ๊งหมุนเวียนสถานี (OSPE Carousel Rotation)</strong>
-                      <div style="font-size: 0.76rem; color: var(--text-muted);">Examiner ประจำฐาน Participant วนฐานตามเข็มนาฬิกา</div>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Join fields -->
-              <div id="lobby-join-fields" style="display: none; margin-top: 1rem; border-top: 1px dashed var(--border); padding-top: 1rem;">
-                <div class="form-group">
-                  <label class="form-label" style="text-align:center; display:block; margin-bottom:0.75rem;">กรอกรหัสห้องสอบ 4 หลัก</label>
-                  <div style="display: flex; gap: 0.75rem; justify-content: center; margin-bottom: 0.5rem;">
-                    <input type="text" class="otp-box" id="otp-0" maxlength="1" inputmode="numeric" pattern="[0-9]">
-                    <input type="text" class="otp-box" id="otp-1" maxlength="1" inputmode="numeric" pattern="[0-9]">
-                    <input type="text" class="otp-box" id="otp-2" maxlength="1" inputmode="numeric" pattern="[0-9]">
-                    <input type="text" class="otp-box" id="otp-3" maxlength="1" inputmode="numeric" pattern="[0-9]">
-                  </div>
-                  <!-- Hidden input that holds the combined value -->
-                  <input type="hidden" id="lobby-room-id-input">
-                </div>
-              </div>
-
-              <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;" id="lobby-submit-btn">
-                📡 สร้างห้องซ้อมสอบใหม่ (Host)
-              </button>
-            </form>
+          <div id="setup-lobby-host-actions" style="display: none; margin-top: 1rem;">
+            <button type="button" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 1rem;" id="lobby-submit-btn" onclick="submitLobbySetup();">
+              📡 สร้างห้องซ้อมสอบใหม่ (Host)
+            </button>
           </div>
         </div>
       </section>
@@ -2188,12 +2195,14 @@
       const soloCon = document.getElementById('setup-solo-container');
       const lobbyCon = document.getElementById('setup-lobby-container');
       const sharedConfig = document.getElementById('shared-exam-config');
+      const hostActions = document.getElementById('setup-lobby-host-actions');
       
       if (mode === 'solo') {
         soloBtn.className = 'btn btn-primary';
         lobbyBtn.className = 'btn btn-secondary';
         soloCon.style.display = 'block';
         lobbyCon.style.display = 'none';
+        if (hostActions) hostActions.style.display = 'none';
         sharedConfig.style.display = 'block';
         SimState.isLobby = false;
       } else {
@@ -2201,7 +2210,9 @@
         lobbyBtn.className = 'btn btn-primary';
         soloCon.style.display = 'none';
         lobbyCon.style.display = 'block';
-        sharedConfig.style.display = SimState.lobbyOp === 'create' ? 'block' : 'none';
+        const isCreate = (SimState.lobbyOp === 'create');
+        sharedConfig.style.display = isCreate ? 'block' : 'none';
+        if (hostActions) hostActions.style.display = isCreate ? 'block' : 'none';
         SimState.isLobby = true;
       }
     }
@@ -2364,24 +2375,23 @@
     // Toggle Lobby operations: Create Room vs Join Room
     function toggleLobbyOp(op) {
       SimState.lobbyOp = op;
-      const createFields = document.getElementById('lobby-create-fields');
       const joinFields = document.getElementById('lobby-join-fields');
       const submitBtn = document.getElementById('lobby-submit-btn');
       const sharedConfig = document.getElementById('shared-exam-config');
       const modeSelector = document.getElementById('lobby-mode-selector-group');
+      const hostActions = document.getElementById('setup-lobby-host-actions');
       
       if (op === 'create') {
-        if (createFields) createFields.style.display = 'block';
         if (joinFields) joinFields.style.display = 'none';
         if (sharedConfig && SimState.isLobby) sharedConfig.style.display = 'block';
+        if (hostActions && SimState.isLobby) hostActions.style.display = 'block';
         if (modeSelector) modeSelector.style.display = 'block';
         if (submitBtn) submitBtn.textContent = '📡 สร้างห้องซ้อมสอบใหม่ (Host)';
       } else {
-        if (createFields) createFields.style.display = 'none';
         if (joinFields) joinFields.style.display = 'block';
         if (sharedConfig && SimState.isLobby) sharedConfig.style.display = 'none';
+        if (hostActions && SimState.isLobby) hostActions.style.display = 'none';
         if (modeSelector) modeSelector.style.display = 'none';
-        if (submitBtn) submitBtn.textContent = '📡 เข้าร่วมห้องสอบ';
         // Focus first OTP box
         setTimeout(() => { const el = document.getElementById('otp-0'); if (el) el.focus(); }, 100);
       }
@@ -2448,6 +2458,38 @@
       initOtpBoxes();
       initExamFilterControls();
       populateExamSetDropdown();
+
+      // Restore saved display name
+      try {
+        const savedName = localStorage.getItem('ple_player_name');
+        if (savedName) {
+          const nameInput = document.getElementById('lobby-player-name');
+          if (nameInput && !nameInput.value) nameInput.value = savedName;
+        }
+      } catch (e) {}
+
+      // Handle direct URL params for room joining (?room=1234 or ?join=1234)
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomParam = urlParams.get('room') || urlParams.get('join') || (window.location.hash.startsWith('#room-') ? window.location.hash.replace('#room-', '') : null);
+        if (roomParam) {
+          toggleSetupView('lobby');
+          const joinRadio = document.querySelector('input[name="lobby-op"][value="join"]');
+          if (joinRadio) {
+            joinRadio.checked = true;
+            toggleLobbyOp('join');
+          }
+          const cleanRoom = roomParam.trim().slice(0, 4);
+          for (let i = 0; i < cleanRoom.length; i++) {
+            const el = document.getElementById('otp-' + i);
+            if (el) { el.value = cleanRoom[i]; el.classList.add('filled'); }
+          }
+          const hiddenRoomInput = document.getElementById('lobby-room-id-input');
+          if (hiddenRoomInput) hiddenRoomInput.value = cleanRoom;
+        } else if (window.location.hash === '#lobby') {
+          toggleSetupView('lobby');
+        }
+      } catch (e) {}
     });
 
     function getRestCaseData() {
@@ -2465,6 +2507,9 @@
     async function submitLobbySetup() {
       const playerName = document.getElementById('lobby-player-name').value.trim();
       if (!playerName) { alert('กรุณากรอกชื่อผู้ใช้งาน'); return; }
+      try {
+        localStorage.setItem('ple_player_name', playerName);
+      } catch (e) {}
       
       showGlobalLoader(true);
       SimState.lobbyPlayerName = playerName;
