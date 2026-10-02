@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU</title>
-  <link rel="stylesheet" href="style.css?v=20261002_232000">
-  <script src="case-data-offline.js?v=v_20261002_231835"></script>
-  <script src="case-details-offline.js?v=v_20261002_231835"></script>
-  <script src="app.js?v=v_20261002_231835"></script>
-  <script src="scratchpad.js?v=v_20261002_232000"></script>
+  <link rel="stylesheet" href="style.css?v=20261002_233000">
+  <script src="case-data-offline.js?v=v_20261002_233000"></script>
+  <script src="case-details-offline.js?v=v_20261002_233000"></script>
+  <script src="app.js?v=v_20261002_233000"></script>
+  <script src="scratchpad.js?v=v_20261002_233000"></script>
   <style>
     /* Simulation Source and Topic Selector */
     .sim-filter-section {
@@ -1044,10 +1044,22 @@
                   </button>
                   <div style="flex: 1; min-width: 0;">
                     <div style="font-weight: 700; color: var(--text-primary); font-size: 0.92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="lobby-my-name-display">ผู้เข้าสอบ</div>
-                    <div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.2rem;">
-                      <span id="lobby-my-role-badge" class="badge" style="font-size: 0.72rem; padding: 0.15rem 0.5rem; background: var(--primary-light); color: var(--primary); font-weight:600; border-radius:4px;">คุณ</span>
-                      <button type="button" class="sim-btn-xs" style="padding: 0.15rem 0.45rem; font-size: 0.7rem; border-radius:4px;" onclick="openLobbyRoleSelectModal()">สลับบทบาท</button>
+                    <div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.25rem;">
+                      <span id="lobby-my-role-badge" class="badge" style="font-size: 0.75rem; padding: 0.2rem 0.55rem; font-weight: 600; border-radius: 6px; border: 1px solid transparent;">-</span>
                     </div>
+                  </div>
+                </div>
+
+                <!-- Standard Mode Integrated Role Selector -->
+                <div id="standard-mode-role-selector" style="display: none; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed var(--border);">
+                  <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.35rem; font-weight: 600;">เลือกบทบาทของคุณในรอบนี้:</div>
+                  <div class="lobby-seg-control" style="padding: 3px;">
+                    <button type="button" id="btn-set-role-examiner" class="lobby-seg-btn active" style="padding: 0.35rem 0.6rem; font-size: 0.78rem;" onclick="switchMyLobbyRole('examiner')">
+                      👨‍🏫 ผู้ประเมิน
+                    </button>
+                    <button type="button" id="btn-set-role-examinee" class="lobby-seg-btn" style="padding: 0.35rem 0.6rem; font-size: 0.78rem;" onclick="switchMyLobbyRole('examinee')">
+                      ✍️ ผู้เข้าสอบ
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1130,18 +1142,6 @@
               <div id="lobby-examiners-list" style="display: none;"></div>
               <div id="lobby-examinees-list" style="display: none;"></div>
               <span id="lobby-player-count" style="display: none;">0</span>
-            </div>
-          </div>
-
-          <!-- Standard Mode Role Selector Bar -->
-          <div id="standard-mode-role-selector" style="display: none; margin: 1.25rem auto 0; max-width: 400px; text-align: center;">
-            <div class="lobby-seg-control" style="padding: 4px;">
-              <button type="button" id="btn-set-role-examiner" class="lobby-seg-btn active" style="padding: 0.55rem 1rem; font-size: 0.86rem;" onclick="switchMyLobbyRole('examiner')">
-                ผู้ประเมิน (Examiner)
-              </button>
-              <button type="button" id="btn-set-role-examinee" class="lobby-seg-btn" style="padding: 0.55rem 1rem; font-size: 0.86rem;" onclick="switchMyLobbyRole('examinee')">
-                ผู้เข้าสอบ (Candidate)
-              </button>
             </div>
           </div>
 
@@ -2414,62 +2414,54 @@
 
       if (SimState.examMode === 'standard' || !SimState.examMode) {
         if (currentRole === 'examiner') {
-          roleBadge.textContent = isHost ? '👨‍🏫 ผู้ประเมิน (Host)' : '👨‍🏫 ผู้ประเมิน';
-          roleBadge.style.background = 'rgba(59, 130, 246, 0.15)';
-          roleBadge.style.color = '#2563eb';
+          roleBadge.textContent = isHost ? '👑 Host · 👨‍🏫 ผู้ประเมิน' : '👨‍🏫 ผู้ประเมิน';
+          roleBadge.style.background = '#e0f2fe';
+          roleBadge.style.color = '#0369a1';
+          roleBadge.style.borderColor = '#bae6fd';
         } else {
-          roleBadge.textContent = isHost ? '✍️ ผู้เข้าสอบ (Host)' : '✍️ ผู้เข้าสอบ';
-          roleBadge.style.background = 'rgba(16, 185, 129, 0.15)';
-          roleBadge.style.color = '#16a34a';
+          roleBadge.textContent = isHost ? '👑 Host · ✍️ ผู้เข้าสอบ' : '✍️ ผู้เข้าสอบ';
+          roleBadge.style.background = '#dcfce7';
+          roleBadge.style.color = '#15803d';
+          roleBadge.style.borderColor = '#bbf7d0';
         }
       } else {
         if (isHost && SimState.isSuperHost) {
           roleBadge.textContent = '👑 Super Host';
-          roleBadge.style.background = 'rgba(99, 102, 241, 0.18)';
-          roleBadge.style.color = 'var(--primary)';
+          roleBadge.style.background = '#fef3c7';
+          roleBadge.style.color = '#b45309';
+          roleBadge.style.borderColor = '#fde68a';
         } else if (currentRole === 'examiner') {
-          roleBadge.textContent = '👨‍🏫 ผู้ประเมิน';
-          roleBadge.style.background = 'rgba(59, 130, 246, 0.15)';
-          roleBadge.style.color = '#2563eb';
+          roleBadge.textContent = isHost ? '👑 Host · 👨‍🏫 ผู้ประเมิน' : '👨‍🏫 ผู้ประเมิน';
+          roleBadge.style.background = '#e0f2fe';
+          roleBadge.style.color = '#0369a1';
+          roleBadge.style.borderColor = '#bae6fd';
         } else {
-          roleBadge.textContent = '✍️ ผู้เข้าสอบ';
-          roleBadge.style.background = 'rgba(16, 185, 129, 0.15)';
-          roleBadge.style.color = '#16a34a';
+          roleBadge.textContent = isHost ? '👑 Host · ✍️ ผู้เข้าสอบ' : '✍️ ผู้เข้าสอบ';
+          roleBadge.style.background = '#dcfce7';
+          roleBadge.style.color = '#15803d';
+          roleBadge.style.borderColor = '#bbf7d0';
         }
       }
     }
     window.updateMyRoleBadgeUI = updateMyRoleBadgeUI;
 
     function updateStandardRoleSelectorUI() {
+      const isStandard = SimState.examMode === 'standard' || !SimState.examMode;
+      const roleSelectorEl = document.getElementById('standard-mode-role-selector');
+      if (roleSelectorEl) {
+        roleSelectorEl.style.display = isStandard ? 'block' : 'none';
+      }
       const btnExaminer = document.getElementById('btn-set-role-examiner');
       const btnExaminee = document.getElementById('btn-set-role-examinee');
-      const currentRole = SimState.role;
+      const currentRole = SimState.role || 'examiner';
 
       if (btnExaminer && btnExaminee) {
         if (currentRole === 'examiner') {
-          btnExaminer.className = 'btn btn-sm btn-primary';
-          btnExaminer.style.background = 'var(--primary)';
-          btnExaminer.style.color = '#ffffff';
-          btnExaminer.style.borderColor = 'var(--primary)';
-          btnExaminer.style.boxShadow = '0 2px 8px rgba(99, 102, 241, 0.28)';
-
-          btnExaminee.className = 'btn btn-sm btn-outline';
-          btnExaminee.style.background = 'var(--surface)';
-          btnExaminee.style.color = 'var(--text-secondary)';
-          btnExaminee.style.borderColor = 'var(--border)';
-          btnExaminee.style.boxShadow = 'none';
+          btnExaminer.classList.add('active');
+          btnExaminee.classList.remove('active');
         } else {
-          btnExaminee.className = 'btn btn-sm btn-primary';
-          btnExaminee.style.background = '#16a34a';
-          btnExaminee.style.color = '#ffffff';
-          btnExaminee.style.borderColor = '#16a34a';
-          btnExaminee.style.boxShadow = '0 2px 8px rgba(22, 163, 74, 0.28)';
-
-          btnExaminer.className = 'btn btn-sm btn-outline';
-          btnExaminer.style.background = 'var(--surface)';
-          btnExaminer.style.color = 'var(--text-secondary)';
-          btnExaminer.style.borderColor = 'var(--border)';
-          btnExaminer.style.boxShadow = 'none';
+          btnExaminee.classList.add('active');
+          btnExaminer.classList.remove('active');
         }
       }
       updateMyRoleBadgeUI(currentRole);
@@ -3452,7 +3444,9 @@
                   }
                 }
 
-                const roleBadgeText = p.role === 'examiner' ? 'Examiner' : 'Candidate';
+                const isHost = Boolean(p.isHost);
+                const hostTag = isHost ? '<span style="font-size: 0.65rem; background: #fef3c7; color: #b45309; font-weight: 700; padding: 0.08rem 0.35rem; border-radius: 4px; border: 1px solid #fde68a;">👑 Host</span>' : '';
+                const roleBadgeText = p.role === 'examiner' ? '👨‍🏫 ผู้ประเมิน' : '✍️ ผู้เข้าสอบ';
                 const roleBadgeColor = p.role === 'examiner' ? '#0369a1' : '#15803d';
                 const roleBadgeBg = p.role === 'examiner' ? '#e0f2fe' : '#dcfce7';
 
@@ -3467,11 +3461,13 @@
                   <div style="display: flex; align-items: center; gap: 0.5rem; min-width: 0;">
                     <span style="font-size: 1.15rem; line-height: 1;">${escapeHtml(pEmoji)}</span>
                     <div style="min-width: 0;">
-                      <div style="font-weight: 700; color: var(--text-primary); font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                        ${escapeHtml(p.name)} ${isMe ? '<span style="font-size: 0.72rem; color: var(--primary); font-weight: 700;">(คุณ)</span>' : ''}
+                      <div style="font-weight: 700; color: var(--text-primary); font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; gap: 0.35rem;">
+                        <span>${escapeHtml(p.name)}</span>
+                        ${isMe ? '<span style="font-size: 0.72rem; color: var(--primary); font-weight: 700;">(คุณ)</span>' : ''}
+                        ${hostTag}
                       </div>
-                      <div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.05rem; flex-wrap: wrap;">
-                        <span style="font-size: 0.68rem; background: ${roleBadgeBg}; color: ${roleBadgeColor}; font-weight: 700; padding: 0.05rem 0.35rem; border-radius: 4px;">${roleBadgeText}</span>
+                      <div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.15rem; flex-wrap: wrap;">
+                        <span style="font-size: 0.68rem; background: ${roleBadgeBg}; color: ${roleBadgeColor}; font-weight: 700; padding: 0.08rem 0.4rem; border-radius: 4px;">${roleBadgeText}</span>
                         ${stationInfoHtml}
                       </div>
                     </div>
@@ -3584,8 +3580,8 @@
                   startBtn.style.borderColor = '';
                 }
               }
-              if (waitingTitle) waitingTitle.textContent = 'บทบาท: ผู้ประเมิน (Examiner)';
-              if (waitingDesc) waitingDesc.textContent = 'ควบคุมการประเมิน ให้คะแนน และสั่งเปลี่ยนสถานี';
+              if (waitingTitle) waitingTitle.textContent = 'ห้องซ้อมสอบออนไลน์ (1:1 Exam Room)';
+              if (waitingDesc) waitingDesc.textContent = 'คุณทำหน้าที่เป็นผู้ประเมิน ให้คะแนน และควบคุมสถานีสอบ';
               if (waitingMsg) waitingMsg.textContent = hasExaminee ? `ผู้เข้าสอบ: ${escapeHtml(examineePlayer.name)}` : 'รหัสห้อง 4 หลักด้านบนสำหรับให้เพื่อนเข้าร่วม';
             } else {
               // Examinee (Participant) CANNOT start exam!
@@ -3612,7 +3608,7 @@
                 }
               }
 
-              if (waitingTitle) waitingTitle.textContent = 'บทบาท: ผู้เข้าสอบ (Candidate)';
+              if (waitingTitle) waitingTitle.textContent = 'ห้องซ้อมสอบออนไลน์ (1:1 Exam Room)';
               if (waitingDesc) waitingDesc.textContent = 'โจทย์สถานการณ์และข้อมูลผู้ป่วยจะแสดงเมื่อเริ่มการสอบ';
               if (examinerPlayer) {
                 waitingMsg.textContent = `รอผู้ประเมิน (${escapeHtml(examinerPlayer.name)}) กดเริ่มการสอบ`;
