@@ -5232,3 +5232,164 @@ body.is-printing #batch-print-execution-area {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ─── VDO Link / YouTube Rich Media & Print System ─── */
+.youtube-embed-card {
+  margin: 1.25rem 0;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg, 12px);
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.youtube-embed-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.12);
+}
+.youtube-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 1rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  gap: 0.5rem;
+}
+.youtube-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-title);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.youtube-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: #ff0000;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+.youtube-ext-btn {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-decoration: none;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.youtube-ext-btn:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.youtube-player-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 ratio */
+  height: 0;
+  background: #0f172a;
+}
+.youtube-player-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* YouTube Print Card */
+.youtube-print-card {
+  display: none; /* hidden on web screen by default */
+  margin: 1rem 0;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.youtube-print-box {
+  border: 1.5px solid #334155;
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: #f8fafc;
+}
+.youtube-print-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+  font-size: 0.88rem;
+}
+.youtube-print-url {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.82rem;
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+.youtube-print-body {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.youtube-print-thumb-wrap {
+  flex: 0 0 210px;
+}
+.youtube-print-thumb {
+  width: 210px;
+  height: auto;
+  border-radius: 6px;
+  border: 1px solid #94a3b8;
+  display: block;
+}
+.youtube-print-qr-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.youtube-print-qr {
+  width: 85px;
+  height: 85px;
+  border: 1px solid #cbd5e1;
+  padding: 3px;
+  background: #ffffff;
+  border-radius: 4px;
+}
+.youtube-print-scan-hint {
+  font-size: 0.72rem;
+  color: #475569;
+  font-weight: 700;
+  text-align: center;
+}
+
+@media print {
+  .youtube-embed-card {
+    display: none !important;
+  }
+  .youtube-print-card {
+    display: block !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}
+
+/* In Single Case Print Preview Paper on screen */
+.print-preview-paper .youtube-embed-card {
+  display: none !important;
+}
+.print-preview-paper .youtube-print-card {
+  display: block !important;
+}
+

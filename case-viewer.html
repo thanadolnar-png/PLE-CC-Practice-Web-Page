@@ -704,8 +704,9 @@
         document.getElementById('case-equipment-content').style.display = 'none';
       }
       
-      // Render Note/Examiner
-      document.getElementById('note-content-area').innerHTML = stripSectionHeaders(c.noteHtml || '<p>ไม่มีหมายเหตุเพิ่มเติม</p>');
+      // Render Note/Examiner (with YouTube rich media & print handler)
+      const cleanNote = stripSectionHeaders(c.noteHtml || c.note || '<p>ไม่มีหมายเหตุ / เฉลยเพิ่มเติม</p>');
+      document.getElementById('note-content-area').innerHTML = (typeof renderRichNoteContent === 'function') ? renderRichNoteContent(cleanNote) : cleanNote;
       
       // Setup IFrame Document URL
       const iframe = document.getElementById('doc-embed-iframe');
@@ -726,9 +727,6 @@
       
       // Render Checklist
       renderChecklist(c);
-      
-      // Render Note
-      document.getElementById('note-content-area').innerHTML = c.noteHtml || c.note || '<p>ไม่มีหมายเหตุ / เฉลยเพิ่ม</p>';
       
       // แสดงเนื้อหาแอปหลัก
       document.getElementById('case-viewer-app').style.display = 'block';
@@ -1197,7 +1195,8 @@
           </div>`;
         }
 
-        const noteHtml = c.noteHtml || document.getElementById('note-content-area')?.innerHTML || '';
+        const rawNote = c.noteHtml || document.getElementById('note-content-area')?.innerHTML || '';
+        const noteHtml = (typeof renderRichNoteContent === 'function') ? renderRichNoteContent(rawNote) : rawNote;
         if (noteHtml && noteHtml.trim() !== '') {
           html += `<div style="margin-top:1rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem;">
             <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #f59e0b; padding-left:0.5rem;">🔑 เฉลย / ข้อมูลผู้ตรวจ (Examiner Notes)</h4>
@@ -1276,7 +1275,8 @@
           </div>`;
         }
 
-        const noteHtml = c.noteHtml || document.getElementById('note-content-area')?.innerHTML || '';
+        const rawNote = c.noteHtml || document.getElementById('note-content-area')?.innerHTML || '';
+        const noteHtml = (typeof renderRichNoteContent === 'function') ? renderRichNoteContent(rawNote) : rawNote;
         if (noteHtml && noteHtml.trim() !== '') {
           html += `<div style="margin-top:1.25rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem;">
             <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #f59e0b; padding-left:0.5rem; page-break-after:avoid;">🔑 เฉลย / ข้อมูลผู้ตรวจ (Examiner Notes)</h3>

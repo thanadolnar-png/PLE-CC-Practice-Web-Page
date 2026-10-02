@@ -4846,7 +4846,8 @@
         noticeCard.style.display = 'none';
         chkContainer.style.display = 'block';
         noteContainer.style.display = 'block';
-        document.getElementById('exam-note-content-area').innerHTML = c.noteHtml || c.note || '<p>ไม่มีเฉลย/รายละเอียดเพิ่มเติม</p>';
+        const rawNoteSolo = c.noteHtml || c.note || '<p>ไม่มีเฉลย/รายละเอียดเพิ่มเติม</p>';
+        document.getElementById('exam-note-content-area').innerHTML = (typeof renderRichNoteContent === 'function') ? renderRichNoteContent(rawNoteSolo) : rawNoteSolo;
         document.getElementById('exam-note-content-area').classList.remove('show');
         document.getElementById('exam-toggle-note-btn').textContent = '🔑 แสดงเฉลย / ข้อมูลผู้ตรวจ / บทบาทผู้ป่วยจำลอง';
         renderExamChecklist(st.stationNumber, c);
@@ -4865,7 +4866,8 @@
         noticeCard.style.display = 'none';
         chkContainer.style.display = 'block';
         noteContainer.style.display = 'block';
-        document.getElementById('exam-note-content-area').innerHTML = c.noteHtml || c.note || '<p>ไม่มีเฉลย/รายละเอียดเพิ่มเติม</p>';
+        const rawNoteEx = c.noteHtml || c.note || '<p>ไม่มีเฉลย/รายละเอียดเพิ่มเติม</p>';
+        document.getElementById('exam-note-content-area').innerHTML = (typeof renderRichNoteContent === 'function') ? renderRichNoteContent(rawNoteEx) : rawNoteEx;
         document.getElementById('exam-note-content-area').classList.add('show');
         document.getElementById('exam-toggle-note-btn').textContent = '🔒 ซ่อนบทบาทคนไข้จำลอง / เฉลย';
         renderExamChecklist(st.stationNumber, c);

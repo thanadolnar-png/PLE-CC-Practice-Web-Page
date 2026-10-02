@@ -134,6 +134,83 @@ function addLogoutButton() {
 }
 
 // ──────────────────────────────────────────────────────────────
+// 0.5 VDO LINK & YOUTUBE RICH MEDIA HANDLER (Screen + Print)
+// ──────────────────────────────────────────────────────────────
+function extractYouTubeVideoId(url) {
+  if (!url) return null;
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
+  return m ? m[1] : null;
+}
+
+function renderRichNoteContent(rawHtml) {
+  if (!rawHtml) return '';
+  
+  // Regex to detect VDO Link pattern: VDO Link: / vdo link: / Video Link: / VDO: / Video: / วิดีโอ Link: / คลิป:
+  const vdoPattern = /(?:<p[^>]*>)?\s*(?:(?:<strong[^>]*>|<b[^>]*>|<span[^>]*>)?\s*(?:vdo|video|วิดีโอ|คลิป)\s*(?:link)?(?::|(?:\s*:\s*)|(?:<\/strong>|<\/b>|<\/span>)\s*:\s*|:\s*(?:<\/strong>|<\/b>|<\/span>))\s*)(?:<a[^>]*href=["']([^"']+)["'][^>]*>.*?<\/a>|(https?:\/\/[^\s<"'>]+))(?:\s*<\/p>)?/gi;
+
+  return rawHtml.replace(vdoPattern, (match, url1, url2) => {
+    const rawUrl = url1 || url2;
+    const vid = extractYouTubeVideoId(rawUrl);
+    if (!vid) {
+      const safeUrl = (typeof escapeHtml === 'function') ? escapeHtml(rawUrl) : rawUrl;
+      return `<p class="vdo-link-plain"><strong>📹 วิดีโออ้างอิง:</strong> <a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a></p>`;
+    }
+
+    const cleanUrl = `https://youtu.be/${vid}`;
+    const embedUrl = `https://www.youtube-nocookie.com/embed/${vid}`;
+    const thumbUrl = `https://img.youtube.com/vi/${vid}/hqdefault.jpg`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&margin=2&data=${encodeURIComponent(cleanUrl)}`;
+
+    return `
+      <!-- YouTube Interactive Embed (Visible on screen, hidden on print) -->
+      <div class="youtube-embed-card no-print">
+        <div class="youtube-card-header">
+          <div class="youtube-card-title">
+            <span class="youtube-icon-badge">▶</span>
+            <span>วิดีโอสาธิตเทคนิค / เฉลยสถานี</span>
+          </div>
+          <a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="youtube-ext-btn" title="เปิดดูใน YouTube (แท็บใหม่)">
+            เปิดใน YouTube ↗
+          </a>
+        </div>
+        <div class="youtube-player-wrapper">
+          <iframe 
+            src="${embedUrl}" 
+            title="วิดีโอสาธิตเทคนิค / เฉลยสถานี" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+            allowfullscreen 
+            loading="lazy">
+          </iframe>
+        </div>
+      </div>
+
+      <!-- YouTube Print Card (Hidden on screen, visible on print & paper preview) -->
+      <div class="youtube-print-card print-only">
+        <div class="youtube-print-box">
+          <div class="youtube-print-header">
+            <strong>📹 วิดีโอสาธิตและเฉลยเทคนิค (YouTube Reference):</strong>
+            <span class="youtube-print-url">${cleanUrl}</span>
+          </div>
+          <div class="youtube-print-body">
+            <div class="youtube-print-thumb-wrap">
+              <img src="${thumbUrl}" class="youtube-print-thumb" alt="Video Thumbnail" crossorigin="anonymous">
+            </div>
+            <div class="youtube-print-qr-wrap">
+              <img src="${qrUrl}" class="youtube-print-qr" alt="QR Code">
+              <span class="youtube-print-scan-hint">📲 สแกน QR Code ด้วยมือถือเพื่อเปิดคลิป</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+window.extractYouTubeVideoId = extractYouTubeVideoId;
+window.renderRichNoteContent = renderRichNoteContent;
+
+// ──────────────────────────────────────────────────────────────
 // 1. Initializer & Event Listeners
 // ──────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -2007,9 +2084,10 @@ function executeBatchPrint() {
         }
 
         if (c.noteHtml && c.noteHtml.trim() !== '') {
+          const formattedNote = typeof renderRichNoteContent === 'function' ? renderRichNoteContent(c.noteHtml) : c.noteHtml;
           html += `<div style="margin-top:1.25rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem;">
             <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #f59e0b; padding-left:0.5rem; page-break-after:avoid;">🔑 เฉลย / ข้อมูลผู้ตรวจ (Examiner Notes)</h3>
-            <div style="font-size:0.9rem; line-height:1.5;">${c.noteHtml}</div>
+            <div style="font-size:0.9rem; line-height:1.5;">${formattedNote}</div>
           </div>`;
         }
 
