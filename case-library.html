@@ -32,7 +32,6 @@
       <div class="topbar-right">
         <a href="video-library.html" class="icon-btn" title="🎬 คลิปเทคนิคเตรียมยา (Product)">🎬</a>
         <a href="exam-simulation.html" class="icon-btn" title="ซ้อมสอบ 16 สถานี">🎯</a>
-        <button class="icon-btn" id="toggleViewModeBtn" onclick="toggleAppViewMode()" title="สลับโหมด Desktop / Phone">📱</button>
         <button class="icon-btn" onclick="toggleFullscreen()" title="เต็มจอ">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
         </button>
@@ -66,38 +65,38 @@
           <!-- Select filters (Ladder Filter System) -->
           <div class="filter-selects">
             <!-- Category Filter -->
-            <label class="filter-group-label">หมวดวิชา</label>
+            <label class="filter-group-label">Category</label>
             <select id="filter-category" class="select-filter" aria-label="Filter by category">
-              <option value="All">ทุกหมวด (All Category)</option>
-              <option value="Clinic">Clinic (คลินิก)</option>
-              <option value="Product">Product (ผลิต)</option>
-              <option value="SAP">SAP (สังคมศาสตร์)</option>
+              <option value="All">All Category</option>
+              <option value="Clinic">Clinic</option>
+              <option value="Product">Product</option>
+              <option value="SAP">SAP</option>
             </select>
             
             <!-- OSPE Main Group Filter -->
-            <label class="filter-group-label">กลุ่มวิชาหลัก</label>
+            <label class="filter-group-label">Main Group</label>
             <select id="filter-course-group" class="select-filter" aria-label="Filter by OSPE Main Group">
-              <option value="All">ทุกกลุ่มวิชาหลัก</option>
+              <option value="All">All Main Groups</option>
               <!-- Filled dynamically by JS based on Category -->
             </select>
 
             <!-- Disease / Topic Filter -->
-            <label class="filter-group-label">โรค / หัวข้อ</label>
+            <label class="filter-group-label">Disease and Topic</label>
             <select id="filter-disease" class="select-filter" aria-label="Filter by Disease or Topic">
-              <option value="All">ทุกโรค / หัวข้อ</option>
+              <option value="All">All Topics</option>
               <!-- Filled dynamically by JS based on Main Group -->
             </select>
 
             <!-- Source / Exam Set Filter -->
-            <label class="filter-group-label">แหล่งที่มา</label>
+            <label class="filter-group-label">Source</label>
             <select id="filter-source" class="select-filter" aria-label="Filter by Source or Exam Set">
-              <option value="All">ทุกแหล่งที่มา</option>
+              <option value="All">All Sources</option>
               <!-- Filled dynamically by JS -->
             </select>
             
             <!-- Compact View Toggles & Reset Bar -->
             <div class="filter-toolbar-row">
-              <div class="view-toggles" role="group" aria-label="View Mode">
+              <div class="view-toggles" role="group" aria-label="รูปแบบมุมมอง">
                 <button id="btn-view-grid" class="view-toggle-btn active" title="แบบตาราง (Grid View)" aria-label="Grid View">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                 </button>
@@ -105,8 +104,8 @@
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
                 </button>
               </div>
-              <button id="btn-reset-filters" type="button" class="btn-compact-reset" onclick="resetAllFilters()" title="ล้างตัวกรองทั้งหมด">
-                🔄 ล้างค่า
+              <button id="btn-reset-filters" type="button" class="btn-compact-reset" onclick="resetAllFilters()" title="ล้างตัวกรอง">
+                🔄 ล้าง
               </button>
             </div>
             
@@ -255,12 +254,6 @@
   <script src="app.js?v=v_20261003_021957"></script>
 
   <script>
-    // ─ View Mode & Fullscreen helpers ─
-    function toggleAppViewMode() {
-      document.body.classList.toggle('mode-phone');
-      const btn = document.getElementById('toggleViewModeBtn');
-      if (btn) btn.textContent = document.body.classList.contains('mode-phone') ? '🖥️' : '📱';
-    }
     function toggleFullscreen() {
       if (!document.fullscreenElement) {
         if (document.documentElement.requestFullscreen) {

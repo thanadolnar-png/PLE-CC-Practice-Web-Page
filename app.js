@@ -2064,13 +2064,13 @@ function executeBatchPrint() {
 
       if (mode === 'full' || mode === 'question') {
         html += `<div style="margin-bottom:1.25rem;">
-          <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #3b82f6; padding-left:0.5rem;">📌 สถานการณ์ (Scenario)</h3>
+          <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #3b82f6; padding-left:0.5rem;">📌 สถานการณ์</h3>
           <div style="font-size:0.95rem; line-height:1.5;">${c.scenario || '<p>ไม่มีข้อมูลสถานการณ์</p>'}</div>
         </div>`;
 
         if (c.patientInfoHtml) {
           html += `<div style="margin-bottom:1.25rem;">
-            <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #06b6d4; padding-left:0.5rem;">👤 ข้อมูลผู้ป่วย (Patient Info)</h3>
+            <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #06b6d4; padding-left:0.5rem;">👤 ข้อมูลผู้ป่วย</h3>
             <div style="font-size:0.95rem; line-height:1.5;">${c.patientInfoHtml}</div>
           </div>`;
         }
@@ -2121,7 +2121,7 @@ function executeBatchPrint() {
           chkTable += `</tbody></table>`;
 
           html += `<div>
-            <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #10b981; padding-left:0.5rem; page-break-after:avoid;">📋 รายการทักษะประเมิน (Checklist)</h3>
+            <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #10b981; padding-left:0.5rem; page-break-after:avoid;">📋 รายการทักษะประเมิน</h3>
             ${chkTable}
           </div>`;
         }
@@ -2129,7 +2129,7 @@ function executeBatchPrint() {
         if (c.noteHtml && c.noteHtml.trim() !== '') {
           const formattedNote = typeof renderRichNoteContent === 'function' ? renderRichNoteContent(c.noteHtml) : c.noteHtml;
           html += `<div style="margin-top:1.25rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem;">
-            <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #f59e0b; padding-left:0.5rem; page-break-after:avoid;">🔑 เฉลย / ข้อมูลผู้ตรวจ (Examiner Notes)</h3>
+            <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #f59e0b; padding-left:0.5rem; page-break-after:avoid;">🔑 เฉลย / ข้อมูลผู้ตรวจ</h3>
             <div style="font-size:0.9rem; line-height:1.5;">${formattedNote}</div>
           </div>`;
         }

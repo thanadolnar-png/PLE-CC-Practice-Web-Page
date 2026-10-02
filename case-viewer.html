@@ -122,7 +122,6 @@
     <div class="topbar-right">
       <a href="video-library.html" class="icon-btn" title="🎬 คลิปเทคนิคเตรียมยา (Product)">🎬</a>
       <a href="#" class="icon-btn" onclick="goToReportCase(event)" title="แจ้งปัญหาเคสนี้" id="report-case-direct-link" style="color: #dc2626; border-color: #fca5a5; background: #fef2f2;">🚨</a>
-      <button class="icon-btn" id="toggleViewModeBtn" onclick="toggleAppViewMode()" title="สลับโหมด Desktop / Phone">📱</button>
       <button class="icon-btn" onclick="toggleFullscreen()" title="เต็มจอ">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
       </button>
@@ -168,16 +167,10 @@
 
       <!-- Role / Practice Mode Selector (no-print) -->
       <div id="mode-selector" class="role-selector-container no-print">
-        <button class="role-btn active" id="role-btn-solo" onclick="setViewerRole('solo')">👤 ฝึกคนเดียว (Solo)</button>
-        <button class="role-btn" id="role-btn-examinee" onclick="setViewerRole('examinee')">✍️ เป็นคนสอบ (Examinee)</button>
-        <button class="role-btn" id="role-btn-examiner" onclick="setViewerRole('examiner')">🔎 เป็นคนตรวจ/คนไข้ (Examiner)</button>
+        <button class="role-btn active" id="role-btn-solo" onclick="setViewerRole('solo')">👤 ฝึกคนเดียว</button>
+        <button class="role-btn" id="role-btn-examinee" onclick="setViewerRole('examinee')">✍️ เป็นคนสอบ</button>
+        <button class="role-btn" id="role-btn-examiner" onclick="setViewerRole('examiner')">🔎 เป็นคนตรวจ</button>
       </div>
-
-
-
-
-
-
 
       <!-- Viewer Grid Split Layout -->
       <div class="viewer-grid">
@@ -194,17 +187,17 @@
           <!-- Tab Content 1: Case Detail HTML -->
           <div id="view-tab-content-area" class="view-tab-content active print-hide-checklist">
             
-            <h3 class="viewer-section-title" id="scenario-section-title">สถานการณ์ (Scenario)</h3>
+            <h3 class="viewer-section-title" id="scenario-section-title">สถานการณ์</h3>
             <div id="case-scenario-content">
               <!-- Filled dynamically by JS -->
             </div>
 
-            <h3 class="viewer-section-title" id="patient-section-title">ข้อมูลผู้ป่วย (Patient Info)</h3>
+            <h3 class="viewer-section-title" id="patient-section-title">ข้อมูลผู้ป่วย</h3>
             <div id="case-patient-content">
               <!-- Table or list filled dynamically by JS -->
             </div>
             
-            <h3 class="viewer-section-title" id="equipment-section-title" style="display: none;">สิ่งที่มีให้ในสถานี (Provided Items)</h3>
+            <h3 class="viewer-section-title" id="equipment-section-title" style="display: none;">สิ่งที่มีให้ในสถานี</h3>
             <div id="case-equipment-content" style="display: none;">
               <!-- Filled dynamically by JS -->
             </div>
@@ -270,7 +263,7 @@
           <div id="checklist-and-notes-section" class="no-print">
             <!-- Checklist Group -->
             <h3 class="viewer-section-title" style="margin-top: 0; border-left-color: var(--success);">
-              รายการทักษะประเมิน (Checklist)
+              รายการทักษะประเมิน
             </h3>
             
             <div class="checklist-container" id="checklist-items-container">
@@ -280,28 +273,30 @@
 
           <!-- Note / Answer Section (always visible when printing, toggleable on web screen) -->
           <div class="note-container print-page-break print-hide-question" id="case-note-section">
-            <button class="btn btn-secondary no-print" style="width: 100%;" id="toggle-note-btn" onclick="toggleNote()">
-              🔑 เปิดแสดงเฉลย / ข้อมูลผู้ตรวจ
-            </button>
             <div class="note-content" id="note-content-area">
               <!-- Note content filled dynamically by JS -->
             </div>
           </div>
 
-          <!-- Action buttons (no-print) -->
-          <div style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;" id="viewer-action-buttons" class="no-print">
-            <button id="btn-next-linked-station" class="btn btn-primary" style="display: none; width: 100%; font-size: 1rem; padding: 0.75rem; justify-content: center; background: linear-gradient(135deg, var(--primary), var(--secondary));">
+          <!-- Action buttons (2-Column Grid, no-print) -->
+          <div id="viewer-action-buttons" class="no-print" style="margin-top: 1rem;">
+            <button id="btn-next-linked-station" class="btn btn-primary" style="display: none; width: 100%; font-size: 0.95rem; padding: 0.65rem; margin-bottom: 0.5rem; justify-content: center; background: linear-gradient(135deg, var(--primary), var(--secondary));">
               ⏩ ไปยังสถานีต่อเนื่อง (ถัดไป)
             </button>
-            <button class="btn btn-primary" style="width: 100%; font-weight: 700; background: var(--primary); color: #fff;" onclick="toggleViewerScratchpad()">
-              📝 เปิดกระดาษทด (เขียน / พิมพ์)
-            </button>
-            <button class="btn btn-secondary" style="width: 100%;" onclick="openSingleCasePrintModal()">
-              🖨️ พิมพ์หน้านี้ / เซฟ PDF (ปรับแต่ง)
-            </button>
-            <button class="btn btn-danger" style="width: 100%;" onclick="resetChecklistProgress()">
-              🔄 รีเซ็ตการติ๊ก
-            </button>
+            <div class="viewer-actions-grid-2col">
+              <button class="btn btn-secondary" id="toggle-note-btn" onclick="toggleNote()">
+                📄 เปิดเฉลย
+              </button>
+              <button class="btn btn-primary" style="background: var(--primary); color: #fff;" onclick="toggleViewerScratchpad()">
+                📝 เปิดกระดาษ
+              </button>
+              <button class="btn btn-secondary" onclick="openSingleCasePrintModal()">
+                🖨️ พิมพ์
+              </button>
+              <button class="btn btn-danger" onclick="resetChecklistProgress()">
+                🔄 รีเซ็ต
+              </button>
+            </div>
           </div>
 
         </section>
@@ -329,13 +324,7 @@
   <script src="app.js?v=v_20261003_021957"></script>
   <script src="scratchpad.js?v=20261002_205600"></script>
 
-  <script>
-    // ─ View Mode & Fullscreen helpers ─
-    function toggleAppViewMode() {
-      document.body.classList.toggle('mode-phone');
-      const btn = document.getElementById('toggleViewModeBtn');
-      if (btn) btn.textContent = document.body.classList.contains('mode-phone') ? '🖥️' : '📱';
-    }
+    // ─ Fullscreen helper ─
     function toggleFullscreen() {
       if (!document.fullscreenElement) {
         if (document.documentElement.requestFullscreen) {
@@ -1009,7 +998,7 @@
         
         // ซ่อนเฉลยตามดีฟอลต์ของโซโล่
         noteArea.classList.remove('show');
-        if (toggleNoteBtn) toggleNoteBtn.textContent = '🔑 เปิดแสดงเฉลย / ข้อมูลผู้ตรวจ';
+        if (toggleNoteBtn) toggleNoteBtn.textContent = '📄 เปิดเฉลย';
       } 
       else if (role === 'examinee') {
         // ผู้เข้าสอบ: ซ่อนเฉลยและเกณฑ์ประเมินทั้งหมด เห็นเฉพาะโจทย์และปุ่มจับเวลา
@@ -1034,7 +1023,7 @@
         
         // ทางเลือกแสดงแผนการตรวจผู้ประเมิน
         noteArea.classList.add('show');
-        if (toggleNoteBtn) toggleNoteBtn.textContent = '🙈 ซ่อนเฉลย / ข้อมูลผู้ตรวจ';
+        if (toggleNoteBtn) toggleNoteBtn.textContent = '🔒 ซ่อนเฉลย';
         
         resetViewerTimer();
         // ไม่ต้องเริ่มจับเวลาโดยอัตโนมัติ ให้ผู้ประเมินกดเริ่มเอง
@@ -1187,10 +1176,10 @@
       const btn = document.getElementById('toggle-note-btn');
       if (area.classList.contains('show')) {
         area.classList.remove('show');
-        btn.textContent = '🔑 เปิดแสดงเฉลย / ข้อมูลผู้ตรวจ';
+        if (btn) btn.textContent = '📄 เปิดเฉลย';
       } else {
         area.classList.add('show');
-        btn.textContent = '🔒 ซ่อนเฉลย / ข้อมูลผู้ตรวจ';
+        if (btn) btn.textContent = '🔒 ซ่อนเฉลย';
       }
     }
 
@@ -1257,14 +1246,14 @@
 
       if (mode === 'full' || mode === 'question') {
         html += `<div style="margin-bottom:1rem;">
-          <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #3b82f6; padding-left:0.5rem;">📌 สถานการณ์ (Scenario)</h4>
+          <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #3b82f6; padding-left:0.5rem;">📌 สถานการณ์</h4>
           <div style="font-size:0.9rem; line-height:1.5;">${c.scenario || document.getElementById('case-scenario-content')?.innerHTML || ''}</div>
         </div>`;
 
         const patientHtml = c.patientInfoHtml || document.getElementById('case-patient-content')?.innerHTML || '';
         if (patientHtml) {
           html += `<div style="margin-bottom:1rem;">
-            <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #06b6d4; padding-left:0.5rem;">👤 ข้อมูลผู้ป่วย (Patient Info)</h4>
+            <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #06b6d4; padding-left:0.5rem;">👤 ข้อมูลผู้ป่วย</h4>
             <div style="font-size:0.9rem; line-height:1.5;">${patientHtml}</div>
           </div>`;
         }
@@ -1286,7 +1275,7 @@
         const printChkHtml = document.getElementById('print-checklist-list')?.innerHTML || '';
         if (printChkHtml) {
           html += `<div style="margin-top:1rem;">
-            <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #10b981; padding-left:0.5rem;">📋 รายการทักษะประเมิน (Checklist)</h4>
+            <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #10b981; padding-left:0.5rem;">📋 รายการทักษะประเมิน</h4>
             <div>${printChkHtml}</div>
           </div>`;
         }
@@ -1295,7 +1284,7 @@
         const noteHtml = (typeof renderRichNoteContent === 'function') ? renderRichNoteContent(rawNote) : rawNote;
         if (noteHtml && noteHtml.trim() !== '') {
           html += `<div style="margin-top:1rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem;">
-            <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #f59e0b; padding-left:0.5rem;">🔑 เฉลย / ข้อมูลผู้ตรวจ (Examiner Notes)</h4>
+            <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #f59e0b; padding-left:0.5rem;">🔑 เฉลย / ข้อมูลผู้ตรวจ</h4>
             <div style="font-size:0.88rem; line-height:1.5;">${noteHtml}</div>
           </div>`;
         }
@@ -1325,7 +1314,7 @@
       const c = AppState.currentCaseDetail || {};
       const cat = c.category || 'CLINIC';
       const rawTitle = c.title || document.getElementById('case-title-display')?.textContent || 'ข้อสอบ OSPE';
-      const displayTitle = hideTitle ? 'สถานีสอบ OSPE (OSPE Station)' : `${rawTitle} (${c.caseId || activeCaseId || ''})`;
+      const displayTitle = hideTitle ? 'สถานีสอบ OSPE' : `${rawTitle} (${c.caseId || activeCaseId || ''})`;
 
       let html = `<div class="batch-print-case">
         <div style="border-bottom: 2px solid #000; padding-bottom: 0.5rem; margin-bottom: 1rem;">
@@ -1337,14 +1326,14 @@
 
       if (mode === 'full' || mode === 'question') {
         html += `<div style="margin-bottom:1.25rem;">
-          <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #3b82f6; padding-left:0.5rem;">📌 สถานการณ์ (Scenario)</h3>
+          <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #3b82f6; padding-left:0.5rem;">📌 สถานการณ์</h3>
           <div style="font-size:0.95rem; line-height:1.5;">${c.scenario || document.getElementById('case-scenario-content')?.innerHTML || ''}</div>
         </div>`;
 
         const patientHtml = c.patientInfoHtml || document.getElementById('case-patient-content')?.innerHTML || '';
         if (patientHtml) {
           html += `<div style="margin-bottom:1.25rem;">
-            <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #06b6d4; padding-left:0.5rem;">👤 ข้อมูลผู้ป่วย (Patient Info)</h3>
+            <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #06b6d4; padding-left:0.5rem;">👤 ข้อมูลผู้ป่วย</h3>
             <div style="font-size:0.95rem; line-height:1.5;">${patientHtml}</div>
           </div>`;
         }
@@ -1366,7 +1355,7 @@
         const printChkHtml = document.getElementById('print-checklist-list')?.innerHTML || '';
         if (printChkHtml) {
           html += `<div>
-            <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #10b981; padding-left:0.5rem; page-break-after:avoid;">📋 รายการทักษะประเมิน (Checklist)</h3>
+            <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #10b981; padding-left:0.5rem; page-break-after:avoid;">📋 รายการทักษะประเมิน</h3>
             <div>${printChkHtml}</div>
           </div>`;
         }
@@ -1375,7 +1364,7 @@
         const noteHtml = (typeof renderRichNoteContent === 'function') ? renderRichNoteContent(rawNote) : rawNote;
         if (noteHtml && noteHtml.trim() !== '') {
           html += `<div style="margin-top:1.25rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem;">
-            <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #f59e0b; padding-left:0.5rem; page-break-after:avoid;">🔑 เฉลย / ข้อมูลผู้ตรวจ (Examiner Notes)</h3>
+            <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #f59e0b; padding-left:0.5rem; page-break-after:avoid;">🔑 เฉลย / ข้อมูลผู้ตรวจ</h3>
             <div style="font-size:0.9rem; line-height:1.5;">${noteHtml}</div>
           </div>`;
         }

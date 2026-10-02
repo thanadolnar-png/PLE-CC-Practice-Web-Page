@@ -95,15 +95,16 @@
 
 body {
   font-family: var(--font-body);
-  background-color: #EDEAE3;
+  background-color: var(--bg);
   color: var(--text-primary);
   line-height: 1.6;
   min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
-  padding: 16px 14px;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: flex-start;
   -webkit-font-smoothing: antialiased;
 }
@@ -120,30 +121,31 @@ a {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   APP SHELL — Fluid & Adaptive Wide Layout
+   APP SHELL — Modern Fluid Full-Bleed Layout
    ══════════════════════════════════════════════════════════════ */
 .app-shell {
   width: 100%;
-  max-width: 1480px;
+  max-width: 100%;
   background: var(--bg);
-  border-radius: 24px;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.08);
-  border: 1px solid var(--border);
-  min-height: calc(100vh - 32px);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
-  transition: max-width 0.25s ease;
 }
 
-/* Page-specific optimal max-widths */
-.shell-index { max-width: 1200px; }
-.shell-library { max-width: 1440px; }
-.shell-viewer { max-width: 1060px; }
-.shell-sim { max-width: 1600px; }
+.shell-index,
+.shell-library,
+.shell-viewer,
+.shell-sim {
+  max-width: 100%;
+}
 
-/* ── Fullscreen Mode: Expands 100% borderless ── */
+/* Fullscreen Mode */
 :fullscreen .app-shell,
 :-webkit-full-screen .app-shell,
 body.is-fullscreen .app-shell {
@@ -163,44 +165,19 @@ body.is-fullscreen {
   background: var(--bg) !important;
 }
 
-/* ── Phone Preview Mode (Toggled via 📱) ── */
-body.mode-phone {
-  background: #C4C0B4 !important;
-  padding: 14px 8px !important;
-}
-body.mode-phone .app-shell {
-  max-width: 430px !important;
-  border-radius: 36px !important;
-  min-height: 800px !important;
-  box-shadow: 0 0 0 8px #1E2320, 0 24px 50px rgba(0,0,0,0.3) !important;
-  border: 2px solid #333C37 !important;
-}
 .phone-notch {
-  display: none; width: 100px; height: 18px; background: #1E2320;
-  border-radius: 18px; margin: 8px auto 2px; z-index: 100; flex-shrink: 0;
+  display: none !important;
 }
-body.mode-phone .phone-notch { display: block; }
 
-/* ── Mobile Devices (Auto Full-Bleed) ── */
+/* Responsive container defaults */
 @media (max-width: 860px) {
   html, body {
     padding: 0 !important;
     margin: 0 !important;
     background: var(--bg) !important;
     overflow-x: hidden !important;
-    max-width: 100vw !important;
     width: 100% !important;
   }
-  .app-shell {
-    max-width: 100vw !important;
-    width: 100% !important;
-    border-radius: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
-    min-height: 100dvh !important;
-    overflow-x: hidden !important;
-  }
-  .phone-notch { display: none !important; }
 }
 
 .page-viewport {
@@ -2964,11 +2941,14 @@ ol.ordered-list li,
 
 .filter-console .search-input-wrapper {
   position: relative;
-  width: 100%;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
 }
 
 .filter-console .search-input {
-  width: 100%;
+  width: 100% !important;
+  box-sizing: border-box !important;
   padding: 0.42rem 0.75rem 0.42rem 2.2rem;
   font-size: 0.82rem;
   height: 34px;
@@ -2999,11 +2979,15 @@ ol.ordered-list li,
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
-  width: 100%;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
 }
 
 .filter-console .select-filter {
   width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
   margin: 0 !important;
   border-radius: var(--radius-md);
   padding: 0.4rem 1.6rem 0.4rem 0.65rem !important;
@@ -3018,6 +3002,7 @@ ol.ordered-list li,
   align-items: center;
   gap: 0.4rem;
   margin-top: 0.2rem;
+  width: 100%;
 }
 
 .filter-console .view-toggles {
@@ -3080,6 +3065,7 @@ ol.ordered-list li,
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.4rem;
+  width: 100%;
 }
 
 .btn-filter-action {
@@ -3096,6 +3082,22 @@ ol.ordered-list li,
   cursor: pointer;
   transition: all 0.18s ease;
   white-space: nowrap;
+}
+
+/* 2-Column Action Buttons Grid in Case Viewer */
+.viewer-actions-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.viewer-actions-grid-2col .btn {
+  width: 100% !important;
+  padding: 0.55rem 0.5rem !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  justify-content: center !important;
+  text-align: center !important;
 }
 
 .btn-print-action {

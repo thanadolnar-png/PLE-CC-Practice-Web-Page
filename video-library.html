@@ -667,7 +667,6 @@
       <a href="video-library.html" class="topbar-nav-tab active" id="nav-videos">🎬 คลิปเทคนิค (Product)</a>
     </div>
     <div class="topbar-right">
-      <button class="icon-btn" id="toggleViewModeBtn" onclick="toggleAppViewMode()" title="สลับโหมด Desktop / Phone">📱</button>
       <button class="icon-btn" onclick="toggleFullscreen()" title="เต็มจอ">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
       </button>
@@ -682,7 +681,7 @@
         <!-- Hero Banner -->
         <header class="video-hero-banner">
           <div class="video-hero-badge">
-            <span>🧪 หมวดวิชา: Product (เทคนิคเภสัชกรรมและการเตรียมยา)</span>
+            <span>🧪 Product (เทคนิคเภสัชกรรมและการเตรียมยา)</span>
           </div>
           <h1 class="video-hero-title">
             🎬 คลังคลิปวิดีโอเทคนิคการเตรียมยา (Compounding Video Hub)
@@ -692,24 +691,11 @@
             รวบรวมเทคนิคพื้นฐานในห้องปฏิบัติการและขั้นตอนการเตรียมเภสัชภัณฑ์รูปแบบต่างๆ สำหรับทบทวนก่อนสอบ PLE-CC2 (OSPE)
           </p>
 
-          <!-- Stats & Watched Tracker -->
+          <!-- Stats Bar -->
           <div class="video-stats-bar">
             <div class="video-stat-item">
               <span class="video-stat-num" id="stat-total-videos">46</span>
-              <span>คลิปวิดีโอทั้งหมด</span>
-            </div>
-            <div class="video-stat-item">
-              <span class="video-stat-num" id="stat-watched-count" style="color: #10b981;">0</span>
-              <span>ดูแล้ว</span>
-            </div>
-            <div class="video-progress-container">
-              <div class="video-progress-labels">
-                <span>ความก้าวหน้าการทบทวน</span>
-                <span id="stat-progress-pct">0%</span>
-              </div>
-              <div class="video-progress-track">
-                <div class="video-progress-fill" id="stat-progress-fill"></div>
-              </div>
+              <span>คลิปวิดีโอสาธิตทั้งหมด</span>
             </div>
           </div>
         </header>
@@ -733,30 +719,30 @@
           <div class="video-filter-group-row">
             <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); margin-right: 0.25rem;">หมวดหลัก:</span>
             <button class="video-group-btn active" data-group="all" onclick="setMajorGroup('all', this)">
-              <span>ทั้งหมด (46)</span>
+              <span>All (46)</span>
             </button>
             <button class="video-group-btn" data-group="fundamental" onclick="setMajorGroup('fundamental', this)">
-              <span>🧪 หมวด 1: เทคนิคพื้นฐานสำคัญ (19)</span>
+              <span>🧪 Fundamental Techniques (19)</span>
             </button>
             <button class="video-group-btn" data-group="courses" onclick="setMajorGroup('courses', this)">
-              <span>📦 หมวด 2: เภสัชภัณฑ์รูปแบบต่างๆ (27)</span>
+              <span>📦 Dosage Forms (27)</span>
             </button>
           </div>
 
-          <!-- Dosage Form Chips -->
+          <!-- Dosage Form Chips (English labels) -->
           <div class="video-chips-row">
             <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); align-self: center; margin-right: 0.2rem;">รูปแบบยา/ทักษะ:</span>
-            <button class="video-chip-btn active" data-form="all" onclick="setDosageForm('all', this)">ทั้งหมด</button>
-            <button class="video-chip-btn" data-form="การชั่งตวง & Aliquot" onclick="setDosageForm('การชั่งตวง & Aliquot', this)">⚖️ ชั่งตวง & Aliquot</button>
-            <button class="video-chip-btn" data-form="การบด ผสม & หลอม" onclick="setDosageForm('การบด ผสม & หลอม', this)">🥣 บด ผสม & หลอม</button>
-            <button class="video-chip-btn" data-form="การกรอง & พับกระดาษกรอง" onclick="setDosageForm('การกรอง & พับกระดาษกรอง', this)">📄 กรอง & พับกระทง</button>
-            <button class="video-chip-btn" data-form="ยาน้ำใส & สารละลาย" onclick="setDosageForm('ยาน้ำใส & สารละลาย', this)">💧 ยาน้ำใส & สารละลาย</button>
-            <button class="video-chip-btn" data-form="ยาน้ำแขวนตะกอน (Suspensions)" onclick="setDosageForm('ยาน้ำแขวนตะกอน (Suspensions)', this)">🧪 ยาน้ำแขวนตะกอน</button>
-            <button class="video-chip-btn" data-form="ยาอิมัลชัน (Emulsions)" onclick="setDosageForm('ยาอิมัลชัน (Emulsions)', this)">🥛 ยาอิมัลชัน</button>
-            <button class="video-chip-btn" data-form="ยาครีม ขี้ผึ้ง & เพสต์" onclick="setDosageForm('ยาครีม ขี้ผึ้ง & เพสต์', this)">🧴 ครีม ขี้ผึ้ง & เพสต์</button>
-            <button class="video-chip-btn" data-form="ยาเจล (Gels)" onclick="setDosageForm('ยาเจล (Gels)', this)">🧫 ยาเจล</button>
-            <button class="video-chip-btn" data-form="ยาแคปซูล & ผงยา" onclick="setDosageForm('ยาแคปซูล & ผงยา', this)">💊 แคปซูล & ผงยา</button>
-            <button class="video-chip-btn" data-form="ยาปราศจากเชื้อ (Sterile & Aseptic)" onclick="setDosageForm('ยาปราศจากเชื้อ (Sterile & Aseptic)', this)">💉 ยาปราศจากเชื้อ</button>
+            <button class="video-chip-btn active" data-form="all" onclick="setDosageForm('all', this)">All</button>
+            <button class="video-chip-btn" data-form="การชั่งตวง & Aliquot" onclick="setDosageForm('การชั่งตวง & Aliquot', this)">⚖️ Weighing & Aliquot</button>
+            <button class="video-chip-btn" data-form="การบด ผสม & หลอม" onclick="setDosageForm('การบด ผสม & หลอม', this)">🥣 Trituration & Fusion</button>
+            <button class="video-chip-btn" data-form="การกรอง & พับกระดาษกรอง" onclick="setDosageForm('การกรอง & พับกระดาษกรอง', this)">📄 Filtration & Folding</button>
+            <button class="video-chip-btn" data-form="ยาน้ำใส & สารละลาย" onclick="setDosageForm('ยาน้ำใส & สารละลาย', this)">💧 Liquid Solutions</button>
+            <button class="video-chip-btn" data-form="ยาน้ำแขวนตะกอน (Suspensions)" onclick="setDosageForm('ยาน้ำแขวนตะกอน (Suspensions)', this)">🧪 Suspensions</button>
+            <button class="video-chip-btn" data-form="ยาอิมัลชัน (Emulsions)" onclick="setDosageForm('ยาอิมัลชัน (Emulsions)', this)">🥛 Emulsions</button>
+            <button class="video-chip-btn" data-form="ยาครีม ขี้ผึ้ง & เพสต์" onclick="setDosageForm('ยาครีม ขี้ผึ้ง & เพสต์', this)">🧴 Semisolids (Cream/Oint)</button>
+            <button class="video-chip-btn" data-form="ยาเจล (Gels)" onclick="setDosageForm('ยาเจล (Gels)', this)">🧫 Gels</button>
+            <button class="video-chip-btn" data-form="ยาแคปซูล & ผงยา" onclick="setDosageForm('ยาแคปซูล & ผงยา', this)">💊 Capsules & Powders</button>
+            <button class="video-chip-btn" data-form="ยาปราศจากเชื้อ (Sterile & Aseptic)" onclick="setDosageForm('ยาปราศจากเชื้อ (Sterile & Aseptic)', this)">💉 Sterile & Aseptic</button>
           </div>
         </aside>
 

@@ -5,16 +5,112 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PLE-CC2 OSPE Practice Hub | RxCU</title>
   <meta name="description" content="ระบบฝึกซ้อมเตรียมตัวสอบทักษะวิชาชีพสภาเภสัชกรรม (OSPE) สำหรับนิสิตเภสัชฯ จุฬาฯ">
-  <link rel="stylesheet" href="style.css?v=20261002_235000">
+  <link rel="stylesheet" href="style.css?v=20261003_023500">
   
   <!-- SEO Meta tags -->
   <meta property="og:title" content="PLE-CC2 OSPE Practice Hub">
   <meta property="og:description" content="ระบบฝึกซ้อมเตรียมตัวสอบทักษะวิชาชีพสภาเภสัชกรรม (OSPE) สำหรับนิสิตเภสัชฯ จุฬาฯ">
   <meta property="og:type" content="website">
+  <style>
+    /* Cinematic Home Hero Styling */
+    .hero-cinematic {
+      background: radial-gradient(120% 100% at 50% 0%, #0c4a6e 0%, #075985 30%, #0369a1 70%, #0284c7 100%);
+      padding: 3.5rem 1.5rem 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .hero-cinematic::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: linear-gradient(to bottom, transparent, var(--bg));
+      pointer-events: none;
+    }
+    .cinematic-search-container {
+      width: 100%;
+      max-width: 680px;
+      margin: 1.5rem auto 1.75rem;
+      position: relative;
+      z-index: 2;
+    }
+    .cinematic-search-bar {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 9999px;
+      padding: 0.35rem 0.5rem 0.35rem 1.25rem;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .cinematic-search-bar:focus-within {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 44px rgba(0, 0, 0, 0.3), 0 0 0 3px rgba(56, 189, 248, 0.4);
+    }
+    .cinematic-search-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-family: var(--font-title);
+      font-size: 1rem;
+      color: #0f172a;
+      background: transparent;
+      padding: 0.4rem 0.5rem;
+    }
+    .cinematic-search-btn {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #ffffff;
+      border: none;
+      border-radius: 9999px;
+      padding: 0.65rem 1.35rem;
+      font-family: var(--font-title);
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+    .cinematic-search-btn:hover {
+      opacity: 0.92;
+      transform: scale(1.02);
+    }
+    .cinematic-quick-tags {
+      display: flex;
+      gap: 0.45rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 0.85rem;
+    }
+    .cinematic-tag-pill {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 9999px;
+      padding: 0.25rem 0.75rem;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      backdrop-filter: blur(4px);
+    }
+    .cinematic-tag-pill:hover {
+      background: rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+  </style>
 </head>
 <body>
 <div class="app-shell shell-index" id="appShell">
-  <div class="phone-notch"></div>
 
   <!-- API Connection Status Banner -->
   <div id="api-status-banner" class="api-banner">
@@ -37,7 +133,6 @@
       <a href="video-library.html" class="topbar-nav-tab" id="nav-videos">🎬 คลิปเทคนิค (Product)</a>
     </div>
     <div class="topbar-right">
-      <button class="icon-btn" id="toggleViewModeBtn" onclick="toggleAppViewMode()" title="สลับโหมด Desktop / Phone">📱</button>
       <button class="icon-btn" onclick="toggleFullscreen()" title="เต็มจอ">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
       </button>
@@ -47,59 +142,62 @@
   <!-- Page Viewport -->
   <div class="page-viewport">
 
-  <!-- Hero Section -->
-  <header class="hero" id="home-hero">
-    <div class="container">
+  <!-- Hero Section with Cinematic UI -->
+  <header class="hero hero-cinematic" id="home-hero">
+    <div class="container" style="max-width: 880px;">
+      
       <!-- Eyebrow indicating authority and cohort -->
       <div class="hero-eyebrow">
         <span>⚡</span>
         <span>โครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม • RxCU</span>
       </div>
+      
       <h1 class="hero-title">PLE-CC2 OSPE Practice Hub</h1>
       <p class="hero-subtitle">ระบบจำลองฝึกทักษะวิชาชีพการซักประวัติ จ่ายยา คำแนะนำยา และตั้งตำรับ (OSPE) สำหรับการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม</p>
       
-      <!-- Stats Dashboard -->
-      <div class="stats-grid is-loading" id="stats-dashboard">
-        <div class="stat-card clinic-stat" id="stat-card-clinic">
-          <span class="stat-num" id="stat-clinic">0</span>
-          <span class="stat-label">เคส Clinic (คลินิก)</span>
-        </div>
-        <div class="stat-card product-stat" id="stat-card-product">
-          <span class="stat-num" id="stat-product">0</span>
-          <span class="stat-label">เคส Product (ผลิต)</span>
-        </div>
-        <div class="stat-card sap-stat" id="stat-card-sap">
-          <span class="stat-num" id="stat-sap">0</span>
-          <span class="stat-label">เคส SAP (สังคมฯ)</span>
-        </div>
-        <div class="stat-card total-stat" id="stat-card-total">
-          <span class="stat-num" id="stat-total">0</span>
-          <span class="stat-label">เคสรวมในระบบทั้งหมด</span>
+      <!-- Cinematic Quick Search Console -->
+      <div class="cinematic-search-container">
+        <form class="cinematic-search-bar" onsubmit="handleHomeSearch(event)">
+          <svg width="18" height="18" fill="none" stroke="#64748b" stroke-width="2.5" viewBox="0 0 24 24" style="margin-right: 0.25rem;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input type="text" id="home-search-input" class="cinematic-search-input" placeholder="ค้นหาเคส, ยา, กลุ่มโรค หรือเทคนิคเตรียมยา..." autocomplete="off">
+          <button type="submit" class="cinematic-search-btn">
+            <span>ค้นหาเคส</span>
+          </button>
+        </form>
+
+        <!-- Quick Filter Jump Pills -->
+        <div class="cinematic-quick-tags">
+          <a href="case-library.html" class="cinematic-tag-pill">📚 ทั้งหมด</a>
+          <a href="case-library.html?cat=Clinic" class="cinematic-tag-pill">🏥 Clinic</a>
+          <a href="case-library.html?cat=Product" class="cinematic-tag-pill">🧪 Product</a>
+          <a href="case-library.html?cat=SAP" class="cinematic-tag-pill">⚖️ SAP</a>
+          <a href="case-library.html?cat=Mock" class="cinematic-tag-pill">💜 Mock (เล่มม่วง)</a>
+          <a href="video-library.html" class="cinematic-tag-pill">🎬 คลิปเทคนิค</a>
         </div>
       </div>
 
-      <div class="hero-cta">
-        <a href="exam-simulation.html" class="btn-interactive-hover btn-variant-primary" id="btn-start-sim">
-          <span class="btn-text-default">🎯 เริ่มต้นจำลองการสอบจริง</span>
-          <span class="btn-text-hover">
-            <span>กล้าไหม? กดเลย! 😤</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </span>
-          <span class="btn-bubble-dot"></span>
+      <!-- Stats Dashboard (Clean Labels: Clinic, Product, SAP, Total) -->
+      <div class="stats-grid is-loading" id="stats-dashboard" style="margin-top: 1.5rem; margin-bottom: 0.5rem;">
+        <a href="case-library.html?cat=Clinic" class="stat-card clinic-stat" id="stat-card-clinic" style="text-decoration:none;">
+          <span class="stat-num" id="stat-clinic">0</span>
+          <span class="stat-label">Clinic</span>
         </a>
-        <a href="case-library.html" class="btn-interactive-hover" id="btn-goto-library">
-          <span class="btn-text-default">📚 เปิดดูคลังเคสทั้งหมด</span>
-          <span class="btn-text-hover">
-            <span>ค่อย ๆ ดูนะจ้ะที่รัก 🥰</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </span>
-          <span class="btn-bubble-dot"></span>
+        <a href="case-library.html?cat=Product" class="stat-card product-stat" id="stat-card-product" style="text-decoration:none;">
+          <span class="stat-num" id="stat-product">0</span>
+          <span class="stat-label">Product</span>
         </a>
-        <a href="video-library.html" class="btn btn-secondary" style="border-color: #10b981; color: #10b981; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem;">
-          🎬 คลิปเทคนิคเตรียมยา (46 คลิป)
+        <a href="case-library.html?cat=SAP" class="stat-card sap-stat" id="stat-card-sap" style="text-decoration:none;">
+          <span class="stat-num" id="stat-sap">0</span>
+          <span class="stat-label">SAP</span>
         </a>
-        <button onclick="openBatchPrintModal()" class="btn btn-secondary" style="border-color: var(--primary); color: var(--primary);">🖨️ สั่งพิมพ์หลายเคส</button>
+        <a href="case-library.html" class="stat-card total-stat" id="stat-card-total" style="text-decoration:none;">
+          <span class="stat-num" id="stat-total">0</span>
+          <span class="stat-label">Total</span>
+        </a>
       </div>
+
     </div>
   </header>
 
@@ -109,67 +207,13 @@
     <p style="font-family: var(--font-title); font-weight: 500; color: var(--text-secondary);">กำลังดาวน์โหลดข้อมูลระบบ...</p>
   </div>
 
-  <!-- Category Selection Section -->
-  <main class="main-section" id="category-section">
-    <div class="container">
-      <h2 class="section-heading">
-        ฝึกฝนตามหมวดหมู่ทักษะหลัก
-      </h2>
-      <p class="section-lead">
-        เลือกหัวข้อการทำทบทวนบทเรียนตามหลักสูตรสภาเภสัชกรรม (PLE-CC2) เพื่อเจาะลึกเฉพาะหมวด
-      </p>
-
-      <div class="grid-cards">
-        <!-- Clinic Card -->
-        <article class="card card-clinic" id="card-category-clinic">
-          <div class="card-header-band">
-            <div class="card-icon">🏥</div>
-            <h3 class="card-title">หมวดคลินิก (Clinic)</h3>
-          </div>
-          <div class="card-body">
-            <p class="card-desc">ทบทวนการซักประวัติผู้ป่วย การวิเคราะห์และแก้ไขปัญหาจากการใช้ยา (DTP) การให้คำแนะนำการใช้ยากลุ่มเสี่ยง (Warfarin, Insulin, Inhalers) และการประเมินติดตามค่าทางแล็บ</p>
-            <a href="case-library.html?cat=Clinic" class="btn btn-secondary btn-clinic" id="btn-cat-clinic">ฝึกหมวดคลินิก</a>
-          </div>
-        </article>
-
-        <!-- Product Card -->
-        <article class="card card-product" id="card-category-product">
-          <div class="card-header-band">
-            <div class="card-icon">🧪</div>
-            <h3 class="card-title">หมวดผลิตภัณฑ์ (Product)</h3>
-          </div>
-          <div class="card-body">
-            <p class="card-desc">ฝึกฝนทักษะการคำนวณตำรับยาและขนาดยา การเตรียมยาเฉพาะราย (Compounding) เช่น ยาน้ำ ยาขี้ผึง ครีม หรือยาปราศจากเชื้อ (Sterile) รวมถึงการเขียนฉลากยาอย่างถูกต้อง</p>
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-              <a href="case-library.html?cat=Product" class="btn btn-secondary btn-product" id="btn-cat-product" style="flex: 1;">ฝึกเคส Product</a>
-              <a href="video-library.html" class="btn btn-secondary" style="border-color: #10b981; color: #10b981; font-weight: 700; flex: 1.2; text-align: center;">🎬 ดูคลิปเทคนิคเตรียมยา</a>
-            </div>
-          </div>
-        </article>
-
-        <!-- SAP Card -->
-        <article class="card card-sap" id="card-category-sap">
-          <div class="card-header-band">
-            <div class="card-icon">⚖️</div>
-            <h3 class="card-title">หมวดสังคมศาสตร์ (SAP)</h3>
-          </div>
-          <div class="card-body">
-            <p class="card-desc">ทบทวนความรู้ด้านกฎหมายยา ยาเสพติด วัตถุออกฤทธิ์ทางจิตประสาท จรรยาบรรณวิชาชีพ ทักษะการวิเคราะห์ข้อมูลสาธารณสุข และเศรษฐศาสตร์สาธารณสุขเบื้องต้น</p>
-            <a href="case-library.html?cat=SAP" class="btn btn-secondary btn-sap" id="btn-cat-sap">ฝึกหมวดกฎหมาย/สังคม</a>
-          </div>
-        </article>
-      </div>
-
-    </div>
-  </main>
-
   <!-- Footer -->
-  <footer class="footer" id="main-footer">
+  <footer class="footer" id="main-footer" style="margin-top: auto;">
     <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; padding: 14px 1.5rem;">
       <div>
         <p style="margin-bottom: 0.2rem; font-size: 0.82rem;">© 2026 คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม (PLE-CC) ปีการศึกษา 2569</p>
         <p class="footer-credit" style="font-size: 0.75rem; color: var(--ink-soft);">
-          <strong>Version 2.0 (Theme Sandbox)</strong> · พัฒนาโดย แม็กนั่ม (Maxnum) · หัวหน้าชั้นปีที่ 5 คณะเภสัชศาสตร์ จุฬาฯ
+          <strong>RxCU OSPE Hub</strong> · พัฒนาโดย คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพฯ นิสิตเภสัชฯ จุฬาฯ
         </p>
       </div>
     </div>
@@ -182,12 +226,17 @@
   <script src="app.js?v=v_20261003_021957"></script>
 
   <script>
-    // ─ View Mode & Fullscreen helpers ─
-    function toggleAppViewMode() {
-      document.body.classList.toggle('mode-phone');
-      const btn = document.getElementById('toggleViewModeBtn');
-      if (btn) btn.textContent = document.body.classList.contains('mode-phone') ? '🖥️' : '📱';
+    function handleHomeSearch(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('home-search-input');
+      const val = (input && input.value) ? input.value.trim() : '';
+      if (val) {
+        window.location.href = `case-library.html?search=${encodeURIComponent(val)}`;
+      } else {
+        window.location.href = 'case-library.html';
+      }
     }
+
     function toggleFullscreen() {
       if (!document.fullscreenElement) {
         if (document.documentElement.requestFullscreen) {
