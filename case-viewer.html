@@ -977,9 +977,35 @@
         if (viewerTimerVal <= 0) {
           clearInterval(viewerTimerInterval);
           viewerTimerRunning = false;
-          alert('หมดเวลาสำหรับสถานีนี้แล้ว! (ครบกำหนด 4 นาที)');
+          if (typeof playStationTimeoutAlarm === 'function') {
+            playStationTimeoutAlarm();
+          }
+          showViewerTimeoutPopup();
         }
       }, 1000);
+    }
+
+    function showViewerTimeoutPopup() {
+      // Remove any existing overlay
+      const existing = document.getElementById('viewer-timeout-overlay');
+      if (existing) existing.remove();
+
+      const overlay = document.createElement('div');
+      overlay.id = 'viewer-timeout-overlay';
+      overlay.className = 'fullscreen-overlay';
+      overlay.style.zIndex = '9999';
+      overlay.innerHTML = `
+        <div style="font-size: 5rem; margin-bottom: 0.75rem; animation: pulse 1s infinite;">⏰</div>
+        <h1 style="font-size: 2.8rem; margin-bottom: 0.5rem; color: var(--danger); font-family: var(--font-title); font-weight: 800;">หมดเวลา 4 นาที!</h1>
+        <p style="font-size: 1.25rem; color: #FFFFFF; font-family: var(--font-body); margin-bottom: 1.75rem;">ครบกำหนดเวลาสำหรับสถานีฝึกซ้อมนี้แล้ว</p>
+        <button type="button" class="btn btn-primary" style="padding: 0.65rem 2rem; font-size: 1rem; border-radius: var(--radius-full); font-weight: 700; box-shadow: 0 4px 14px rgba(0,0,0,0.3);" onclick="this.closest('.fullscreen-overlay').remove()">
+          ✓ ทราบแล้ว / ปิดแจ้งเตือน
+        </button>
+      `;
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.remove();
+      });
+      document.body.appendChild(overlay);
     }
 
     function toggleViewerTimer() {

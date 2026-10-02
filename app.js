@@ -2374,3 +2374,95 @@ function showReportToast(message, isError = false) {
   setTimeout(() => { toast.classList.remove('show'); }, 3500);
 }
 
+// ──────────────────────────────────────────────────────────────
+// OSPE STATION TIMEOUT AUDIO ALARM (Web Audio API)
+// ──────────────────────────────────────────────────────────────
+let _sharedAudioCtx = null;
+
+function getSharedAudioContext() {
+  try {
+    if (!_sharedAudioCtx) {
+      const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtxClass) {
+        _sharedAudioCtx = new AudioCtxClass();
+      }
+    }
+    if (_sharedAudioCtx && _sharedAudioCtx.state === 'suspended') {
+      _sharedAudioCtx.resume().catch(() => {});
+    }
+  } catch (e) {
+    console.warn('[Audio] AudioContext init error:', e);
+  }
+  return _sharedAudioCtx;
+}
+
+// Auto-unlock AudioContext on first user interaction
+if (typeof window !== 'undefined') {
+  const _unlockAudio = () => {
+    getSharedAudioContext();
+  };
+  ['click', 'touchstart', 'keydown'].forEach(evt => {
+    document.addEventListener(evt, _unlockAudio, { once: true, passive: true });
+  });
+}
+
+function playStationTimeoutAlarm() {
+  try {
+    const ctx = getSharedAudioContext();
+    if (!ctx) return;
+    if (ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
+    const now = ctx.currentTime;
+
+    // OSPE Station Bell Sequence: 3 sharp chimes + 1 sustained brass bell finish
+    const chimes = [
+      { freq: 880, start: 0.0, dur: 0.22, gain: 0.8 },
+      { freq: 880, start: 0.32, dur: 0.22, gain: 0.8 },
+      { freq: 880, start: 0.64, dur: 0.22, gain: 0.8 },
+      { freq: 1174.66, start: 0.96, dur: 1.8, gain: 0.95 }
+    ];
+
+    chimes.forEach(c => {
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(c.freq, now + c.start);
+
+      // Harmonic overtone for natural bell resonance
+      const oscHarmonic = ctx.createOscillator();
+      const gainHarmonic = ctx.createGain();
+      oscHarmonic.type = 'sine';
+      oscHarmonic.frequency.setValueAtTime(c.freq * 2, now + c.start);
+
+      // Amplitude envelopes
+      gainNode.gain.setValueAtTime(0.0001, now + c.start);
+      gainNode.gain.linearRampToValueAtTime(c.gain, now + c.start + 0.02);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, now + c.start + c.dur);
+
+      gainHarmonic.gain.setValueAtTime(0.0001, now + c.start);
+      gainHarmonic.gain.linearRampToValueAtTime(c.gain * 0.35, now + c.start + 0.015);
+      gainHarmonic.gain.exponentialRampToValueAtTime(0.0001, now + c.start + c.dur * 0.7);
+
+      osc.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      oscHarmonic.connect(gainHarmonic);
+      gainHarmonic.connect(ctx.destination);
+
+      osc.start(now + c.start);
+      osc.stop(now + c.start + c.dur + 0.1);
+
+      oscHarmonic.start(now + c.start);
+      oscHarmonic.stop(now + c.start + c.dur + 0.1);
+    });
+  } catch (err) {
+    console.warn('[Audio] Failed to play OSPE alarm:', err);
+  }
+}
+
+// Make accessible globally
+window.playStationTimeoutAlarm = playStationTimeoutAlarm;
+window.getSharedAudioContext = getSharedAudioContext;
+
