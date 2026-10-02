@@ -142,6 +142,12 @@ function extractYouTubeVideoId(url) {
   return m ? m[1] : null;
 }
 
+function extractGoogleDriveFileId(url) {
+  if (!url) return null;
+  const m = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)([a-zA-Z0-9_-]+)/i);
+  return m ? m[1] : null;
+}
+
 function renderRichNoteContent(rawHtml) {
   if (!rawHtml) return '';
   
@@ -150,55 +156,131 @@ function renderRichNoteContent(rawHtml) {
 
   return rawHtml.replace(vdoPattern, (match, url1, url2) => {
     const rawUrl = url1 || url2;
-    const vid = extractYouTubeVideoId(rawUrl);
-    if (!vid) {
-      const safeUrl = (typeof escapeHtml === 'function') ? escapeHtml(rawUrl) : rawUrl;
-      return `<p class="vdo-link-plain"><strong>📹 วิดีโออ้างอิง:</strong> <a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a></p>`;
+    const ytVid = extractYouTubeVideoId(rawUrl);
+    const driveId = extractGoogleDriveFileId(rawUrl);
+
+    // 1. YouTube Case
+    if (ytVid) {
+      const cleanUrl = `https://youtu.be/${ytVid}`;
+      const embedUrl = `https://www.youtube-nocookie.com/embed/${ytVid}`;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&margin=2&data=${encodeURIComponent(cleanUrl)}`;
+
+      return `
+        <!-- YouTube Interactive Embed (Visible on screen, hidden on print) -->
+        <div class="youtube-embed-card vdo-embed-card no-print">
+          <div class="youtube-card-header">
+            <div class="youtube-card-title">
+              <span class="youtube-icon-badge">▶</span>
+              <span>วิดีโอสาธิตเทคนิค / เฉลยสถานี (YouTube)</span>
+            </div>
+            <a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="youtube-ext-btn" title="เปิดดูใน YouTube (แท็บใหม่)">
+              เปิดใน YouTube ↗
+            </a>
+          </div>
+          <div class="youtube-player-wrapper">
+            <iframe 
+              src="${embedUrl}" 
+              title="วิดีโอสาธิตเทคนิค / เฉลยสถานี" 
+              frameborder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+              allowfullscreen 
+              loading="lazy">
+            </iframe>
+          </div>
+        </div>
+
+        <!-- YouTube Print Card (Hidden on screen, visible on print & paper preview: QR Code คู่กับ ลิงก์) -->
+        <div class="youtube-print-card vdo-print-card print-only">
+          <div class="youtube-print-box">
+            <div class="youtube-print-header">
+              <strong>📹 วิดีโอสาธิตและเฉลยเทคนิค (YouTube Reference)</strong>
+            </div>
+            <div class="youtube-print-body">
+              <div class="youtube-print-qr-wrap">
+                <img src="${qrUrl}" class="youtube-print-qr" alt="QR Code">
+              </div>
+              <div class="vdo-print-link-wrap">
+                <div class="vdo-print-link-title">🔗 สแกน QR Code หรือเข้าดูผ่านลิงก์:</div>
+                <div class="youtube-print-url">${cleanUrl}</div>
+                <div class="youtube-print-scan-hint">📲 สามารถสแกน QR Code ด้วยกล้องมือถือเพื่อเปิดรับชมได้ทันที</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
     }
 
-    const cleanUrl = `https://youtu.be/${vid}`;
-    const embedUrl = `https://www.youtube-nocookie.com/embed/${vid}`;
-    const thumbUrl = `https://img.youtube.com/vi/${vid}/hqdefault.jpg`;
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&margin=2&data=${encodeURIComponent(cleanUrl)}`;
+    // 2. Google Drive Case
+    if (driveId) {
+      const cleanDriveUrl = `https://drive.google.com/file/d/${driveId}/view`;
+      const previewUrl = `https://drive.google.com/file/d/${driveId}/preview`;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&margin=2&data=${encodeURIComponent(cleanDriveUrl)}`;
+
+      return `
+        <!-- Google Drive Interactive Embed (Visible on screen, hidden on print) -->
+        <div class="youtube-embed-card vdo-embed-card drive-embed-card no-print">
+          <div class="youtube-card-header drive-card-header">
+            <div class="youtube-card-title">
+              <span class="drive-icon-badge">📁</span>
+              <span>วิดีโอสาธิตเทคนิค / เฉลยสถานี (Google Drive)</span>
+            </div>
+            <a href="${cleanDriveUrl}" target="_blank" rel="noopener noreferrer" class="youtube-ext-btn drive-ext-btn" title="เปิดดูใน Google Drive (แท็บใหม่)">
+              เปิดใน Google Drive ↗
+            </a>
+          </div>
+          <div class="youtube-player-wrapper">
+            <iframe 
+              src="${previewUrl}" 
+              title="วิดีโอสาธิตเทคนิค / เฉลยสถานี (Google Drive)" 
+              frameborder="0" 
+              allow="autoplay" 
+              allowfullscreen 
+              loading="lazy">
+            </iframe>
+          </div>
+        </div>
+
+        <!-- Google Drive Print Card (Hidden on screen, visible on print & paper preview: QR Code คู่กับ ลิงก์) -->
+        <div class="youtube-print-card vdo-print-card print-only">
+          <div class="youtube-print-box">
+            <div class="youtube-print-header">
+              <strong>📁 วิดีโอสาธิตและเฉลยเทคนิค (Google Drive Reference)</strong>
+            </div>
+            <div class="youtube-print-body">
+              <div class="youtube-print-qr-wrap">
+                <img src="${qrUrl}" class="youtube-print-qr" alt="QR Code">
+              </div>
+              <div class="vdo-print-link-wrap">
+                <div class="vdo-print-link-title">🔗 สแกน QR Code หรือเข้าดูผ่านลิงก์:</div>
+                <div class="youtube-print-url">${cleanDriveUrl}</div>
+                <div class="youtube-print-scan-hint">📲 สามารถสแกน QR Code ด้วยกล้องมือถือเพื่อเปิดรับชมบน Google Drive ได้ทันที</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 3. Fallback General Link
+    const safeUrl = (typeof escapeHtml === 'function') ? escapeHtml(rawUrl) : rawUrl;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&margin=2&data=${encodeURIComponent(safeUrl)}`;
 
     return `
-      <!-- YouTube Interactive Embed (Visible on screen, hidden on print) -->
-      <div class="youtube-embed-card no-print">
-        <div class="youtube-card-header">
-          <div class="youtube-card-title">
-            <span class="youtube-icon-badge">▶</span>
-            <span>วิดีโอสาธิตเทคนิค / เฉลยสถานี</span>
-          </div>
-          <a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="youtube-ext-btn" title="เปิดดูใน YouTube (แท็บใหม่)">
-            เปิดใน YouTube ↗
-          </a>
-        </div>
-        <div class="youtube-player-wrapper">
-          <iframe 
-            src="${embedUrl}" 
-            title="วิดีโอสาธิตเทคนิค / เฉลยสถานี" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-            allowfullscreen 
-            loading="lazy">
-          </iframe>
-        </div>
+      <div class="vdo-fallback-card no-print">
+        <p class="vdo-link-plain"><strong>📹 วิดีโออ้างอิง:</strong> <a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a></p>
       </div>
-
-      <!-- YouTube Print Card (Hidden on screen, visible on print & paper preview) -->
-      <div class="youtube-print-card print-only">
+      <div class="youtube-print-card vdo-print-card print-only">
         <div class="youtube-print-box">
           <div class="youtube-print-header">
-            <strong>📹 วิดีโอสาธิตและเฉลยเทคนิค (YouTube Reference):</strong>
-            <span class="youtube-print-url">${cleanUrl}</span>
+            <strong>📹 วิดีโอหรือสื่อประกอบ (Reference Media)</strong>
           </div>
           <div class="youtube-print-body">
-            <div class="youtube-print-thumb-wrap">
-              <img src="${thumbUrl}" class="youtube-print-thumb" alt="Video Thumbnail" crossorigin="anonymous">
-            </div>
             <div class="youtube-print-qr-wrap">
               <img src="${qrUrl}" class="youtube-print-qr" alt="QR Code">
-              <span class="youtube-print-scan-hint">📲 สแกน QR Code ด้วยมือถือเพื่อเปิดคลิป</span>
+            </div>
+            <div class="vdo-print-link-wrap">
+              <div class="vdo-print-link-title">🔗 เข้าดูผ่านลิงก์หรือสแกน:</div>
+              <div class="youtube-print-url">${safeUrl}</div>
             </div>
           </div>
         </div>

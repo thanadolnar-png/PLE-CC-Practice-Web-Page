@@ -5317,8 +5317,35 @@ body.is-printing #batch-print-execution-area {
   page-break-inside: avoid;
   break-inside: avoid;
 }
+.drive-card-header {
+  background: rgba(30, 64, 175, 0.08) !important;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.25) !important;
+}
+.drive-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  font-size: 14px;
+}
+.drive-ext-btn {
+  background: #2563eb !important;
+}
+.drive-ext-btn:hover {
+  background: #1d4ed8 !important;
+}
+
+/* YouTube & Drive Print Card */
+.youtube-print-card,
+.vdo-print-card {
+  display: none; /* hidden on web screen by default */
+  margin: 1rem 0;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
 .youtube-print-box {
-  border: 1.5px solid #334155;
+  border: 1.5px solid #475569;
   border-radius: 8px;
   padding: 10px 14px;
   background: #f8fafc;
@@ -5329,49 +5356,59 @@ body.is-printing #batch-print-execution-area {
   align-items: center;
   border-bottom: 1px solid #cbd5e1;
   padding-bottom: 5px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   font-size: 0.88rem;
-}
-.youtube-print-url {
-  font-family: var(--font-mono, monospace);
-  font-size: 0.82rem;
-  color: #1d4ed8;
-  text-decoration: underline;
+  color: #1e293b;
 }
 .youtube-print-body {
   display: flex;
   align-items: center;
   gap: 16px;
 }
-.youtube-print-thumb-wrap {
-  flex: 0 0 210px;
-}
-.youtube-print-thumb {
-  width: 210px;
-  height: auto;
-  border-radius: 6px;
-  border: 1px solid #94a3b8;
-  display: block;
-}
 .youtube-print-qr-wrap {
+  flex: 0 0 95px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
 }
 .youtube-print-qr {
-  width: 85px;
-  height: 85px;
-  border: 1px solid #cbd5e1;
+  width: 90px;
+  height: 90px;
+  border: 1px solid #94a3b8;
   padding: 3px;
   background: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.vdo-print-link-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.vdo-print-link-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
+}
+.youtube-print-url {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1d4ed8;
+  word-break: break-all;
+  background: #ffffff;
+  padding: 4px 8px;
   border-radius: 4px;
+  border: 1px solid #cbd5e1;
+  display: inline-block;
 }
 .youtube-print-scan-hint {
   font-size: 0.72rem;
-  color: #475569;
-  font-weight: 700;
-  text-align: center;
+  color: #64748b;
+  font-weight: 600;
+  margin-top: 2px;
 }
 
 @media print {
