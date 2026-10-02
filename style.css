@@ -1834,11 +1834,30 @@ ol.ordered-list li,
 }
 
 /* Simulation Results screen */
+.results-screen {
+  padding: 1.5rem 1rem 3rem 1rem;
+}
+
 .results-card {
   max-width: 920px;
   width: 100%;
   margin: 0 auto;
+  padding: 2.5rem 2.25rem !important;
   box-sizing: border-box;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 768px) {
+  .results-screen {
+    padding: 1rem 0.5rem 2rem 0.5rem;
+  }
+  .results-card {
+    padding: 1.5rem 1rem !important;
+    border-radius: var(--radius-md);
+  }
 }
 
 .results-score-display {
