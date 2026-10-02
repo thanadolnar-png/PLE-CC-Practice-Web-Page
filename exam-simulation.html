@@ -1096,7 +1096,10 @@
               
               <!-- Room Code Box (Host Share) -->
               <div id="lobby-room-code-share" class="lobby-code-box" style="display: none;">
-                <div class="lobby-code-label">รหัสห้องสอบ</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                  <div class="lobby-code-label">รหัสห้องสอบ</div>
+                  <span id="lobby-lock-status-badge" class="badge" style="display: none; background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; font-size: 0.72rem; font-weight: 700;">🔒 ห้องถูกล็อก</span>
+                </div>
                 <div class="lobby-code-digits" id="lobby-share-code-display">----</div>
                 <div class="lobby-code-actions">
                   <button type="button" class="lobby-code-copy" onclick="copyRoomCode()">
@@ -1106,6 +1109,9 @@
                   <button type="button" class="lobby-code-fullscreen-btn" onclick="openFullscreenRoomCode()" title="ขยายรหัสและ QR Code เต็มจอ">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
                     ขยายเต็มจอ
+                  </button>
+                  <button type="button" id="btn-toggle-room-lock" class="lobby-code-copy" onclick="toggleRoomLock()" title="คลิกเพื่อล็อกหรือปลดล็อกห้องสอบ">
+                    <span id="room-lock-icon">🔓</span> <span id="room-lock-text">ล็อกห้อง (ห้ามคนนอกเข้า)</span>
                   </button>
                 </div>
               </div>
@@ -3350,6 +3356,108 @@
     }
     window.leaveExamRoom = leaveExamRoom;
 
+    async function toggleRoomLock() {
+      if (!SimState.isHost || !SimState.roomId || typeof _fbDb === 'undefined' || !_fbDb) return;
+      const currentLocked = Boolean(SimState.cachedRoom?.isLocked);
+      const newLocked = !currentLocked;
+      try {
+        await _fbDb.ref(`rooms/${SimState.roomId}`).update({
+          isLocked: newLocked,
+          lockedAt: Date.now()
+        });
+        showToast(newLocked ? '🔒 ล็อกห้องสอบแล้ว (ห้ามคนนอกเข้า)' : '🔓 ปลดล็อกห้องสอบแล้ว (เปิดรับสมาชิก)', 'info');
+      } catch (err) {
+        console.error('Toggle room lock error:', err);
+        alert('ไม่สามารถเปลี่ยนสถานะล็อกห้องได้: ' + err.toString());
+      }
+    }
+    window.toggleRoomLock = toggleRoomLock;
+
+    async function kickLobbyPlayer(targetPlayerId, targetName) {
+      if (!SimState.isHost || !SimState.roomId || typeof _fbDb === 'undefined' || !_fbDb) return;
+      const ok = confirm(`คุณแน่ใจหรือไม่ว่าต้องการเตะคุณ "${targetName}" ออกจากห้องสอบนี้?`);
+      if (!ok) return;
+
+      try {
+        const updates = {};
+        updates[`rooms/${SimState.roomId}/players/${targetPlayerId}`] = null;
+
+        // Clean up carousel assignment if any
+        if (SimState.cachedRoom && SimState.cachedRoom.carouselPosts) {
+          Object.keys(SimState.cachedRoom.carouselPosts).forEach(k => {
+            const post = SimState.cachedRoom.carouselPosts[k];
+            if (post.examinerId === targetPlayerId) {
+              updates[`rooms/${SimState.roomId}/carouselPosts/${k}/examinerId`] = '';
+              updates[`rooms/${SimState.roomId}/carouselPosts/${k}/examinerName`] = '';
+            }
+            if (post.startParticipantId === targetPlayerId) {
+              updates[`rooms/${SimState.roomId}/carouselPosts/${k}/startParticipantId`] = '';
+              updates[`rooms/${SimState.roomId}/carouselPosts/${k}/startParticipantName`] = '';
+            }
+          });
+        }
+
+        // Clean up breakout table if any
+        if (SimState.cachedRoom && SimState.cachedRoom.breakouts) {
+          Object.keys(SimState.cachedRoom.breakouts).forEach(k => {
+            const table = SimState.cachedRoom.breakouts[k];
+            if (table.examinerId === targetPlayerId) {
+              updates[`rooms/${SimState.roomId}/breakouts/${k}/examinerId`] = '';
+              updates[`rooms/${SimState.roomId}/breakouts/${k}/examinerName`] = '';
+            }
+            if (table.participantId === targetPlayerId) {
+              updates[`rooms/${SimState.roomId}/breakouts/${k}/participantId`] = '';
+              updates[`rooms/${SimState.roomId}/breakouts/${k}/participantName`] = '';
+            }
+          });
+        }
+
+        await _fbDb.ref().update(updates);
+        showToast(`เตะคุณ ${targetName} ออกจากห้องสอบแล้ว`, 'info');
+      } catch (err) {
+        console.error('Kick player error:', err);
+        alert('เกิดข้อผิดพลาดในการเตะผู้เล่น: ' + err.toString());
+      }
+    }
+    window.kickLobbyPlayer = kickLobbyPlayer;
+
+    function showRoomBlockedModal(options = {}) {
+      const modal = document.getElementById('modal-room-blocked');
+      if (!modal) {
+        alert((options.title || 'ไม่สามารถเข้าห้องสอบได้') + '\n\n' + (options.message || ''));
+        return;
+      }
+      const iconEl = document.getElementById('room-blocked-icon');
+      const titleEl = document.getElementById('room-blocked-title');
+      const subEl = document.getElementById('room-blocked-subtitle');
+      const msgEl = document.getElementById('room-blocked-message');
+      const noteBox = document.getElementById('room-blocked-note-box');
+
+      if (iconEl) iconEl.textContent = options.icon || (options.type === 'locked' ? '🔒' : '⛔');
+      if (titleEl) titleEl.textContent = options.title || 'ไม่สามารถเข้าห้องสอบได้';
+      if (subEl) {
+        subEl.textContent = options.subtitle || '';
+        subEl.style.color = (options.type === 'locked' ? '#d97706' : '#ef4444');
+      }
+      if (msgEl) msgEl.textContent = options.message || '';
+      if (noteBox) {
+        if (options.note) {
+          noteBox.innerHTML = `💡 <strong>คำแนะนำ:</strong> ${escapeHtml(options.note)}`;
+          noteBox.style.display = 'block';
+        } else {
+          noteBox.style.display = 'none';
+        }
+      }
+      modal.style.display = 'flex';
+    }
+    window.showRoomBlockedModal = showRoomBlockedModal;
+
+    function closeRoomBlockedModal() {
+      const modal = document.getElementById('modal-room-blocked');
+      if (modal) modal.style.display = 'none';
+    }
+    window.closeRoomBlockedModal = closeRoomBlockedModal;
+
     function setupLobbyRoomUI() {
       document.getElementById('exam-setup-view').style.display = 'none';
       document.getElementById('exam-running-view').style.display = 'block';
@@ -3451,6 +3559,13 @@
         // CRITICAL FIX: Initialize isHost at top of applyRoomState to eliminate TDZ ReferenceError
         const isHost = Boolean(SimState.isHost || (room.players && room.players[SimState.myPlayerId]?.isHost) || (room.hostId && room.hostId === SimState.myPlayerId) || (room.hostRole === SimState.role && playersList[0] && playersList[0].name === SimState.lobbyPlayerName));
         SimState.isHost = isHost;
+
+        // Eject player if kicked by Host
+        if (!isHost && SimState.myPlayerId && room.players && !room.players[SimState.myPlayerId] && SimState.isLobby) {
+          alert('คุณถูกผู้คุมสอบ (Host) เชิญออกจากห้องสอบ');
+          leaveExamRoom(true);
+          return;
+        }
 
         // Synchronize Alarm Sound & Timeout Transition Mode across all participants in real time
         if (room.alarmSound) {
@@ -3566,6 +3681,31 @@
             const hostName = room.hostName || hostObj?.name || 'ยังไม่มี Host';
             hostEl.innerHTML = `<span style="font-size:1.15rem;margin-right:0.35rem;">${escapeHtml(hostEmoji)}</span><span style="font-weight:700;color:var(--primary);">${escapeHtml(hostName)}</span>`;
           }
+
+          // Sync Room Lock UI (Host toggle button & status badge)
+          const lockBtn = document.getElementById('btn-toggle-room-lock');
+          const lockIcon = document.getElementById('room-lock-icon');
+          const lockText = document.getElementById('room-lock-text');
+          const lockStatusBadge = document.getElementById('lobby-lock-status-badge');
+          if (lockBtn) {
+            lockBtn.style.display = isHost ? 'inline-flex' : 'none';
+            if (room.isLocked) {
+              lockBtn.style.background = '#fef2f2';
+              lockBtn.style.borderColor = '#ef4444';
+              lockBtn.style.color = '#b91c1c';
+              if (lockIcon) lockIcon.textContent = '🔒';
+              if (lockText) lockText.textContent = 'ห้องถูกล็อก (คนนอกเข้าไม่ได้)';
+            } else {
+              lockBtn.style.background = '';
+              lockBtn.style.borderColor = 'var(--border)';
+              lockBtn.style.color = 'var(--text-secondary)';
+              if (lockIcon) lockIcon.textContent = '🔓';
+              if (lockText) lockText.textContent = 'ล็อกห้อง (ห้ามคนนอกเข้า)';
+            }
+          }
+          if (lockStatusBadge) {
+            lockStatusBadge.style.display = room.isLocked ? 'inline-flex' : 'none';
+          }
           const partListEl = document.getElementById('lobby-participants-list');
           if (partListEl) {
             // Show all participants including Host (sorted with Host first)
@@ -3664,6 +3804,11 @@
                     : '<span style="display:inline-flex; align-items:center; gap:0.25rem; font-size: 0.72rem; color: var(--text-muted); background: var(--bg-secondary); padding: 0.15rem 0.5rem; border-radius: 999px; border: 1px solid var(--border);">○ รอ</span>';
                 }
 
+                // Kick button for host (can kick any participant except themselves and host)
+                const kickBtnHtml = (isHost && !isMe && !isPlayerHost) 
+                  ? `<button type="button" class="sim-btn-xs" style="color: #ef4444; border: 1px solid rgba(239,68,68,0.3); background: transparent; padding: 0.18rem 0.45rem; font-size: 0.72rem; cursor: pointer; border-radius: 4px; transition: all 0.15s ease;" onclick="kickLobbyPlayer('${escapeHtml(p.id)}', '${escapeHtml(p.name)}')" title="เตะผู้ใช้นี้ออกจากห้อง">เตะ</button>` 
+                  : '';
+
                 const item = document.createElement('div');
                 item.className = 'lobby-member-row';
                 if (isMe) {
@@ -3686,8 +3831,9 @@
                       </div>
                     </div>
                   </div>
-                  <div>
+                  <div style="display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0;">
                     ${statusTagHtml}
+                    ${kickBtnHtml}
                   </div>
                 `;
                 partListEl.appendChild(item);
@@ -4604,6 +4750,8 @@
         const now = Date.now();
         await _fbDb.ref('rooms/' + SimState.roomId).update({
           status: 'running',
+          isLocked: true,
+          lockedAt: Date.now(),
           timerRunning: true,
           timerValue: 240,
           timerDuration: 240,
@@ -8698,6 +8846,32 @@
         <button type="button" class="btn btn-secondary" onclick="closeStationCasePreview()" style="font-size: 0.85rem; padding: 0.45rem 1.25rem;">ปิดหน้าต่าง</button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       MODAL: ROOM BLOCKED / ACCESS DENIED (ปฏิเสธการเข้าห้องสอบ)
+       ═══════════════════════════════════════════ -->
+  <div id="modal-room-blocked" class="exam-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.72); backdrop-filter: blur(6px); z-index: 100000; align-items: center; justify-content: center; padding: 1rem;" onclick="closeRoomBlockedModal()">
+    <div class="modal-card" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-lg); max-width: 520px; width: 100%; box-shadow: 0 25px 60px -15px rgba(0,0,0,0.4); overflow: hidden; animation: popIn 0.25s ease;" onclick="event.stopPropagation()">
+      <div style="padding: 1.75rem 1.5rem 1.25rem; text-align: center;">
+        <div id="room-blocked-icon" style="font-size: 3.2rem; line-height: 1; margin-bottom: 0.75rem;">⛔</div>
+        <h3 id="room-blocked-title" style="font-family: var(--font-title); font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin: 0 0 0.35rem;">
+          ไม่สามารถเข้าห้องสอบได้
+        </h3>
+        <div id="room-blocked-subtitle" style="font-size: 0.88rem; font-weight: 600; color: #ef4444; margin-bottom: 0.95rem;">
+          การสอบเริ่มขึ้นแล้ว (Exam in Progress)
+        </div>
+        <p id="room-blocked-message" style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.6; margin: 0 0 1rem; text-align: left; background: var(--bg); padding: 0.85rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          ห้องสอบกำลังดำเนินการสอบอยู่ ระบบล็อกห้องสอบเพื่อรักษาลำดับการวนสถานีและความเป็นธรรมในการสอบ ไม่อนุญาตให้ผู้สอบคนใหม่เข้าห้องสอบระหว่างการสอบครับ
+        </p>
+        <div id="room-blocked-note-box" style="display: none; font-size: 0.82rem; color: #b45309; background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-sm); padding: 0.65rem 0.9rem; text-align: left; line-height: 1.5; margin-bottom: 0.5rem;">
+          <!-- Injected dynamic note -->
+        </div>
+      </div>
+      <div style="padding: 0.85rem 1.5rem; border-top: 1px solid var(--border); background: var(--bg); display: flex; justify-content: flex-end; gap: 0.75rem;">
+        <button type="button" class="btn btn-secondary" onclick="closeRoomBlockedModal()" style="font-size: 0.88rem; padding: 0.5rem 1.35rem; width: 100%;">ตกลง รับทราบ</button>
+      </div>
     </div>
   </div>
 
