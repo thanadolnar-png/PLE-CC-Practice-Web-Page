@@ -56,16 +56,16 @@
         <aside class="filter-console" id="filters-section">
           <!-- Search bar -->
           <div class="search-input-wrapper">
-            <svg class="search-icon-svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg class="search-icon-svg" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
-            <input type="text" id="search-case" class="search-input" placeholder="ค้นหาด้วยชื่อเคส, ตัวยา, โรค..." aria-label="Search cases">
+            <input type="text" id="search-case" class="search-input" placeholder="ค้นหาชื่อเคส, ยา, โรค..." aria-label="Search cases">
           </div>
           
           <!-- Select filters (Ladder Filter System) -->
           <div class="filter-selects">
-            <!-- Step 1: Category Filter -->
-            <label class="filter-group-label">1. หมวดวิชา (Category)</label>
+            <!-- Category Filter -->
+            <label class="filter-group-label">หมวดวิชา</label>
             <select id="filter-category" class="select-filter" aria-label="Filter by category">
               <option value="All">ทุกหมวด (All Category)</option>
               <option value="Clinic">Clinic (คลินิก)</option>
@@ -73,50 +73,51 @@
               <option value="SAP">SAP (สังคมศาสตร์)</option>
             </select>
             
-            <!-- Step 2: OSPE Main Group Filter -->
-            <label class="filter-group-label">2. กลุ่มวิชาหลัก (Main Group)</label>
+            <!-- OSPE Main Group Filter -->
+            <label class="filter-group-label">กลุ่มวิชาหลัก</label>
             <select id="filter-course-group" class="select-filter" aria-label="Filter by OSPE Main Group">
-              <option value="All">ทุก OSPE Main Group</option>
+              <option value="All">ทุกกลุ่มวิชาหลัก</option>
               <!-- Filled dynamically by JS based on Category -->
             </select>
 
-            <!-- Step 3: Disease / Topic Filter -->
-            <label class="filter-group-label">3. โรค / หัวข้อสอบ (Disease / Topic)</label>
+            <!-- Disease / Topic Filter -->
+            <label class="filter-group-label">โรค / หัวข้อ</label>
             <select id="filter-disease" class="select-filter" aria-label="Filter by Disease or Topic">
-              <option value="All">ทุกโรค / หัวข้อสอบ</option>
+              <option value="All">ทุกโรค / หัวข้อ</option>
               <!-- Filled dynamically by JS based on Main Group -->
             </select>
 
-            <!-- Step 4: Source / Exam Set Filter -->
-            <label class="filter-group-label">4. แหล่งที่มา (Source / Exam Set)</label>
+            <!-- Source / Exam Set Filter -->
+            <label class="filter-group-label">แหล่งที่มา</label>
             <select id="filter-source" class="select-filter" aria-label="Filter by Source or Exam Set">
-              <option value="All">ทุกแหล่งที่มา (All Sources)</option>
+              <option value="All">ทุกแหล่งที่มา</option>
               <!-- Filled dynamically by JS -->
             </select>
             
-            <button id="btn-reset-filters" type="button" class="btn btn-secondary" style="width: 100%; font-size: 0.8rem; padding: 0.35rem 0.5rem; justify-content: center; margin-top: 0.35rem; margin-bottom: 0.75rem; border-color: var(--border); color: var(--text-secondary);" onclick="resetAllFilters()">
-              🔄 ล้างตัวกรองและคำค้นหาทั้งหมด
-            </button>
-            
-            <!-- View Toggles & Tools -->
-            <label class="filter-group-label">รูปแบบมุมมอง & เครื่องมือพิมพ์</label>
-            <div class="view-toggles" style="margin-bottom: 0.75rem;">
-              <button id="btn-view-grid" class="view-toggle-btn active" title="แบบตาราง (Grid View)">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-              </button>
-              <button id="btn-view-list" class="view-toggle-btn" title="แบบรายการ (List View)">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            <!-- Compact View Toggles & Reset Bar -->
+            <div class="filter-toolbar-row">
+              <div class="view-toggles" role="group" aria-label="View Mode">
+                <button id="btn-view-grid" class="view-toggle-btn active" title="แบบตาราง (Grid View)" aria-label="Grid View">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                </button>
+                <button id="btn-view-list" class="view-toggle-btn" title="แบบรายการ (List View)" aria-label="List View">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                </button>
+              </div>
+              <button id="btn-reset-filters" type="button" class="btn-compact-reset" onclick="resetAllFilters()" title="ล้างตัวกรองทั้งหมด">
+                🔄 ล้างค่า
               </button>
             </div>
             
-            <button class="btn btn-secondary" style="width: 100%; font-size: 0.85rem; padding: 0.5rem; justify-content: center; border-color: var(--primary); color: var(--primary);" onclick="openBatchPrintModal()">
-              🖨️ เครื่องมือสั่งพิมพ์หลายเคส
-            </button>
-            
-            <!-- Report Case Button -->
-            <button class="btn-report-case" id="btn-open-report-modal" onclick="openReportModal()">
-              🚨 แจ้งปัญหาเคส
-            </button>
+            <!-- Action Buttons: Print & Report -->
+            <div class="filter-actions-row">
+              <button type="button" class="btn-filter-action btn-print-action" onclick="openBatchPrintModal()" title="สั่งพิมพ์หลายเคส">
+                🖨️ สั่งพิมพ์
+              </button>
+              <button type="button" class="btn-filter-action btn-report-action btn-report-case" id="btn-open-report-modal" onclick="openReportModal()" title="แจ้งปัญหาเคส">
+                🚨 แจ้งปัญหา
+              </button>
+            </div>
           </div>
         </aside>
 
