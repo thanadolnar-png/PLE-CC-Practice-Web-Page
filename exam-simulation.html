@@ -1049,8 +1049,8 @@
                 </div>
               </div>
 
-              <!-- Host Info Card -->
-              <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 0.65rem 1rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; box-shadow: var(--shadow-sm);">
+              <!-- Host Info Card (Hidden for Host to avoid redundancy, shown only for guest participants) -->
+              <div id="lobby-host-card" style="display: none; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 0.65rem 1rem; justify-content: space-between; align-items: center; font-size: 0.85rem; box-shadow: var(--shadow-sm);">
                 <span style="color: var(--text-secondary); display: flex; align-items: center; gap: 0.4rem; font-weight: 600;">👨‍🏫 Host:</span>
                 <span id="lobby-host-display" style="font-weight: 700; color: var(--primary);">Maxnum</span>
               </div>
@@ -1069,7 +1069,7 @@
                   <option value="cafe-comedy">🎪 เปิดตัวตลกคาเฟ่</option>
                 </select>
                 <div id="lobby-sound-role-note" style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.3rem; line-height: 1.3;">
-                  👑 Host กำหนดเสียงกริ่งหมดเวลา (ดังประมาณ 10 วินาที)
+                  🔊 เสียงกริ่งจะดังพร้อมกันทุกคนเมื่อหมดเวลา (ดังประมาณ 10 วินาที)
                 </div>
               </div>
 
@@ -1083,7 +1083,7 @@
                   <option value="manual">⏸️ หมดเวลาแล้วให้ Host กดไปต่อ (Manual)</option>
                 </select>
                 <div id="lobby-timeout-mode-note" style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.3rem; line-height: 1.3;">
-                  👑 กำหนดว่าเมื่อเวลา 00:00 จะเปลี่ยนฐานทันทีหรือรอ Host กด
+                  ⏱️ กำหนดว่าเมื่อเวลา 04:00 หมดลง จะเปลี่ยนฐานทันทีหรือรอ Host กด
                 </div>
               </div>
             </div>
@@ -1111,20 +1111,14 @@
           </div>
 
           <!-- Standard Mode Role Selector Bar (Shown when examMode === 'standard') -->
-          <div id="standard-mode-role-selector" style="display: none; margin: 1.25rem auto; max-width: 480px; padding: 1.1rem 1.25rem; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); text-align: center;">
-            <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 0.6rem; font-family: var(--font-title);">
-              🎭 เลือกบทบาทของคุณในห้องนี้ (Role Selection)
-            </div>
-            <div style="display: inline-flex; gap: 0.65rem; justify-content: center; flex-wrap: wrap;">
-              <button type="button" id="btn-set-role-examiner" class="btn btn-sm btn-outline" style="border-radius: 20px; padding: 0.45rem 1.15rem; font-weight: 700; font-size: 0.88rem;" onclick="switchMyLobbyRole('examiner')">
+          <div id="standard-mode-role-selector" style="display: none; margin: 1rem auto 1.25rem auto; max-width: 440px; text-align: center;">
+            <div style="display: flex; gap: 0.65rem; justify-content: center;">
+              <button type="button" id="btn-set-role-examiner" class="btn btn-sm" style="flex: 1; border-radius: var(--radius-md); padding: 0.65rem 1rem; font-weight: 700; font-size: 0.92rem; transition: all 0.2s ease;" onclick="switchMyLobbyRole('examiner')">
                 👨‍🏫 ผู้ประเมิน (Examiner)
               </button>
-              <button type="button" id="btn-set-role-examinee" class="btn btn-sm btn-outline" style="border-radius: 20px; padding: 0.45rem 1.15rem; font-weight: 700; font-size: 0.88rem;" onclick="switchMyLobbyRole('examinee')">
+              <button type="button" id="btn-set-role-examinee" class="btn btn-sm" style="flex: 1; border-radius: var(--radius-md); padding: 0.65rem 1rem; font-weight: 700; font-size: 0.92rem; transition: all 0.2s ease;" onclick="switchMyLobbyRole('examinee')">
                 ✍️ ผู้เข้าสอบ (Participant)
               </button>
-            </div>
-            <div id="standard-role-hint" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; line-height: 1.4;">
-              เลือกได้อิสระ: ผู้ประเมินจะเห็น Checklist ให้คะแนน / ผู้เข้าสอบจะเห็นโจทย์สถานการณ์
             </div>
           </div>
 
@@ -2386,18 +2380,46 @@
         }
       }
       updateStandardRoleSelectorUI();
+      updateMyRoleBadgeUI(newRole);
+    }
+
+    function updateMyRoleBadgeUI(role) {
       const roleBadge = document.getElementById('lobby-my-role-badge');
-      if (roleBadge) {
-        roleBadge.textContent = SimState.isHost ? 'Host' : (newRole === 'examiner' ? 'Examiner' : 'Participant');
-        roleBadge.style.background = SimState.isHost ? 'rgba(99,102,241,0.18)' : (newRole === 'examiner' ? 'rgba(59,130,246,0.15)' : 'rgba(16,185,129,0.15)');
-        roleBadge.style.color = SimState.isHost ? 'var(--primary)' : (newRole === 'examiner' ? '#2563eb' : '#16a34a');
+      if (!roleBadge) return;
+      const currentRole = role || SimState.role || 'examiner';
+      const isHost = Boolean(SimState.isHost);
+
+      if (SimState.examMode === 'standard' || !SimState.examMode) {
+        if (currentRole === 'examiner') {
+          roleBadge.textContent = isHost ? '👨‍🏫 ผู้ประเมิน (Host)' : '👨‍🏫 ผู้ประเมิน';
+          roleBadge.style.background = 'rgba(59, 130, 246, 0.15)';
+          roleBadge.style.color = '#2563eb';
+        } else {
+          roleBadge.textContent = isHost ? '✍️ ผู้เข้าสอบ (Host)' : '✍️ ผู้เข้าสอบ';
+          roleBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+          roleBadge.style.color = '#16a34a';
+        }
+      } else {
+        if (isHost && SimState.isSuperHost) {
+          roleBadge.textContent = '👑 Super Host';
+          roleBadge.style.background = 'rgba(99, 102, 241, 0.18)';
+          roleBadge.style.color = 'var(--primary)';
+        } else if (currentRole === 'examiner') {
+          roleBadge.textContent = '👨‍🏫 ผู้ประเมิน';
+          roleBadge.style.background = 'rgba(59, 130, 246, 0.15)';
+          roleBadge.style.color = '#2563eb';
+        } else {
+          roleBadge.textContent = '✍️ ผู้เข้าสอบ';
+          roleBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+          roleBadge.style.color = '#16a34a';
+        }
       }
     }
+    window.updateMyRoleBadgeUI = updateMyRoleBadgeUI;
 
     function updateStandardRoleSelectorUI() {
       const btnExaminer = document.getElementById('btn-set-role-examiner');
       const btnExaminee = document.getElementById('btn-set-role-examinee');
-      const hint = document.getElementById('standard-role-hint');
       const currentRole = SimState.role;
 
       if (btnExaminer && btnExaminee) {
@@ -2406,27 +2428,28 @@
           btnExaminer.style.background = 'var(--primary)';
           btnExaminer.style.color = '#ffffff';
           btnExaminer.style.borderColor = 'var(--primary)';
+          btnExaminer.style.boxShadow = '0 2px 8px rgba(99, 102, 241, 0.28)';
 
           btnExaminee.className = 'btn btn-sm btn-outline';
-          btnExaminee.style.background = 'transparent';
+          btnExaminee.style.background = 'var(--surface)';
           btnExaminee.style.color = 'var(--text-secondary)';
           btnExaminee.style.borderColor = 'var(--border)';
-
-          if (hint) hint.innerHTML = 'สถานะของคุณ: <strong style="color:var(--primary);">👨‍🏫 ผู้ประเมิน (Examiner)</strong> — คุณจะเห็น Checklist ให้คะแนนผู้เข้าสอบ';
+          btnExaminee.style.boxShadow = 'none';
         } else {
           btnExaminee.className = 'btn btn-sm btn-primary';
           btnExaminee.style.background = '#16a34a';
           btnExaminee.style.color = '#ffffff';
           btnExaminee.style.borderColor = '#16a34a';
+          btnExaminee.style.boxShadow = '0 2px 8px rgba(22, 163, 74, 0.28)';
 
           btnExaminer.className = 'btn btn-sm btn-outline';
-          btnExaminer.style.background = 'transparent';
+          btnExaminer.style.background = 'var(--surface)';
           btnExaminer.style.color = 'var(--text-secondary)';
           btnExaminer.style.borderColor = 'var(--border)';
-
-          if (hint) hint.innerHTML = 'สถานะของคุณ: <strong style="color:#16a34a;">✍️ ผู้เข้าสอบ (Participant)</strong> — คุณจะเห็นโจทย์สถานการณ์และข้อสอบ';
+          btnExaminer.style.boxShadow = 'none';
         }
       }
+      updateMyRoleBadgeUI(currentRole);
     }
 
     function selectLobbyOp(op) {
@@ -2901,12 +2924,7 @@
       }
 
       // Update Role badge in profile card
-      const roleBadge = document.getElementById('lobby-my-role-badge');
-      if (roleBadge) {
-        roleBadge.textContent = role === 'host' ? 'Host' : (role === 'examiner' ? 'Examiner' : 'Participant');
-        roleBadge.style.background = role === 'host' ? 'rgba(99,102,241,0.18)' : (role === 'examiner' ? 'rgba(59,130,246,0.15)' : 'rgba(16,185,129,0.15)');
-        roleBadge.style.color = role === 'host' ? 'var(--primary)' : (role === 'examiner' ? '#2563eb' : '#16a34a');
-      }
+      updateMyRoleBadgeUI(role);
 
       // If Carousel mode, re-render diagram to update card labels
       if (SimState.examMode === 'carousel_rotation' && _fbRoomRef) {
@@ -2938,6 +2956,12 @@
         if (shareEl) shareEl.style.display = 'none';
       }
 
+      // Hide Host card for Host (they know they are host!), show only for guests
+      const hostCard = document.getElementById('lobby-host-card');
+      if (hostCard) {
+        hostCard.style.display = SimState.isHost ? 'none' : 'flex';
+      }
+
       // Initialize Personal Avatar display
       const mySavedEmoji = SimState.myEmoji || localStorage.getItem('ple_player_emoji') || (SimState.isHost ? '👑' : '💊');
       SimState.myEmoji = mySavedEmoji;
@@ -2945,12 +2969,7 @@
       if (preview) preview.textContent = mySavedEmoji;
       const nameDisp = document.getElementById('lobby-my-name-display');
       if (nameDisp) nameDisp.textContent = SimState.lobbyPlayerName || 'ผู้เข้าสอบ';
-      const roleBadge = document.getElementById('lobby-my-role-badge');
-      if (roleBadge) {
-        roleBadge.textContent = SimState.isHost ? 'Host' : (SimState.role === 'examiner' ? 'Examiner' : 'Participant');
-        roleBadge.style.background = SimState.isHost ? 'rgba(99,102,241,0.18)' : (SimState.role === 'examiner' ? 'rgba(59,130,246,0.15)' : 'rgba(16,185,129,0.15)');
-        roleBadge.style.color = SimState.isHost ? 'var(--primary)' : (SimState.role === 'examiner' ? '#2563eb' : '#16a34a');
-      }
+      updateMyRoleBadgeUI(SimState.role);
       
       // Detach any old listener first
       if (_fbRoomRef) _fbRoomRef.off();
@@ -3063,15 +3082,25 @@
           const stickyHeader = document.getElementById('exam-sticky-top-header');
           if (stickyHeader) stickyHeader.style.display = 'none';
           
-          // Sync current player's avatar in customizer
+          // Sync current player's avatar & role in customizer
           const mePlayer = playersList.find(p => p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName);
-          if (mePlayer && mePlayer.emoji) {
-            SimState.myEmoji = mePlayer.emoji;
-            const preview = document.getElementById('lobby-my-avatar-preview');
-            if (preview) preview.textContent = mePlayer.emoji;
+          if (mePlayer) {
+            if (mePlayer.emoji) {
+              SimState.myEmoji = mePlayer.emoji;
+              const preview = document.getElementById('lobby-my-avatar-preview');
+              if (preview) preview.textContent = mePlayer.emoji;
+            }
+            if (mePlayer.role) {
+              SimState.role = mePlayer.role;
+            }
+            updateMyRoleBadgeUI(mePlayer.role);
           }
 
           // Modern Minimalist Status Box update
+          const hostCard = document.getElementById('lobby-host-card');
+          if (hostCard) {
+            hostCard.style.display = isHost ? 'none' : 'flex';
+          }
           const hostEl = document.getElementById('lobby-host-display');
           if (hostEl) {
             const hostObj = playersList.find(p => p.isHost);
@@ -3227,6 +3256,7 @@
           const isStandardMode = (room.examMode === 'standard' || !room.examMode);
 
           if (isStandardMode) {
+            updateStandardRoleSelectorUI();
             // ── Standard Pair Mode ──
             // ONLY the Examiner can start the exam! Participant must wait.
             const mePlayer = playersList.find(p => p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName);
