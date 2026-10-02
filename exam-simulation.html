@@ -950,10 +950,27 @@
       <section class="exam-screen" id="exam-running-view" style="display: none;">
         
         <!-- Lobby Info Panel (Only shown in Lobby Mode) -->
-        <div id="exam-lobby-info-bar" class="exam-lobby-info-bar" style="display: none; background: var(--primary-light); color: var(--primary); padding: 0.65rem 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; font-family: var(--font-title); font-size: 0.88rem; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); flex-wrap: wrap; gap: 0.5rem;">
-          <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-            <span>📍 รหัสห้อง: <strong id="lobby-room-id-display" style="font-size: 1.05rem; color: var(--primary); letter-spacing: 1px;">----</strong></span>
-            <span>👥 สมาชิก (<strong id="lobby-active-count">0</strong> คน): <span id="lobby-participants-names" style="font-weight: 600; color: var(--text-primary);">กำลังโหลด...</span></span>
+        <div id="exam-lobby-info-bar" class="exam-lobby-info-bar" style="display: none; background: var(--surface); color: var(--primary); padding: 0.55rem 1rem; border: 1.5px solid var(--border); border-radius: var(--radius-md); margin-bottom: 0.85rem; font-family: var(--font-title); font-size: 0.88rem; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); flex-wrap: wrap; gap: 0.5rem;">
+          <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.85rem;">
+            <span>🔑 รหัสห้อง: <strong id="lobby-room-id-display" style="font-size: 1.05rem; color: var(--primary); letter-spacing: 1px;">----</strong></span>
+            
+            <!-- Compact Members Counter with Dropdown (No cluttered name dumping) -->
+            <div style="position: relative; display: inline-flex; align-items: center;">
+              <button type="button" onclick="toggleMembersListDropdown(event)" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.22rem 0.65rem; border-radius: var(--radius-sm); border-color: var(--primary); color: var(--primary); background: var(--bg); display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer;" title="คลิกเพื่อดูหรือซ่อนรายชื่อผู้เข้าร่วม">
+                👥 สมาชิก: <strong id="lobby-active-count">0</strong> คน <span style="font-size: 0.68rem;">▼</span>
+              </button>
+              
+              <!-- Collapsible Popover for Member Names -->
+              <div id="lobby-members-dropdown" style="display: none; position: absolute; top: calc(100% + 6px); left: 0; z-index: 1000; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); padding: 0.75rem 1rem; min-width: 250px; max-width: 320px; max-height: 240px; overflow-y: auto; text-align: left;" onclick="event.stopPropagation()">
+                <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.4rem; border-bottom: 1px solid var(--border); padding-bottom: 0.25rem;">
+                  รายชื่อผู้เข้าร่วม (<span id="lobby-dropdown-count">0</span> คน)
+                </div>
+                <div id="lobby-participants-names" style="display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.82rem; color: var(--text-primary); font-family: var(--font-body);">
+                  กำลังโหลด...
+                </div>
+              </div>
+            </div>
+            
             <!-- Hidden backward-compatible spans -->
             <span id="lobby-examinee-display" style="display: none;"></span>
             <span id="lobby-examiner-display" style="display: none;"></span>
@@ -2688,6 +2705,22 @@
     // Initialize Lobby Room UI — attach Firebase real-time listener
     
     // ── Lobby Role Selection Popup ──
+    
+    // ── Lobby Members Popover Dropdown in Info Bar ──
+    function toggleMembersListDropdown(e) {
+      if (e) e.stopPropagation();
+      const dropdown = document.getElementById('lobby-members-dropdown');
+      if (!dropdown) return;
+      dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    }
+
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('lobby-members-dropdown');
+      if (dropdown && dropdown.style.display !== 'none') {
+        dropdown.style.display = 'none';
+      }
+    });
+
     function openLobbyRoleSelectModal() {
       const modal = document.getElementById('modal-lobby-role-select');
       if (!modal) return;
@@ -2835,15 +2868,30 @@
         const totalPlayers = playersList.length;
         const activeCountEl = document.getElementById('lobby-active-count');
         if (activeCountEl) activeCountEl.textContent = totalPlayers;
-        
+        const dropdownCountEl = document.getElementById('lobby-dropdown-count');
+        if (dropdownCountEl) dropdownCountEl.textContent = totalPlayers;
+
         const participantsNamesEl = document.getElementById('lobby-participants-names');
         if (participantsNamesEl) {
-          const namesStr = playersList.map(p => {
-            const isMe = p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName;
-            const pEmoji = p.emoji || (p.isHost ? '👑' : '👤');
-            return `${pEmoji} ${escapeHtml(p.name)}${p.isHost ? ' (Host)' : ''}${isMe ? ' (คุณ)' : ''}`;
-          }).join(', ');
-          participantsNamesEl.innerHTML = namesStr || 'ยังไม่มีผู้เข้าร่วม';
+          participantsNamesEl.innerHTML = '';
+          if (playersList.length === 0) {
+            participantsNamesEl.innerHTML = '<span style="color: var(--text-muted);">ยังไม่มีผู้เข้าร่วม</span>';
+          } else {
+            playersList.forEach(p => {
+              const isMe = p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName;
+              const pEmoji = p.emoji || (p.isHost ? '👨‍🏫' : '👤');
+              const roleText = p.isHost ? '👑 Host' : (p.role === 'examiner' ? '👨‍⚖️ Examiner' : '✍️ Examinee');
+              const row = document.createElement('div');
+              row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 0.25rem 0; border-bottom: 1px dashed var(--border);';
+              row.innerHTML = `
+                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px;">
+                  ${escapeHtml(pEmoji)} <strong>${escapeHtml(p.name)}</strong> ${isMe ? '<span style="color: var(--primary); font-size: 0.72rem;">(คุณ)</span>' : ''}
+                </span>
+                <span style="font-size: 0.72rem; color: var(--text-muted); flex-shrink: 0;">${roleText}</span>
+              `;
+              participantsNamesEl.appendChild(row);
+            });
+          }
         }
         
         const dot = document.getElementById('lobby-dot');
