@@ -1153,8 +1153,9 @@
                 <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.1rem;">เลือกโต๊ะสอบเพื่อจับคู่ผู้ประเมินและผู้เข้าสอบ</div>
               </div>
               <div style="display: flex; gap: 0.4rem; align-items: center;" id="cohort-table-btn-group">
+                <button type="button" class="btn btn-sm btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; border-radius: 6px;" onclick="promptBatchCreateBreakoutTables()">⚡ ตั้ง 50 โต๊ะ</button>
                 <button type="button" class="btn btn-sm btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; border-radius: 6px;" onclick="removeLastBreakoutTable()">- ลบโต๊ะ</button>
-                <button type="button" class="btn btn-sm btn-primary" style="padding: 0.35rem 0.95rem; font-size: 0.8rem; font-weight: 600; border-radius: 6px;" onclick="addBreakoutTable()">+ เพิ่มโต๊ะสอบ</button>
+                <button type="button" class="btn btn-sm btn-primary" style="padding: 0.35rem 0.95rem; font-size: 0.8rem; font-weight: 600; border-radius: 6px;" onclick="addBreakoutTable()">+ เพิ่ม 1 โต๊ะ</button>
               </div>
             </div>
             <div id="cohort-tables-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
@@ -3887,13 +3888,41 @@
             SimState.timerInterval = null;
           }
 
-          if (room.scoresByStation) {
+          if (room.scoresByStation && room.examMode !== 'cohort_breakout' && room.examMode !== 'carousel_rotation') {
             try {
               const parsedScores = typeof room.scoresByStation === 'string' ? JSON.parse(room.scoresByStation) : room.scoresByStation;
               if (parsedScores && typeof parsedScores === 'object') {
                 SimState.studentScores = Object.assign({}, SimState.studentScores, parsedScores);
               }
             } catch (e) {}
+          } else if (room.examMode === 'cohort_breakout') {
+            let myTable = null;
+            if (SimState.myBreakoutTableId && room.breakouts?.[SimState.myBreakoutTableId]) {
+              myTable = room.breakouts[SimState.myBreakoutTableId];
+            } else if (room.breakouts) {
+              const myId = SimState.myPlayerId;
+              const myName = SimState.lobbyPlayerName;
+              myTable = Object.values(room.breakouts).find(b => 
+                b.participantId === myId || b.examinerId === myId ||
+                (b.participantName && b.participantName === myName) ||
+                (b.examinerName && b.examinerName === myName)
+              );
+              if (myTable && !SimState.myBreakoutTableId) {
+                SimState.myBreakoutTableId = myTable.id;
+              }
+            }
+            if (myTable && myTable.scores) {
+              Object.keys(myTable.scores).forEach(sNum => {
+                const s = myTable.scores[sNum];
+                if (s && s.checkedProgress) {
+                  SimState.studentScores[sNum] = s.checkedProgress;
+                } else if (s && s.checkedIds) {
+                  SimState.studentScores[sNum] = s.checkedIds;
+                } else if (Array.isArray(s)) {
+                  SimState.studentScores[sNum] = s;
+                }
+              });
+            }
           }
           
           // Live sync checklist items across ALL participants in real time
@@ -3915,7 +3944,7 @@
           if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
           if (SimState.timerInterval) clearInterval(SimState.timerInterval);
           
-          if (room.scoresByStation) {
+          if (room.scoresByStation && room.examMode !== 'cohort_breakout' && room.examMode !== 'carousel_rotation') {
             try {
               const parsedScores = typeof room.scoresByStation === 'string' ? JSON.parse(room.scoresByStation) : room.scoresByStation;
               if (parsedScores && typeof parsedScores === 'object') {
@@ -3923,6 +3952,31 @@
               }
             } catch (e) {
               console.warn('Error parsing room scores on results:', e);
+            }
+          } else if (room.examMode === 'cohort_breakout') {
+            let myTable = null;
+            if (SimState.myBreakoutTableId && room.breakouts?.[SimState.myBreakoutTableId]) {
+              myTable = room.breakouts[SimState.myBreakoutTableId];
+            } else if (room.breakouts) {
+              const myId = SimState.myPlayerId;
+              const myName = SimState.lobbyPlayerName;
+              myTable = Object.values(room.breakouts).find(b => 
+                b.participantId === myId || b.examinerId === myId ||
+                (b.participantName && b.participantName === myName) ||
+                (b.examinerName && b.examinerName === myName)
+              );
+            }
+            if (myTable && myTable.scores) {
+              Object.keys(myTable.scores).forEach(sNum => {
+                const s = myTable.scores[sNum];
+                if (s && s.checkedProgress) {
+                  SimState.studentScores[sNum] = s.checkedProgress;
+                } else if (s && s.checkedIds) {
+                  SimState.studentScores[sNum] = s.checkedIds;
+                } else if (Array.isArray(s)) {
+                  SimState.studentScores[sNum] = s;
+                }
+              });
             }
           }
           
@@ -4341,17 +4395,35 @@
 
     // Sync checklist to Firebase
     async function updateLobbyChecklistOnServer() {
-      if (!SimState.isLobby || !SimState.roomId) return;
+      if (!SimState.isLobby || !SimState.roomId || typeof _fbDb === 'undefined' || !_fbDb) return;
       const stationNum = SimState.stations[SimState.currentIdx]?.stationNumber || 1;
       const checkedIds = SimState.studentScores[stationNum] || [];
       const timestamp = Date.now();
-      if (timestamp - SimState.lastServerSyncTime < 500) return;
+      if (timestamp - SimState.lastServerSyncTime < 300) return;
       SimState.lastServerSyncTime = timestamp;
       try {
-        _fbDb.ref('rooms/' + SimState.roomId).update({
-          checklistProgress: checkedIds,
-          scoresByStation: JSON.stringify(SimState.studentScores)
-        });
+        if (SimState.examMode === 'cohort_breakout' && SimState.myBreakoutTableId) {
+          const currentCase = SimState.stations[SimState.currentIdx]?.case;
+          const { currentScore, totalScore } = calculateStationScore(currentCase?.checklist || [], checkedIds);
+          _fbDb.ref(`rooms/${SimState.roomId}/breakouts/${SimState.myBreakoutTableId}/scores/${stationNum}`).set({
+            stationNumber: stationNum,
+            checkedProgress: checkedIds,
+            checkedIds: checkedIds,
+            score: currentScore,
+            earnedScore: currentScore,
+            maxScore: totalScore,
+            percent: totalScore > 0 ? Math.round((currentScore / totalScore) * 100) : 0,
+            examinerName: SimState.lobbyPlayerName || SimState.myBreakoutRole || 'Examiner',
+            updatedAt: timestamp
+          });
+        } else if (SimState.examMode === 'carousel_rotation') {
+          // Handled per post assignment
+        } else {
+          _fbDb.ref('rooms/' + SimState.roomId).update({
+            checklistProgress: checkedIds,
+            scoresByStation: JSON.stringify(SimState.studentScores)
+          });
+        }
       } catch (e) {
         console.warn('Error syncing checklist:', e);
       }
@@ -5472,25 +5544,21 @@
       renderMiniMap(false);
       
       if (SimState.isLobby && SimState.roomId && typeof _fbDb !== 'undefined') {
-        _fbDb.ref('rooms/' + SimState.roomId).update({
-          checklistProgress: currentChecked,
-          scoresByStation: JSON.stringify(SimState.studentScores)
-        });
-
-        // Cohort Breakout scoring sync
         if (SimState.examMode === 'cohort_breakout' && SimState.myBreakoutTableId) {
+          // Cohort Breakout scoped table scoring
           const { currentScore, totalScore } = calculateStationScore(currentCase?.checklist || [], currentChecked);
           _fbDb.ref(`rooms/${SimState.roomId}/breakouts/${SimState.myBreakoutTableId}/scores/${stationNum}`).set({
             stationNumber: stationNum,
             checkedProgress: currentChecked,
+            checkedIds: currentChecked,
             score: currentScore,
+            earnedScore: currentScore,
             maxScore: totalScore,
+            percent: totalScore > 0 ? Math.round((currentScore / totalScore) * 100) : 0,
+            examinerName: SimState.lobbyPlayerName || SimState.myBreakoutRole || 'Examiner',
             updatedAt: Date.now()
           });
-        }
-
-        // Carousel Rotation scoring sync
-        if (SimState.examMode === 'carousel_rotation') {
+        } else if (SimState.examMode === 'carousel_rotation') {
           const r = SimState.currentIdx || 0;
           const N = SimState.stations.length || 1;
           const assignedStationNum = SimState.myCarouselStation || stationNum;
@@ -5507,6 +5575,12 @@
               updatedAt: Date.now()
             });
           }
+        } else {
+          // Standard 1-on-1 mode
+          _fbDb.ref('rooms/' + SimState.roomId).update({
+            checklistProgress: currentChecked,
+            scoresByStation: JSON.stringify(SimState.studentScores)
+          });
         }
       }
     }
@@ -6775,6 +6849,54 @@
     // ═════════════════════════════════════════════════════════════════
     // LARGE GROUP MULTIPLAYER MODES (COHORT BREAKOUTS & CAROUSEL)
     // ═════════════════════════════════════════════════════════════════
+    async function promptBatchCreateBreakoutTables() {
+      if (!SimState.roomId || typeof _fbDb === 'undefined' || !_fbDb) return;
+      const input = prompt('ระบุจำนวนโต๊ะสอบย่อยที่ต้องการตั้งพร้อมกัน (เช่น 50 โต๊ะ สำหรับ 100 คน):', '50');
+      if (input === null) return;
+      const count = parseInt(input, 10);
+      if (isNaN(count) || count < 1 || count > 50) {
+        alert('กรุณาระบุจำนวนโต๊ะระหว่าง 1 ถึง 50 ครับ');
+        return;
+      }
+      await batchCreateBreakoutTables(count);
+    }
+
+    async function batchCreateBreakoutTables(totalCount = 50) {
+      if (!SimState.roomId || typeof _fbDb === 'undefined' || !_fbDb) return;
+      try {
+        if (typeof showGlobalLoader === 'function') {
+          showGlobalLoader(true, `กำลังจัดเตรียมโต๊ะสอบย่อย ${totalCount} โต๊ะ...`);
+        }
+        const snap = await _fbDb.ref(`rooms/${SimState.roomId}/breakouts`).get();
+        const existing = snap.val() || {};
+        const updates = {};
+        for (let i = 1; i <= totalCount; i++) {
+          const tId = `table_${i}`;
+          if (!existing[tId]) {
+            updates[`rooms/${SimState.roomId}/breakouts/${tId}`] = {
+              id: tId,
+              name: `โต๊ะสอบที่ ${i}`,
+              examinerId: '',
+              examinerName: '',
+              participantId: '',
+              participantName: '',
+              scores: {}
+            };
+          }
+        }
+        if (Object.keys(updates).length > 0) {
+          await _fbDb.ref().update(updates);
+        }
+      } catch (e) {
+        console.error('Batch create breakout tables failed:', e);
+        alert('ไม่สามารถตั้งโต๊ะสอบได้: ' + e.message);
+      } finally {
+        if (typeof showGlobalLoader === 'function') {
+          showGlobalLoader(false);
+        }
+      }
+    }
+
     async function addBreakoutTable() {
       if (!SimState.roomId || typeof _fbDb === 'undefined' && !_fbDb) return;
       try {
@@ -6851,7 +6973,7 @@
     }
 
     async function joinBreakoutTable(tableId, role) {
-      if (!SimState.roomId || typeof _fbDb === 'undefined') return;
+      if (!SimState.roomId || typeof _fbDb === 'undefined' || !_fbDb) return;
       if (SimState.isHost) {
         alert('Host ผู้คุมสอบใหญ่มีหน้าที่คุมการสอบจากจอภาพรวม ไม่สามารถลงประจำโต๊ะย่อยได้ครับ');
         return;
@@ -6869,67 +6991,89 @@
 
       const myId = SimState.myPlayerId;
       const myName = SimState.lobbyPlayerName;
+      let abortReason = '';
+
       try {
-        const snap = await _fbDb.ref(`rooms/${SimState.roomId}/breakouts`).get();
-        const allBreakouts = snap.val() || {};
-        const targetTable = allBreakouts[tableId] || {};
-
-        // Check if slot is already occupied by someone else
-        if (role === 'examiner' && targetTable.examinerId && targetTable.examinerId !== myId) {
-          alert(`⚠️ โต๊ะ "${targetTable.name || tableId}" มีผู้ประเมิน (${targetTable.examinerName}) ประจำอยู่แล้ว โปรดเลือกโต๊ะอื่น`);
-          return;
-        }
-        if (role === 'participant' && targetTable.participantId && targetTable.participantId !== myId) {
-          alert(`⚠️ โต๊ะ "${targetTable.name || tableId}" มีผู้เข้าสอบ (${targetTable.participantName}) ประจำอยู่แล้ว โปรดเลือกโต๊ะอื่น`);
-          return;
-        }
-
-        const updateData = {};
-
-        // Atomically clear myId from ALL breakout tables (both examiner & participant slots)
-        Object.keys(allBreakouts).forEach(k => {
-          if (allBreakouts[k].examinerId === myId) {
-            updateData[`rooms/${SimState.roomId}/breakouts/${k}/examinerId`] = '';
-            updateData[`rooms/${SimState.roomId}/breakouts/${k}/examinerName`] = '';
+        const breakoutsRef = _fbDb.ref(`rooms/${SimState.roomId}/breakouts`);
+        const txResult = await breakoutsRef.transaction(currentBreakouts => {
+          if (!currentBreakouts) return currentBreakouts;
+          const targetTable = currentBreakouts[tableId];
+          if (!targetTable) {
+            abortReason = 'not_found';
+            return; // Abort transaction
           }
-          if (allBreakouts[k].participantId === myId) {
-            updateData[`rooms/${SimState.roomId}/breakouts/${k}/participantId`] = '';
-            updateData[`rooms/${SimState.roomId}/breakouts/${k}/participantName`] = '';
+
+          // Check if slot is already occupied by someone else
+          if (role === 'examiner' && targetTable.examinerId && targetTable.examinerId !== myId) {
+            abortReason = `โต๊ะ "${targetTable.name || tableId}" มีผู้ประเมิน (${targetTable.examinerName}) ประจำอยู่แล้ว`;
+            return; // Abort transaction
           }
+          if (role === 'participant' && targetTable.participantId && targetTable.participantId !== myId) {
+            abortReason = `โต๊ะ "${targetTable.name || tableId}" มีผู้เข้าสอบ (${targetTable.participantName}) ประจำอยู่แล้ว`;
+            return; // Abort transaction
+          }
+
+          // Atomically clear myId from ALL breakout tables to prevent double bookings
+          Object.keys(currentBreakouts).forEach(k => {
+            if (currentBreakouts[k].examinerId === myId) {
+              currentBreakouts[k].examinerId = '';
+              currentBreakouts[k].examinerName = '';
+            }
+            if (currentBreakouts[k].participantId === myId) {
+              currentBreakouts[k].participantId = '';
+              currentBreakouts[k].participantName = '';
+            }
+          });
+
+          // Reserve slot
+          if (role === 'examiner') {
+            targetTable.examinerId = myId;
+            targetTable.examinerName = myName;
+          } else {
+            targetTable.participantId = myId;
+            targetTable.participantName = myName;
+          }
+
+          return currentBreakouts;
         });
 
-        if (role === 'examiner') {
-          updateData[`rooms/${SimState.roomId}/breakouts/${tableId}/examinerId`] = myId;
-          updateData[`rooms/${SimState.roomId}/breakouts/${tableId}/examinerName`] = myName;
-        } else {
-          updateData[`rooms/${SimState.roomId}/breakouts/${tableId}/participantId`] = myId;
-          updateData[`rooms/${SimState.roomId}/breakouts/${tableId}/participantName`] = myName;
+        if (txResult && txResult.committed) {
+          SimState.myBreakoutTableId = tableId;
+          SimState.myBreakoutRole = role;
+        } else if (abortReason) {
+          if (abortReason === 'not_found') {
+            alert('ไม่พบโต๊ะสอบนี้ อาจถูกลบไปแล้ว');
+          } else {
+            alert(`⚠️ ${abortReason} โปรดเลือกโต๊ะอื่น`);
+          }
         }
-        await _fbDb.ref().update(updateData);
-        SimState.myBreakoutTableId = tableId;
-        SimState.myBreakoutRole = role;
       } catch (e) {
         console.error('Join breakout table failed:', e);
+        alert('เกิดข้อผิดพลาดในการเข้าโต๊ะสอบ: ' + e.message);
       }
     }
 
     async function leaveBreakoutTable(tableId) {
-      if (!SimState.roomId || typeof _fbDb === 'undefined') return;
+      if (!SimState.roomId || typeof _fbDb === 'undefined' || !_fbDb) return;
       const myId = SimState.myPlayerId;
       try {
-        const snap = await _fbDb.ref(`rooms/${SimState.roomId}/breakouts/${tableId}`).get();
-        const table = snap.val();
-        if (!table) return;
-        const updateData = {};
-        if (table.examinerId === myId) {
-          updateData[`rooms/${SimState.roomId}/breakouts/${tableId}/examinerId`] = '';
-          updateData[`rooms/${SimState.roomId}/breakouts/${tableId}/examinerName`] = '';
-        }
-        if (table.participantId === myId) {
-          updateData[`rooms/${SimState.roomId}/breakouts/${tableId}/participantId`] = '';
-          updateData[`rooms/${SimState.roomId}/breakouts/${tableId}/participantName`] = '';
-        }
-        await _fbDb.ref().update(updateData);
+        const breakoutsRef = _fbDb.ref(`rooms/${SimState.roomId}/breakouts`);
+        await breakoutsRef.transaction(currentBreakouts => {
+          if (!currentBreakouts) return currentBreakouts;
+          Object.keys(currentBreakouts).forEach(k => {
+            if (!tableId || k === tableId) {
+              if (currentBreakouts[k].examinerId === myId) {
+                currentBreakouts[k].examinerId = '';
+                currentBreakouts[k].examinerName = '';
+              }
+              if (currentBreakouts[k].participantId === myId) {
+                currentBreakouts[k].participantId = '';
+                currentBreakouts[k].participantName = '';
+              }
+            }
+          });
+          return currentBreakouts;
+        });
         SimState.myBreakoutTableId = null;
         SimState.myBreakoutRole = null;
       } catch (e) {
@@ -6948,7 +7092,11 @@
       }
 
       const breakouts = room.breakouts || {};
-      const tableKeys = Object.keys(breakouts);
+      const tableKeys = Object.keys(breakouts).sort((a,b) => {
+        const numA = parseInt(a.replace(/\D/g, ''), 10) || 0;
+        const numB = parseInt(b.replace(/\D/g, ''), 10) || 0;
+        return numA - numB;
+      });
       if (tableKeys.length === 0) {
         container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:1rem;">ยังไม่มีโต๊ะสอบย่อย กด "+ เพิ่มโต๊ะสอบ"</div>';
         return;
@@ -7511,17 +7659,31 @@
       if (room.examMode === 'cohort_breakout') {
         if (matrixTitleEl) matrixTitleEl.textContent = '📊 ความคืบหน้าการประเมินสดรายโต๊ะสอบ (Live Breakout Matrix)';
         const breakouts = room.breakouts || {};
-        Object.keys(breakouts).forEach(k => {
+        const breakoutKeys = Object.keys(breakouts).sort((a,b) => {
+          const numA = parseInt(a.replace(/\D/g, ''), 10) || 0;
+          const numB = parseInt(b.replace(/\D/g, ''), 10) || 0;
+          return numA - numB;
+        });
+
+        breakoutKeys.forEach(k => {
           const t = breakouts[k];
-          const currScoreObj = t.scores ? t.scores[SimState.currentIdx + 1] : null;
-          const scoreText = currScoreObj ? ` · ให้คะแนนแล้ว (${currScoreObj.score || 0}/${currScoreObj.maxScore || 0})` : '';
+          const currScoreObj = t.scores ? (t.scores[SimState.currentIdx + 1] || t.scores[String(SimState.currentIdx + 1)]) : null;
+          const earned = currScoreObj ? (currScoreObj.earnedScore !== undefined ? currScoreObj.earnedScore : (currScoreObj.score || 0)) : null;
+          const max = currScoreObj ? (currScoreObj.maxScore || 0) : null;
+          const isDone = Boolean(currScoreObj && (
+            (Array.isArray(currScoreObj.checkedProgress) && currScoreObj.checkedProgress.length > 0) ||
+            (Array.isArray(currScoreObj.checkedIds) && currScoreObj.checkedIds.length > 0)
+          ));
+          const scoreText = currScoreObj ? ` · ให้คะแนนแล้ว (${earned}/${max})` : '';
 
           const item = document.createElement('div');
-          item.style.cssText = 'background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.75rem;font-size:0.84rem;';
+          item.style.cssText = `background:var(--surface);border:1px solid ${isDone ? 'rgba(34,197,94,0.5)' : 'var(--border)'};border-radius:var(--radius-sm);padding:0.75rem;font-size:0.84rem;box-shadow:${isDone ? '0 1px 4px rgba(34,197,94,0.15)' : 'none'};`;
           item.innerHTML = `
-            <div style="font-weight:700;color:var(--text-primary);border-bottom:1px solid var(--border);padding-bottom:0.35rem;margin-bottom:0.35rem;display:flex;justify-content:space-between;">
+            <div style="font-weight:700;color:var(--text-primary);border-bottom:1px solid var(--border);padding-bottom:0.35rem;margin-bottom:0.35rem;display:flex;justify-content:space-between;align-items:center;">
               <span>${escapeHtml(t.name || k)}</span>
-              <span style="font-size:0.72rem;color:var(--text-muted);">สถานีที่ ${r + 1}</span>
+              <span style="font-size:0.72rem;font-weight:700;color:${isDone ? '#16a34a' : 'var(--text-muted)'};background:${isDone ? '#dcfce7' : 'transparent'};padding:0.1rem 0.4rem;border-radius:4px;">
+                ${isDone ? '✅ ประเมินแล้ว' : `สถานีที่ ${r + 1}`}
+              </span>
             </div>
             <div style="display:flex;justify-content:space-between;margin-bottom:0.2rem;">
               <span style="color:var(--text-muted);">Examiner:</span>
