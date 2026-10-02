@@ -2477,7 +2477,8 @@ function syncCaseLibraryFromDocs() {
   const sourceDocs = [
     { docId: '1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g', defaultCat: 'Clinic' },
     { docId: '1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw', defaultCat: 'Product' },
-    { docId: '1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg', defaultCat: 'SAP' }
+    { docId: '1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg', defaultCat: 'SAP' },
+    { docId: '1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24', defaultCat: 'Product' } // 🌟 Mock Exam Doc
   ];
   
   const scannedCases = [];
