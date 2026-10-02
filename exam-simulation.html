@@ -862,13 +862,8 @@
                 <input type="text" id="lobby-player-name" class="select-filter" style="width: 100%; border: 1px solid var(--border); padding: 0.5rem;" placeholder="ระบุชื่อของคุณ..." required>
               </div>
 
-              <div class="form-group" style="margin-top: 1rem;">
-                <label class="form-label" for="lobby-role-select">บทบาทในการจำลองสอบ</label>
-                <select id="lobby-role-select" class="select-filter" style="width: 100%;" onchange="toggleLobbyRole(this.value)">
-                  <option value="examiner">🔎 ฉันเป็นผู้ประเมิน/ผู้ให้คะแนน (Examiner — ดูแนวคำตอบ/เฉลย)</option>
-                  <option value="examinee">✍️ ฉันเป็นผู้เข้าสอบ (Examinee — ทำการตอบและแสดงสถานการณ์)</option>
-                </select>
-              </div>
+              <!-- Role selection is chosen dynamically inside the Lobby for all modes -->
+              <input type="hidden" id="lobby-role-select" value="examinee">
 
               <!-- Mode Choice: Create vs Join -->
               <div class="form-group" style="margin-top: 1.5rem;">
@@ -1075,6 +1070,24 @@
             <div style="font-size: 2.75rem; font-weight: 900; letter-spacing: 0.4rem; color: var(--primary); font-family: var(--font-title);" id="lobby-share-code-display">----</div>
           </div>
 
+          <!-- Standard Mode Role Selector Bar (Shown when examMode === 'standard') -->
+          <div id="standard-mode-role-selector" style="display: none; margin: 1.25rem auto; max-width: 480px; padding: 1.1rem 1.25rem; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); text-align: center;">
+            <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 0.6rem; font-family: var(--font-title);">
+              🎭 เลือกบทบาทของคุณในห้องนี้ (Role Selection)
+            </div>
+            <div style="display: inline-flex; gap: 0.65rem; justify-content: center; flex-wrap: wrap;">
+              <button type="button" id="btn-set-role-examiner" class="btn btn-sm btn-outline" style="border-radius: 20px; padding: 0.45rem 1.15rem; font-weight: 700; font-size: 0.88rem;" onclick="switchMyLobbyRole('examiner')">
+                👨‍🏫 ผู้ประเมิน (Examiner)
+              </button>
+              <button type="button" id="btn-set-role-examinee" class="btn btn-sm btn-outline" style="border-radius: 20px; padding: 0.45rem 1.15rem; font-weight: 700; font-size: 0.88rem;" onclick="switchMyLobbyRole('examinee')">
+                ✍️ ผู้เข้าสอบ (Participant)
+              </button>
+            </div>
+            <div id="standard-role-hint" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; line-height: 1.4;">
+              เลือกได้อิสระ: ผู้ประเมินจะเห็น Checklist ให้คะแนน / ผู้เข้าสอบจะเห็นโจทย์สถานการณ์
+            </div>
+          </div>
+
           <!-- Cohort Breakout Tables Panel (Shown when examMode === 'cohort_breakout') -->
           <div id="lobby-cohort-breakout-panel" style="display: none; margin: 1.5rem auto 1rem auto; max-width: 720px; text-align: left;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -1082,9 +1095,9 @@
                 <strong style="font-size: 1rem; color: var(--text-primary); font-family: var(--font-title);">👥 โต๊ะสอบย่อย (Breakout Tables)</strong>
                 <div style="font-size: 0.78rem; color: var(--text-muted);">จับคู่ 1 Examiner + 1 Participant ต่อโต๊ะ เพื่อสอบโจทย์เดียวกันพร้อมกันทั้งห้อง</div>
               </div>
-              <div style="display: flex; gap: 0.4rem; align-items: center;" id="cohort-table-btn-group">
-                <button type="button" class="sim-btn-xs" style="background: var(--surface); border: 1px solid var(--border); color: var(--danger, #ef4444);" onclick="removeLastBreakoutTable()" title="ลบโต๊ะสอบตัวล่าสุด">➖ ลบโต๊ะ</button>
-                <button type="button" class="sim-btn-xs" style="background: var(--primary); color: white;" onclick="addBreakoutTable()">➕ เพิ่มโต๊ะสอบ</button>
+              <div style="display: flex; gap: 0.5rem; align-items: center;" id="cohort-table-btn-group">
+                <button type="button" class="btn btn-sm btn-outline" style="color: var(--danger, #ef4444); border-color: rgba(239,68,68,0.3); padding: 0.35rem 0.65rem; font-size: 0.82rem; border-radius: 6px;" onclick="removeLastBreakoutTable()" title="ลบโต๊ะสอบตัวล่าสุด">➖ ลบโต๊ะ</button>
+                <button type="button" class="btn btn-sm btn-primary" style="padding: 0.35rem 0.85rem; font-size: 0.85rem; font-weight: 700; border-radius: 6px;" onclick="addBreakoutTable()">➕ เพิ่มโต๊ะสอบ</button>
               </div>
             </div>
             <div id="cohort-tables-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem;">
@@ -2262,6 +2275,63 @@
       if (joinRadio) joinRadio.disabled = false;
     }
 
+    // Dynamic role switching inside the lobby for standard mode
+    async function switchMyLobbyRole(newRole) {
+      SimState.role = newRole;
+      SimState.lobbyRole = newRole;
+      if (SimState.roomId && typeof _fbDb !== 'undefined') {
+        try {
+          const updates = {};
+          updates[`rooms/${SimState.roomId}/players/${SimState.myPlayerId}/role`] = newRole;
+          await _fbDb.ref().update(updates);
+        } catch (e) {
+          console.error('Error updating player role in Firebase:', e);
+        }
+      }
+      updateStandardRoleSelectorUI();
+      const roleBadge = document.getElementById('lobby-my-role-badge');
+      if (roleBadge) {
+        roleBadge.textContent = SimState.isHost ? 'Host' : (newRole === 'examiner' ? 'Examiner' : 'Participant');
+        roleBadge.style.background = SimState.isHost ? 'rgba(99,102,241,0.18)' : (newRole === 'examiner' ? 'rgba(59,130,246,0.15)' : 'rgba(16,185,129,0.15)');
+        roleBadge.style.color = SimState.isHost ? 'var(--primary)' : (newRole === 'examiner' ? '#2563eb' : '#16a34a');
+      }
+    }
+
+    function updateStandardRoleSelectorUI() {
+      const btnExaminer = document.getElementById('btn-set-role-examiner');
+      const btnExaminee = document.getElementById('btn-set-role-examinee');
+      const hint = document.getElementById('standard-role-hint');
+      const currentRole = SimState.role;
+
+      if (btnExaminer && btnExaminee) {
+        if (currentRole === 'examiner') {
+          btnExaminer.className = 'btn btn-sm btn-primary';
+          btnExaminer.style.background = 'var(--primary)';
+          btnExaminer.style.color = '#ffffff';
+          btnExaminer.style.borderColor = 'var(--primary)';
+
+          btnExaminee.className = 'btn btn-sm btn-outline';
+          btnExaminee.style.background = 'transparent';
+          btnExaminee.style.color = 'var(--text-secondary)';
+          btnExaminee.style.borderColor = 'var(--border)';
+
+          if (hint) hint.innerHTML = 'สถานะของคุณ: <strong style="color:var(--primary);">👨‍🏫 ผู้ประเมิน (Examiner)</strong> — คุณจะเห็น Checklist ให้คะแนนผู้เข้าสอบ';
+        } else {
+          btnExaminee.className = 'btn btn-sm btn-primary';
+          btnExaminee.style.background = '#16a34a';
+          btnExaminee.style.color = '#ffffff';
+          btnExaminee.style.borderColor = '#16a34a';
+
+          btnExaminer.className = 'btn btn-sm btn-outline';
+          btnExaminer.style.background = 'transparent';
+          btnExaminer.style.color = 'var(--text-secondary)';
+          btnExaminer.style.borderColor = 'var(--border)';
+
+          if (hint) hint.innerHTML = 'สถานะของคุณ: <strong style="color:#16a34a;">✍️ ผู้เข้าสอบ (Participant)</strong> — คุณจะเห็นโจทย์สถานการณ์และข้อสอบ';
+        }
+      }
+    }
+
     // Toggle Lobby operations: Create Room vs Join Room
     function toggleLobbyOp(op) {
       SimState.lobbyOp = op;
@@ -2488,12 +2558,16 @@
           const savedEmoji = localStorage.getItem('ple_player_emoji') || (isSuperHost ? '👑' : '👨‍🏫');
           SimState.myEmoji = savedEmoji;
 
+          const hostInitialRole = isSuperHost ? 'host' : 'examiner';
+          SimState.lobbyRole = hostInitialRole;
+          SimState.role = hostInitialRole;
+
           const initialPlayers = {};
           initialPlayers[myPlayerId] = {
             id: myPlayerId,
             name: playerName,
             emoji: savedEmoji,
-            role: SimState.lobbyRole,
+            role: hostInitialRole,
             isHost: true,
             joinedAt: Date.now()
           };
@@ -2506,9 +2580,9 @@
             hostId: myPlayerId,
             hostName: playerName,
             hostEmoji: savedEmoji,
-            hostRole: SimState.lobbyRole,
-            examineeName: SimState.lobbyRole === 'examinee' ? playerName : '',
-            examinerName: SimState.lobbyRole === 'examiner' ? playerName : '',
+            hostRole: hostInitialRole,
+            examineeName: '',
+            examinerName: hostInitialRole === 'examiner' ? playerName : '',
             players: initialPlayers,
             currentStationIdx: 0,
             caseId: fullExamSet[0].caseId,
@@ -2526,7 +2600,7 @@
           await _fbDb.ref('rooms/' + randomRoomId).set(roomData);
           
           SimState.roomId = randomRoomId;
-          SimState.role = SimState.lobbyRole;
+          SimState.role = hostInitialRole;
           
           // Set up local stations
           SimState.stations = [];
@@ -2568,7 +2642,7 @@
             id: myPlayerId,
             name: playerName,
             emoji: savedEmoji,
-            role: SimState.lobbyRole,
+            role: 'examinee',
             isHost: false,
             joinedAt: Date.now()
           };
@@ -2588,7 +2662,8 @@
           });
           
           SimState.roomId = roomIdInput;
-          SimState.role = SimState.lobbyRole;
+          SimState.role = 'examinee';
+          SimState.lobbyRole = 'examinee';
           setupLobbyRoomUI();
         }
       } catch (e) {
@@ -2760,7 +2835,10 @@
                 const readyIcon = isReady 
                   ? '<span style="color:#10b981;font-weight:700;font-size:0.75rem;">🟢 พร้อม</span>' 
                   : '<span style="color:var(--text-muted);font-size:0.75rem;">⚪ ยังไม่พร้อม</span>';
-                tag.innerHTML = `${readyIcon} <span style="font-size:1.15rem;line-height:1;">${escapeHtml(pEmoji)}</span> <strong>${escapeHtml(p.name)}</strong>${isMe ? ' <span style="font-size:0.72rem;color:var(--primary);font-weight:700;">(คุณ)</span>' : ''}`;
+                const roleBadgeText = p.isHost ? '👑 Host' : (p.role === 'examiner' ? '👨‍🏫 ผู้ประเมิน' : '✍️ ผู้เข้าสอบ');
+                const roleBadgeColor = p.isHost ? 'var(--primary)' : (p.role === 'examiner' ? '#2563eb' : '#16a34a');
+                const roleBadgeBg = p.isHost ? 'rgba(99,102,241,0.12)' : (p.role === 'examiner' ? 'rgba(59,130,246,0.12)' : 'rgba(16,185,129,0.12)');
+                tag.innerHTML = `${readyIcon} <span style="font-size:1.15rem;line-height:1;">${escapeHtml(pEmoji)}</span> <strong>${escapeHtml(p.name)}</strong> <span style="font-size:0.72rem;background:${roleBadgeBg};color:${roleBadgeColor};font-weight:700;padding:0.1rem 0.35rem;border-radius:4px;">${roleBadgeText}</span>${isMe ? ' <span style="font-size:0.72rem;color:var(--primary);font-weight:700;">(คุณ)</span>' : ''}`;
                 partListEl.appendChild(tag);
               });
             }
@@ -2769,17 +2847,30 @@
           // Show/Hide Multiplayer Panels
           const breakoutPanel = document.getElementById('lobby-cohort-breakout-panel');
           const carouselPanel = document.getElementById('lobby-carousel-rotation-panel');
+          const standardRoleSelector = document.getElementById('standard-mode-role-selector');
+          
           if (room.examMode === 'cohort_breakout') {
             if (breakoutPanel) breakoutPanel.style.display = 'block';
             if (carouselPanel) carouselPanel.style.display = 'none';
+            if (standardRoleSelector) standardRoleSelector.style.display = 'none';
             renderBreakoutTables(room);
           } else if (room.examMode === 'carousel_rotation') {
             if (breakoutPanel) breakoutPanel.style.display = 'none';
             if (carouselPanel) carouselPanel.style.display = 'block';
+            if (standardRoleSelector) standardRoleSelector.style.display = 'none';
             renderCarouselDiagram(room);
           } else {
+            // Standard Mode
             if (breakoutPanel) breakoutPanel.style.display = 'none';
             if (carouselPanel) carouselPanel.style.display = 'none';
+            if (standardRoleSelector) {
+              standardRoleSelector.style.display = 'block';
+              const meP = playersList.find(p => p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName);
+              if (meP && meP.role) {
+                SimState.role = meP.role;
+              }
+              updateStandardRoleSelectorUI();
+            }
           }
 
           const isHost = SimState.isHost || (room.hostRole === SimState.role && playersList[0] && playersList[0].name === SimState.lobbyPlayerName);
@@ -4356,22 +4447,23 @@
 
     // ─── Leaderboard & Podium Helpers ─────────────────────────
     function computeLeaderboard(room) {
-      if (!room) return [];
+      if (!room) room = SimState.cachedRoom || {};
       const stationsList = SimState.stations || [];
       const leaderboard = [];
       const examMode = room.examMode || SimState.examMode || 'standard';
 
       if (examMode === 'cohort_breakout' && room.breakouts) {
         Object.entries(room.breakouts).forEach(([tableId, t]) => {
-          const partName = t.participantName || `ผู้เข้าสอบ (${tableId})`;
+          const partName = t.participantName;
           const partId = t.participantId;
+          if (!partName && !partId) return; // Skip empty tables without participants
           const examinerName = t.examinerName || 'ไม่ระบุ';
           let totalEarned = 0, totalMax = 0, passedStations = 0;
 
           stationsList.forEach(st => {
             const c = st.case || {};
             const isRest = st.isRest || ((c.category || '').toUpperCase() === 'REST');
-            const stScore = t.scores ? t.scores[st.stationNumber] : null;
+            const stScore = t.scores ? (t.scores[st.stationNumber] || t.scores[String(st.stationNumber)]) : null;
             let earned = 0, max = 0;
             if (stScore) {
               earned = stScore.score || 0;
@@ -4392,7 +4484,7 @@
           const overallPct = totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0;
           leaderboard.push({
             id: partId || tableId,
-            name: partName,
+            name: partName || 'ผู้เข้าสอบ',
             emoji: pEmoji,
             detail: `โต๊ะ ${tableId} (ผู้ประเมิน: ${examinerName})`,
             earned: Number.isInteger(totalEarned) ? totalEarned : totalEarned.toFixed(2),
@@ -4430,7 +4522,7 @@
           stationsList.forEach(st => {
             const c = st.case || {};
             const isRest = st.isRest || ((c.category || '').toUpperCase() === 'REST');
-            const stScore = pData.stations ? pData.stations[st.stationNumber] : null;
+            const stScore = pData.stations ? (pData.stations[st.stationNumber] || pData.stations[String(st.stationNumber)]) : null;
             let earned = 0, max = 0;
             if (stScore) {
               earned = stScore.score || 0;
@@ -4451,7 +4543,7 @@
           const overallPct = totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0;
           leaderboard.push({
             id: pId,
-            name: pData.name,
+            name: pData.name || 'ผู้เข้าสอบ',
             emoji: pEmoji,
             detail: pData.startStation ? `เริ่มต้นที่สถานี ${pData.startStation}` : 'แลปกิ๊งหมุนเวียน',
             earned: Number.isInteger(totalEarned) ? totalEarned : totalEarned.toFixed(2),
@@ -4464,46 +4556,81 @@
         });
       } else {
         // Standard multiplayer room
-        if (room.players) {
-          const examinees = Object.values(room.players).filter(p => !p.isHost && p.role !== 'examiner');
-          examinees.forEach(p => {
-            let totalEarned = 0, totalMax = 0, passedStations = 0;
-            const scMap = SimState.studentScores || {};
-            stationsList.forEach(st => {
-              const c = st.case || {};
-              const isRest = st.isRest || ((c.category || '').toUpperCase() === 'REST');
-              const checked = scMap[st.stationNumber] || [];
-              const { currentScore: earned, totalScore: max } = calculateStationScore(c.checklist || [], checked);
-              totalEarned += earned;
-              totalMax += max;
-              const pct = max > 0 ? Math.round((earned / max) * 100) : 0;
-              if (isRest || pct >= 80) passedStations++;
-            });
-            const overallPct = totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0;
-            leaderboard.push({
-              id: p.id || p.name,
-              name: p.name,
-              emoji: p.emoji || '👤',
-              detail: 'ผู้เข้าสอบ',
-              earned: Number.isInteger(totalEarned) ? totalEarned : totalEarned.toFixed(2),
-              max: Number.isInteger(totalMax) ? totalMax : totalMax.toFixed(2),
-              percent: overallPct,
-              passedStations: passedStations,
-              totalStations: stationsList.length,
-              isPassed: overallPct >= 80
-            });
-          });
+        const playersList = room.players ? Object.values(room.players) : (SimState.cachedPlayersList || []);
+        let examinees = playersList.filter(p => !p.isHost && p.role !== 'examiner' && p.role !== 'host');
+        if (examinees.length === 0) {
+          examinees = playersList.filter(p => !p.isHost);
         }
+        if (examinees.length === 0 && playersList.length > 0) {
+          examinees = playersList;
+        }
+
+        let scMap = SimState.studentScores || {};
+        if (room.scoresByStation) {
+          try {
+            const parsed = typeof room.scoresByStation === 'string' ? JSON.parse(room.scoresByStation) : room.scoresByStation;
+            if (parsed && typeof parsed === 'object') {
+              scMap = Object.assign({}, scMap, parsed);
+            }
+          } catch (e) {}
+        }
+
+        examinees.forEach(p => {
+          let totalEarned = 0, totalMax = 0, passedStations = 0;
+          stationsList.forEach(st => {
+            const c = st.case || {};
+            const isRest = st.isRest || ((c.category || '').toUpperCase() === 'REST');
+            const checked = scMap[st.stationNumber] || scMap[String(st.stationNumber)] || [];
+            const { currentScore: earned, totalScore: max } = calculateStationScore(c.checklist || [], checked);
+            totalEarned += earned;
+            totalMax += max;
+            const pct = max > 0 ? Math.round((earned / max) * 100) : 0;
+            if (isRest || pct >= 80) passedStations++;
+          });
+          const overallPct = totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0;
+          leaderboard.push({
+            id: p.id || p.name,
+            name: p.name || 'ผู้เข้าสอบ',
+            emoji: p.emoji || '👤',
+            detail: 'ผู้เข้าสอบ',
+            earned: Number.isInteger(totalEarned) ? totalEarned : totalEarned.toFixed(2),
+            max: Number.isInteger(totalMax) ? totalMax : totalMax.toFixed(2),
+            percent: overallPct,
+            passedStations: passedStations,
+            totalStations: stationsList.length,
+            isPassed: overallPct >= 80
+          });
+        });
       }
 
       leaderboard.sort((a, b) => b.percent !== a.percent ? b.percent - a.percent : b.earned - a.earned);
       return leaderboard;
     }
 
+    function renderHostSummaryBanner(leaderboard) {
+      const hostBanner = document.getElementById('results-host-summary-banner');
+      if (!hostBanner) return;
+      hostBanner.style.display = 'block';
+      const totalExaminees = leaderboard.length;
+      const passedCount = leaderboard.filter(x => x.isPassed).length;
+      const failedCount = totalExaminees - passedCount;
+      const passRate = totalExaminees > 0 ? Math.round((passedCount / totalExaminees) * 100) : 0;
+
+      const statsEl = document.getElementById('results-host-summary-stats');
+      if (statsEl) statsEl.textContent = `ผู้เข้าสอบทั้งหมด ${totalExaminees} คน · ผ่านเกณฑ์ ${passedCount} คน (${passRate}%) · ไม่ผ่าน ${failedCount} คน`;
+
+      const bTot = document.getElementById('host-badge-total-part');
+      if (bTot) bTot.textContent = `👤 ผู้เข้าสอบ ${totalExaminees} คน`;
+      const bPass = document.getElementById('host-badge-passed-count');
+      if (bPass) bPass.textContent = `✅ ผ่านเกณฑ์ ${passedCount} คน (${passRate}%)`;
+      const bFail = document.getElementById('host-badge-failed-count');
+      if (bFail) bFail.textContent = `❌ ไม่ผ่านเกณฑ์ ${failedCount} คน`;
+    }
+
     function renderPodiumLeaderboard(leaderboard) {
-      const p1 = leaderboard[0];
-      const p2 = leaderboard[1];
-      const p3 = leaderboard[2];
+      const slot1 = document.getElementById('podium-slot-1');
+      const slot2 = document.getElementById('podium-slot-2');
+      const slot3 = document.getElementById('podium-slot-3');
 
       const renderSlot = (item, rank, medal, color, height, borderCol) => {
         if (!item) {
@@ -4536,9 +4663,20 @@
         `;
       };
 
-      const slot1 = document.getElementById('podium-slot-1');
-      const slot2 = document.getElementById('podium-slot-2');
-      const slot3 = document.getElementById('podium-slot-3');
+      if (!leaderboard || leaderboard.length === 0) {
+        if (slot1) slot1.innerHTML = renderSlot(null, 1, '🥇', '#f59e0b', 115, '#f59e0b');
+        if (slot2) slot2.innerHTML = renderSlot(null, 2, '🥈', '#94a3b8', 85, '#94a3b8');
+        if (slot3) slot3.innerHTML = renderSlot(null, 3, '🥉', '#d97706', 65, '#b45309');
+        const tbody = document.getElementById('podium-full-tbody');
+        if (tbody) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:1.5rem;color:var(--text-muted);">ยังไม่มีข้อมูลคะแนนของผู้เข้าสอบในห้องนี้</td></tr>';
+        }
+        return;
+      }
+
+      const p1 = leaderboard[0];
+      const p2 = leaderboard[1];
+      const p3 = leaderboard[2];
 
       if (slot1) slot1.innerHTML = renderSlot(p1, 1, '🥇', '#f59e0b', 115, '#f59e0b');
       if (slot2) slot2.innerHTML = renderSlot(p2, 2, '🥈', '#94a3b8', 85, '#94a3b8');
@@ -4722,53 +4860,47 @@
 
         // Render Podium & Leaderboard if multiplayer room
         const roomData = latestRoom || SimState.cachedRoom;
-        const isMultiplayer = SimState.isLobby && roomData;
-        const isHost = SimState.isHost;
+        const isMultiplayer = Boolean(SimState.isLobby);
+        const isHost = Boolean(SimState.isHost || (roomData && (roomData.hostId === SimState.myPlayerId || roomData.hostName === SimState.lobbyPlayerName)));
         const podiumSection = document.getElementById('results-podium-section');
         const personalScoreSection = document.getElementById('results-personal-score-section');
         const hostBanner = document.getElementById('results-host-summary-banner');
 
-        if (isMultiplayer) {
+        if (isHost) {
+          // HOST: ALWAYS HIDE PERSONAL SCORECARD (0/40), ALWAYS SHOW PODIUM + HOST BANNER
+          if (personalScoreSection) personalScoreSection.style.display = 'none';
+          if (podiumSection) podiumSection.style.display = 'block';
+          if (hostBanner) hostBanner.style.display = 'block';
+
           const leaderboard = computeLeaderboard(roomData);
-          if (leaderboard.length > 0) {
-            renderPodiumLeaderboard(leaderboard);
-            if (podiumSection) podiumSection.style.display = 'block';
-
-            if (isHost) {
-              // Super Host: Hide personal scorecard and personal station breakdown
-              if (personalScoreSection) personalScoreSection.style.display = 'none';
-              if (hostBanner) {
-                hostBanner.style.display = 'block';
-                const totalExaminees = leaderboard.length;
-                const passedCount = leaderboard.filter(x => x.isPassed).length;
-                const failedCount = totalExaminees - passedCount;
-                const passRate = totalExaminees > 0 ? Math.round((passedCount / totalExaminees) * 100) : 0;
-
-                const statsEl = document.getElementById('results-host-summary-stats');
-                if (statsEl) statsEl.textContent = `ผู้เข้าสอบทั้งหมด ${totalExaminees} คน · ผ่านเกณฑ์ ${passedCount} คน (${passRate}%) · ไม่ผ่าน ${failedCount} คน`;
-
-                const bTot = document.getElementById('host-badge-total-part');
-                if (bTot) bTot.textContent = `👤 ผู้เข้าสอบ ${totalExaminees} คน`;
-                const bPass = document.getElementById('host-badge-passed-count');
-                if (bPass) bPass.textContent = `✅ ผ่านเกณฑ์ ${passedCount} คน (${passRate}%)`;
-                const bFail = document.getElementById('host-badge-failed-count');
-                if (bFail) bFail.textContent = `❌ ไม่ผ่านเกณฑ์ ${failedCount} คน`;
-              }
-            } else {
-              // Examinee / Examiner: Show personal scorecard AND podium
-              if (personalScoreSection) personalScoreSection.style.display = 'block';
-              if (hostBanner) hostBanner.style.display = 'none';
-            }
-          } else {
-            if (podiumSection) podiumSection.style.display = 'none';
-            if (personalScoreSection) personalScoreSection.style.display = 'block';
-            if (hostBanner) hostBanner.style.display = 'none';
-          }
+          renderPodiumLeaderboard(leaderboard);
+          renderHostSummaryBanner(leaderboard);
         } else {
-          // Solo simulation: regular personal scorecard
-          if (podiumSection) podiumSection.style.display = 'none';
+          // PARTICIPANT / EXAMINER: Show personal scorecard
           if (personalScoreSection) personalScoreSection.style.display = 'block';
           if (hostBanner) hostBanner.style.display = 'none';
+
+          if (isMultiplayer && podiumSection) {
+            podiumSection.style.display = 'block';
+            const leaderboard = computeLeaderboard(roomData);
+            renderPodiumLeaderboard(leaderboard);
+          } else {
+            if (podiumSection) podiumSection.style.display = 'none';
+          }
+        }
+
+        // Live real-time listener on results screen so as examiners finish grading, Host podium updates dynamically
+        if (typeof _fbDb !== 'undefined' && _fbDb && SimState.isLobby && SimState.roomId) {
+          if (_fbRoomRef) { try { _fbRoomRef.off(); } catch (e) {} }
+          _fbRoomRef = _fbDb.ref('rooms/' + SimState.roomId);
+          _fbRoomRef.on('value', (snap) => {
+            if (!snap.exists()) return;
+            const liveRoom = snap.val();
+            SimState.cachedRoom = liveRoom;
+            const freshLb = computeLeaderboard(liveRoom);
+            renderPodiumLeaderboard(freshLb);
+            if (isHost) renderHostSummaryBanner(freshLb);
+          });
         }
 
         // Render participants chips in the results screen
@@ -5307,11 +5439,7 @@
     // LARGE GROUP MULTIPLAYER MODES (COHORT BREAKOUTS & CAROUSEL)
     // ═════════════════════════════════════════════════════════════════
     async function addBreakoutTable() {
-      if (!SimState.roomId || typeof _fbDb === 'undefined') return;
-      if (!SimState.isHost) {
-        alert('เฉพาะผู้สร้างห้อง (Host) เท่านั้นที่สามารถเพิ่มโต๊ะสอบได้');
-        return;
-      }
+      if (!SimState.roomId || typeof _fbDb === 'undefined' && !_fbDb) return;
       try {
         const snap = await _fbDb.ref(`rooms/${SimState.roomId}/breakouts`).get();
         const existing = snap.val() || {};
@@ -5336,21 +5464,25 @@
         });
       } catch (e) {
         console.error('Add breakout table failed:', e);
+        alert('ไม่สามารถเพิ่มโต๊ะสอบได้: ' + e.message);
       }
     }
 
     async function deleteBreakoutTable(tableId) {
-      if (!SimState.roomId || typeof _fbDb === 'undefined') return;
-      if (!SimState.isHost) {
-        alert('เฉพาะผู้สร้างห้อง (Host) เท่านั้นที่สามารถลบโต๊ะสอบได้');
-        return;
-      }
+      if (!SimState.roomId || typeof _fbDb === 'undefined' && !_fbDb) return;
       try {
         const snap = await _fbDb.ref(`rooms/${SimState.roomId}/breakouts/${tableId}`).get();
         const table = snap.val();
         if (!table) return;
 
         const hasPlayers = Boolean(table.examinerId || table.participantId);
+        const isHost = SimState.isHost || (SimState.cachedRoom && SimState.cachedRoom.hostId === SimState.myPlayerId);
+        
+        if (hasPlayers && !isHost) {
+          alert('โต๊ะสอบนี้มีผู้เข้าร่วมอยู่ เฉพาะผู้สร้างห้อง (Host) เท่านั้นที่สามารถลบได้');
+          return;
+        }
+
         if (hasPlayers) {
           const names = [table.examinerName, table.participantName].filter(Boolean).join(', ');
           if (!confirm(`โต๊ะ "${table.name || tableId}" มีผู้เข้าร่วมอยู่ (${names})\nต้องการลบโต๊ะสอบนี้จริงหรือไม่?`)) {
@@ -5365,11 +5497,7 @@
     }
 
     async function removeLastBreakoutTable() {
-      if (!SimState.roomId || typeof _fbDb === 'undefined') return;
-      if (!SimState.isHost) {
-        alert('เฉพาะผู้สร้างห้อง (Host) เท่านั้นที่สามารถลบโต๊ะสอบได้');
-        return;
-      }
+      if (!SimState.roomId || typeof _fbDb === 'undefined' && !_fbDb) return;
       try {
         const snap = await _fbDb.ref(`rooms/${SimState.roomId}/breakouts`).get();
         const existing = snap.val() || {};
@@ -5454,7 +5582,7 @@
 
       const btnGroup = document.getElementById('cohort-table-btn-group');
       if (btnGroup) {
-        btnGroup.style.display = SimState.isHost ? 'flex' : 'none';
+        btnGroup.style.display = 'flex';
       }
 
       const breakouts = room.breakouts || {};
