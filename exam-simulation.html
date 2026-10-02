@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU</title>
   <link rel="stylesheet" href="style.css">
-  <script src="case-data-offline.js?v=v_20261002_162240"></script>
+  <script src="case-data-offline.js?v=v_20261002_165840"></script>
   <script src="case-details-offline.js?v=v_20260930_202218"></script>
-  <script src="app.js?v=v_20261002_162240"></script>
+  <script src="app.js?v=v_20261002_165840"></script>
   <script src="scratchpad.js?v=v_20261002_045854"></script>
   <style>
     /* Simulation Source and Topic Selector */
@@ -997,6 +997,14 @@
             </div>
           </div>
           
+          <!-- Participant / Examiner Ready Status Toggle -->
+          <div id="lobby-ready-toggle-container" style="display: none; margin: 1.25rem auto 0.75rem auto; text-align: center;">
+            <button type="button" id="btn-lobby-toggle-ready" class="btn" style="min-width: 240px; font-size: 1.05rem; padding: 0.75rem 2rem; font-weight: 700; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); cursor: pointer;" onclick="toggleMyReadyStatus()">
+              🟢 แจ้งว่าพร้อมสอบ (Ready)
+            </button>
+            <p id="lobby-ready-status-hint" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.45rem;">กดเพื่อส่งสัญญาณให้ Host ทราบว่าคุณพร้อมเริ่มการสอบแล้ว</p>
+          </div>
+          
           <!-- Examiner / Super Host Start button -->
           <button id="lobby-start-exam-btn" class="btn btn-secondary" style="display: none; margin: 1.25rem auto 0 auto; padding: 0.75rem 2rem; font-size: 1.05rem; box-shadow: var(--shadow-sm); min-width: 220px;" onclick="startLobbyExamOnServer()">
             รอผู้เข้าสอบเชื่อมต่อ...
@@ -1287,24 +1295,79 @@
             </div>
           </div>
 
-          <div class="results-score-display">
-            <div class="results-score-circle">
-              <span class="results-score-num" id="results-score-val">0/0</span>
-              <span class="results-score-pct" id="results-score-pct">0%</span>
+          <!-- Host Room Summary Banner (Only shown if Host in Multiplayer) -->
+          <div id="results-host-summary-banner" style="display: none; margin-bottom: 1.5rem; padding: 1.25rem; background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(16, 185, 129, 0.08)); border: 1px solid var(--border); border-radius: var(--radius-lg); text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 0.35rem;">👑</div>
+            <h3 style="font-family: var(--font-title); font-size: 1.25rem; color: var(--text-primary); margin-bottom: 0.25rem;">ภาพรวมการสอบระดับห้องรวม (Super Host Summary)</h3>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 0.75rem;" id="results-host-summary-stats">ผู้เข้าสอบทั้งหมด 0 คน · ผ่านเกณฑ์ 0 คน (0%)</p>
+            <div style="display: inline-flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center;">
+              <span class="badge" style="background: var(--surface); border: 1px solid var(--border); font-size: 0.85rem; padding: 0.35rem 0.75rem;" id="host-badge-total-part">👤 0 คน</span>
+              <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: var(--success); font-size: 0.85rem; padding: 0.35rem 0.75rem;" id="host-badge-passed-count">✅ ผ่าน 0 คน</span>
+              <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: var(--danger); font-size: 0.85rem; padding: 0.35rem 0.75rem;" id="host-badge-failed-count">❌ ตก 0 คน</span>
             </div>
-            <div class="results-status" id="results-status-text">FAILED</div>
-            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;" id="results-summary-desc">ผ่านการประเมิน 0 จาก 16 สถานี (เกณฑ์ผ่านสถานีต้องได้ >= 80%)</p>
           </div>
-          <h3 class="viewer-section-title" style="border-left-color: var(--primary);">สรุปคะแนนแต่ละสถานี</h3>
-          <div class="table-responsive">
-            <table class="breakdown-table">
-              <thead>
-                <tr>
-                  <th>สถานี</th><th>ชื่อ</th><th>หมวดวิชา</th><th>คะแนนเต็ม</th><th>ได้ (%)</th><th>ผลประเมิน</th>
-                </tr>
-              </thead>
-              <tbody id="results-stations-tbody"><!-- Filled dynamically --></tbody>
-            </table>
+
+          <!-- Multi-player Podium Section (Top 3 & Full Leaderboard) -->
+          <div id="results-podium-section" style="display: none; margin-bottom: 2rem;">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+              <h3 style="font-family: var(--font-title); font-size: 1.4rem; color: var(--text-primary); margin-bottom: 0.25rem;">🏆 ทำเนียบเกียรติยศ (Podium Top 3)</h3>
+              <p style="color: var(--text-secondary); font-size: 0.85rem;">ผู้ทำคะแนนสูงสุดประจำรอบการสอบ</p>
+            </div>
+            
+            <div class="podium-container" style="display: flex; justify-content: center; align-items: flex-end; gap: 0.85rem; max-width: 640px; margin: 0 auto 1.5rem auto; padding: 0 0.5rem;">
+              <!-- 2nd Place -->
+              <div id="podium-slot-2" style="flex: 1; min-width: 130px; text-align: center;"></div>
+              <!-- 1st Place -->
+              <div id="podium-slot-1" style="flex: 1.2; min-width: 150px; text-align: center;"></div>
+              <!-- 3rd Place -->
+              <div id="podium-slot-3" style="flex: 1; min-width: 130px; text-align: center;"></div>
+            </div>
+
+            <!-- Full Ranking Table (ตารางสรุปคะแนนผู้เข้าสอบทุกคน) -->
+            <div id="podium-full-table-wrapper" style="margin-top: 1.5rem; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.25rem 1rem;">
+              <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text-primary); font-family: var(--font-title);">📊 ตารางจัดอันดับผู้เข้าสอบทั้งหมด (Full Leaderboard)</h4>
+              <div class="table-responsive">
+                <table class="breakdown-table" style="font-size: 0.88rem; width: 100%;">
+                  <thead>
+                    <tr>
+                      <th style="width: 70px; text-align: center;">อันดับ</th>
+                      <th>ผู้เข้าสอบ</th>
+                      <th>รายละเอียดกลุ่ม</th>
+                      <th style="text-align: right;">คะแนนรวม</th>
+                      <th style="text-align: center;">ร้อยละ</th>
+                      <th style="text-align: center;">ผ่านสถานี</th>
+                      <th style="text-align: center;">ผลประเมิน</th>
+                    </tr>
+                  </thead>
+                  <tbody id="podium-full-tbody">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Personal Score Breakdown (Shown for examinee / examiner, hidden for Host) -->
+          <div id="results-personal-score-section">
+            <div class="results-score-display">
+              <div class="results-score-circle">
+                <span class="results-score-num" id="results-score-val">0/0</span>
+                <span class="results-score-pct" id="results-score-pct">0%</span>
+              </div>
+              <div class="results-status" id="results-status-text">FAILED</div>
+              <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;" id="results-summary-desc">ผ่านการประเมิน 0 จาก 16 สถานี (เกณฑ์ผ่านสถานีต้องได้ >= 80%)</p>
+            </div>
+            <h3 class="viewer-section-title" style="border-left-color: var(--primary);">สรุปคะแนนแต่ละสถานี</h3>
+            <div class="table-responsive">
+              <table class="breakdown-table">
+                <thead>
+                  <tr>
+                    <th>สถานี</th><th>ชื่อ</th><th>หมวดวิชา</th><th>คะแนนเต็ม</th><th>ได้ (%)</th><th>ผลประเมิน</th>
+                  </tr>
+                </thead>
+                <tbody id="results-stations-tbody"><!-- Filled dynamically --></tbody>
+              </table>
+            </div>
           </div>
           <div style="display: flex; gap: 1rem; margin-top: 2rem;">
             <button class="btn btn-primary" style="flex: 1;" onclick="restartSetup()">🔄 ทำการสอบอีกครั้ง</button>
@@ -2090,16 +2153,19 @@
       const joinFields = document.getElementById('lobby-join-fields');
       const submitBtn = document.getElementById('lobby-submit-btn');
       const sharedConfig = document.getElementById('shared-exam-config');
+      const modeSelector = document.getElementById('lobby-mode-selector-group');
       
       if (op === 'create') {
         if (createFields) createFields.style.display = 'block';
         if (joinFields) joinFields.style.display = 'none';
         if (sharedConfig && SimState.isLobby) sharedConfig.style.display = 'block';
+        if (modeSelector) modeSelector.style.display = 'block';
         if (submitBtn) submitBtn.textContent = '📡 สร้างห้องซ้อมสอบใหม่ (Host)';
       } else {
         if (createFields) createFields.style.display = 'none';
         if (joinFields) joinFields.style.display = 'block';
         if (sharedConfig && SimState.isLobby) sharedConfig.style.display = 'none';
+        if (modeSelector) modeSelector.style.display = 'none';
         if (submitBtn) submitBtn.textContent = '📡 เข้าร่วมห้องสอบ';
         // Focus first OTP box
         setTimeout(() => { const el = document.getElementById('otp-0'); if (el) el.focus(); }, 100);
@@ -2462,6 +2528,22 @@
           if (room.examineeName) playersList.push({ name: room.examineeName, role: 'examinee', isHost: false });
         }
         SimState.cachedPlayersList = playersList;
+        if (room.examMode) SimState.examMode = room.examMode;
+        if (room.isSuperHost !== undefined) SimState.isSuperHost = room.isSuperHost;
+
+        // Auto-detect breakout table membership for current player
+        if (room.breakouts) {
+          Object.entries(room.breakouts).forEach(([tId, t]) => {
+            if (t.examinerId === SimState.myPlayerId || (t.examinerName && t.examinerName === SimState.lobbyPlayerName)) {
+              SimState.myBreakoutTableId = tId;
+              SimState.role = 'examiner';
+            }
+            if (t.participantId === SimState.myPlayerId || (t.participantName && t.participantName === SimState.lobbyPlayerName)) {
+              SimState.myBreakoutTableId = tId;
+              SimState.role = 'participant';
+            }
+          });
+        }
 
         const totalPlayers = playersList.length;
         const activeCountEl = document.getElementById('lobby-active-count');
@@ -2492,6 +2574,8 @@
           document.getElementById('lobby-waiting-screen').style.display = 'block';
           document.getElementById('lobby-countdown-screen').style.display = 'none';
           document.querySelector('.exam-layout').style.display = 'none';
+          const superHostMonitor = document.getElementById('super-host-monitor-view');
+          if (superHostMonitor) superHostMonitor.style.display = 'none';
           const stickyTimer = document.getElementById('exam-sticky-timer-bar');
           if (stickyTimer) stickyTimer.style.display = 'none';
           const stickyHeader = document.getElementById('exam-sticky-top-header');
@@ -2511,9 +2595,13 @@
               partListEl.innerHTML = '';
               participants.forEach(p => {
                 const isMe = p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName;
+                const isReady = !!p.isReady;
                 const tag = document.createElement('span');
-                tag.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.18rem 0.5rem;font-size:0.83rem;color:var(--text-primary);display:inline-flex;align-items:center;gap:0.25rem;';
-                tag.innerHTML = `${escapeHtml(p.name)}${isMe ? ' <span style="font-size:0.72rem;color:var(--primary);font-weight:700;">(คุณ)</span>' : ''}`;
+                tag.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.2rem 0.55rem;font-size:0.83rem;color:var(--text-primary);display:inline-flex;align-items:center;gap:0.35rem;';
+                const readyIcon = isReady 
+                  ? '<span style="color:#10b981;font-weight:700;">🟢 พร้อม</span>' 
+                  : '<span style="color:var(--text-muted);">⚪ ยังไม่พร้อม</span>';
+                tag.innerHTML = `${readyIcon} <span>${escapeHtml(p.name)}</span>${isMe ? ' <span style="font-size:0.72rem;color:var(--primary);font-weight:700;">(คุณ)</span>' : ''}`;
                 partListEl.appendChild(tag);
               });
             }
@@ -2536,6 +2624,34 @@
           }
 
           const isHost = SimState.isHost || (room.hostRole === SimState.role && playersList[0] && playersList[0].name === SimState.lobbyPlayerName);
+          const readyContainer = document.getElementById('lobby-ready-toggle-container');
+          const readyBtn = document.getElementById('btn-lobby-toggle-ready');
+          
+          if (!isHost) {
+            if (readyContainer) readyContainer.style.display = 'block';
+            const mePlayer = playersList.find(p => p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName);
+            if (mePlayer && mePlayer.isReady !== undefined) {
+              SimState.isReady = !!mePlayer.isReady;
+            }
+            if (readyBtn) {
+              if (SimState.isReady) {
+                readyBtn.className = 'btn btn-secondary';
+                readyBtn.style.background = 'var(--surface)';
+                readyBtn.style.borderColor = 'var(--border)';
+                readyBtn.style.color = 'var(--text-secondary)';
+                readyBtn.innerHTML = '⚪ ยกเลิกความพร้อม (Not Ready)';
+              } else {
+                readyBtn.className = 'btn btn-primary';
+                readyBtn.style.background = '#10b981';
+                readyBtn.style.borderColor = '#10b981';
+                readyBtn.style.color = '#ffffff';
+                readyBtn.innerHTML = '🟢 กดเพื่อแจ้งว่าพร้อม (Ready)';
+              }
+            }
+          } else {
+            if (readyContainer) readyContainer.style.display = 'none';
+          }
+
           const startBtn = document.getElementById('lobby-start-exam-btn');
           const waitingMsg = document.getElementById('lobby-waiting-msg');
           const waitingTitle = document.getElementById('lobby-waiting-title');
@@ -2545,10 +2661,27 @@
             if (startBtn) {
               startBtn.style.display = 'block';
               startBtn.disabled = false;
-              startBtn.textContent = totalPlayers > 1 
-                ? `🚀 เริ่มการซ้อมจำลองสอบร่วมกัน (${totalPlayers} คนพร้อมสอบ)` 
-                : '🚀 เริ่มการสอบทันที (รอเพื่อนเข้าร่วมได้ตลอดเวลา)';
-              startBtn.classList.add('btn-primary');
+              const participants = playersList.filter(p => !p.isHost);
+              const readyCount = participants.filter(p => p.isReady).length;
+              const totalPart = participants.length;
+              const allReady = totalPart > 0 && readyCount === totalPart;
+
+              if (totalPart === 0) {
+                startBtn.textContent = '🚀 เริ่มการสอบทันที (รอเพื่อนเข้าร่วมได้ตลอดเวลา)';
+                startBtn.className = 'btn btn-primary';
+                startBtn.style.background = '';
+                startBtn.style.borderColor = '';
+              } else if (allReady) {
+                startBtn.textContent = `🚀 เริ่มการสอบ (ทุกคนพร้อมแล้ว ${readyCount}/${totalPart})`;
+                startBtn.className = 'btn btn-primary';
+                startBtn.style.background = '#10b981';
+                startBtn.style.borderColor = '#10b981';
+              } else {
+                startBtn.textContent = `🚀 เริ่มการสอบ (${readyCount}/${totalPart} คนพร้อม)`;
+                startBtn.className = 'btn btn-secondary';
+                startBtn.style.background = '';
+                startBtn.style.borderColor = '';
+              }
             }
             if (waitingTitle) waitingTitle.textContent = 'ห้องซ้อมสอบพร้อมแล้ว!';
             if (waitingDesc) waitingDesc.textContent = 'แชร์รหัสห้อง 4 หลักด้านบนให้เพื่อนเพื่อเข้าร่วมซ้อมสอบด้วยกันได้ไม่จำกัดจำนวนคน';
@@ -2567,35 +2700,12 @@
           if (SimState.stations.length === 0) {
             await buildStationsFromRoom(room);
           }
-          
-          // ── Super Host Monitor View (Big Projector Screen) ──
-          if (room.isSuperHost && SimState.isHost) {
-            document.getElementById('lobby-waiting-screen').style.display = 'none';
-            document.getElementById('lobby-countdown-screen').style.display = 'none';
-            document.querySelector('.exam-layout').style.display = 'none';
-            const stickyTimer = document.getElementById('exam-sticky-timer-bar');
-            if (stickyTimer) stickyTimer.style.display = 'none';
-            const stickyHeader = document.getElementById('exam-sticky-top-header');
-            if (stickyHeader) stickyHeader.style.display = 'none';
-            
-            SimState.currentIdx = room.currentStationIdx !== undefined ? room.currentStationIdx : (SimState.currentIdx || 0);
-            renderSuperHostMonitor(room);
-            
-            SimState.timerRunning = room.timerRunning !== undefined ? room.timerRunning : true;
-            SimState.timerValue = room.timerValue !== undefined ? room.timerValue : 240;
-            updateTimerDisplay();
-            if (SimState.timerRunning && !SimState.timerInterval) {
-              startLocalCountdown();
-            }
-            return;
-          }
 
-          // If regular client (examiner / participant): hide super host monitor
-          const superHostMonitor = document.getElementById('super-host-monitor-view');
-          if (superHostMonitor) superHostMonitor.style.display = 'none';
-
+          // Countdown synchronized for all participants & Super Host
           if (!SimState.hasDoneCountdown) {
             document.querySelector('.exam-layout').style.display = 'none';
+            const superHostMonitor = document.getElementById('super-host-monitor-view');
+            if (superHostMonitor) superHostMonitor.style.display = 'none';
             const stickyTimer = document.getElementById('exam-sticky-timer-bar');
             if (stickyTimer) stickyTimer.style.display = 'none';
             const stickyHeader = document.getElementById('exam-sticky-top-header');
@@ -2614,37 +2724,45 @@
                   SimState.countdownInterval = null;
                   SimState.hasDoneCountdown = true;
                   document.getElementById('lobby-countdown-screen').style.display = 'none';
-                  document.querySelector('.exam-layout').style.display = 'flex';
-                  const stickyTimer = document.getElementById('exam-sticky-timer-bar');
-                  if (stickyTimer) stickyTimer.style.display = 'block';
-                  const stickyHeader = document.getElementById('exam-sticky-top-header');
-                  if (stickyHeader) stickyHeader.style.display = 'block';
                   
-                  let initialTargetIdx = 0;
-                  if (room.examMode === 'carousel_rotation') {
-                    const N = SimState.stations.length || 1;
-                    const r = room.currentStationIdx !== undefined ? room.currentStationIdx : 0;
-                    if (SimState.role === 'examiner') {
-                      let stNum = 1;
-                      if (room.carouselPosts) {
-                        const post = Object.values(room.carouselPosts).find(p => p.examinerId === SimState.myPlayerId || p.examinerName === SimState.lobbyPlayerName);
-                        if (post) stNum = post.stationNumber;
-                      }
-                      initialTargetIdx = Math.max(0, Math.min(N - 1, stNum - 1));
-                    } else {
-                      let stNum = 1;
-                      if (room.carouselPosts) {
-                        const post = Object.values(room.carouselPosts).find(p => p.startParticipantId === SimState.myPlayerId || p.startParticipantName === SimState.lobbyPlayerName);
-                        if (post) stNum = post.stationNumber;
-                      }
-                      const activeSt = ((stNum - 1 + r) % N) + 1;
-                      initialTargetIdx = Math.max(0, Math.min(N - 1, activeSt - 1));
-                    }
+                  if (room.isSuperHost && SimState.isHost) {
+                    // Super Host transition after countdown
+                    document.querySelector('.exam-layout').style.display = 'none';
+                    SimState.currentIdx = room.currentStationIdx !== undefined ? room.currentStationIdx : (SimState.currentIdx || 0);
+                    renderSuperHostMonitor(room);
                   } else {
-                    initialTargetIdx = room.currentStationIdx !== undefined ? room.currentStationIdx : 0;
+                    document.querySelector('.exam-layout').style.display = 'flex';
+                    const stickyTimer = document.getElementById('exam-sticky-timer-bar');
+                    if (stickyTimer) stickyTimer.style.display = 'block';
+                    const stickyHeader = document.getElementById('exam-sticky-top-header');
+                    if (stickyHeader) stickyHeader.style.display = 'block';
+                    
+                    let initialTargetIdx = 0;
+                    if (room.examMode === 'carousel_rotation') {
+                      const N = SimState.stations.length || 1;
+                      const r = room.currentStationIdx !== undefined ? room.currentStationIdx : 0;
+                      if (SimState.role === 'examiner') {
+                        let stNum = 1;
+                        if (room.carouselPosts) {
+                          const post = Object.values(room.carouselPosts).find(p => p.examinerId === SimState.myPlayerId || p.examinerName === SimState.lobbyPlayerName);
+                          if (post) stNum = post.stationNumber;
+                        }
+                        initialTargetIdx = Math.max(0, Math.min(N - 1, stNum - 1));
+                      } else {
+                        let stNum = 1;
+                        if (room.carouselPosts) {
+                          const post = Object.values(room.carouselPosts).find(p => p.startParticipantId === SimState.myPlayerId || p.startParticipantName === SimState.lobbyPlayerName);
+                          if (post) stNum = post.stationNumber;
+                        }
+                        const activeSt = ((stNum - 1 + r) % N) + 1;
+                        initialTargetIdx = Math.max(0, Math.min(N - 1, activeSt - 1));
+                      }
+                    } else {
+                      initialTargetIdx = room.currentStationIdx !== undefined ? room.currentStationIdx : 0;
+                    }
+                    renderStation(initialTargetIdx);
                   }
                   
-                  renderStation(initialTargetIdx);
                   SimState.timerRunning = room.timerRunning !== undefined ? room.timerRunning : true;
                   SimState.timerValue = room.timerValue || 240;
                   updateTimerDisplay();
@@ -2656,6 +2774,30 @@
           }
           
           document.getElementById('lobby-countdown-screen').style.display = 'none';
+
+          // ── Super Host Monitor View (Big Projector Screen, after countdown) ──
+          if (room.isSuperHost && SimState.isHost) {
+            document.querySelector('.exam-layout').style.display = 'none';
+            const stickyTimer = document.getElementById('exam-sticky-timer-bar');
+            if (stickyTimer) stickyTimer.style.display = 'none';
+            const stickyHeader = document.getElementById('exam-sticky-top-header');
+            if (stickyHeader) stickyHeader.style.display = 'none';
+            
+            SimState.currentIdx = room.currentStationIdx !== undefined ? room.currentStationIdx : (SimState.currentIdx || 0);
+            renderSuperHostMonitor(room);
+            
+            SimState.timerRunning = room.timerRunning !== undefined ? room.timerRunning : true;
+            SimState.timerValue = room.timerValue !== undefined ? room.timerValue : 240;
+            updateTimerDisplay();
+            if (SimState.timerRunning && !SimState.timerInterval) {
+              startLocalCountdown();
+            }
+            return;
+          }
+          
+          // Regular client (examiner / participant)
+          const superHostMonitor = document.getElementById('super-host-monitor-view');
+          if (superHostMonitor) superHostMonitor.style.display = 'none';
           document.querySelector('.exam-layout').style.display = 'flex';
           const stickyTimer = document.getElementById('exam-sticky-timer-bar');
           if (stickyTimer) stickyTimer.style.display = 'block';
@@ -2847,6 +2989,38 @@
       }
       showGlobalLoader(false);
     }
+
+    // Participant / Examiner toggles ready status in lobby
+    async function toggleMyReadyStatus() {
+      SimState.isReady = !SimState.isReady;
+      const readyBtn = document.getElementById('btn-lobby-toggle-ready');
+      if (readyBtn) {
+        if (SimState.isReady) {
+          readyBtn.className = 'btn btn-secondary';
+          readyBtn.style.background = 'var(--surface)';
+          readyBtn.style.borderColor = 'var(--border)';
+          readyBtn.style.color = 'var(--text-secondary)';
+          readyBtn.innerHTML = '⚪ ยกเลิกความพร้อม (Not Ready)';
+        } else {
+          readyBtn.className = 'btn btn-primary';
+          readyBtn.style.background = '#10b981';
+          readyBtn.style.borderColor = '#10b981';
+          readyBtn.style.color = '#ffffff';
+          readyBtn.innerHTML = '🟢 กดเพื่อแจ้งว่าพร้อม (Ready)';
+        }
+      }
+      if (SimState.isLobby && SimState.roomId && typeof _fbDb !== 'undefined' && SimState.myPlayerId) {
+        try {
+          await _fbDb.ref(`rooms/${SimState.roomId}/players/${SimState.myPlayerId}`).update({
+            isReady: SimState.isReady,
+            updatedAt: Date.now()
+          });
+        } catch(e) {
+          console.warn('Failed to update ready state in Firebase:', e);
+        }
+      }
+    }
+    window.toggleMyReadyStatus = toggleMyReadyStatus;
 
     // Examiner starts exam (Firebase)
     async function startLobbyExamOnServer() {
@@ -3899,21 +4073,23 @@
         const nextIdx = SimState.currentIdx + 1;
         playStationTimeoutAlarm('bell');
         if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
-          // Reset timer locally
           SimState.timerValue = 240;
           SimState.timerRunning = true;
           if (SimState.timerInterval) clearInterval(SimState.timerInterval);
           updateTimerDisplay();
           startLocalCountdown();
-          // Push to Firebase — All participants react in real-time
-          _fbDb.ref('rooms/' + SimState.roomId).update({
+          
+          const updatePayload = {
             currentStationIdx: nextIdx,
             caseId: SimState.stations[nextIdx]?.case?.caseId || SimState.stations[nextIdx]?.caseId,
             timerValue: 240,
             timerRunning: true,
-            status: 'running',
-            scoresByStation: JSON.stringify(SimState.studentScores)
-          });
+            status: 'running'
+          };
+          if (!SimState.cachedRoom?.isSuperHost && SimState.examMode === 'standard') {
+            updatePayload.scoresByStation = JSON.stringify(SimState.studentScores);
+          }
+          _fbDb.ref('rooms/' + SimState.roomId).update(updatePayload);
         }
         renderStation(nextIdx);
         if (SimState.cachedRoom && SimState.cachedRoom.isSuperHost && SimState.isHost) {
@@ -3927,26 +4103,230 @@
         const prevIdx = SimState.currentIdx - 1;
         playStationTimeoutAlarm('bell');
         if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
-          // Reset timer locally
           SimState.timerValue = 240;
           SimState.timerRunning = true;
           if (SimState.timerInterval) clearInterval(SimState.timerInterval);
           updateTimerDisplay();
           startLocalCountdown();
-          // Push to Firebase — All participants react in real-time
-          _fbDb.ref('rooms/' + SimState.roomId).update({
+          
+          const updatePayload = {
             currentStationIdx: prevIdx,
             caseId: SimState.stations[prevIdx]?.case?.caseId || SimState.stations[prevIdx]?.caseId,
             timerValue: 240,
             timerRunning: true,
-            status: 'running',
-            scoresByStation: JSON.stringify(SimState.studentScores)
-          });
+            status: 'running'
+          };
+          if (!SimState.cachedRoom?.isSuperHost && SimState.examMode === 'standard') {
+            updatePayload.scoresByStation = JSON.stringify(SimState.studentScores);
+          }
+          _fbDb.ref('rooms/' + SimState.roomId).update(updatePayload);
         }
         renderStation(prevIdx);
         if (SimState.cachedRoom && SimState.cachedRoom.isSuperHost && SimState.isHost) {
           renderSuperHostMonitor(SimState.cachedRoom);
         }
+      }
+    }
+
+    // ─── Leaderboard & Podium Helpers ─────────────────────────
+    function computeLeaderboard(room) {
+      if (!room) return [];
+      const stationsList = SimState.stations || [];
+      const leaderboard = [];
+      const examMode = room.examMode || SimState.examMode || 'standard';
+
+      if (examMode === 'cohort_breakout' && room.breakouts) {
+        Object.entries(room.breakouts).forEach(([tableId, t]) => {
+          const partName = t.participantName || `ผู้เข้าสอบ (${tableId})`;
+          const partId = t.participantId;
+          const examinerName = t.examinerName || 'ไม่ระบุ';
+          let totalEarned = 0, totalMax = 0, passedStations = 0;
+
+          stationsList.forEach(st => {
+            const c = st.case || {};
+            const isRest = st.isRest || ((c.category || '').toUpperCase() === 'REST');
+            const stScore = t.scores ? t.scores[st.stationNumber] : null;
+            let earned = 0, max = 0;
+            if (stScore) {
+              earned = stScore.score || 0;
+              max = stScore.maxScore || 0;
+            } else if (c.checklist) {
+              const { currentScore, totalScore } = calculateStationScore(c.checklist, []);
+              max = totalScore;
+            }
+            totalEarned += earned;
+            totalMax += max;
+            const pct = max > 0 ? Math.round((earned / max) * 100) : 0;
+            if (isRest || pct >= 80) passedStations++;
+          });
+
+          const overallPct = totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0;
+          leaderboard.push({
+            id: partId || tableId,
+            name: partName,
+            detail: `โต๊ะ ${tableId} (ผู้ประเมิน: ${examinerName})`,
+            earned: Number.isInteger(totalEarned) ? totalEarned : totalEarned.toFixed(2),
+            max: Number.isInteger(totalMax) ? totalMax : totalMax.toFixed(2),
+            percent: overallPct,
+            passedStations: passedStations,
+            totalStations: stationsList.length,
+            isPassed: overallPct >= 80
+          });
+        });
+      } else if (examMode === 'carousel_rotation') {
+        const partMap = {};
+        if (room.participantScores) {
+          Object.entries(room.participantScores).forEach(([pId, pData]) => {
+            partMap[pId] = {
+              name: pData.participantName || ('ผู้เข้าสอบ ' + pId),
+              stations: pData.stations || {}
+            };
+          });
+        }
+        if (room.carouselPosts) {
+          Object.values(room.carouselPosts).forEach(post => {
+            if (post.startParticipantId && !partMap[post.startParticipantId]) {
+              partMap[post.startParticipantId] = {
+                name: post.startParticipantName || ('ผู้เข้าสอบ ' + post.startParticipantId),
+                startStation: post.stationNumber,
+                stations: {}
+              };
+            }
+          });
+        }
+
+        Object.entries(partMap).forEach(([pId, pData]) => {
+          let totalEarned = 0, totalMax = 0, passedStations = 0;
+          stationsList.forEach(st => {
+            const c = st.case || {};
+            const isRest = st.isRest || ((c.category || '').toUpperCase() === 'REST');
+            const stScore = pData.stations ? pData.stations[st.stationNumber] : null;
+            let earned = 0, max = 0;
+            if (stScore) {
+              earned = stScore.score || 0;
+              max = stScore.maxScore || 0;
+            } else if (c.checklist) {
+              const { currentScore, totalScore } = calculateStationScore(c.checklist, []);
+              max = totalScore;
+            }
+            totalEarned += earned;
+            totalMax += max;
+            const pct = max > 0 ? Math.round((earned / max) * 100) : 0;
+            if (isRest || pct >= 80) passedStations++;
+          });
+
+          const overallPct = totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0;
+          leaderboard.push({
+            id: pId,
+            name: pData.name,
+            detail: pData.startStation ? `เริ่มต้นที่สถานี ${pData.startStation}` : 'แลปกิ๊งหมุนเวียน',
+            earned: Number.isInteger(totalEarned) ? totalEarned : totalEarned.toFixed(2),
+            max: Number.isInteger(totalMax) ? totalMax : totalMax.toFixed(2),
+            percent: overallPct,
+            passedStations: passedStations,
+            totalStations: stationsList.length,
+            isPassed: overallPct >= 80
+          });
+        });
+      } else {
+        // Standard multiplayer room
+        if (room.players) {
+          const examinees = Object.values(room.players).filter(p => !p.isHost && p.role !== 'examiner');
+          examinees.forEach(p => {
+            let totalEarned = 0, totalMax = 0, passedStations = 0;
+            const scMap = SimState.studentScores || {};
+            stationsList.forEach(st => {
+              const c = st.case || {};
+              const isRest = st.isRest || ((c.category || '').toUpperCase() === 'REST');
+              const checked = scMap[st.stationNumber] || [];
+              const { currentScore: earned, totalScore: max } = calculateStationScore(c.checklist || [], checked);
+              totalEarned += earned;
+              totalMax += max;
+              const pct = max > 0 ? Math.round((earned / max) * 100) : 0;
+              if (isRest || pct >= 80) passedStations++;
+            });
+            const overallPct = totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0;
+            leaderboard.push({
+              id: p.id || p.name,
+              name: p.name,
+              detail: 'ผู้เข้าสอบ',
+              earned: Number.isInteger(totalEarned) ? totalEarned : totalEarned.toFixed(2),
+              max: Number.isInteger(totalMax) ? totalMax : totalMax.toFixed(2),
+              percent: overallPct,
+              passedStations: passedStations,
+              totalStations: stationsList.length,
+              isPassed: overallPct >= 80
+            });
+          });
+        }
+      }
+
+      leaderboard.sort((a, b) => b.percent !== a.percent ? b.percent - a.percent : b.earned - a.earned);
+      return leaderboard;
+    }
+
+    function renderPodiumLeaderboard(leaderboard) {
+      const p1 = leaderboard[0];
+      const p2 = leaderboard[1];
+      const p3 = leaderboard[2];
+
+      const renderSlot = (item, rank, medal, color, height, borderCol) => {
+        if (!item) {
+          return `
+            <div style="background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius-md) var(--radius-md) 0 0; padding: 1rem 0.5rem; opacity: 0.6;">
+              <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">${medal}</div>
+              <div style="font-size: 0.82rem; color: var(--text-muted);">- ว่าง -</div>
+            </div>
+            <div style="background: var(--border); color: var(--text-muted); height: ${height}px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 800; border-radius: 0 0 var(--radius-md) var(--radius-md);">${rank}</div>
+          `;
+        }
+        const isPassed = item.isPassed;
+        const isMe = item.id === SimState.myPlayerId || item.name === SimState.lobbyPlayerName;
+        return `
+          <div style="background: var(--surface); border: 2px solid ${borderCol}; border-radius: var(--radius-md) var(--radius-md) 0 0; padding: 0.75rem 0.4rem; box-shadow: 0 4px 12px rgba(0,0,0,0.06); position: relative;">
+            ${isMe ? '<span style="position: absolute; top: -10px; right: 8px; background: var(--primary); color: white; font-size: 0.68rem; font-weight: 800; padding: 0.1rem 0.45rem; border-radius: 10px;">คุณ</span>' : ''}
+            <div style="font-size: ${rank === 1 ? '2.3rem' : '1.8rem'}; line-height: 1.1; margin-bottom: 0.25rem;">${medal}</div>
+            <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.35rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(item.detail || '')}</div>
+            <div style="font-size: ${rank === 1 ? '1.25rem' : '1.1rem'}; font-weight: 900; color: ${color}; line-height: 1;">${item.percent}%</div>
+            <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 0.2rem;">${item.earned} / ${item.max} คะแนน</div>
+            <div style="margin-top: 0.4rem;">
+              <span class="badge" style="background: ${isPassed ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)'}; color: ${isPassed ? 'var(--success)' : 'var(--danger)'}; font-size: 0.72rem; padding: 0.15rem 0.45rem;">${isPassed ? 'ผ่านเกณฑ์' : 'ไม่ผ่าน'}</span>
+            </div>
+          </div>
+          <div style="background: ${color}; color: white; height: ${height}px; display: flex; align-items: center; justify-content: center; font-size: ${rank === 1 ? '2.4rem' : '2rem'}; font-weight: 900; border-radius: 0 0 var(--radius-md) var(--radius-md); box-shadow: inset 0 2px 4px rgba(0,0,0,0.18); font-family: var(--font-title);">${rank}</div>
+        `;
+      };
+
+      const slot1 = document.getElementById('podium-slot-1');
+      const slot2 = document.getElementById('podium-slot-2');
+      const slot3 = document.getElementById('podium-slot-3');
+
+      if (slot1) slot1.innerHTML = renderSlot(p1, 1, '🥇', '#f59e0b', 115, '#f59e0b');
+      if (slot2) slot2.innerHTML = renderSlot(p2, 2, '🥈', '#94a3b8', 85, '#94a3b8');
+      if (slot3) slot3.innerHTML = renderSlot(p3, 3, '🥉', '#d97706', 65, '#b45309');
+
+      const tbody = document.getElementById('podium-full-tbody');
+      if (tbody) {
+        tbody.innerHTML = '';
+        leaderboard.forEach((item, idx) => {
+          const rank = idx + 1;
+          const isMe = item.id === SimState.myPlayerId || item.name === SimState.lobbyPlayerName;
+          const medal = rank === 1 ? '🥇 ' : (rank === 2 ? '🥈 ' : (rank === 3 ? '🥉 ' : ''));
+          const tr = document.createElement('tr');
+          if (isMe) tr.style.background = 'rgba(99, 102, 241, 0.07)';
+          
+          tr.innerHTML = `
+            <td style="text-align: center; font-weight: 800; color: ${rank <= 3 ? 'var(--primary)' : 'var(--text-muted)'};">${medal}#${rank}</td>
+            <td><strong>${escapeHtml(item.name)}</strong>${isMe ? ' <span style="font-size:0.72rem;background:var(--primary);color:white;padding:0.1rem 0.35rem;border-radius:4px;">คุณ</span>' : ''}</td>
+            <td style="color: var(--text-secondary); font-size: 0.84rem;">${escapeHtml(item.detail || '-')}</td>
+            <td style="text-align: right; font-weight: 700;">${item.earned} / ${item.max}</td>
+            <td style="text-align: center; font-weight: 800; color: ${item.percent >= 80 ? 'var(--success)' : 'var(--danger)'};">${item.percent}%</td>
+            <td style="text-align: center; color: var(--text-secondary);">${item.passedStations} / ${item.totalStations}</td>
+            <td style="text-align: center;"><span class="badge" style="background:${item.isPassed ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)'};color:${item.isPassed ? 'var(--success)' : 'var(--danger)'};font-size:0.75rem;">${item.isPassed ? 'ผ่าน' : 'ตก'}</span></td>
+          `;
+          tbody.appendChild(tr);
+        });
       }
     }
 
@@ -3963,35 +4343,69 @@
       if (typeof _fbDb !== 'undefined' && _fbDb && SimState.isLobby && SimState.roomId) {
         try {
           if (SimState.isHost || SimState.role === 'examiner') {
-            await _fbDb.ref('rooms/' + SimState.roomId).update({
-              status: 'results',
-              scoresByStation: JSON.stringify(SimState.studentScores)
-            });
+            const finishPayload = { status: 'results' };
+            if (!SimState.cachedRoom?.isSuperHost && SimState.examMode === 'standard' && SimState.role === 'examiner') {
+              finishPayload.scoresByStation = JSON.stringify(SimState.studentScores);
+            }
+            await _fbDb.ref('rooms/' + SimState.roomId).update(finishPayload);
           }
           // Fetch the definitive shared scores from Firebase so everyone has 100% matching results
           const snap = await _fbDb.ref('rooms/' + SimState.roomId).get();
           if (snap.exists()) {
             latestRoom = snap.val();
-            if (latestRoom.scoresByStation) {
-              const parsed = typeof latestRoom.scoresByStation === 'string' ? JSON.parse(latestRoom.scoresByStation) : latestRoom.scoresByStation;
-              if (parsed && typeof parsed === 'object') {
-                SimState.studentScores = Object.assign({}, SimState.studentScores, parsed);
+            
+            // 1. Breakout Table mode scores
+            if (latestRoom.examMode === 'cohort_breakout') {
+              let myTable = null;
+              if (SimState.myBreakoutTableId && latestRoom.breakouts?.[SimState.myBreakoutTableId]) {
+                myTable = latestRoom.breakouts[SimState.myBreakoutTableId];
+              } else if (latestRoom.breakouts) {
+                myTable = Object.values(latestRoom.breakouts).find(b => 
+                  b.participantId === SimState.myPlayerId || 
+                  b.examinerId === SimState.myPlayerId || 
+                  (b.participantName && b.participantName === SimState.lobbyPlayerName) ||
+                  (b.examinerName && b.examinerName === SimState.lobbyPlayerName)
+                );
               }
-            }
-            if (latestRoom.examMode === 'carousel_rotation' && latestRoom.participantScores && latestRoom.participantScores[SimState.myPlayerId]) {
-              const myStScores = latestRoom.participantScores[SimState.myPlayerId].stations || {};
-              Object.keys(myStScores).forEach(stNum => {
-                if (myStScores[stNum].checkedProgress) {
-                  SimState.studentScores[stNum] = myStScores[stNum].checkedProgress;
+              if (myTable && myTable.scores) {
+                Object.keys(myTable.scores).forEach(stNum => {
+                  const s = myTable.scores[stNum];
+                  if (s && s.checkedProgress) {
+                    SimState.studentScores[stNum] = s.checkedProgress;
+                  } else if (Array.isArray(s)) {
+                    SimState.studentScores[stNum] = s;
+                  }
+                });
+              }
+            } else if (latestRoom.examMode === 'carousel_rotation') {
+              // 2. Carousel mode scores
+              let myStScores = null;
+              if (latestRoom.participantScores) {
+                if (latestRoom.participantScores[SimState.myPlayerId]) {
+                  myStScores = latestRoom.participantScores[SimState.myPlayerId].stations;
+                } else {
+                  const pEntry = Object.values(latestRoom.participantScores).find(ps => ps.participantName === SimState.lobbyPlayerName);
+                  if (pEntry) myStScores = pEntry.stations;
                 }
-              });
-            } else if (latestRoom.examMode === 'cohort_breakout' && SimState.myBreakoutTableId && latestRoom.breakouts && latestRoom.breakouts[SimState.myBreakoutTableId]) {
-              const tableScores = latestRoom.breakouts[SimState.myBreakoutTableId].scores || {};
-              Object.keys(tableScores).forEach(stNum => {
-                if (tableScores[stNum].checkedProgress) {
-                  SimState.studentScores[stNum] = tableScores[stNum].checkedProgress;
+              }
+              if (myStScores) {
+                Object.keys(myStScores).forEach(stNum => {
+                  const s = myStScores[stNum];
+                  if (s && s.checkedProgress) {
+                    SimState.studentScores[stNum] = s.checkedProgress;
+                  } else if (Array.isArray(s)) {
+                    SimState.studentScores[stNum] = s;
+                  }
+                });
+              }
+            } else {
+              // 3. Standard room scores
+              if (latestRoom.scoresByStation) {
+                const parsed = typeof latestRoom.scoresByStation === 'string' ? JSON.parse(latestRoom.scoresByStation) : latestRoom.scoresByStation;
+                if (parsed && typeof parsed === 'object') {
+                  SimState.studentScores = Object.assign({}, SimState.studentScores, parsed);
                 }
-              });
+              }
             }
           }
         } catch (e) {
@@ -4068,7 +4482,58 @@
           summaryDescEl.textContent = `ผ่านการประเมินวิชาชีพทั้งหมด ${passedStations} จาก ${totalStationsCount} สถานีสอบ (ผ่านเมื่อสอบได้คะแนนตั้งแต่ร้อยละ 80 ขึ้นไปต่อสถานี)`;
         }
 
-        // Render participants in the results screen
+        // Render Podium & Leaderboard if multiplayer room
+        const roomData = latestRoom || SimState.cachedRoom;
+        const isMultiplayer = SimState.isLobby && roomData;
+        const isHost = SimState.isHost;
+        const podiumSection = document.getElementById('results-podium-section');
+        const personalScoreSection = document.getElementById('results-personal-score-section');
+        const hostBanner = document.getElementById('results-host-summary-banner');
+
+        if (isMultiplayer) {
+          const leaderboard = computeLeaderboard(roomData);
+          if (leaderboard.length > 0) {
+            renderPodiumLeaderboard(leaderboard);
+            if (podiumSection) podiumSection.style.display = 'block';
+
+            if (isHost) {
+              // Super Host: Hide personal scorecard and personal station breakdown
+              if (personalScoreSection) personalScoreSection.style.display = 'none';
+              if (hostBanner) {
+                hostBanner.style.display = 'block';
+                const totalExaminees = leaderboard.length;
+                const passedCount = leaderboard.filter(x => x.isPassed).length;
+                const failedCount = totalExaminees - passedCount;
+                const passRate = totalExaminees > 0 ? Math.round((passedCount / totalExaminees) * 100) : 0;
+
+                const statsEl = document.getElementById('results-host-summary-stats');
+                if (statsEl) statsEl.textContent = `ผู้เข้าสอบทั้งหมด ${totalExaminees} คน · ผ่านเกณฑ์ ${passedCount} คน (${passRate}%) · ไม่ผ่าน ${failedCount} คน`;
+
+                const bTot = document.getElementById('host-badge-total-part');
+                if (bTot) bTot.textContent = `👤 ผู้เข้าสอบ ${totalExaminees} คน`;
+                const bPass = document.getElementById('host-badge-passed-count');
+                if (bPass) bPass.textContent = `✅ ผ่านเกณฑ์ ${passedCount} คน (${passRate}%)`;
+                const bFail = document.getElementById('host-badge-failed-count');
+                if (bFail) bFail.textContent = `❌ ไม่ผ่านเกณฑ์ ${failedCount} คน`;
+              }
+            } else {
+              // Examinee / Examiner: Show personal scorecard AND podium
+              if (personalScoreSection) personalScoreSection.style.display = 'block';
+              if (hostBanner) hostBanner.style.display = 'none';
+            }
+          } else {
+            if (podiumSection) podiumSection.style.display = 'none';
+            if (personalScoreSection) personalScoreSection.style.display = 'block';
+            if (hostBanner) hostBanner.style.display = 'none';
+          }
+        } else {
+          // Solo simulation: regular personal scorecard
+          if (podiumSection) podiumSection.style.display = 'none';
+          if (personalScoreSection) personalScoreSection.style.display = 'block';
+          if (hostBanner) hostBanner.style.display = 'none';
+        }
+
+        // Render participants chips in the results screen
         const rosterBar = document.getElementById('results-participants-bar');
         const rosterCount = document.getElementById('results-participants-count');
         const rosterChips = document.getElementById('results-participants-chips');
@@ -4319,37 +4784,58 @@
     // ═════════════════════════════════════════════════════════════════
     // AUDIO TIMEOUT ALERT (Web Audio API Synthesizer)
     // ═════════════════════════════════════════════════════════════════
+    // AUDIO TIMEOUT ALERT (Web Audio API Synthesizer)
+    // ═════════════════════════════════════════════════════════════════
     function playStationTimeoutAlarm(type = 'alarm') {
       try {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         if (!AudioContextClass) return;
         const ctx = new AudioContextClass();
+        if (ctx.state === 'suspended') {
+          ctx.resume().catch(() => {});
+        }
         const now = ctx.currentTime;
         if (type === 'bell') {
-          [880, 1320].forEach((freq, idx) => {
+          // Sharp double chime for host call
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, now + idx * 0.22);
-            gain.gain.setValueAtTime(0.35, now + idx * 0.22);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.22 + 0.7);
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+            gain.gain.setValueAtTime(0.4, now + idx * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.08 + 1.2);
             osc.connect(gain);
             gain.connect(ctx.destination);
-            osc.start(now + idx * 0.22);
-            osc.stop(now + idx * 0.22 + 0.75);
+            osc.start(now + idx * 0.08);
+            osc.stop(now + idx * 0.08 + 1.25);
           });
         } else {
-          [880, 1174.66, 1318.51].forEach((freq, idx) => {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, now + idx * 0.16);
-            gain.gain.setValueAtTime(0.35, now + idx * 0.16);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.16 + 0.8);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start(now + idx * 0.16);
-            osc.stop(now + idx * 0.16 + 0.85);
+          // Thrilling, startling, prolonged authentic OSPE industrial buzzer siren (2.3s duration)
+          // Burst 1: 0.75s punchy dissonant alarm -> 0.15s pause -> Burst 2: 1.4s sustained intense klaxon
+          const bursts = [
+            { start: 0.0, dur: 0.75, freqs: [370, 392, 185] }, // F#4, G4 (dissonant semitone) + sub F#3
+            { start: 0.88, dur: 1.42, freqs: [349.23, 370, 174.6] } // F4, F#4 + sub F3
+          ];
+          
+          bursts.forEach(b => {
+            b.freqs.forEach((freq, fIdx) => {
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.type = fIdx === 2 ? 'square' : 'sawtooth';
+              osc.frequency.setValueAtTime(freq, now + b.start);
+              // Slight pitch sag like authentic mechanical emergency buzzer
+              osc.frequency.linearRampToValueAtTime(freq * 0.95, now + b.start + b.dur);
+              
+              gain.gain.setValueAtTime(0.001, now + b.start);
+              gain.gain.linearRampToValueAtTime(fIdx === 2 ? 0.25 : 0.4, now + b.start + 0.03);
+              gain.gain.setValueAtTime(fIdx === 2 ? 0.22 : 0.35, now + b.start + b.dur - 0.1);
+              gain.gain.exponentialRampToValueAtTime(0.0001, now + b.start + b.dur);
+              
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.start(now + b.start);
+              osc.stop(now + b.start + b.dur + 0.08);
+            });
           });
         }
       } catch (e) {

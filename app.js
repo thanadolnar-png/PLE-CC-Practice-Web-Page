@@ -1431,7 +1431,7 @@ if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
 const DB_NAME = 'RxCU_OSPE_DB';
 const DB_VERSION = 1;
 const STORE_NAME = 'case_details';
-const DB_VERSION_STR = 'v_20261002_162240'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
+const DB_VERSION_STR = 'v_20261002_165840'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
 
 function openIndexedDB() {
   return new Promise((resolve, reject) => {
@@ -2501,7 +2501,7 @@ if (typeof window !== 'undefined') {
   });
 }
 
-function playStationTimeoutAlarm() {
+function playStationTimeoutAlarm(type = 'alarm') {
   try {
     const ctx = getSharedAudioContext();
     if (!ctx) return;
@@ -2510,48 +2510,46 @@ function playStationTimeoutAlarm() {
     }
     const now = ctx.currentTime;
 
-    // OSPE Station Bell Sequence: 3 sharp chimes + 1 sustained brass bell finish
-    const chimes = [
-      { freq: 880, start: 0.0, dur: 0.22, gain: 0.8 },
-      { freq: 880, start: 0.32, dur: 0.22, gain: 0.8 },
-      { freq: 880, start: 0.64, dur: 0.22, gain: 0.8 },
-      { freq: 1174.66, start: 0.96, dur: 1.8, gain: 0.95 }
-    ];
+    if (type === 'bell') {
+      [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+        gain.gain.setValueAtTime(0.4, now + idx * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.08 + 1.2);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + idx * 0.08);
+        osc.stop(now + idx * 0.08 + 1.25);
+      });
+    } else {
+      // Thrilling, startling, prolonged authentic OSPE industrial buzzer siren (2.3s duration)
+      const bursts = [
+        { start: 0.0, dur: 0.75, freqs: [370, 392, 185] }, // F#4, G4 (dissonant semitone) + sub F#3
+        { start: 0.88, dur: 1.42, freqs: [349.23, 370, 174.6] } // F4, F#4 + sub F3
+      ];
 
-    chimes.forEach(c => {
-      const osc = ctx.createOscillator();
-      const gainNode = ctx.createGain();
+      bursts.forEach(b => {
+        b.freqs.forEach((freq, fIdx) => {
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.type = fIdx === 2 ? 'square' : 'sawtooth';
+          osc.frequency.setValueAtTime(freq, now + b.start);
+          osc.frequency.linearRampToValueAtTime(freq * 0.95, now + b.start + b.dur);
 
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(c.freq, now + c.start);
+          gainNode.gain.setValueAtTime(0.001, now + b.start);
+          gainNode.gain.linearRampToValueAtTime(fIdx === 2 ? 0.25 : 0.4, now + b.start + 0.03);
+          gainNode.gain.setValueAtTime(fIdx === 2 ? 0.22 : 0.35, now + b.start + b.dur - 0.1);
+          gainNode.gain.exponentialRampToValueAtTime(0.0001, now + b.start + b.dur);
 
-      // Harmonic overtone for natural bell resonance
-      const oscHarmonic = ctx.createOscillator();
-      const gainHarmonic = ctx.createGain();
-      oscHarmonic.type = 'sine';
-      oscHarmonic.frequency.setValueAtTime(c.freq * 2, now + c.start);
-
-      // Amplitude envelopes
-      gainNode.gain.setValueAtTime(0.0001, now + c.start);
-      gainNode.gain.linearRampToValueAtTime(c.gain, now + c.start + 0.02);
-      gainNode.gain.exponentialRampToValueAtTime(0.0001, now + c.start + c.dur);
-
-      gainHarmonic.gain.setValueAtTime(0.0001, now + c.start);
-      gainHarmonic.gain.linearRampToValueAtTime(c.gain * 0.35, now + c.start + 0.015);
-      gainHarmonic.gain.exponentialRampToValueAtTime(0.0001, now + c.start + c.dur * 0.7);
-
-      osc.connect(gainNode);
-      gainNode.connect(ctx.destination);
-
-      oscHarmonic.connect(gainHarmonic);
-      gainHarmonic.connect(ctx.destination);
-
-      osc.start(now + c.start);
-      osc.stop(now + c.start + c.dur + 0.1);
-
-      oscHarmonic.start(now + c.start);
-      oscHarmonic.stop(now + c.start + c.dur + 0.1);
-    });
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc.start(now + b.start);
+          osc.stop(now + b.start + b.dur + 0.08);
+        });
+      });
+    }
   } catch (err) {
     console.warn('[Audio] Failed to play OSPE alarm:', err);
   }

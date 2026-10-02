@@ -3683,17 +3683,34 @@ function getDocEquations(docId) {
   }
   
   let bodies = [];
-  if (tabs && tabs.length > 0) {
-    for (let t = 0; t < tabs.length; t++) {
+  function collectTabs(tabList) {
+    if (!tabList || tabList.length === 0) return;
+    for (let t = 0; t < tabList.length; t++) {
+      const tab = tabList[t];
       try {
-        const dTab = tabs[t].asDocumentTab();
-        if (dTab) {
-          bodies.push({ name: tabs[t].getTitle ? tabs[t].getTitle() : ('Tab ' + t), body: dTab.getBody() });
+        const dTab = tab.asDocumentTab();
+        if (dTab && dTab.getBody) {
+          const title = tab.getTitle ? tab.getTitle() : ('Tab ' + t);
+          bodies.push({ name: title, body: dTab.getBody() });
         }
       } catch(e) {
         Logger.log('Tab error: ' + e);
       }
+      try {
+        if (tab.getChildTabs) {
+          const children = tab.getChildTabs();
+          if (children && children.length > 0) {
+            collectTabs(children);
+          }
+        }
+      } catch(e) {
+        Logger.log('childTabs error: ' + e);
+      }
     }
+  }
+
+  if (tabs && tabs.length > 0) {
+    collectTabs(tabs);
   }
   if (bodies.length === 0) {
     bodies.push({ name: 'RootBody', body: doc.getBody() });
