@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU</title>
-  <link rel="stylesheet" href="style.css?v=20261002_231500">
-  <script src="case-data-offline.js?v=v_20261002_230447"></script>
-  <script src="case-details-offline.js?v=v_20261002_230447"></script>
-  <script src="app.js?v=v_20261002_230447"></script>
-  <script src="scratchpad.js?v=v_20261002_231500"></script>
+  <link rel="stylesheet" href="style.css?v=20261002_232000">
+  <script src="case-data-offline.js?v=v_20261002_232000"></script>
+  <script src="case-details-offline.js?v=v_20261002_232000"></script>
+  <script src="app.js?v=v_20261002_232000"></script>
+  <script src="scratchpad.js?v=v_20261002_232000"></script>
   <style>
     /* Simulation Source and Topic Selector */
     .sim-filter-section {
@@ -1065,13 +1065,29 @@
                   <button type="button" class="sim-btn-xs" style="padding: 0.15rem 0.45rem; font-size: 0.72rem; border-radius:4px;" onclick="previewCurrentAlarmSound()">ทดลองฟัง</button>
                 </div>
                 <select id="lobby-alarm-sound-select" class="select-filter" style="width: 100%; font-size: 0.82rem; padding: 0.4rem 0.5rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text-primary); font-weight: 500;" onchange="updateRoomAlarmSound(this.value)">
-                  <option value="school-bell">กระดิ่งมาตรฐาน (Standard Bell)</option>
-                  <option value="nene">เนเน่นายแน่มาก</option>
-                  <option value="brazil">เพลง Brazil</option>
-                  <option value="plaahm">เพลงปลาหมอสีเหลือง</option>
-                  <option value="chicken">ไก่กรีดร้องบนต้นไม้</option>
-                  <option value="black-panther">เสือดำเด้าหน่อย</option>
-                  <option value="cafe-comedy">เปิดตัวตลกคาเฟ่</option>
+                  <option value="school-bell">🔔 กระดิ่งมาตรฐาน (Standard Bell)</option>
+                  <option value="random">🎲 สุ่มเสียงอัตโนมัติทุกรอบ (Random Alarm)</option>
+                  <optgroup label="🎵 เสียงเอฟเฟกต์ & เพลงยอดฮิต">
+                    <option value="khon-khee-lang-kwai">คนขี่หลังควาย</option>
+                    <option value="nan-jang-nee-jang-see">นั้นจังนี้จังสี้ ชุปมานังจัมรี้</option>
+                    <option value="em-all-new-rak-pupe">เอมออนิวรักปูเป้</option>
+                    <option value="weew-hor-weew-weew">หวีวห้อวิ้ววิ้ว</option>
+                    <option value="ngaen-pee-jazz">แง้นพี่แจ็ส</option>
+                    <option value="id-a-tid-tai">อิดอะติดไตชิ้กกะเด้วอิดอะติดไต</option>
+                    <option value="lok-thang-bai-plian-see">โลกทั้งใบเปลี่ยนสีไปเพราะเธอ</option>
+                    <option value="skoy-scan">สก้อยสแก้น</option>
+                    <option value="ngern-tee-yoo-nai-mue">เงินที่อยู่ในมือ</option>
+                    <option value="okay-1-2-3-tew">okay 1 23 ติ้วๆๆๆ</option>
+                    <option value="brazil-slow">Brazil ช้าๆ</option>
+                    <option value="aa-sak-doong-sading">เอเอสักดุ้งสะดิ้ง</option>
+                    <option value="brazil-faad-sae">Brazil ฟาดแซ่</option>
+                    <option value="nene">เนเน่นายแน่มาก</option>
+                    <option value="brazil">เพลง Brazil</option>
+                    <option value="plaahm">เพลงปลาหมอสีเหลือง</option>
+                    <option value="chicken">ไก่กรีดร้องบนต้นไม้</option>
+                    <option value="black-panther">เสือดำเด้าหน่อย</option>
+                    <option value="cafe-comedy">เปิดตัวตลกคาเฟ่</option>
+                  </optgroup>
                 </select>
                 <div id="lobby-sound-role-note" style="display:none;"></div>
               </div>
@@ -6330,7 +6346,21 @@
     let _activeTimeoutAudio = null;
 
     const ALARM_SOUND_MAP = {
-      'school-bell': { title: 'กระดิ่งมาตรฐาน (Standard Bell)', file: './freesound_community-school-bell-37445.mp3' },
+      'school-bell': { title: '🔔 กระดิ่งมาตรฐาน (Standard Bell)', file: './freesound_community-school-bell-37445.mp3' },
+      'random': { title: '🎲 สุ่มเสียงอัตโนมัติทุกรอบ (Random Alarm)', file: null },
+      'khon-khee-lang-kwai': { title: 'คนขี่หลังควาย', file: './khon-khee-lang-kwai.mp3' },
+      'nan-jang-nee-jang-see': { title: 'นั้นจังนี้จังสี้ ชุปมานังจัมรี้', file: './nan-jang-nee-jang-see.mp3' },
+      'em-all-new-rak-pupe': { title: 'เอมออนิวรักปูเป้', file: './em-all-new-rak-pupe.mp3' },
+      'weew-hor-weew-weew': { title: 'หวีวห้อวิ้ววิ้ว', file: './weew-hor-weew-weew.mp3' },
+      'ngaen-pee-jazz': { title: 'แง้นพี่แจ็ส', file: './ngaen-pee-jazz.mp3' },
+      'id-a-tid-tai': { title: 'อิดอะติดไตชิ้กกะเด้วอิดอะติดไต', file: './id-a-tid-tai.mp3' },
+      'lok-thang-bai-plian-see': { title: 'โลกทั้งใบเปลี่ยนสีไปเพราะเธอ', file: './lok-thang-bai-plian-see.mp3' },
+      'skoy-scan': { title: 'สก้อยสแก้น', file: './skoy-scan.mp3' },
+      'ngern-tee-yoo-nai-mue': { title: 'เงินที่อยู่ในมือ', file: './ngern-tee-yoo-nai-mue.mp3' },
+      'okay-1-2-3-tew': { title: 'okay 1 23 ติ้วๆๆๆ', file: './okay-1-2-3-tew.mp3' },
+      'brazil-slow': { title: 'Brazil ช้าๆ', file: './brazil-slow.mp3' },
+      'aa-sak-doong-sading': { title: 'เอเอสักดุ้งสะดิ้ง', file: './aa-sak-doong-sading.mp3' },
+      'brazil-faad-sae': { title: 'Brazil ฟาดแซ่', file: './brazil-faad-sae.mp3' },
       'nene': { title: 'เนเน่นายแน่มาก', file: './nene-nai-nae-mak.mp3' },
       'brazil': { title: 'เพลง Brazil', file: './brazil.mp3' },
       'plaahm': { title: 'เพลงปลาหมอสีเหลือง', file: './plaahm-siiehluue-ng.mp3' },
@@ -6455,8 +6485,20 @@
         // Stop any running sound first
         stopTimeoutAlarmSound();
         try {
-          const soundKey = soundOverride || SimState.alarmSound || 'school-bell';
+          let soundKey = soundOverride || SimState.alarmSound || 'school-bell';
+          
+          // Random mode: dynamically pick one of the available meme tracks
+          if (soundKey === 'random') {
+            const playableKeys = Object.keys(ALARM_SOUND_MAP).filter(k => k !== 'random' && ALARM_SOUND_MAP[k]?.file);
+            soundKey = playableKeys[Math.floor(Math.random() * playableKeys.length)] || 'school-bell';
+          }
+
           const soundObj = ALARM_SOUND_MAP[soundKey] || ALARM_SOUND_MAP['school-bell'];
+          if (!soundObj || !soundObj.file) {
+            playFallbackSynthAlarm();
+            return;
+          }
+
           const audio = new Audio(soundObj.file);
           audio.volume = 1.0;
           _activeTimeoutAudio = audio;
