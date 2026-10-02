@@ -5233,110 +5233,93 @@ body.is-printing #batch-print-execution-area {
   }
 }
 
-/* ─── VDO Link / YouTube Rich Media & Print System ─── */
+/* ─── VDO Link / YouTube Rich Media & Print System (Harmonized Note Integration) ─── */
 .youtube-embed-card,
 .vdo-embed-card {
-  margin: 1.25rem 0;
+  margin: 1rem 0;
   background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-lg, 12px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 8px);
   overflow: hidden;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: none !important;
   white-space: normal !important;
   display: block !important;
-  width: 100% !important;
+  max-width: 620px;
+  transition: border-color 0.15s ease;
 }
 .youtube-embed-card:hover,
 .vdo-embed-card:hover {
-  border-color: var(--primary);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.12);
+  border-color: rgba(99, 102, 241, 0.4);
 }
 .youtube-card-header,
 .drive-card-header {
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
-  padding: 0.65rem 1rem !important;
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border);
+  padding: 0.45rem 0.75rem !important;
+  background: rgba(0, 0, 0, 0.02) !important;
+  border-bottom: 1px solid var(--border) !important;
   gap: 0.5rem;
   white-space: normal !important;
-}
-.drive-card-header {
-  background: rgba(30, 64, 175, 0.08) !important;
-  border-bottom: 1px solid rgba(59, 130, 246, 0.25) !important;
 }
 .youtube-card-title {
   display: flex !important;
   align-items: center !important;
-  gap: 0.5rem !important;
+  gap: 0.4rem !important;
   font-family: var(--font-title);
-  font-size: 0.92rem;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-size: 0.84rem !important;
+  font-weight: 600 !important;
+  color: var(--text-secondary) !important;
   white-space: normal !important;
   margin: 0 !important;
   padding: 0 !important;
 }
-.youtube-icon-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  background: #ff0000;
-  color: #fff;
-  border-radius: 6px;
-  font-size: 0.72rem;
-  font-weight: 900;
-  flex-shrink: 0;
-}
+.youtube-icon-badge,
 .drive-icon-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  font-size: 16px;
+  font-size: 0.9rem;
+  line-height: 1;
   flex-shrink: 0;
 }
 .youtube-ext-btn {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--primary);
-  text-decoration: none;
-  padding: 0.3rem 0.75rem;
-  border-radius: 6px;
-  background: rgba(99, 102, 241, 0.1);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  transition: all 0.15s ease;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  color: var(--text-secondary) !important;
+  text-decoration: none !important;
+  padding: 0.2rem 0.55rem !important;
+  border-radius: 4px !important;
+  background: var(--bg-primary) !important;
+  border: 1px solid var(--border) !important;
+  transition: all 0.15s ease !important;
   white-space: nowrap !important;
   display: inline-flex !important;
-  align-items: center;
-  gap: 0.25rem;
+  align-items: center !important;
+  gap: 0.2rem;
   flex-shrink: 0;
 }
 .youtube-ext-btn:hover {
-  background: var(--primary);
-  color: #fff;
-  border-color: var(--primary);
+  background: var(--surface) !important;
+  color: var(--primary) !important;
+  border-color: var(--primary) !important;
 }
 .drive-ext-btn {
-  background: #2563eb !important;
-  color: #ffffff !important;
-  border-color: #1d4ed8 !important;
+  color: var(--text-secondary) !important;
+  background: var(--bg-primary) !important;
+  border: 1px solid var(--border) !important;
 }
 .drive-ext-btn:hover {
-  background: #1d4ed8 !important;
-  color: #ffffff !important;
+  color: #2563eb !important;
+  border-color: #2563eb !important;
+  background: rgba(37, 99, 235, 0.06) !important;
 }
 .youtube-player-wrapper {
   position: relative;
   width: 100% !important;
   padding-bottom: 56.25% !important; /* 16:9 ratio */
   height: 0 !important;
-  background: #0f172a;
+  background: #090d16;
   overflow: hidden !important;
   display: block !important;
 }
@@ -5350,6 +5333,8 @@ body.is-printing #batch-print-execution-area {
 }
 .vdo-fallback-card {
   white-space: normal !important;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
 }
 
 /* YouTube Print Card */
