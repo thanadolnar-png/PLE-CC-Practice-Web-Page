@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU</title>
-  <link rel="stylesheet" href="style.css?v=20261003_001000">
-  <script src="case-data-offline.js?v=v_20261003_001000"></script>
-  <script src="case-details-offline.js?v=v_20261003_001000"></script>
-  <script src="app.js?v=v_20261003_001000"></script>
-  <script src="scratchpad.js?v=v_20261003_001000"></script>
+  <link rel="stylesheet" href="style.css?v=20261003_001200">
+  <script src="case-data-offline.js?v=v_20261003_001200"></script>
+  <script src="case-details-offline.js?v=v_20261003_001200"></script>
+  <script src="app.js?v=v_20261003_001200"></script>
+  <script src="scratchpad.js?v=v_20261003_001200"></script>
   <style>
     /* Simulation Source and Topic Selector */
     .sim-filter-section {
@@ -2826,6 +2826,10 @@
           SimState.myPlayerId = myPlayerId;
           SimState.isHost = true;
           SimState.isLobby = true;
+          try {
+            localStorage.setItem('ple_player_id', myPlayerId);
+            localStorage.setItem('ple_room_id', randomRoomId);
+          } catch (e) {}
 
           const selectedExamMode = document.querySelector('input[name="lobby-exam-mode"]:checked')?.value || 'standard';
           const isSuperHost = selectedExamMode === 'cohort_breakout' || selectedExamMode === 'carousel_rotation';
@@ -2885,6 +2889,7 @@
             roomId: randomRoomId,
             examMode: selectedExamMode,
             isSuperHost: isSuperHost,
+            isLocked: false,
             hostId: myPlayerId,
             hostName: playerName,
             hostEmoji: savedEmoji,
@@ -2942,29 +2947,109 @@
           }
           
           const roomData = snapshot.val();
-          const myPlayerId = 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+
+          // ─── LATE JOINER & ROOM LOCK ENFORCEMENT ───
+          if (roomData.status === 'dissolved') {
+            showGlobalLoader(false);
+            showRoomBlockedModal({
+              icon: '❌',
+              title: 'ห้องสอบถูกปิดแล้ว',
+              subtitle: 'Room Dissolved',
+              message: `ห้องสอบรหัส ${roomIdInput} ถูกปิดหรือยุบห้องไปแล้วโดยผู้คุมสอบ`,
+              note: 'กรุณาตรวจสอบรหัสห้องใหม่อีกครั้ง หรือรอผู้คุมสอบสร้างห้องใหม่'
+            });
+            return;
+          }
+
+          if (roomData.status === 'results') {
+            showGlobalLoader(false);
+            showRoomBlockedModal({
+              icon: '🏁',
+              title: 'การสอบเสร็จสิ้นแล้ว',
+              subtitle: 'Exam Finished',
+              message: `ห้องสอบรหัส ${roomIdInput} ได้ทำการสอบเสร็จสิ้นเรียบร้อยแล้ว ไม่สามารถเข้าร่วมสอบใหม่ได้`,
+              note: 'หากต้องการดูสรุปผลคะแนน กรุณาติดต่อผู้คุมสอบ (Host)'
+            });
+            return;
+          }
+
+          // Check if this person was ALREADY an admitted member of this room (for reconnecting)
+          const savedPlayerId = localStorage.getItem('ple_player_id');
+          const savedRoomId = localStorage.getItem('ple_room_id');
+          const existingById = (savedRoomId === roomIdInput && savedPlayerId && roomData.players && roomData.players[savedPlayerId]);
+          const existingByName = playerName && Object.values(roomData.players || {}).find(p => p.name && p.name.trim().toLowerCase() === playerName.trim().toLowerCase());
+          const isExistingMember = Boolean(existingById || existingByName);
+
+          // If exam is in progress (running or countdown) and this is NOT an existing member: BLOCK!
+          if ((roomData.status === 'running' || roomData.status === 'countdown') && !isExistingMember) {
+            showGlobalLoader(false);
+            showRoomBlockedModal({
+              icon: '⛔',
+              title: 'ไม่สามารถเข้าห้องสอบได้ในขณะนี้',
+              subtitle: 'การสอบได้เริ่มต้นขึ้นแล้ว (Exam in Progress)',
+              message: `ห้องสอบรหัส ${roomIdInput} กำลังดำเนินการสอบอยู่ ระบบได้ทำการล็อกห้องสอบเพื่อรักษาลำดับการวนสถานีและความเป็นธรรมในการสอบ ไม่อนุญาตให้ผู้เข้าสอบคนใหม่เข้าร่วมระหว่างการสอบครับ`,
+              note: 'หากคุณเป็นผู้เข้าสอบในห้องนี้ที่เน็ตหลุดหรือเผลอกดรีเฟรช กรุณากรอก "ชื่อเดิม" ที่ใช้ตอนเข้าห้อง หรือติดต่อผู้คุมสอบ (Host)'
+            });
+            return;
+          }
+
+          // If room is manually locked by Host and NOT an existing member: BLOCK!
+          if (roomData.isLocked && !isExistingMember) {
+            showGlobalLoader(false);
+            showRoomBlockedModal({
+              icon: '🔒',
+              title: 'ห้องสอบถูกล็อกโดยผู้คุมสอบ',
+              subtitle: 'ห้องสอบปิดรับสมาชิกใหม่ (Room Locked)',
+              message: `ผู้คุมสอบ (Host) ได้ทำการล็อกห้องสอบรหัส ${roomIdInput} ไว้ชั่วคราว เพื่อป้องกันบุคคลภายนอกเข้ามารบกวน`,
+              note: 'หากคุณมีสิทธิ์เข้าสอบในรอบนี้ กรุณาแจ้งผู้คุมสอบให้กด "ปลดล็อกห้อง" เพื่อให้คุณเข้าร่วมได้'
+            });
+            return;
+          }
+
+          // Reconnecting or new player setup
+          let myPlayerId;
+          let playerEmoji;
+          let playerRole = 'examinee';
+          if (existingById) {
+            myPlayerId = savedPlayerId;
+            playerEmoji = existingById.emoji || '💊';
+            playerRole = existingById.role || 'examinee';
+          } else if (existingByName) {
+            myPlayerId = existingByName.id;
+            playerEmoji = existingByName.emoji || '💊';
+            playerRole = existingByName.role || 'examinee';
+          } else {
+            myPlayerId = 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+            playerEmoji = localStorage.getItem('ple_player_emoji') || '💊';
+          }
+
           SimState.myPlayerId = myPlayerId;
           SimState.isHost = false;
           SimState.isLobby = true;
-          
-          const savedEmoji = localStorage.getItem('ple_player_emoji') || '💊';
-          SimState.myEmoji = savedEmoji;
+          SimState.myEmoji = playerEmoji;
+
+          try {
+            localStorage.setItem('ple_player_id', myPlayerId);
+            localStorage.setItem('ple_room_id', roomIdInput);
+          } catch (e) {}
 
           const newPlayer = {
             id: myPlayerId,
             name: playerName,
-            emoji: savedEmoji,
-            role: 'examinee',
+            emoji: playerEmoji,
+            role: playerRole,
             isHost: false,
-            joinedAt: Date.now()
+            joinedAt: (existingById?.joinedAt || existingByName?.joinedAt || Date.now())
           };
           
-          // Add this player into players collection
+          // Add/update this player into players collection
           await _fbDb.ref(`rooms/${roomIdInput}/players/${myPlayerId}`).set(newPlayer);
           
           // Update summary strings for backward compatibility
           const existingPlayers = Object.values(roomData.players || {});
-          existingPlayers.push(newPlayer);
+          if (!existingById && !existingByName) {
+            existingPlayers.push(newPlayer);
+          }
           const examiners = existingPlayers.filter(p => p.role === 'examiner' || p.isHost).map(p => p.name);
           const examinees = existingPlayers.filter(p => p.role === 'examinee' && !p.isHost).map(p => p.name);
           
@@ -2974,8 +3059,8 @@
           });
           
           SimState.roomId = roomIdInput;
-          SimState.role = 'examinee';
-          SimState.lobbyRole = 'examinee';
+          SimState.role = playerRole;
+          SimState.lobbyRole = playerRole;
           setupLobbyRoomUI();
         }
       } catch (e) {
@@ -3241,6 +3326,10 @@
         SimState.myCarouselStation = null;
         SimState.hasDoneCountdown = false;
         SimState.roleSelectedThisSession = false;
+        try {
+          localStorage.removeItem('ple_room_id');
+          localStorage.removeItem('ple_player_id');
+        } catch (e) {}
         
         // Switch views back to setup
         document.getElementById('exam-running-view').style.display = 'none';
@@ -4759,12 +4848,7 @@
           showGlobalLoader(false);
           return;
         }
-        showGlobalLoader(false);
-        document.getElementById('exam-setup-view').style.display = 'none';
-        document.getElementById('exam-running-view').style.display = 'block';
-        document.getElementById('exam-lobby-info-bar').style.display = 'none';
-        renderStation(0);
-        startTimer();
+        launchSoloExamWithCountdown(0);
         return;
       }
 
@@ -4796,13 +4880,7 @@
           showGlobalLoader(false);
           return;
         }
-        showGlobalLoader(false);
-        document.getElementById('exam-setup-view').style.display = 'none';
-        document.getElementById('exam-running-view').style.display = 'block';
-        document.getElementById('exam-lobby-info-bar').style.display = 'none';
-        
-        renderStation(0);
-        startTimer();
+        launchSoloExamWithCountdown(0);
         return;
       }
 
@@ -4882,14 +4960,55 @@
         return;
       }
 
+      launchSoloExamWithCountdown(0);
+    }
+
+    function launchSoloExamWithCountdown(initialIdx = 0) {
       showGlobalLoader(false);
       document.getElementById('exam-setup-view').style.display = 'none';
       document.getElementById('exam-running-view').style.display = 'block';
       document.getElementById('exam-lobby-info-bar').style.display = 'none';
-      
-      renderStation(0);
-      startTimer();
+      document.querySelector('.exam-layout').style.display = 'none';
+
+      const superHostMonitor = document.getElementById('super-host-monitor-view');
+      if (superHostMonitor) superHostMonitor.style.display = 'none';
+      const stickyTimer = document.getElementById('exam-sticky-timer-bar');
+      if (stickyTimer) stickyTimer.style.display = 'none';
+      const stickyHeader = document.getElementById('exam-sticky-top-header');
+      if (stickyHeader) stickyHeader.style.display = 'none';
+
+      const cdScreen = document.getElementById('lobby-countdown-screen');
+      const cdNum = document.getElementById('lobby-countdown-number');
+      if (cdScreen && cdNum) {
+        cdScreen.style.display = 'flex';
+        let count = 3;
+        cdNum.textContent = count;
+
+        if (SimState.countdownInterval) clearInterval(SimState.countdownInterval);
+        SimState.countdownInterval = setInterval(() => {
+          count--;
+          if (count > 0) {
+            cdNum.textContent = count;
+          } else {
+            clearInterval(SimState.countdownInterval);
+            SimState.countdownInterval = null;
+            cdScreen.style.display = 'none';
+            document.querySelector('.exam-layout').style.display = 'flex';
+            if (stickyTimer) stickyTimer.style.display = 'block';
+            if (stickyHeader) stickyHeader.style.display = 'block';
+            renderStation(initialIdx);
+            startTimer();
+          }
+        }, 1000);
+      } else {
+        document.querySelector('.exam-layout').style.display = 'flex';
+        if (stickyTimer) stickyTimer.style.display = 'block';
+        if (stickyHeader) stickyHeader.style.display = 'block';
+        renderStation(initialIdx);
+        startTimer();
+      }
     }
+    window.launchSoloExamWithCountdown = launchSoloExamWithCountdown;
 
     // Generate exam set locally (offline) with Source, Course Group, Topic Filters and Smart Constraints
     function generateLocalExamSet(clinic, product, sap) {

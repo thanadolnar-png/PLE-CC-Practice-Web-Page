@@ -2891,7 +2891,7 @@ ol.ordered-list li,
   color: white;
 }
 
-/* Countdown screen (lobby pre-start) */
+/* Countdown screen (lobby & solo pre-start) */
 #lobby-countdown-screen {
   display: none;
   position: fixed;
@@ -2906,6 +2906,25 @@ ol.ordered-list li,
   justify-content: center;
   align-items: center;
   color: white;
+  animation: fadeIn 0.2s ease;
+}
+
+#lobby-countdown-number {
+  font-size: 8.5rem;
+  font-weight: 900;
+  color: var(--primary-light, #818cf8);
+  font-family: var(--font-title);
+  line-height: 1;
+  text-shadow: 0 0 40px rgba(99, 102, 241, 0.6);
+  animation: cdNumberPop 1s ease infinite;
+}
+
+@keyframes cdNumberPop {
+  0% { transform: scale(0.6); opacity: 0; }
+  25% { transform: scale(1.12); opacity: 1; }
+  40% { transform: scale(1); opacity: 1; }
+  85% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.2); opacity: 0; }
 }
 
 /* --- Asymmetric Case Database Layout --- */
