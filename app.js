@@ -197,8 +197,8 @@ const BgmManager = {
   volume: 0.35,
   currentTrackIndex: 0,
   tracks: [
-    { id: 'muan', name: 'ดนตรีให้กำลังใจม่วนๆ', src: './bgm-muan-muan.mp3' },
-    { id: 'susu', name: 'OSPE SUSU', src: './bgm-ospe-susu.mp3' }
+    { id: 'susu', name: 'OSPE SUSU (Main Theme)', src: './bgm-ospe-susu.mp3' },
+    { id: 'muan', name: 'ดนตรีให้กำลังใจม่วนๆ', src: './bgm-muan-muan.mp3' }
   ],
 
   get currentTrack() {
