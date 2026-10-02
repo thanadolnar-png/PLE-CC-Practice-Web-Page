@@ -969,7 +969,10 @@
                 <strong style="font-size: 1rem; color: var(--text-primary); font-family: var(--font-title);">👥 โต๊ะสอบย่อย (Breakout Tables)</strong>
                 <div style="font-size: 0.78rem; color: var(--text-muted);">จับคู่ 1 Examiner + 1 Participant ต่อโต๊ะ เพื่อสอบโจทย์เดียวกันพร้อมกันทั้งห้อง</div>
               </div>
-              <button type="button" class="sim-btn-xs" onclick="addBreakoutTable()">➕ เพิ่มโต๊ะสอบย่อย</button>
+              <div style="display: flex; gap: 0.4rem; align-items: center;" id="cohort-table-btn-group">
+                <button type="button" class="sim-btn-xs" style="background: var(--surface); border: 1px solid var(--border); color: var(--danger, #ef4444);" onclick="removeLastBreakoutTable()" title="ลบโต๊ะสอบตัวล่าสุด">➖ ลบโต๊ะ</button>
+                <button type="button" class="sim-btn-xs" style="background: var(--primary); color: white;" onclick="addBreakoutTable()">➕ เพิ่มโต๊ะสอบ</button>
+              </div>
             </div>
             <div id="cohort-tables-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem;">
               <!-- Filled dynamically by JS -->
@@ -2340,7 +2343,7 @@
           // Breakout tables for cohort_breakout
           const breakouts = {};
           if (selectedExamMode === 'cohort_breakout') {
-            for (let t = 1; t <= 4; t++) {
+            for (let t = 1; t <= 2; t++) {
               breakouts['table_' + t] = {
                 id: 'table_' + t,
                 name: `โต๊ะสอบที่ ${t}`,
@@ -2532,17 +2535,24 @@
         if (room.isSuperHost !== undefined) SimState.isSuperHost = room.isSuperHost;
 
         // Auto-detect breakout table membership for current player
+        let foundInBreakout = false;
         if (room.breakouts) {
           Object.entries(room.breakouts).forEach(([tId, t]) => {
             if (t.examinerId === SimState.myPlayerId || (t.examinerName && t.examinerName === SimState.lobbyPlayerName)) {
               SimState.myBreakoutTableId = tId;
               SimState.role = 'examiner';
+              foundInBreakout = true;
             }
             if (t.participantId === SimState.myPlayerId || (t.participantName && t.participantName === SimState.lobbyPlayerName)) {
               SimState.myBreakoutTableId = tId;
               SimState.role = 'participant';
+              foundInBreakout = true;
             }
           });
+        }
+        if (!foundInBreakout) {
+          SimState.myBreakoutTableId = null;
+          SimState.myBreakoutRole = null;
         }
 
         const totalPlayers = playersList.length;
@@ -5070,10 +5080,22 @@
     // ═════════════════════════════════════════════════════════════════
     async function addBreakoutTable() {
       if (!SimState.roomId || typeof _fbDb === 'undefined') return;
+      if (!SimState.isHost) {
+        alert('เฉพาะผู้สร้างห้อง (Host) เท่านั้นที่สามารถเพิ่มโต๊ะสอบได้');
+        return;
+      }
       try {
         const snap = await _fbDb.ref(`rooms/${SimState.roomId}/breakouts`).get();
         const existing = snap.val() || {};
-        const count = Object.keys(existing).length + 1;
+        let maxNum = 0;
+        Object.keys(existing).forEach(k => {
+          const match = k.match(/table_(\d+)/);
+          if (match) {
+            const num = parseInt(match[1], 10);
+            if (num > maxNum) maxNum = num;
+          }
+        });
+        const count = maxNum + 1;
         const newId = 'table_' + count;
         await _fbDb.ref(`rooms/${SimState.roomId}/breakouts/${newId}`).set({
           id: newId,
@@ -5081,10 +5103,57 @@
           examinerId: '',
           examinerName: '',
           participantId: '',
-          participantName: ''
+          participantName: '',
+          scores: {}
         });
       } catch (e) {
         console.error('Add breakout table failed:', e);
+      }
+    }
+
+    async function deleteBreakoutTable(tableId) {
+      if (!SimState.roomId || typeof _fbDb === 'undefined') return;
+      if (!SimState.isHost) {
+        alert('เฉพาะผู้สร้างห้อง (Host) เท่านั้นที่สามารถลบโต๊ะสอบได้');
+        return;
+      }
+      try {
+        const snap = await _fbDb.ref(`rooms/${SimState.roomId}/breakouts/${tableId}`).get();
+        const table = snap.val();
+        if (!table) return;
+
+        const hasPlayers = Boolean(table.examinerId || table.participantId);
+        if (hasPlayers) {
+          const names = [table.examinerName, table.participantName].filter(Boolean).join(', ');
+          if (!confirm(`โต๊ะ "${table.name || tableId}" มีผู้เข้าร่วมอยู่ (${names})\nต้องการลบโต๊ะสอบนี้จริงหรือไม่?`)) {
+            return;
+          }
+        }
+
+        await _fbDb.ref(`rooms/${SimState.roomId}/breakouts/${tableId}`).remove();
+      } catch (e) {
+        console.error('Delete breakout table failed:', e);
+      }
+    }
+
+    async function removeLastBreakoutTable() {
+      if (!SimState.roomId || typeof _fbDb === 'undefined') return;
+      if (!SimState.isHost) {
+        alert('เฉพาะผู้สร้างห้อง (Host) เท่านั้นที่สามารถลบโต๊ะสอบได้');
+        return;
+      }
+      try {
+        const snap = await _fbDb.ref(`rooms/${SimState.roomId}/breakouts`).get();
+        const existing = snap.val() || {};
+        const keys = Object.keys(existing);
+        if (keys.length <= 1) {
+          alert('ต้องมีโต๊ะสอบอย่างน้อย 1 โต๊ะครับ');
+          return;
+        }
+        const lastKey = keys[keys.length - 1];
+        await deleteBreakoutTable(lastKey);
+      } catch (e) {
+        console.error('Remove last breakout table failed:', e);
       }
     }
 
@@ -5094,6 +5163,23 @@
       const myName = SimState.lobbyPlayerName;
       try {
         const updateData = {};
+
+        // If player is already sitting at another table, clear their old seat
+        if (SimState.myBreakoutTableId && SimState.myBreakoutTableId !== tableId) {
+          const oldSnap = await _fbDb.ref(`rooms/${SimState.roomId}/breakouts/${SimState.myBreakoutTableId}`).get();
+          const oldT = oldSnap.val();
+          if (oldT) {
+            if (oldT.examinerId === myId) {
+              updateData[`rooms/${SimState.roomId}/breakouts/${SimState.myBreakoutTableId}/examinerId`] = '';
+              updateData[`rooms/${SimState.roomId}/breakouts/${SimState.myBreakoutTableId}/examinerName`] = '';
+            }
+            if (oldT.participantId === myId) {
+              updateData[`rooms/${SimState.roomId}/breakouts/${SimState.myBreakoutTableId}/participantId`] = '';
+              updateData[`rooms/${SimState.roomId}/breakouts/${SimState.myBreakoutTableId}/participantName`] = '';
+            }
+          }
+        }
+
         if (role === 'examiner') {
           updateData[`rooms/${SimState.roomId}/breakouts/${tableId}/examinerId`] = myId;
           updateData[`rooms/${SimState.roomId}/breakouts/${tableId}/examinerName`] = myName;
@@ -5138,10 +5224,15 @@
       if (!container) return;
       container.innerHTML = '';
 
+      const btnGroup = document.getElementById('cohort-table-btn-group');
+      if (btnGroup) {
+        btnGroup.style.display = SimState.isHost ? 'flex' : 'none';
+      }
+
       const breakouts = room.breakouts || {};
       const tableKeys = Object.keys(breakouts);
       if (tableKeys.length === 0) {
-        container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:1rem;">ยังไม่มีโต๊ะสอบย่อย กด "+ เพิ่มโต๊ะสอบย่อย"</div>';
+        container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:1rem;">ยังไม่มีโต๊ะสอบย่อย กด "+ เพิ่มโต๊ะสอบ"</div>';
         return;
       }
 
@@ -5152,11 +5243,16 @@
         const isMyTable = (t.examinerId === SimState.myPlayerId || t.participantId === SimState.myPlayerId);
 
         const card = document.createElement('div');
-        card.style.cssText = `background:var(--surface);border:1.5px solid ${isMyTable ? 'var(--primary)' : 'var(--border)'};border-radius:var(--radius-md);padding:0.75rem;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:0.4rem;font-size:0.86rem;`;
+        card.style.cssText = `background:var(--surface);border:1.5px solid ${isMyTable ? 'var(--primary)' : 'var(--border)'};border-radius:var(--radius-md);padding:0.75rem;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:0.4rem;font-size:0.86rem;position:relative;`;
 
         card.innerHTML = `
           <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:0.35rem;margin-bottom:0.25rem;">
-            <strong style="color:var(--text-primary);">${escapeHtml(t.name || tKey)}</strong>
+            <div style="display:flex;align-items:center;gap:0.35rem;">
+              <strong style="color:var(--text-primary);">${escapeHtml(t.name || tKey)}</strong>
+              ${SimState.isHost ? `
+                <button type="button" class="sim-btn-xs" style="padding:0.1rem 0.35rem;font-size:0.72rem;color:#ef4444;background:transparent;border:1px solid rgba(239,68,68,0.25);border-radius:4px;cursor:pointer;" title="ลบโต๊ะสอบนี้" onclick="deleteBreakoutTable('${tKey}')">🗑️ ลบ</button>
+              ` : ''}
+            </div>
             <span style="font-size:0.75rem;color:${hasExaminer && hasParticipant ? 'var(--success)' : 'var(--text-muted)'};font-weight:600;">
               ${hasExaminer && hasParticipant ? '🟢 พร้อมสอบ' : '⚪ รอคน'}
             </span>
