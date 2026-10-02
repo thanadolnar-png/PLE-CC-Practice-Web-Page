@@ -2590,6 +2590,7 @@ function scanDocForCases(docId) {
             let difficulty = 2;
             let author = '';
             let createdDate = '';
+            let caseSource = '';
             let isTableCase = false;
             
             for (let r = 0; r < numRows; r++) {
@@ -2619,6 +2620,8 @@ function scanDocForCases(docId) {
                 author = valText;
               } else if (keyText.includes('วันที่') || keyText.includes('date')) {
                 createdDate = valText;
+              } else if (keyText.includes('แหล่งที่มา') || keyText.includes('source')) {
+                caseSource = valText;
               }
             }
             
@@ -2642,7 +2645,8 @@ function scanDocForCases(docId) {
                 author: author || 'Unknown',
                 createdDate: createdDate || new Date().toLocaleDateString('th-TH'),
                 isActive: 'TRUE',
-                linkedFromCase: linkedFromCase
+                linkedFromCase: linkedFromCase,
+                source: formatSourceName(caseId, caseSource)
               });
             }
           }
@@ -2664,6 +2668,7 @@ function scanDocForCases(docId) {
           let difficulty = 2;
           let author = '';
           let createdDate = '';
+          let caseSource = '';
           
           let j = i + 1;
           while (j < numChildren) {
@@ -2685,7 +2690,7 @@ function scanDocForCases(docId) {
                 break;
               }
               
-              const metaMatch = nextText.match(/^[-*\sข้อมูลเคส]*\s*(หมวด|category|ospe main group|กลุ่มวิชา|course group|mainGroup|โรค\/หัวข้อ|โรค|disease|ระดับ|difficulty|ผู้เขียน|author|วันที่|date)\s*:\s*(.*)$/i);
+              const metaMatch = nextText.match(/^[-*\sข้อมูลเคส]*\s*(หมวด|category|ospe main group|กลุ่มวิชา|course group|mainGroup|โรค\/หัวข้อ|โรค|disease|ระดับ|difficulty|ผู้เขียน|author|วันที่|date|แหล่งที่มา|source)\s*:\s*(.*)$/i);
               if (metaMatch) {
                 const key = metaMatch[1].toLowerCase();
                 const val = metaMatch[2].trim();
@@ -2703,6 +2708,8 @@ function scanDocForCases(docId) {
                   author = val;
                 } else if (key.includes('วันที่') || key.includes('date')) {
                   createdDate = val;
+                } else if (key.includes('แหล่งที่มา') || key.includes('source')) {
+                  caseSource = val.replace(/\*/g, '').trim();
                 }
               }
             }
@@ -2728,7 +2735,8 @@ function scanDocForCases(docId) {
             author: author || '',
             createdDate: createdDate || new Date().toLocaleDateString('th-TH'),
             isActive: 'TRUE',
-            linkedFromCase: linkedFromCase
+            linkedFromCase: linkedFromCase,
+            source: formatSourceName(caseId, caseSource)
           });
           
           i = j - 1;

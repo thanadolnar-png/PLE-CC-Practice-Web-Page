@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU</title>
   <link rel="stylesheet" href="style.css?v=20261002_231500">
-  <script src="case-data-offline.js?v=v_20261002_231500"></script>
-  <script src="case-details-offline.js?v=v_20261002_231500"></script>
-  <script src="app.js?v=v_20261002_231500"></script>
+  <script src="case-data-offline.js?v=v_20261002_230447"></script>
+  <script src="case-details-offline.js?v=v_20261002_230447"></script>
+  <script src="app.js?v=v_20261002_230447"></script>
   <script src="scratchpad.js?v=v_20261002_231500"></script>
   <style>
     /* Simulation Source and Topic Selector */
@@ -2090,7 +2090,7 @@
       }
 
       const existingSet = new Set(SimState.customSelectedCases.filter(x => x !== 'REST'));
-      const candidates = shuffle(AppState.cases.filter(c => !existingSet.has(c.caseId) && !c.linkedFromCase));
+      const candidates = shuffle(AppState.cases.filter(c => !existingSet.has(c.caseId) && !c.linkedFromCase && !c.isProtected && !c.hasPassword && !c.isEncrypted));
       
       let added = 0;
       for (const c of candidates) {
@@ -4674,6 +4674,15 @@
       // 1. Filter candidate cases by user selection
       const candidateCases = AppState.cases.filter(c => {
         if (!c || !c.caseId) return false;
+
+        // Exclude password-protected / secret mock cases from random simulation by default
+        const isProtected = Boolean(c.isProtected || c.hasPassword || c.isEncrypted);
+        if (isProtected) {
+          const src = c.source || 'ไม่ระบุ';
+          const srcExplicitlySelected = SimState.selectedSources && SimState.selectedSources.size > 0 && SimState.selectedSources.has(src);
+          if (!srcExplicitlySelected) return false;
+        }
+
         const src = c.source || 'ไม่ระบุ';
         if (SimState.selectedSources && SimState.selectedSources.size > 0 && !SimState.selectedSources.has(src)) return false;
         
