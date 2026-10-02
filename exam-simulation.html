@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU</title>
-  <link rel="stylesheet" href="style.css?v=20261002_235000">
-  <script src="case-data-offline.js?v=v_20261002_234500"></script>
-  <script src="case-details-offline.js?v=v_20261002_234500"></script>
-  <script src="app.js?v=v_20261002_234500"></script>
-  <script src="scratchpad.js?v=v_20261002_234500"></script>
+  <link rel="stylesheet" href="style.css?v=20261002_235500">
+  <script src="case-data-offline.js?v=v_20261002_235500"></script>
+  <script src="case-details-offline.js?v=v_20261002_235500"></script>
+  <script src="app.js?v=v_20261002_235500"></script>
+  <script src="scratchpad.js?v=v_20261002_235500"></script>
   <style>
     /* Simulation Source and Topic Selector */
     .sim-filter-section {
@@ -1027,10 +1027,16 @@
               <div id="lobby-room-code-share" class="lobby-code-box" style="display: none;">
                 <div class="lobby-code-label">รหัสห้องสอบ</div>
                 <div class="lobby-code-digits" id="lobby-share-code-display">----</div>
-                <button type="button" class="lobby-code-copy" onclick="copyRoomCode()">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                  คัดลอกรหัส
-                </button>
+                <div class="lobby-code-actions">
+                  <button type="button" class="lobby-code-copy" onclick="copyRoomCode()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    คัดลอกรหัส
+                  </button>
+                  <button type="button" class="lobby-code-fullscreen-btn" onclick="openFullscreenRoomCode()" title="ขยายรหัสและ QR Code เต็มจอ">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                    ขยายเต็มจอ
+                  </button>
+                </div>
               </div>
 
               <!-- Personal Profile Card -->
@@ -7286,6 +7292,51 @@
     }
     window.copyRoomCode = copyRoomCode;
 
+    function openFullscreenRoomCode() {
+      if (!SimState.roomId) return;
+      const modal = document.getElementById('modal-room-code-fullscreen');
+      const codeEl = document.getElementById('fs-room-code-display');
+      const qrEl = document.getElementById('fs-room-qr-code');
+      const urlInput = document.getElementById('fs-room-url-input');
+      
+      if (codeEl) codeEl.textContent = SimState.roomId;
+      
+      const cleanUrl = `${window.location.origin}${window.location.pathname}?join=${SimState.roomId}`;
+      if (urlInput) urlInput.value = cleanUrl;
+      
+      if (qrEl) {
+        qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(cleanUrl)}`;
+        qrEl.style.display = 'block';
+      }
+      
+      if (modal) modal.style.display = 'flex';
+    }
+    window.openFullscreenRoomCode = openFullscreenRoomCode;
+
+    function closeFullscreenRoomCode() {
+      const modal = document.getElementById('modal-room-code-fullscreen');
+      if (modal) modal.style.display = 'none';
+    }
+    window.closeFullscreenRoomCode = closeFullscreenRoomCode;
+
+    function copyFullscreenJoinUrl() {
+      const urlInput = document.getElementById('fs-room-url-input');
+      if (!urlInput || !urlInput.value) return;
+      navigator.clipboard.writeText(urlInput.value).then(() => {
+        if (typeof showToast === 'function') showToast('คัดลอกลิงก์เข้าร่วมห้องสอบแล้ว', 'success');
+        else alert('คัดลอกลิงก์เข้าร่วมห้องสอบแล้ว');
+      }).catch(() => {
+        prompt('คัดลอกลิงก์เข้าร่วมห้องสอบ:', urlInput.value);
+      });
+    }
+    window.copyFullscreenJoinUrl = copyFullscreenJoinUrl;
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeFullscreenRoomCode();
+      }
+    });
+
     // ── Carousel Rotation Diagram & Assignment ──
     async function assignCarouselStation(stationNum, role) {
       if (!SimState.roomId || typeof _fbDb === 'undefined') return;
@@ -7935,6 +7986,39 @@
           👑 ทำหน้าที่ Host ควบคุมห้องสอบอย่างเดียว (ไม่ลงสอบ)
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       FULLSCREEN ROOM CODE PROJECTOR MODAL
+       ═══════════════════════════════════════════ -->
+  <div id="modal-room-code-fullscreen" class="exam-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(10px); z-index: 999999; align-items: center; justify-content: center; padding: 1.5rem;" onclick="if(event.target === this) closeFullscreenRoomCode()">
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 1.25rem; max-width: 580px; width: 100%; padding: 2.25rem 2rem; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.3); position: relative; animation: modalFadeIn 0.2s ease;">
+      <button type="button" onclick="closeFullscreenRoomCode()" style="position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; line-height: 1; padding: 0.25rem;" title="ปิด">✕</button>
+      
+      <span style="font-size: 0.82rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--primary); background: var(--primary-light); padding: 0.3rem 0.8rem; border-radius: 999px;">
+        📡 รหัสห้องสอบ OSPE (Room Code)
+      </span>
+
+      <div id="fs-room-code-display" style="font-family: var(--font-mono); font-size: clamp(4.5rem, 12vw, 7.5rem); font-weight: 900; letter-spacing: 0.6rem; color: var(--text-primary); line-height: 1.05; margin: 1.25rem 0 0.75rem; text-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+        ----
+      </div>
+
+      <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.25rem; line-height: 1.4;">
+        ให้นิสิต/ผู้ร่วมซ้อม เข้าเว็บแล้วกรอกรหัส 4 หลัก<br>หรือใช้กล้องมือถือสแกน QR Code ด้านล่างนี้:
+      </p>
+
+      <div style="background: var(--bg-secondary); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.25rem; display: flex; flex-direction: column; align-items: center; gap: 0.85rem;">
+        <img id="fs-room-qr-code" src="" alt="Room QR Code" style="width: 170px; height: 170px; border-radius: 8px; background: #ffffff; padding: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); display: none;">
+        <div style="display: flex; gap: 0.5rem; width: 100%; max-width: 440px;">
+          <input type="text" id="fs-room-url-input" readonly style="flex: 1; font-size: 0.82rem; padding: 0.45rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text-primary); text-overflow: ellipsis;" value="">
+          <button type="button" class="btn btn-primary btn-sm" onclick="copyFullscreenJoinUrl()" style="white-space: nowrap; font-weight: 600;">📋 คัดลอกลิงก์</button>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-secondary" style="padding: 0.55rem 2rem; font-weight: 600; border-radius: var(--radius-sm);" onclick="closeFullscreenRoomCode()">
+        เสร็จสิ้น / ปิดหน้าต่าง (ESC)
+      </button>
     </div>
   </div>
 
