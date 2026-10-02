@@ -324,8 +324,9 @@
   </div><!-- /.page-viewport -->
 </div><!-- /.app-shell -->
 
-  <script src="case-data-offline.js?v=20261002_205600"></script>
-  <script src="app.js?v=20261002_205600"></script>
+  <script src="case-data-offline.js?v=v_20261002_210522"></script>
+  <script src="case-details-offline.js?v=v_20261002_210522"></script>
+  <script src="app.js?v=v_20261002_210522"></script>
   <script src="scratchpad.js?v=20261002_205600"></script>
 
   <script>
@@ -395,7 +396,7 @@
           // ดึงจาก IndexedDB ทันที (5-10ms) เพื่อเปิดเคสได้ทันทีโดยไม่ต้องรอ
           openIndexedDB().then(db => getCasesFromDB(db)).then(cached => {
             if (cached && Object.keys(cached).length > 0) {
-              window.OFFLINE_CASE_DETAILS = cached;
+              window.OFFLINE_CASE_DETAILS = Object.assign({}, cached, window.OFFLINE_CASE_DETAILS || {});
               console.log('[Case Viewer] Loaded case details directly from IndexedDB (5ms).');
               loadCaseDetail();
             } else {

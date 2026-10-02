@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU</title>
   <link rel="stylesheet" href="style.css">
-  <script src="case-data-offline.js?v=v_20261002_201440"></script>
+  <script src="case-data-offline.js?v=v_20261002_210241"></script>
   <script src="case-details-offline.js?v=v_20261002_165840"></script>
-  <script src="app.js?v=v_20261002_201440"></script>
+  <script src="app.js?v=v_20261002_210241"></script>
   <script src="scratchpad.js?v=v_20261002_165840"></script>
   <style>
     /* Simulation Source and Topic Selector */
@@ -2195,9 +2195,10 @@
       });
 
       sortedSources.forEach(src => {
+        const isProtectedSet = AppState.cases.some(c => c && c.source === src && (c.isProtected || c.hasPassword));
         const opt = document.createElement('option');
         opt.value = src;
-        opt.textContent = `${src} (${sourceMap[src]} สถานี)`;
+        opt.textContent = `${isProtectedSet ? '🔒 ' : ''}${src} (${sourceMap[src]} สถานี)`;
         select.appendChild(opt);
       });
 
@@ -2217,7 +2218,9 @@
       }
       const infoText = document.getElementById('exam-set-info-text');
       if (infoText) {
-        infoText.innerHTML = `💡 ชุด <strong>${src}</strong> มีข้อสอบทั้งหมด <strong>${count} สถานี</strong> (สามารถเลือกจำนวนข้อหรือสอบครบทุกข้อได้)`;
+        const isProtectedSet = AppState.cases.some(c => c && c.source === src && (c.isProtected || c.hasPassword));
+        const lockNote = isProtectedSet ? ' <span style="color:#ef4444;font-weight:700;">🔒 ข้อสอบลับ (ต้องใช้รหัสผ่านก่อนสอบ)</span>' : '';
+        infoText.innerHTML = `💡 ชุด <strong>${src}</strong> มีข้อสอบทั้งหมด <strong>${count} สถานี</strong> (สามารถเลือกจำนวนข้อหรือสอบครบทุกข้อได้)${lockNote}`;
       }
     }
 
@@ -2707,6 +2710,19 @@
           }
           
           SimState.totalStations = fullExamSet.length;
+          
+          // Verify passcode if host creates room with protected cases
+          const tempStations = fullExamSet.map((st, i) => ({
+            stationNumber: i + 1,
+            isRest: st.caseId === 'REST',
+            case: AppState.cases.find(x => x && x.caseId === st.caseId)
+          }));
+          const unlockedOk = await unlockStationsIfProtected(tempStations);
+          if (!unlockedOk) {
+            showGlobalLoader(false);
+            return;
+          }
+
           const randomRoomId = String(Math.floor(1000 + Math.random() * 9000));
           const examSetJson = JSON.stringify(fullExamSet);
           
@@ -3894,6 +3910,179 @@
       }
     }
 
+    /**
+     * Unlock stations if any of them are password-protected (Confidential Mock Exam)
+     * Prompts the user ONCE for passcode, decrypts all protected stations in the set,
+     * and saves to sessionStorage so subsequent loads in this session don't ask again.
+     */
+    async function unlockStationsIfProtected(stations) {
+      if (!stations || stations.length === 0) return true;
+
+      // 1. Check for any protected station
+      const protectedStations = stations.filter(st => {
+        if (!st || st.isRest || !st.case) return false;
+        const c = st.case;
+        return Boolean(c.isEncrypted || c.isProtected || c.hasPassword);
+      });
+
+      if (protectedStations.length === 0) return true;
+
+      // 2. Check if already decrypted and cached in sessionStorage
+      for (const st of protectedStations) {
+        const cleanId = (st.case.caseId || '').trim();
+        const cached = sessionStorage.getItem('ple_unlocked_' + cleanId);
+        if (cached) {
+          try {
+            const decCase = JSON.parse(cached);
+            st.case = Object.assign({}, st.case, decCase);
+            if (typeof AppState !== 'undefined' && AppState.cases) {
+              const idx = AppState.cases.findIndex(c => c && c.caseId && c.caseId.trim() === cleanId);
+              if (idx !== -1) AppState.cases[idx] = Object.assign({}, AppState.cases[idx], decCase);
+            }
+          } catch(e) {}
+        }
+      }
+
+      // Check if any station is still encrypted / locked (i.e. lacks scenario/checklist)
+      const stillLocked = protectedStations.filter(st => {
+        const c = st.case;
+        return Boolean(c.isEncrypted || ((c.isProtected || c.hasPassword) && !c.scenario && !(c.checklist && c.checklist.length > 0)));
+      });
+
+      if (stillLocked.length === 0) {
+        return true; // All already unlocked!
+      }
+
+      // 3. Prompt user for passcode via a sleek modal
+      return new Promise((resolve) => {
+        showGlobalLoader(false);
+        let modal = document.getElementById('exam-passcode-modal');
+        if (!modal) {
+          modal = document.createElement('div');
+          modal.id = 'exam-passcode-modal';
+          modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.68);display:flex;align-items:center;justify-content:center;z-index:99999;backdrop-filter:blur(4px);padding:1rem;';
+          modal.innerHTML = `
+            <div style="background:var(--surface);border:1.5px solid var(--primary);border-radius:var(--radius-lg);padding:1.85rem;max-width:440px;width:100%;box-shadow:var(--shadow-xl);text-align:center;">
+              <div style="font-size:2.8rem;margin-bottom:0.5rem;">🔒</div>
+              <h2 style="font-size:1.25rem;font-weight:700;color:var(--text-primary);margin-bottom:0.4rem;">ชุดข้อสอบลับ (Confidential Mock)</h2>
+              <p id="exam-passcode-desc" style="font-size:0.86rem;color:var(--text-secondary);line-height:1.5;margin-bottom:1.25rem;">
+                ชุดข้อสอบนี้มีสถานีที่เป็นข้อสอบลับที่ได้รับการปกป้องด้วยรหัสผ่าน<br>กรุณากรอกรหัสผ่านเพื่อปลดล็อกก่อนเริ่มทำข้อสอบ
+              </p>
+              <form id="exam-passcode-form" onsubmit="event.preventDefault(); window.submitExamPasscode();">
+                <input type="password" id="exam-passcode-input" class="select-filter" style="width:100%;padding:0.7rem 0.85rem;font-size:1rem;border:1.5px solid var(--border);border-radius:var(--radius-md);margin-bottom:0.75rem;text-align:center;" placeholder="กรอกรหัสผ่านชุดข้อสอบ..." autofocus required>
+                <div id="exam-passcode-error" style="display:none;color:#ef4444;font-size:0.82rem;font-weight:600;margin-bottom:0.75rem;">⚠️ รหัสผ่านไม่ถูกต้อง โปรดลองใหม่อีกครั้ง</div>
+                <div style="display:flex;gap:0.5rem;">
+                  <button type="button" class="btn btn-secondary" style="flex:1;" id="exam-passcode-cancel-btn">ยกเลิก</button>
+                  <button type="submit" class="btn btn-primary" style="flex:2;" id="exam-passcode-submit-btn">🔓 ปลดล็อกและเริ่มสอบ</button>
+                </div>
+              </form>
+            </div>
+          `;
+          document.body.appendChild(modal);
+        } else {
+          modal.style.display = 'flex';
+        }
+
+        const inp = document.getElementById('exam-passcode-input');
+        const err = document.getElementById('exam-passcode-error');
+        const submitBtn = document.getElementById('exam-passcode-submit-btn');
+        const cancelBtn = document.getElementById('exam-passcode-cancel-btn');
+
+        if (err) err.style.display = 'none';
+        if (inp) {
+          inp.value = '';
+          setTimeout(() => inp.focus(), 100);
+        }
+
+        cancelBtn.onclick = () => {
+          modal.style.display = 'none';
+          resolve(false);
+        };
+
+        window.submitExamPasscode = async () => {
+          const pwd = inp ? inp.value.trim() : '';
+          if (!pwd) return;
+
+          if (err) err.style.display = 'none';
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'กำลังตรวจสอบ...';
+          }
+
+          try {
+            // Find encrypted payload for the first locked station to test password
+            let foundDecryptedSample = null;
+            for (const st of stillLocked) {
+              const cleanId = (st.case.caseId || '').trim();
+              let encObj = st.case;
+              if (!encObj || !encObj.ciphertext) {
+                if (typeof OFFLINE_DETAILS !== 'undefined' && OFFLINE_DETAILS) {
+                  encObj = OFFLINE_DETAILS[cleanId] || OFFLINE_DETAILS[cleanId.replace('OSPE-', '')] || OFFLINE_DETAILS['OSPE-' + cleanId];
+                }
+              }
+              if (!encObj || !encObj.ciphertext) continue;
+
+              // Test decryption
+              const dec = await window.decryptCaseData(encObj, pwd);
+              if (dec) {
+                foundDecryptedSample = dec;
+                break;
+              }
+            }
+
+            if (!foundDecryptedSample) {
+              throw new Error('Decryption failed');
+            }
+
+            // If we reached here, decryption test passed! Decrypt all locked stations in the set
+            for (const st of stillLocked) {
+              const cleanId = (st.case.caseId || '').trim();
+              let encObj = st.case;
+              if (!encObj || !encObj.ciphertext) {
+                if (typeof OFFLINE_DETAILS !== 'undefined' && OFFLINE_DETAILS) {
+                  encObj = OFFLINE_DETAILS[cleanId] || OFFLINE_DETAILS[cleanId.replace('OSPE-', '')] || OFFLINE_DETAILS['OSPE-' + cleanId];
+                }
+              }
+              if (encObj && encObj.ciphertext) {
+                try {
+                  const dec = await window.decryptCaseData(encObj, pwd);
+                  if (dec) {
+                    st.case = Object.assign({}, st.case, dec);
+                    sessionStorage.setItem('ple_unlocked_' + cleanId, JSON.stringify(dec));
+                    if (typeof AppState !== 'undefined' && AppState.cases) {
+                      const idx = AppState.cases.findIndex(c => c && c.caseId && c.caseId.trim() === cleanId);
+                      if (idx !== -1) AppState.cases[idx] = Object.assign({}, AppState.cases[idx], dec);
+                    }
+                  }
+                } catch(decErr) {
+                  console.warn('Error decrypting case:', cleanId, decErr);
+                }
+              }
+            }
+
+            modal.style.display = 'none';
+            if (typeof showToast === 'function') showToast('ปลดล็อกชุดข้อสอบสำเร็จ!', 'success');
+            resolve(true);
+          } catch(e) {
+            console.warn('Exam passcode verification failed:', e);
+            if (err) {
+              err.style.display = 'block';
+              err.textContent = '❌ รหัสผ่านไม่ถูกต้อง โปรดลองใหม่อีกครั้ง';
+            }
+            if (inp) {
+              inp.value = '';
+              inp.focus();
+            }
+          } finally {
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = '🔓 ปลดล็อกและเริ่มสอบ';
+            }
+          }
+        };
+      });
+    }
+
     async function buildStationsFromRoom(room) {
       showGlobalLoader(true);
       let fullExamSet = [];
@@ -3951,6 +4140,7 @@
           SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: false, case: matchedCase });
         }
       }
+      await unlockStationsIfProtected(SimState.stations);
       showGlobalLoader(false);
     }
 
@@ -4289,6 +4479,11 @@
           }
         });
         SimState.currentIdx = 0;
+        const unlockedOk = await unlockStationsIfProtected(SimState.stations);
+        if (!unlockedOk) {
+          showGlobalLoader(false);
+          return;
+        }
         showGlobalLoader(false);
         document.getElementById('exam-setup-view').style.display = 'none';
         document.getElementById('exam-running-view').style.display = 'block';
@@ -4321,6 +4516,11 @@
         });
 
         SimState.currentIdx = 0;
+        const unlockedOk = await unlockStationsIfProtected(SimState.stations);
+        if (!unlockedOk) {
+          showGlobalLoader(false);
+          return;
+        }
         showGlobalLoader(false);
         document.getElementById('exam-setup-view').style.display = 'none';
         document.getElementById('exam-running-view').style.display = 'block';
@@ -4401,6 +4601,12 @@
       SimState.studentScores = {};
       SimState.stations.forEach(st => { SimState.studentScores[st.stationNumber] = []; });
       
+      const unlockedOk = await unlockStationsIfProtected(SimState.stations);
+      if (!unlockedOk) {
+        showGlobalLoader(false);
+        return;
+      }
+
       showGlobalLoader(false);
       document.getElementById('exam-setup-view').style.display = 'none';
       document.getElementById('exam-running-view').style.display = 'block';

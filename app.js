@@ -1538,7 +1538,7 @@ if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
 const DB_NAME = 'RxCU_OSPE_DB';
 const DB_VERSION = 1;
 const STORE_NAME = 'case_details';
-const DB_VERSION_STR = 'v_20261002_201440'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
+const DB_VERSION_STR = 'v_20261002_210522'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
 
 function openIndexedDB() {
   return new Promise((resolve, reject) => {
@@ -1632,6 +1632,8 @@ async function loadOfflineDetailsWithProgress() {
     mergeOfflineDetails();
     removeSplashOverlay();
     try {
+      const targetVersion = (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.version) ? OFFLINE_DATA.version : DB_VERSION_STR;
+      localStorage.setItem('ospe_db_version', targetVersion);
       openIndexedDB().then(db => saveCasesToDB(db, OFFLINE_CASE_DETAILS)).catch(() => {});
     } catch(e) {}
     return;
@@ -1660,7 +1662,7 @@ async function loadOfflineDetailsWithProgress() {
     // 1) ดึงแคชเดิมที่มีอยู่แล้วขึ้นมาแสดงก่อนทันที 0ms เพื่อไม่ให้ผู้ใช้ต้องรอ!
     const existingDetails = await getCasesFromDB(db);
     if (existingDetails && Object.keys(existingDetails).length > 0) {
-      window.OFFLINE_CASE_DETAILS = existingDetails;
+      window.OFFLINE_CASE_DETAILS = Object.assign({}, existingDetails, window.OFFLINE_CASE_DETAILS || {});
       mergeOfflineDetails();
       console.log('[Database Preloader] Previous cache loaded instantly (0ms); updating new cases in background...');
     }
