@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU</title>
   <link rel="stylesheet" href="style.css">
-  <script src="case-data-offline.js?v=v_20261002_155328"></script>
+  <script src="case-data-offline.js?v=v_20261002_162240"></script>
   <script src="case-details-offline.js?v=v_20260930_202218"></script>
-  <script src="app.js?v=v_20261002_155328"></script>
+  <script src="app.js?v=v_20261002_162240"></script>
   <script src="scratchpad.js?v=v_20261002_045854"></script>
   <style>
     /* Simulation Source and Topic Selector */
@@ -726,9 +726,14 @@
             <!-- 2. Exam Set Container (Shown in 'set' mode) -->
             <div id="config-set-container" style="display: none; background: var(--surface); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border);">
               <div class="form-group" style="margin-bottom: 1rem;">
-                <label class="form-label" for="exam-set-select" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">
-                  📑 เลือกชุดข้อสอบ / ปีที่ต้องการสอบ (Exam Set)
-                </label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+                  <label class="form-label" for="exam-set-select" style="font-weight: 600; margin-bottom: 0;">
+                    📑 เลือกชุดข้อสอบ / ปีที่ต้องการสอบ (Exam Set)
+                  </label>
+                  <button type="button" class="btn btn-outline" id="btn-adjust-stations" style="font-size: 0.78rem; padding: 0.22rem 0.65rem; border-radius: var(--radius-sm); border-color: var(--primary); color: var(--primary);" onclick="openExamSetAdjuster()">
+                    ⚙️ ปรับแต่งสถานี (Adjust)
+                  </button>
+                </div>
                 <select id="exam-set-select" class="select-filter" style="width: 100%; padding: 0.65rem; font-size: 0.95rem; border: 1.5px solid var(--primary); border-radius: var(--radius-sm);" onchange="onExamSetSelected(this.value)">
                   <!-- Filled dynamically by JS -->
                 </select>
@@ -858,8 +863,33 @@
                 </div>
               </div>
 
-              <!-- Create fields removed (Case Selection is now automatic based on proportion) -->
-              <div id="lobby-create-fields" style="display: none;"></div>
+              <!-- Multiplayer Exam Mode Selector (For Host) -->
+              <div id="lobby-mode-selector-group" class="form-group" style="margin-top: 1rem; padding: 0.85rem; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md);">
+                <label class="form-label" style="font-size: 0.85rem; font-weight: 700; margin-bottom: 0.5rem; display: block; color: var(--text-primary);">🎯 รูปแบบห้องสอบออนไลน์</label>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                  <label style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.86rem; cursor: pointer; background: var(--surface); padding: 0.5rem 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                    <input type="radio" name="lobby-exam-mode" value="standard" checked style="margin-top: 0.15rem;">
+                    <div>
+                      <strong style="color: var(--text-primary);">1. ซ้อมคู่มาตรฐาน (Standard Room)</strong>
+                      <div style="font-size: 0.76rem; color: var(--text-muted);">สอบคู่กันหรือช่วยกันประเมินข้อสอบตามปกติ</div>
+                    </div>
+                  </label>
+                  <label style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.86rem; cursor: pointer; background: var(--surface); padding: 0.5rem 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                    <input type="radio" name="lobby-exam-mode" value="cohort_breakout" style="margin-top: 0.15rem;">
+                    <div>
+                      <strong style="color: var(--text-primary);">2. กลุ่มใหญ่: ห้องย่อยสอบพร้อมกันทั้งห้อง (Cohort Breakouts)</strong>
+                      <div style="font-size: 0.76rem; color: var(--text-muted);">Super Host คุมจอใหญ่และสั่งเปลี่ยนข้อพร้อมกัน ทุกคู่ได้โจทย์เดียวกัน</div>
+                    </div>
+                  </label>
+                  <label style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.86rem; cursor: pointer; background: var(--surface); padding: 0.5rem 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                    <input type="radio" name="lobby-exam-mode" value="carousel_rotation" style="margin-top: 0.15rem;">
+                    <div>
+                      <strong style="color: var(--text-primary);">3. กลุ่มใหญ่: แลปกิ๊งหมุนเวียนสถานี (OSPE Carousel Rotation)</strong>
+                      <div style="font-size: 0.76rem; color: var(--text-muted);">Examiner ประจำฐาน Participant วนฐานตามเข็มนาฬิกา</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
 
               <!-- Join fields -->
               <div id="lobby-join-fields" style="display: none; margin-top: 1rem; border-top: 1px dashed var(--border); padding-top: 1rem;">
@@ -905,43 +935,119 @@
         </div>
 
         <!-- Lobby Waiting Screen (Only shown during Lobby Setup) -->
-        <div id="lobby-waiting-screen" style="display: none; padding: 2.5rem 1.25rem; text-align: center; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); margin-bottom: 2rem;">
-          <span style="font-size: 3.5rem; display: block; margin-bottom: 0.75rem;">⏳</span>
-          <h3 style="font-family: var(--font-title); font-size: 1.45rem; color: var(--text-primary); margin-bottom: 0.5rem;" id="lobby-waiting-title">กำลังรอเพื่อนๆ เข้าห้องซ้อม...</h3>
-          <p style="color: var(--text-secondary); margin-bottom: 1.25rem; font-size: 0.92rem;" id="lobby-waiting-desc">สามารถชวนเพื่อนเข้าร่วมห้องนี้ได้ไม่จำกัดจำนวนคน เพื่อซ้อมและสรุปคะแนนร่วมกัน</p>
+        <div id="lobby-waiting-screen" style="display: none; padding: 2.25rem 1.25rem; text-align: center; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); margin-bottom: 2rem;">
+          <span style="font-size: 3.25rem; display: block; margin-bottom: 0.5rem;">⏳</span>
+          <h3 style="font-family: var(--font-title); font-size: 1.4rem; color: var(--text-primary); margin-bottom: 0.35rem;" id="lobby-waiting-title">กำลังรอการเตรียมพร้อม...</h3>
+          <p style="color: var(--text-secondary); margin-bottom: 1.25rem; font-size: 0.9rem;" id="lobby-waiting-desc">รอผู้เข้าร่วมการจำลองซ้อมสอบเข้ามาเชื่อมต่อที่ห้องนี้</p>
           
-          <!-- Room ID display for Host to share -->
-          <div id="lobby-room-code-share" style="display: none; margin: 0 auto 1.25rem auto; padding: 0.85rem 1.5rem; background: var(--bg); border: 2px dashed var(--primary); border-radius: var(--radius-lg); max-width: 320px;">
-            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.35rem;" id="lobby-waiting-msg">แชร์รหัสห้อง 4 หลักนี้ให้เพื่อน:</p>
-            <div style="font-size: 2.5rem; font-weight: 900; letter-spacing: 0.5rem; color: var(--primary); font-family: var(--font-title);" id="lobby-share-code-display">----</div>
+          <!-- Modern Minimalist Status Box (as in Image 1) -->
+          <div id="lobby-players-status" style="margin: 1.25rem auto; padding: 1.1rem 1.4rem; border: 1px solid var(--border); border-radius: var(--radius-md); max-width: 440px; text-align: left; background: var(--bg); font-size: 0.92rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.45rem 0; border-bottom: 1px dashed var(--border);">
+              <span style="color: var(--text-secondary); display: flex; align-items: center; gap: 0.4rem; font-weight: 500;">👨‍🏫 Host:</span>
+              <span id="lobby-host-display" style="font-weight: 700; color: var(--primary);">Maxnum</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 0.45rem 0; gap: 0.5rem;">
+              <span style="color: var(--text-secondary); display: flex; align-items: center; gap: 0.4rem; white-space: nowrap; font-weight: 500;">👤 Participants:</span>
+              <div id="lobby-participants-list" style="text-align: right; color: var(--text-muted); font-size: 0.88rem; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.35rem;">รอการเชื่อมต่อ...</div>
+            </div>
+            <!-- Hidden backward-compatible spans -->
+            <div id="lobby-examiners-list" style="display: none;"></div>
+            <div id="lobby-examinees-list" style="display: none;"></div>
+            <span id="lobby-player-count" style="display: none;">0</span>
           </div>
 
-          <!-- Dynamic Multi-player Status Box -->
-          <div id="lobby-players-status" style="margin: 1.25rem auto; padding: 1.2rem; border: 1px solid var(--border); border-radius: var(--radius-md); max-width: 480px; text-align: left; background: var(--bg); font-size: 0.95rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
-              <span style="font-weight: 700; color: var(--text-primary); font-family: var(--font-title);">👥 สมาชิกในห้องซ้อม (<span id="lobby-player-count">0</span> คน)</span>
-              <span style="font-size: 0.75rem; color: var(--text-muted);">Real-time Sync</span>
+          <!-- Room ID display for Host to share (as in Image 1) -->
+          <div id="lobby-room-code-share" style="display: none; margin: 1.25rem auto; padding: 0.85rem 1.5rem; background: var(--surface); border: 2px solid var(--primary); border-radius: var(--radius-lg); max-width: 300px; box-shadow: var(--shadow-sm);">
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.35rem;" id="lobby-waiting-msg">แชร์รหัสห้องนี้ให้ผู้เข้าสอบ:</p>
+            <div style="font-size: 2.75rem; font-weight: 900; letter-spacing: 0.4rem; color: var(--primary); font-family: var(--font-title);" id="lobby-share-code-display">----</div>
+          </div>
+
+          <!-- Cohort Breakout Tables Panel (Shown when examMode === 'cohort_breakout') -->
+          <div id="lobby-cohort-breakout-panel" style="display: none; margin: 1.5rem auto 1rem auto; max-width: 720px; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+              <div>
+                <strong style="font-size: 1rem; color: var(--text-primary); font-family: var(--font-title);">👥 โต๊ะสอบย่อย (Breakout Tables)</strong>
+                <div style="font-size: 0.78rem; color: var(--text-muted);">จับคู่ 1 Examiner + 1 Participant ต่อโต๊ะ เพื่อสอบโจทย์เดียวกันพร้อมกันทั้งห้อง</div>
+              </div>
+              <button type="button" class="sim-btn-xs" onclick="addBreakoutTable()">➕ เพิ่มโต๊ะสอบย่อย</button>
+            </div>
+            <div id="cohort-tables-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem;">
+              <!-- Filled dynamically by JS -->
+            </div>
+          </div>
+
+          <!-- Carousel Circuit Rotation Panel (Shown when examMode === 'carousel_rotation') -->
+          <div id="lobby-carousel-rotation-panel" style="display: none; margin: 1.5rem auto 1rem auto; max-width: 760px; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+              <div>
+                <strong style="font-size: 1rem; color: var(--text-primary); font-family: var(--font-title);">🔄 ผังการวนสถานี (OSPE Carousel Circuit Diagram)</strong>
+                <div style="font-size: 0.78rem; color: var(--text-muted);">Examiner ประจำฐานถาวร (เห็นชื่อเคส) ส่วน Participant เลือกสถานีเริ่มต้น (Blinded) และจะวนตามเข็มนาฬิกา</div>
+              </div>
+              <span id="carousel-rotation-summary" class="badge" style="background: rgba(99, 102, 241, 0.12); color: var(--primary); font-size: 0.8rem;">14 สถานี</span>
             </div>
             
-            <div style="margin-bottom: 0.85rem;">
-              <div style="font-size: 0.82rem; font-weight: 700; color: var(--primary); margin-bottom: 0.35rem;">👨‍🏫 ผู้สร้างห้อง / ผู้ประเมิน (Host &amp; Examiners):</div>
-              <div id="lobby-examiners-list" style="display: flex; flex-wrap: wrap; gap: 0.4rem; min-height: 28px;">
-                <span id="lobby-status-examiner" style="color: var(--text-muted); font-size: 0.85rem;">รอการเชื่อมต่อ...</span>
-              </div>
+            <!-- Visual Circular Carousel Map / Track -->
+            <div id="carousel-track-container" style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1rem; overflow-x: auto;">
+              <!-- Track rendered dynamically -->
             </div>
-
-            <div>
-              <div style="font-size: 0.82rem; font-weight: 700; color: #16a34a; margin-bottom: 0.35rem;">✍️ ผู้เข้าสอบ / สมาชิกร่วมซ้อม (Examinees / Participants):</div>
-              <div id="lobby-examinees-list" style="display: flex; flex-wrap: wrap; gap: 0.4rem; min-height: 28px;">
-                <span id="lobby-status-examinee" style="color: var(--text-muted); font-size: 0.85rem;">รอเพื่อนๆ เข้าร่วม...</span>
-              </div>
+            
+            <!-- Station Assignment Cards -->
+            <div id="carousel-stations-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.65rem;">
+              <!-- Filled dynamically by JS -->
             </div>
           </div>
           
-          <!-- Examiner Start button -->
-          <button id="lobby-start-exam-btn" class="btn btn-primary" style="display: none; margin: 1.25rem auto 0 auto; padding: 0.75rem 2rem; font-size: 1.1rem; box-shadow: var(--shadow-md);" onclick="startLobbyExamOnServer()">
-            🚀 เริ่มการซ้อมจำลองสอบร่วมกัน
+          <!-- Examiner / Super Host Start button -->
+          <button id="lobby-start-exam-btn" class="btn btn-secondary" style="display: none; margin: 1.25rem auto 0 auto; padding: 0.75rem 2rem; font-size: 1.05rem; box-shadow: var(--shadow-sm); min-width: 220px;" onclick="startLobbyExamOnServer()">
+            รอผู้เข้าสอบเชื่อมต่อ...
           </button>
+        </div>
+
+        <!-- Super Host Big Screen Projector Monitor (Shown during running exam if isSuperHost) -->
+        <div id="super-host-monitor-view" style="display: none; padding: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 1.5rem; text-align: center; box-shadow: var(--shadow-md);">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+            <div style="text-align: left;">
+              <span class="badge" style="background: var(--primary); color: white; font-size: 0.82rem; padding: 0.2rem 0.6rem; border-radius: var(--radius-sm);">👑 Super Host Monitor</span>
+              <span style="font-size: 0.88rem; color: var(--text-muted); margin-left: 0.5rem;" id="sh-mode-title">ห้องสอบรวม</span>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button type="button" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="playStationTimeoutAlarm('bell')">🔔 สั่นกริ่งเตือน</button>
+              <button type="button" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="toggleSuperHostFullscreen()">🖥️ เต็มจอ Projector</button>
+            </div>
+          </div>
+          
+          <!-- Giant Timer and Master Controls -->
+          <div style="background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem 1rem; margin-bottom: 1.25rem;">
+            <div id="sh-timer-display" style="font-size: 5rem; font-weight: 900; color: var(--primary); font-family: var(--font-mono, monospace); line-height: 1; letter-spacing: 2px;">04:00</div>
+            <div style="margin-top: 0.75rem; display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
+              <button type="button" class="btn btn-primary" id="sh-timer-toggle-btn" onclick="toggleTimer()">⏸️ พักตัวจับเวลา</button>
+              <button type="button" class="btn btn-secondary" onclick="resetTimer()">🔄 รีเซ็ตเวลา</button>
+            </div>
+          </div>
+          
+          <!-- Large Station Title & Scenario Overview for Big Screen -->
+          <div style="text-align: left; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.25rem;">
+            <div style="font-size: 0.88rem; color: var(--primary); font-weight: 700; text-transform: uppercase;" id="sh-station-number-label">สถานีที่ 1 / 14</div>
+            <h2 style="font-family: var(--font-title); font-size: 1.5rem; margin: 0.35rem 0 0.75rem 0; color: var(--text-primary);" id="sh-station-title">...</h2>
+            <div id="sh-scenario-content" style="font-size: 1.05rem; line-height: 1.6; color: var(--text-secondary); max-height: 240px; overflow-y: auto; background: var(--bg); padding: 1rem; border-radius: var(--radius-sm); border-left: 4px solid var(--primary);">
+              <!-- Scenario text shown big for screen share -->
+            </div>
+          </div>
+          
+          <!-- Master Station Switching Controls -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; padding: 0.75rem 1rem; background: var(--bg); border-radius: var(--radius-md); border: 1px solid var(--border); flex-wrap: wrap; gap: 0.5rem;">
+            <button type="button" class="btn btn-secondary" id="sh-prev-btn" onclick="prevStation()">⏮️ สถานีก่อนหน้า (ย้อนทุกคน)</button>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Super Host เป็นผู้เปลี่ยนสถานีของทั้งห้องพร้อมกัน</span>
+            <button type="button" class="btn btn-primary" id="sh-next-btn" onclick="nextStation()">⏭️ สถานีถัดไป (เปลี่ยนทุกคนพร้อมกัน)</button>
+          </div>
+          
+          <!-- Live Breakout / Station Progress Matrix -->
+          <div style="text-align: left;">
+            <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--text-primary);" id="sh-matrix-title">📊 ความคืบหน้าการประเมินสด (Live Grading Matrix)</div>
+            <div id="sh-live-matrix" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.65rem;">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
         </div>
 
         <!-- Countdown Overlay -->
@@ -2087,7 +2193,12 @@
           // Host: create room via Firebase
           let fullExamSet = [];
 
-          if (SimState.examGenMode === 'custom') {
+          if (SimState.customExamSet && SimState.customExamSet.length > 0) {
+            fullExamSet = SimState.customExamSet.map((item, idx) => ({
+              stationNumber: idx + 1,
+              caseId: item.caseId
+            }));
+          } else if (SimState.examGenMode === 'custom') {
             if (SimState.customSelectedCases.length === 0) {
               alert('กรุณาเลือกอย่างน้อย 1 สถานี หรือกดปุ่ม "🎲 สุ่มเติมให้ครบ 14 ข้อ"');
               showGlobalLoader(false);
@@ -2155,6 +2266,42 @@
           SimState.myPlayerId = myPlayerId;
           SimState.isHost = true;
           SimState.isLobby = true;
+
+          const selectedExamMode = document.querySelector('input[name="lobby-exam-mode"]:checked')?.value || 'standard';
+          const isSuperHost = selectedExamMode === 'cohort_breakout' || selectedExamMode === 'carousel_rotation';
+          SimState.examMode = selectedExamMode;
+
+          // Breakout tables for cohort_breakout
+          const breakouts = {};
+          if (selectedExamMode === 'cohort_breakout') {
+            for (let t = 1; t <= 4; t++) {
+              breakouts['table_' + t] = {
+                id: 'table_' + t,
+                name: `โต๊ะสอบที่ ${t}`,
+                examinerId: '',
+                examinerName: '',
+                participantId: '',
+                participantName: '',
+                scores: {}
+              };
+            }
+          }
+
+          // Carousel posts for carousel_rotation
+          const carouselPosts = {};
+          if (selectedExamMode === 'carousel_rotation') {
+            fullExamSet.forEach((st) => {
+              const k = 'st_' + st.stationNumber;
+              carouselPosts[k] = {
+                stationNumber: st.stationNumber,
+                caseId: st.caseId,
+                examinerId: '',
+                examinerName: '',
+                startParticipantId: '',
+                startParticipantName: ''
+              };
+            });
+          }
           
           const initialPlayers = {};
           initialPlayers[myPlayerId] = {
@@ -2168,17 +2315,23 @@
           // Write room to Firebase
           const roomData = {
             roomId: randomRoomId,
+            examMode: selectedExamMode,
+            isSuperHost: isSuperHost,
             hostId: myPlayerId,
             hostName: playerName,
             hostRole: SimState.lobbyRole,
             examineeName: SimState.lobbyRole === 'examinee' ? playerName : '',
             examinerName: SimState.lobbyRole === 'examiner' ? playerName : '',
             players: initialPlayers,
+            currentStationIdx: 0,
             caseId: fullExamSet[0].caseId,
             timerValue: 240,
             timerRunning: false,
             status: 'setup',
             examSet: examSetJson,
+            breakouts: breakouts,
+            carouselPosts: carouselPosts,
+            participantScores: {},
             checklistProgress: '',
             scoresByStation: '{}',
             createdAt: Date.now()
@@ -2344,43 +2497,42 @@
           const stickyHeader = document.getElementById('exam-sticky-top-header');
           if (stickyHeader) stickyHeader.style.display = 'none';
           
-          // Update dynamic player chips in Waiting Room
-          const examinersListEl = document.getElementById('lobby-examiners-list');
-          const examineesListEl = document.getElementById('lobby-examinees-list');
-          const playerCountEl = document.getElementById('lobby-player-count');
-          if (playerCountEl) playerCountEl.textContent = totalPlayers;
-
-          const examiners = playersList.filter(p => p.role === 'examiner' || p.isHost);
-          const examinees = playersList.filter(p => p.role === 'examinee' && !p.isHost);
-
-          if (examinersListEl) {
-            examinersListEl.innerHTML = '';
-            if (examiners.length === 0) {
-              examinersListEl.innerHTML = '<span style="color: var(--text-muted); font-size: 0.85rem;">รอการเชื่อมต่อ...</span>';
+          // Modern Minimalist Status Box update
+          const hostEl = document.getElementById('lobby-host-display');
+          if (hostEl) {
+            hostEl.textContent = room.hostName || (playersList.find(p => p.isHost)?.name) || 'ยังไม่มี Host';
+          }
+          const partListEl = document.getElementById('lobby-participants-list');
+          if (partListEl) {
+            const participants = playersList.filter(p => !p.isHost);
+            if (participants.length === 0) {
+              partListEl.innerHTML = '<span style="color: var(--text-muted); font-size: 0.88rem;">รอการเชื่อมต่อ...</span>';
             } else {
-              examiners.forEach(p => {
+              partListEl.innerHTML = '';
+              participants.forEach(p => {
                 const isMe = p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName;
-                const chip = document.createElement('span');
-                chip.className = 'lobby-player-chip ' + (p.isHost ? 'host' : 'examiner');
-                chip.innerHTML = `${p.isHost ? '👑 Host' : '👨‍🏫 ผู้ประเมิน'}: <strong>${escapeHtml(p.name)}</strong>${isMe ? ' <span class="me-badge">คุณ</span>' : ''}`;
-                examinersListEl.appendChild(chip);
+                const tag = document.createElement('span');
+                tag.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.18rem 0.5rem;font-size:0.83rem;color:var(--text-primary);display:inline-flex;align-items:center;gap:0.25rem;';
+                tag.innerHTML = `${escapeHtml(p.name)}${isMe ? ' <span style="font-size:0.72rem;color:var(--primary);font-weight:700;">(คุณ)</span>' : ''}`;
+                partListEl.appendChild(tag);
               });
             }
           }
 
-          if (examineesListEl) {
-            examineesListEl.innerHTML = '';
-            if (examinees.length === 0) {
-              examineesListEl.innerHTML = '<span style="color: var(--text-muted); font-size: 0.85rem;">รอเพื่อนๆ เข้าร่วม...</span>';
-            } else {
-              examinees.forEach(p => {
-                const isMe = p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName;
-                const chip = document.createElement('span');
-                chip.className = 'lobby-player-chip examinee';
-                chip.innerHTML = `✍️ ผู้เข้าสอบ: <strong>${escapeHtml(p.name)}</strong>${isMe ? ' <span class="me-badge">คุณ</span>' : ''}`;
-                examineesListEl.appendChild(chip);
-              });
-            }
+          // Show/Hide Multiplayer Panels
+          const breakoutPanel = document.getElementById('lobby-cohort-breakout-panel');
+          const carouselPanel = document.getElementById('lobby-carousel-rotation-panel');
+          if (room.examMode === 'cohort_breakout') {
+            if (breakoutPanel) breakoutPanel.style.display = 'block';
+            if (carouselPanel) carouselPanel.style.display = 'none';
+            renderBreakoutTables(room);
+          } else if (room.examMode === 'carousel_rotation') {
+            if (breakoutPanel) breakoutPanel.style.display = 'none';
+            if (carouselPanel) carouselPanel.style.display = 'block';
+            renderCarouselDiagram(room);
+          } else {
+            if (breakoutPanel) breakoutPanel.style.display = 'none';
+            if (carouselPanel) carouselPanel.style.display = 'none';
           }
 
           const isHost = SimState.isHost || (room.hostRole === SimState.role && playersList[0] && playersList[0].name === SimState.lobbyPlayerName);
@@ -2416,6 +2568,32 @@
             await buildStationsFromRoom(room);
           }
           
+          // ── Super Host Monitor View (Big Projector Screen) ──
+          if (room.isSuperHost && SimState.isHost) {
+            document.getElementById('lobby-waiting-screen').style.display = 'none';
+            document.getElementById('lobby-countdown-screen').style.display = 'none';
+            document.querySelector('.exam-layout').style.display = 'none';
+            const stickyTimer = document.getElementById('exam-sticky-timer-bar');
+            if (stickyTimer) stickyTimer.style.display = 'none';
+            const stickyHeader = document.getElementById('exam-sticky-top-header');
+            if (stickyHeader) stickyHeader.style.display = 'none';
+            
+            SimState.currentIdx = room.currentStationIdx !== undefined ? room.currentStationIdx : (SimState.currentIdx || 0);
+            renderSuperHostMonitor(room);
+            
+            SimState.timerRunning = room.timerRunning !== undefined ? room.timerRunning : true;
+            SimState.timerValue = room.timerValue !== undefined ? room.timerValue : 240;
+            updateTimerDisplay();
+            if (SimState.timerRunning && !SimState.timerInterval) {
+              startLocalCountdown();
+            }
+            return;
+          }
+
+          // If regular client (examiner / participant): hide super host monitor
+          const superHostMonitor = document.getElementById('super-host-monitor-view');
+          if (superHostMonitor) superHostMonitor.style.display = 'none';
+
           if (!SimState.hasDoneCountdown) {
             document.querySelector('.exam-layout').style.display = 'none';
             const stickyTimer = document.getElementById('exam-sticky-timer-bar');
@@ -2442,10 +2620,32 @@
                   const stickyHeader = document.getElementById('exam-sticky-top-header');
                   if (stickyHeader) stickyHeader.style.display = 'block';
                   
-                  let targetIdx = SimState.stations.findIndex(st => st.case && st.case.caseId === room.caseId);
-                  renderStation(targetIdx !== -1 ? targetIdx : 0);
+                  let initialTargetIdx = 0;
+                  if (room.examMode === 'carousel_rotation') {
+                    const N = SimState.stations.length || 1;
+                    const r = room.currentStationIdx !== undefined ? room.currentStationIdx : 0;
+                    if (SimState.role === 'examiner') {
+                      let stNum = 1;
+                      if (room.carouselPosts) {
+                        const post = Object.values(room.carouselPosts).find(p => p.examinerId === SimState.myPlayerId || p.examinerName === SimState.lobbyPlayerName);
+                        if (post) stNum = post.stationNumber;
+                      }
+                      initialTargetIdx = Math.max(0, Math.min(N - 1, stNum - 1));
+                    } else {
+                      let stNum = 1;
+                      if (room.carouselPosts) {
+                        const post = Object.values(room.carouselPosts).find(p => p.startParticipantId === SimState.myPlayerId || p.startParticipantName === SimState.lobbyPlayerName);
+                        if (post) stNum = post.stationNumber;
+                      }
+                      const activeSt = ((stNum - 1 + r) % N) + 1;
+                      initialTargetIdx = Math.max(0, Math.min(N - 1, activeSt - 1));
+                    }
+                  } else {
+                    initialTargetIdx = room.currentStationIdx !== undefined ? room.currentStationIdx : 0;
+                  }
                   
-                  SimState.timerRunning = room.timerRunning || true;
+                  renderStation(initialTargetIdx);
+                  SimState.timerRunning = room.timerRunning !== undefined ? room.timerRunning : true;
                   SimState.timerValue = room.timerValue || 240;
                   updateTimerDisplay();
                   if (SimState.timerRunning) startLocalCountdown();
@@ -2462,19 +2662,58 @@
           const stickyHeader = document.getElementById('exam-sticky-top-header');
           if (stickyHeader) stickyHeader.style.display = 'block';
           
-          // Find current station index by matching caseId
-          let targetIdx = SimState.stations.findIndex(st => st.case && st.case.caseId === room.caseId);
-          const stationChanged = targetIdx !== -1 && targetIdx !== SimState.currentIdx;
-          const isFirstLoad = SimState.currentIdx === 0 && SimState.stations[0] && SimState.stations[0].case && SimState.stations[0].case.caseId === room.caseId && document.getElementById('exam-case-title').textContent === 'โหลดเคส...';
+          // Determine active station index for this player
+          let targetIdx = 0;
+          if (room.examMode === 'carousel_rotation') {
+            const r = room.currentStationIdx !== undefined ? room.currentStationIdx : 0;
+            const N = SimState.stations.length || 1;
+            if (SimState.role === 'examiner') {
+              let assignedStationNum = 1;
+              if (room.carouselPosts) {
+                const post = Object.values(room.carouselPosts).find(p => p.examinerId === SimState.myPlayerId || p.examinerName === SimState.lobbyPlayerName);
+                if (post) assignedStationNum = post.stationNumber;
+              }
+              targetIdx = Math.max(0, Math.min(N - 1, assignedStationNum - 1));
+              const startNum = ((assignedStationNum - 1 - r + N) % N) + 1;
+              const partName = room.carouselPosts?.['st_' + startNum]?.startParticipantName || 'ยังไม่มีผู้เข้าสอบ';
+              const badge = document.getElementById('exam-station-badge');
+              if (badge) badge.textContent = `STATION ${assignedStationNum} (ประจำฐาน) · ผู้เข้าสอบ: ${partName}`;
+            } else {
+              let startNum = 1;
+              if (room.carouselPosts) {
+                const post = Object.values(room.carouselPosts).find(p => p.startParticipantId === SimState.myPlayerId || p.startParticipantName === SimState.lobbyPlayerName);
+                if (post) startNum = post.stationNumber;
+              }
+              const activeStationNum = ((startNum - 1 + r) % N) + 1;
+              targetIdx = Math.max(0, Math.min(N - 1, activeStationNum - 1));
+              const badge = document.getElementById('exam-station-badge');
+              if (badge) badge.textContent = `STATION ${activeStationNum} (รอบที่ ${r + 1}/${N})`;
+            }
+          } else {
+            // cohort_breakout or standard: all follow room.currentStationIdx or room.caseId
+            if (room.currentStationIdx !== undefined) {
+              targetIdx = room.currentStationIdx;
+            } else {
+              targetIdx = SimState.stations.findIndex(st => st.case && st.case.caseId === room.caseId);
+              if (targetIdx === -1) targetIdx = 0;
+            }
+          }
+
+          const stationChanged = targetIdx !== SimState.currentIdx;
+          const isFirstLoad = SimState.currentIdx === 0 && (!SimState.hasRenderedFirstStation);
 
           if (stationChanged || isFirstLoad) {
+            SimState.hasRenderedFirstStation = true;
             renderStation(stationChanged ? targetIdx : 0);
+            if (stationChanged) {
+              playStationTimeoutAlarm('bell');
+            }
             // Station changed — force timer reset for everyone
             SimState.timerValue = room.timerValue || 240;
             updateTimerDisplay();
-            SimState.timerRunning = true;
+            SimState.timerRunning = room.timerRunning !== undefined ? room.timerRunning : true;
             if (SimState.timerInterval) clearInterval(SimState.timerInterval);
-            startLocalCountdown();
+            if (SimState.timerRunning) startLocalCountdown();
           } else {
             // Same station — Host is timer source of truth, other participants sync from Firebase
             if (!SimState.isHost && SimState.role !== 'examiner') {
@@ -2712,6 +2951,30 @@
       if (window.Scratchpad) Scratchpad.resetAll();
       showGlobalLoader(true);
       
+      if (SimState.customExamSet && SimState.customExamSet.length > 0) {
+        SimState.stations = [];
+        SimState.studentScores = {};
+        SimState.totalStations = SimState.customExamSet.length;
+        SimState.customExamSet.forEach((item, idx) => {
+          const stNum = idx + 1;
+          SimState.studentScores[stNum] = [];
+          if (item.caseId === 'REST') {
+            SimState.stations.push({ stationNumber: stNum, isRest: true, case: getRestCaseData() });
+          } else {
+            let matchedCase = item.case || AppState.cases.find(c => c.caseId === item.caseId) || AppState.cases[0];
+            SimState.stations.push({ stationNumber: stNum, isRest: false, case: matchedCase });
+          }
+        });
+        SimState.currentIdx = 0;
+        showGlobalLoader(false);
+        document.getElementById('exam-setup-view').style.display = 'none';
+        document.getElementById('exam-running-view').style.display = 'block';
+        document.getElementById('exam-lobby-info-bar').style.display = 'none';
+        renderStation(0);
+        startTimer();
+        return;
+      }
+
       if (SimState.examGenMode === 'custom') {
         if (!SimState.customSelectedCases || SimState.customSelectedCases.length === 0) {
           showGlobalLoader(false);
@@ -2989,7 +3252,11 @@
 
     function toggleTimer() {
       SimState.timerRunning = !SimState.timerRunning;
-      document.getElementById('timer-toggle-btn').textContent = SimState.timerRunning ? '⏸️ พักตัวจับเวลา' : '▶️ เล่นตัวจับเวลาต่อ';
+      const toggleBtn = document.getElementById('timer-toggle-btn');
+      if (toggleBtn) toggleBtn.textContent = SimState.timerRunning ? '⏸️ พักตัวจับเวลา' : '▶️ เล่นตัวจับเวลาต่อ';
+      const shToggleBtn = document.getElementById('sh-timer-toggle-btn');
+      if (shToggleBtn) shToggleBtn.textContent = SimState.timerRunning ? '⏸️ พักตัวจับเวลา' : '▶️ เล่นตัวจับเวลาต่อ';
+
       if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
         _fbDb.ref('rooms/' + SimState.roomId).update({
           timerRunning: SimState.timerRunning,
@@ -3032,6 +3299,12 @@
         timerEl.className = 'timer-display';
         if (SimState.timerValue < 10) timerEl.classList.add('danger');
         else if (SimState.timerValue < 60) timerEl.classList.add('warn');
+      }
+
+      const shTimerEl = document.getElementById('sh-timer-display');
+      if (shTimerEl) {
+        shTimerEl.textContent = displayStr;
+        shTimerEl.style.color = SimState.timerValue < 10 ? 'var(--danger)' : (SimState.timerValue < 60 ? 'var(--warning)' : 'var(--primary)');
       }
       
       // Multi-color Fuse Bar Animation ("ชนวนระเบิด")
@@ -3557,6 +3830,38 @@
           checklistProgress: currentChecked,
           scoresByStation: JSON.stringify(SimState.studentScores)
         });
+
+        // Cohort Breakout scoring sync
+        if (SimState.examMode === 'cohort_breakout' && SimState.myBreakoutTableId) {
+          const { currentScore, totalScore } = calculateStationScore(currentCase?.checklist || [], currentChecked);
+          _fbDb.ref(`rooms/${SimState.roomId}/breakouts/${SimState.myBreakoutTableId}/scores/${stationNum}`).set({
+            stationNumber: stationNum,
+            checkedProgress: currentChecked,
+            score: currentScore,
+            maxScore: totalScore,
+            updatedAt: Date.now()
+          });
+        }
+
+        // Carousel Rotation scoring sync
+        if (SimState.examMode === 'carousel_rotation') {
+          const r = SimState.currentIdx || 0;
+          const N = SimState.stations.length || 1;
+          const assignedStationNum = SimState.myCarouselStation || stationNum;
+          const startNum = ((assignedStationNum - 1 - r + N) % N) + 1;
+          const partId = SimState.cachedRoom?.carouselPosts?.['st_' + startNum]?.startParticipantId;
+          if (partId) {
+            const { currentScore, totalScore } = calculateStationScore(currentCase?.checklist || [], currentChecked);
+            _fbDb.ref(`rooms/${SimState.roomId}/participantScores/${partId}/stations/${assignedStationNum}`).set({
+              stationNumber: assignedStationNum,
+              checkedProgress: currentChecked,
+              score: currentScore,
+              maxScore: totalScore,
+              examinerName: SimState.lobbyPlayerName,
+              updatedAt: Date.now()
+            });
+          }
+        }
       }
     }
 
@@ -3592,6 +3897,7 @@
     function nextStation() {
       if (SimState.currentIdx < SimState.stations.length - 1) {
         const nextIdx = SimState.currentIdx + 1;
+        playStationTimeoutAlarm('bell');
         if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
           // Reset timer locally
           SimState.timerValue = 240;
@@ -3601,7 +3907,8 @@
           startLocalCountdown();
           // Push to Firebase — All participants react in real-time
           _fbDb.ref('rooms/' + SimState.roomId).update({
-            caseId: SimState.stations[nextIdx].case.caseId,
+            currentStationIdx: nextIdx,
+            caseId: SimState.stations[nextIdx]?.case?.caseId || SimState.stations[nextIdx]?.caseId,
             timerValue: 240,
             timerRunning: true,
             status: 'running',
@@ -3609,12 +3916,16 @@
           });
         }
         renderStation(nextIdx);
+        if (SimState.cachedRoom && SimState.cachedRoom.isSuperHost && SimState.isHost) {
+          renderSuperHostMonitor(SimState.cachedRoom);
+        }
       }
     }
 
     function prevStation() {
       if (SimState.currentIdx > 0) {
         const prevIdx = SimState.currentIdx - 1;
+        playStationTimeoutAlarm('bell');
         if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
           // Reset timer locally
           SimState.timerValue = 240;
@@ -3624,7 +3935,8 @@
           startLocalCountdown();
           // Push to Firebase — All participants react in real-time
           _fbDb.ref('rooms/' + SimState.roomId).update({
-            caseId: SimState.stations[prevIdx].case.caseId,
+            currentStationIdx: prevIdx,
+            caseId: SimState.stations[prevIdx]?.case?.caseId || SimState.stations[prevIdx]?.caseId,
             timerValue: 240,
             timerRunning: true,
             status: 'running',
@@ -3632,6 +3944,9 @@
           });
         }
         renderStation(prevIdx);
+        if (SimState.cachedRoom && SimState.cachedRoom.isSuperHost && SimState.isHost) {
+          renderSuperHostMonitor(SimState.cachedRoom);
+        }
       }
     }
 
@@ -3662,6 +3977,21 @@
               if (parsed && typeof parsed === 'object') {
                 SimState.studentScores = Object.assign({}, SimState.studentScores, parsed);
               }
+            }
+            if (latestRoom.examMode === 'carousel_rotation' && latestRoom.participantScores && latestRoom.participantScores[SimState.myPlayerId]) {
+              const myStScores = latestRoom.participantScores[SimState.myPlayerId].stations || {};
+              Object.keys(myStScores).forEach(stNum => {
+                if (myStScores[stNum].checkedProgress) {
+                  SimState.studentScores[stNum] = myStScores[stNum].checkedProgress;
+                }
+              });
+            } else if (latestRoom.examMode === 'cohort_breakout' && SimState.myBreakoutTableId && latestRoom.breakouts && latestRoom.breakouts[SimState.myBreakoutTableId]) {
+              const tableScores = latestRoom.breakouts[SimState.myBreakoutTableId].scores || {};
+              Object.keys(tableScores).forEach(stNum => {
+                if (tableScores[stNum].checkedProgress) {
+                  SimState.studentScores[stNum] = tableScores[stNum].checkedProgress;
+                }
+              });
             }
           }
         } catch (e) {
@@ -3985,8 +4315,652 @@
         }
       }
     }
+
+    // ═════════════════════════════════════════════════════════════════
+    // AUDIO TIMEOUT ALERT (Web Audio API Synthesizer)
+    // ═════════════════════════════════════════════════════════════════
+    function playStationTimeoutAlarm(type = 'alarm') {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        const ctx = new AudioContextClass();
+        const now = ctx.currentTime;
+        if (type === 'bell') {
+          [880, 1320].forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.22);
+            gain.gain.setValueAtTime(0.35, now + idx * 0.22);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.22 + 0.7);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.22);
+            osc.stop(now + idx * 0.22 + 0.75);
+          });
+        } else {
+          [880, 1174.66, 1318.51].forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.16);
+            gain.gain.setValueAtTime(0.35, now + idx * 0.16);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.16 + 0.8);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.16);
+            osc.stop(now + idx * 0.16 + 0.85);
+          });
+        }
+      } catch (e) {
+        console.warn('Audio alert error:', e);
+      }
+    }
+    window.playStationTimeoutAlarm = playStationTimeoutAlarm;
+
+    // ═════════════════════════════════════════════════════════════════
+    // CUSTOM EXAM SET ADJUSTER (ปรับแต่งสถานีในชุดข้อสอบ)
+    // ═════════════════════════════════════════════════════════════════
+    let adjusterTargetSwapIdx = null;
+
+    function openExamSetAdjuster() {
+      let stations = [];
+      if (SimState.customExamSet && SimState.customExamSet.length > 0) {
+        stations = JSON.parse(JSON.stringify(SimState.customExamSet));
+      } else if (SimState.examGenMode === 'set') {
+        const selectedSource = document.getElementById('exam-set-select').value;
+        const stationCount = parseInt(document.getElementById('exam-set-station-count').value) || 14;
+        const orderMode = document.getElementById('exam-set-order').value;
+        const raw = generateExamSetBySource(selectedSource, stationCount, orderMode);
+        stations = raw.map((c, i) => ({ stationNumber: i + 1, caseId: c.caseId, case: c }));
+      } else if (SimState.examGenMode === 'custom' && SimState.customSelectedCases) {
+        stations = SimState.customSelectedCases.map((cid, i) => {
+          if (cid === 'REST') return { stationNumber: i + 1, caseId: 'REST', isRest: true, case: getRestCaseData() };
+          const c = AppState.cases.find(x => x.caseId === cid) || { caseId: cid, title: cid, category: 'Product' };
+          return { stationNumber: i + 1, caseId: cid, case: c };
+        });
+      } else {
+        const { clinic, product, sap } = getProportionValues();
+        const raw = generateLocalExamSet(clinic, product, sap);
+        stations = raw.map((c, i) => ({ stationNumber: i + 1, caseId: c.caseId, case: c }));
+      }
+
+      SimState.tempAdjusterStations = stations;
+      renderAdjusterStations();
+      document.getElementById('modal-adjust-stations').style.display = 'flex';
+    }
+
+    function closeExamSetAdjuster() {
+      document.getElementById('modal-adjust-stations').style.display = 'none';
+    }
+
+    function renderAdjusterStations() {
+      const listEl = document.getElementById('adjust-stations-list');
+      if (!listEl) return;
+      listEl.innerHTML = '';
+      const stations = SimState.tempAdjusterStations || [];
+
+      let clinicCount = 0, productCount = 0, sapCount = 0, restCount = 0;
+      stations.forEach(s => {
+        const cat = (s.case && s.case.category) || s.category || (s.caseId === 'REST' ? 'REST' : 'Product');
+        if (cat === 'Clinic') clinicCount++;
+        else if (cat === 'Product') productCount++;
+        else if (cat === 'SAP') sapCount++;
+        else if (cat === 'REST') restCount++;
+      });
+
+      document.getElementById('adjust-total-count').textContent = stations.length;
+      document.getElementById('adjust-ratio-summary').textContent = 
+        `Clinic: ${clinicCount} | Product: ${productCount} | SAP: ${sapCount}` + (restCount > 0 ? ` | พัก: ${restCount}` : '');
+
+      if (stations.length === 0) {
+        listEl.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:2rem;">ยังไม่มีสถานีในชุดนี้ กด "➕ เพิ่มข้อสอบ" หรือ "🥤 เพิ่มสถานีพัก" ด้านบน</div>';
+        return;
+      }
+
+      stations.forEach((st, idx) => {
+        const isRest = st.caseId === 'REST';
+        const c = st.case || AppState.cases.find(x => x.caseId === st.caseId) || { title: st.caseId, category: 'Product' };
+        const cat = isRest ? 'REST' : (c.category || 'Product');
+        const badgeColor = cat === 'Clinic' ? 'var(--primary)' : (cat === 'Product' ? '#16a34a' : (cat === 'SAP' ? '#ea580c' : '#64748b'));
+        const badgeBg = cat === 'Clinic' ? 'rgba(99, 102, 241, 0.12)' : (cat === 'Product' ? 'rgba(22, 163, 74, 0.12)' : (cat === 'SAP' ? 'rgba(234, 88, 12, 0.12)' : 'rgba(100, 116, 139, 0.12)'));
+
+        const itemEl = document.createElement('div');
+        itemEl.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0.85rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);gap:0.5rem;box-shadow:var(--shadow-sm);';
+        
+        itemEl.innerHTML = `
+          <div style="display:flex;align-items:center;gap:0.65rem;flex:1;min-width:0;">
+            <div style="display:flex;flex-direction:column;gap:2px;">
+              <button type="button" class="sim-btn-xs" style="padding:0.1rem 0.35rem;line-height:1;" ${idx === 0 ? 'disabled' : ''} onclick="moveStationUp(${idx})">▲</button>
+              <button type="button" class="sim-btn-xs" style="padding:0.1rem 0.35rem;line-height:1;" ${idx === stations.length - 1 ? 'disabled' : ''} onclick="moveStationDown(${idx})">▼</button>
+            </div>
+            <strong style="color:var(--text-muted);font-size:0.85rem;min-width:26px;">#${idx + 1}</strong>
+            <span class="badge" style="background:${badgeBg};color:${badgeColor};font-size:0.75rem;padding:0.15rem 0.45rem;border-radius:4px;font-weight:600;">${cat}</span>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:600;font-size:0.88rem;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                ${isRest ? '🥤 สถานีพัก (Rest Station)' : (escapeHtml(c.title || st.caseId))}
+              </div>
+              <div style="font-size:0.75rem;color:var(--text-muted);">
+                ${isRest ? 'ไม่มีการประเมิน' : `รหัส: ${st.caseId} · ${c.mainGroup || ''}`}
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.35rem;">
+            ${!isRest ? `<button type="button" class="sim-btn-xs" onclick="openCasePickerForAdjuster(${idx})">🔄 สลับเคส</button>` : ''}
+            <button type="button" class="sim-btn-xs" style="color:var(--danger);" onclick="removeStationFromAdjuster(${idx})">🗑️</button>
+          </div>
+        `;
+        listEl.appendChild(itemEl);
+      });
+    }
+
+    function moveStationUp(idx) {
+      if (idx <= 0) return;
+      const temp = SimState.tempAdjusterStations[idx];
+      SimState.tempAdjusterStations[idx] = SimState.tempAdjusterStations[idx - 1];
+      SimState.tempAdjusterStations[idx - 1] = temp;
+      renderAdjusterStations();
+    }
+
+    function moveStationDown(idx) {
+      if (idx >= SimState.tempAdjusterStations.length - 1) return;
+      const temp = SimState.tempAdjusterStations[idx];
+      SimState.tempAdjusterStations[idx] = SimState.tempAdjusterStations[idx + 1];
+      SimState.tempAdjusterStations[idx + 1] = temp;
+      renderAdjusterStations();
+    }
+
+    function removeStationFromAdjuster(idx) {
+      SimState.tempAdjusterStations.splice(idx, 1);
+      renderAdjusterStations();
+    }
+
+    function addRestStationToAdjuster() {
+      SimState.tempAdjusterStations.push({
+        stationNumber: SimState.tempAdjusterStations.length + 1,
+        caseId: 'REST',
+        isRest: true,
+        case: getRestCaseData()
+      });
+      renderAdjusterStations();
+    }
+
+    function openCasePickerForAdjuster(targetIdx = null) {
+      adjusterTargetSwapIdx = targetIdx;
+      const titleEl = document.getElementById('case-picker-title');
+      if (titleEl) {
+        titleEl.textContent = targetIdx !== null ? `สลับข้อสอบสำหรับสถานีที่ #${targetIdx + 1}` : 'เลือกข้อสอบเพิ่มในชุด';
+      }
+      filterAdjustPickerCases('');
+      document.getElementById('modal-adjust-case-picker').style.display = 'flex';
+    }
+
+    function closeCasePickerForAdjuster() {
+      document.getElementById('modal-adjust-case-picker').style.display = 'none';
+      adjusterTargetSwapIdx = null;
+    }
+
+    function filterAdjustPickerCases(q) {
+      const listEl = document.getElementById('adjust-case-picker-list');
+      if (!listEl) return;
+      listEl.innerHTML = '';
+      const query = (q || '').toLowerCase();
+      const allCases = AppState.cases || [];
+
+      const filtered = allCases.filter(c => {
+        if (!c) return false;
+        if (!query) return true;
+        return (c.title && c.title.toLowerCase().includes(query)) ||
+               (c.caseId && c.caseId.toLowerCase().includes(query)) ||
+               (c.disease && c.disease.toLowerCase().includes(query)) ||
+               (c.mainGroup && c.mainGroup.toLowerCase().includes(query));
+      });
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:1.5rem;">ไม่พบเคสที่ตรงกับคำค้นหา</div>';
+        return;
+      }
+
+      filtered.slice(0, 50).forEach(c => {
+        const item = document.createElement('div');
+        item.style.cssText = 'padding:0.5rem 0.75rem;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background 0.15s;';
+        item.onmouseenter = () => item.style.background = 'var(--surface)';
+        item.onmouseleave = () => item.style.background = 'var(--bg)';
+        item.onclick = () => selectCaseForAdjuster(c.caseId);
+        
+        const catBadge = `<span class="badge" style="font-size:0.72rem;background:${c.category === 'Clinic' ? 'rgba(99,102,241,0.12)' : (c.category === 'Product' ? 'rgba(22,163,74,0.12)' : 'rgba(234,88,12,0.12)')};color:${c.category === 'Clinic' ? 'var(--primary)' : (c.category === 'Product' ? '#16a34a' : '#ea580c')};">${c.category}</span>`;
+        item.innerHTML = `
+          <div style="flex:1;min-width:0;padding-right:0.5rem;">
+            <div style="font-weight:600;font-size:0.85rem;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(c.title)}</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);">${c.caseId} · ${c.mainGroup || ''}</div>
+          </div>
+          <div>${catBadge}</div>
+        `;
+        listEl.appendChild(item);
+      });
+    }
+
+    function selectCaseForAdjuster(caseId) {
+      const matched = AppState.cases.find(c => c.caseId === caseId) || { caseId: caseId, title: caseId, category: 'Product' };
+      if (adjusterTargetSwapIdx !== null && adjusterTargetSwapIdx >= 0 && adjusterTargetSwapIdx < SimState.tempAdjusterStations.length) {
+        SimState.tempAdjusterStations[adjusterTargetSwapIdx] = {
+          stationNumber: adjusterTargetSwapIdx + 1,
+          caseId: caseId,
+          case: matched
+        };
+      } else {
+        SimState.tempAdjusterStations.push({
+          stationNumber: SimState.tempAdjusterStations.length + 1,
+          caseId: caseId,
+          case: matched
+        });
+      }
+      closeCasePickerForAdjuster();
+      renderAdjusterStations();
+    }
+
+    function applyAdjustedStations() {
+      if (!SimState.tempAdjusterStations || SimState.tempAdjusterStations.length === 0) {
+        alert('กรุณาเลือกอย่างน้อย 1 สถานี');
+        return;
+      }
+      SimState.customExamSet = JSON.parse(JSON.stringify(SimState.tempAdjusterStations));
+      closeExamSetAdjuster();
+      
+      const btnAdjust = document.getElementById('btn-adjust-stations');
+      if (btnAdjust) {
+        btnAdjust.innerHTML = `✅ ปรับแต่งแล้ว (${SimState.customExamSet.length} ฐาน)`;
+        btnAdjust.classList.add('active');
+        btnAdjust.style.background = 'var(--primary)';
+        btnAdjust.style.color = '#FFFFFF';
+      }
+      if (typeof showToast === 'function') {
+        showToast(`บันทึกชุดข้อสอบที่ปรับแต่งแล้ว ${SimState.customExamSet.length} สถานี เรียบร้อย`, 'success');
+      }
+    }
+
+    // ═════════════════════════════════════════════════════════════════
+    // LARGE GROUP MULTIPLAYER MODES (COHORT BREAKOUTS & CAROUSEL)
+    // ═════════════════════════════════════════════════════════════════
+    async function addBreakoutTable() {
+      if (!SimState.roomId || typeof _fbDb === 'undefined') return;
+      try {
+        const snap = await _fbDb.ref(`rooms/${SimState.roomId}/breakouts`).get();
+        const existing = snap.val() || {};
+        const count = Object.keys(existing).length + 1;
+        const newId = 'table_' + count;
+        await _fbDb.ref(`rooms/${SimState.roomId}/breakouts/${newId}`).set({
+          id: newId,
+          name: `โต๊ะสอบที่ ${count}`,
+          examinerId: '',
+          examinerName: '',
+          participantId: '',
+          participantName: ''
+        });
+      } catch (e) {
+        console.error('Add breakout table failed:', e);
+      }
+    }
+
+    async function joinBreakoutTable(tableId, role) {
+      if (!SimState.roomId || typeof _fbDb === 'undefined') return;
+      const myId = SimState.myPlayerId;
+      const myName = SimState.lobbyPlayerName;
+      try {
+        const updateData = {};
+        if (role === 'examiner') {
+          updateData[`rooms/${SimState.roomId}/breakouts/${tableId}/examinerId`] = myId;
+          updateData[`rooms/${SimState.roomId}/breakouts/${tableId}/examinerName`] = myName;
+        } else {
+          updateData[`rooms/${SimState.roomId}/breakouts/${tableId}/participantId`] = myId;
+          updateData[`rooms/${SimState.roomId}/breakouts/${tableId}/participantName`] = myName;
+        }
+        await _fbDb.ref().update(updateData);
+        SimState.myBreakoutTableId = tableId;
+        SimState.myBreakoutRole = role;
+      } catch (e) {
+        console.error('Join breakout table failed:', e);
+      }
+    }
+
+    async function leaveBreakoutTable(tableId) {
+      if (!SimState.roomId || typeof _fbDb === 'undefined') return;
+      const myId = SimState.myPlayerId;
+      try {
+        const snap = await _fbDb.ref(`rooms/${SimState.roomId}/breakouts/${tableId}`).get();
+        const table = snap.val();
+        if (!table) return;
+        const updateData = {};
+        if (table.examinerId === myId) {
+          updateData[`rooms/${SimState.roomId}/breakouts/${tableId}/examinerId`] = '';
+          updateData[`rooms/${SimState.roomId}/breakouts/${tableId}/examinerName`] = '';
+        }
+        if (table.participantId === myId) {
+          updateData[`rooms/${SimState.roomId}/breakouts/${tableId}/participantId`] = '';
+          updateData[`rooms/${SimState.roomId}/breakouts/${tableId}/participantName`] = '';
+        }
+        await _fbDb.ref().update(updateData);
+        SimState.myBreakoutTableId = null;
+        SimState.myBreakoutRole = null;
+      } catch (e) {
+        console.error('Leave breakout table failed:', e);
+      }
+    }
+
+    function renderBreakoutTables(room) {
+      const container = document.getElementById('cohort-tables-grid');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const breakouts = room.breakouts || {};
+      const tableKeys = Object.keys(breakouts);
+      if (tableKeys.length === 0) {
+        container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:1rem;">ยังไม่มีโต๊ะสอบย่อย กด "+ เพิ่มโต๊ะสอบย่อย"</div>';
+        return;
+      }
+
+      tableKeys.forEach(tKey => {
+        const t = breakouts[tKey];
+        const hasExaminer = Boolean(t.examinerId && t.examinerName);
+        const hasParticipant = Boolean(t.participantId && t.participantName);
+        const isMyTable = (t.examinerId === SimState.myPlayerId || t.participantId === SimState.myPlayerId);
+
+        const card = document.createElement('div');
+        card.style.cssText = `background:var(--surface);border:1.5px solid ${isMyTable ? 'var(--primary)' : 'var(--border)'};border-radius:var(--radius-md);padding:0.75rem;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:0.4rem;font-size:0.86rem;`;
+
+        card.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:0.35rem;margin-bottom:0.25rem;">
+            <strong style="color:var(--text-primary);">${escapeHtml(t.name || tKey)}</strong>
+            <span style="font-size:0.75rem;color:${hasExaminer && hasParticipant ? 'var(--success)' : 'var(--text-muted)'};font-weight:600;">
+              ${hasExaminer && hasParticipant ? '🟢 พร้อมสอบ' : '⚪ รอคน'}
+            </span>
+          </div>
+          
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.2rem 0;">
+            <span style="color:var(--text-secondary);font-size:0.8rem;">👨‍🏫 Examiner:</span>
+            ${hasExaminer ? `<strong style="color:var(--primary);">${escapeHtml(t.examinerName)}</strong>` : `<button type="button" class="sim-btn-xs" onclick="joinBreakoutTable('${tKey}', 'examiner')">+ เป็นผู้ประเมิน</button>`}
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.2rem 0;">
+            <span style="color:var(--text-secondary);font-size:0.8rem;">✍️ Participant:</span>
+            ${hasParticipant ? `<strong style="color:#16a34a;">${escapeHtml(t.participantName)}</strong>` : `<button type="button" class="sim-btn-xs" onclick="joinBreakoutTable('${tKey}', 'participant')">+ เป็นผู้เข้าสอบ</button>`}
+          </div>
+
+          ${isMyTable ? `
+            <div style="margin-top:0.4rem;text-align:right;">
+              <button type="button" class="sim-btn-xs" style="color:var(--danger);" onclick="leaveBreakoutTable('${tKey}')">ออกจากโต๊ะนี้</button>
+            </div>
+          ` : ''}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // ── Carousel Rotation Diagram & Assignment ──
+    async function assignCarouselStation(stationNum, role) {
+      if (!SimState.roomId || typeof _fbDb === 'undefined') return;
+      const myId = SimState.myPlayerId;
+      const myName = SimState.lobbyPlayerName;
+      try {
+        const updateData = {};
+        const postKey = 'st_' + stationNum;
+        if (role === 'examiner') {
+          updateData[`rooms/${SimState.roomId}/carouselPosts/${postKey}/examinerId`] = myId;
+          updateData[`rooms/${SimState.roomId}/carouselPosts/${postKey}/examinerName`] = myName;
+        } else {
+          updateData[`rooms/${SimState.roomId}/carouselPosts/${postKey}/startParticipantId`] = myId;
+          updateData[`rooms/${SimState.roomId}/carouselPosts/${postKey}/startParticipantName`] = myName;
+        }
+        await _fbDb.ref().update(updateData);
+        SimState.myCarouselStation = stationNum;
+        SimState.myCarouselRole = role;
+      } catch (e) {
+        console.error('Assign carousel station failed:', e);
+      }
+    }
+
+    function renderCarouselDiagram(room) {
+      const trackContainer = document.getElementById('carousel-track-container');
+      const gridContainer = document.getElementById('carousel-stations-grid');
+      if (!gridContainer) return;
+
+      const posts = room.carouselPosts || {};
+      const postKeys = Object.keys(posts).sort((a,b) => (parseInt(a.replace('st_','')) || 0) - (parseInt(b.replace('st_','')) || 0));
+      
+      const summaryEl = document.getElementById('carousel-rotation-summary');
+      if (summaryEl) summaryEl.textContent = `${postKeys.length} สถานี (วนตามเข็ม)`;
+
+      // Render Visual Circular / Racetrack Loop
+      if (trackContainer) {
+        trackContainer.innerHTML = '';
+        const trackWrap = document.createElement('div');
+        trackWrap.style.cssText = 'display:flex;align-items:center;gap:0.4rem;min-width:max-content;padding:0.4rem 0;';
+        
+        postKeys.forEach((k, i) => {
+          const p = posts[k];
+          const stNum = p.stationNumber || (i + 1);
+          const hasEx = Boolean(p.examinerName);
+          const hasPart = Boolean(p.startParticipantName);
+
+          const node = document.createElement('div');
+          node.style.cssText = `background:var(--surface);border:1.5px solid ${hasEx ? 'var(--primary)' : 'var(--border)'};border-radius:var(--radius-md);padding:0.45rem 0.65rem;text-align:center;min-width:110px;box-shadow:var(--shadow-sm);font-size:0.8rem;`;
+          node.innerHTML = `
+            <div style="font-weight:700;color:var(--primary);">ฐานที่ ${stNum}</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);margin:2px 0;">${hasEx ? escapeHtml(p.examinerName) : 'รอ Examiner'}</div>
+            <div style="font-size:0.72rem;color:#16a34a;font-weight:600;">${hasPart ? '👤 ' + escapeHtml(p.startParticipantName) : 'รอ Participant'}</div>
+          `;
+          trackWrap.appendChild(node);
+
+          const arrow = document.createElement('span');
+          arrow.style.cssText = 'color:var(--primary);font-size:1.1rem;font-weight:bold;user-select:none;';
+          arrow.innerHTML = i === postKeys.length - 1 ? '🔄' : '➔';
+          trackWrap.appendChild(arrow);
+        });
+        trackContainer.appendChild(trackWrap);
+      }
+
+      // Render Detailed Grid Cards
+      gridContainer.innerHTML = '';
+      postKeys.forEach((k, i) => {
+        const p = posts[k];
+        const stNum = p.stationNumber || (i + 1);
+        const hasEx = Boolean(p.examinerName);
+        const hasPart = Boolean(p.startParticipantName);
+        const isExaminerRole = SimState.role === 'examiner' || SimState.isHost;
+
+        let caseTitle = 'สถานีปริศนา (Blinded)';
+        if (isExaminerRole) {
+          const c = AppState.cases.find(x => x.caseId === p.caseId) || { title: p.caseId };
+          caseTitle = p.caseId === 'REST' ? '🥤 สถานีพัก (REST)' : `${p.caseId}: ${c.title || ''}`;
+        }
+
+        const card = document.createElement('div');
+        card.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:0.75rem;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:0.4rem;font-size:0.85rem;';
+        
+        card.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:0.35rem;">
+            <strong style="color:var(--primary);">สถานีที่ ${stNum}</strong>
+            <span style="font-size:0.72rem;color:var(--text-muted);">${p.caseId === 'REST' ? '🥤 พัก' : (isExaminerRole ? p.caseId : '🔒 ปิดข้อมูล')}</span>
+          </div>
+          <div style="font-size:0.8rem;color:var(--text-secondary);line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(caseTitle)}">
+            ${escapeHtml(caseTitle)}
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.25rem;">
+            <span style="font-size:0.78rem;color:var(--text-muted);">Examiner:</span>
+            ${hasEx ? `<strong style="font-size:0.82rem;color:var(--primary);">${escapeHtml(p.examinerName)}</strong>` : `<button type="button" class="sim-btn-xs" onclick="assignCarouselStation(${stNum}, 'examiner')">+ ประจำฐานนี้</button>`}
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:0.78rem;color:var(--text-muted);">เริ่มที่นี่:</span>
+            ${hasPart ? `<strong style="font-size:0.82rem;color:#16a34a;">${escapeHtml(p.startParticipantName)}</strong>` : `<button type="button" class="sim-btn-xs" onclick="assignCarouselStation(${stNum}, 'participant')">+ เริ่มฐานนี้</button>`}
+          </div>
+        `;
+        gridContainer.appendChild(card);
+      });
+    }
+
+    // ── Super Host Monitor View ──
+    function renderSuperHostMonitor(room) {
+      const monitorView = document.getElementById('super-host-monitor-view');
+      if (!monitorView) return;
+      monitorView.style.display = 'block';
+
+      const modeTitleEl = document.getElementById('sh-mode-title');
+      if (modeTitleEl) {
+        modeTitleEl.textContent = room.examMode === 'carousel_rotation' ? 'โหมดแลปกิ๊งหมุนเวียนสถานี' : 'โหมด Breakout สอบพร้อมกันทั้งห้อง';
+      }
+
+      // Update Large Timer Display
+      const minutes = Math.floor(SimState.timerValue / 60);
+      const seconds = SimState.timerValue % 60;
+      const displayStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      const timerDisplayEl = document.getElementById('sh-timer-display');
+      if (timerDisplayEl) {
+        timerDisplayEl.textContent = displayStr;
+        timerDisplayEl.style.color = SimState.timerValue < 10 ? 'var(--danger)' : (SimState.timerValue < 60 ? 'var(--warning)' : 'var(--primary)');
+      }
+
+      // Update Current Station Info
+      const currSt = SimState.stations[SimState.currentIdx] || {};
+      const currCase = currSt.case || {};
+      const numLabel = document.getElementById('sh-station-number-label');
+      if (numLabel) numLabel.textContent = `สถานีที่ ${SimState.currentIdx + 1} / ${SimState.stations.length}`;
+
+      const titleEl = document.getElementById('sh-station-title');
+      if (titleEl) titleEl.textContent = currCase.title || currSt.caseId || 'สถานีพัก';
+
+      const scenarioEl = document.getElementById('sh-scenario-content');
+      if (scenarioEl) {
+        const cleanScenario = (currCase.scenario || currCase.contentHtml || 'ไม่มีโจทย์สำหรับสถานีนี้').replace(/<[^>]*>/g, ' ').trim();
+        scenarioEl.textContent = cleanScenario.slice(0, 320) + (cleanScenario.length > 320 ? '...' : '');
+      }
+
+      // Master Navigation Buttons Update
+      const prevBtn = document.getElementById('sh-prev-btn');
+      if (prevBtn) prevBtn.disabled = SimState.currentIdx <= 0;
+      const nextBtn = document.getElementById('sh-next-btn');
+      if (nextBtn) {
+        if (SimState.currentIdx >= SimState.stations.length - 1) {
+          nextBtn.textContent = '🏁 จบการสอบ (Finish Exam)';
+          nextBtn.onclick = () => finishExamSimulation();
+        } else {
+          nextBtn.textContent = '⏭️ สถานีถัดไป (เปลี่ยนทุกคนพร้อมกัน)';
+          nextBtn.onclick = () => nextStation();
+        }
+      }
+
+      // Render Live Progress Matrix
+      const matrixEl = document.getElementById('sh-live-matrix');
+      if (!matrixEl) return;
+      matrixEl.innerHTML = '';
+
+      if (room.examMode === 'cohort_breakout') {
+        const breakouts = room.breakouts || {};
+        Object.keys(breakouts).forEach(k => {
+          const t = breakouts[k];
+          const currScoreObj = t.scores ? t.scores[SimState.currentIdx + 1] : null;
+          const scoreText = currScoreObj ? ` · ให้คะแนนแล้ว (${currScoreObj.score || 0}/${currScoreObj.maxScore || 0})` : '';
+
+          const item = document.createElement('div');
+          item.style.cssText = 'background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.6rem;font-size:0.84rem;';
+          item.innerHTML = `
+            <div style="font-weight:700;color:var(--text-primary);border-bottom:1px solid var(--border);padding-bottom:0.25rem;margin-bottom:0.25rem;">
+              ${escapeHtml(t.name || k)}
+            </div>
+            <div>👨‍🏫 Examiner: <strong>${escapeHtml(t.examinerName || 'ยังไม่มี')}</strong></div>
+            <div>✍️ Participant: <strong>${escapeHtml(t.participantName || 'ยังไม่มี')}</strong></div>
+            ${scoreText ? `<div style="color:var(--success);font-size:0.75rem;margin-top:0.2rem;">${scoreText}</div>` : ''}
+          `;
+          matrixEl.appendChild(item);
+        });
+      } else if (room.examMode === 'carousel_rotation') {
+        const posts = room.carouselPosts || {};
+        const postKeys = Object.keys(posts);
+        const N = SimState.stations.length || postKeys.length || 1;
+        const r = SimState.currentIdx || 0;
+
+        postKeys.forEach((k, i) => {
+          const p = posts[k];
+          const stNum = p.stationNumber || (i + 1);
+          const startNum = ((stNum - 1 - r + N) % N) + 1;
+          const currentPartName = posts['st_' + startNum]?.startParticipantName || 'ไม่มี';
+
+          const item = document.createElement('div');
+          item.style.cssText = 'background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.6rem;font-size:0.84rem;';
+          item.innerHTML = `
+            <div style="font-weight:700;color:var(--primary);border-bottom:1px solid var(--border);padding-bottom:0.25rem;margin-bottom:0.25rem;">
+              สถานีที่ ${stNum}
+            </div>
+            <div>👨‍🏫 Examiner: <strong>${escapeHtml(p.examinerName || 'ไม่มี')}</strong></div>
+            <div>📍 เริ่มต้น: <strong>${escapeHtml(p.startParticipantName || 'ไม่มี')}</strong></div>
+            <div style="margin-top:0.25rem;font-size:0.8rem;border-top:1px dashed var(--border);padding-top:0.2rem;">
+              🔄 รอบนี้: <strong style="color:#16a34a;">${escapeHtml(currentPartName)}</strong>
+            </div>
+          `;
+          matrixEl.appendChild(item);
+        });
+      }
+    }
+
+    function toggleSuperHostFullscreen() {
+      const elem = document.getElementById('super-host-monitor-view');
+      if (!elem) return;
+      if (!document.fullscreenElement) {
+        elem.requestFullscreen().catch(err => console.warn(err));
+      } else {
+        document.exitFullscreen().catch(err => console.warn(err));
+      }
+    }
   </script>
 
+  <!-- ==============================================================
+       MODAL: CUSTOM EXAM SET ADJUSTER (ปรับแต่งสถานี)
+       ============================================================== -->
+  <div id="modal-adjust-stations" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 10000; align-items: center; justify-content: center; padding: 1rem; backdrop-filter: blur(2px);">
+    <div class="modal-card" style="background: var(--surface); border-radius: var(--radius-lg); max-width: 680px; width: 100%; max-height: 88vh; display: flex; flex-direction: column; box-shadow: var(--shadow-xl); border: 1px solid var(--border); overflow: hidden;">
+      <div style="padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-family: var(--font-title); font-size: 1.2rem; margin: 0; color: var(--text-primary); display: flex; align-items: center; gap: 0.4rem;">
+          ⚙️ ปรับแต่งชุดข้อสอบ (Adjust Stations)
+        </h3>
+        <button type="button" onclick="closeExamSetAdjuster()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); line-height: 1;">&times;</button>
+      </div>
+      
+      <div style="padding: 0.75rem 1.4rem; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; font-size: 0.85rem;">
+        <div>
+          <span>จำนวนสถานี: <strong id="adjust-total-count" style="color: var(--primary);">0</strong> ฐาน</span>
+          <span id="adjust-ratio-summary" style="margin-left: 0.75rem; color: var(--text-muted); font-size: 0.78rem;"></span>
+        </div>
+        <div style="display: flex; gap: 0.4rem;">
+          <button type="button" class="sim-btn-xs" onclick="addRestStationToAdjuster()">🥤 เพิ่มสถานีพัก (REST)</button>
+          <button type="button" class="sim-btn-xs" onclick="openCasePickerForAdjuster()">➕ เพิ่มข้อสอบ</button>
+        </div>
+      </div>
+      
+      <div id="adjust-stations-list" style="padding: 1rem 1.4rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 0.45rem;">
+        <!-- Populated dynamically -->
+      </div>
+      
+      <div style="padding: 0.85rem 1.4rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.65rem; background: var(--surface);">
+        <button type="button" class="btn btn-secondary" onclick="closeExamSetAdjuster()">ยกเลิก</button>
+        <button type="button" class="btn btn-primary" onclick="applyAdjustedStations()">💾 ใช้งานชุดนี้ (Apply)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sub-Modal: Case Picker for Swapping or Adding Station -->
+  <div id="modal-adjust-case-picker" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10050; align-items: center; justify-content: center; padding: 1rem;">
+    <div class="modal-card" style="background: var(--surface); border-radius: var(--radius-lg); max-width: 580px; width: 100%; max-height: 80vh; display: flex; flex-direction: column; box-shadow: var(--shadow-xl); border: 1px solid var(--border); overflow: hidden;">
+      <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="font-family: var(--font-title); font-size: 1.1rem; margin: 0; color: var(--text-primary);" id="case-picker-title">เลือกข้อสอบจากคลัง</h4>
+        <button type="button" onclick="closeCasePickerForAdjuster()" style="background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+      </div>
+      <div style="padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border); background: var(--bg);">
+        <input type="text" id="adjust-case-search" class="select-filter" style="width: 100%; padding: 0.45rem 0.75rem; font-size: 0.85rem;" placeholder="🔍 ค้นหารหัสเคส / ชื่อโรค / อาการ..." oninput="filterAdjustPickerCases(this.value)">
+      </div>
+      <div id="adjust-case-picker-list" style="padding: 0.75rem 1.25rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 0.4rem;">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>

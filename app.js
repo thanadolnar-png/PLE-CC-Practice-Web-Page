@@ -723,7 +723,12 @@ function applyFilters() {
   }
 
   if (source && source !== 'All') {
-    list = list.filter(c => c && c.source === source);
+    const normSource = source.replace(/^ข้อสอบจริง\s*ปี\s*/, 'ข้อสอบจริง ปี ').replace(/^ข้อสอบจริงปี\s*/, 'ข้อสอบจริง ปี ');
+    list = list.filter(c => {
+      if (!c || !c.source) return false;
+      const cNorm = c.source.replace(/^ข้อสอบจริง\s*ปี\s*/, 'ข้อสอบจริง ปี ').replace(/^ข้อสอบจริงปี\s*/, 'ข้อสอบจริง ปี ');
+      return cNorm === normSource;
+    });
   }
   
   if (search) {
@@ -812,11 +817,15 @@ function renderFilterSelectOptions() {
   if (selectSource) {
     const sources = new Set();
     AppState.cases.forEach(c => {
-      if (c && c.source) sources.add(c.source);
+      if (c && c.source) {
+        c.source = c.source.replace(/^ข้อสอบจริง\s*ปี\s*/, 'ข้อสอบจริง ปี ').replace(/^ข้อสอบจริงปี\s*/, 'ข้อสอบจริง ปี ');
+        sources.add(c.source);
+      }
     });
 
     const currentSource = AppState.activeFilters.source;
-    const preservedSource = sources.has(currentSource) ? currentSource : 'All';
+    const normalizedCurrent = currentSource ? currentSource.replace(/^ข้อสอบจริง\s*ปี\s*/, 'ข้อสอบจริง ปี ').replace(/^ข้อสอบจริงปี\s*/, 'ข้อสอบจริง ปี ') : 'All';
+    const preservedSource = sources.has(normalizedCurrent) ? normalizedCurrent : 'All';
     AppState.activeFilters.source = preservedSource;
 
     selectSource.innerHTML = '<option value="All">ทุกแหล่งที่มา (All Sources)</option>';
@@ -1422,7 +1431,7 @@ if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
 const DB_NAME = 'RxCU_OSPE_DB';
 const DB_VERSION = 1;
 const STORE_NAME = 'case_details';
-const DB_VERSION_STR = 'v_20261002_155328'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
+const DB_VERSION_STR = 'v_20261002_162240'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
 
 function openIndexedDB() {
   return new Promise((resolve, reject) => {

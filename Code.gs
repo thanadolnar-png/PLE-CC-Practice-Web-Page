@@ -189,6 +189,9 @@ function doGet(e) {
         case 'getDocEquations':
           return buildResponse(getDocEquations(e.parameter.docId));
           
+        case 'fixDocSources':
+          return buildResponse(fixDocSources(e.parameter.docId, e.parameter.tabId, e.parameter.passcode));
+          
         default:
           return buildResponse({ error: 'Invalid action parameter' }, 400);
       }
@@ -247,15 +250,71 @@ function getSpreadsheet() {
  */
 function formatSourceName(caseId, rawSource) {
   if (rawSource && String(rawSource).trim()) {
-    const s = String(rawSource).replace(/\*/g, '').trim();
-    if (/^25\d{2}$/.test(s)) return 'ข้อสอบจริงปี ' + s;
-    if (/^\d{2}$/.test(s)) return 'ข้อสอบจริงปี 25' + s;
+    let s = String(rawSource).replace(/\*/g, '').trim();
+    s = s.replace(/^ข้อสอบจริง\s*ปี\s*/, 'ข้อสอบจริง ปี ');
+    s = s.replace(/^ข้อสอบจริงปี\s*/, 'ข้อสอบจริง ปี ');
+    if (/^25\d{2}$/.test(s)) return 'ข้อสอบจริง ปี ' + s;
+    if (/^\d{2}$/.test(s)) return 'ข้อสอบจริง ปี 25' + s;
     return s;
   }
   const cid = String(caseId || '').toUpperCase();
   const m = cid.match(/OSPE-CL(\d{2})/);
-  if (m) return 'ข้อสอบจริงปี 25' + m[1];
+  if (m) return 'ข้อสอบจริง ปี 25' + m[1];
   return 'ไม่ระบุ';
+}
+
+function fixDocSources(docId, tabId, passcode) {
+  if (passcode !== CONFIG.adminPasscode) {
+    return { error: 'Unauthorized: Invalid passcode' };
+  }
+  docId = docId || '1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g';
+  tabId = tabId || 't.7yp4u368xgwv';
+  
+  const doc = DocumentApp.openById(docId);
+  const tabs = doc.getTabs();
+  
+  function findTab(tabList, tid) {
+    for (let i = 0; i < tabList.length; i++) {
+      const t = tabList[i];
+      if (t.getId && t.getId() === tid) return t;
+      if (t.getChildTabs) {
+        const sub = findTab(t.getChildTabs(), tid);
+        if (sub) return sub;
+      }
+    }
+    return null;
+  }
+  
+  const targetTab = findTab(tabs, tabId);
+  if (!targetTab) {
+    return { error: 'Tab not found: ' + tabId };
+  }
+  
+  const body = targetTab.asDocumentTab().getBody();
+  const paragraphs = body.getParagraphs();
+  const modified = [];
+  
+  for (let j = 0; j < paragraphs.length; j++) {
+    const p = paragraphs[j];
+    const txt = p.getText();
+    if (txt.indexOf('แหล่งที่มา') !== -1) {
+      const m = txt.match(/^-\s*แหล่งที่มา\s*:\s*(25\d{2}|\d{2})\s*$/);
+      if (m) {
+        const yr = m[1].length === 2 ? ('25' + m[1]) : m[1];
+        const newTxt = '- แหล่งที่มา: ข้อสอบจริง ปี ' + yr;
+        p.setText(newTxt);
+        modified.push({ before: txt, after: newTxt });
+      }
+    }
+  }
+  
+  doc.saveAndClose();
+  return {
+    success: true,
+    tabTitle: targetTab.getTitle ? targetTab.getTitle() : '',
+    totalModified: modified.length,
+    modified: modified
+  };
 }
 
 function getCaseList(params = {}) {
