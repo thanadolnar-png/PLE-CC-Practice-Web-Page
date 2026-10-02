@@ -165,49 +165,7 @@ function renderRichNoteContent(rawHtml) {
       const embedUrl = `https://www.youtube-nocookie.com/embed/${ytVid}`;
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&margin=2&data=${encodeURIComponent(cleanUrl)}`;
 
-      return `
-        <!-- YouTube Interactive Embed (Visible on screen, hidden on print) -->
-        <div class="youtube-embed-card vdo-embed-card no-print">
-          <div class="youtube-card-header">
-            <div class="youtube-card-title">
-              <span class="youtube-icon-badge">▶</span>
-              <span>วิดีโอสาธิตเทคนิค / เฉลยสถานี (YouTube)</span>
-            </div>
-            <a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="youtube-ext-btn" title="เปิดดูใน YouTube (แท็บใหม่)">
-              เปิดใน YouTube ↗
-            </a>
-          </div>
-          <div class="youtube-player-wrapper">
-            <iframe 
-              src="${embedUrl}" 
-              title="วิดีโอสาธิตเทคนิค / เฉลยสถานี" 
-              frameborder="0" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-              allowfullscreen 
-              loading="lazy">
-            </iframe>
-          </div>
-        </div>
-
-        <!-- YouTube Print Card (Hidden on screen, visible on print & paper preview: QR Code คู่กับ ลิงก์) -->
-        <div class="youtube-print-card vdo-print-card print-only">
-          <div class="youtube-print-box">
-            <div class="youtube-print-header">
-              <strong>📹 วิดีโอสาธิตและเฉลยเทคนิค (YouTube Reference)</strong>
-            </div>
-            <div class="youtube-print-body">
-              <div class="youtube-print-qr-wrap">
-                <img src="${qrUrl}" class="youtube-print-qr" alt="QR Code">
-              </div>
-              <div class="vdo-print-link-wrap">
-                <div class="vdo-print-link-title">🔗 สแกน QR Code หรือเข้าดูผ่านลิงก์:</div>
-                <div class="youtube-print-url">${cleanUrl}</div>
-                <div class="youtube-print-scan-hint">📲 สามารถสแกน QR Code ด้วยกล้องมือถือเพื่อเปิดรับชมได้ทันที</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
+      return `<div class="youtube-embed-card vdo-embed-card no-print" style="white-space:normal;margin:1.25rem 0;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.06);"><div class="youtube-card-header" style="display:flex;justify-content:space-between;align-items:center;padding:0.65rem 1rem;background:var(--bg-secondary);border-bottom:1px solid var(--border);gap:0.5rem;"><div class="youtube-card-title" style="display:flex;align-items:center;gap:0.5rem;font-weight:700;font-size:0.92rem;"><span class="youtube-icon-badge" style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:#ff0000;color:#fff;border-radius:6px;font-size:0.72rem;font-weight:900;">▶</span><span>วิดีโอสาธิตเทคนิค / เฉลยสถานี (YouTube)</span></div><a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="youtube-ext-btn" style="font-size:0.8rem;font-weight:700;color:var(--primary);text-decoration:none;padding:0.3rem 0.75rem;border-radius:6px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);display:inline-flex;align-items:center;white-space:nowrap;" title="เปิดดูใน YouTube (แท็บใหม่)">เปิดใน YouTube ↗</a></div><div class="youtube-player-wrapper" style="position:relative;width:100%;padding-bottom:56.25%;height:0;background:#0f172a;overflow:hidden;"><iframe src="${embedUrl}" title="วิดีโอสาธิตเทคนิค / เฉลยสถานี" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" loading="lazy" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"></iframe></div></div><div class="youtube-print-card vdo-print-card print-only" style="white-space:normal;display:none;margin:1rem 0;"><div class="youtube-print-box"><div class="youtube-print-header"><strong>📹 วิดีโอสาธิตและเฉลยเทคนิค (YouTube Reference)</strong></div><div class="youtube-print-body"><div class="youtube-print-qr-wrap"><img src="${qrUrl}" class="youtube-print-qr" alt="QR Code"></div><div class="vdo-print-link-wrap"><div class="vdo-print-link-title">🔗 สแกน QR Code หรือเข้าดูผ่านลิงก์:</div><div class="youtube-print-url">${cleanUrl}</div><div class="youtube-print-scan-hint">📲 สามารถสแกน QR Code ด้วยกล้องมือถือเพื่อเปิดรับชมได้ทันที</div></div></div></div></div>`;
     }
 
     // 2. Google Drive Case
@@ -216,78 +174,14 @@ function renderRichNoteContent(rawHtml) {
       const previewUrl = `https://drive.google.com/file/d/${driveId}/preview`;
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&margin=2&data=${encodeURIComponent(cleanDriveUrl)}`;
 
-      return `
-        <!-- Google Drive Interactive Embed (Visible on screen, hidden on print) -->
-        <div class="youtube-embed-card vdo-embed-card drive-embed-card no-print">
-          <div class="youtube-card-header drive-card-header">
-            <div class="youtube-card-title">
-              <span class="drive-icon-badge">📁</span>
-              <span>วิดีโอสาธิตเทคนิค / เฉลยสถานี (Google Drive)</span>
-            </div>
-            <a href="${cleanDriveUrl}" target="_blank" rel="noopener noreferrer" class="youtube-ext-btn drive-ext-btn" title="เปิดดูใน Google Drive (แท็บใหม่)">
-              เปิดใน Google Drive ↗
-            </a>
-          </div>
-          <div class="youtube-player-wrapper">
-            <iframe 
-              src="${previewUrl}" 
-              title="วิดีโอสาธิตเทคนิค / เฉลยสถานี (Google Drive)" 
-              frameborder="0" 
-              allow="autoplay; fullscreen" 
-              allowfullscreen="true" 
-              webkitallowfullscreen="true" 
-              mozallowfullscreen="true" 
-              loading="lazy">
-            </iframe>
-          </div>
-        </div>
-
-        <!-- Google Drive Print Card (Hidden on screen, visible on print & paper preview: QR Code คู่กับ ลิงก์) -->
-        <div class="youtube-print-card vdo-print-card print-only">
-          <div class="youtube-print-box">
-            <div class="youtube-print-header">
-              <strong>📁 วิดีโอสาธิตและเฉลยเทคนิค (Google Drive Reference)</strong>
-            </div>
-            <div class="youtube-print-body">
-              <div class="youtube-print-qr-wrap">
-                <img src="${qrUrl}" class="youtube-print-qr" alt="QR Code">
-              </div>
-              <div class="vdo-print-link-wrap">
-                <div class="vdo-print-link-title">🔗 สแกน QR Code หรือเข้าดูผ่านลิงก์:</div>
-                <div class="youtube-print-url">${cleanDriveUrl}</div>
-                <div class="youtube-print-scan-hint">📲 สามารถสแกน QR Code ด้วยกล้องมือถือเพื่อเปิดรับชมบน Google Drive ได้ทันที</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
+      return `<div class="youtube-embed-card vdo-embed-card drive-embed-card no-print" style="white-space:normal;margin:1.25rem 0;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.06);"><div class="youtube-card-header drive-card-header" style="display:flex;justify-content:space-between;align-items:center;padding:0.65rem 1rem;background:rgba(30,64,175,0.08);border-bottom:1px solid rgba(59,130,246,0.25);gap:0.5rem;"><div class="youtube-card-title" style="display:flex;align-items:center;gap:0.5rem;font-weight:700;font-size:0.92rem;"><span class="drive-icon-badge" style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;font-size:16px;">📁</span><span>วิดีโอสาธิตเทคนิค / เฉลยสถานี (Google Drive)</span></div><a href="${cleanDriveUrl}" target="_blank" rel="noopener noreferrer" class="youtube-ext-btn drive-ext-btn" style="font-size:0.8rem;font-weight:700;color:#ffffff;text-decoration:none;padding:0.3rem 0.75rem;border-radius:6px;background:#2563eb;border:1px solid #1d4ed8;display:inline-flex;align-items:center;white-space:nowrap;" title="เปิดดูใน Google Drive (แท็บใหม่)">เปิดใน Google Drive ↗</a></div><div class="youtube-player-wrapper" style="position:relative;width:100%;padding-bottom:56.25%;height:0;background:#0f172a;overflow:hidden;"><iframe src="${previewUrl}" title="วิดีโอสาธิตเทคนิค / เฉลยสถานี (Google Drive)" frameborder="0" allow="autoplay; fullscreen" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" loading="lazy" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"></iframe></div></div><div class="youtube-print-card vdo-print-card print-only" style="white-space:normal;display:none;margin:1rem 0;"><div class="youtube-print-box"><div class="youtube-print-header"><strong>📁 วิดีโอสาธิตและเฉลยเทคนิค (Google Drive Reference)</strong></div><div class="youtube-print-body"><div class="youtube-print-qr-wrap"><img src="${qrUrl}" class="youtube-print-qr" alt="QR Code"></div><div class="vdo-print-link-wrap"><div class="vdo-print-link-title">🔗 สแกน QR Code หรือเข้าดูผ่านลิงก์:</div><div class="youtube-print-url">${cleanDriveUrl}</div><div class="youtube-print-scan-hint">📲 สามารถสแกน QR Code ด้วยกล้องมือถือเพื่อเปิดรับชมบน Google Drive ได้ทันที</div></div></div></div></div>`;
     }
 
     // 3. Fallback General Link
     const safeUrl = (typeof escapeHtml === 'function') ? escapeHtml(rawUrl) : rawUrl;
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&margin=2&data=${encodeURIComponent(safeUrl)}`;
 
-    return `
-      <div class="vdo-fallback-card no-print">
-        <p class="vdo-link-plain"><strong>📹 วิดีโออ้างอิง:</strong> <a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a></p>
-      </div>
-      <div class="youtube-print-card vdo-print-card print-only">
-        <div class="youtube-print-box">
-          <div class="youtube-print-header">
-            <strong>📹 วิดีโอหรือสื่อประกอบ (Reference Media)</strong>
-          </div>
-          <div class="youtube-print-body">
-            <div class="youtube-print-qr-wrap">
-              <img src="${qrUrl}" class="youtube-print-qr" alt="QR Code">
-            </div>
-            <div class="vdo-print-link-wrap">
-              <div class="vdo-print-link-title">🔗 เข้าดูผ่านลิงก์หรือสแกน:</div>
-              <div class="youtube-print-url">${safeUrl}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
+    return `<div class="vdo-fallback-card no-print" style="white-space:normal;margin:1rem 0;"><p class="vdo-link-plain"><strong>📹 วิดีโออ้างอิง:</strong> <a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a></p></div><div class="youtube-print-card vdo-print-card print-only" style="white-space:normal;display:none;margin:1rem 0;"><div class="youtube-print-box"><div class="youtube-print-header"><strong>📹 วิดีโอหรือสื่อประกอบ (Reference Media)</strong></div><div class="youtube-print-body"><div class="youtube-print-qr-wrap"><img src="${qrUrl}" class="youtube-print-qr" alt="QR Code"></div><div class="vdo-print-link-wrap"><div class="vdo-print-link-title">🔗 เข้าดูผ่านลิงก์หรือสแกน:</div><div class="youtube-print-url">${safeUrl}</div></div></div></div></div>`;
   });
 }
 
@@ -499,6 +393,39 @@ async function loadCasesData() {
 
 
 /**
+ * Decrypt AES-256-GCM encrypted case data with PBKDF2 key derivation
+ */
+async function decryptCaseData(encryptedObj, password) {
+  if (!encryptedObj || !encryptedObj.ciphertext || !password) return null;
+  const enc = new TextEncoder();
+  const keyMaterial = await window.crypto.subtle.importKey(
+    'raw',
+    enc.encode(password.trim()),
+    'PBKDF2',
+    false,
+    ['deriveKey']
+  );
+  const salt = Uint8Array.from(atob(encryptedObj.salt), c => c.charCodeAt(0));
+  const iv = Uint8Array.from(atob(encryptedObj.iv), c => c.charCodeAt(0));
+  const ciphertext = Uint8Array.from(atob(encryptedObj.ciphertext), c => c.charCodeAt(0));
+  const key = await window.crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: salt, iterations: 100000, hash: 'SHA-256' },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['decrypt']
+  );
+  const decrypted = await window.crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: iv },
+    key,
+    ciphertext
+  );
+  const dec = new TextDecoder();
+  return JSON.parse(dec.decode(decrypted));
+}
+window.decryptCaseData = decryptCaseData;
+
+/**
  * fetchCaseDetail — ดึงข้อมูล scenario/checklist เต็มของเคสจาก API แบบ on-demand
  * ใช้เมื่อ case ที่อยู่ใน AppState.cases ไม่มี contentHtml / scenario / checklist
  * (เช่น เคสใหม่ที่ยังไม่ได้อัปเดตใน offline file)
@@ -519,6 +446,21 @@ async function fetchCaseDetail(caseId, forceLive = false) {
                 OFFLINE_CASE_DETAILS[cleanId.toUpperCase()] || 
                 OFFLINE_CASE_DETAILS[ospeId.toUpperCase()];
     if (det) {
+      if (det.isEncrypted) {
+        const cached = sessionStorage.getItem('ple_unlocked_' + ospeId) || sessionStorage.getItem('ple_unlocked_' + cleanId);
+        if (cached) {
+          try {
+            const decCase = JSON.parse(cached);
+            const idx = AppState.cases.findIndex(c => c.caseId && (c.caseId.trim() === cleanId || c.caseId.trim() === ospeId));
+            if (idx !== -1) {
+              AppState.cases[idx] = Object.assign({}, AppState.cases[idx], decCase);
+              return AppState.cases[idx];
+            }
+            return decCase;
+          } catch (e) {}
+        }
+        return det;
+      }
       const idx = AppState.cases.findIndex(c => c.caseId && (c.caseId.trim() === cleanId || c.caseId.trim() === ospeId || c.caseId.trim() === rawId));
       if (idx !== -1) {
         const merged = Object.assign({}, AppState.cases[idx]);
@@ -1030,20 +972,24 @@ function renderCaseList() {
       window.location.href = `case-viewer.html?id=${encodeURIComponent(c.caseId)}`;
     });
     
+    const isProtected = Boolean(c.isProtected || c.hasPassword);
     const sourceBadge = c.source ? `<span class="case-card-tag" style="background: rgba(99, 102, 241, 0.12); color: var(--primary); font-weight: 600; border: 1px solid rgba(99, 102, 241, 0.25);">🏷️ ${c.source}</span>` : '';
+    const lockBadge = isProtected ? `<span class="case-card-tag" style="background: rgba(239, 68, 68, 0.12); color: #ef4444; font-weight: 700; border: 1px solid rgba(239, 68, 68, 0.25);">🔒 ข้อสอบลับ</span>` : '';
+    const displayTitle = isProtected ? `🔒 ${c.caseId}` : c.title;
 
     card.innerHTML = `
       <div class="case-card-header">
         <span class="badge badge-${c.category.toLowerCase()}">${c.category}</span>
         <span class="case-card-id">${c.caseId}</span>
       </div>
-      <h3 class="case-card-title">${c.title}</h3>
+      <h3 class="case-card-title">${escapeHtml(displayTitle)}</h3>
       <div style="margin-bottom: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.35rem;">
-        <span class="case-card-tag">${c.mainGroup || ""}${c.subTopic ? " · " + c.subTopic : ""}</span>
+        ${lockBadge}
+        <span class="case-card-tag">${escapeHtml(isProtected ? "🔒 ล็อกด้วยรหัสผ่าน" : (c.mainGroup || "") + (c.subTopic ? " · " + c.subTopic : ""))}</span>
         ${sourceBadge}
       </div>
       <div class="case-card-meta">
-        <span>ผู้เขียน: ${c.author || 'ไม่ระบุ'}</span>
+        <span>ผู้เขียน: ${escapeHtml(isProtected ? "🔒 สงวนสิทธิ์" : (c.author || 'ไม่ระบุ'))}</span>
       </div>
     `;
     

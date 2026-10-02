@@ -5234,7 +5234,8 @@ body.is-printing #batch-print-execution-area {
 }
 
 /* ─── VDO Link / YouTube Rich Media & Print System ─── */
-.youtube-embed-card {
+.youtube-embed-card,
+.vdo-embed-card {
   margin: 1.25rem 0;
   background: var(--surface);
   border: 1.5px solid var(--border);
@@ -5242,28 +5243,41 @@ body.is-printing #batch-print-execution-area {
   overflow: hidden;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  white-space: normal !important;
+  display: block !important;
+  width: 100% !important;
 }
-.youtube-embed-card:hover {
+.youtube-embed-card:hover,
+.vdo-embed-card:hover {
   border-color: var(--primary);
   box-shadow: 0 6px 20px rgba(99, 102, 241, 0.12);
 }
-.youtube-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.65rem 1rem;
+.youtube-card-header,
+.drive-card-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 0.65rem 1rem !important;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border);
   gap: 0.5rem;
+  white-space: normal !important;
+}
+.drive-card-header {
+  background: rgba(30, 64, 175, 0.08) !important;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.25) !important;
 }
 .youtube-card-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
   font-family: var(--font-title);
   font-size: 0.92rem;
   font-weight: 700;
   color: var(--text-primary);
+  white-space: normal !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 .youtube-icon-badge {
   display: inline-flex;
@@ -5276,73 +5290,76 @@ body.is-printing #batch-print-execution-area {
   border-radius: 6px;
   font-size: 0.72rem;
   font-weight: 900;
+  flex-shrink: 0;
+}
+.drive-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  flex-shrink: 0;
 }
 .youtube-ext-btn {
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--primary);
   text-decoration: none;
-  padding: 0.25rem 0.65rem;
+  padding: 0.3rem 0.75rem;
   border-radius: 6px;
   background: rgba(99, 102, 241, 0.1);
   border: 1px solid rgba(99, 102, 241, 0.2);
   transition: all 0.15s ease;
-  white-space: nowrap;
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
 }
 .youtube-ext-btn:hover {
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
 }
+.drive-ext-btn {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border-color: #1d4ed8 !important;
+}
+.drive-ext-btn:hover {
+  background: #1d4ed8 !important;
+  color: #ffffff !important;
+}
 .youtube-player-wrapper {
   position: relative;
-  width: 100%;
-  padding-bottom: 56.25%; /* 16:9 ratio */
-  height: 0;
+  width: 100% !important;
+  padding-bottom: 56.25% !important; /* 16:9 ratio */
+  height: 0 !important;
   background: #0f172a;
+  overflow: hidden !important;
+  display: block !important;
 }
 .youtube-player-wrapper iframe {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
+  width: 100% !important;
+  height: 100% !important;
+  border: 0 !important;
+}
+.vdo-fallback-card {
+  white-space: normal !important;
 }
 
 /* YouTube Print Card */
-.youtube-print-card {
-  display: none; /* hidden on web screen by default */
-  margin: 1rem 0;
-  page-break-inside: avoid;
-  break-inside: avoid;
-}
-.drive-card-header {
-  background: rgba(30, 64, 175, 0.08) !important;
-  border-bottom: 1px solid rgba(59, 130, 246, 0.25) !important;
-}
-.drive-icon-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  font-size: 14px;
-}
-.drive-ext-btn {
-  background: #2563eb !important;
-}
-.drive-ext-btn:hover {
-  background: #1d4ed8 !important;
-}
-
-/* YouTube & Drive Print Card */
 .youtube-print-card,
 .vdo-print-card {
   display: none; /* hidden on web screen by default */
   margin: 1rem 0;
   page-break-inside: avoid;
   break-inside: avoid;
+  white-space: normal !important;
 }
 .youtube-print-box {
   border: 1.5px solid #475569;

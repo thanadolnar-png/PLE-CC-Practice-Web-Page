@@ -1,12 +1,7 @@
-/**
- * RxCU OSPE Hub — Compounding Videos Database
- * Domain: Product (เทคนิคเภสัชกรรมและการเตรียมยา)
- * Source: ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย
- * Total Videos: 46
- * Enriched with: Descriptions, Key Principles, High-Yield OSPE Techniques, and Exam Pitfalls
- */
+# -*- coding: utf-8 -*-
+import json
 
-const COMPOUNDING_VIDEOS = [
+videos_data = [
   {
     "id": "T01",
     "domain": "Product",
@@ -19,13 +14,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "16N_Ko1iBmvwjQAev0gbwz2FMQpvFS7gh",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "การบด ผสม & หลอม",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Trituration"
-    ],
+    "tags": ["การบด ผสม & หลอม", "Product", "Compounding", "OSPE", "Trituration"],
     "description": "สาธิตเทคนิคการบดลดขนาดอนุภาคของแข็งด้วยโกร่งและสาก (Mortar & Pestle) โดยใช้แรงกดและหมุนเป็นวงก้นหอย เพื่อให้อนุภาคผงยามีขนาดเล็กลงและกระจายตัวสม่ำเสมอตามมาตรฐานเภสัชตำรับ",
     "keyPoints": [
       "🎯 หลักการ: บดวนสากเป็นวงก้นหอยจากจุดศูนย์กลางออกสู่ขอบโกร่ง และวนกลับเข้าสู่ศูนย์กลางอย่างต่อเนื่อง",
@@ -46,14 +35,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1YxZ_32llEapMCF8rOEfY7BUMJtpcnuwp",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "การบด ผสม & หลอม",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Pulverization",
-      "Camphor"
-    ],
+    "tags": ["การบด ผสม & หลอม", "Product", "Compounding", "OSPE", "Pulverization", "Camphor"],
     "description": "สาธิตการบดลดขนาดสารที่มีความเหนียว ยืดหยุ่น หรือจับตัวเป็นก้อน เช่น Camphor, Menthol, Thymol โดยใช้ตัวทำละลายระเหยง่าย (Volatile solvent เช่น 95% Alcohol) ช่วยแทรกสลายโครงสร้างผลึก",
     "keyPoints": [
       "🎯 หลักการ: เติมตัวทำละลายระเหยง่ายปริมาณเล็กน้อยพอเปียก (Intervening agent) เพื่อช่วยทำลายแรงยึดเหนี่ยวระหว่างโมเลกุล",
@@ -74,15 +56,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1hueACDWD82fVNbLq3_HQCNrsjrhboska",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "การบด ผสม & หลอม",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Pulverization",
-      "Menthol",
-      "Thymol"
-    ],
+    "tags": ["การบด ผสม & หลอม", "Product", "Compounding", "OSPE", "Pulverization", "Menthol", "Thymol"],
     "description": "เจาะลึกขั้นตอนต่อเนื่องของการบดแทรกสารกลุ่ม Gummy/Crystalline solids การสังเกตจุดสิ้นสุดเมื่อตัวทำละลายระเหยหมด และการนำผงยาไปผสมต่อกับสารช่วยตั้งตำรับอื่นๆ",
     "keyPoints": [
       "🎯 หลักการ: ตรวจสอบความแห้งและการกระจายตัวของผลึกก่อนนำไปผสมกับตัวยาอื่น เพื่อป้องกันการเกิด Eutectic mixture โดยไม่ตั้งใจ",
@@ -103,14 +77,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1kUrEb-cZI92NwFaZlWHDpCHAgHZnOkkr",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "การชั่งตวง & Aliquot",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Balance",
-      "Calibration"
-    ],
+    "tags": ["การชั่งตวง & Aliquot", "Product", "Compounding", "OSPE", "Balance", "Calibration"],
     "description": "แนะนำโครงสร้าง ส่วนประกอบ และหลักการปรับสมดุลเครื่องชั่งคาน 2 จาน (Class A Prescription Balance) รวมถึงการเช็กฟองอากาศระดับน้ำและการตั้งศูนย์ (Zero balance)",
     "keyPoints": [
       "🎯 หลักการ: เครื่องชั่งต้องวางบนโต๊ะที่มั่นคง ระดับน้ำ (Bubble level) ต้องอยู่ตรงกลางวงกลมก่อนเริ่มใช้งาน",
@@ -131,14 +98,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "15YOwVNbW4ZCJ7yvfL0aqFgLMixMA_L36",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "การชั่งตวง & Aliquot",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Weighing",
-      "Paper boat"
-    ],
+    "tags": ["การชั่งตวง & Aliquot", "Product", "Compounding", "OSPE", "Weighing", "Paper boat"],
     "description": "ขั้นตอนการชั่งสารเคมีแห้ง/ผงยาบนกระดาษชั่งสาร การพับกระทงกระดาษ (Weighing boat) เพื่อรองรับผงยา และการตักสารด้วย Spatula เข้า-ออกจากจานชั่งอย่างถูกต้อง",
     "keyPoints": [
       "🎯 หลักการ: วางกระดาษชั่งสารขนาดและน้ำหนักเท่ากันทั้งสองจาน (สารอยู่จานซ้าย ตุ้มน้ำหนักอยู่จานขวา)",
@@ -159,13 +119,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1_T0PpsT4tQx3j8_7f4dJ_xN_12345",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "การชั่งตวง & Aliquot",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Paper folding"
-    ],
+    "tags": ["การชั่งตวง & Aliquot", "Product", "Compounding", "OSPE", "Paper folding"],
     "description": "เจาะลึกเทคนิคการพับกระดาษไข/กระดาษชั่งสาร (Glassine paper) ให้เป็นกระทงทรงเรือที่มีขอบสูง ป้องกันผงยาหกเลอะเทอะและสะดวกต่อการเทลงโกร่งหรือขวดบรรจุ",
     "keyPoints": [
       "🎯 หลักการ: พับทบตามแนวทแยงและพับขอบขึ้นเป็นสัน เพื่อให้เกิดรางเทสารที่แม่นยำและไม่สูญเสียผงยาตามซอกพับ",
@@ -186,13 +140,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zD5qD2Q5s1_L31",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "การชั่งตวง & Aliquot",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Semisolid weighing"
-    ],
+    "tags": ["การชั่งตวง & Aliquot", "Product", "Compounding", "OSPE", "Semisolid weighing"],
     "description": "เทคนิคการชั่งสารกึ่งแข็ง เช่น ยาพื้นขี้ผึ้ง (Vaseline, Lanolin) หรือยาครีม โดยใช้กระดาษไขพับกระทงพิเศษหรือ Watch glass เพื่อไม่ให้สารเหนียวติดเปื้อนจานชั่ง",
     "keyPoints": [
       "🎯 หลักการ: สารกึ่งแข็งมีความหนืดและเหนียว ต้องใช้ Spatula สเตนเลสหรือเขาสัตว์ป้ายสารวางตรงกลางกระทง",
@@ -213,14 +161,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zD6qD2Q5s1_L32",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "การชั่งตวง & Aliquot",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Liquid weighing",
-      "Viscous liquid"
-    ],
+    "tags": ["การชั่งตวง & Aliquot", "Product", "Compounding", "OSPE", "Liquid weighing", "Viscous liquid"],
     "description": "การชั่งน้ำหนักของเหลวที่มีความหนืดสูง เช่น Glycerin, Liquid paraffin, Propylene glycol หรือสารละลายเข้มข้นที่ไม่สะดวกต่อการตวงด้วยกระบอกตวง",
     "keyPoints": [
       "🎯 หลักการ: ของเหลวหนืดจะเกาะติดผนังกระบอกตวง (Loss on container) จึงนิยมใช้วิธีชั่งน้ำหนักโดยตรงลงใน Beaker หรือขวดบรรจุ",
@@ -241,15 +182,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zD7qD2Q5s1_L33",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "การชั่งตวง & Aliquot",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Aliquot",
-      "Solid in Solid",
-      "LWQ"
-    ],
+    "tags": ["การชั่งตวง & Aliquot", "Product", "Compounding", "OSPE", "Aliquot", "Solid in Solid", "LWQ"],
     "description": "ขั้นตอนการเจือจางผงยาปริมาณน้อยกว่าค่า Least Weighable Quantity (LWQ/MWQ) ของเครื่องชั่ง โดยผสมตัวยากับสารตัวเติมเฉื่อย (Inert diluent เช่น Lactose) แล้วชั่งส่วนแบ่ง (Aliquot part)",
     "keyPoints": [
       "🎯 หลักการ: เมื่อต้องการชั่งตัวยา < LWQ (เช่น ต้องการ 10 mg แต่ LWQ = 120 mg) ต้องชั่งตัวยา ≥ LWQ มาเจือจางกับ Diluent ในอัตราส่วนที่เหมาะสม",
@@ -270,14 +203,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zD8qD2Q5s1_L34",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "การชั่งตวง & Aliquot",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Aliquot",
-      "Solid in Liquid"
-    ],
+    "tags": ["การชั่งตวง & Aliquot", "Product", "Compounding", "OSPE", "Aliquot", "Solid in Liquid"],
     "description": "วิธีเตรียมสารละลายจากตัวยาผงของแข็งปริมาณน้อยกว่า LWQ โดยชั่งตัวยาในปริมาณที่ชั่งได้แม่นยำ ละลายในตัวทำละลายจนครบปริมาตร แล้วตวงสารละลายส่วนแบ่ง (Liquid aliquot) มาใช้",
     "keyPoints": [
       "🎯 หลักการ: ชั่งตัวยาของแข็ง ≥ LWQ ละลายในตัวทำละลาย (เช่น Purified Water) ใน Volumetric flask หรือ Cylindrical graduate แล้วตวงส่วนแบ่ง",
@@ -298,14 +224,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zD9qD2Q5s1_L35",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "การชั่งตวง & Aliquot",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Aliquot",
-      "Liquid in Liquid"
-    ],
+    "tags": ["การชั่งตวง & Aliquot", "Product", "Compounding", "OSPE", "Aliquot", "Liquid in Liquid"],
     "description": "การตวงของเหลวปริมาณน้อยกว่าปริมาตรต่ำสุดที่กระบอกตวงวัดได้แม่นยำ (Least Measurable Volume) โดยการเจือจางของเหลวเข้มข้นด้วยตัวทำละลาย แล้วตวงส่วนแบ่งมาตั้งตำรับ",
     "keyPoints": [
       "🎯 หลักการ: ห้ามตวงของเหลวต่ำกว่า 20% ของความจุกระบอกตวง หากต้องการตวงปริมาณน้อยมาก ต้องใช้วิธี Aliquot dilution หรือใช้ Measuring pipette",
@@ -326,14 +245,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zD10qD2Q5s1_L36",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "การชั่งตวง & Aliquot",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Liquid measuring",
-      "Meniscus"
-    ],
+    "tags": ["การชั่งตวง & Aliquot", "Product", "Compounding", "OSPE", "Liquid measuring", "Meniscus"],
     "description": "เทคนิคการเลือกใช้อุปกรณ์ตวง (Graduated cylinder, Conical graduate, Pipette) และการอ่านระดับส่วนโค้งของผิวของเหลว (Meniscus) ในระดับสายตา",
     "keyPoints": [
       "🎯 หลักการ: ของเหลวใสให้อ่านขีดระดับที่ 'ท้องน้ำล่าง' (Lower meniscus) ของเหลวทึบแสงให้อ่านที่ 'ผิวบน' (Upper meniscus)",
@@ -354,14 +266,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zD11qD2Q5s1_L37",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาน้ำใส & สารละลาย",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Filtration",
-      "Funnel"
-    ],
+    "tags": ["ยาน้ำใส & สารละลาย", "Product", "Compounding", "OSPE", "Filtration", "Funnel"],
     "description": "ขั้นตอนการประกอบชุดกรอง (Funnel, Filter paper, Receiving vessel) การทำให้กระดาษกรองเปียกด้วยตัวทำละลายก่อนกรอง และเทคนิคการรินของเหลวผ่านแท่งแก้วกวน",
     "keyPoints": [
       "🎯 หลักการ: กรองเพื่อแยกอนุภาคของแข็งที่ไม่ละลายหรือสิ่งแปลกปลอมออกจากสารละลายใส (Clarification)",
@@ -382,13 +287,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zD11_2qD2Q5s1_L38",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาน้ำใส & สารละลาย",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Plain filter"
-    ],
+    "tags": ["ยาน้ำใส & สารละลาย", "Product", "Compounding", "OSPE", "Plain filter"],
     "description": "สาธิตการพับกระดาษกรองทรงกรวยแบบเรียบ (Plain / Simple filter) สำหรับงานกรองทั่วไปที่ต้องการเก็บตะกอนหรือกรองสารละลายปริมาณน้อย",
     "keyPoints": [
       "🎯 หลักการ: พับครึ่งวงกลม 2 ครั้ง ฉีกมุมปลายกระดาษชั้นนอกเล็กน้อย เพื่อให้แนบสนิทกับผิวด้านในของกรวยกรอง",
@@ -409,14 +308,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zD11_3qD2Q5s1_L39",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาน้ำใส & สารละลาย",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Plaited filter",
-      "Fluted filter"
-    ],
+    "tags": ["ยาน้ำใส & สารละลาย", "Product", "Compounding", "OSPE", "Plaited filter", "Fluted filter"],
     "description": "สาธิตการพับกระดาษกรองแบบจีบ (Plaited / Fluted filter) เพื่อเพิ่มพื้นที่ผิวในการกรอง (Surface area) และช่วยให้อากาศไหลเวียน ทำให้อัตราการกรองรวดเร็วขึ้นอย่างมาก",
     "keyPoints": [
       "🎯 หลักการ: การพับจีบสลับฟันปลาช่วยลดการแนบติดผนังกรวย เกิดช่องว่างให้อากาศถ่ายเท ทำให้ของเหลวไหลผ่านเร็วขึ้น",
@@ -437,14 +329,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zD12qD2Q5s1_L40",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "การบด ผสม & หลอม",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Geometric dilution",
-      "Trituration"
-    ],
+    "tags": ["การบด ผสม & หลอม", "Product", "Compounding", "OSPE", "Geometric dilution", "Trituration"],
     "description": "ขั้นตอนการผสมผงยาตั้งแต่ 2 ชนิดขึ้นไปในโกร่ง โดยใช้หลักการผสมแบบทวีคูณ (Geometric Dilution) เพื่อให้ตัวยาปริมาณน้อยกระจายตัวอย่างสม่ำเสมอทั่วทั้งตำรับ",
     "keyPoints": [
       "🎯 หลักการ: เริ่มต้นจากตัวยาที่มีปริมาณน้อยที่สุด แล้วเติมผงยาตัวเติม (Diluent) ในปริมาณที่เท่ากัน ผสมจนเข้ากัน แล้วจึงเติมผงยาเพิ่มขึ้นทีละเท่าตัว (1:1 -> 2:2 -> 4:4)",
@@ -465,14 +350,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zD13qD2Q5s1_L41",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "การบด ผสม & หลอม",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Spatulation",
-      "Ointment slab"
-    ],
+    "tags": ["การบด ผสม & หลอม", "Product", "Compounding", "OSPE", "Spatulation", "Ointment slab"],
     "description": "การผสมผงยาหรือสารเคมีบนแผ่นกระเบื้องผสมยา (Ointment slab / Tile) โดยใช้ใบมีด Spatula เหมาะสำหรับสารที่ไม่ต้องการแรงกดบดมาก หรือสารที่อาจหลอมเหลวเมื่อถูกเสียดสี (Eutectic mixture)",
     "keyPoints": [
       "🎯 หลักการ: ใช้แรงเฉือนและปาดเกลี่ยของ Spatula เพื่อผสมผงยาเข้าด้วยกันโดยไม่เกิดแรงกดอัดรุนแรง",
@@ -493,14 +371,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zD14qD2Q5s1_L42",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาครีม ขี้ผึ้ง & เพสต์",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Levigation",
-      "Ointment"
-    ],
+    "tags": ["ยาครีม ขี้ผึ้ง & เพสต์", "Product", "Compounding", "OSPE", "Levigation", "Ointment"],
     "description": "สาธิตการบดลดขนาดผงยาของแข็งที่ไม่ละลายด้วยสารช่วยบดเปียก (Levigating agent เช่น Mineral oil, Glycerin) บน Ointment slab ก่อนผสมเข้ากับ Base ยาขี้ผึ้งหรือครีม",
     "keyPoints": [
       "🎯 หลักการ: เลือก Levigating agent ที่เข้ากันได้กับ Base (ถ้า Base เป็นน้ำมัน/Oleaginous ใช้ Mineral oil, ถ้า Base เป็น Water-washable/Cream ใช้ Glycerin หรือ Propylene glycol)",
@@ -521,14 +392,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zD15qD2Q5s1_L43",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาน้ำใส & สารละลาย",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Pouring technique",
-      "Label protection"
-    ],
+    "tags": ["ยาน้ำใส & สารละลาย", "Product", "Compounding", "OSPE", "Pouring technique", "Label protection"],
     "description": "เทคนิคการรินของเหลวออกจากขวดสต็อกสารเคมีหรือขวดยา โดยหันฉลากยาเข้าหาฝ่ามือเพื่อป้องกันหยดสารเคมีไหลเปื้อนทำลายข้อความบนฉลาก",
     "keyPoints": [
       "🎯 หลักการ: จับขวดสารเคมีโดยให้ฝ่ามือทาบปิดทับฉลากยา (Label facing the palm) ตลอดเวลาขณะรินสาร",
@@ -549,13 +413,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC00_intro",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ภาพรวม & หลักสูตร",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Introduction"
-    ],
+    "tags": ["ภาพรวม & หลักสูตร", "Product", "Compounding", "OSPE", "Introduction"],
     "description": "แนะนำโครงสร้างบทเรียน วัตถุประสงค์การฝึกทักษะปฏิบัติการเตรียมยาเฉพาะคราว (Extemporaneous Compounding) และเกณฑ์การประเมินมาตรฐานทางเภสัชกรรม",
     "keyPoints": [
       "🎯 หลักการ: มุ่งเน้นความถูกต้อง แม่นยำ ความสะอาด ปลอดภัย และการปฏิบัติตาม Good Compounding Practices",
@@ -576,13 +434,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC01_balance",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "การชั่งตวง & Aliquot",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Balance equipment"
-    ],
+    "tags": ["การชั่งตวง & Aliquot", "Product", "Compounding", "OSPE", "Balance equipment"],
     "description": "ภาพรวมเครื่องชั่งแบบต่างๆ ที่ใช้ในงานเภสัชกรรม อุปกรณ์ประกอบการชั่ง การดูแลรักษา และการสอบเทียบความไวเครื่องชั่ง (Sensitivity Requirement)",
     "keyPoints": [
       "🎯 หลักการ: ทำความเข้าใจค่าพิกัดน้ำหนักสูงสุด (Capacity) และค่าความไว (Sensitivity) เพื่อคำนวณ Minimum Weighable Quantity",
@@ -603,13 +455,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC02_1_aliquot_ss",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "การชั่งตวง & Aliquot",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Aliquot Solid in Solid"
-    ],
+    "tags": ["การชั่งตวง & Aliquot", "Product", "Compounding", "OSPE", "Aliquot Solid in Solid"],
     "description": "กรณีศึกษาและตัวอย่างการคำนวณการเตรียมผงยาปริมาณน้อย เช่น Atropine sulfate หรือ Digitoxin ในผงยาแบ่งซอง โดยการผสมแบบ Solid in Solid Aliquot",
     "keyPoints": [
       "🎯 หลักการ: คำนวณหาปริมาณตัวยาที่ต้องชั่งจริง (Drug weighed ≥ LWQ), ปริมาณ Diluent ที่ต้องเติม, และน้ำหนัก Aliquot portion ที่ต้องตักมาใช้",
@@ -630,13 +476,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC02_2_aliquot_sl",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "การชั่งตวง & Aliquot",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Aliquot Solid in Liquid"
-    ],
+    "tags": ["การชั่งตวง & Aliquot", "Product", "Compounding", "OSPE", "Aliquot Solid in Liquid"],
     "description": "ตัวอย่างการเตรียมยาน้ำใสหรือยาน้ำเชื่อมที่ต้องใช้ตัวยาของแข็งปริมาณน้อยมาก โดยใช้วิธีละลายตัวยาในน้ำแล้วตวงสารละลายส่วนแบ่ง",
     "keyPoints": [
       "🎯 หลักการ: ละลายตัวยาของแข็งที่ชั่งได้ (≥ LWQ) ในตัวทำละลายปริมาตรที่แน่นอน แล้วตวงสารละลาย Aliquot มาผสมในตำรับ",
@@ -657,13 +497,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC02_3_aliquot_ll",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "การชั่งตวง & Aliquot",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Aliquot Liquid in Liquid"
-    ],
+    "tags": ["การชั่งตวง & Aliquot", "Product", "Compounding", "OSPE", "Aliquot Liquid in Liquid"],
     "description": "การเตรียมของเหลวปริมาณน้อยมาก เช่น สีผสมยา กลิ่นผสมยา หรือสารละลายสารเข้มข้น โดยเจือจางของเหลวต้นทางกับตัวทำละลาย",
     "keyPoints": [
       "🎯 หลักการ: ตวงของเหลวเข้มข้นในปริมาตรที่ตวงได้แม่นยำ (≥ Least measurable volume) ผสมกับตัวทำละลาย แล้วตวงส่วนแบ่ง",
@@ -684,15 +518,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC03_1_solutions",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาน้ำใส & สารละลาย",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Solutions",
-      "Syrup",
-      "Elixir"
-    ],
+    "tags": ["ยาน้ำใส & สารละลาย", "Product", "Compounding", "OSPE", "Solutions", "Syrup", "Elixir"],
     "description": "หลักการเตรียมยาน้ำใส สารละลาย ยาน้ำเชื่อม (Syrups) และยาน้ำอิลิกเซอร์ (Elixirs) การละลายสารช่วยและตัวยาสำคัญ การปรับแต่งรส กลิ่น สี และการกรองใส",
     "keyPoints": [
       "🎯 หลักการ: ตัวยาต้องละลายเป็นโมเลกุลเดี่ยวในตัวทำละลายอย่างสมบูรณ์ ไม่มีอนุภาคของแข็งแขวนลอย",
@@ -713,14 +539,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC03_2_saturated",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาน้ำใส & สารละลาย",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "SSKI",
-      "Saturated Solution"
-    ],
+    "tags": ["ยาน้ำใส & สารละลาย", "Product", "Compounding", "OSPE", "SSKI", "Saturated Solution"],
     "description": "การเตรียมสารละลายอิ่มตัว เช่น Saturated Potassium Iodide Solution (SSKI) เทคนิคการเร่งการละลาย และการป้องกันการตกผลึกกลับคืนเมื่ออุณหภูมิเปลี่ยนแปลง",
     "keyPoints": [
       "🎯 หลักการ: ตัวยาละลายจนถึงขีดจำกัดความสามารถในการละลายสูงสุดที่อุณหภูมิห้อง",
@@ -741,14 +560,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC03_3_percolation",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาน้ำใส & สารละลาย",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Tincture",
-      "Percolation"
-    ],
+    "tags": ["ยาน้ำใส & สารละลาย", "Product", "Compounding", "OSPE", "Tincture", "Percolation"],
     "description": "กระบวนการสกัดสารสำคัญจากพืชสมุนไพรแห้งด้วยวิธีไหลซึมผ่าน (Percolation) เพื่อเตรียมทิงเจอร์หรือสารสกัดเหลว การเตรียมคอลัมน์ Percolator และการควบคุมอัตราการไหล",
     "keyPoints": [
       "🎯 หลักการ: หมักผงยาให้พองตัว (Imbibition) ด้วย Menstruum ก่อนบรรจุลง Percolator แล้วปล่อยให้ตัวทำละลายไหลผ่านช้าๆ",
@@ -769,14 +581,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC03_4_gowning",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาปราศจากเชื้อ & ยาหยอดตา",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Sterile gowning",
-      "Cleanroom"
-    ],
+    "tags": ["ยาปราศจากเชื้อ & ยาหยอดตา", "Product", "Compounding", "OSPE", "Sterile gowning", "Cleanroom"],
     "description": "ลำดับขั้นตอนการแต่งกายปลอดเชื้อ (Gowning procedure) ตามมาตรฐาน Cleanroom: การสวมหมวกคลุมผม หน้ากากอนามัย ถุงคลุมรองเท้า ชุดกาวน์ปลอดเชื้อ และถุงมือสเตอร์ไรล์",
     "keyPoints": [
       "🎯 หลักการ: แต่งกายจากส่วนบนลงส่วนล่าง (Top to Bottom): หมวก -> หน้ากาก -> ล้างมือ -> ชุดกาวน์ -> ถุงคลุมรองเท้า -> ถุงมือปลอดเชื้อ",
@@ -797,14 +602,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC03_5_aseptic",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาปราศจากเชื้อ & ยาหยอดตา",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Aseptic technique",
-      "Laminar air flow"
-    ],
+    "tags": ["ยาปราศจากเชื้อ & ยาหยอดตา", "Product", "Compounding", "OSPE", "Aseptic technique", "Laminar air flow"],
     "description": "เทคนิคการปฏิบัติงานในตู้ปลอดเชื้อ (Laminar Airflow Hood / Biosafety Cabinet) การเช็ดแอลกอฮอล์ 70% การจัดวางอุปกรณ์ไม่บังทิศทางลม (Direct airflow) และเทคนิคการดูดฉีดยา",
     "keyPoints": [
       "🎯 หลักการ: วัตถุปลอดเชื้อต้องได้รับลมบริสุทธิ์ (First air) ตลอดเวลา ห้ามมีสิ่งกีดขวางระหว่าง HEPA filter กับ Critical site",
@@ -825,14 +623,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC03_6_ophthalmic",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาปราศจากเชื้อ & ยาหยอดตา",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Fortified eye drops",
-      "Ophthalmic"
-    ],
+    "tags": ["ยาปราศจากเชื้อ & ยาหยอดตา", "Product", "Compounding", "OSPE", "Fortified eye drops", "Ophthalmic"],
     "description": "การเตรียมยาหยอดตาเข้มข้นพิเศษ (Fortified Ophthalmic Solutions เช่น Cefazolin, Tobramycin, Vancomycin) จากยาฉีดผงแห้ง การคำนวณการเจือจาง และการกรองฆ่าเชื้อผ่าน 0.22 micron membrane filter",
     "keyPoints": [
       "🎯 หลักการ: ยาหยอดตาต้องปราศจากเชื้อ (Sterile), มีค่าความดันออสโมติกใกล้เคียงน้ำตา (Isotonicity) และ pH เหมาะสม",
@@ -853,15 +644,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC04_1_adsorbent",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาน้ำแขวนตะกอน & อิมัลชัน",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Suspension",
-      "Kaolin",
-      "Adsorbent"
-    ],
+    "tags": ["ยาน้ำแขวนตะกอน & อิมัลชัน", "Product", "Compounding", "OSPE", "Suspension", "Kaolin", "Adsorbent"],
     "description": "การเตรียมยาน้ำแขวนตะกอนที่มีผงยาดูดซับปริมาณสูง เช่น Kaolin-Pectin Suspension เทคนิคการเปียกผงยา (Wetting) และการป้องกันการเกิด Caking",
     "keyPoints": [
       "🎯 หลักการ: ผงยาดูดซับไม่ชอบน้ำ (Hydrophobic) ต้องใช้สารช่วยเปียก (Wetting agent) หรือกวนบดกับของเหลวหนืดก่อนกระจายตัว",
@@ -882,14 +665,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC04_2_hpmc",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาน้ำแขวนตะกอน & อิมัลชัน",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "HPMC",
-      "Suspending agent"
-    ],
+    "tags": ["ยาน้ำแขวนตะกอน & อิมัลชัน", "Product", "Compounding", "OSPE", "HPMC", "Suspending agent"],
     "description": "เทคนิคการเตรียม Mucilage ของ Hydroxypropyl Methylcellulose (HPMC) โดยใช้วิธี Hot-Cold technique (กระจายในน้ำร้อน แล้วละลายในน้ำเย็น) เพื่อป้องกันการจับตัวเป็นก้อนแป้งเปียก (Lump)",
     "keyPoints": [
       "🎯 หลักการ: HPMC ไม่ละลายในน้ำร้อนแต่จะกระจายตัวได้ดี เมื่ออุณหภูมิลดลงโมเลกุลจะพองตัวและละลายเป็นสารละลายหนืดใส",
@@ -910,14 +686,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC04_3_scmc",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาน้ำแขวนตะกอน & อิมัลชัน",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "SCMC",
-      "Sodium CMC"
-    ],
+    "tags": ["ยาน้ำแขวนตะกอน & อิมัลชัน", "Product", "Compounding", "OSPE", "SCMC", "Sodium CMC"],
     "description": "การเตรียมสารช่วยแขวนตะกอน Sodium Carboxymethylcellulose (SCMC) โดยการโรยผงยาช้าๆ บนผิวน้ำที่กำลังกวน เพื่อให้พองตัวและเพิ่มความหนืดตามต้องการ",
     "keyPoints": [
       "🎯 หลักการ: SCMC เป็น Anionic polymer ละลายได้ในน้ำเย็นและน้ำอุ่น แต่ต้องการเวลาในการ Hydration",
@@ -938,14 +707,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC04_4_veegum",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาน้ำแขวนตะกอน & อิมัลชัน",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Veegum",
-      "Magnesium Aluminum Silicate"
-    ],
+    "tags": ["ยาน้ำแขวนตะกอน & อิมัลชัน", "Product", "Compounding", "OSPE", "Veegum", "Magnesium Aluminum Silicate"],
     "description": "การเตรียมสารแขวนตะกอนกลุ่มดินเหนียวอนินทรีย์ Magnesium Aluminum Silicate (Veegum / MAS) โดยการ Hydrate ในน้ำร้อนและการสร้างโครงสร้าง Thixotropic gel",
     "keyPoints": [
       "🎯 หลักการ: อนุภาค Veegum จะพองตัวและสร้างโครงสร้างร่างแหแบบ House of cards เมื่ออยู่นิ่งจะหนืด แต่เมื่อเขย่าจะเหลวรินง่าย (Thixotropy)",
@@ -966,14 +728,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC04_5_tablet_susp",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาน้ำแขวนตะกอน & อิมัลชัน",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Crushed tablets",
-      "Extemporaneous"
-    ],
+    "tags": ["ยาน้ำแขวนตะกอน & อิมัลชัน", "Product", "Compounding", "OSPE", "Crushed tablets", "Extemporaneous"],
     "description": "ขั้นตอนการบดยาเม็ดสำเร็จรูป (Commercial tablets เช่น Spironolactone, Captopril) เพื่อนำมาเตรียมเป็นยาน้ำสำหรับเด็กหรือผู้ป่วยให้อาหารทางสายยาง",
     "keyPoints": [
       "🎯 หลักการ: คำนวณจำนวนเม็ดยาที่ต้องการ บดเม็ดยาในโกร่งให้ละเอียดเนียนที่สุด และเลือก Vehicle (เช่น Ora-Plus/Ora-Sweet 1:1 หรือ Simple Syrup + Suspending agent)",
@@ -994,13 +749,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC04_6_capsule_susp",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาน้ำแขวนตะกอน & อิมัลชัน",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Capsule compounding"
-    ],
+    "tags": ["ยาน้ำแขวนตะกอน & อิมัลชัน", "Product", "Compounding", "OSPE", "Capsule compounding"],
     "description": "การแกะเปลือกแคปซูล รวบรวมผงยา และการผสมกับสารช่วยแขวนตะกอนเพื่อตั้งสูตรยาน้ำแขวนตะกอนเฉพาะคราว",
     "keyPoints": [
       "🎯 หลักการ: แกะเปลือกแคปซูลอย่างระมัดระวัง เคาะผงยาออกจากปลอกให้หมด ชั่งน้ำหนักเพื่อตรวจสอบความครบถ้วน",
@@ -1021,15 +770,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC04_7_dry_gum",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาน้ำแขวนตะกอน & อิมัลชัน",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Dry gum",
-      "Continental method",
-      "4:2:1"
-    ],
+    "tags": ["ยาน้ำแขวนตะกอน & อิมัลชัน", "Product", "Compounding", "OSPE", "Dry gum", "Continental method", "4:2:1"],
     "description": "การเตรียม Primary Emulsion ชนิด O/W ด้วยวิธี Dry Gum (Continental Method) โดยใช้อัตราส่วนคงที่ น้ำมัน : น้ำ : กัม (Oil : Water : Gum = 4 : 2 : 1 สำหรับ Fixed oil)",
     "keyPoints": [
       "🎯 หลักการ: นำ Gum (Acacia) ผสมกับ น้ำมัน (Oil) ในโกร่งแห้งสนิทก่อน แล้วจึงเติม น้ำ (Water) ทั้งหมด 2 ส่วนในคราวเดียว แล้วกวนเร็วแรงในทิศทางเดียว",
@@ -1050,15 +791,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC04_8_wet_gum",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาน้ำแขวนตะกอน & อิมัลชัน",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Wet gum",
-      "English method",
-      "4:2:1"
-    ],
+    "tags": ["ยาน้ำแขวนตะกอน & อิมัลชัน", "Product", "Compounding", "OSPE", "Wet gum", "English method", "4:2:1"],
     "description": "การเตรียม Primary Emulsion ด้วยวิธี Wet Gum (English Method) โดยผสม กัม + น้ำ ให้เกิด Mucilage ก่อน แล้วค่อยๆ หยดเติมน้ำมันทีละน้อย",
     "keyPoints": [
       "🎯 หลักการ: อัตราส่วน 4 : 2 : 1 เริ่มต้นด้วยการทำ Mucilage จาก Gum 1 ส่วน + Water 2 ส่วน บดจนเหนียว จากนั้นค่อยๆ เติม Oil 4 ส่วนทีละน้อยพร้อมกวนตลอดเวลา",
@@ -1079,14 +812,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC05_1_beaker_cream",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาครีม ขี้ผึ้ง & เพสต์",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Beaker method",
-      "Cream"
-    ],
+    "tags": ["ยาครีม ขี้ผึ้ง & เพสต์", "Product", "Compounding", "OSPE", "Beaker method", "Cream"],
     "description": "การเตรียมยาครีมอิมัลชัน (O/W หรือ W/O Cream) ด้วยวิธี Beaker Method โดยหลอม Phase น้ำมันใน Beaker หนึ่ง และต้ม Phase น้ำในอีก Beaker หนึ่ง ที่อุณหภูมิประมาณ 70-75°C แล้วเทรวมกัน",
     "keyPoints": [
       "🎯 หลักการ: ควบคุมอุณหภูมิของทั้งสอง Phase ให้เท่ากันหรือใกล้เคียงกัน (Phase น้ำควรสูงกว่า Phase น้ำมันประมาณ 2-3°C เพื่อป้องกันไขมันแข็งตัวจับก้อน)",
@@ -1107,14 +833,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC05_2_fusion_oint",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาครีม ขี้ผึ้ง & เพสต์",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Fusion method",
-      "Ointment"
-    ],
+    "tags": ["ยาครีม ขี้ผึ้ง & เพสต์", "Product", "Compounding", "OSPE", "Fusion method", "Ointment"],
     "description": "การเตรียมยาขี้ผึ้งที่มีสารพื้นหลายชนิดที่มีจุดหลอมเหลวต่างกัน (เช่น White wax, Cetyl alcohol, Vaseline) โดยการหลอมรวมกันบน Water bath",
     "keyPoints": [
       "🎯 หลักการ: หลอมสารที่มีจุดหลอมเหลวสูงที่สุด (Highest melting point) ก่อน จากนั้นจึงใส่สารที่มีจุดหลอมเหลวต่ำลงมาตามลำดับ",
@@ -1135,13 +854,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC05_3_soluble_active",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาครีม ขี้ผึ้ง & เพสต์",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Active incorporation"
-    ],
+    "tags": ["ยาครีม ขี้ผึ้ง & เพสต์", "Product", "Compounding", "OSPE", "Active incorporation"],
     "description": "การผสมตัวยาสำคัญที่สามารถละลายได้ใน Phase น้ำหรือ Phase น้ำมัน เข้ากับยาพื้นขี้ผึ้งหรือครีมที่เตรียมไว้แล้วอย่างถูกต้องตามหลักชีวเภสัชกรรม",
     "keyPoints": [
       "🎯 หลักการ: ละลายตัวยาสำคัญในตัวทำละลายที่เหมาะสมปริมาณน้อยที่สุดก่อนนำไป Incorporate กับ Base",
@@ -1162,14 +875,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC05_4_pastes",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาครีม ขี้ผึ้ง & เพสต์",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Zinc oxide paste",
-      "Pastes"
-    ],
+    "tags": ["ยาครีม ขี้ผึ้ง & เพสต์", "Product", "Compounding", "OSPE", "Zinc oxide paste", "Pastes"],
     "description": "การเตรียมเภสัชภัณฑ์กึ่งแข็งชนิดเพสต์ ซึ่งมีปริมาณผงยาของแข็งสูงมาก (มัก > 20-50% เช่น Zinc Oxide Paste, Lassar's Paste) ทำให้มีความแข็งและเหนียวหนาแน่นสูง",
     "keyPoints": [
       "🎯 หลักการ: เพสต์มีสัดส่วนผงยาของแข็งสูงมาก ทำหน้าที่ดูดซับของเหลวและปกป้องผิวหนัง จึงต้องบดผงยาให้ละเอียดมากที่สุดเพื่อไม่ให้ระคายเคือง",
@@ -1190,15 +896,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC06_1_natural_gel",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาเจล & เจลลี่",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Natural gum gel",
-      "Tragacanth",
-      "Alginate"
-    ],
+    "tags": ["ยาเจล & เจลลี่", "Product", "Compounding", "OSPE", "Natural gum gel", "Tragacanth", "Alginate"],
     "description": "การเตรียมเจลจากพอลิเมอร์ธรรมชาติ เช่น Tragacanth, Sodium alginate, Gelatin การ Wetting ด้วย Alcohol หรือ Glycerin ก่อนเติมน้ำ และการใส่สารกันเสีย",
     "keyPoints": [
       "🎯 หลักการ: กัมธรรมชาติต้องการการ Hydration และเสี่ยงต่อการเจริญเติบโตของเชื้อจุลินทรีย์สูง จำเป็นต้องใส่ Preservative (เช่น Parabens)",
@@ -1219,15 +917,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC06_2_synthetic_gel",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาเจล & เจลลี่",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Carbomer",
-      "Carbopol",
-      "Neutralization"
-    ],
+    "tags": ["ยาเจล & เจลลี่", "Product", "Compounding", "OSPE", "Carbomer", "Carbopol", "Neutralization"],
     "description": "การเตรียมเจลคาร์โบเมอร์ (Carbomer / Carbopol Gel) การโปรยกระจายผงคาร์โบเมอร์ในน้ำ และกระบวนการปรับสภาพเป็นกลาง (Neutralization) ด้วยด่าง เช่น Triethanolamine (TEA) หรือ NaOH",
     "keyPoints": [
       "🎯 หลักการ: Carbomer เป็นผงกรด (Acidic polymer) เมื่อกระจายในน้ำจะยังเป็นของเหลวใส เมื่อหยดด่าง (Neutralizer) ปรับ pH เป็น ~6-7 โครงสร้างจะคลี่ออกและเกิดเจลใสหนืดทันที",
@@ -1248,14 +938,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC07_1_capsule_punch",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาแคปซูล & ผงแบ่งซอง",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Punch method",
-      "Capsule compounding"
-    ],
+    "tags": ["ยาแคปซูล & ผงแบ่งซอง", "Product", "Compounding", "OSPE", "Punch method", "Capsule compounding"],
     "description": "การบรรจุผงยาลงปลอกแคปซูลแข็งด้วยมือ (Manual Punch Method) การเลือกขนาดแคปซูล (Capsule size 000 ถึง 5) และการคำนวณเติม Diluent ให้เต็มปลอก",
     "keyPoints": [
       "🎯 หลักการ: เลือกขนาดเบอร์แคปซูลให้สัมพันธ์กับน้ำหนักผงยารวม (Size 0 บรรจุได้ประมาณ 500 mg, Size 1 ประมาณ 400 mg, Size 2 ประมาณ 300 mg ขึ้นกับความหนาแน่น)",
@@ -1276,14 +959,7 @@ const COMPOUNDING_VIDEOS = [
     "videoId": "",
     "driveId": "1zDC07_2_semi_capsule",
     "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "ยาแคปซูล & ผงแบ่งซอง",
-      "Product",
-      "Compounding",
-      "OSPE",
-      "Capsule machine",
-      "Semi-automatic"
-    ],
+    "tags": ["ยาแคปซูล & ผงแบ่งซอง", "Product", "Compounding", "OSPE", "Capsule machine", "Semi-automatic"],
     "description": "การใช้เครื่องบรรจุแคปซูลแบบมือโยก/กึ่งอัตโนมัติ (Manual Capsule Filling Machine 100/300 หลุม) การเรียงแคปซูล การเปิดฝา การเกลี่ยผงยา และการกดอัดด้วย Tamper",
     "keyPoints": [
       "🎯 หลักการ: คำนวณผงยารวมสำหรับแคปซูลทั้งหมด เกลี่ยผงยาลงหลุมให้สม่ำเสมอเท่ากันทุกช่องเพื่อความแม่นยำของขนาดยา",
@@ -1292,7 +968,18 @@ const COMPOUNDING_VIDEOS = [
     ],
     "quickTakeaway": "เรียงแคปซูลตรงช่อง เกลี่ยผงยาให้สม่ำเสมอ ใช้ Tamper กดอัด ล็อกปิดแน่นสนิท"
   }
-];
+]
+
+# Generate JavaScript file content
+js_content = """/**
+ * RxCU OSPE Hub — Compounding Videos Database
+ * Domain: Product (เทคนิคเภสัชกรรมและการเตรียมยา)
+ * Source: ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย
+ * Total Videos: 46
+ * Enriched with: Descriptions, Key Principles, High-Yield OSPE Techniques, and Exam Pitfalls
+ */
+
+const COMPOUNDING_VIDEOS = """ + json.dumps(videos_data, ensure_ascii=False, indent=2) + """;
 
 // Expose globally for browser usage
 if (typeof window !== 'undefined') {
@@ -1301,3 +988,9 @@ if (typeof window !== 'undefined') {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = COMPOUNDING_VIDEOS;
 }
+"""
+
+with open("video-data.js", "w", encoding="utf-8") as f:
+    f.write(js_content)
+
+print(f"Successfully generated video-data.js with {len(videos_data)} enriched videos!")
