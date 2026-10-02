@@ -192,6 +192,12 @@ function doGet(e) {
         case 'fixDocSources':
           return buildResponse(fixDocSources(e.parameter.docId, e.parameter.tabId, e.parameter.passcode));
           
+        case 'grantClinicEditor':
+          return buildResponse(grantClinicEditor(e.parameter.passcode));
+          
+        case 'fixClinicCaseStatusTags':
+          return buildResponse(fixClinicCaseStatusTags(e.parameter.passcode));
+          
         default:
           return buildResponse({ error: 'Invalid action parameter' }, 400);
       }
@@ -315,6 +321,117 @@ function fixDocSources(docId, tabId, passcode) {
     totalModified: modified.length,
     modified: modified
   };
+}
+
+function grantClinicEditor(passcode) {
+  if (passcode !== CONFIG.adminPasscode) {
+    return { error: 'Unauthorized: Invalid passcode' };
+  }
+  const email = 'senior-projects@gemini-sheets-editor-497118.iam.gserviceaccount.com';
+  const file = DriveApp.getFileById('1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g');
+  file.addEditor(email);
+  return { success: true, message: 'Granted editor permission on Clinic Doc to ' + email };
+}
+
+function fixClinicCaseStatusTags(passcode) {
+  if (passcode !== CONFIG.adminPasscode) {
+    return { error: 'Unauthorized: Invalid passcode' };
+  }
+  const docId = '1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g';
+  const doc = DocumentApp.openById(docId);
+  const tabs = doc.getTabs();
+  
+  function getFlatTabs(tList) {
+    let res = [];
+    tList.forEach(t => {
+      res.push(t);
+      if (t.getChildTabs) res = res.concat(getFlatTabs(t.getChildTabs()));
+    });
+    return res;
+  }
+  
+  function insertStatusAfter(body, targetP) {
+    if (!targetP) return false;
+    try {
+      const parent = targetP.getParent();
+      const parentBody = (parent && parent.insertParagraph) ? parent : body;
+      const childIdx = parentBody.getChildIndex(targetP);
+      if (childIdx !== -1) {
+        if (childIdx + 1 >= parentBody.getNumChildren()) {
+          parentBody.appendParagraph('- Case status: Active');
+        } else {
+          parentBody.insertParagraph(childIdx + 1, '- Case status: Active');
+        }
+        return true;
+      }
+    } catch (err) {
+      Logger.log('Error insertStatusAfter: ' + err.toString());
+    }
+    return false;
+  }
+  
+  const allTabs = getFlatTabs(tabs);
+  let totalInserted = 0;
+  const log = [];
+  
+  allTabs.forEach(t => {
+    const tabTitle = t.getTitle ? t.getTitle() : 'Untitled';
+    const body = t.asDocumentTab().getBody();
+    const paragraphs = body.getParagraphs();
+    
+    const targetsInTab = [];
+    let currentCaseId = null;
+    let hasStatus = false;
+    let targetP = null;
+    
+    for (let i = 0; i < paragraphs.length; i++) {
+      const p = paragraphs[i];
+      const txt = p.getText().trim();
+      const mCase = txt.match(/^[#\s]*\[(OSPE-[A-Z0-9]+)\]/);
+      
+      if (mCase && !mCase[1].includes('…') && !mCase[1].includes('...')) {
+        if (currentCaseId && !hasStatus && targetP) {
+          targetsInTab.push({ caseId: currentCaseId, p: targetP });
+        }
+        currentCaseId = mCase[1].toUpperCase();
+        hasStatus = false;
+        targetP = null;
+      } else if (currentCaseId) {
+        if (txt.indexOf('##') === 0 && (txt.includes('สถานการณ์') || txt.includes('โจทย์') || txt.includes('ข้อมูลผู้ป่วย'))) {
+          if (!hasStatus && targetP) {
+            targetsInTab.push({ caseId: currentCaseId, p: targetP });
+          }
+          currentCaseId = null;
+          hasStatus = false;
+          targetP = null;
+          continue;
+        }
+        
+        if (txt.toLowerCase().includes('case status') || txt.includes('สถานะเคส')) {
+          hasStatus = true;
+        } else if (txt.includes('แหล่งที่มา') || txt.toLowerCase().includes('source')) {
+          targetP = p;
+        } else if ((txt.includes('วันที่') || txt.includes('date')) && !targetP) {
+          targetP = p;
+        }
+      }
+    }
+    if (currentCaseId && !hasStatus && targetP) {
+      targetsInTab.push({ caseId: currentCaseId, p: targetP });
+    }
+    
+    // Insert in reverse order
+    for (let k = targetsInTab.length - 1; k >= 0; k--) {
+      const item = targetsInTab[k];
+      if (insertStatusAfter(body, item.p)) {
+        totalInserted++;
+        log.push(item.caseId + ' in ' + tabTitle);
+      }
+    }
+  });
+  
+  doc.saveAndClose();
+  return { success: true, totalInserted: totalInserted, log: log };
 }
 
 function getCaseList(params = {}) {
@@ -727,7 +844,7 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
         const text = getParaTxt_(para, currentTabEqs);
         const cm = text.match(/^#+\s*[\[{]([A-Z0-9\-]+)[\]}]/) || text.match(/^[\[{]([A-Z0-9\-]+)[\]}]/);
         if (cm) {
-          if (cm[1].trim() === cleanTarget) { recording = true; currentSection = 'METADATA'; caseSource = ''; }
+          if (cm[1].trim() === cleanTarget) { recording = true; currentSection = 'METADATA'; caseSource = ''; caseStatus = 'Active'; }
           else if (recording) break;
           continue;
         }
@@ -737,6 +854,13 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
           if (text.includes('แหล่งที่มา')) {
             const mSrc = text.match(/แหล่งที่มา\s*:\s*(.*)$/);
             if (mSrc) caseSource = mSrc[1].replace(/\*/g, '').trim();
+          }
+          if (text.toLowerCase().includes('case status') || text.includes('สถานะ')) {
+            const mStat = text.match(/(?:case status|สถานะ(?:เคส)?)\s*:\s*(.*)$/i);
+            if (mStat) {
+              const sVal = mStat[1].toLowerCase().replace(/\*/g, '').trim();
+              caseStatus = (sVal.includes('unactive') || sVal.includes('inactive')) ? 'Unactive' : 'Active';
+            }
           }
         }
 
@@ -808,7 +932,8 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
         equipmentHtml: wrapListItemsInHtml_(equipmentHtml),
         checklist: checklist,
         noteHtml: wrapListItemsInHtml_(noteHtml),
-        source: formatSourceName(cleanTarget, caseSource)
+        source: formatSourceName(cleanTarget, caseSource),
+        caseStatus: caseStatus || 'Active'
       };
     }
   }
@@ -2506,7 +2631,7 @@ function syncCaseLibraryFromDocs() {
       docId: c.docId || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].docId : ''),
       author: c.author || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].author : ''),
       createdDate: c.createdDate || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].createdDate : ''),
-      isActive: (existingCasesMap[c.caseId] && existingCasesMap[c.caseId].isActive !== undefined) ? existingCasesMap[c.caseId].isActive : 'TRUE',
+      isActive: (c.isActive !== undefined && c.isActive !== '') ? c.isActive : ((existingCasesMap[c.caseId] && existingCasesMap[c.caseId].isActive !== undefined) ? existingCasesMap[c.caseId].isActive : 'TRUE'),
       linkedFromCase: c.linkedFromCase || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].linkedFromCase : ''),
       linkedNextCase: existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].linkedNextCase : '',
       source: c.source || (existingCasesMap[c.caseId] ? existingCasesMap[c.caseId].source : '')
@@ -2591,6 +2716,8 @@ function scanDocForCases(docId) {
             let author = '';
             let createdDate = '';
             let caseSource = '';
+            let caseStatus = 'Active';
+            let isActive = 'TRUE';
             let isTableCase = false;
             
             for (let r = 0; r < numRows; r++) {
@@ -2622,6 +2749,15 @@ function scanDocForCases(docId) {
                 createdDate = valText;
               } else if (keyText.includes('แหล่งที่มา') || keyText.includes('source')) {
                 caseSource = valText;
+              } else if (keyText.includes('case status') || keyText.includes('status') || keyText.includes('สถานะ')) {
+                const sVal = valText.toLowerCase().replace(/\*/g, '').trim();
+                if (sVal.includes('unactive') || sVal.includes('inactive') || sVal.includes('draft') || sVal.includes('pending')) {
+                  caseStatus = 'Unactive';
+                  isActive = 'FALSE';
+                } else {
+                  caseStatus = 'Active';
+                  isActive = 'TRUE';
+                }
               }
             }
             
@@ -2644,7 +2780,8 @@ function scanDocForCases(docId) {
                 docId: docId,
                 author: author || 'Unknown',
                 createdDate: createdDate || new Date().toLocaleDateString('th-TH'),
-                isActive: 'TRUE',
+                isActive: isActive,
+                caseStatus: caseStatus,
                 linkedFromCase: linkedFromCase,
                 source: formatSourceName(caseId, caseSource)
               });
@@ -2669,6 +2806,8 @@ function scanDocForCases(docId) {
           let author = '';
           let createdDate = '';
           let caseSource = '';
+          let caseStatus = 'Active';
+          let isActive = 'TRUE';
           
           let j = i + 1;
           while (j < numChildren) {
@@ -2690,7 +2829,7 @@ function scanDocForCases(docId) {
                 break;
               }
               
-              const metaMatch = nextText.match(/^[-*\sข้อมูลเคส]*\s*(หมวด|category|ospe main group|กลุ่มวิชา|course group|mainGroup|โรค\/หัวข้อ|โรค|disease|ระดับ|difficulty|ผู้เขียน|author|วันที่|date|แหล่งที่มา|source)\s*:\s*(.*)$/i);
+              const metaMatch = nextText.match(/^[-*\sข้อมูลเคส]*\s*(หมวด|category|ospe main group|กลุ่มวิชา|course group|mainGroup|โรค\/หัวข้อ|โรค|disease|ระดับ|difficulty|ผู้เขียน|author|วันที่|date|แหล่งที่มา|source|case status|status|สถานะเคส|สถานะ)\s*:\s*(.*)$/i);
               if (metaMatch) {
                 const key = metaMatch[1].toLowerCase();
                 const val = metaMatch[2].trim();
@@ -2710,6 +2849,15 @@ function scanDocForCases(docId) {
                   createdDate = val;
                 } else if (key.includes('แหล่งที่มา') || key.includes('source')) {
                   caseSource = val.replace(/\*/g, '').trim();
+                } else if (key.includes('case status') || key.includes('status') || key.includes('สถานะ')) {
+                  const sVal = val.toLowerCase().replace(/\*/g, '').trim();
+                  if (sVal.includes('unactive') || sVal.includes('inactive') || sVal.includes('draft') || sVal.includes('pending')) {
+                    caseStatus = 'Unactive';
+                    isActive = 'FALSE';
+                  } else {
+                    caseStatus = 'Active';
+                    isActive = 'TRUE';
+                  }
                 }
               }
             }
@@ -2734,7 +2882,8 @@ function scanDocForCases(docId) {
             docId: docId,
             author: author || '',
             createdDate: createdDate || new Date().toLocaleDateString('th-TH'),
-            isActive: 'TRUE',
+            isActive: isActive,
+            caseStatus: caseStatus,
             linkedFromCase: linkedFromCase,
             source: formatSourceName(caseId, caseSource)
           });

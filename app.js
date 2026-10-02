@@ -289,6 +289,15 @@ function initApiConfig() {
   // No-op
 }
 
+// Helper ตรวจสอบความพร้อมของเคส (Active vs Unactive)
+function isCaseActive(c) {
+  if (!c) return false;
+  if (c.isActive === false || c.isActive === 'FALSE' || String(c.isActive).toUpperCase() === 'FALSE') return false;
+  if (c.caseStatus && (String(c.caseStatus).toLowerCase() === 'unactive' || String(c.caseStatus).toLowerCase() === 'inactive')) return false;
+  return true;
+}
+window.isCaseActive = isCaseActive;
+
 // ──────────────────────────────────────────────────────────────
 // 2. Data Fetching & State
 // ──────────────────────────────────────────────────────────────
@@ -298,7 +307,7 @@ async function loadCasesData() {
   const hasFreshOfflineData = typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases && OFFLINE_DATA.cases.length > 0;
   
   if (hasFreshOfflineData) {
-    initialCases = OFFLINE_DATA.cases;
+    initialCases = OFFLINE_DATA.cases.filter(isCaseActive);
     // ซิงก์เก็บลง LocalStorage ให้ตรงกับไฟล์คอมไพล์ล่าสุดเสมอ
     try {
       localStorage.setItem('ospe_cached_case_list', JSON.stringify(initialCases));
@@ -307,7 +316,7 @@ async function loadCasesData() {
     const cachedListStr = localStorage.getItem('ospe_cached_case_list');
     if (cachedListStr) {
       try {
-        initialCases = JSON.parse(cachedListStr);
+        initialCases = JSON.parse(cachedListStr).filter(isCaseActive);
       } catch (e) {
         initialCases = [];
       }
@@ -342,6 +351,7 @@ async function loadCasesData() {
             return offlineMatch ? Object.assign({}, offlineMatch, apiCase) : apiCase;
           });
         }
+        fetchedCases = fetchedCases.filter(isCaseActive);
         
         // บันทึกความเปลี่ยนแปลงลง Cache LocalStorage
         localStorage.setItem('ospe_cached_case_list', JSON.stringify(fetchedCases));
@@ -376,7 +386,7 @@ async function loadCasesData() {
   // Fallback if offline data wasn't loaded at step 1
   if (!AppState.cases || AppState.cases.length === 0) {
     if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
-      AppState.cases = OFFLINE_DATA.cases;
+      AppState.cases = OFFLINE_DATA.cases.filter(isCaseActive);
     } else {
       AppState.cases = [];
     }
@@ -688,6 +698,7 @@ async function forceSyncDatabase() {
             return offlineMatch ? Object.assign({}, offlineMatch, apiCase) : apiCase;
           });
         }
+        fetchedCases = fetchedCases.filter(isCaseActive);
         
         localStorage.setItem('ospe_cached_case_list', JSON.stringify(fetchedCases));
         AppState.cases = fetchedCases;
@@ -702,7 +713,7 @@ async function forceSyncDatabase() {
     
     // Fallback: หาก API ไม่คืนข้อมูล ให้ใช้ฐานข้อมูลในเครื่อง
     if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
-      AppState.cases = OFFLINE_DATA.cases;
+      AppState.cases = OFFLINE_DATA.cases.filter(isCaseActive);
       AppState.dataReady = true;
       AppState.dataReadyCount = AppState.cases.length;
       showApiStatusBanner(true, `⚡ พร้อมใช้งาน (ฐานข้อมูลในเครื่อง ${AppState.cases.length} เคส 0ms)`);
@@ -1538,7 +1549,7 @@ if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
 const DB_NAME = 'RxCU_OSPE_DB';
 const DB_VERSION = 1;
 const STORE_NAME = 'case_details';
-const DB_VERSION_STR = 'v_20261002_231835'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
+const DB_VERSION_STR = 'v_20261003_021957'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
 
 function openIndexedDB() {
   return new Promise((resolve, reject) => {
