@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RxCU OSPE Hub — AI Motion Design Comic Tour (Mock Preview)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&family=DotGothic16&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #e0e7ff;
+      --accent: #ec4899;
+      --chula-pink: #e83e8c;
+      --gold: #f59e0b;
+      --bg: #070a12;
+      --surface: #0f172a;
+      --surface-card: rgba(15, 23, 42, 0.88);
+      --border: rgba(255, 255, 255, 0.12);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-body: 'Prompt', -apple-system, sans-serif;
+      --font-title: 'Bai Jamjuree', sans-serif;
+      --font-pixel: 'DotGothic16', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      perspective: 1200px;
+    }
+
+    /* Fixed Top Navigation */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 58px;
+      background: rgba(7, 10, 18, 0.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      z-index: 1000;
+    }
+
+    .topbar-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+      color: #fff;
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 1.15rem;
+    }
+
+    .badge-live {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(236, 72, 153, 0.25));
+      color: #f472b6;
+      border: 1px solid rgba(236, 72, 153, 0.4);
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* AI Motion Canvas Background Particles */
+    #motion-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Dynamic Camera Stage */
+    #comic-stage {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
+      transform-style: preserve-3d;
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Panels Layout */
+    .comic-panel-section {
+      position: relative;
+      min-height: 92vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5rem 1.5rem;
+      z-index: 10;
+    }
+
+    .comic-panel-frame {
+      position: relative;
+      width: 100%;
+      max-width: 980px;
+      background: var(--surface-card);
+      border: 2px solid var(--border);
+      border-radius: 24px;
+      padding: 2.75rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(99, 102, 241, 0.1);
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      transform-style: preserve-3d;
+    }
+
+    .comic-panel-frame::before {
+      content: attr(data-panel-tag);
+      position: absolute;
+      top: -15px;
+      left: 28px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      font-family: var(--font-pixel);
+      font-size: 0.88rem;
+      padding: 0.3rem 0.9rem;
+      border-radius: 8px;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+    }
+
+    /* Split Grid for Chibi & Dialogue */
+    .comic-split {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 2.5rem;
+      align-items: center;
+    }
+
+    @media (max-width: 840px) {
+      .comic-split {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+    }
+
+    /* AI Motion Chibi Box */
+    .chibi-motion-wrapper {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .chibi-aura-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, rgba(236, 72, 153, 0.15) 50%, transparent 70%);
+      border-radius: 50%;
+      filter: blur(20px);
+      animation: pulseAura 3s ease-in-out infinite alternate;
+      z-index: 1;
+    }
+
+    @keyframes pulseAura {
+      0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.6; }
+      100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+    }
+
+    .chibi-motion-img {
+      position: relative;
+      width: 230px;
+      height: 230px;
+      object-fit: contain;
+      border-radius: 20px;
+      z-index: 2;
+      filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.5));
+      animation: floatCharacter 3.2s ease-in-out infinite alternate;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .chibi-motion-img:hover {
+      transform: scale(1.08) rotate(-2deg);
+    }
+
+    @keyframes floatCharacter {
+      0% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(1.5deg); }
+      100% { transform: translateY(0px) rotate(0deg); }
+    }
+
+    .chibi-badge-tag {
+      margin-top: 1rem;
+      position: relative;
+      z-index: 3;
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0.35rem 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+    }
+
+    /* Comic Speech Balloon with Soundwave SFX */
+    .speech-balloon {
+      position: relative;
+      background: #ffffff;
+      color: #0f172a;
+      border-radius: 20px;
+      padding: 1.75rem 2rem;
+      font-family: var(--font-body);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+      animation: popBalloon 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .speech-balloon::before {
+      content: '';
+      position: absolute;
+      left: -16px;
+      top: 36px;
+      width: 0;
+      height: 0;
+      border-top: 12px solid transparent;
+      border-bottom: 12px solid transparent;
+      border-right: 16px solid #ffffff;
+    }
+
+    @media (max-width: 840px) {
+      .speech-balloon::before {
+        display: none;
+      }
+    }
+
+    @keyframes popBalloon {
+      0% { opacity: 0; transform: scale(0.85) translateY(12px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .balloon-quote {
+      font-size: 1.25rem;
+      font-weight: 700;
+      font-family: var(--font-title);
+      color: #1e1b4b;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .balloon-desc {
+      font-size: 1rem;
+      line-height: 1.65;
+      color: #334155;
+    }
+
+    /* Motion Mini Feature Cards */
+    .feature-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-top: 1.5rem;
+    }
+
+    @media (max-width: 640px) {
+      .feature-grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .feature-mini-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.35rem;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .feature-mini-card:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-4px) scale(1.02);
+      border-color: var(--primary-light);
+    }
+
+    .feature-mini-card h4 {
+      font-family: var(--font-title);
+      font-size: 1.1rem;
+      color: #fff;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .feature-mini-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* Camera Motion States */
+    .cam-pos-hero { transform: rotateX(0deg) rotateY(0deg) translateZ(0); }
+    .cam-pos-p1 { transform: rotateX(2.5deg) rotateY(-5deg) translateX(35px) translateZ(30px); }
+    .cam-pos-p2 { transform: rotateX(-2.5deg) rotateY(6deg) translateX(-35px) translateZ(35px); }
+    .cam-pos-p3 { transform: rotateX(2deg) rotateY(-2deg) translateY(-15px) translateZ(20px); }
+    .cam-pos-credits { transform: rotateX(0deg) rotateY(0deg) translateZ(0); }
+
+    /* Credits Roster */
+    .credits-roster-box {
+      margin-top: 2rem;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 1.75rem;
+    }
+
+    .credits-dept-title {
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--gold);
+      margin-bottom: 0.85rem;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
+      padding-bottom: 0.45rem;
+    }
+
+    .credits-names-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .credit-tag {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 0.35rem 0.75rem;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      color: #f1f5f9;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .credit-tag:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--accent);
+    }
+
+    .credit-tag strong {
+      color: #fff;
+    }
+
+    .credit-tag span {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: rgba(0, 0, 0, 0.35);
+      padding: 0.1rem 0.45rem;
+      border-radius: 6px;
+    }
+
+    /* Action Buttons with AI Motion Glow */
+    .btn-action-glow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+      color: #fff;
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 1.05rem;
+      padding: 0.9rem 2rem;
+      border-radius: 14px;
+      text-decoration: none;
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4), 0 0 20px rgba(236, 72, 153, 0.3);
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .btn-action-glow:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 15px 40px rgba(236, 72, 153, 0.6);
+    }
+
+    .btn-action-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      font-family: var(--font-title);
+      font-weight: 600;
+      font-size: 1.05rem;
+      padding: 0.9rem 2rem;
+      border-radius: 14px;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      transition: all 0.2s ease;
+    }
+
+    .btn-action-secondary:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    /* Camera Direction Indicator Floating Widget */
+    .cam-indicator {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1.1rem;
+      border-radius: 999px;
+      font-family: var(--font-pixel);
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+    }
+
+    .cam-dot {
+      width: 9px;
+      height: 9px;
+      background: #22c55e;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #22c55e;
+      animation: blink 1.2s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- AI Motion Dynamic Canvas Background -->
+  <canvas id="motion-bg"></canvas>
+
+  <!-- Top Navigation -->
+  <nav class="topbar">
+    <a href="#" class="topbar-logo">
+      <span>🥼</span>
+      <span>RxCU OSPE Hub</span>
+    </a>
+    <div style="display: flex; align-items: center; gap: 0.85rem;">
+      <span class="badge-live">✨ AI Motion Comic Mode</span>
+      <a href="case-library.html" class="btn-action-secondary" style="padding: 0.35rem 0.9rem; font-size: 0.85rem;">ข้ามไปคลังเคส</a>
+    </div>
+  </nav>
+
+  <!-- Floating Camera State UI Indicator -->
+  <div class="cam-indicator">
+    <div class="cam-dot"></div>
+    <span id="cam-status-text">AI CAMERA: 00 WIDE ANGLE</span>
+  </div>
+
+  <!-- Main 3D Comic Stage -->
+  <div id="comic-stage" class="cam-pos-hero">
+
+    <!-- ========================================== -->
+    <!-- PANEL 0: HERO OPENING WITH CHIBI SENSEI A -->
+    <!-- ========================================== -->
+    <section class="comic-panel-section" id="panel-hero" data-camera="cam-pos-hero" data-cam-label="PANEL 00: WIDE OPENING">
+      <div class="comic-panel-frame" data-panel-tag="SCENE #00 // WELCOME TO OSPE HUB">
+        <div class="comic-split">
+          
+          <!-- AI Chibi Sensei A with Dynamic Aura -->
+          <div class="chibi-motion-wrapper">
+            <div class="chibi-aura-glow"></div>
+            <img src="assets/chibi/chibi_sensei_a.png" alt="Chibi Sensei A" class="chibi-motion-img">
+            <span class="chibi-badge-tag">👓 อาจารย์ที่ปรึกษา</span>
+          </div>
+
+          <!-- Hero Comic Speech Balloon -->
+          <div>
+            <div class="speech-balloon">
+              <div class="balloon-quote">
+                <span>👋</span>
+                <span>"ยินดีต้อนรับสู่อาณาจักรเตรียมสอบ OSPE ของพวกเรา!"</span>
+              </div>
+              <p class="balloon-desc">
+                แพลตฟอร์มศูนย์กลางการฝึกทักษะวิชาชีพเภสัชกรรม (PLE-CC2 OSPE) สำหรับนิสิตเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย รวบรวมเคสจริง ระบบจำลองห้องสอบเสมือนจริง และคลิปสาธิตเทคนิคครบถ้วน
+              </p>
+            </div>
+
+            <!-- Quick Action Jump Grid -->
+            <div class="feature-grid-2">
+              <div class="feature-mini-card">
+                <h4>🏥 Clinic & Product</h4>
+                <p>รวมเคสซักประวัติ จ่ายยา และตั้งสูตรตำรับกว่า 240 ข้อ</p>
+              </div>
+              <div class="feature-mini-card">
+                <h4>⏱️ 16 สถานี 4 นาที</h4>
+                <p>ระบบจับเวลา 240 วินาทีพร้อมเกณฑ์ประเมิน Rubric สด</p>
+              </div>
+            </div>
+
+            <div style="margin-top: 1.75rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+              <a href="#panel-origin" class="btn-action-glow">👇 เลื่อนลงชมเรื่องราว (Motion Tour)</a>
+              <a href="case-library.html" class="btn-action-secondary">📚 เข้าคลังเคสทันที</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- PANEL 1: ORIGIN & OBJECTIVE -->
+    <!-- ========================================== -->
+    <section class="comic-panel-section" id="panel-origin" data-camera="cam-pos-p1" data-cam-label="PANEL 01: DUTCH ANGLE (PAN LEFT)">
+      <div class="comic-panel-frame" data-panel-tag="SCENE #01 // THE ORIGIN & QUESTIONS">
+        <div class="comic-split">
+          
+          <div class="chibi-motion-wrapper">
+            <div class="chibi-aura-glow" style="background: radial-gradient(circle, rgba(236, 72, 153, 0.35) 0%, transparent 70%);"></div>
+            <img src="assets/chibi/chibi_sensei_a.png" alt="Chibi Sensei A Thinking" class="chibi-motion-img" style="filter: drop-shadow(0 15px 25px rgba(236, 72, 153, 0.4));">
+            <span class="chibi-badge-tag" style="border-color: var(--accent); color: #f472b6;">💡 จุดเริ่มต้นโครงการ</span>
+          </div>
+
+          <div>
+            <div class="speech-balloon">
+              <div class="balloon-quote">
+                <span>🤔</span>
+                <span>"ก่อนสอบ OSPE... เราจะซ้อมเองยังไงให้เห็นภาพเหมือนจริง?"</span>
+              </div>
+              <p class="balloon-desc">
+                นี่คือคำถามสำคัญที่เกิดขึ้นในใจของพวกเราทุกคน! การอ่านหนังสืออย่างเดียวไม่เพียงพอกับการสอบทักษะปฏิบัติ 4 นาทีที่ต้องลงมือจริง พูดจริง และคำนวณจริง... <strong>RxCU OSPE Hub จึงถูกออกแบบขึ้นมาเพื่อเปลี่ยนความกังวลให้กลายเป็นความมั่นใจ!</strong>
+              </p>
+            </div>
+
+            <div class="feature-grid-2">
+              <div class="feature-mini-card" style="border-left: 4px solid var(--primary);">
+                <h4>🧘 ซ้อมคนเดียวได้ (Solo Practice)</h4>
+                <p>เปิดเคสจับเวลา 4 นาที พลิกดูเฉลยและ Rubric ตรวจคำตอบของตัวเองได้ทุกที่ ไม่ต้องรอรวมกลุ่ม</p>
+              </div>
+              <div class="feature-mini-card" style="border-left: 4px solid var(--accent);">
+                <h4>👥 ซ้อมกับเพื่อนได้ (Multiplayer Room)</h4>
+                <p>เปิดห้องจำลองสถานการณ์ สลับบทบาทเป็นผู้สอบ (Examinee) และอาจารย์คุมสอบ (Examiner) ให้คะแนนสดแบบเรียลไทม์</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- PANEL 2: EXAM SIMULATION & CHIBI SENSEI B -->
+    <!-- ========================================== -->
+    <section class="comic-panel-section" id="panel-simulation" data-camera="cam-pos-p2" data-cam-label="PANEL 02: PAN RIGHT & FOCUS">
+      <div class="comic-panel-frame" data-panel-tag="SCENE #02 // 16 STATIONS SIMULATION">
+        <div class="comic-split">
+          
+          <!-- AI Chibi Sensei B (CU Phra Kiao Suit) -->
+          <div class="chibi-motion-wrapper">
+            <div class="chibi-aura-glow" style="background: radial-gradient(circle, rgba(232, 62, 140, 0.35) 0%, rgba(251, 191, 36, 0.2) 60%, transparent 75%);"></div>
+            <img src="assets/chibi/chibi_sensei_b.png" alt="Chibi Sensei B" class="chibi-motion-img" style="filter: drop-shadow(0 15px 25px rgba(232, 62, 140, 0.4));">
+            <span class="chibi-badge-tag" style="background: rgba(232, 62, 140, 0.2); border-color: rgba(232, 62, 140, 0.5); color: #f472b6;">🌸 อาจารย์ที่ปรึกษา</span>
+          </div>
+
+          <div>
+            <div class="speech-balloon">
+              <div class="balloon-quote">
+                <span>⏱️</span>
+                <span>"กริ่งดัง... 4 นาทีต่อสถานี พร้อม Rubric อาจารย์คุมสอบ!"</span>
+              </div>
+              <p class="balloon-desc">
+                จำลองสนามสอบจริง 16 สถานี (Clinic, Product, SAP) สุ่มเคสอัตโนมัติ พร้อมระบบ <strong>โต๊ะสอบย่อย (Breakout Tables)</strong> และ <strong>Super Host Monitor</strong> ให้รุ่นพี่และอาจารย์ช่วยตรวจประเมินได้หลายโต๊ะพร้อมกัน
+              </p>
+            </div>
+
+            <div class="feature-grid-2">
+              <div class="feature-mini-card">
+                <h4>🔔 เสียงกริ่ง & จับเวลาสด</h4>
+                <p>มีเสียงเตือนเมื่อเหลือ 1 นาที และกริ่งหมดเวลา 240 วินาทีแบบสนามสอบจริง</p>
+              </div>
+              <div class="feature-mini-card">
+                <h4>📊 สรุปผลคะแนนทันที</h4>
+                <p>ประมวลผลคะแนนรายข้อ รายหมวดวิชา ชี้จุดที่ต้องปรับปรุงก่อนลงสนามจริง</p>
+              </div>
+            </div>
+
+            <div style="margin-top: 1.75rem;">
+              <a href="exam-simulation.html" class="btn-action-glow">🚪 เข้าสู่ระบบห้องซ้อมสอบ</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- PANEL 3: SPECIAL THANKS & COMPLETE CREDITS -->
+    <!-- ========================================== -->
+    <section class="comic-panel-section" id="panel-credits" data-camera="cam-pos-credits" data-cam-label="PANEL 03: GRAND STAGE CREDITS">
+      <div class="comic-panel-frame" data-panel-tag="SCENE #03 // SPECIAL THANKS & CREDITS">
+        
+        <div style="text-align: center; margin-bottom: 1.75rem;">
+          <h2 style="font-family: var(--font-title); font-size: 1.75rem; color: #fff; margin-bottom: 0.6rem;">
+            💖 "ถ้าไม่มีสตาฟเหล่านี้... ก็จะไม่มีแพลตฟอร์มนี้ขึ้นมา"
+          </h2>
+          <p style="color: var(--text-muted); font-size: 1rem;">
+            ขอขอบคุณพลังและความทุ่มเทของเพื่อนๆ นิสิตคณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพฯ ทุกคน
+          </p>
+        </div>
+
+        <div class="credits-roster-box">
+          
+          <!-- 👑 ฝ่ายบริหาร -->
+          <div class="credits-dept-title">👑 ฝ่ายบริหารและจัดการโครงการ (Management)</div>
+          <div class="credits-names-wrap">
+            <div class="credit-tag"><strong>แม็กนั่ม</strong> <span>ปี 5 • ประธาน & Lead Dev</span></div>
+            <div class="credit-tag"><strong>พอย</strong> <span>ปี 5 • เลขานุการ</span></div>
+            <div class="credit-tag"><strong>ไตเติ้ล</strong> <span>ปี 5 • เหรัญญิก</span></div>
+          </div>
+
+          <!-- 🥼 ฝ่ายวิชาการ CC2 OSPE -->
+          <div class="credits-dept-title">🥼 ฝ่ายวิชาการ PLE-CC2 (OSPE Team)</div>
+          <div class="credits-names-wrap">
+            <div class="credit-tag" style="border-color: var(--accent);"><strong>ไอรีณ</strong> <span>ปี 5 • Head CC2</span></div>
+            <div class="credit-tag" style="border-color: var(--primary);"><strong>กระแต</strong> <span>ปี 5 • Head Clinic CC2</span></div>
+            <div class="credit-tag" style="border-color: var(--gold);"><strong>มิน</strong> <span>ปี 5 • Head Product CC2</span></div>
+            <div class="credit-tag"><strong>ส้ม</strong> <span>ปี 4</span></div>
+            <div class="credit-tag"><strong>มีน</strong> <span>ปี 4</span></div>
+            <div class="credit-tag"><strong>ไอ</strong> <span>ปี 4</span></div>
+            <div class="credit-tag"><strong>เมย์</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>หยก</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>กุ๊กกุ๊ก</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>ดิว</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>ฟ้าใส</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>มดเขียว</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>บอล</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>มิ้นท์</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>กิ๊ฟ</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>เพ้นท์</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>ฟ้า</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>เร้กเก้</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>ตาหวาน</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>ไข่มุก</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>ทิว</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>ดับบลิว</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>ออม</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>นีนนี่</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>ตอง</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>โฟล์ค</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>ยูจีน</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>วีวี่</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>ใบตอง</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>บีเอ็ม</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>ฟาน่า</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>มิ้นท์</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>ตะวัน</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>ป่าน</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>เจแปน</strong> <span>ปี 5</span></div>
+          </div>
+
+          <!-- 🏥 ฝ่ายวิชาการ CC1 MCQ -->
+          <div class="credits-dept-title">🏥 ฝ่ายวิชาการ PLE-CC1 (MCQ Team)</div>
+          <div class="credits-names-wrap">
+            <div class="credit-tag"><strong>Lin</strong> <span>ปี 5 • Head Clinic CC1</span></div>
+            <div class="credit-tag"><strong>ไอซ์</strong> <span>ปี 4</span></div>
+            <div class="credit-tag"><strong>ปอ</strong> <span>ปี 4</span></div>
+            <div class="credit-tag"><strong>ดิว</strong> <span>ปี 4</span></div>
+            <div class="credit-tag"><strong>ปันปัน</strong> <span>ปี 4</span></div>
+            <div class="credit-tag"><strong>อายส์</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>โฟล์ค</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>เดียว</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>เอมมี่</strong> <span>ปี 4</span></div>
+            <div class="credit-tag"><strong>ปาล์มมี่</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>ปิน</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>ฝน</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>ตาต้า</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>จงรัก</strong> <span>ปี 4</span></div>
+            <div class="credit-tag"><strong>ต้นไม้</strong> <span>ปี 4</span></div>
+            <div class="credit-tag"><strong>นาย</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>ฟิวส์</strong> <span>ปี 4</span></div>
+            <div class="credit-tag"><strong>ปิงปิง</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>แน็ท</strong> <span>ปี 5</span></div>
+            <div class="credit-tag"><strong>สุง</strong> <span>ปี 4</span></div>
+          </div>
+
+        </div>
+
+        <div style="margin-top: 2.25rem; text-align: center;">
+          <a href="case-library.html" class="btn-action-glow" style="font-size: 1.15rem; padding: 1rem 2.75rem;">
+            🚀 เริ่มต้นฝึกฝนข้อสอบตอนนี้
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+  </div><!-- /#comic-stage -->
+
+  <!-- Footer Centered Standard -->
+  <footer style="border-top: 1px solid var(--border); padding: 24px 1.5rem; text-align: center; background: rgba(7, 10, 18, 0.96); position: relative; z-index: 50;">
+    <p style="margin-bottom: 0.35rem; font-size: 0.85rem; color: var(--text-muted);">© 2026 คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม (PLE-CC) ปีการศึกษา 2569</p>
+    <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">
+      <strong>RxCU OSPE Hub</strong> · พัฒนาโดย คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพฯ นิสิตเภสัชฯ จุฬาฯ
+    </p>
+  </footer>
+
+  <!-- AI Motion Canvas Particles & Camera Controller Script -->
+  <script>
+    // ─── 1. AI Motion Dynamic Canvas Background Particles ───
+    const canvas = document.getElementById('motion-bg');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2.5 + 0.8;
+        this.speedX = (Math.random() - 0.5) * 0.4;
+        this.speedY = (Math.random() - 0.5) * 0.4 - 0.2;
+        this.opacity = Math.random() * 0.6 + 0.2;
+        this.color = Math.random() > 0.5 ? 'rgba(99, 102, 241, ' : 'rgba(236, 72, 153, ';
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+          this.reset();
+        }
+      }
+      draw() {
+        ctx.fillStyle = this.color + this.opacity + ')';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 45; i++) {
+      particles.push(new Particle());
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // ─── 2. Scroll-Driven 3D Dynamic Camera Pan Controller ───
+    const stage = document.getElementById('comic-stage');
+    const camStatus = document.getElementById('cam-status-text');
+    const panels = document.querySelectorAll('.comic-panel-section');
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '-30% 0px -30% 0px',
+      threshold: 0.2
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const camClass = entry.target.getAttribute('data-camera');
+          const camLabel = entry.target.getAttribute('data-cam-label') || 'ACTIVE SHOT';
+          
+          stage.className = '';
+          if (camClass) {
+            stage.classList.add(camClass);
+          }
+          if (camStatus) {
+            camStatus.textContent = 'AI CAMERA: ' + camLabel;
+          }
+        }
+      });
+    }, observerOptions);
+
+    panels.forEach(panel => observer.observe(panel));
+  </script>
+
+</body>
+</html>

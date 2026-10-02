@@ -1,13 +1,13 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Version: v_20261003_030040
- * Generated on 2026-10-03 03:00:40
+ * Version: v_20261003_040842
+ * Generated on 2026-10-03 04:08:42
  */
 
 const OFFLINE_DATA = {
-  "version": "v_20261003_030040",
-  "generatedAt": "2026-10-03 03:00:40",
-  "totalCases": 361,
+  "version": "v_20261003_040842",
+  "generatedAt": "2026-10-03 04:08:42",
+  "totalCases": 352,
   "cases": [
     {
       "caseId": "OSPE-CL4801",
@@ -475,21 +475,6 @@ const OFFLINE_DATA = {
       "caseStatus": "Active"
     },
     {
-      "caseId": "OSPE-CL5402",
-      "title": "การนับเม็ดยาและเขียนฉลากยา Hypertension",
-      "category": "Clinic",
-      "mainGroup": "การนับเม็ดยาและเขียนฉลากยา",
-      "subTopic": "",
-      "disease": "Hypertension",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "เมย์",
-      "createdDate": "26/07/2026",
-      "source": "ข้อสอบจริง ปี 2554",
-      "isActive": true,
-      "caseStatus": "Active"
-    },
-    {
       "caseId": "OSPE-CL5404",
       "title": "แนะนำวิธีการใช้ยาในผู้ป่วย COPD",
       "category": "Clinic",
@@ -811,21 +796,6 @@ const OFFLINE_DATA = {
       "mainGroup": "การค้นข้อมูลและประสานงาน",
       "subTopic": "",
       "disease": "Lipid profile",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "ฟ้าใส",
-      "createdDate": "03/08/2026",
-      "source": "ข้อสอบจริง ปี 2555",
-      "isActive": true,
-      "caseStatus": "Active"
-    },
-    {
-      "caseId": "OSPE-CL5525",
-      "title": "Drug interaction",
-      "category": "Clinic",
-      "mainGroup": "การค้นข้อมูลและประสานงาน",
-      "subTopic": "",
-      "disease": "Drug interaction",
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้าใส",
@@ -1360,21 +1330,6 @@ const OFFLINE_DATA = {
       "caseStatus": "Active"
     },
     {
-      "caseId": "OSPE-CL6005",
-      "title": "ซักประวัติและจ่ายยาในร้านยา",
-      "category": "Clinic",
-      "mainGroup": "การซักประวัติและจ่ายยา",
-      "subTopic": "",
-      "disease": "ตรวจสอบความถูกต้องของยากับใบสั่งยา",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "มีน",
-      "createdDate": "16/07/2026 (วันที่เขียน)",
-      "source": "ข้อสอบจริง ปี 2560",
-      "isActive": true,
-      "caseStatus": "Active"
-    },
-    {
       "caseId": "OSPE-CL6010",
       "title": "แปลผล lab Thyroid function test",
       "category": "Clinic",
@@ -1480,21 +1435,6 @@ const OFFLINE_DATA = {
       "caseStatus": "Active"
     },
     {
-      "caseId": "OSPE-CL61109",
-      "title": "แปลผล Lab ทางห้องปฏิบัติการและให้คำแนะนำ",
-      "category": "Clinic",
-      "mainGroup": "การค้นข้อมูลและประสานงาน",
-      "subTopic": "",
-      "disease": "",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "กุ๊กกุ๊ก",
-      "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2561",
-      "isActive": true,
-      "caseStatus": "Active"
-    },
-    {
       "caseId": "OSPE-CL61110",
       "title": "เปิดหนังสือ DIS / Gentamicin Y-site Compatibility",
       "category": "Clinic",
@@ -1561,36 +1501,6 @@ const OFFLINE_DATA = {
       "mainGroup": "การซักประวัติและจ่ายยา",
       "subTopic": "",
       "disease": "GERD",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "กุ๊กกุ๊ก",
-      "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2561",
-      "isActive": true,
-      "caseStatus": "Active"
-    },
-    {
-      "caseId": "OSPE-CL61205",
-      "title": "จับผิดใบสั่งยา (Prescription Screening)",
-      "category": "Clinic",
-      "mainGroup": "การตรวจสอบใบสั่งยา",
-      "subTopic": "",
-      "disease": "จับผิดใบสั่งยา",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "กุ๊กกุ๊ก",
-      "createdDate": "02/08/2026",
-      "source": "ข้อสอบจริง ปี 2561",
-      "isActive": true,
-      "caseStatus": "Active"
-    },
-    {
-      "caseId": "OSPE-CL61209",
-      "title": "แปลผล Lab ทางห้องปฏิบัติการ (Total CO2)",
-      "category": "Clinic",
-      "mainGroup": "การค้นข้อมูลและประสานงาน",
-      "subTopic": "",
-      "disease": "",
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "กุ๊กกุ๊ก",
@@ -1726,51 +1636,6 @@ const OFFLINE_DATA = {
       "mainGroup": "การซักประวัติและจ่ายยา",
       "subTopic": "",
       "disease": "Bacterial Pharyngitis",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "ฟ้า เร้กเก้",
-      "createdDate": "3/8/69",
-      "source": "ข้อสอบจริง ปี 2566",
-      "isActive": true,
-      "caseStatus": "Active"
-    },
-    {
-      "caseId": "OSPE-CL6605",
-      "title": "จ่ายยาและอธิบายวิธีการใช้ยา",
-      "category": "Clinic",
-      "mainGroup": "การให้คำแนะนำด้านยา",
-      "subTopic": "",
-      "disease": "Metrotrexate",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "ฟ้า เร้กเก้",
-      "createdDate": "3/8/69",
-      "source": "ข้อสอบจริง ปี 2566",
-      "isActive": true,
-      "caseStatus": "Active"
-    },
-    {
-      "caseId": "OSPE-CL6607",
-      "title": "ซักประวัติ",
-      "category": "Clinic",
-      "mainGroup": "การซักประวัติและจ่ายยา",
-      "subTopic": "",
-      "disease": "เชื้อราในช่องปากจากการใช้สเตียรอยด์พ่นคอ",
-      "difficulty": 2,
-      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "ฟ้า เร้กเก้",
-      "createdDate": "3/8/69",
-      "source": "ข้อสอบจริง ปี 2566",
-      "isActive": true,
-      "caseStatus": "Active"
-    },
-    {
-      "caseId": "OSPE-CL6608",
-      "title": "อธิบายวิธีการใช้ยาคุมกำเนิด",
-      "category": "Clinic",
-      "mainGroup": "การให้คำแนะนำด้านยา",
-      "subTopic": "",
-      "disease": "ยาคุมกำเนิด",
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ฟ้า เร้กเก้",
