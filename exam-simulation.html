@@ -4374,6 +4374,10 @@
         alert('เฉพาะผู้ประเมิน (Examiner) เท่านั้นที่สามารถกดเริ่มการสอบในโหมดนี้ได้ ผู้เข้าสอบกรุณารอผู้ประเมิน');
         return;
       }
+      if (!isStandardMode && !SimState.isHost) {
+        alert('เฉพาะ Super Host เท่านั้นที่สามารถกดเริ่มการสอบในโหมดนี้ได้');
+        return;
+      }
 
       // Situational validation for Cohort Breakout and Carousel Rotation
       if (SimState.isHost && typeof _fbDb !== 'undefined') {
