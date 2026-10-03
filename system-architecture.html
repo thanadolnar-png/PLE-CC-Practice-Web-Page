@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🗺️ แผนผังสถาปัตยกรรมระบบ (System Architecture) | PLE-CC Practice Platform</title>
+  <title>ℹ️ เกี่ยวกับระบบ & การทำงาน | PLE-CC Practice Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <style>
     :root {
@@ -16,13 +16,8 @@
       --text-main: #0f172a;
       --text-sub: #475569;
       --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-      --accent-clinic: #2563eb;
-      --accent-product: #059669;
-      --accent-sap: #d97706;
-      --accent-security: #dc2626;
       --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
-      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07);
     }
 
     body {
@@ -34,14 +29,13 @@
       line-height: 1.6;
     }
 
-    .arch-container {
-      max-width: 1240px;
+    .about-container {
+      max-width: 1040px;
       margin: 0 auto;
       padding: 1.5rem 1rem 4rem 1rem;
     }
 
-    /* Top Nav Banner */
-    .arch-nav-banner {
+    .about-nav-banner {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -53,7 +47,7 @@
       box-shadow: var(--shadow-sm);
     }
 
-    .arch-nav-btn {
+    .about-nav-btn {
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
@@ -68,579 +62,238 @@
       transition: all 0.15s ease;
     }
 
-    .arch-nav-btn:hover {
+    .about-nav-btn:hover {
       background: #dbeafe;
       transform: translateY(-1px);
     }
 
-    /* Hero Header */
-    .arch-hero {
+    .about-hero {
       background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
       color: #ffffff;
       border-radius: 16px;
       padding: 2.25rem 2rem;
       margin-bottom: 2rem;
-      box-shadow: var(--shadow-lg);
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08);
       position: relative;
       overflow: hidden;
     }
 
-    .arch-hero::after {
-      content: '';
-      position: absolute;
-      right: -40px;
-      bottom: -40px;
-      width: 220px;
-      height: 220px;
-      background: radial-gradient(circle, rgba(99,102,241,0.25) 0%, rgba(99,102,241,0) 70%);
-      border-radius: 50%;
-    }
-
-    .arch-hero h1 {
+    .about-hero h1 {
       margin: 0 0 0.5rem 0;
       font-size: 1.85rem;
       font-weight: 800;
       letter-spacing: -0.02em;
     }
 
-    .arch-hero p {
+    .about-hero p {
       margin: 0;
       font-size: 1rem;
       color: #c7d2fe;
       max-width: 750px;
     }
 
-    /* Section Tabs */
-    .arch-tabs {
-      display: flex;
-      gap: 0.5rem;
-      border-bottom: 2px solid #e2e8f0;
-      margin-bottom: 2rem;
-      overflow-x: auto;
-      padding-bottom: 4px;
-    }
-
-    .arch-tab-btn {
-      padding: 0.75rem 1.25rem;
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--text-sub);
-      background: transparent;
-      border: none;
-      border-radius: 8px 8px 0 0;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      white-space: nowrap;
-      transition: all 0.15s ease;
-      border-bottom: 3px solid transparent;
-      margin-bottom: -6px;
-    }
-
-    .arch-tab-btn:hover {
-      color: #4f46e5;
-      background: #f1f5f9;
-    }
-
-    .arch-tab-btn.active {
-      color: #4f46e5;
-      border-bottom-color: #4f46e5;
-      background: #ffffff;
-      box-shadow: var(--shadow-sm);
-    }
-
-    /* Tab Contents */
-    .arch-tab-content {
-      display: none;
-      animation: fadeIn 0.2s ease;
-    }
-
-    .arch-tab-content.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Grid & Cards */
-    .arch-grid {
+    .about-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 1.25rem;
       margin-bottom: 2rem;
     }
 
-    .arch-card {
+    .about-card {
       background: var(--bg-card);
       border: 1px solid var(--border-card);
       border-radius: 12px;
-      padding: 1.25rem;
+      padding: 1.35rem;
       box-shadow: var(--shadow-sm);
-      transition: box-shadow 0.2s ease;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
-    .arch-card:hover {
+    .about-card:hover {
+      transform: translateY(-2px);
       box-shadow: var(--shadow-md);
     }
 
-    .arch-card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 0.85rem;
-      padding-bottom: 0.65rem;
-      border-bottom: 1px solid #f1f5f9;
-    }
-
-    .arch-card-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .arch-badge {
-      font-size: 0.72rem;
-      font-weight: 700;
-      padding: 0.2rem 0.55rem;
-      border-radius: 9999px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .badge-source { background: #e0e7ff; color: #3730a3; }
-    .badge-compiler { background: #fef3c7; color: #92400e; }
-    .badge-runtime { background: #d1fae5; color: #065f46; }
-    .badge-exam { background: #ede9fe; color: #5b21b6; }
-    .badge-security { background: #fee2e2; color: #991b1b; }
-
-    /* Flow Step Boxes */
-    .flow-step-box {
-      display: flex;
-      gap: 1rem;
-      padding: 1rem;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
+    .about-card-icon {
+      width: 44px;
+      height: 44px;
       border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
       margin-bottom: 0.85rem;
-      position: relative;
     }
 
-    .flow-step-num {
-      width: 32px;
-      height: 32px;
-      min-width: 32px;
-      background: #4f46e5;
-      color: #ffffff;
+    .about-card h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .about-card p {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--text-sub);
+      line-height: 1.55;
+    }
+
+    .step-list {
+      list-style: none;
+      padding: 0;
+      margin: 0.75rem 0 0 0;
+    }
+
+    .step-list li {
+      display: flex;
+      gap: 0.65rem;
+      margin-bottom: 0.6rem;
+      font-size: 0.86rem;
+      color: var(--text-sub);
+    }
+
+    .step-list li strong {
+      color: var(--text-main);
+    }
+
+    .step-badge {
+      min-width: 22px;
+      height: 22px;
+      background: #e0e7ff;
+      color: #4338ca;
+      font-size: 0.75rem;
+      font-weight: 700;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 700;
-      font-size: 0.88rem;
-    }
-
-    .flow-step-body h4 {
-      margin: 0 0 0.25rem 0;
-      font-size: 0.95rem;
-      color: var(--text-main);
-    }
-
-    .flow-step-body p {
-      margin: 0;
-      font-size: 0.85rem;
-      color: var(--text-sub);
-    }
-
-    /* Code & Function List Table */
-    .func-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.86rem;
-      margin-top: 1rem;
-      background: #ffffff;
-      border: 1px solid var(--border-card);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .func-table th {
-      background: #f1f5f9;
-      padding: 0.65rem 0.85rem;
-      text-align: left;
-      font-weight: 700;
-      color: #334155;
-      border-bottom: 1px solid #e2e8f0;
-    }
-
-    .func-table td {
-      padding: 0.6rem 0.85rem;
-      border-bottom: 1px solid #f1f5f9;
-      vertical-align: top;
-    }
-
-    .func-table tr:hover td {
-      background: #f8fafc;
-    }
-
-    .code-fn {
-      font-family: 'Fira Code', monospace;
-      color: #4f46e5;
-      font-weight: 600;
-      background: #eef2ff;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.82rem;
-      display: inline-block;
-    }
-
-    .filter-input {
-      width: 100%;
-      padding: 0.55rem 0.85rem;
-      font-size: 0.88rem;
-      border: 1px solid var(--border-card);
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      box-sizing: border-box;
-      outline: none;
-    }
-
-    .filter-input:focus {
-      border-color: #4f46e5;
-      box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
     }
   </style>
 </head>
 <body>
 
-  <div class="arch-container">
+  <div class="about-container">
     
     <!-- Navigation Banner -->
-    <div class="arch-nav-banner">
+    <div class="about-nav-banner">
       <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
-        <span>🏛️ คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม (PLE-CC)</span>
+        <span>🏛️ โครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม (RxCU84/85)</span>
       </div>
       <div style="display: flex; gap: 0.5rem;">
-        <a href="index.html" class="arch-nav-btn">🏠 หน้าหลัก (Home)</a>
-        <a href="case-library.html" class="arch-nav-btn">📚 คลังข้อสอบ (Library)</a>
-        <a href="exam-simulation.html" class="arch-nav-btn">🎮 จำลองสอบ (Simulation)</a>
+        <a href="index.html" class="about-nav-btn">🏠 หน้าหลัก</a>
+        <a href="case-library.html" class="about-nav-btn">📚 คลังข้อสอบ</a>
+        <a href="exam-simulation.html" class="about-nav-btn">🎮 ซ้อมสอบ OSPE</a>
       </div>
     </div>
 
     <!-- Hero Header -->
-    <div class="arch-hero">
-      <h1>🗺️ Master System Architecture & Function Index</h1>
+    <div class="about-hero">
+      <h1>ℹ️ เกี่ยวกับระบบ & การทำงานของแพลตฟอร์ม</h1>
       <p>
-        แผนภาพสถาปัตยกรรมระบบ โครงสร้างข้อมูล และสารบัญฟังก์ชันทั้งหมดของแพลตฟอร์มเตรียมสอบ PLE-CC อธิบายการทำงานแบบครบวงจรตั้งแต่ Google Docs ➔ Compiler ➔ Browser Kernel ➔ Vercel Production
+        แพลตฟอร์มรวบรวมคลังข้อสอบและจำลองการสอบ OSPE สำหรับนิสิตเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย ออกแบบด้วยเทคโนโลยี Offline-First เพื่อความเร็วสูงสุด 0ms ปลอดภัย และพร้อมใช้งานทุกที่ทุกเวลา
       </p>
     </div>
 
-    <!-- Navigation Tabs -->
-    <div class="arch-tabs">
-      <button class="arch-tab-btn active" onclick="switchArchTab('tab-topology')">🌐 1. สถาปัตยกรรมภาพรวม (System Topology)</button>
-      <button class="arch-tab-btn" onclick="switchArchTab('tab-exam-engine')">🎮 2. กลไกจำลองสอบ (Exam Engine)</button>
-      <button class="arch-tab-btn" onclick="switchArchTab('tab-functions')">📋 3. สารบัญฟังก์ชัน (Function Index)</button>
-      <button class="arch-tab-btn" onclick="switchArchTab('tab-security')">🔒 4. การเข้ารหัส (AES-256 Security)</button>
-    </div>
-
-    <!-- TAB 1: System Topology -->
-    <div id="tab-topology" class="arch-tab-content active">
-      <div class="arch-grid">
-        
-        <!-- Card 1: Source Layer -->
-        <div class="arch-card">
-          <div class="arch-card-header">
-            <h3 class="arch-card-title">📊 1. Data Source Layer</h3>
-            <span class="arch-badge badge-source">Cloud Sources</span>
-          </div>
-          <p style="font-size: 0.88rem; color: var(--text-sub); margin-bottom: 0.85rem;">
-            แหล่งเก็บข้อมูลต้นทางสำหรับทีมวิชาการและผู้แต่งข้อสอบ:
-          </p>
-          <div class="flow-step-box">
-            <div class="flow-step-num">A</div>
-            <div class="flow-step-body">
-              <h4>Google Sheets (CaseLibrary)</h4>
-              <p>ทะเบียนข้อสอบ 353 เคส เก็บ Metadata: หมวดวิชา, Course Group, โรค, ผู้แต่ง, แหล่งที่มา, <code>linkedNextCase</code> และ <code>linkedFromCase</code></p>
-            </div>
-          </div>
-          <div class="flow-step-box">
-            <div class="flow-step-num">B</div>
-            <div class="flow-step-body">
-              <h4>Google Docs (4 Master Docs)</h4>
-              <p>เอกสารข้อสอบหลัก แบ่งเป็นหมวด Clinic, Product, SAP และ Mock Secret Cases รวบรวมโจทย์ ข้อมูลคนไข้ Checklist และรูปภาพ</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 2: Build Pipeline -->
-        <div class="arch-card">
-          <div class="arch-card-header">
-            <h3 class="arch-card-title">⚙️ 2. Build Pipeline Layer</h3>
-            <span class="arch-badge badge-compiler">Python Engine</span>
-          </div>
-          <p style="font-size: 0.88rem; color: var(--text-sub); margin-bottom: 0.85rem;">
-            สคริปต์คอมไพเลอร์ที่ประมวลผลข้อมูลลงเป็นฐานข้อมูลออฟไลน์:
-          </p>
-          <div class="flow-step-box">
-            <div class="flow-step-num">1</div>
-            <div class="flow-step-body">
-              <h4>Strict Heading Parser</h4>
-              <p>แยก Section ด้วย Heading แท้ (<code>##</code>, Style Gate) ป้องกันการตัดข้อความมั่วจากย่อหน้าธรรมดา</p>
-            </div>
-          </div>
-          <div class="flow-step-box">
-            <div class="flow-step-num">2</div>
-            <div class="flow-step-body">
-              <h4>Base64 Image Ingestion</h4>
-              <p>ดาวน์โหลดรูปภาพจาก Docs ฝังเป็น Data URI Base64 ทำให้เปิดดูรูปภาพได้แม้ออฟไลน์</p>
-            </div>
-          </div>
-          <div class="flow-step-box">
-            <div class="flow-step-num">3</div>
-            <div class="flow-step-body">
-              <h4>Output: case-data & case-details.js</h4>
-              <p>สร้างไฟล์ดัชนีเคส (~250 KB) และไฟล์รายละเอียดเต็ม (~43 MB) พร้อม Cache-busting version</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 3: Browser Runtime -->
-        <div class="arch-card">
-          <div class="arch-card-header">
-            <h3 class="arch-card-title">⚡ 3. Browser Runtime Layer</h3>
-            <span class="arch-badge badge-runtime">Client Engine</span>
-          </div>
-          <p style="font-size: 0.88rem; color: var(--text-sub); margin-bottom: 0.85rem;">
-            การประมวลผลบนเบราว์เซอร์ของนิสิตและอาจารย์:
-          </p>
-          <div class="flow-step-box">
-            <div class="flow-step-num">0s</div>
-            <div class="flow-step-body">
-              <h4>0ms Instant LocalBoot</h4>
-              <p>โหลดฐานข้อมูลเข้าสู่ <code>AppState.cases</code> ทันทีตั้งแต่เสี้ยววินาทีแรก ไม่ต้องรออินเทอร์เน็ต</p>
-            </div>
-          </div>
-          <div class="flow-step-box">
-            <div class="flow-step-num">4D</div>
-            <div class="flow-step-body">
-              <h4>4D Batch Print Modal</h4>
-              <p>ระบบพิมพ์ข้อสอบหลายเคสพร้อมกัน กรองตาม Category, Course Group, Source และ Search</p>
-            </div>
-          </div>
-          <div class="flow-step-box">
-            <div class="flow-step-num">🔄</div>
-            <div class="flow-step-body">
-              <h4>Live Apps Script Fallback</h4>
-              <p>ปุ่มอัปเดตข้อมูลสดรายข้อ เชื่อมต่อกับ <code>Code.gs</code> ผ่าน Google Apps Script Web App</p>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- TAB 2: Exam Simulation Engine -->
-    <div id="tab-exam-engine" class="arch-tab-content">
-      <div class="arch-card" style="margin-bottom: 1.5rem;">
-        <div class="arch-card-header">
-          <h3 class="arch-card-title">🎮 วงจรการทำงานของระบบจำลองสอบ (Exam Simulation Engine Cycle)</h3>
-          <span class="arch-badge badge-exam">Smart Algorithm</span>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-top: 1rem;">
-          
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-              <span style="background: #4f46e5; color: white; border-radius: 6px; padding: 2px 7px; font-weight: 700; font-size: 0.8rem;">ขั้นที่ 1</span>
-              <strong style="font-size: 0.95rem;">Smart Filtering</strong>
-            </div>
-            <p style="font-size: 0.82rem; color: var(--text-sub); margin: 0;">
-              คัดเลือกเคสตามสัดส่วนหมวดวิชา (Clinic, Product, SAP) และตัวกรองแหล่งที่มาหรือกลุ่มโรคที่ผู้ใช้กำหนด
-            </p>
-          </div>
-
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-              <span style="background: #4f46e5; color: white; border-radius: 6px; padding: 2px 7px; font-weight: 700; font-size: 0.8rem;">ขั้นที่ 2</span>
-              <strong style="font-size: 0.95rem;">Smart Constraints</strong>
-            </div>
-            <p style="font-size: 0.82rem; color: var(--text-sub); margin: 0;">
-              จำกัดไม่ให้กลุ่มโรค (Course Group) ซ้ำเกิน 2 สถานี และชื่อโรคไม่ซ้ำกันเลย (0 Duplicate Topics)
-            </p>
-          </div>
-
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-              <span style="background: #4f46e5; color: white; border-radius: 6px; padding: 2px 7px; font-weight: 700; font-size: 0.8rem;">ขั้นที่ 3</span>
-              <strong style="font-size: 0.95rem;">Cluster Shuffling</strong>
-            </div>
-            <p style="font-size: 0.82rem; color: var(--text-sub); margin: 0;">
-              มัดรวมเคสต่อเนื่อง (เช่น PDSS19 ➔ PDSS20) เป็น Cluster Block เดียวก่อนสับไพ่ รับประกันความต่อเนื่อง 100%
-            </p>
-          </div>
-
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-              <span style="background: #4f46e5; color: white; border-radius: 6px; padding: 2px 7px; font-weight: 700; font-size: 0.8rem;">ขั้นที่ 4</span>
-              <strong style="font-size: 0.95rem;">REST Interleaving</strong>
-            </div>
-            <p style="font-size: 0.82rem; color: var(--text-sub); margin: 0;">
-              แทรกสถานีพัก (REST) ตามรอบที่กำหนด โดยมี Guard Clause ป้องกันไม่ให้แทรกคั่นกลางระหว่างคู่เคสต่อเนื่อง
-            </p>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 3: Function Index -->
-    <div id="tab-functions" class="arch-tab-content">
-      <div class="arch-card">
-        <div class="arch-card-header">
-          <h3 class="arch-card-title">📋 สารบัญฟังก์ชันทั้งหมดในระบบ (Complete Function Index)</h3>
-          <span class="arch-badge badge-runtime">300+ Functions</span>
-        </div>
-        
-        <input type="text" class="filter-input" placeholder="🔍 พิมพ์ชื่อฟังก์ชัน หรือคำอธิบายเพื่อค้นหา..." oninput="filterFuncTable(this.value)">
-
-        <table class="func-table" id="master-func-table">
-          <thead>
-            <tr>
-              <th style="width: 25%;">Function Signature</th>
-              <th style="width: 20%;">ไฟล์ต้นทาง (Source File)</th>
-              <th style="width: 55%;">หน้าที่และการทำงาน (Description)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><span class="code-fn">initOfflineDb()</span></td>
-              <td><code>app.js</code></td>
-              <td>โหลดข้อมูลจาก <code>OFFLINE_DATA.cases</code> และ <code>OFFLINE_CASE_DETAILS</code> เข้าสู่หน่วยความจำ <code>AppState.cases</code> ภายใน 0ms</td>
-            </tr>
-            <tr>
-              <td><span class="code-fn">generateLocalExamSet(c, p, s)</span></td>
-              <td><code>exam-simulation.html</code></td>
-              <td>แกนกลางการสร้างชุดข้อสอบสุ่ม กรองสัดส่วนวิชา ใช้ Smart Constraints และ Cluster Block Shuffling</td>
-            </tr>
-            <tr>
-              <td><span class="code-fn">renderStation(idx)</span></td>
-              <td><code>exam-simulation.html</code></td>
-              <td>เรนเดอร์โจทย์, กล่องข้อมูลผู้ป่วย/อุปกรณ์, ป้ายกำกับ <code>🔗 สถานีต่อเนื่อง</code>, และ Layout ตามบทบาท Examinee/Examiner</td>
-            </tr>
-            <tr>
-              <td><span class="code-fn">quickFillCustomStations(total)</span></td>
-              <td><code>exam-simulation.html</code></td>
-              <td>ปุ่ม "🎲 สุ่มเติมครบ 14 ข้อ" ดึงเคสแบบสุ่มพร้อมพ่วงเคสต่อเนื่อง (Linked Chain) เข้าชุดทันที</td>
-            </tr>
-            <tr>
-              <td><span class="code-fn">openBatchPrintModal()</span></td>
-              <td><code>app.js</code></td>
-              <td>เปิดหน้าต่างสั่งพิมพ์ข้อสอบหลายเคสพร้อมกัน พร้อมประมวลผลตัวกรอง 4 มิติ</td>
-            </tr>
-            <tr>
-              <td><span class="code-fn">populateBatchFilterDropdowns()</span></td>
-              <td><code>app.js</code></td>
-              <td>ดึงรายชื่อกลุ่มวิชา (Course Group) และแหล่งที่มา (Source) มาสร้าง Dropdown ในหน้าต่างพิมพ์แบบไดนามิก</td>
-            </tr>
-            <tr>
-              <td><span class="code-fn">executeBatchPrint()</span></td>
-              <td><code>app.js</code></td>
-              <td>รวมเนื้อหาเคสที่เลือกทั้งหมด จัด Layout หน้าคู่/หน้าคี่ สั่งพิมพ์แยกโจทย์และเฉลยคนละหน้าอัตโนมัติ</td>
-            </tr>
-            <tr>
-              <td><span class="code-fn">loadCaseDetail()</span></td>
-              <td><code>case-viewer.html</code></td>
-              <td>อ่าน Query Parameter <code>?id=...</code> ดึงข้อมูลเคสจาก <code>AppState</code> และเรนเดอร์ลงในหน้าตรวจเคสเดี่ยว</td>
-            </tr>
-            <tr>
-              <td><span class="code-fn">renderChecklist(items)</span></td>
-              <td><code>case-viewer.html</code></td>
-              <td>สร้างตารางประเมิน Checklist รองรับข้อย่อย (Subset) และคิดคะแนนรวมแบบ Real-time</td>
-            </tr>
-            <tr>
-              <td><span class="code-fn">get_case_content_from_doc()</span></td>
-              <td><code>compile_offline_db_python.py</code></td>
-              <td>สกัดข้อมูลโจทย์และเฉลยจาก Google Docs API ด้วย Strict Heading Parser และผูกความสัมพันธ์ Linked Case</td>
-            </tr>
-            <tr>
-              <td><span class="code-fn">BgmManager.play()</span></td>
-              <td><code>app.js</code></td>
-              <td>เล่นเพลงพื้นหลังประจำคณะเภสัชฯ จุฬาฯ ผ่าน Web Audio Context รองรับการปรับระดับเสียง</td>
-            </tr>
-            <tr>
-              <td><span class="code-fn">initAuthGuard()</span></td>
-              <td><code>app.js</code></td>
-              <td>ระบบความปลอดภัยหน้าแรก ตรวจสอบรหัสผ่าน <code>rxcu</code> เพื่อป้องกันการเข้าถึงจากบุคคลภายนอก</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB 4: Security & Encryption -->
-    <div id="tab-security" class="arch-tab-content">
-      <div class="arch-card">
-        <div class="arch-card-header">
-          <h3 class="arch-card-title">🔒 สถาปัตยกรรมการรักษาความปลอดภัย (AES-256-GCM Encryption)</h3>
-          <span class="arch-badge badge-security">Zero-Knowledge</span>
-        </div>
-        <p style="font-size: 0.9rem; color: var(--text-sub); margin-bottom: 1rem;">
-          สำหรับข้อสอบจำลองลับ (Secret Mock Exam 2569) ระบบใช้การเข้ารหัสระดับมาตรฐานกองทัพ เพื่อป้องกันไม่ให้นิสิตแกะดูเฉลยผ่านการ Inspect Code:
+    <!-- 4 Main Pillars -->
+    <div class="about-grid">
+      
+      <!-- Card 1: Data Storage -->
+      <div class="about-card">
+        <div class="about-card-icon" style="background: #eff6ff; color: #2563eb;">📊</div>
+        <h3>1. แหล่งจัดเก็บข้อมูล (Data Sources)</h3>
+        <p>
+          ข้อมูลข้อสอบทั้งหมดได้รับการจัดเตรียมและควบคุมคุณภาพโดยคณะทำงานวิชาการโครงการเตรียมสอบฯ:
         </p>
-
-        <div class="flow-step-box">
-          <div class="flow-step-num">1</div>
-          <div class="flow-step-body">
-            <h4>Build Time Encryption (Python Compiler)</h4>
-            <p>เมื่อพบเคสที่มีรหัสผ่านใน Google Doc ระบบจะสร้าง Salt (16 bytes) และ IV (12 bytes) สุ่ม จากนั้น Derive Key ด้วย <strong>PBKDF2-HMAC-SHA256 (100,000 rounds)</strong> แล้วเข้ารหัสทั้งก้อน JSON ด้วย <strong>AES-256-GCM</strong></p>
-          </div>
-        </div>
-
-        <div class="flow-step-box">
-          <div class="flow-step-num">2</div>
-          <div class="flow-step-body">
-            <h4>Safe Metadata Masking</h4>
-            <p>ในไฟล์ <code>case-data-offline.js</code> ข้อมูลชื่อโรค หัวข้อ และเฉลยจะถูกแทนที่ด้วยข้อความ <code>🔒 ล็อกด้วยรหัสผ่าน (Secret Mock)</code> เพื่อความลับสูงสุด</p>
-          </div>
-        </div>
-
-        <div class="flow-step-box">
-          <div class="flow-step-num">3</div>
-          <div class="flow-step-body">
-            <h4>Client-side Decryption (Web Crypto API)</h4>
-            <p>เมื่ออาจารย์หรือผู้คุมสอบกรอกรหัสผ่านในหน้าเว็บ ฟังก์ชัน <code>decryptCasePayload()</code> จะใช้ Web Crypto API ในเบราว์เซอร์ถอดรหัสออกมาทันที โดยไม่ต้องส่งรหัสผ่านกลับไปที่เซิร์ฟเวอร์</p>
-          </div>
-        </div>
+        <ul class="step-list">
+          <li>
+            <span class="step-badge">1</span>
+            <div><strong>Google Sheets (CaseLibrary):</strong> ทะเบียนคลังข้อสอบ 350+ ข้อ จัดหมวดหมู่ กลุ่มโรค ผู้แต่ง และการเชื่อมโยงสถานี</div>
+          </li>
+          <li>
+            <span class="step-badge">2</span>
+            <div><strong>Google Docs:</strong> เอกสารแม่แบบโจทย์ ข้อมูลผู้ป่วย อุปกรณ์ เกณฑ์ Checklist และเฉลยละเอียด</div>
+          </li>
+        </ul>
       </div>
+
+      <!-- Card 2: Offline-First Engine -->
+      <div class="about-card">
+        <div class="about-card-icon" style="background: #ecfdf5; color: #059669;">⚡</div>
+        <h3>2. การทำงานออฟไลน์ 0ms (Offline-First)</h3>
+        <p>
+          ระบบถูกคอมไพล์ล่วงหน้าเป็นฐานข้อมูลในตัวเว็บเบราว์เซอร์ ทำให้นิสิตเข้าถึงข้อสอบได้ทันที:
+        </p>
+        <ul class="step-list">
+          <li>
+            <span class="step-badge">1</span>
+            <div><strong>โหลดทันที 0ms:</strong> ไม่ต้องรอโหลด API หรือฐานข้อมูลจากภายนอก เปิดเว็บปุ๊บพร้อมฝึกทำข้อสอบได้ทันที</div>
+          </li>
+          <li>
+            <span class="step-badge">2</span>
+            <div><strong>รูปภาพฝังในตัว:</strong> รูปภาพประกอบข้อสอบทั้งหมดถูกแปลงเป็น Base64 เปิดดูได้แม้ไม่มีอินเทอร์เน็ต</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Card 3: Smart Exam Engine -->
+      <div class="about-card">
+        <div class="about-card-icon" style="background: #fdf4ff; color: #a855f7;">🎮</div>
+        <h3>3. ระบบจำลองสอบ OSPE อัจฉริยะ</h3>
+        <p>
+          ระบบสุ่มข้อสอบที่จำลองบรรยากาศห้องสอบจริงตามเกณฑ์ของสภาเภสัชกรรม:
+        </p>
+        <ul class="step-list">
+          <li>
+            <span class="step-badge">1</span>
+            <div><strong>สุ่มกระจายหัวข้อ:</strong> คัดกรองไม่ให้กลุ่มโรคซ้ำเกิน 2 สถานี และชื่อโรคไม่ซ้ำกัน เพื่อความหลากหลาย</div>
+          </li>
+          <li>
+            <span class="step-badge">2</span>
+            <div><strong>สถานีต่อเนื่อง (Linked Cases):</strong> เคสที่ต้องทำต่อเนื่อง (เช่น ชั่ง ➔ ผสม) จะถูกจัดให้อยู่ติดกันเสมอ 100%</div>
+          </li>
+          <li>
+            <span class="step-badge">3</span>
+            <div><strong>สถานีพัก (REST):</strong> คำนวณช่วงการพักตามรอบสอบจริง โดยไม่แทรกคั่นกลางเคสต่อเนื่อง</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Card 4: Cloud Deployment -->
+      <div class="about-card">
+        <div class="about-card-icon" style="background: #fffbeb; color: #d97706;">☁️</div>
+        <h3>4. การเผยแพร่และโฮสติ้ง (Deployment)</h3>
+        <p>
+          เว็บไซต์ทำงานบนคลาวด์มาตรฐานระดับโลก มีความเสถียรและความปลอดภัยสูง:
+        </p>
+        <ul class="step-list">
+          <li>
+            <span class="step-badge">1</span>
+            <div><strong>GitHub Repository:</strong> จัดเก็บซอร์สโค้ดและควบคุมเวอร์ชันอย่างเป็นระบบ</div>
+          </li>
+          <li>
+            <span class="step-badge">2</span>
+            <div><strong>Vercel Edge Network:</strong> Auto-deploy จาก GitHub อัตโนมัติ กระจายเซิร์ฟเวอร์แบบ CDN ทั่วโลก โหลดเร็ว ลื่นไหล ไม่ล่ม</div>
+          </li>
+          <li>
+            <span class="step-badge">3</span>
+            <div><strong>Analytics & Performance:</strong> ตรวจวัดความเร็วและสถิติการใช้งานผ่าน Vercel Insights อย่างปลอดภัย</div>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Security & Privacy Card -->
+    <div class="about-card" style="border-left: 4px solid #4f46e5;">
+      <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+        🔒 ความปลอดภัยและการรักษาความลับข้อสอบ (Security & Privacy)
+      </h3>
+      <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-sub);">
+        สำหรับข้อสอบจำลองลับ (Secret Mock Exam) ข้อมูลจะได้รับการเข้ารหัสด้วยมาตรฐาน <strong>AES-256-GCM + PBKDF2 (100,000 rounds)</strong> และถอดรหัสผ่าน Web Crypto API ภายในเครื่องของผู้ใช้เมื่อได้รับรหัสผ่านที่ถูกต้องเท่านั้น มั่นใจได้ในความปลอดภัยของคลังข้อสอบ 100%
+      </p>
     </div>
 
   </div>
 
-  <script>
-    function switchArchTab(tabId) {
-      document.querySelectorAll('.arch-tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.arch-tab-content').forEach(c => c.classList.remove('active'));
-      
-      const targetBtn = Array.from(document.querySelectorAll('.arch-tab-btn')).find(b => b.getAttribute('onclick')?.includes(tabId));
-      if (targetBtn) targetBtn.classList.add('active');
-      
-      const targetContent = document.getElementById(tabId);
-      if (targetContent) targetContent.classList.add('active');
-    }
-
-    function filterFuncTable(query) {
-      const q = query.toLowerCase().trim();
-      const rows = document.querySelectorAll('#master-func-table tbody tr');
-      rows.forEach(row => {
-        const text = row.innerText.toLowerCase();
-        row.style.display = (!q || text.includes(q)) ? '' : 'none';
-      });
-    }
-  </script>
 </body>
 </html>
