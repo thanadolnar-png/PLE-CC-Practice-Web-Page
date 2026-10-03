@@ -224,21 +224,10 @@ const BgmManager = {
       if (savedVol !== null) {
         this.volume = parseFloat(savedVol) || 0.35;
       }
-      this.audio.volume = this.volume;
-
-      const shouldPlay = localStorage.getItem('ple_bgm_enabled') === 'true';
+      // Never auto-play on page open/click. Only play when user explicitly clicks the play button.
+      this.isPlaying = false;
       this.renderWidget();
       this.updateUI();
-
-      if (shouldPlay) {
-        const tryPlay = () => {
-          this.play().catch(() => {});
-          document.removeEventListener('click', tryPlay);
-          document.removeEventListener('touchstart', tryPlay);
-        };
-        document.addEventListener('click', tryPlay, { once: true });
-        document.addEventListener('touchstart', tryPlay, { once: true });
-      }
     } catch (e) {
       console.warn('BGM Init error:', e);
     }
