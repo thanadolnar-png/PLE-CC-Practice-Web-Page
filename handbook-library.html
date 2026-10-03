@@ -5,117 +5,114 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>คลังคู่มือทักษะสภาฯ & เอกสารสอบ (PDF Reader) | RxCU OSPE</title>
   <meta name="description" content="คลังคู่มือทักษะวิชาชีพสภาเภสัชกรรมและเอกสารทางการสำหรับการเตรียมสอบ PLE-CC1 & PLE-CC2 สำหรับนิสิตเภสัชฯ จุฬาฯ">
-  <link rel="stylesheet" href="style.css?v=20261003_044000">
-  <script src="app.js?v=20261003_044000"></script>
+  <link rel="stylesheet" href="style.css?v=20261003_135000">
+  
+  <!-- PDF.js library from Cloudflare CDN for flawless mobile & canvas rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="app.js?v=20261003_135000"></script>
 
   <style>
-    /* ─── Handbook Reader Specific Styles ─── */
+    /* ─── Compact Hero Banner ─── */
     .handbook-hero-banner {
       background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(59, 130, 246, 0.06) 100%);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 1.25rem 1.5rem;
-      margin-bottom: 1.25rem;
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.85rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 1rem;
+      gap: 0.75rem;
       flex-wrap: wrap;
     }
     .handbook-hero-left {
       flex: 1;
-      min-width: 280px;
+      min-width: 240px;
     }
     .handbook-hero-badge {
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.35rem;
       background: rgba(16, 185, 129, 0.12);
       color: #059669;
       border: 1px solid rgba(16, 185, 129, 0.25);
       border-radius: 9999px;
-      font-size: 0.78rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      padding: 0.2rem 0.65rem;
-      margin-bottom: 0.45rem;
+      padding: 0.15rem 0.55rem;
+      margin-bottom: 0.25rem;
     }
     .handbook-hero-title {
       font-family: var(--font-title);
-      font-size: 1.35rem;
+      font-size: 1.12rem;
       font-weight: 800;
       color: var(--text-primary);
-      margin: 0 0 0.35rem 0;
+      margin: 0 0 0.2rem 0;
       display: flex;
       align-items: center;
-      gap: 0.45rem;
+      gap: 0.4rem;
     }
     .handbook-hero-sub {
-      font-size: 0.86rem;
+      font-size: 0.78rem;
       color: var(--text-secondary);
       margin: 0;
-      line-height: 1.45;
+      line-height: 1.35;
     }
 
-    /* Document Selector Shelf */
+    /* Document Selector Shelf (Select Dropdown) */
     .doc-shelf-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 0.85rem 1rem;
-      margin-bottom: 1rem;
+      border-radius: var(--radius-md);
+      padding: 0.55rem 0.85rem;
+      margin-bottom: 0.85rem;
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      overflow-x: auto;
-      scrollbar-width: thin;
+      gap: 0.65rem;
+      flex-wrap: wrap;
     }
     .doc-shelf-label {
       font-size: 0.82rem;
       font-weight: 700;
-      color: var(--text-secondary);
+      color: var(--text-primary);
       white-space: nowrap;
       display: flex;
       align-items: center;
       gap: 0.35rem;
     }
-    .doc-tabs-list {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: nowrap;
+    .doc-select-wrapper {
+      flex: 1;
+      min-width: 240px;
+      position: relative;
     }
-    .doc-tab-btn {
-      background: var(--bg-secondary);
+    .doc-select-dropdown {
+      width: 100%;
+      padding: 0.45rem 2rem 0.45rem 0.75rem;
+      background: var(--bg-primary);
       border: 1.5px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 0.45rem 0.85rem;
-      font-family: var(--font-body);
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      white-space: nowrap;
-      transition: all 0.15s ease;
-    }
-    .doc-tab-btn:hover {
-      border-color: var(--primary-light, #93c5fd);
+      border-radius: var(--radius-sm);
       color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.65rem center;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
-    .doc-tab-btn.active {
-      background: #eff6ff;
+    .doc-select-dropdown:focus {
       border-color: #3b82f6;
-      color: #1d4ed8;
-      font-weight: 700;
-      box-shadow: 0 2px 6px rgba(59, 130, 246, 0.15);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
     }
 
     /* Main Reader Layout */
     .reader-grid-container {
       display: grid;
-      grid-template-columns: 310px 1fr;
-      gap: 1rem;
+      grid-template-columns: 290px 1fr;
+      gap: 0.85rem;
       align-items: start;
     }
 
@@ -125,54 +122,75 @@
       }
     }
 
-    /* TOC Sidebar */
+    /* TOC Sidebar (Collapsible) */
     .reader-toc-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 1rem;
+      border-radius: var(--radius-md);
+      padding: 0.75rem;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 0.5rem;
       position: sticky;
-      top: 75px;
-      max-height: calc(100vh - 90px);
+      top: 65px;
+      max-height: calc(100vh - 80px);
       overflow-y: auto;
+      transition: max-height 0.3s ease;
     }
     .reader-toc-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding-bottom: 0.45rem;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 0.5rem;
+      user-select: none;
     }
     .reader-toc-title {
       font-family: var(--font-title);
-      font-size: 0.95rem;
+      font-size: 0.88rem;
       font-weight: 700;
       color: var(--text-primary);
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.35rem;
+    }
+    .toc-toggle-btn {
+      background: rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .toc-toggle-btn:hover {
+      background: rgba(0,0,0,0.1);
+      color: var(--text-primary);
     }
     .reader-toc-list {
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: 0.35rem;
+      transition: all 0.25s ease;
+    }
+    .reader-toc-card.is-collapsed .reader-toc-list {
+      display: none;
     }
     .toc-item-btn {
       background: var(--bg-primary);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 0.55rem 0.75rem;
+      padding: 0.45rem 0.65rem;
       text-align: left;
       cursor: pointer;
       font-family: var(--font-body);
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: var(--text-primary);
       display: flex;
       flex-direction: column;
-      gap: 0.2rem;
+      gap: 0.15rem;
       transition: all 0.15s ease;
     }
     .toc-item-btn:hover {
@@ -183,7 +201,7 @@
     .toc-item-btn.active {
       background: #f0fdf4;
       border-color: #10b981;
-      border-left: 4px solid #10b981;
+      border-left: 3.5px solid #10b981;
     }
     .toc-item-top {
       display: flex;
@@ -193,24 +211,24 @@
       color: var(--text-primary);
     }
     .toc-item-page {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       background: rgba(0,0,0,0.06);
-      padding: 2px 6px;
+      padding: 1px 5px;
       border-radius: 4px;
       color: var(--text-secondary);
-      font-family: var(--font-pixel, monospace);
+      font-family: monospace;
     }
     .toc-item-desc {
-      font-size: 0.73rem;
+      font-size: 0.7rem;
       color: var(--text-secondary);
-      line-height: 1.35;
+      line-height: 1.3;
     }
 
     /* PDF Viewer Area */
     .reader-main-viewer {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
+      border-radius: var(--radius-md);
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -219,125 +237,189 @@
     .reader-toolbar {
       background: #1e293b;
       color: #f8fafc;
-      padding: 0.65rem 1rem;
+      padding: 0.55rem 0.85rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 0.75rem;
+      gap: 0.5rem;
       border-bottom: 1px solid #334155;
     }
     .reader-toolbar-left {
       display: flex;
       align-items: center;
-      gap: 0.65rem;
+      gap: 0.5rem;
       flex-wrap: wrap;
     }
-    .reader-doc-title-badge {
-      font-size: 0.84rem;
-      font-weight: 700;
-      color: #38bdf8;
-      display: flex;
+    .reader-nav-controls {
+      display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
+      gap: 0.25rem;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.2rem 0.4rem;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
-    .reader-page-jump-wrap {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
+    .reader-nav-btn {
+      background: #3b82f6;
+      border: none;
+      color: white;
+      padding: 0.25rem 0.55rem;
+      border-radius: 4px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .reader-nav-btn:hover:not(:disabled) {
+      background: #2563eb;
+    }
+    .reader-nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .reader-page-indicator {
       font-size: 0.78rem;
-      color: #cbd5e1;
+      font-family: monospace;
+      color: #f1f5f9;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0 0.25rem;
     }
     .reader-page-input {
-      width: 55px;
-      padding: 0.25rem 0.4rem;
+      width: 48px;
+      padding: 0.2rem 0.3rem;
       border-radius: 4px;
       border: 1px solid #475569;
       background: #0f172a;
       color: #fff;
-      font-size: 0.8rem;
-      text-align: center;
-    }
-    .reader-jump-btn {
-      background: #3b82f6;
-      border: none;
-      color: white;
-      padding: 0.25rem 0.6rem;
-      border-radius: 4px;
       font-size: 0.78rem;
-      font-weight: 600;
+      text-align: center;
+      font-family: monospace;
+    }
+    .reader-zoom-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+    }
+    .reader-zoom-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f8fafc;
+      padding: 0.25rem 0.45rem;
+      border-radius: 4px;
+      font-size: 0.74rem;
       cursor: pointer;
     }
-    .reader-jump-btn:hover {
-      background: #2563eb;
+    .reader-zoom-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
     }
     .reader-toolbar-right {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.4rem;
+      flex-wrap: wrap;
     }
     .reader-tool-btn {
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: #f8fafc;
-      padding: 0.35rem 0.75rem;
+      padding: 0.3rem 0.65rem;
       border-radius: 6px;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
+      gap: 0.3rem;
       text-decoration: none;
       transition: all 0.15s ease;
     }
     .reader-tool-btn:hover {
       background: rgba(255, 255, 255, 0.2);
       color: #ffffff;
-      transform: translateY(-1px);
     }
     .reader-tool-btn-primary {
       background: linear-gradient(135deg, #10b981, #059669);
       border-color: #059669;
       color: #ffffff;
     }
-    .reader-tool-btn-primary:hover {
-      background: linear-gradient(135deg, #059669, #047857);
-    }
 
-    /* Embedded Frame Container */
-    .reader-frame-wrapper {
+    /* PDF Canvas & Scroll Container */
+    .reader-viewport-container {
       position: relative;
       width: 100%;
-      height: 780px;
-      background: #525659;
+      height: 760px;
+      background: #334155;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem 0.5rem;
+      touch-action: pan-y;
+      -webkit-overflow-scrolling: touch;
     }
-    .reader-frame-wrapper iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
+    .pdf-canvas-element {
+      box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+      border-radius: 4px;
+      background: #ffffff;
+      max-width: 100%;
+      height: auto;
       display: block;
     }
-    .reader-frame-wrapper.is-fullscreen {
+    .pdf-loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-family: var(--font-title);
+      font-size: 0.9rem;
+      gap: 0.6rem;
+      z-index: 10;
+      transition: opacity 0.2s ease;
+    }
+    .pdf-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(255,255,255,0.2);
+      border-top-color: #38bdf8;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .reader-viewport-container.is-fullscreen {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
       z-index: 99999;
+      padding: 1.5rem 0.5rem;
     }
 
     @media (max-width: 640px) {
-      .reader-frame-wrapper {
-        height: 540px;
+      .reader-viewport-container {
+        height: 520px;
+        padding: 0.5rem 0.25rem;
       }
       .reader-toolbar {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
       }
-      .reader-toolbar-right {
-        width: 100%;
-        justify-content: flex-end;
+      .reader-toolbar-left, .reader-toolbar-right {
+        justify-content: space-between;
       }
     }
   </style>
@@ -375,9 +457,9 @@
 
   <!-- Page Viewport -->
   <div class="page-viewport">
-    <div class="container" style="max-width: 1240px; padding-top: 1rem; padding-bottom: 2.5rem;">
+    <div class="container" style="max-width: 1240px; padding-top: 0.6rem; padding-bottom: 2rem;">
 
-      <!-- Hero Banner -->
+      <!-- Compact Hero Banner -->
       <div class="handbook-hero-banner">
         <div class="handbook-hero-left">
           <div class="handbook-hero-badge">
@@ -392,68 +474,74 @@
             เปิดอ่านหนังสือคู่มือทักษะตามเกณฑ์ความรู้ความสามารถทางวิชาชีพของผู้ประกอบวิชาชีพเภสัชกรรม (สมรรถนะร่วม) พ.ศ. 2562 และเอกสารทางการสำหรับการเตรียมสอบ PLE-CC
           </p>
         </div>
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-          <a href="./docs/pharmacy-skill-handbook-2562.pdf" target="_blank" class="btn btn-secondary" style="font-size:0.84rem; padding:0.45rem 0.9rem;" title="เปิดดูในแท็บใหม่">
+        <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+          <a href="./docs/pharmacy-skill-handbook-2562.pdf" target="_blank" class="btn btn-secondary" id="hero-ext-btn" style="font-size:0.78rem; padding:0.35rem 0.75rem;" title="เปิดดูในแท็บใหม่">
             ↗️ เปิดในแท็บใหม่
           </a>
-          <a href="./docs/pharmacy-skill-handbook-2562.pdf" download="คู่มือทักษะสภาเภสัชกรรม2562.pdf" class="btn btn-primary" style="font-size:0.84rem; padding:0.45rem 0.9rem; background: linear-gradient(135deg, #10b981, #059669);" title="ดาวน์โหลดไฟล์ PDF เก็บไว้">
+          <a href="./docs/pharmacy-skill-handbook-2562.pdf" download="คู่มือทักษะสภาเภสัชกรรม2562.pdf" id="hero-dl-btn" class="btn btn-primary" style="font-size:0.78rem; padding:0.35rem 0.75rem; background: linear-gradient(135deg, #10b981, #059669);" title="ดาวน์โหลดไฟล์ PDF เก็บไว้">
             ⬇️ ดาวน์โหลด PDF
           </a>
         </div>
       </div>
 
-      <!-- Document Selector Shelf -->
+      <!-- Document Selector Shelf (Select Dropdown) -->
       <div class="doc-shelf-card">
-        <div class="doc-shelf-label">
+        <label for="doc-select-dropdown" class="doc-shelf-label">
           <span>📑</span> เลือกเอกสาร:
-        </div>
-        <div class="doc-tabs-list" id="doc-tabs-list">
-          <button type="button" class="doc-tab-btn active" onclick="selectDocument('handbook2562')" id="tab-doc-handbook2562">
-            <span>📘</span> คู่มือทักษะวิชาชีพสภาฯ (2562) · 200 หน้า
-          </button>
-          <button type="button" class="doc-tab-btn" onclick="selectDocument('calendar2569')" id="tab-doc-calendar2569">
-            <span>📅</span> ปฏิทินสอบ PLE 2569
-          </button>
-          <button type="button" class="doc-tab-btn" onclick="selectDocument('cc2reg')" id="tab-doc-cc2reg">
-            <span>📋</span> ระเบียบสอบ PLE-CC2 OSPE
-          </button>
-          <button type="button" class="doc-tab-btn" onclick="selectDocument('faqs')" id="tab-doc-faqs">
-            <span>💡</span> คู่มือ FAQs สภาเภสัชกรรม
-          </button>
+        </label>
+        <div class="doc-select-wrapper">
+          <select id="doc-select-dropdown" class="doc-select-dropdown" onchange="selectDocument(this.value)">
+            <option value="handbook2562">📘 คู่มือทักษะวิชาชีพสภาฯ (2562) · 200 หน้า</option>
+            <option value="calendar2569">📅 ปฏิทินสอบ PLE 2569 · 2 หน้า</option>
+            <option value="cc2reg">📋 ระเบียบสอบ PLE-CC2 OSPE · 4 หน้า</option>
+            <option value="faqs">💡 คู่มือ FAQs สภาเภสัชกรรม · 25 หน้า</option>
+          </select>
         </div>
       </div>
 
       <!-- Reader Grid Container -->
       <div class="reader-grid-container">
 
-        <!-- Table of Contents Sidebar -->
+        <!-- Table of Contents Sidebar (Collapsible) -->
         <div class="reader-toc-card" id="reader-toc-card">
-          <div class="reader-toc-header">
+          <div class="reader-toc-header" onclick="toggleTOCCollapse()" style="cursor: pointer;" title="แตะเพื่อย่อ/ขยายสารบัญ">
             <div class="reader-toc-title">
               <span>📑</span>
               <span>สารบัญ & ทางลัดบทเรียน</span>
             </div>
-            <span style="font-size: 0.72rem; color: var(--text-secondary);" id="toc-item-count">9 หมวด</span>
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+              <span style="font-size: 0.72rem; color: var(--text-secondary);" id="toc-item-count">10 หมวด</span>
+              <button type="button" class="toc-toggle-btn" id="toc-toggle-btn">🔼 ซ่อน</button>
+            </div>
           </div>
 
           <!-- Dynamic Chapter Jump List -->
           <div class="reader-toc-list" id="reader-toc-list">
-            <!-- Will be injected by JS -->
+            <!-- Injected by JS -->
           </div>
         </div>
 
-        <!-- Main PDF Viewer -->
+        <!-- Main PDF Viewer (Canvas-based PDF.js) -->
         <div class="reader-main-viewer">
           <div class="reader-toolbar">
             <div class="reader-toolbar-left">
-              <div class="reader-doc-title-badge" id="current-doc-badge">
-                <span>📘</span>
-                <span id="current-doc-name">คู่มือทักษะตามเกณฑ์ความรู้ความสามารถทางวิชาชีพฯ พ.ศ. 2562</span>
+              <!-- Page Navigator -->
+              <div class="reader-nav-controls">
+                <button type="button" class="reader-nav-btn" id="btn-prev-page" onclick="prevPage()" title="หน้าก่อนหน้า (หรือปัดซ้าย)">◀</button>
+                <div class="reader-page-indicator">
+                  <input type="number" id="reader-jump-input" class="reader-page-input" min="1" max="200" value="1" onchange="jumpToCustomPage()" onkeydown="if(event.key==='Enter') jumpToCustomPage()">
+                  <span>/</span>
+                  <span id="reader-total-pages">200</span>
+                </div>
+                <button type="button" class="reader-nav-btn" id="btn-next-page" onclick="nextPage()" title="หน้าถัดไป (หรือปัดขวา)">▶</button>
               </div>
-              <div class="reader-page-jump-wrap" id="page-jump-controller">
-                <span>หน้า:</span>
-                <input type="number" id="reader-jump-input" class="reader-page-input" min="1" max="200" value="1" onkeydown="if(event.key==='Enter') jumpToCustomPage()">
-                <button type="button" class="reader-jump-btn" onclick="jumpToCustomPage()">ไป</button>
+
+              <!-- Zoom Controls -->
+              <div class="reader-zoom-controls">
+                <button type="button" class="reader-zoom-btn" onclick="zoomOut()" title="ย่อ">-</button>
+                <span id="zoom-level-text" style="font-size:0.75rem; font-family:monospace; min-width:35px; text-align:center;">100%</span>
+                <button type="button" class="reader-zoom-btn" onclick="zoomIn()" title="ขยาย">+</button>
+                <button type="button" class="reader-zoom-btn" onclick="fitWidth()" title="พอดีความกว้าง">⛶ พอดีจอ</button>
               </div>
             </div>
 
@@ -470,9 +558,13 @@
             </div>
           </div>
 
-          <!-- Embedded PDF Viewer Frame -->
-          <div class="reader-frame-wrapper" id="reader-frame-wrapper">
-            <iframe id="pdf-viewer-frame" src="./docs/pharmacy-skill-handbook-2562.pdf#page=1&zoom=page-width" title="PDF Viewer" allowfullscreen></iframe>
+          <!-- Embedded PDF Canvas Viewport -->
+          <div class="reader-viewport-container" id="reader-viewport-container">
+            <div id="pdf-loading-overlay" class="pdf-loading-overlay">
+              <div class="pdf-spinner"></div>
+              <span>กำลังเรนเดอร์เอกสาร PDF...</span>
+            </div>
+            <canvas id="pdf-canvas" class="pdf-canvas-element"></canvas>
           </div>
         </div>
 
@@ -494,6 +586,11 @@
 </div><!-- /.app-shell -->
 
 <script>
+  // ─── PDF.js WORKER CONFIGURATION ───
+  if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+
   // ─── DOCUMENT CATALOG CONFIGURATION ───
   const DOCUMENTS_CONFIG = {
     handbook2562: {
@@ -552,43 +649,187 @@
   };
 
   let currentDocKey = 'handbook2562';
-  let currentPage = 1;
+  let pdfDoc = null;
+  let pageNum = 1;
+  let pageRendering = false;
+  let pageNumPending = null;
+  let scale = 1.35;
+  const canvas = document.getElementById('pdf-canvas');
+  const ctx = canvas.getContext('2d');
+
+  function showLoading(show) {
+    const overlay = document.getElementById('pdf-loading-overlay');
+    if (overlay) overlay.style.display = show ? 'flex' : 'none';
+  }
+
+  function renderPage(num) {
+    pageRendering = true;
+    showLoading(true);
+
+    pdfDoc.getPage(num).then(function(page) {
+      const dpr = window.devicePixelRatio || 1;
+      const viewport = page.getViewport({ scale: scale });
+      
+      canvas.height = viewport.height * dpr;
+      canvas.width = viewport.width * dpr;
+      canvas.style.width = viewport.width + 'px';
+      canvas.style.height = viewport.height + 'px';
+
+      const renderContext = {
+        canvasContext: ctx,
+        viewport: viewport,
+        transform: [dpr, 0, 0, dpr, 0, 0]
+      };
+      
+      const renderTask = page.render(renderContext);
+      renderTask.promise.then(function() {
+        pageRendering = false;
+        showLoading(false);
+        if (pageNumPending !== null) {
+          renderPage(pageNumPending);
+          pageNumPending = null;
+        }
+      });
+    }).catch(function(err) {
+      console.error('Error rendering page:', err);
+      showLoading(false);
+      pageRendering = false;
+    });
+
+    // Update UI controls
+    const jumpInp = document.getElementById('reader-jump-input');
+    if (jumpInp) jumpInp.value = num;
+    const btnPrev = document.getElementById('btn-prev-page');
+    const btnNext = document.getElementById('btn-next-page');
+    if (btnPrev) btnPrev.disabled = num <= 1;
+    if (btnNext) btnNext.disabled = num >= pdfDoc.numPages;
+
+    // Update active TOC item if page matches
+    updateTOCActiveState(num);
+  }
+
+  function queueRenderPage(num) {
+    if (pageRendering) {
+      pageNumPending = num;
+    } else {
+      renderPage(num);
+    }
+  }
+
+  function prevPage() {
+    if (pageNum <= 1) return;
+    pageNum--;
+    queueRenderPage(pageNum);
+  }
+
+  function nextPage() {
+    if (pageNum >= pdfDoc.numPages) return;
+    pageNum++;
+    queueRenderPage(pageNum);
+  }
+
+  function jumpToCustomPage() {
+    const jumpInp = document.getElementById('reader-jump-input');
+    const target = parseInt(jumpInp ? jumpInp.value : '1', 10);
+    if (!isNaN(target) && target >= 1 && target <= pdfDoc.numPages) {
+      pageNum = target;
+      queueRenderPage(pageNum);
+    }
+  }
+
+  function zoomIn() {
+    scale = Math.min(scale + 0.2, 3.0);
+    updateZoomText();
+    queueRenderPage(pageNum);
+  }
+
+  function zoomOut() {
+    scale = Math.max(scale - 0.2, 0.6);
+    updateZoomText();
+    queueRenderPage(pageNum);
+  }
+
+  function fitWidth() {
+    const container = document.getElementById('reader-viewport-container');
+    if (!container || !pdfDoc) return;
+    pdfDoc.getPage(pageNum).then(function(page) {
+      const vp = page.getViewport({ scale: 1 });
+      const availableWidth = container.clientWidth - 32;
+      scale = Math.max(availableWidth / vp.width, 0.6);
+      updateZoomText();
+      queueRenderPage(pageNum);
+    });
+  }
+
+  function updateZoomText() {
+    const el = document.getElementById('zoom-level-text');
+    if (el) el.textContent = Math.round(scale * 100) + '%';
+  }
 
   function selectDocument(docKey) {
     const doc = DOCUMENTS_CONFIG[docKey];
     if (!doc) return;
     currentDocKey = docKey;
-    currentPage = 1;
+    pageNum = 1;
 
-    // Update Doc Tabs
-    document.querySelectorAll('.doc-tab-btn').forEach(btn => btn.classList.remove('active'));
-    const activeTab = document.getElementById(`tab-doc-${docKey}`);
-    if (activeTab) activeTab.classList.add('active');
+    // Update dropdown selection
+    const selectEl = document.getElementById('doc-select-dropdown');
+    if (selectEl && selectEl.value !== docKey) {
+      selectEl.value = docKey;
+    }
 
-    // Update Toolbar
-    const badge = document.getElementById('current-doc-name');
-    if (badge) badge.textContent = doc.name;
-
+    // Update External & Download links
     const extLink = document.getElementById('reader-ext-link');
     if (extLink) extLink.href = doc.src;
+    const heroExtBtn = document.getElementById('hero-ext-btn');
+    if (heroExtBtn) heroExtBtn.href = doc.src;
 
     const dlLink = document.getElementById('reader-download-link');
     if (dlLink) {
       dlLink.href = doc.src;
       dlLink.download = doc.downloadName || 'document.pdf';
     }
-
-    const jumpInp = document.getElementById('reader-jump-input');
-    if (jumpInp) {
-      jumpInp.max = doc.totalPages;
-      jumpInp.value = 1;
+    const heroDlBtn = document.getElementById('hero-dl-btn');
+    if (heroDlBtn) {
+      heroDlBtn.href = doc.src;
+      heroDlBtn.download = doc.downloadName || 'document.pdf';
     }
 
     // Render TOC
     renderTOC(doc);
 
-    // Load PDF in iframe
-    loadPdfPage(doc.src, 1);
+    // Load PDF via PDF.js
+    showLoading(true);
+    pdfjsLib.getDocument(doc.src).promise.then(function(loadedDoc) {
+      pdfDoc = loadedDoc;
+      const totalPagesEl = document.getElementById('reader-total-pages');
+      if (totalPagesEl) totalPagesEl.textContent = pdfDoc.numPages;
+      const jumpInp = document.getElementById('reader-jump-input');
+      if (jumpInp) jumpInp.max = pdfDoc.numPages;
+
+      // Auto fit on load
+      const container = document.getElementById('reader-viewport-container');
+      const containerWidth = container ? container.clientWidth - 32 : 600;
+      pdfDoc.getPage(1).then(function(page) {
+        const vp = page.getViewport({ scale: 1 });
+        scale = Math.max(containerWidth / vp.width, 0.85);
+        updateZoomText();
+        renderPage(pageNum);
+      });
+    }).catch(function(err) {
+      console.error('Error loading PDF document:', err);
+      showLoading(false);
+      // Fallback message
+      const container = document.getElementById('reader-viewport-container');
+      if (container) {
+        container.innerHTML = `
+          <div style="color:white; text-align:center; padding:2rem;">
+            <p style="font-size:1.1rem; margin-bottom:1rem;">⚠️ ไม่สามารถโหลดตัวอ่าน PDF ได้ในขณะนี้</p>
+            <a href="${doc.src}" target="_blank" class="btn btn-primary">↗️ แตะที่นี่เพื่อเปิดอ่านไฟล์ PDF โดยตรง</a>
+          </div>
+        `;
+      }
+    });
   }
 
   function renderTOC(doc) {
@@ -596,7 +837,7 @@
     const tocCount = document.getElementById('toc-item-count');
     if (!tocList) return;
 
-    if (tocCount) tocCount.textContent = `${doc.toc.length} รายการ`;
+    if (tocCount) tocCount.textContent = `${doc.toc.length} หมวด`;
     tocList.innerHTML = '';
 
     doc.toc.forEach((item, idx) => {
@@ -615,55 +856,52 @@
     });
   }
 
+  function updateTOCActiveState(curPage) {
+    const doc = DOCUMENTS_CONFIG[currentDocKey];
+    if (!doc || !doc.toc) return;
+
+    let activeIdx = 0;
+    for (let i = 0; i < doc.toc.length; i++) {
+      if (curPage >= doc.toc[i].page) {
+        activeIdx = i;
+      } else {
+        break;
+      }
+    }
+    const buttons = document.querySelectorAll('.toc-item-btn');
+    buttons.forEach((b, idx) => {
+      if (idx === activeIdx) b.classList.add('active');
+      else b.classList.remove('active');
+    });
+  }
+
   function jumpToChapter(pageNumber, btnEl) {
-    currentPage = pageNumber;
-    const doc = DOCUMENTS_CONFIG[currentDocKey];
-    if (!doc) return;
+    if (!pdfDoc) return;
+    pageNum = Math.min(Math.max(pageNumber, 1), pdfDoc.numPages);
+    queueRenderPage(pageNum);
 
-    // Update active state in TOC list
-    document.querySelectorAll('.toc-item-btn').forEach(b => b.classList.remove('active'));
-    if (btnEl) btnEl.classList.add('active');
-
-    // Update Jump input
-    const jumpInp = document.getElementById('reader-jump-input');
-    if (jumpInp) jumpInp.value = pageNumber;
-
-    loadPdfPage(doc.src, pageNumber);
+    // Scroll viewer into view on mobile
+    if (window.innerWidth <= 960) {
+      const viewer = document.querySelector('.reader-main-viewer');
+      if (viewer) viewer.scrollIntoView({ behavior: 'smooth' });
+    }
   }
 
-  function jumpToCustomPage() {
-    const jumpInp = document.getElementById('reader-jump-input');
-    const pageNum = parseInt(jumpInp ? jumpInp.value : '1', 10);
-    const doc = DOCUMENTS_CONFIG[currentDocKey];
-    if (!doc) return;
-
-    if (isNaN(pageNum) || pageNum < 1) return;
-    currentPage = Math.min(pageNum, doc.totalPages);
-    if (jumpInp) jumpInp.value = currentPage;
-
-    loadPdfPage(doc.src, currentPage);
-  }
-
-  function loadPdfPage(pdfSrc, pageNum) {
-    const iframe = document.getElementById('pdf-viewer-frame');
-    if (!iframe) return;
-    iframe.src = `${pdfSrc}#page=${pageNum}&zoom=page-width`;
+  function toggleTOCCollapse() {
+    const card = document.getElementById('reader-toc-card');
+    const btn = document.getElementById('toc-toggle-btn');
+    if (!card) return;
+    card.classList.toggle('is-collapsed');
+    if (btn) {
+      btn.textContent = card.classList.contains('is-collapsed') ? '🔽 แสดง' : '🔼 ซ่อน';
+    }
   }
 
   function toggleViewerFullscreen() {
-    const wrapper = document.getElementById('reader-frame-wrapper');
-    if (!wrapper) return;
-    wrapper.classList.toggle('is-fullscreen');
-    if (wrapper.classList.contains('is-fullscreen')) {
-      // Add Escape listener
-      const handleEsc = (e) => {
-        if (e.key === 'Escape') {
-          wrapper.classList.remove('is-fullscreen');
-          document.removeEventListener('keydown', handleEsc);
-        }
-      };
-      document.addEventListener('keydown', handleEsc);
-    }
+    const container = document.getElementById('reader-viewport-container');
+    if (!container) return;
+    container.classList.toggle('is-fullscreen');
+    setTimeout(fitWidth, 200);
   }
 
   function toggleFullscreen() {
@@ -680,8 +918,36 @@
     }
   }
 
+  // ─── Touch Swipe Gestures for Mobile Page Turns ───
+  let touchStartX = 0;
+  let touchEndX = 0;
+  const viewport = document.getElementById('reader-viewport-container');
+  if (viewport) {
+    viewport.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    viewport.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+  }
+
+  function handleSwipe() {
+    const swipeDistance = touchEndX - touchStartX;
+    if (Math.abs(swipeDistance) > 75) {
+      if (swipeDistance < 0) {
+        // Swiped Left -> Next Page
+        nextPage();
+      } else {
+        // Swiped Right -> Prev Page
+        prevPage();
+      }
+    }
+  }
+
+  // ─── INIT ───
   document.addEventListener('DOMContentLoaded', () => {
-    // Check URL Param e.g. ?doc=handbook2562&page=130
     const urlParams = new URLSearchParams(window.location.search);
     const docParam = urlParams.get('doc');
     const pageParam = parseInt(urlParams.get('page') || '1', 10);
@@ -691,10 +957,9 @@
 
     if (pageParam && pageParam > 1) {
       setTimeout(() => {
-        const jumpInp = document.getElementById('reader-jump-input');
-        if (jumpInp) jumpInp.value = pageParam;
-        jumpToCustomPage();
-      }, 300);
+        pageNum = pageParam;
+        queueRenderPage(pageNum);
+      }, 500);
     }
   });
 </script>
