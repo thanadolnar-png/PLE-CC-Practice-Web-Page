@@ -5663,16 +5663,23 @@
       document.getElementById('exam-scenario-content').innerHTML = cleanScenario;
 
       // Render patientInfoHtml — convert inner ##Header markers to styled headings while stripping section tag
-      const rawPatient = stripSectionHeaders(c.patientInfoHtml) || '<p>ไม่มีตารางข้อมูลผู้ป่วย</p>';
-      const processedPatient = rawPatient.replace(
-        /<p[^>]*>##([^<]+)<\/p>/gi,
-        (match, heading) => `<p style="font-family:var(--font-title);font-weight:700;color:var(--text-primary);margin:1rem 0 0.35rem 0;font-size:0.92rem;border-left:3px solid var(--primary);padding-left:0.6rem;">&#128204; ${heading.trim()}</p>`
-      );
-      document.getElementById('exam-patient-content').innerHTML = processedPatient;
+      const rawPatient = stripSectionHeaders(c.patientInfoHtml || '');
+      const patientAccordion = document.getElementById('exam-patient-accordion');
+      const hasPatientInfo = Boolean(rawPatient && rawPatient.trim() && rawPatient.replace(/<[^>]*>/g, '').trim().length > 0);
 
-      // Reset patient accordion — expand on every new station
-      _patientAccordionOpen = false;
-      togglePatientAccordion();
+      if (hasPatientInfo) {
+        if (patientAccordion) patientAccordion.style.display = 'block';
+        const processedPatient = rawPatient.replace(
+          /<p[^>]*>##([^<]+)<\/p>/gi,
+          (match, heading) => `<p style="font-family:var(--font-title);font-weight:700;color:var(--text-primary);margin:1rem 0 0.35rem 0;font-size:0.92rem;border-left:3px solid var(--primary);padding-left:0.6rem;">&#128204; ${heading.trim()}</p>`
+        );
+        document.getElementById('exam-patient-content').innerHTML = processedPatient;
+        _patientAccordionOpen = false;
+        togglePatientAccordion();
+      } else {
+        if (patientAccordion) patientAccordion.style.display = 'none';
+        document.getElementById('exam-patient-content').innerHTML = '';
+      }
 
       // Render Equipment accordion
       const equipAccordion = document.getElementById('exam-equipment-accordion');

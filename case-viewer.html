@@ -773,8 +773,25 @@
         ? renderInteractiveBlanks(rawScenario, { isExaminer, caseId }) 
         : rawScenario;
       document.getElementById('case-scenario-content').innerHTML = cleanScenario || '<p>ไม่มีข้อมูลสถานการณ์</p>';
+
       const cleanPatient = stripSectionHeaders(c.patientInfoHtml);
-      document.getElementById('case-patient-content').innerHTML = cleanPatient || '<p>ไม่มีตารางข้อมูลผู้ป่วย</p>';
+      const patientTitleEl = document.getElementById('patient-section-title');
+      const patientContentEl = document.getElementById('case-patient-content');
+      
+      const hasPatientInfo = Boolean(cleanPatient && cleanPatient.trim() && cleanPatient.replace(/<[^>]*>/g, '').trim().length > 0);
+      if (hasPatientInfo) {
+        if (patientTitleEl) patientTitleEl.style.display = 'block';
+        if (patientContentEl) {
+          patientContentEl.style.display = 'block';
+          patientContentEl.innerHTML = cleanPatient;
+        }
+      } else {
+        if (patientTitleEl) patientTitleEl.style.display = 'none';
+        if (patientContentEl) {
+          patientContentEl.style.display = 'none';
+          patientContentEl.innerHTML = '';
+        }
+      }
       
       // Render Equipment
       if (c.equipmentHtml) {
