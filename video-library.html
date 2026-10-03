@@ -1,17 +1,17 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>เธเธฅเธฑเธเธเธฅเธดเธเธงเธดเธ”เธตเนเธญเน€เธ—เธเธเธดเธเธเธฒเธฃเน€เธ•เธฃเธตเธขเธกเธขเธฒเนเธฅเธฐเธเธฒเธฃเนเธเนเธขเธฒ (Product & Clinic) | RxCU OSPE</title>
-  <meta name="description" content="เธเธฅเธฑเธเธเธฅเธดเธเธงเธดเธ”เธตเนเธญเธชเธฒเธเธดเธ•เน€เธ—เธเธเธดเธเธ—เธฒเธเน€เธ เธชเธฑเธเธเธฃเธฃเธก (Product) เนเธฅเธฐเน€เธ—เธเธเธดเธเธเธฒเธฃเนเธเนเธขเธฒเธเธดเน€เธจเธฉ/เธซเธฑเธ•เธ–เธเธฒเธฃเธเธฅเธดเธเธดเธ (Clinic) เธเธฒเธเธเธ“เธฐเน€เธ เธชเธฑเธเธฏ เธเธธเธฌเธฒเธฏ (เนเธญเธชเธ–เธจเธฒเธฅเธฒ) เนเธฅเธฐเนเธฃเธเธเธขเธฒเธเธฒเธฅเธเธฑเนเธเธเธณ เธชเธณเธซเธฃเธฑเธเน€เธ•เธฃเธตเธขเธกเธชเธญเธ PLE-CC2 OSPE">
+  <title>คลังคลิปวิดีโอเทคนิคการเตรียมยาและการใช้ยา (Product & Clinic) | RxCU OSPE</title>
+  <meta name="description" content="คลังคลิปวิดีโอสาธิตเทคนิคทางเภสัชกรรม (Product) และเทคนิคการใช้ยาพิเศษ/หัตถการคลินิก (Clinic) จากคณะเภสัชฯ จุฬาฯ (โอสถศาลา) และโรงพยาบาลชั้นนำ สำหรับเตรียมสอบ PLE-CC2 OSPE">
   <link rel="stylesheet" href="style.css?v=1791019915">
   <script src="video-data.js?v=1791019915"></script>
   <script src="app.js?v=1791019915"></script>
 
   <style>
     
-    /* โ”€โ”€โ”€ Big Domain Selector Tabs โ”€โ”€โ”€ */
+    /* ─── Big Domain Selector Tabs ─── */
     .domain-selector-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -111,7 +111,7 @@
       color: #fff;
     }
 
-    /* โ”€โ”€โ”€ Video Library Layout & Components โ”€โ”€โ”€ */
+    /* ─── Video Library Layout & Components ─── */
     .video-hero-banner {
       background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(59, 130, 246, 0.05) 100%);
       border: 1px solid var(--border);
@@ -203,7 +203,7 @@
       border-radius: 9999px;
     }
 
-    /* โ”€โ”€โ”€ Controls & Filter Toolbar โ”€โ”€โ”€ */
+    /* ─── Controls & Filter Toolbar ─── */
     .video-filter-console {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -308,7 +308,7 @@
       font-weight: 700;
     }
 
-    /* โ”€โ”€โ”€ Video Cards Grid โ”€โ”€โ”€ */
+    /* ─── Video Cards Grid ─── */
     .video-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
@@ -504,7 +504,7 @@
       box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
     }
 
-    /* โ”€โ”€โ”€ Theater Modal โ”€โ”€โ”€ */
+    /* ─── Theater Modal ─── */
     .theater-modal-overlay {
       position: fixed;
       top: 0;
@@ -621,7 +621,7 @@
       color: var(--text-secondary);
     }
 
-    /* โ”€โ”€โ”€ Tablet / Intermediate Responsiveness (Screens <= 1024px) โ”€โ”€โ”€ */
+    /* ─── Tablet / Intermediate Responsiveness (Screens <= 1024px) ─── */
     @media (max-width: 1024px) {
       .domain-selector-grid {
         gap: 0.5rem;
@@ -643,7 +643,7 @@
       }
     }
 
-    /* โ”€โ”€โ”€ Mobile Responsiveness & Polish (Screens < 768px) โ”€โ”€โ”€ */
+    /* ─── Mobile Responsiveness & Polish (Screens < 768px) ─── */
     @media (max-width: 768px) {
 
       .domain-selector-grid {
@@ -787,27 +787,27 @@
 
   <!-- API Connection Status Banner -->
   <div id="api-status-banner" class="api-banner">
-    <span class="banner-icon">๐</span>
-    <span class="banner-text">เธเธณเธฅเธฑเธเธ•เธฃเธงเธเธชเธญเธเธชเธ–เธฒเธเธฐเธเธฒเธฃเน€เธเธทเนเธญเธกเธ•เนเธญ...</span>
+    <span class="banner-icon">🌐</span>
+    <span class="banner-text">กำลังตรวจสอบสถานะการเชื่อมต่อ...</span>
   </div>
 
   <!-- Topbar -->
   <div class="topbar" id="main-nav">
     <div class="topbar-left">
       <a href="index.html" class="topbar-logo" id="nav-logo">
-        <div class="topbar-logo-badge">๐ฅผ</div>
+        <div class="topbar-logo-badge">🥼</div>
         <span class="topbar-logo-text">RxCU OSPE Hub</span>
       </a>
     </div>
     <div class="topbar-nav-tabs" id="nav-menu">
-      <a href="index.html" class="topbar-nav-tab" id="nav-home">เธซเธเนเธฒเนเธฃเธ</a>
-      <a href="case-library.html" class="topbar-nav-tab" id="nav-library">เธเธฅเธฑเธเน€เธเธช</a>
-      <a href="exam-simulation.html" class="topbar-nav-tab" id="nav-sim">เธเนเธญเธกเธชเธญเธ</a>
-      <a href="video-library.html" class="topbar-nav-tab active" id="nav-videos">๐ฌ เธเธฅเธดเธเน€เธ—เธเธเธดเธ</a>
-      <a href="handbook-library.html" class="topbar-nav-tab" id="nav-handbook">๐“– เธเธนเนเธกเธทเธญเธ—เธฑเธเธฉเธฐเธชเธ เธฒเธฏ</a>
+      <a href="index.html" class="topbar-nav-tab" id="nav-home">หน้าแรก</a>
+      <a href="case-library.html" class="topbar-nav-tab" id="nav-library">คลังเคส</a>
+      <a href="exam-simulation.html" class="topbar-nav-tab" id="nav-sim">ซ้อมสอบ</a>
+      <a href="video-library.html" class="topbar-nav-tab active" id="nav-videos">🎬 คลิปเทคนิค</a>
+      <a href="handbook-library.html" class="topbar-nav-tab" id="nav-handbook">📖 คู่มือทักษะสภาฯ</a>
     </div>
     <div class="topbar-right">
-      <button class="icon-btn" onclick="toggleFullscreen()" title="เน€เธ•เนเธกเธเธญ">
+      <button class="icon-btn" onclick="toggleFullscreen()" title="เต็มจอ">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
       </button>
     </div>
@@ -821,60 +821,60 @@
         <!-- Hero Banner -->
         <header class="video-hero-banner">
           <div class="video-hero-badge">
-            <span>๐ฌ OSPE Video Hub</span>
+            <span>🎬 OSPE Video Hub</span>
           </div>
           <h1 class="video-hero-title">
-            ๐ฌ เธเธฅเธดเธเน€เธ—เธเธเธดเธ (Product & Clinic)
+            🎬 คลิปเทคนิค (Product & Clinic)
           </h1>
 
           <!-- Stats Bar -->
           <div class="video-stats-bar">
             <div class="video-stat-item">
               <span class="video-stat-num" id="stat-total-videos">77</span>
-              <span>เธเธฅเธดเธเธ—เธฑเนเธเธซเธกเธ”</span>
+              <span>คลิปทั้งหมด</span>
             </div>
             <div class="video-stat-item">
               <span class="video-stat-num" id="stat-product-videos" style="color: #0284c7;">46</span>
-              <span>๐”ฌ Product</span>
+              <span>🔬 Product</span>
             </div>
             <div class="video-stat-item">
               <span class="video-stat-num" id="stat-clinic-videos" style="color: #10b981;">31</span>
-              <span>๐’ Clinic</span>
+              <span>💊 Clinic</span>
             </div>
           </div>
         </header>
 
         <!-- Big Domain Selector (PRODUCT vs CLINIC vs ALL) -->
-        <section class="domain-selector-grid" id="domain-selector-section" aria-label="เน€เธฅเธทเธญเธเธซเธกเธงเธ”เธงเธดเธเธฒเธซเธฅเธฑเธ">
+        <section class="domain-selector-grid" id="domain-selector-section" aria-label="เลือกหมวดวิชาหลัก">
           <div class="domain-select-card active" id="domain-card-all" onclick="selectDomainFilter('all', this)">
-            <div class="domain-card-icon">๐</div>
+            <div class="domain-card-icon">🌐</div>
             <div class="domain-card-body">
               <h3 class="domain-card-title">
-                เธ—เธฑเนเธเธซเธกเธ” (All)
+                ทั้งหมด (All)
               </h3>
-              <p class="domain-card-desc">เธฃเธงเธกเธ—เธฑเนเธ Product เนเธฅเธฐ Clinic เธ—เธธเธเธฃเธนเธเนเธเธ</p>
+              <p class="domain-card-desc">รวมทั้ง Product และ Clinic ทุกรูปแบบ</p>
             </div>
             <span class="domain-count-badge" id="badge-count-all">77</span>
           </div>
 
           <div class="domain-select-card" id="domain-card-product" onclick="selectDomainFilter('Product', this)">
-            <div class="domain-card-icon">๐”ฌ</div>
+            <div class="domain-card-icon">🔬</div>
             <div class="domain-card-body">
               <h3 class="domain-card-title">
-                Product (เน€เธ•เธฃเธตเธขเธกเธขเธฒ)
+                Product (เตรียมยา)
               </h3>
-              <p class="domain-card-desc">เน€เธ—เธเธเธดเธเธเธฑเนเธเธ•เธงเธ เธเธ”เธเธชเธก เธชเธฒเธฃเธฅเธฐเธฅเธฒเธข เธขเธฒเธเนเธณ เนเธเธงเธเธ•เธฐเธเธญเธ เธญเธดเธกเธฑเธฅเธเธฑเธ เธเธฃเธตเธก เธเธตเนเธเธถเนเธ เนเธเธเธเธนเธฅ</p>
+              <p class="domain-card-desc">เทคนิคชั่งตวง บดผสม สารละลาย ยาน้ำ แขวนตะกอน อิมัลชัน ครีม ขี้ผึ้ง แคปซูล</p>
             </div>
             <span class="domain-count-badge" id="badge-count-product">46</span>
           </div>
 
           <div class="domain-select-card" id="domain-card-clinic" onclick="selectDomainFilter('Clinic', this)">
-            <div class="domain-card-icon">๐’</div>
+            <div class="domain-card-icon">💊</div>
             <div class="domain-card-body">
               <h3 class="domain-card-title">
-                Clinic (เน€เธ—เธเธเธดเธเนเธเนเธขเธฒ)
+                Clinic (เทคนิคใช้ยา)
               </h3>
-              <p class="domain-card-desc">เธชเธทเนเธญเนเธญเธชเธ–เธจเธฒเธฅเธฒ เธเธธเธฌเธฒเธฏ, เธขเธฒเธชเธนเธ”เธเนเธ Inhaler, เธขเธฒเธซเธขเธญเธ”เธ•เธฒ/เธซเธน, เธเนเธเธเธกเธนเธ, เธขเธฒเธเธตเธ”เธญเธดเธเธเธนเธฅเธดเธ</p>
+              <p class="domain-card-desc">สื่อโอสถศาลา จุฬาฯ, ยาสูดพ่น Inhaler, ยาหยอดตา/หู, พ่นจมูก, ยาฉีดอินซูลิน</p>
             </div>
             <span class="domain-count-badge" id="badge-count-clinic">31</span>
           </div>
@@ -888,10 +888,10 @@
               <svg class="video-search-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
-              <input type="text" id="video-search-input" class="video-search-input" placeholder="เธเนเธเธซเธฒเธเธทเนเธญเน€เธ—เธเธเธดเธ, Aliquot, เธขเธฒเธเนเธณ, เธขเธฒเนเธเธงเธเธ•เธฐเธเธญเธ, MDI, Turbuhaler, เนเธญเธชเธ–เธจเธฒเธฅเธฒ, เธซเธกเธฒเธเธเธฃเธฑเนเธเธเธดเนเธเธ•เธดเธ...">
+              <input type="text" id="video-search-input" class="video-search-input" placeholder="ค้นหาชื่อเทคนิค, Aliquot, ยาน้ำ, ยาแขวนตะกอน, MDI, Turbuhaler, โอสถศาลา, หมากฝรั่งนิโคติน...">
             </div>
             <button class="btn btn-secondary" onclick="resetVideoFilters()" style="padding: 0.65rem 1rem; font-size: 0.85rem;">
-              ๐” เธฃเธตเน€เธเนเธ•
+              🔄 รีเซ็ต
             </button>
           </div>
 
@@ -909,16 +909,16 @@
         <!-- Video Count Indicator -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
           <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-secondary);">
-            เนเธชเธ”เธ <span id="video-display-count" style="color: var(--primary);">46</span> เธฃเธฒเธขเธเธฒเธฃ
+            แสดง <span id="video-display-count" style="color: var(--primary);">46</span> รายการ
           </div>
           <div style="display: flex; gap: 0.5rem;">
             <label style="font-size: 0.82rem; display: flex; align-items: center; gap: 0.35rem; cursor: pointer; user-select: none;">
               <input type="checkbox" id="filter-unwatched-only" onchange="applyFilters()">
-              <span>เน€เธเธเธฒเธฐเธ—เธตเนเธขเธฑเธเนเธกเนเนเธ”เนเธ”เธน</span>
+              <span>เฉพาะที่ยังไม่ได้ดู</span>
             </label>
             <label style="font-size: 0.82rem; display: flex; align-items: center; gap: 0.35rem; cursor: pointer; user-select: none;">
               <input type="checkbox" id="filter-favorites-only" onchange="applyFilters()">
-              <span>เน€เธเธเธฒเธฐเธฃเธฒเธขเธเธฒเธฃเนเธเธฃเธ” โญ</span>
+              <span>เฉพาะรายการโปรด ⭐</span>
             </label>
           </div>
         </div>
@@ -934,9 +934,9 @@
   <!-- Footer -->
   <footer class="footer" id="main-footer" style="margin-top: 2rem; padding: 18px 1.5rem; border-top: 1px solid var(--border); text-align: center;">
     <div class="container" style="text-align: center;">
-      <p style="margin-bottom: 0.35rem; font-size: 0.82rem; color: var(--text-secondary);">ยฉ 2026 เธเธ“เธฐเธ—เธณเธเธฒเธเนเธเธฃเธเธเธฒเธฃเน€เธ•เธฃเธตเธขเธกเธชเธญเธเนเธเธเธฃเธฐเธเธญเธเธงเธดเธเธฒเธเธตเธเน€เธ เธชเธฑเธเธเธฃเธฃเธก (PLE-CC) เธเธตเธเธฒเธฃเธจเธถเธเธฉเธฒ 2569</p>
+      <p style="margin-bottom: 0.35rem; font-size: 0.82rem; color: var(--text-secondary);">© 2026 คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม (PLE-CC) ปีการศึกษา 2569</p>
       <p class="footer-credit" style="font-size: 0.78rem; color: var(--ink-soft); margin: 0;">
-        <strong>RxCU OSPE Hub</strong> ยท เธเธฑเธ’เธเธฒเนเธ”เธข เธเธ“เธฐเธ—เธณเธเธฒเธเนเธเธฃเธเธเธฒเธฃเน€เธ•เธฃเธตเธขเธกเธชเธญเธเนเธเธเธฃเธฐเธเธญเธเธงเธดเธเธฒเธเธตเธเธฏ เธเธดเธชเธดเธ•เน€เธ เธชเธฑเธเธฏ เธเธธเธฌเธฒเธฏ
+        <strong>RxCU OSPE Hub</strong> · พัฒนาโดย คณะทำงานโครงการเตรียมสอบใบประกอบวิชาชีพฯ นิสิตเภสัชฯ จุฬาฯ
       </p>
     </div>
   </footer>
@@ -949,17 +949,17 @@
   <div class="theater-modal-card">
     <div class="theater-header">
       <h3 class="theater-title" id="theater-video-title">
-        <span>๐ฌ</span>
-        <span id="theater-title-text">เธเธณเธฅเธฑเธเนเธซเธฅเธ”เธเธฅเธดเธเธงเธดเธ”เธตเนเธญ...</span>
+        <span>🎬</span>
+        <span id="theater-title-text">กำลังโหลดคลิปวิดีโอ...</span>
       </h3>
       <div style="display: flex; align-items: center; gap: 0.35rem;">
-        <button class="theater-btn-tool" id="theater-maximize-btn" onclick="toggleTheaterMaximize()" title="เธเธขเธฒเธขเน€เธ•เนเธกเธเธเธฒเธ”เธซเธเนเธฒเธ•เนเธฒเธ (Maximize)">
-          โถ
+        <button class="theater-btn-tool" id="theater-maximize-btn" onclick="toggleTheaterMaximize()" title="ขยายเต็มขนาดหน้าต่าง (Maximize)">
+          ⛶
         </button>
-        <button class="theater-btn-tool" id="theater-fullscreen-btn" onclick="toggleTheaterNativeFullscreen()" title="เนเธซเธกเธ”เน€เธ•เนเธกเธซเธเนเธฒเธเธญ (Fullscreen F11)">
-          ๐“บ
+        <button class="theater-btn-tool" id="theater-fullscreen-btn" onclick="toggleTheaterNativeFullscreen()" title="โหมดเต็มหน้าจอ (Fullscreen F11)">
+          📺
         </button>
-        <button class="theater-close-btn" onclick="closeTheaterModal()" title="เธเธดเธ”เธซเธเนเธฒเธ•เนเธฒเธ (Esc)">โ•</button>
+        <button class="theater-close-btn" onclick="closeTheaterModal()" title="ปิดหน้าต่าง (Esc)">✕</button>
       </div>
     </div>
     
@@ -970,26 +970,26 @@
     <div class="theater-body">
       <div class="theater-nav-row">
         <button class="video-action-btn" id="btn-prev-video" onclick="navigateVideo(-1)">
-          โฎ เธเธฅเธดเธเธเนเธญเธเธซเธเนเธฒ
+          ⏮ คลิปก่อนหน้า
         </button>
         <div class="theater-actions-group">
           <button class="video-action-btn" id="theater-watched-toggle" onclick="toggleCurrentVideoWatched()">
-            โ”๏ธ เธ”เธนเนเธฅเนเธง
+            ✔️ ดูแล้ว
           </button>
           <button class="video-action-btn" id="theater-fav-toggle" onclick="toggleCurrentVideoFav()">
-            โญ เธฃเธฒเธขเธเธฒเธฃเนเธเธฃเธ”
+            ⭐ รายการโปรด
           </button>
           <a href="#" target="_blank" rel="noopener noreferrer" class="video-action-btn" id="theater-external-link">
-            เน€เธเธดเธ”เธ”เธนเธ เธฒเธขเธเธญเธ โ—
+            เปิดดูภายนอก ↗
           </a>
         </div>
         <button class="video-action-btn" id="btn-next-video" onclick="navigateVideo(1)">
-          เธเธฅเธดเธเธ–เธฑเธ”เนเธ โญ
+          คลิปถัดไป ⏭
         </button>
       </div>
 
       <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-top: 0.25rem;">
-        <span id="theater-video-faculty" style="font-weight: 600;">เธ เธฒเธเธงเธดเธเธฒเธงเธดเธ—เธขเธฒเธเธฒเธฃเน€เธ เธชเธฑเธเธเธฃเธฃเธก เธเธ“เธฐเน€เธ เธชเธฑเธเธจเธฒเธชเธ•เธฃเน เธเธธเธฌเธฒเธฅเธเธเธฃเธ“เนเธกเธซเธฒเธงเธดเธ—เธขเธฒเธฅเธฑเธข</span>
+        <span id="theater-video-faculty" style="font-weight: 600;">ภาควิชาวิทยาการเภสัชกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย</span>
         <div id="theater-video-meta" style="margin-top: 0.25rem; font-size: 0.8rem; color: var(--text-muted);"></div>
       </div>
     </div>
@@ -997,7 +997,7 @@
 </div>
 
 <script>
-  // โ”€โ”€โ”€ Video Library Application Controller โ”€โ”€โ”€
+  // ─── Video Library Application Controller ───
   let currentActiveVideos = (typeof COMPOUNDING_VIDEOS !== 'undefined') ? COMPOUNDING_VIDEOS : [];
   let currentFilteredList = [];
   let currentPlayingIndex = -1;
@@ -1092,62 +1092,62 @@
     // 1. Render Major Groups based on Domain
     if (activeDomain === 'Product') {
       groupContainer.innerHTML = `
-        <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); margin-right: 0.25rem;">เธซเธกเธงเธ” Product:</span>
+        <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); margin-right: 0.25rem;">หมวด Product:</span>
         <button class="video-group-btn ${activeMajorGroup === 'all' ? 'active' : ''}" onclick="setMajorGroup('all', this)">All Product (46)</button>
-        <button class="video-group-btn ${activeMajorGroup === 'เธซเธกเธงเธ” 1' ? 'active' : ''}" onclick="setMajorGroup('เธซเธกเธงเธ” 1', this)">๐งช เธซเธกเธงเธ” 1: เธเธทเนเธเธเธฒเธเธชเธณเธเธฑเธ (19)</button>
-        <button class="video-group-btn ${activeMajorGroup === 'เธซเธกเธงเธ” 2' ? 'active' : ''}" onclick="setMajorGroup('เธซเธกเธงเธ” 2', this)">๐“ฆ เธซเธกเธงเธ” 2: เน€เธ เธชเธฑเธเธ เธฑเธ“เธ‘เนเน€เธเธเธฒเธฐเธฃเธนเธเนเธเธ (27)</button>
+        <button class="video-group-btn ${activeMajorGroup === 'หมวด 1' ? 'active' : ''}" onclick="setMajorGroup('หมวด 1', this)">🧪 หมวด 1: พื้นฐานสำคัญ (19)</button>
+        <button class="video-group-btn ${activeMajorGroup === 'หมวด 2' ? 'active' : ''}" onclick="setMajorGroup('หมวด 2', this)">📦 หมวด 2: เภสัชภัณฑ์เฉพาะรูปแบบ (27)</button>
       `;
 
       chipsContainer.innerHTML = `
-        <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); align-self: center; margin-right: 0.2rem;">เธฃเธนเธเนเธเธเธขเธฒ/เธ—เธฑเธเธฉเธฐ:</span>
+        <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); align-self: center; margin-right: 0.2rem;">รูปแบบยา/ทักษะ:</span>
         <button class="video-chip-btn ${activeDosageForm === 'all' ? 'active' : ''}" onclick="setDosageForm('all', this)">All</button>
-        <button class="video-chip-btn ${activeDosageForm === 'เธเธฒเธฃเธเธฑเนเธเธ•เธงเธ & Aliquot' ? 'active' : ''}" onclick="setDosageForm('เธเธฒเธฃเธเธฑเนเธเธ•เธงเธ & Aliquot', this)">โ–๏ธ เธเธฑเนเธเธ•เธงเธ & Aliquot</button>
-        <button class="video-chip-btn ${activeDosageForm === 'เธเธฒเธฃเธเธ” เธเธชเธก & เธซเธฅเธญเธก' ? 'active' : ''}" onclick="setDosageForm('เธเธฒเธฃเธเธ” เธเธชเธก & เธซเธฅเธญเธก', this)">๐ฅฃ เธเธ”เธเธชเธก & เธซเธฅเธญเธก</button>
-        <button class="video-chip-btn ${activeDosageForm === 'เธเธฒเธฃเธเธฃเธญเธ & เธเธฑเธเธเธฃเธฐเธ”เธฒเธฉเธเธฃเธญเธ' ? 'active' : ''}" onclick="setDosageForm('เธเธฒเธฃเธเธฃเธญเธ & เธเธฑเธเธเธฃเธฐเธ”เธฒเธฉเธเธฃเธญเธ', this)">๐“ เธเธฃเธญเธ & เธเธฑเธเธเธฃเธฐเธ”เธฒเธฉ</button>
-        <button class="video-chip-btn ${activeDosageForm === 'เธขเธฒเธเนเธณเนเธช & เธชเธฒเธฃเธฅเธฐเธฅเธฒเธข' ? 'active' : ''}" onclick="setDosageForm('เธขเธฒเธเนเธณเนเธช & เธชเธฒเธฃเธฅเธฐเธฅเธฒเธข', this)">๐’ง เธขเธฒเธเนเธณเนเธช</button>
-        <button class="video-chip-btn ${activeDosageForm === 'เธขเธฒเธเนเธณเนเธเธงเธเธ•เธฐเธเธญเธ (Suspensions)' ? 'active' : ''}" onclick="setDosageForm('เธขเธฒเธเนเธณเนเธเธงเธเธ•เธฐเธเธญเธ (Suspensions)', this)">๐งช เธขเธฒเนเธเธงเธเธ•เธฐเธเธญเธ</button>
-        <button class="video-chip-btn ${activeDosageForm === 'เธขเธฒเธญเธดเธกเธฑเธฅเธเธฑเธ (Emulsions)' ? 'active' : ''}" onclick="setDosageForm('เธขเธฒเธญเธดเธกเธฑเธฅเธเธฑเธ (Emulsions)', this)">๐ฅ เธญเธดเธกเธฑเธฅเธเธฑเธ</button>
-        <button class="video-chip-btn ${activeDosageForm === 'เธขเธฒเธเธฃเธตเธก เธเธตเนเธเธถเนเธ & เน€เธเธชเธ•เน' ? 'active' : ''}" onclick="setDosageForm('เธขเธฒเธเธฃเธตเธก เธเธตเนเธเธถเนเธ & เน€เธเธชเธ•เน', this)">๐งด เธเธฃเธตเธก/เธเธตเนเธเธถเนเธ</button>
-        <button class="video-chip-btn ${activeDosageForm === 'เธขเธฒเน€เธเธฅ (Gels)' ? 'active' : ''}" onclick="setDosageForm('เธขเธฒเน€เธเธฅ (Gels)', this)">๐งซ เน€เธเธฅ</button>
-        <button class="video-chip-btn ${activeDosageForm === 'เธขเธฒเนเธเธเธเธนเธฅ & เธเธเธขเธฒ' ? 'active' : ''}" onclick="setDosageForm('เธขเธฒเนเธเธเธเธนเธฅ & เธเธเธขเธฒ', this)">๐’ เนเธเธเธเธนเธฅ/เธเธ</button>
-        <button class="video-chip-btn ${activeDosageForm === 'เธขเธฒเธเธฃเธฒเธจเธเธฒเธเน€เธเธทเนเธญ (Sterile & Aseptic)' ? 'active' : ''}" onclick="setDosageForm('เธขเธฒเธเธฃเธฒเธจเธเธฒเธเน€เธเธทเนเธญ (Sterile & Aseptic)', this)">๐’ เธเธฃเธฒเธจเธเธฒเธเน€เธเธทเนเธญ</button>
+        <button class="video-chip-btn ${activeDosageForm === 'การชั่งตวง & Aliquot' ? 'active' : ''}" onclick="setDosageForm('การชั่งตวง & Aliquot', this)">⚖️ ชั่งตวง & Aliquot</button>
+        <button class="video-chip-btn ${activeDosageForm === 'การบด ผสม & หลอม' ? 'active' : ''}" onclick="setDosageForm('การบด ผสม & หลอม', this)">🥣 บดผสม & หลอม</button>
+        <button class="video-chip-btn ${activeDosageForm === 'การกรอง & พับกระดาษกรอง' ? 'active' : ''}" onclick="setDosageForm('การกรอง & พับกระดาษกรอง', this)">📄 กรอง & พับกระดาษ</button>
+        <button class="video-chip-btn ${activeDosageForm === 'ยาน้ำใส & สารละลาย' ? 'active' : ''}" onclick="setDosageForm('ยาน้ำใส & สารละลาย', this)">💧 ยาน้ำใส</button>
+        <button class="video-chip-btn ${activeDosageForm === 'ยาน้ำแขวนตะกอน (Suspensions)' ? 'active' : ''}" onclick="setDosageForm('ยาน้ำแขวนตะกอน (Suspensions)', this)">🧪 ยาแขวนตะกอน</button>
+        <button class="video-chip-btn ${activeDosageForm === 'ยาอิมัลชัน (Emulsions)' ? 'active' : ''}" onclick="setDosageForm('ยาอิมัลชัน (Emulsions)', this)">🥛 อิมัลชัน</button>
+        <button class="video-chip-btn ${activeDosageForm === 'ยาครีม ขี้ผึ้ง & เพสต์' ? 'active' : ''}" onclick="setDosageForm('ยาครีม ขี้ผึ้ง & เพสต์', this)">🧴 ครีม/ขี้ผึ้ง</button>
+        <button class="video-chip-btn ${activeDosageForm === 'ยาเจล (Gels)' ? 'active' : ''}" onclick="setDosageForm('ยาเจล (Gels)', this)">🧫 เจล</button>
+        <button class="video-chip-btn ${activeDosageForm === 'ยาแคปซูล & ผงยา' ? 'active' : ''}" onclick="setDosageForm('ยาแคปซูล & ผงยา', this)">💊 แคปซูล/ผง</button>
+        <button class="video-chip-btn ${activeDosageForm === 'ยาปราศจากเชื้อ (Sterile & Aseptic)' ? 'active' : ''}" onclick="setDosageForm('ยาปราศจากเชื้อ (Sterile & Aseptic)', this)">💉 ปราศจากเชื้อ</button>
       `;
     } else if (activeDomain === 'Clinic') {
       groupContainer.innerHTML = `
-        <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); margin-right: 0.25rem;">เธซเธกเธงเธ” Clinic:</span>
+        <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); margin-right: 0.25rem;">หมวด Clinic:</span>
         <button class="video-group-btn ${activeMajorGroup === 'all' ? 'active' : ''}" onclick="setMajorGroup('all', this)">All Clinic (31)</button>
-        <button class="video-group-btn ${activeMajorGroup === 'เนเธญเธชเธ–เธจเธฒเธฅเธฒ' ? 'active' : ''}" onclick="setMajorGroup('เนเธญเธชเธ–เธจเธฒเธฅเธฒ', this)">๐๏ธ เนเธญเธชเธ–เธจเธฒเธฅเธฒ เธเธธเธฌเธฒเธฏ (9)</button>
-        <button class="video-group-btn ${activeMajorGroup === 'Inhalers' ? 'active' : ''}" onclick="setMajorGroup('Inhalers', this)">๐ซ เธขเธฒเธชเธนเธ”เธเนเธ Inhalers (10)</button>
-        <button class="video-group-btn ${activeMajorGroup === 'Special' ? 'active' : ''}" onclick="setMajorGroup('Special', this)">๐งด เธขเธฒเนเธเนเน€เธเธเธฒเธฐเธ—เธตเน/เธ เธฒเธขเธเธญเธ (8)</button>
-        <button class="video-group-btn ${activeMajorGroup === 'Injections' ? 'active' : ''}" onclick="setMajorGroup('Injections', this)">๐’ เธขเธฒเธเธตเธ”/เธญเธกเนเธ•เนเธฅเธดเนเธ (4)</button>
+        <button class="video-group-btn ${activeMajorGroup === 'โอสถศาลา' ? 'active' : ''}" onclick="setMajorGroup('โอสถศาลา', this)">🏛️ โอสถศาลา จุฬาฯ (9)</button>
+        <button class="video-group-btn ${activeMajorGroup === 'Inhalers' ? 'active' : ''}" onclick="setMajorGroup('Inhalers', this)">🫁 ยาสูดพ่น Inhalers (10)</button>
+        <button class="video-group-btn ${activeMajorGroup === 'Special' ? 'active' : ''}" onclick="setMajorGroup('Special', this)">🧴 ยาใช้เฉพาะที่/ภายนอก (8)</button>
+        <button class="video-group-btn ${activeMajorGroup === 'Injections' ? 'active' : ''}" onclick="setMajorGroup('Injections', this)">💉 ยาฉีด/อมใต้ลิ้น (4)</button>
       `;
 
       chipsContainer.innerHTML = `
-        <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); align-self: center; margin-right: 0.2rem;">เธญเธธเธเธเธฃเธ“เน/เธ—เธฑเธเธฉเธฐ:</span>
+        <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); align-self: center; margin-right: 0.2rem;">อุปกรณ์/ทักษะ:</span>
         <button class="video-chip-btn ${activeDosageForm === 'all' ? 'active' : ''}" onclick="setDosageForm('all', this)">All</button>
-        <button class="video-chip-btn ${activeDosageForm === 'Nicotine' ? 'active' : ''}" onclick="setDosageForm('Nicotine', this)">๐ฌ เธซเธกเธฒเธเธเธฃเธฑเนเธ/เนเธเนเธเนเธเธฐเธเธดเนเธเธ•เธดเธ</button>
-        <button class="video-chip-btn ${activeDosageForm === 'Inhaler' ? 'active' : ''}" onclick="setDosageForm('Inhaler', this)">๐ซ MDI / DPI / Respimat</button>
-        <button class="video-chip-btn ${activeDosageForm === 'Eye/Ear' ? 'active' : ''}" onclick="setDosageForm('Eye/Ear', this)">๐‘๏ธ๐‘ เธซเธขเธญเธ”เธ•เธฒ / เธซเธขเธญเธ”เธซเธน</button>
-        <button class="video-chip-btn ${activeDosageForm === 'Nasal' ? 'active' : ''}" onclick="setDosageForm('Nasal', this)">๐‘ เธเนเธเธเธกเธนเธ / เธฅเนเธฒเธเธเธกเธนเธ</button>
-        <button class="video-chip-btn ${activeDosageForm === 'Suppository' ? 'active' : ''}" onclick="setDosageForm('Suppository', this)">๐’ เธขเธฒเน€เธซเธเนเธ / เธขเธฒเธชเธงเธเธ—เธงเธฒเธฃ</button>
-        <button class="video-chip-btn ${activeDosageForm === 'Insulin' ? 'active' : ''}" onclick="setDosageForm('Insulin', this)">๐’ เธเธฒเธเธเธฒ / เนเธเธฃเธดเธเธเนเธญเธดเธเธเธนเธฅเธดเธ</button>
+        <button class="video-chip-btn ${activeDosageForm === 'Nicotine' ? 'active' : ''}" onclick="setDosageForm('Nicotine', this)">🚬 หมากฝรั่ง/แผ่นแปะนิโคติน</button>
+        <button class="video-chip-btn ${activeDosageForm === 'Inhaler' ? 'active' : ''}" onclick="setDosageForm('Inhaler', this)">🫁 MDI / DPI / Respimat</button>
+        <button class="video-chip-btn ${activeDosageForm === 'Eye/Ear' ? 'active' : ''}" onclick="setDosageForm('Eye/Ear', this)">👁️👂 หยอดตา / หยอดหู</button>
+        <button class="video-chip-btn ${activeDosageForm === 'Nasal' ? 'active' : ''}" onclick="setDosageForm('Nasal', this)">👃 พ่นจมูก / ล้างจมูก</button>
+        <button class="video-chip-btn ${activeDosageForm === 'Suppository' ? 'active' : ''}" onclick="setDosageForm('Suppository', this)">💊 ยาเหน็บ / ยาสวนทวาร</button>
+        <button class="video-chip-btn ${activeDosageForm === 'Insulin' ? 'active' : ''}" onclick="setDosageForm('Insulin', this)">💉 ปากกา / ไซริงค์อินซูลิน</button>
       `;
     } else {
       // ALL
       groupContainer.innerHTML = `
-        <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); margin-right: 0.25rem;">เธซเธกเธงเธ”เธงเธดเธเธฒ:</span>
+        <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); margin-right: 0.25rem;">หมวดวิชา:</span>
         <button class="video-group-btn ${activeMajorGroup === 'all' ? 'active' : ''}" onclick="setMajorGroup('all', this)">All Domains (77)</button>
-        <button class="video-group-btn ${activeMajorGroup === 'Product' ? 'active' : ''}" onclick="setMajorGroup('Product', this)">๐”ฌ Product (46)</button>
-        <button class="video-group-btn ${activeMajorGroup === 'Clinic' ? 'active' : ''}" onclick="setMajorGroup('Clinic', this)">๐’ Clinic (31)</button>
+        <button class="video-group-btn ${activeMajorGroup === 'Product' ? 'active' : ''}" onclick="setMajorGroup('Product', this)">🔬 Product (46)</button>
+        <button class="video-group-btn ${activeMajorGroup === 'Clinic' ? 'active' : ''}" onclick="setMajorGroup('Clinic', this)">💊 Clinic (31)</button>
       `;
 
       chipsContainer.innerHTML = `
-        <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); align-self: center; margin-right: 0.2rem;">เธฃเธนเธเนเธเธ/เนเธซเธฅเนเธเธ—เธตเนเธกเธฒ:</span>
+        <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); align-self: center; margin-right: 0.2rem;">รูปแบบ/แหล่งที่มา:</span>
         <button class="video-chip-btn ${activeDosageForm === 'all' ? 'active' : ''}" onclick="setDosageForm('all', this)">All</button>
-        <button class="video-chip-btn ${activeDosageForm === 'เนเธญเธชเธ–เธจเธฒเธฅเธฒ' ? 'active' : ''}" onclick="setDosageForm('เนเธญเธชเธ–เธจเธฒเธฅเธฒ', this)">๐๏ธ เนเธญเธชเธ–เธจเธฒเธฅเธฒ เธเธธเธฌเธฒเธฏ</button>
-        <button class="video-chip-btn ${activeDosageForm === 'Inhaler' ? 'active' : ''}" onclick="setDosageForm('Inhaler', this)">๐ซ เธขเธฒเธชเธนเธ”เธเนเธ (Inhalers)</button>
-        <button class="video-chip-btn ${activeDosageForm === 'Compounding' ? 'active' : ''}" onclick="setDosageForm('Compounding', this)">๐งช เน€เธ เธชเธฑเธเธเธฃเธฃเธกเน€เธ•เธฃเธตเธขเธกเธขเธฒ</button>
-        <button class="video-chip-btn ${activeDosageForm === 'Aseptic' ? 'active' : ''}" onclick="setDosageForm('Aseptic', this)">๐’ เธขเธฒเธเธตเธ”/เธเธฃเธฒเธจเธเธฒเธเน€เธเธทเนเธญ</button>
+        <button class="video-chip-btn ${activeDosageForm === 'โอสถศาลา' ? 'active' : ''}" onclick="setDosageForm('โอสถศาลา', this)">🏛️ โอสถศาลา จุฬาฯ</button>
+        <button class="video-chip-btn ${activeDosageForm === 'Inhaler' ? 'active' : ''}" onclick="setDosageForm('Inhaler', this)">🫁 ยาสูดพ่น (Inhalers)</button>
+        <button class="video-chip-btn ${activeDosageForm === 'Compounding' ? 'active' : ''}" onclick="setDosageForm('Compounding', this)">🧪 เภสัชกรรมเตรียมยา</button>
+        <button class="video-chip-btn ${activeDosageForm === 'Aseptic' ? 'active' : ''}" onclick="setDosageForm('Aseptic', this)">💉 ยาฉีด/ปราศจากเชื้อ</button>
       `;
     }
   }
@@ -1206,10 +1206,10 @@
         } else if (activeDomain === 'Product') {
           if (!v.majorGroup.includes(activeMajorGroup)) return false;
         } else if (activeDomain === 'Clinic') {
-          if (activeMajorGroup === 'เนเธญเธชเธ–เธจเธฒเธฅเธฒ' && !v.majorGroup.includes('เนเธญเธชเธ–เธจเธฒเธฅเธฒ') && !(v.tags || []).includes('เนเธญเธชเธ–เธจเธฒเธฅเธฒ')) return false;
-          if (activeMajorGroup === 'Inhalers' && !v.majorGroup.includes('Inhalers') && !v.majorGroup.includes('เธขเธฒเธชเธนเธ”เธเนเธ')) return false;
-          if (activeMajorGroup === 'Special' && !v.majorGroup.includes('Special') && !v.majorGroup.includes('เธ เธฒเธขเธเธญเธ')) return false;
-          if (activeMajorGroup === 'Injections' && !v.majorGroup.includes('Injections') && !v.majorGroup.includes('เธขเธฒเธเธตเธ”')) return false;
+          if (activeMajorGroup === 'โอสถศาลา' && !v.majorGroup.includes('โอสถศาลา') && !(v.tags || []).includes('โอสถศาลา')) return false;
+          if (activeMajorGroup === 'Inhalers' && !v.majorGroup.includes('Inhalers') && !v.majorGroup.includes('ยาสูดพ่น')) return false;
+          if (activeMajorGroup === 'Special' && !v.majorGroup.includes('Special') && !v.majorGroup.includes('ภายนอก')) return false;
+          if (activeMajorGroup === 'Injections' && !v.majorGroup.includes('Injections') && !v.majorGroup.includes('ยาฉีด')) return false;
         }
       }
 
@@ -1218,18 +1218,18 @@
         if (activeDomain === 'Product') {
           if (v.dosageForm !== activeDosageForm) return false;
         } else if (activeDomain === 'Clinic') {
-          if (activeDosageForm === 'Nicotine' && !v.title.includes('เธเธดเนเธเธ•เธดเธ') && !v.dosageForm.includes('เธเธดเนเธเธ•เธดเธ')) return false;
-          if (activeDosageForm === 'Inhaler' && !v.dosageForm.includes('เธขเธฒเธชเธนเธ”เธเนเธ') && !v.title.includes('Inhaler') && !v.title.includes('เธเนเธเธชเธนเธ”') && !v.title.includes('เธชเธนเธ”เธขเธฒ')) return false;
-          if (activeDosageForm === 'Eye/Ear' && !v.dosageForm.includes('เธ•เธฒ') && !v.dosageForm.includes('เธซเธน')) return false;
-          if (activeDosageForm === 'Nasal' && !v.dosageForm.includes('เธเธกเธนเธ')) return false;
-          if (activeDosageForm === 'Suppository' && !v.dosageForm.includes('เน€เธซเธเนเธ') && !v.dosageForm.includes('เธชเธงเธ')) return false;
-          if (activeDosageForm === 'Insulin' && !v.dosageForm.includes('เธญเธดเธเธเธนเธฅเธดเธ')) return false;
+          if (activeDosageForm === 'Nicotine' && !v.title.includes('นิโคติน') && !v.dosageForm.includes('นิโคติน')) return false;
+          if (activeDosageForm === 'Inhaler' && !v.dosageForm.includes('ยาสูดพ่น') && !v.title.includes('Inhaler') && !v.title.includes('พ่นสูด') && !v.title.includes('สูดยา')) return false;
+          if (activeDosageForm === 'Eye/Ear' && !v.dosageForm.includes('ตา') && !v.dosageForm.includes('หู')) return false;
+          if (activeDosageForm === 'Nasal' && !v.dosageForm.includes('จมูก')) return false;
+          if (activeDosageForm === 'Suppository' && !v.dosageForm.includes('เหน็บ') && !v.dosageForm.includes('สวน')) return false;
+          if (activeDosageForm === 'Insulin' && !v.dosageForm.includes('อินซูลิน')) return false;
         } else {
           // All domain chips
-          if (activeDosageForm === 'เนเธญเธชเธ–เธจเธฒเธฅเธฒ' && !v.faculty.includes('เนเธญเธชเธ–เธจเธฒเธฅเธฒ') && !(v.tags || []).includes('เนเธญเธชเธ–เธจเธฒเธฅเธฒ')) return false;
-          if (activeDosageForm === 'Inhaler' && !v.dosageForm.includes('เธขเธฒเธชเธนเธ”เธเนเธ') && !v.title.includes('Inhaler') && !v.title.includes('เธชเธนเธ”เธขเธฒ')) return false;
+          if (activeDosageForm === 'โอสถศาลา' && !v.faculty.includes('โอสถศาลา') && !(v.tags || []).includes('โอสถศาลา')) return false;
+          if (activeDosageForm === 'Inhaler' && !v.dosageForm.includes('ยาสูดพ่น') && !v.title.includes('Inhaler') && !v.title.includes('สูดยา')) return false;
           if (activeDosageForm === 'Compounding' && v.domain !== 'Product') return false;
-          if (activeDosageForm === 'Aseptic' && !v.dosageForm.includes('Sterile') && !v.dosageForm.includes('เธเธตเธ”')) return false;
+          if (activeDosageForm === 'Aseptic' && !v.dosageForm.includes('Sterile') && !v.dosageForm.includes('ฉีด')) return false;
         }
       }
 
@@ -1269,10 +1269,10 @@
     if (currentFilteredList.length === 0) {
       container.innerHTML = `
         <div class="empty-video-state" style="grid-column: 1 / -1;">
-          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">๐”</div>
-          <h3 style="font-family: var(--font-title); color: var(--text-primary); margin: 0 0 0.5rem 0;">เนเธกเนเธเธเธเธฅเธดเธเธงเธดเธ”เธตเนเธญเธ—เธตเนเธ•เธฃเธเธเธฑเธเน€เธเธทเนเธญเธเนเธ</h3>
-          <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 1rem 0;">เธฅเธญเธเน€เธเธฅเธตเนเธขเธเธเธณเธเนเธเธซเธฒ เธซเธฃเธทเธญเธเธ”เน€เธฅเธทเธญเธเธ”เธนเธซเธกเธงเธ”เธซเธกเธนเนเธญเธทเนเธเน€เธเธทเนเธญเธ”เธนเธเธฅเธดเธเธ—เธฑเนเธเธซเธกเธ”</p>
-          <button class="btn btn-secondary" onclick="resetVideoFilters()">๐” เนเธชเธ”เธเธเธฅเธดเธเธ—เธฑเนเธเธซเธกเธ”</button>
+          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🔍</div>
+          <h3 style="font-family: var(--font-title); color: var(--text-primary); margin: 0 0 0.5rem 0;">ไม่พบคลิปวิดีโอที่ตรงกับเงื่อนไข</h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 1rem 0;">ลองเปลี่ยนคำค้นหา หรือกดเลือกดูหมวดหมู่อื่นเพื่อดูคลิปทั้งหมด</p>
+          <button class="btn btn-secondary" onclick="resetVideoFilters()">🔄 แสดงคลิปทั้งหมด</button>
         </div>
       `;
       return;
@@ -1291,20 +1291,20 @@
       if (v.type === 'youtube' && v.videoId) {
         thumbHtml = `
           <img src="https://img.youtube.com/vi/${v.videoId}/hqdefault.jpg" class="video-thumb-img" alt="${escapeHtml(v.title)}" loading="lazy">
-          <div class="video-play-overlay">โ–ถ</div>
+          <div class="video-play-overlay">▶</div>
           <div class="video-platform-badge" style="${isClinic ? 'background: rgba(16, 185, 129, 0.9);' : 'background: rgba(15, 23, 42, 0.82);'}">
-            ${isClinic ? '๐’ Clinic YouTube' : '๐”ด YouTube'}
+            ${isClinic ? '💊 Clinic YouTube' : '🔴 YouTube'}
           </div>
         `;
       } else {
         thumbHtml = `
           <div class="video-thumb-drive-banner">
-            <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">๐งช๐“น</div>
+            <div style="font-size: 2.2rem; margin-bottom: 0.25rem;">🧪📹</div>
             <div style="font-size: 0.78rem; font-weight: 700; color: #e2e8f0;">${escapeHtml(v.chapter)}</div>
             <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 2px;">Google Drive Video</div>
           </div>
-          <div class="video-play-overlay">โ–ถ</div>
-          <div class="video-platform-badge" style="background: rgba(30, 41, 59, 0.9);">๐“ Google Drive</div>
+          <div class="video-play-overlay">▶</div>
+          <div class="video-platform-badge" style="background: rgba(30, 41, 59, 0.9);">📁 Google Drive</div>
         `;
       }
 
@@ -1316,7 +1316,7 @@
         <article class="video-card ${isWatched ? 'watched' : ''}" id="vcard-${v.id}">
           <div class="video-thumb-container" onclick="openTheaterModal(${idx})">
             ${thumbHtml}
-            <div class="video-watched-badge">โ“ เธ”เธนเนเธฅเนเธง</div>
+            <div class="video-watched-badge">✓ ดูแล้ว</div>
           </div>
           
           <div class="video-card-body">
@@ -1330,16 +1330,16 @@
             </h4>
 
             <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-              ๐ซ ${escapeHtml(v.faculty || 'เธเธ“เธฐเน€เธ เธชเธฑเธเธจเธฒเธชเธ•เธฃเน เธเธธเธฌเธฒเธฅเธเธเธฃเธ“เนเธกเธซเธฒเธงเธดเธ—เธขเธฒเธฅเธฑเธข')}
+              🏫 ${escapeHtml(v.faculty || 'คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย')}
             </div>
 
             <div class="video-card-footer">
               <div style="display: flex; gap: 0.35rem; width: 100%; justify-content: space-between;">
-                <button class="video-action-btn ${isWatched ? 'active' : ''}" onclick="toggleVideoWatched('${v.id}')" title="เธ—เธณเน€เธเธฃเธทเนเธญเธเธซเธกเธฒเธขเธงเนเธฒเธ”เธนเนเธฅเนเธง">
-                  ${isWatched ? 'โ“ เธ”เธนเนเธฅเนเธง' : 'โ—ฏ เธขเธฑเธเนเธกเนเธ”เธน'}
+                <button class="video-action-btn ${isWatched ? 'active' : ''}" onclick="toggleVideoWatched('${v.id}')" title="ทำเครื่องหมายว่าดูแล้ว">
+                  ${isWatched ? '✓ ดูแล้ว' : '◯ ยังไม่ดู'}
                 </button>
-                <button class="video-action-btn" onclick="toggleVideoFav('${v.id}')" title="เธฃเธฒเธขเธเธฒเธฃเนเธเธฃเธ”" style="${isFav ? 'color: #f59e0b; border-color: #f59e0b;' : ''}">
-                  ${isFav ? 'โญ เธฃเธฒเธขเธเธฒเธฃเนเธเธฃเธ”' : 'โ เธฃเธฒเธขเธเธฒเธฃเนเธเธฃเธ”'}
+                <button class="video-action-btn" onclick="toggleVideoFav('${v.id}')" title="รายการโปรด" style="${isFav ? 'color: #f59e0b; border-color: #f59e0b;' : ''}">
+                  ${isFav ? '⭐ รายการโปรด' : '☆ รายการโปรด'}
                 </button>
               </div>
             </div>
@@ -1374,7 +1374,7 @@
     if (badgeClinic) badgeClinic.textContent = totalClinic;
   }
 
-  // โ”€โ”€โ”€ Theater Modal Controller โ”€โ”€โ”€
+  // ─── Theater Modal Controller ───
   function openTheaterModal(filteredIndex) {
     if (filteredIndex < 0 || filteredIndex >= currentFilteredList.length) return;
     currentPlayingIndex = filteredIndex;
@@ -1387,9 +1387,9 @@
     const extLink = document.getElementById('theater-external-link');
     const metaEl = document.getElementById('theater-video-meta');
 
-    if (titleEl) titleEl.textContent = `${v.chapter} โ€ข ${v.title}`;
+    if (titleEl) titleEl.textContent = `${v.chapter} • ${v.title}`;
     if (extLink) extLink.href = v.url;
-    if (metaEl) metaEl.textContent = `${v.majorGroup} โ€ข เธฃเธนเธเนเธเธ: ${v.dosageForm}`;
+    if (metaEl) metaEl.textContent = `${v.majorGroup} • รูปแบบ: ${v.dosageForm}`;
 
     // Update Embed Iframe Player
     if (v.type === 'youtube' && v.videoId) {
@@ -1417,8 +1417,8 @@
     } else {
       playerBox.innerHTML = `
         <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#fff; padding:2rem; text-align:center;">
-          <p>เน€เธเธดเธ”เธ”เธนเธงเธดเธ”เธตเนเธญเธเนเธฒเธเธฅเธดเธเธเนเธ•เนเธเธ—เธฒเธเธ เธฒเธขเธเธญเธ:</p>
-          <a href="${v.url}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="margin-top:1rem;">โ—๏ธ เน€เธเธดเธ”เธ”เธนเธเธฅเธดเธเธงเธดเธ”เธตเนเธญ</a>
+          <p>เปิดดูวิดีโอผ่านลิงก์ต้นทางภายนอก:</p>
+          <a href="${v.url}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="margin-top:1rem;">↗️ เปิดดูคลิปวิดีโอ</a>
         </div>
       `;
     }
@@ -1443,11 +1443,11 @@
     const nextBtn = document.getElementById('btn-next-video');
 
     if (watchedBtn) {
-      watchedBtn.textContent = isWatched ? 'โ“ เธ”เธนเนเธฅเนเธง (Watched)' : 'โ—ฏ เธ—เธณเน€เธเธฃเธทเนเธญเธเธซเธกเธฒเธขเธงเนเธฒเธ”เธนเนเธฅเนเธง';
+      watchedBtn.textContent = isWatched ? '✓ ดูแล้ว (Watched)' : '◯ ทำเครื่องหมายว่าดูแล้ว';
       watchedBtn.classList.toggle('active', isWatched);
     }
     if (favBtn) {
-      favBtn.textContent = isFav ? 'โญ เธฃเธฒเธขเธเธฒเธฃเนเธเธฃเธ”' : 'โ เน€เธเธดเนเธกเน€เธเนเธเธฃเธฒเธขเธเธฒเธฃเนเธเธฃเธ”';
+      favBtn.textContent = isFav ? '⭐ รายการโปรด' : '☆ เพิ่มเป็นรายการโปรด';
       favBtn.style.color = isFav ? '#f59e0b' : '';
     }
 
@@ -1484,8 +1484,8 @@
     if (!card) return;
     const isMax = card.classList.toggle('is-maximized');
     if (maxBtn) {
-      maxBtn.textContent = isMax ? '๐——' : 'โถ';
-      maxBtn.title = isMax ? 'เธขเนเธญเธเธเธฒเธ”เธฅเธเน€เธเนเธเธเธเธฒเธ”เธเธเธ•เธด' : 'เธเธขเธฒเธขเน€เธ•เนเธกเธเธเธฒเธ”เธซเธเนเธฒเธ•เนเธฒเธ (Maximize)';
+      maxBtn.textContent = isMax ? '🗗' : '⛶';
+      maxBtn.title = isMax ? 'ย่อขนาดลงเป็นขนาดปกติ' : 'ขยายเต็มขนาดหน้าต่าง (Maximize)';
     }
   }
 
@@ -1511,7 +1511,7 @@
       document.exitFullscreen().catch(() => {});
     }
     if (card) card.classList.remove('is-maximized');
-    if (maxBtn) maxBtn.textContent = 'โถ';
+    if (maxBtn) maxBtn.textContent = '⛶';
     if (playerBox) playerBox.innerHTML = ''; // Stop video playback
     if (modal) modal.classList.remove('show');
     document.body.style.overflow = '';
@@ -1524,12 +1524,5 @@
   }
 </script>
 
-  <!-- Vercel Web Analytics & Speed Insights -->
-  <script>
-    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-    window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
-  </script>
-  <script defer src="/_vercel/insights/script.js"></script>
-  <script defer src="/_vercel/speed-insights/script.js"></script>
 </body>
 </html>

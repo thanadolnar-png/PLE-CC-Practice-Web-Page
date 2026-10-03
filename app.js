@@ -11,28 +11,6 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbyabU-EfF9Ob4zwi07DvovB3gxVyednn1HZ4OUyWIi4wQBczPCaaRDgyHlkaMvnM_AK/exec';
 let currentApiUrl = API_URL;
 
-// ──────────────────────────────────────────────────────────────
-// Vercel Web Analytics & Speed Insights Tracker
-// ──────────────────────────────────────────────────────────────
-(function initVercelTracking() {
-  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-  window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
-
-  if (typeof document !== 'undefined' && !document.querySelector('script[src*="/_vercel/insights/script.js"]')) {
-    const va = document.createElement('script');
-    va.defer = true;
-    va.src = '/_vercel/insights/script.js';
-    document.head.appendChild(va);
-  }
-
-  if (typeof document !== 'undefined' && !document.querySelector('script[src*="/_vercel/speed-insights/script.js"]')) {
-    const si = document.createElement('script');
-    si.defer = true;
-    si.src = '/_vercel/speed-insights/script.js';
-    document.head.appendChild(si);
-  }
-})();
-
 const AppState = {
   theme: 'light',
   cases: [],
