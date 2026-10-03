@@ -2895,7 +2895,10 @@ window.getSharedAudioContext = getSharedAudioContext;
 
 // ──────────────────────────────────────────────────────────────
 // INTERACTIVE FILL-IN-THE-BLANK / AUTO-CHECK SYSTEM
-// Tag Format: [BLANK: Answer1, Answer2 | Score | #Tag]
+// Tag Formats:
+//   [BLANK: Answer1, Answer2 | Score | ข้อ 1.1]
+//   [BLANK: Answer1, Answer2 | Score | 1.1]
+//   [BLANK: Answer1, Answer2 | Score | ข้อ 1.1 | len: 12] or [BLANK: Answer1 | len: short/medium/long]
 // ──────────────────────────────────────────────────────────────
 function renderInteractiveBlanks(htmlOrText, options = {}) {
   if (!htmlOrText) return '';
@@ -2904,36 +2907,72 @@ function renderInteractiveBlanks(htmlOrText, options = {}) {
   const stationNum = options.stationNum || null;
   const caseId = options.caseId || '';
 
-  // Regex matches [BLANK: accepted_answers | score | #tag] or [BLANK: answers]
-  const blankRegex = /\[BLANK:\s*([^|\]]+)(?:\s*\|\s*([^|\]]+))?(?:\s*\|\s*#?([^\]]+))?\]/gi;
+  // Regex matches: [BLANK: answers | score/param | tag/param | optional_param]
+  const blankRegex = /\[BLANK:\s*([^|\]]+)(?:\s*\|\s*([^|\]]+))?(?:\s*\|\s*([^|\]]+))?(?:\s*\|\s*([^\]]+))?\]/gi;
   let blankIndex = 0;
 
-  let processed = htmlOrText.replace(blankRegex, (match, answersStr, scoreStr, tagStr) => {
+  let processed = htmlOrText.replace(blankRegex, (match, p1, p2, p3, p4) => {
     blankIndex++;
-    const answers = (answersStr || '').split(/[,/]/).map(a => a.trim()).filter(Boolean);
-    const score = parseFloat(scoreStr) || 1.0;
-    const tag = (tagStr || '').trim();
-    const inputId = `blank-input-${tag || blankIndex}`;
+    const answers = (p1 || '').split(/[,/]/).map(a => a.trim()).filter(Boolean);
+    
+    // Parse positional or key-value parameters
+    const rawParts = [p2, p3, p4].filter(Boolean);
+    let score = 1.0;
+    let tag = '';
+    let customWidth = '';
+    let customLen = null;
+
+    rawParts.forEach(part => {
+      const trimmed = part.trim();
+      if (/^len:\s*(\d+|short|medium|long|s|m|l)/i.test(trimmed)) {
+        const val = trimmed.replace(/^len:\s*/i, '').trim().toLowerCase();
+        if (val === 'short' || val === 's') customLen = 8;
+        else if (val === 'medium' || val === 'm') customLen = 16;
+        else if (val === 'long' || val === 'l') customLen = 28;
+        else customLen = parseInt(val, 10);
+      } else if (/^\d+(\.\d+)?$/.test(trimmed)) {
+        score = parseFloat(trimmed);
+      } else {
+        // Assume it is tag (e.g. "ข้อ 1.1", "1.1", "#1.1", "ข้อ 2")
+        tag = trimmed.replace(/^#/, '').trim();
+      }
+    });
+
+    if (!tag) {
+      tag = `ข้อ ${blankIndex}`;
+    }
+
+    // Clean display tag format (e.g. convert "1.1" -> "ข้อ 1.1")
+    const cleanDisplayTag = tag.startsWith('ข้อ') ? tag : `ข้อ ${tag}`;
+    const cleanDataTag = tag.replace(/^ข้อ\s*/, '').trim();
+
+    // Auto calculate initial input width if not explicitly defined
+    let maxAnsLength = answers.reduce((max, a) => Math.max(max, a.length), 10);
+    let initialCols = customLen || Math.min(Math.max(maxAnsLength + 4, 12), 34);
+
+    const inputId = `blank-input-${cleanDataTag.replace(/[^a-zA-Z0-9_-]/g, '_') || blankIndex}`;
     const encAnswers = encodeURIComponent(JSON.stringify(answers));
 
     if (isExaminer) {
       // Examiner View: Display clean answer badge & points
       return `
-        <span class="interactive-blank-examiner-badge" data-tag="${escapeHtml(tag)}">
-          <span class="blank-ans-label">🔑 เฉลย: <strong>${escapeHtml(answers.join(' / '))}</strong></span>
+        <span class="interactive-blank-examiner-badge" data-tag="${escapeHtml(cleanDataTag)}">
+          <span class="blank-ans-label">🔑 เฉลย (${escapeHtml(cleanDisplayTag)}): <strong>${escapeHtml(answers.join(' / '))}</strong></span>
           <span class="blank-score-label">(${score} คะแนน)</span>
         </span>
       `;
     }
 
     // Examinee / Solo / Practice View:
-    // Render an interactive input with instant check button
+    // Render an interactive auto-resizing input with instant check button
     return `
-      <span class="interactive-blank-wrapper" data-tag="${escapeHtml(tag)}" data-score="${score}" data-answers="${encAnswers}">
+      <span class="interactive-blank-wrapper" data-tag="${escapeHtml(cleanDataTag)}" data-display-tag="${escapeHtml(cleanDisplayTag)}" data-score="${score}" data-answers="${encAnswers}">
         <input type="text" 
                class="interactive-blank-input" 
                id="${inputId}" 
-               placeholder="พิมพ์คำตอบที่นี่..." 
+               size="${initialCols}"
+               style="width: ${initialCols}ch; max-width: 90vw;"
+               placeholder="พิมพ์คำตอบ..." 
                autocomplete="off" 
                spellcheck="false" 
                onkeydown="if(event.key === 'Enter'){ checkSingleInteractiveBlank(this.parentElement); }"
@@ -2959,6 +2998,13 @@ function normalizeAnswerText(str) {
 function handleInteractiveBlankInput(inputEl) {
   const wrapper = inputEl.closest('.interactive-blank-wrapper');
   if (!wrapper) return;
+
+  // Auto-expand input width dynamically as user types
+  const currentValLen = inputEl.value.length;
+  const initialCols = parseInt(inputEl.getAttribute('size'), 10) || 14;
+  const newCols = Math.max(initialCols, currentValLen + 3);
+  inputEl.style.width = `${Math.min(newCols, 45)}ch`;
+
   // Reset previous check status when user edits
   wrapper.classList.remove('is-correct', 'is-wrong');
   const badge = wrapper.querySelector('.blank-status-badge');
@@ -3038,24 +3084,29 @@ function checkSingleInteractiveBlank(wrapper) {
 }
 
 function autoCheckLinkedChecklistItem(tag, shouldCheck = true) {
-  // Search for checklist items matching tag (data-tag or (ข้อ 1.1) in text)
-  const normTag = tag.replace(/^#/, '').trim();
-  
-  // Look in Case Viewer or Exam Simulation checklist containers
+  if (!tag) return;
+  const rawTag = tag.replace(/^#/, '').trim();
+  const numOnly = rawTag.replace(/^ข้อ\s*/, '').trim(); // e.g. "1.1"
+  const fullTextTag = rawTag.startsWith('ข้อ') ? rawTag : `ข้อ ${rawTag}`; // e.g. "ข้อ 1.1"
+
   const items = document.querySelectorAll('.checklist-item');
   items.forEach(item => {
     const itemText = item.textContent || '';
-    const hasTagMatch = item.getAttribute('data-tag') === normTag || 
-                        itemText.includes(`(${normTag})`) || 
-                        itemText.includes(`(ข้อ ${normTag})`) ||
-                        itemText.includes(`ข้อ ${normTag}`) ||
-                        itemText.includes(` ${normTag} `) ||
-                        itemText.startsWith(normTag);
+    const itemDataTag = item.getAttribute('data-tag') || '';
+    
+    const hasTagMatch = (itemDataTag === numOnly || itemDataTag === fullTextTag) ||
+                        itemText.includes(`(${fullTextTag})`) ||
+                        itemText.includes(`(${numOnly})`) ||
+                        itemText.includes(`(ข้อ ${numOnly})`) ||
+                        itemText.includes(fullTextTag) ||
+                        itemText.includes(`ข้อ ${numOnly}`) ||
+                        itemText.trim().startsWith(fullTextTag) ||
+                        itemText.trim().startsWith(numOnly);
 
     if (hasTagMatch) {
       const isAlreadyChecked = item.classList.contains('checked');
       if (shouldCheck && !isAlreadyChecked) {
-        // Trigger click on item
+        // Trigger click on item to auto-tick and update score
         item.click();
       }
     }
