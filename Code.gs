@@ -605,17 +605,54 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
 
   function applyTs_(ts, txt) {
     if (!ts || !txt || txt === '\n') return escapeHtml(txt || '');
-    let s = escapeHtml(txt);
-    if (ts.bold) s = '<strong>' + s + '</strong>';
-    if (ts.italic) s = '<em>' + s + '</em>';
-    if (ts.underline) s = '<u>' + s + '</u>';
-    if (ts.strikethrough) s = '<del>' + s + '</del>';
+    let escaped = escapeHtml(txt);
+    const styles = [];
+
+    // 1. Foreground Color
     if (ts.foregroundColor && ts.foregroundColor.color && ts.foregroundColor.color.rgbColor) {
       const rgb = ts.foregroundColor.color.rgbColor;
-      s = '<span style="color:rgb(' + Math.round((rgb.red||0)*255) + ',' + Math.round((rgb.green||0)*255) + ',' + Math.round((rgb.blue||0)*255) + ')">' + s + '</span>';
+      const r = Math.round((rgb.red || 0) * 255);
+      const g = Math.round((rgb.green || 0) * 255);
+      const b = Math.round((rgb.blue || 0) * 255);
+      if (!(r === 0 && g === 0 && b === 0)) {
+        styles.push('color: rgb(' + r + ', ' + g + ', ' + b + ')');
+      }
     }
-    if (ts.link && ts.link.url) s = '<a href="' + ts.link.url + '" target="_blank" rel="noopener">' + s + '</a>';
-    return s;
+
+    // 2. Background Color
+    if (ts.backgroundColor && ts.backgroundColor.color && ts.backgroundColor.color.rgbColor) {
+      const rgb = ts.backgroundColor.color.rgbColor;
+      const r = Math.round((rgb.red || 0) * 255);
+      const g = Math.round((rgb.green || 0) * 255);
+      const b = Math.round((rgb.blue || 0) * 255);
+      if (!(r === 255 && g === 255 && b === 255)) {
+        styles.push('background-color: rgb(' + r + ', ' + g + ', ' + b + ')');
+      }
+    }
+
+    // 3. Font Size (Relative scaling)
+    if (ts.fontSize && ts.fontSize.magnitude && ts.fontSize.magnitude !== 11) {
+      styles.push('font-size: ' + (Math.round((ts.fontSize.magnitude / 11.0) * 100) / 100) + 'rem');
+    }
+
+    // 4. Font Family
+    if (ts.weightedFontFamily && ts.weightedFontFamily.fontFamily) {
+      const ff = ts.weightedFontFamily.fontFamily;
+      if (['Bai Jamjuree', 'Sarabun', 'sans-serif'].indexOf(ff) === -1) {
+        styles.push("font-family: '" + ff + "', sans-serif");
+      }
+    }
+
+    if (styles.length > 0) {
+      escaped = '<span style="' + styles.join('; ') + ';">' + escaped + '</span>';
+    }
+
+    if (ts.bold) escaped = '<strong>' + escaped + '</strong>';
+    if (ts.italic) escaped = '<em>' + escaped + '</em>';
+    if (ts.underline) escaped = '<u>' + escaped + '</u>';
+    if (ts.strikethrough) escaped = '<del>' + escaped + '</del>';
+    if (ts.link && ts.link.url) escaped = '<a href="' + escapeHtml(ts.link.url) + '" target="_blank" rel="noopener noreferrer">' + escaped + '</a>';
+    return escaped;
   }
 
   function getParaTxt_(para, tabEquations) {
@@ -638,41 +675,60 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
     for (let elIdx = 0; elIdx < els.length; elIdx++) {
       const el = els[elIdx];
       if (el.textRun) {
-        const t = el.textRun.content || '';
-        if (t === '\n') continue;
+        let t = el.textRun.content || '';
+        if (elIdx === els.length - 1) {
+          t = t.replace(/[\r\n]+$/, '');
+        }
+        if (!t) continue;
         html += applyTs_(el.textRun.textStyle, t);
       } else if (el.inlineObjectElement) {
         const dataUri = fetchImg_(inlineObjects, el.inlineObjectElement.inlineObjectId);
         if (dataUri) {
           hasImg = true;
-          html += '</p><div class="case-image-wrapper" style="text-align:center;margin:12px 0;"><img src="' + dataUri + '" class="case-image" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);" alt="รูปภาพประกอบเคส"/></div><p>';
+          html += '<div class="case-image-wrapper" style="text-align:center;margin:12px 0;"><img src="' + dataUri + '" class="case-image" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);" alt="รูปภาพประกอบเคส"/></div>';
         }
       } else if (el.equation) {
         let eqHtml = '<span class="doc-equation">[สมการ]</span>';
         if (tabEquations && tabEquations.length > 0) {
           const prevRun = elIdx > 0 && els[elIdx - 1].textRun ? (els[elIdx - 1].textRun.content || '') : '';
           const nextRun = elIdx < els.length - 1 && els[elIdx + 1].textRun ? (els[elIdx + 1].textRun.content || '') : '';
-          const prevEnd = prevRun.slice(-20);
-          const nextStart = nextRun.slice(0, 20);
+          const prevEnd = prevRun.slice(-25).trim();
+          const nextStart = nextRun.slice(0, 25).trim();
           
-          let matchedIdx = -1;
+          let lastUsed = -1;
           for (let m = 0; m < tabEquations.length; m++) {
-            const candidate = tabEquations[m];
-            if (!candidate.used) {
-              const preMatch = prevEnd && candidate.preText && (candidate.preText.indexOf(prevEnd) !== -1 || prevEnd.indexOf(candidate.preText) !== -1);
-              const postMatch = nextStart && candidate.postText && (candidate.postText.indexOf(nextStart) !== -1 || nextStart.indexOf(candidate.postText) !== -1);
-              if (preMatch || postMatch) {
-                matchedIdx = m;
-                break;
-              }
+            if (tabEquations[m].used) lastUsed = Math.max(lastUsed, m);
+          }
+          const searchIndices = [];
+          for (let m = lastUsed + 1; m < tabEquations.length; m++) searchIndices.push(m);
+
+          let matchedIdx = -1;
+          // 1. pre & post match
+          for (let s = 0; s < searchIndices.length; s++) {
+            const cand = tabEquations[searchIndices[s]];
+            const preMatch = prevEnd && cand.preText && (prevEnd.indexOf(cand.preText.trim()) !== -1 || cand.preText.trim().indexOf(prevEnd) !== -1);
+            const postMatch = nextStart && cand.postText && (nextStart.indexOf(cand.postText.trim()) !== -1 || cand.postText.trim().indexOf(nextStart) !== -1);
+            if (preMatch && postMatch) { matchedIdx = searchIndices[s]; break; }
+          }
+          // 2. pre or post match
+          if (matchedIdx === -1) {
+            for (let s = 0; s < searchIndices.length; s++) {
+              const cand = tabEquations[searchIndices[s]];
+              const preMatch = prevEnd && cand.preText && (prevEnd.indexOf(cand.preText.trim()) !== -1 || cand.preText.trim().indexOf(prevEnd) !== -1);
+              const postMatch = nextStart && cand.postText && (nextStart.indexOf(cand.postText.trim()) !== -1 || cand.postText.trim().indexOf(nextStart) !== -1);
+              if (preMatch || postMatch) { matchedIdx = searchIndices[s]; break; }
             }
+          }
+          // 3. linear fallback
+          if (matchedIdx === -1 && searchIndices.length > 0) {
+            matchedIdx = searchIndices[0];
           }
           if (matchedIdx === -1) {
             matchedIdx = tabEquations.findIndex(function(e) { return !e.used; });
           }
           if (matchedIdx !== -1) {
             tabEquations[matchedIdx].used = true;
-            eqHtml = tabEquations[matchedIdx].html;
+            eqHtml = tabEquations[matchedIdx].html || '<span class="doc-equation">[สมการ]</span>';
           }
         }
         html += eqHtml;
@@ -685,41 +741,88 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
     if (!htmlStr || htmlStr.indexOf('<li') === -1) return htmlStr;
     const tokens = htmlStr.split(/(<li[^>]*>.*?<\/li>)/);
     const out = [];
-    let currentListType = null;
+
+    function flushList(items) {
+      if (!items || items.length === 0) return '';
+      const root = { level: -1, children: [] };
+      const stack = [root];
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const node = {
+          type: item.type,
+          level: item.level,
+          content: item.content,
+          children: []
+        };
+        while (stack.length > 1 && stack[stack.length - 1].level >= node.level) {
+          stack.pop();
+        }
+        stack[stack.length - 1].children.push(node);
+        stack.push(node);
+      }
+
+      function renderNodes(nodes) {
+        if (!nodes || nodes.length === 0) return '';
+        const res = [];
+        let idx = 0;
+        while (idx < nodes.length) {
+          const currType = nodes[idx].type;
+          const group = [];
+          while (idx < nodes.length && nodes[idx].type === currType) {
+            group.push(nodes[idx]);
+            idx++;
+          }
+          const tag = currType === 'ol' ? 'ol' : 'ul';
+          const cls = currType === 'ol' ? 'ordered-list' : 'bullet-list';
+          res.push('<' + tag + ' class="' + cls + '">');
+          for (let g = 0; g < group.length; g++) {
+            const childHtml = renderNodes(group[g].children);
+            res.push('<li>' + group[g].content + childHtml + '</li>');
+          }
+          res.push('</' + tag + '>');
+        }
+        return res.join('');
+      }
+
+      return renderNodes(root.children);
+    }
+
     let currentListItems = [];
-    
     for (let i = 0; i < tokens.length; i++) {
       const tok = tokens[i];
       if (!tok) continue;
-      const m = tok.match(/<li(?:\s+data-list-type="([^"]*)")?[^>]*>(.*?)<\/li>/);
+      const m = tok.match(/<li(?:\s+data-list-type="([^"]*)")?(?:\s+data-nest-level="([^"]*)")?[^>]*>(.*?)<\/li>/)
+             || tok.match(/<li(?:\s+data-nest-level="([^"]*)")?(?:\s+data-list-type="([^"]*)")?[^>]*>(.*?)<\/li>/);
       if (m) {
-        const lType = m[1] || 'ul';
-        const content = m[2];
-        if (currentListType && currentListType !== lType) {
-          const tag = currentListType === 'ol' ? 'ol' : 'ul';
-          const cls = currentListType === 'ol' ? 'ordered-list' : 'bullet-list';
-          out.push('<' + tag + ' class="' + cls + '">' + currentListItems.join('') + '</' + tag + '>');
-          currentListItems = [];
+        let lType = 'ul';
+        let lLevel = 0;
+        let content = '';
+        if (tok.indexOf('data-nest-level') !== -1 && tok.indexOf('data-list-type') !== -1) {
+          const mType = tok.match(/data-list-type="([^"]*)"/);
+          const mLvl = tok.match(/data-nest-level="([^"]*)"/);
+          const mCont = tok.match(/<li[^>]*>(.*?)<\/li>/);
+          lType = (mType && mType[1]) || 'ul';
+          lLevel = (mLvl && parseInt(mLvl[1], 10)) || 0;
+          content = (mCont && mCont[1]) ? mCont[1].trim() : '';
+        } else {
+          lType = m[1] || 'ul';
+          lLevel = parseInt(m[2] || 0, 10) || 0;
+          content = (m[3] || '').trim();
         }
-        currentListType = lType;
-        currentListItems.push('<li>' + content + '</li>');
+        currentListItems.push({ type: lType, level: lLevel, content: content });
       } else {
         if (tok.trim()) {
           if (currentListItems.length > 0) {
-            const tag = currentListType === 'ol' ? 'ol' : 'ul';
-            const cls = currentListType === 'ol' ? 'ordered-list' : 'bullet-list';
-            out.push('<' + tag + ' class="' + cls + '">' + currentListItems.join('') + '</' + tag + '>');
+            out.push(flushList(currentListItems));
             currentListItems = [];
-            currentListType = null;
           }
           out.push(tok);
         }
       }
     }
     if (currentListItems.length > 0) {
-      const tag = currentListType === 'ol' ? 'ol' : 'ul';
-      const cls = currentListType === 'ol' ? 'ordered-list' : 'bullet-list';
-      out.push('<' + tag + ' class="' + cls + '">' + currentListItems.join('') + '</' + tag + '>');
+      out.push(flushList(currentListItems));
     }
     return out.join('');
   }
@@ -741,18 +844,27 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
     
     if (para.bullet) {
       const lid = para.bullet.listId;
+      const nestLvl = para.bullet.nestingLevel || 0;
       let glyph = 'GLYPH_TYPE_UNSPECIFIED';
       if (listsDict && listsDict[lid]) {
-        const nestLvl = para.bullet.nestingLevel || 0;
         const nestLvls = (listsDict[lid].listProperties && listsDict[lid].listProperties.nestingLevels) || [];
         if (nestLvl < nestLvls.length) {
           glyph = nestLvls[nestLvl].glyphType || 'GLYPH_TYPE_UNSPECIFIED';
         }
       }
-      const lType = (glyph === 'DECIMAL' || glyph === 'DECIMAL_ENCLOSED_PARENTHESIS' || glyph === 'DECIMAL_RAW') ? 'ol' : 'ul';
-      return '<li data-list-type="' + lType + '">' + trimmed + '</li>';
+
+      const rawText = (para.elements || []).map(e => (e.textRun && e.textRun.content) || '').join('').trim();
+      const isDecimalGlyph = glyph === 'DECIMAL' || glyph === 'DECIMAL_ENCLOSED_PARENTHESIS' || glyph === 'DECIMAL_RAW' || glyph === 'DECIMAL_ENCLOSED_CIRCLE';
+      const isNumberedText = /^\d+\./.test(rawText);
+
+      const lType = (isDecimalGlyph || isNumberedText) ? 'ol' : 'ul';
+      let itemHtml = trimmed;
+      if (isNumberedText && !isDecimalGlyph) {
+        itemHtml = itemHtml.replace(/^(<[^>]+>)*\d+\.\s*/, '$1');
+      }
+      return '<li data-list-type="' + lType + '" data-nest-level="' + nestLvl + '">' + itemHtml + '</li>';
     } else {
-      return ('<p>' + trimmed + '</p>').replace(/<p><\/p>/g, '').replace(/<p>\s*<\/p>/g, '');
+      return '<p>' + trimmed + '</p>';
     }
   }
 
@@ -782,9 +894,8 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
 
     const tblClass = hasImages ? 'table-image-grid' : 'table-patient-info';
     const colWidthPct = hasImages ? (100.0 / maxCols).toFixed(1) : null;
-    const styleAttr = hasImages ? ' style="width:100%;border-collapse:collapse;table-layout:fixed;"' : ' style="width:100%;border-collapse:collapse;"';
 
-    let h = '<div class="table-responsive"><table class="' + tblClass + '"' + styleAttr + '>';
+    let h = '<div class="table-responsive"><table class="' + tblClass + '">';
     for (let r = 0; r < rows.length; r++) {
       h += '<tr>';
       const cells = rows[r].tableCells || [];
@@ -799,8 +910,12 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
             cellHtml += parseTable_(cnt.table, inlineObjects, listsDict, tabEqs);
           }
         }
-        const cellStyle = colWidthPct ? ' style="width:' + colWidthPct + '%;padding:6px;vertical-align:middle;text-align:center;"' : ' style="border:1px solid #e2e8f0;padding:0.5rem 0.75rem;"';
-        h += '<' + tag + cellStyle + '>' + cellHtml + '</' + tag + '>';
+        let innerHtml = cellHtml.trim();
+        if (innerHtml.startsWith('<p>') && innerHtml.endsWith('</p>') && (innerHtml.match(/<p>/g) || []).length === 1) {
+          innerHtml = innerHtml.slice(3, -4);
+        }
+        const cellStyle = colWidthPct ? ' style="width:' + colWidthPct + '%;"' : '';
+        h += '<' + tag + cellStyle + '>' + innerHtml + '</' + tag + '>';
       }
       h += '</tr>';
     }
@@ -912,6 +1027,26 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
           const sc = sm ? parseFloat(sm[1]) : 1;
           if (sm) itemText = sm[2].trim();
           if (!itemText) continue;
+
+          // Render itemHtml with rich styling
+          let itemHtml = '';
+          const els = para.elements || [];
+          for (let elIdx = 0; elIdx < els.length; elIdx++) {
+            const el = els[elIdx];
+            if (el.textRun) {
+              let t = el.textRun.content || '';
+              if (elIdx === els.length - 1) t = t.replace(/[\r\n]+$/, '');
+              itemHtml += applyTs_(el.textRun.textStyle, t);
+            }
+          }
+          itemHtml = itemHtml.replace(/^(<[^>]+>)*([-*•☐☑]|\[\s*\]|\[x\]|\d+\.)\s*/, '$1').trim();
+          itemHtml = itemHtml.replace(/^(<[^>]+>)*\(\d+(\.\d+)?\)\s*/, '$1').trim();
+
+          const nestLvl = (para.bullet && para.bullet.nestingLevel) || 0;
+          const indentMag = (para.paragraphStyle && para.paragraphStyle.indentStart && para.paragraphStyle.indentStart.magnitude) || 0;
+          const isParentHeader = ['หัวข้อล่าง', 'ดังต่อไปนี้', 'เลือกตอบ', 'ถามอย่างน้อย'].some(x => itemText.indexOf(x) !== -1);
+          const isSubset = isParentHeader ? false : (nestLvl > 0 || indentMag >= 70);
+
           let imgHtml = '';
           for (const el of (para.elements || [])) {
             if (el.inlineObjectElement) {
@@ -919,7 +1054,16 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
               if (du) imgHtml += '<div class="case-image-wrapper" style="text-align:center;margin:8px 0;"><img src="' + du + '" class="case-image" style="max-width:90%;height:auto;border-radius:6px;" alt="รูปประกอบ"/></div>';
             }
           }
-          checklist.push({ id: 'chk_' + simpleHash(itemText).substring(0, 10), text: itemText, score: sc, group: currentGroup, checked: false, imageHtml: imgHtml });
+          checklist.push({
+            id: 'chk_' + simpleHash(itemText).substring(0, 10),
+            text: itemText,
+            textHtml: itemHtml || itemText,
+            score: sc,
+            group: currentGroup,
+            checked: false,
+            isSubset: isSubset,
+            imageHtml: imgHtml
+          });
         }
 
       } else if (se.table) {
