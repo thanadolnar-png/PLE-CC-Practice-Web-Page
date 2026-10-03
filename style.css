@@ -1095,7 +1095,8 @@ ul.bullet-list,
 #exam-scenario-content ul,
 #exam-patient-content ul,
 #exam-equipment-content ul,
-#exam-note-content-area ul {
+#exam-note-content-area ul,
+.print-section-content ul {
   list-style-type: disc !important;
   padding-left: 1.5rem !important;
   margin: 0.4rem 0 !important;
@@ -1109,10 +1110,39 @@ ol.ordered-list,
 #exam-scenario-content ol,
 #exam-patient-content ol,
 #exam-equipment-content ol,
-#exam-note-content-area ol {
+#exam-note-content-area ol,
+.print-section-content ol {
   list-style-type: decimal !important;
   padding-left: 1.5rem !important;
   margin: 0.4rem 0 !important;
+}
+
+/* Nested lists */
+ul.bullet-list ul,
+#case-scenario-content ul ul,
+#case-patient-content ul ul,
+#case-equipment-content ul ul,
+#exam-scenario-content ul ul,
+#exam-patient-content ul ul,
+#exam-equipment-content ul ul,
+.print-section-content ul ul {
+  list-style-type: circle !important;
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+ul.bullet-list ol,
+ol.ordered-list ol,
+#case-scenario-content ul ol,
+#case-patient-content ul ol,
+#case-equipment-content ul ol,
+#exam-scenario-content ul ol,
+#exam-patient-content ul ol,
+#exam-equipment-content ul ol,
+.print-section-content ul ol {
+  list-style-type: decimal !important;
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
 }
 
 ul.bullet-list li,
@@ -1124,10 +1154,10 @@ ol.ordered-list li,
 #exam-scenario-content li,
 #exam-patient-content li,
 #exam-equipment-content li,
-#exam-note-content-area li {
+#exam-note-content-area li,
+.print-section-content li {
   margin-bottom: 0.25rem !important;
   line-height: 1.6 !important;
-  list-style: inherit !important;
 }
 
 /* Checklist Styling */

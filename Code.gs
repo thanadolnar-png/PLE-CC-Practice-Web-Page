@@ -195,9 +195,9 @@ function doGet(e) {
         case 'grantClinicEditor':
           return buildResponse(grantClinicEditor(e.parameter.passcode));
           
-        case 'fixClinicCaseStatusTags':
-          return buildResponse(fixClinicCaseStatusTags(e.parameter.passcode));
-          
+        case 'writeTemplateToDoc':
+          return buildResponse(writeOspeTemplateToTargetDoc(e.parameter.docId, e.parameter.tabName, e.parameter.passcode));
+
         default:
           return buildResponse({ error: 'Invalid action parameter' }, 400);
       }
@@ -3688,6 +3688,421 @@ function checkInBooking(bookingId, studentId) {
   } catch (e) {
     Logger.log('checkInBooking error: ' + e.toString());
     return { success: false, error: 'เกิดข้อผิดพลาดในระบบ: ' + e.message };
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  END OF ROOM BOOKING SYSTEM
+// ════════════════════════════════════════════════════════════════════
+
+/**
+ * เขียนคู่มือและแม่แบบการสร้างเคส OSPE (Formatted Guideline & Template) ลงใน Google Doc / Tab
+ */
+function writeOspeTemplateToTargetDoc(targetDocId, tabName, passcode) {
+  if (passcode !== CONFIG.adminPasscode && passcode !== 'rxcu') {
+    return { success: false, error: 'Unauthorized: รหัสผ่านไม่ถูกต้อง' };
+  }
+  
+  const docId = targetDocId || '1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw';
+  const tabTitle = tabName || 'template';
+  
+  try {
+    const doc = DocumentApp.openById(docId);
+    let targetBody = null;
+    
+    // ค้นหา Tab ตามชื่อถ้ามี (สำหรับ Google Docs Tabs)
+    try {
+      if (doc.getTabs) {
+        const tabs = doc.getTabs();
+        for (let t = 0; t < tabs.length; t++) {
+          const tab = tabs[t];
+          const title = tab.getTitle ? tab.getTitle() : '';
+          if (title.toLowerCase().includes(tabTitle.toLowerCase()) || title.toLowerCase() === tabTitle.toLowerCase()) {
+            const dTab = tab.asDocumentTab();
+            if (dTab && dTab.getBody) {
+              targetBody = dTab.getBody();
+              break;
+            }
+          }
+        }
+      }
+    } catch(e) {
+      Logger.log('Tab search notice: ' + e);
+    }
+    
+    if (!targetBody) {
+      targetBody = doc.getBody();
+    }
+    
+    // เคลียร์เนื้อหาเดิมใน Tab / Body
+    targetBody.clear();
+    
+    // Helper จัดแต่ง Paragraph สวยงาม
+    function addTitle(text) {
+      const p = targetBody.appendParagraph(text);
+      p.setHeading(DocumentApp.ParagraphHeading.TITLE);
+      p.setFontFamily('Bai Jamjuree');
+      p.setFontSize(22);
+      p.setBold(true);
+      p.setForegroundColor('#1565C0');
+      return p;
+    }
+    
+    function addSubtitle(text) {
+      const p = targetBody.appendParagraph(text);
+      p.setHeading(DocumentApp.ParagraphHeading.SUBTITLE);
+      p.setFontFamily('Bai Jamjuree');
+      p.setFontSize(13);
+      p.setForegroundColor('#546E7A');
+      return p;
+    }
+    
+    function addH1(text) {
+      const p = targetBody.appendParagraph(text);
+      p.setHeading(DocumentApp.ParagraphHeading.HEADING1);
+      p.setFontFamily('Bai Jamjuree');
+      p.setFontSize(16);
+      p.setBold(true);
+      p.setForegroundColor('#0D47A1');
+      p.setSpacingBefore(14);
+      p.setSpacingAfter(6);
+      return p;
+    }
+    
+    function addH2(text) {
+      const p = targetBody.appendParagraph(text);
+      p.setHeading(DocumentApp.ParagraphHeading.HEADING2);
+      p.setFontFamily('Bai Jamjuree');
+      p.setFontSize(13);
+      p.setBold(true);
+      p.setForegroundColor('#1976D2');
+      p.setSpacingBefore(10);
+      p.setSpacingAfter(4);
+      return p;
+    }
+    
+    function addH3(text) {
+      const p = targetBody.appendParagraph(text);
+      p.setHeading(DocumentApp.ParagraphHeading.HEADING3);
+      p.setFontFamily('Bai Jamjuree');
+      p.setFontSize(11);
+      p.setBold(true);
+      p.setForegroundColor('#37474F');
+      p.setSpacingBefore(6);
+      p.setSpacingAfter(2);
+      return p;
+    }
+    
+    function addP(text, isItalic) {
+      const p = targetBody.appendParagraph(text);
+      p.setFontFamily('Bai Jamjuree');
+      p.setFontSize(10.5);
+      p.setForegroundColor('#263238');
+      p.setLineSpacing(1.15);
+      if (isItalic) p.setItalic(true);
+      return p;
+    }
+    
+    function addBullet(text, indentLevel) {
+      const li = targetBody.appendListItem(text);
+      li.setFontFamily('Bai Jamjuree');
+      li.setFontSize(10.5);
+      li.setForegroundColor('#263238');
+      li.setGlyphType(DocumentApp.GlyphType.BULLET);
+      if (indentLevel) li.setNestingLevel(indentLevel);
+      return li;
+    }
+    
+    function addCalloutBox(titleText, lines) {
+      const table = targetBody.appendTable([
+        [titleText],
+        [lines.join('\n')]
+      ]);
+      table.setBorderWidth(1);
+      table.setBorderColor('#90CAF9');
+      
+      const headerCell = table.getRow(0).getCell(0);
+      headerCell.setBackgroundColor('#E3F2FD');
+      headerCell.getChild(0).asParagraph().setFontFamily('Bai Jamjuree').setFontSize(10.5).setBold(true).setForegroundColor('#0D47A1');
+      
+      const bodyCell = table.getRow(1).getCell(0);
+      bodyCell.setBackgroundColor('#F8FAFC');
+      bodyCell.getChild(0).asParagraph().setFontFamily('Bai Jamjuree').setFontSize(10).setForegroundColor('#37474F');
+      targetBody.appendParagraph('');
+      return table;
+    }
+    
+    // --- เริ่มเขียนเนื้อหา ---
+    addTitle('📘 คู่มือมาตรฐานและแม่แบบการเขียนข้อสอบ OSPE (PLE-CC2)');
+    addSubtitle('โครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย (RxCU)');
+    addP('เวอร์ชัน: 2.0 (Official Standard) | ผู้รับผิดชอบระบบ: ประธานฝ่ายวิชาการเตรียมสอบ PLE-CC', true);
+    targetBody.appendHorizontalRule();
+    
+    // สารบัญ
+    addH1('📑 สารบัญคู่มือ');
+    addBullet('1. ภาพรวมโครงสร้างของเอกสารเคส (Case Document Structure)');
+    addBullet('2. ส่วนหัวข้อมูลเคส (Case Metadata) & กฎการระบุหมวด');
+    addBullet('3. การเขียนสถานการณ์ (Scenario) & ข้อมูลผู้ป่วย');
+    addBullet('4. ระบบข้อสอบเติมคำอัจฉริยะ (Interactive Fill-in-the-Blank System)');
+    addBullet('5. การเขียน Checklist & ระบบเกณฑ์คะแนนย่อย (Rubric / Subset System)');
+    addBullet('6. การเชื่อมโยงสถานีต่อเนื่อง (Linked Stations: A ➔ B)');
+    addBullet('7. การใส่สื่อมัลติมีเดีย (รูปภาพ, คลิปวิดีโอ YouTube / Google Drive)');
+    addBullet('8. ตารางสรุปข้อผิดพลาดที่พบบ่อยและข้อห้ามเด็ดขาด (Common Pitfalls & Prohibitions)');
+    addBullet('9. แม่แบบสำเร็จรูปพร้อมใช้งาน (Ready-to-Use Templates)');
+    targetBody.appendHorizontalRule();
+    
+    // Section 1
+    addH1('1. ภาพรวมโครงสร้างของเอกสารเคส');
+    addP('เอกสาร Google Docs ของแต่ละเคส จะต้องแบ่งออกเป็น 6 ส่วนหลัก ตามลำดับนี้เสมอ (หากไม่มีข้อมูลในส่วนใด เช่น ไม่มีข้อมูลผู้ป่วย หรือไม่มีสิ่งของ ให้ข้ามหัวข้อนั้นไปเลย ห้ามสร้าง Heading เปล่าทิ้งไว้):');
+    addCalloutBox('📌 โครงสร้าง 6 ส่วนมาตรฐาน (Clean Plain Text — ไร้ดอกจัน **)', [
+      '1. [ส่วนหัวข้อมูลเคส / Metadata] (ระบุด้วยรายการ Bullet - ด้านบนสุด)',
+      '2. ## สถานการณ์ (Scenario / โจทย์ที่ผู้เข้าสอบเห็น)',
+      '3. ## ข้อมูลผู้ป่วย (Patient Profile / ถ้ามีคนไข้)',
+      '4. ## สิ่งที่มีให้ในสถานี (Equipment / Station Materials / ถ้ามี)',
+      '5. ## Checklist (เกณฑ์การให้คะแนนสำหรับผู้ประเมิน รวม 10.0 คะแนนเต็ม)',
+      '6. ## ข้อมูลผู้ตรวจ (Examiner Notes / เฉลย / บทบาทคนไข้จำลอง SP)'
+    ]);
+    
+    // Section 2
+    addH1('2. ส่วนหัวข้อมูลเคส (Case Metadata)');
+    addP('อยู่บรรทัดบนสุดของไฟล์เสมอ ใช้เครื่องหมายขีด - นำหน้า:');
+    addCalloutBox('ตัวอย่าง Metadata ด้านบนสุดของเคส', [
+      '- หมวด: Clinic (หรือ Product / SAP)',
+      '- Course Group: การบริบาลทางเภสัชกรรมผู้ป่วยนอก',
+      '- โรค/หัวข้อ: Hypertension with CKD',
+      '- ผู้เขียน: ทีมวิชาการ RxCU84 (Lin)',
+      '- วันที่: 03/10/2026',
+      '- แหล่งที่มา: ข้อสอบจริง ศรภ. ปี 2566',
+      '- Case status: Active',
+      '- Linked Next Case: OSPE-CL6602 (ใส่เฉพาะกรณีเป็นสถานีต่อเนื่องข้อแรก)'
+    ]);
+    addBullet('หมวด: ระบุ Clinic, Product, หรือ SAP');
+    addBullet('Course Group: ระบุกลุ่มวิชา เช่น การบริบาลทางเภสัชกรรมผู้ป่วยนอก, การคุ้มครองผู้บริโภคและระบบยา, การผลิตยาและควบคุมคุณภาพ');
+    addBullet('Case status: Active = พร้อมให้นิสิตฝึกซ้อม / Unactive = ร่างอยู่');
+    addBullet('Linked Next Case: รหัสเคสสถานีถัดไป (เช่น OSPE-CL6602) เมื่อมีสถานีต่อเนื่อง');
+    
+    // Section 3
+    addH1('3. การเขียนสถานการณ์ (Scenario) & ข้อมูลผู้ป่วย');
+    addH2('3.1 หัวข้อ ## สถานการณ์');
+    addP('ข้อความหรือคำสั่งที่ผู้เข้าสอบจะอ่านจากหน้าห้องสอบ (ระยะเวลาอ่าน 1 นาที / ปฏิบัติ 4 นาที): ระบุบริบทและคำสั่งให้ชัดเจน (เช่น จงซักประวัติและให้คำแนะนำ, จงคำนวณและตั้งสูตรตำรับ, จงระบุรูปแบบยาและความไม่คงตัว)');
+    addH2('3.2 หัวข้อ ## ข้อมูลผู้ป่วย (Optional)');
+    addP('• หากมี: ใส่ตารางประวัติ, Vital signs, ผล Lab, หรือรายการยาเดิม');
+    addP('• หากไม่มี (เช่น ข้อสอบ Product/Identification): ห้ามใส่ ## ข้อมูลผู้ป่วย โดยเด็ดขาด ระบบจะซ่อนส่วนนี้ให้อัตโนมัติ');
+    
+    // Section 4
+    addH1('4. ระบบข้อสอบเติมคำอัจฉริยะ (Interactive Blank)');
+    addP('ใช้สำหรับข้อสอบที่ต้องการให้นิสิตพิมพ์ตอบ (เช่น เขียนชื่อ Dosage form, คำนวณขนาดยา, ระบุชื่อความไม่คงตัว)');
+    addCalloutBox('📌 รูปแบบแท็กมาตรฐาน (Tag Syntax)', [
+      '[BLANK: คำตอบที่ยอมรับได้ | คะแนน | ข้อ X.X | ตัวเลือกความยาว]'
+    ]);
+    addH2('🧩 องค์ประกอบของแท็ก:');
+    addBullet('1. คำตอบที่ยอมรับได้: หากมีหลายคำตอบหรือสะกดได้หลายแบบ ให้คั่นด้วยเครื่องหมายจุลภาค , หรือทับ / (ระบบตรวจ Case-insensitive ให้อัตโนมัติ เช่น Liniments, Liniment)');
+    addBullet('2. คะแนน: ตัวเลขคะแนน เช่น 1.0, 1.25, 2.5');
+    addBullet('3. เลขข้อ: ระบุเป็น ข้อ 1.1 หรือ 1.1 (ระบบจะจับคู่กับ Checklist ข้อเดียวกันเพื่อติ๊กคะแนนอัตโนมัติเมื่อพิมพ์ถูก)');
+    addBullet('4. ตัวเลือกความกว้าง (Optional): len: short (~8 ตัวอักษร), len: medium (~16 ตัวอักษร), len: long (~28 ตัวอักษร) หรือ len: 12');
+    
+    addH2('💡 ตัวอย่างในสถานการณ์:');
+    addCalloutBox('ตัวอย่างโจทย์เติมคำ', [
+      '## สถานการณ์',
+      '1. จงระบุรูปแบบ dosage form และความไม่คงตัวต่อไปนี้:',
+      '1.1 ภาพขวดยานวดภายนอก: [BLANK: Liniments, Liniment | 1.25 | ข้อ 1.1 | len: short]',
+      '1.2 ภาพยาอมชนิดนิ่ม: [BLANK: Pastilles, Soft lozenges, Jujubes | 1.25 | ข้อ 1.2 | len: medium]',
+      '1.3 ความไม่คงตัวของเม็ดยาที่มีรอยด่าง: [BLANK: Mottling | 1.25 | ข้อ 2.1 | len: short]'
+    ]);
+    
+    // Section 5
+    addH1('5. การเขียน Checklist & ระบบเกณฑ์คะแนนย่อย');
+    addP('Checklist คือเกณฑ์ที่อาจารย์/ผู้ประเมินใช้ติ๊กให้คะแนน (คะแนนรวมของทุกสถานีต้องเท่ากับ 10.0 คะแนนเต็ม)');
+    addH2('5.1 โครงสร้างกลุ่ม Checklist:');
+    addBullet('ใช้ (กลุ่ม: ชื่อกลุ่มทักษะ) เป็นหัวแถวเพื่อจัดหมวดหมู่');
+    addBullet('แต่ละข้อขึ้นต้นด้วย - (คะแนน) (ข้อ X.X) รายละเอียดเกณฑ์');
+    
+    addCalloutBox('ตัวอย่าง Checklist', [
+      '## Checklist',
+      '(กลุ่ม: ทักษะการระบุรูปแบบยา)',
+      '- (1.25) (ข้อ 1.1) ระบุ Liniments ได้ถูกต้อง',
+      '- (1.25) (ข้อ 1.2) ระบุ Pastilles / Soft lozenges ได้ถูกต้อง',
+      '',
+      '(กลุ่ม: ทักษะการประเมินความไม่คงตัว)',
+      '- (1.25) (ข้อ 2.1) ระบุ Mottling ได้ถูกต้อง'
+    ]);
+    
+    addH2('5.2 ระบบข้อแม่-ข้อย่อย และ Rubric เกณฑ์ลดหลั่น (Subset / Rubric System)');
+    addP('ในกรณีที่ข้อสอบมีเกณฑ์การให้คะแนนแบบลดหลั่นตามความถูกต้อง (Rubric: ถูกหมดได้ 2 คะแนน, ถูกบางส่วนได้ 1 คะแนน, ผิดได้ 0 คะแนน):');
+    addBullet('ข้อแม่ (Parent Item): ระบุคะแนนเต็มของประเด็นนั้น (เช่น (2.0))');
+    addBullet('ข้อย่อย (Subset Items): บรรทัดถัดมาให้ขึ้นต้นด้วย - หรือ • พร้อมระบุคะแนนย่อย');
+    addBullet('ระบบจะตรวจจับอัตโนมัติว่าเป็น Rubric แบบเลือกตอบได้ข้อเดียว (Radio style) และคำนวณคะแนนไม่ให้เกินข้อแม่');
+    
+    addCalloutBox('ตัวอย่าง Rubric Checklist', [
+      '(กลุ่ม: การประเมินข้อห้ามใช้ของยาคุมกำเนิด)',
+      '- (2.0) ซักประวัติอาการปวดศีรษะไมเกรนและจำแนกชนิด Aura',
+      '  - (2.0) ซักถามอาการนำ (Aura) ครบถ้วน และระบุข้อห้ามใช้ได้ถูกต้อง',
+      '  - (1.0) ซักถามว่าเป็นไมเกรนแต่ไม่ได้ซักแยกประเภท Aura',
+      '  - (0.0) ไม่ได้ซักประวัติโรคไมเกรน'
+    ]);
+    
+    // Section 6 & 7
+    addH1('6. การเชื่อมโยงสถานีต่อเนื่อง (Linked Stations)');
+    addP('ที่ข้อ A (สถานีต้นทาง) ให้ใส่ใน Metadata: - Linked Next Case: OSPE-CL6602 ระบบจะแสดงปุ่ม "ไปยังสถานีต่อเนื่องถัดไป →" ให้นิสิตกดเปลี่ยนสถานีได้ทันที');
+    
+    addH1('7. การใส่สื่อมัลติมีเดีย (รูปภาพ & คลิปวิดีโอ)');
+    addBullet('รูปภาพ: ใช้ ![คำอธิบาย](URL_รูปภาพ)');
+    addBullet('วิดีโอ YouTube / Google Drive: วางลิงก์ใน ## ข้อมูลผู้ตรวจ ระบบจะแปลงเป็น Video Player ในหน้าจอ และแปลงเป็น QR Code สำหรับสแกนในหน้าพิมพ์ (@media print) ให้อัตโนมัติ');
+    
+    // Section 8: Table Pitfalls
+    addH1('8. ตารางสรุปข้อผิดพลาดที่พบบ่อยและข้อห้ามเด็ดขาด (Common Pitfalls & Prohibitions)');
+    
+    const pitfallTableData = [
+      ['❌ ข้อผิดพลาดที่พบบ่อย', '✅ รูปแบบที่ถูกต้อง', 'เหตุผล / ผลกระทบในระบบ'],
+      ['ใส่ ## ข้อมูลผู้ป่วย เปล่าๆ ทิ้งไว้ในเคสที่ไม่มีคนไข้', 'ข้ามหัวข้อ ## ข้อมูลผู้ป่วย ไปเลย', 'ระบบจะแสดงกล่องว่างเปล่าเกะกะสายตา'],
+      ['ใช้ ** ตัวหนาในเซลล์ Google Sheets หรือ Docs', 'ใช้ข้อความธรรมดาที่จัดย่อหน้าสะอาด', 'Sheets แสดงผลเป็น Plain text ทำให้เครื่องหมาย ** ตกค้างรกสายตา'],
+      ['เขียนเลขข้อใน Blank กับ Checklist ไม่ตรงกัน (เช่น Blank เป็น ข้อ 1.1 แต่ Checklist เขียน ข้อ 1)', 'ใช้ ข้อ 1.1 หรือ 1.1 ให้ตรงกันทั้งสองจุด', 'ระบบจะ Auto-Tick Checklist ไม่ติดเมื่อนิสิตพิมพ์ถูก'],
+      ['คะแนนรวมใน Checklist ไม่ครบ 10.0 คะแนน', 'ตรวจสอบผลรวมคะแนนข้อแม่ให้ได้ 10.0 พอดี', 'เกณฑ์มาตรฐาน OSPE คิดสัดส่วนต่อสถานีที่ 10 คะแนนเต็ม (ผ่าน 80% = 8.0 คะแนน)'],
+      ['ตั้งชื่อ Guideline อ้างอิงขึ้นมาเอง', 'ระบุชื่อเต็มทางการ (Official Title) เช่น Thai Hypertension Guideline 2024', 'หากไม่มี Guideline ทางการชัดเจน ให้ระบุ [NEED_REVIEW] ห้ามเดาชื่อเอง'],
+      ['ลืมใส่ Case status: Active', 'ระบุ - Case status: Active เสมอเมื่อเคสตรวจเสร็จแล้ว', 'หากเป็นสถานะอื่น ระบบจะซ่อนเคสจากคลังค้นหา']
+    ];
+    
+    const pTable = targetBody.appendTable(pitfallTableData);
+    pTable.setBorderWidth(1);
+    pTable.setBorderColor('#CFD8DC');
+    
+    // Style Table Header
+    const pHeadRow = pTable.getRow(0);
+    for (let c = 0; c < 3; c++) {
+      const cell = pHeadRow.getCell(c);
+      cell.setBackgroundColor('#1E88E5');
+      const p = cell.getChild(0).asParagraph();
+      p.setFontFamily('Bai Jamjuree').setFontSize(10.5).setBold(true).setForegroundColor('#FFFFFF');
+    }
+    
+    // Style Table Rows
+    for (let r = 1; r < pitfallTableData.length; r++) {
+      const row = pTable.getRow(r);
+      const bg = (r % 2 === 0) ? '#F5F5F5' : '#FFFFFF';
+      for (let c = 0; c < 3; c++) {
+        const cell = row.getCell(c);
+        cell.setBackgroundColor(bg);
+        const p = cell.getChild(0).asParagraph();
+        p.setFontFamily('Bai Jamjuree').setFontSize(10).setForegroundColor('#263238');
+        if (c === 0) p.setForegroundColor('#C62828');
+        if (c === 1) p.setForegroundColor('#2E7D32').setBold(true);
+      }
+    }
+    targetBody.appendParagraph('');
+    
+    // Section 9: Ready-to-Use Templates
+    addH1('9. แม่แบบสำเร็จรูปพร้อมใช้งาน (Ready-to-Use Templates)');
+    
+    addH2('📋 แม่แบบที่ 1: เคส Clinic สัมภาษณ์ / จ่ายยา (Interactive Patient Consultation)');
+    addCalloutBox('Clinic Template (คัดลอกส่วนนี้ไปใช้งานได้ทันที)', [
+      '- หมวด: Clinic',
+      '- Course Group: การบริบาลทางเภสัชกรรมผู้ป่วยนอก',
+      '- โรค/หัวข้อ: Allergic Rhinitis & Drug Counseling',
+      '- ผู้เขียน: RxCU84 Team Lin',
+      '- วันที่: 03/10/2026',
+      '- แหล่งที่มา: Mock RxCU84 Clinic ครั้งที่ 1',
+      '- Case status: Active',
+      '',
+      '## สถานการณ์',
+      'ผู้ป่วยหญิงไทยคู่ อายุ 28 ปี มาขอรับคำปรึกษาที่ร้านยาเนื่องจากมีอาการคัดจมูก น้ำมูกใส จามบ่อยช่วงเช้า เป็นมานาน 2 สัปดาห์',
+      'จงซักประวัติ ประเมินโรค และให้คำแนะนำการใช้ยาและการปฏิบัติตัวที่เหมาะสมแก่ผู้ป่วย (เวลา 4 นาที)',
+      '',
+      '## ข้อมูลผู้ป่วย',
+      '- ชื่อ: น.ส. อารียา ใจดี อายุ: 28 ปี น้ำหนัก: 52 kg ส่วนสูง: 160 cm',
+      '- โรคประจำตัว: ปฏิเสธโรคประจำตัว',
+      '- ยาที่ใช้อยู่ประจำ: ปฏิเสธการใช้ยาประจำ',
+      '- ประวัติการแพ้ยา/อาหาร: ปฏิเสธประวัติแพ้ยา',
+      '- สถานะตั้งครรภ์/ให้นมบุตร: ไม่ได้ตั้งครรภ์ และไม่ได้ให้นมบุตร',
+      '',
+      '## สิ่งที่มีให้ในสถานี',
+      '1. ตัวอย่างผลิตภัณฑ์ยา Cetirizine 10 mg tab',
+      '2. ตัวอย่างผลิตภัณฑ์ยา Fluticasone furoate nasal spray',
+      '3. ฉลากยาและซองยา',
+      '',
+      '## Checklist',
+      '(กลุ่ม: การทักทาย แนะนำตัว และซักประวัติ)',
+      '- (1.0) ทักทาย แนะนำตัว และยืนยันตัวตนผู้ป่วย',
+      '- (1.5) ซักประวัติอาการสำคัญ (ลักษณะน้ำมูก, ระยะเวลา, ปัจจัยกระตุ้น, อาการร่วมทางตา)',
+      '- (1.5) ซักประวัติคัดกรองข้อห้ามใช้ (โรคประจำตัว, ยาประจำ, ประวัติแพ้ยา, การตั้งครรภ์/ให้นมบุตร)',
+      '',
+      '(กลุ่ม: การประเมินและเลือกยา)',
+      '- (2.0) ประเมินว่าเป็น Allergic Rhinitis และเลือกยาพ่นจมูกสเตียรอยด์หรือยาต้านฮิสตามีนได้อย่างเหมาะสม',
+      '',
+      '(กลุ่ม: ทักษะการให้คำแนะนำการใช้ยาและการปฏิบัติตัว)',
+      '- (2.0) อธิบายชื่อยา ข้อบ่งใช้ ขนาดยา และวิธีใช้ยาได้อย่างถูกต้อง',
+      '- (1.0) อธิบายอาการไม่พึงประสงค์สำคัญและการจัดการ (เช่น ง่วงซึม, ระคายเคืองจมูก)',
+      '- (1.0) ให้คำแนะนำการปรับเปลี่ยนพฤติกรรม (หลีกเลี่ยงสารก่อภูมิแพ้, การล้างจมูก)',
+      '',
+      '## ข้อมูลผู้ตรวจ',
+      '### 🔑 ข้อมูลสำหรับผู้ป่วยจำลอง (SP Script)',
+      '- ผู้ป่วยมีอาการจาม คันจมูก น้ำมูกใส ไม่มีไข้ ไม่มีเจ็บคอ เป็นมากช่วงกวาดห้องนอน',
+      '- ตอบปฏิเสธโรคประจำตัวและการแพ้ยาทุกชนิด',
+      '',
+      '### 📖 Guideline อ้างอิง',
+      '- แนวทางเวชปฏิบัติโรคจมูกอักเสบภูมิแพ้ในคนไทย (Thai Clinical Practice Guideline for Allergic Rhinitis 2022)',
+      '',
+      '### 📌 จุดจำก่อนสอบ',
+      '- First-line สำหรับ Moderate-to-Severe intermittent หรือ Persistent AR คือ Intranasal Corticosteroids (INCS)'
+    ]);
+    
+    addH2('🔬 แม่แบบที่ 2: เคส Product / ข้อสอบเติมคำ (Fill-in-the-Blank Exam)');
+    addCalloutBox('Product Fill-in-the-Blank Template (คัดลอกส่วนนี้ไปใช้งานได้ทันที)', [
+      '- หมวด: Product',
+      '- Course Group: การค้นข้อมูลและประสานงาน',
+      '- โรค/หัวข้อ: Dosage Forms & Drug Instability Identification',
+      '- ผู้เขียน: RxCU84 Team Fon',
+      '- วันที่: 03/10/2026',
+      '- แหล่งที่มา: Mock RxCU84 Product ครั้งที่ 1',
+      '- Case status: Active',
+      '',
+      '## สถานการณ์',
+      'จงระบุรูปแบบ Dosage Form และความไม่คงตัวของผลิตภัณฑ์ยาต่อไปนี้ โดยพิมพ์คำตอบ Technical term ลงในช่องว่าง (ข้อละ 1.25 คะแนน รวม 10.0 คะแนน)',
+      '',
+      '1. การระบุรูปแบบ Dosage Form:',
+      '1.1 ภาพขวดยานวดภายนอกชนิดใสผสมน้ำมัน: [BLANK: Liniments, Liniment | 1.25 | ข้อ 1.1 | len: short]',
+      '1.2 ภาพยาอมชนิดนิ่มเคี้ยวหนึบ: [BLANK: Pastilles, Soft lozenges, Jujubes | 1.25 | ข้อ 1.2 | len: medium]',
+      '1.3 ภาพยาอมชนิดแข็งเนื้อลูกอม: [BLANK: Lozenges, Hard candy lozenges, Troches | 1.25 | ข้อ 1.3 | len: medium]',
+      '1.4 ภาพยาน้ำใสรับประทานผสมตัวยาหลายชนิด: [BLANK: Mixtures, Mixture | 1.25 | ข้อ 1.4 | len: short]',
+      '',
+      '2. การระบุความไม่คงตัวของยา:',
+      '2.1 สียาบนผิวเม็ดยากระจายตัวไม่สม่ำเสมอ เกิดรอยด่าง: [BLANK: Mottling | 1.25 | ข้อ 2.1 | len: short]',
+      '2.2 ตัวอักษรหรือสัญลักษณ์บนผิวเม็ดยาหลุดติดไปกับ Punch: [BLANK: Picking | 1.25 | ข้อ 2.2 | len: short]',
+      '2.3 ผงยาฟู่ชื้นเยิ้มเหลว ไม่เกิดฟองก๊าซเมื่อละลายน้ำ: [BLANK: Dead mixture | 1.25 | ข้อ 2.3 | len: medium]',
+      '2.4 ตะกอนในยาน้ำแขวนตะกอนเกาะกันแน่น เขย่าไม่กระจายตัว: [BLANK: Caking | 1.25 | ข้อ 2.4 | len: short]',
+      '',
+      '## สิ่งที่มีให้ในสถานี',
+      'ภาพผลิตภัณฑ์ยาตัวอย่าง 4 รูปแบบ และภาพแสดงความไม่คงตัวของยา 4 รูปแบบ',
+      '',
+      '## Checklist',
+      '(กลุ่ม: การระบุรูปแบบ Dosage Form)',
+      '- (1.25) (ข้อ 1.1) ระบุ Liniments ได้ถูกต้อง',
+      '- (1.25) (ข้อ 1.2) ระบุ Pastilles / Soft lozenges / Jujubes ได้ถูกต้อง',
+      '- (1.25) (ข้อ 1.3) ระบุ Lozenges / Hard candy lozenges / Troches ได้ถูกต้อง',
+      '- (1.25) (ข้อ 1.4) ระบุ Mixtures ได้ถูกต้อง',
+      '',
+      '(กลุ่ม: การระบุความไม่คงตัวของยา)',
+      '- (1.25) (ข้อ 2.1) ระบุ Mottling ได้ถูกต้อง',
+      '- (1.25) (ข้อ 2.2) ระบุ Picking ได้ถูกต้อง',
+      '- (1.25) (ข้อ 2.3) ระบุ Dead mixture ได้ถูกต้อง',
+      '- (1.25) (ข้อ 2.4) ระบุ Caking ได้ถูกต้อง',
+      '',
+      '## ข้อมูลผู้ตรวจ',
+      '### 🔑 เฉลยและคำอธิบาย',
+      '- Liniments: ยารูปแบบของเหลวหรือกึ่งของเหลวสำหรับทาถูนวดภายนอก มีตัวทำละลายเป็นน้ำมันหรือแอลกอฮอล์ ห้ามใช้กับผิวหนังที่มีแผลเปิด',
+      '- Picking: เกิดจากผงยาติดที่ผิว Punch face ทำให้ตัวอักษรหรือ Logo บนเม็ดยาแหว่ง แก้โดยเพิ่ม Lubricant หรือลดความชื้น Granule',
+      '- Caking: การเกิด Deflocculated suspension ตะกอนอนุภาคเล็กตกทับถมกันแน่นจนเกิดแรงดึงดูดปานประสาน ไม่สามารถกระจายตัวกลับได้ด้วยการเขย่า',
+      '',
+      '### 📖 เอกสารอ้างอิง',
+      '- เภสัชกรรมเทคโนโลยี: การผลิตยาเม็ดและยาน้ำ (Pharmaceutical Technology)'
+    ]);
+    
+    return {
+      success: true,
+      message: `เขียนข้อมูลคู่มือและ Template ลงใน Google Doc ID (${docId}) Tab: [${tabTitle}] เรียบร้อยสวยงาม! ✨`
+    };
+  } catch(err) {
+    Logger.log('writeOspeTemplateToTargetDoc Error: ' + err);
+    return { success: false, error: err.toString() };
   }
 }
 
