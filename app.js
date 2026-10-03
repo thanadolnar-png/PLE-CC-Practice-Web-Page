@@ -197,7 +197,9 @@ const BgmManager = {
   volume: 0.35,
   currentTrackIndex: 0,
   tracks: [
-    { id: 'susu', name: 'OSPE SUSU (Main Theme)', src: './bgm-ospe-susu.mp3' },
+    { id: 'mahachula', name: 'มหาจุฬาลงกรณ์ | CU Chorus (Main Theme)', src: './bgm-mahachula.mp3' },
+    { id: 'shonichi', name: 'Shonichi วันแรก | CU Chorus', src: './bgm-shonichi.mp3' },
+    { id: 'susu', name: 'OSPE SUSU (RxCU)', src: './bgm-ospe-susu.mp3' },
     { id: 'muan', name: 'ดนตรีให้กำลังใจม่วนๆ', src: './bgm-muan-muan.mp3' }
   ],
 
