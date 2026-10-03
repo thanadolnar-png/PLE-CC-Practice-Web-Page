@@ -259,10 +259,20 @@ const BgmManager = {
   },
 
   toggle() {
+    const pill = document.getElementById('ple-bgm-floating-bar');
     if (this.isPlaying) {
       this.pause();
+      if (pill) pill.classList.remove('is-visible');
     } else {
+      if (pill) pill.classList.add('is-visible');
       this.play().catch(() => {});
+    }
+  },
+
+  toggleWidgetVisibility() {
+    const pill = document.getElementById('ple-bgm-floating-bar');
+    if (pill) {
+      pill.classList.toggle('is-visible');
     }
   },
 
@@ -382,7 +392,9 @@ const BgmManager = {
 
   minimize() {
     const pill = document.getElementById('ple-bgm-floating-bar');
-    if (pill) pill.classList.toggle('is-minimized');
+    if (pill) {
+      pill.classList.remove('is-visible');
+    }
   }
 };
 window.BgmManager = BgmManager;
@@ -394,6 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAuthGuard();
   initTheme();
   initApiConfig();
+  initMobileNavigation();
   loadChecklistProgress();
   
   // เริ่มต้นเครื่องเล่นเพลงประกอบพื้นหลัง
@@ -3112,3 +3125,92 @@ window.renderInteractiveBlanks = renderInteractiveBlanks;
 window.checkSingleInteractiveBlank = checkSingleInteractiveBlank;
 window.checkAllInteractiveBlanks = checkAllInteractiveBlanks;
 window.handleInteractiveBlankInput = handleInteractiveBlankInput;
+
+
+// ──────────────────────────────────────────────────────────────
+// 🧭 MOBILE FLOATING DRAWER NAVIGATION CONTROLLER
+// ──────────────────────────────────────────────────────────────
+function initMobileNavigation() {
+  if (document.getElementById('mobile-nav-drawer')) return;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'mobile-nav-overlay';
+  overlay.className = 'mobile-nav-drawer-overlay';
+  overlay.onclick = () => closeMobileNav();
+
+  const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+
+  const drawer = document.createElement('div');
+  drawer.id = 'mobile-nav-drawer';
+  drawer.className = 'mobile-nav-drawer';
+  drawer.innerHTML = `
+    <div class="mobile-drawer-header">
+      <div class="mobile-drawer-title">
+        <span>🥼</span>
+        <span>RxCU OSPE Hub</span>
+      </div>
+      <button type="button" class="mobile-drawer-close" onclick="closeMobileNav()" title="ปิดเมนู (Esc)">✕</button>
+    </div>
+    <div class="mobile-drawer-nav-list">
+      <a href="index.html" class="mobile-drawer-item ${currentPath === 'index.html' || currentPath === '' ? 'active' : ''}">
+        <span class="mobile-drawer-icon">🏠</span>
+        <span>หน้าแรก</span>
+      </a>
+      <a href="case-library.html" class="mobile-drawer-item ${currentPath === 'case-library.html' ? 'active' : ''}">
+        <span class="mobile-drawer-icon">📚</span>
+        <span>คลังเคสข้อสอบ</span>
+      </a>
+      <a href="exam-simulation.html" class="mobile-drawer-item ${currentPath === 'exam-simulation.html' ? 'active' : ''}">
+        <span class="mobile-drawer-icon">🎯</span>
+        <span>ซ้อมสอบ 16 สถานี</span>
+      </a>
+      <a href="video-library.html" class="mobile-drawer-item ${currentPath === 'video-library.html' ? 'active' : ''}">
+        <span class="mobile-drawer-icon">🎬</span>
+        <span>คลิปเทคนิค (Product & Clinic)</span>
+      </a>
+      <a href="handbook-library.html" class="mobile-drawer-item ${currentPath === 'handbook-library.html' ? 'active' : ''}">
+        <span class="mobile-drawer-icon">📖</span>
+        <span>คู่มือทักษะสภาฯ</span>
+      </a>
+    </div>
+    <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.76rem; color: var(--text-muted); text-align: center;">
+      RxCU PLE-CC2 Practice Hub 2569
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.appendChild(drawer);
+
+  // Inject Hamburger button to topbar-right if not present
+  const topbarRight = document.querySelector('.topbar-right');
+  if (topbarRight && !document.getElementById('mobile-nav-toggle-btn')) {
+    const hamburger = document.createElement('button');
+    hamburger.type = 'button';
+    hamburger.id = 'mobile-nav-toggle-btn';
+    hamburger.className = 'mobile-nav-toggle-btn';
+    hamburger.title = 'เปิดเมนูนำทาง';
+    hamburger.onclick = () => openMobileNav();
+    hamburger.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>`;
+    topbarRight.appendChild(hamburger);
+  }
+}
+
+function openMobileNav() {
+  const overlay = document.getElementById('mobile-nav-overlay');
+  const drawer = document.getElementById('mobile-nav-drawer');
+  if (overlay) overlay.classList.add('show');
+  if (drawer) drawer.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMobileNav() {
+  const overlay = document.getElementById('mobile-nav-overlay');
+  const drawer = document.getElementById('mobile-nav-drawer');
+  if (overlay) overlay.classList.remove('show');
+  if (drawer) drawer.classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+window.initMobileNavigation = initMobileNavigation;
+window.openMobileNav = openMobileNav;
+window.closeMobileNav = closeMobileNav;
