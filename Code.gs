@@ -1659,17 +1659,32 @@ function parseTableTemplateToCaseData(table, targetCaseId) {
 function parseCellToHtml(cell) {
   let html = '';
   const numChildren = cell.getNumChildren();
+  let inList = false;
+
   for (let i = 0; i < numChildren; i++) {
     const child = cell.getChild(i);
     const type = child.getType();
     
-    if (type === DocumentApp.ElementType.PARAGRAPH) {
-      html += parseParagraphToHtml(child.asParagraph());
-    } else if (type === DocumentApp.ElementType.TABLE) {
-      html += parseTableToHtml(child.asTable());
-    } else if (type === DocumentApp.ElementType.LIST_ITEM) {
+    if (type === DocumentApp.ElementType.LIST_ITEM) {
+      if (!inList) {
+        html += '<ul>';
+        inList = true;
+      }
       html += `<li>${parseParagraphToHtml(child.asListItem())}</li>`;
+    } else {
+      if (inList) {
+        html += '</ul>';
+        inList = false;
+      }
+      if (type === DocumentApp.ElementType.PARAGRAPH) {
+        html += parseParagraphToHtml(child.asParagraph());
+      } else if (type === DocumentApp.ElementType.TABLE) {
+        html += parseTableToHtml(child.asTable());
+      }
     }
+  }
+  if (inList) {
+    html += '</ul>';
   }
   return html;
 }

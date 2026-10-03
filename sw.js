@@ -6,7 +6,7 @@
  * และสนับสนุนการเข้าใช้งานแบบออฟไลน์ (Offline Mode)
  */
 
-const CACHE_NAME = 'ple-cc2-ospe-v1.2.5';
+const CACHE_NAME = 'ple-cc2-ospe-v1.2.6';
 const ASSETS = [
   './',
   './index.html',

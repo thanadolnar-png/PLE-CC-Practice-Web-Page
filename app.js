@@ -156,6 +156,33 @@ function addLogoutButton() {
 }
 
 // ──────────────────────────────────────────────────────────────
+// 0.2 SAFE LOCAL STORAGE HELPER (QuotaExceeded & Safari Private Guard)
+// ──────────────────────────────────────────────────────────────
+function safeSetLocalStorage(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (e) {
+    console.warn(`[SafeStorage] Failed to save key "${key}" to localStorage:`, e);
+    // If quota exceeded, attempt to clear transient/non-essential keys and retry once
+    try {
+      const nonEssentialKeys = ['ospe_cached_case_list', 'ple_ospe_debug_log'];
+      nonEssentialKeys.forEach(k => { if (k !== key) localStorage.removeItem(k); });
+      localStorage.setItem(key, value);
+      return true;
+    } catch (retryErr) {
+      console.warn(`[SafeStorage] Quota still exceeded after clearing transient cache. Preserving in-memory only.`);
+      return false;
+    }
+  }
+}
+
+function safeFormatScore(num) {
+  const rounded = Math.round((Number(num) || 0) * 100) / 100;
+  return Number.isInteger(rounded) ? rounded.toString() : rounded.toFixed(2).replace(/\.?0+$/, '');
+}
+
+// ──────────────────────────────────────────────────────────────
 // 0.5 VDO LINK & YOUTUBE RICH MEDIA HANDLER (Screen + Print)
 // ──────────────────────────────────────────────────────────────
 function extractYouTubeVideoId(url) {
@@ -627,7 +654,7 @@ async function loadCasesData() {
         fetchedCases = fetchedCases.filter(isCaseActive);
         
         // บันทึกความเปลี่ยนแปลงลง Cache LocalStorage
-        localStorage.setItem('ospe_cached_case_list', JSON.stringify(fetchedCases));
+        safeSetLocalStorage('ospe_cached_case_list', JSON.stringify(fetchedCases));
         
         AppState.cases = fetchedCases;
         AppState.dataReady = true;
@@ -980,7 +1007,7 @@ async function forceSyncDatabase() {
         }
         fetchedCases = fetchedCases.filter(isCaseActive);
         
-        localStorage.setItem('ospe_cached_case_list', JSON.stringify(fetchedCases));
+        safeSetLocalStorage('ospe_cached_case_list', JSON.stringify(fetchedCases));
         AppState.cases = fetchedCases;
         AppState.dataReady = true;
         AppState.dataReadyCount = fetchedCases.length;
@@ -1535,8 +1562,8 @@ function updateChecklistUI(caseId) {
   const pctDisplay = document.getElementById('percentage-display');
   const fillBar = document.getElementById('progress-bar-fill');
   
-  // Format to 2 decimal places only if not integer
-  const formatScore = (num) => Number.isInteger(num) ? num.toString() : num.toFixed(2);
+  // Format score without floating point precision drift
+  const formatScore = safeFormatScore;
   
   if (scoreDisplay) scoreDisplay.textContent = `${formatScore(currentScore)} / ${formatScore(totalScore)}`;
   

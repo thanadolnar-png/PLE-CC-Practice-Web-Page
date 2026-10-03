@@ -1778,6 +1778,12 @@
     // Exam Simulation Logic — Single clean script block
     // ══════════════════════════════════════════════════════════════
 
+    // Helper for precise score display
+    function safeFormatScore(num) {
+      const rounded = Math.round((Number(num) || 0) * 100) / 100;
+      return Number.isInteger(rounded) ? rounded.toString() : rounded.toFixed(2).replace(/\.?0+$/, '');
+    }
+
     // State object
     const SimState = {
       examGenMode: 'proportion', // 'proportion' or 'set'
@@ -1809,6 +1815,21 @@
       timeoutTransitionMode: 'auto', // 'auto' or 'manual'
       alarmSound: localStorage.getItem('ple_ospe_alarm_sound') || 'school-bell'
     };
+
+    // Auto synchronize timer on background tab wake up
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && SimState.timerRunning) {
+        if (typeof updateTimerDisplay === 'function') {
+          if (SimState.isLobby && SimState.cachedRoom?.timerStartedAt) {
+            const now = Date.now();
+            const elapsed = Math.floor((now - SimState.cachedRoom.timerStartedAt) / 1000);
+            const totalDur = SimState.cachedRoom.timerDuration || 240;
+            SimState.timerValue = Math.max(0, totalDur - elapsed);
+          }
+          updateTimerDisplay();
+        }
+      }
+    });
 
     // ─── Mode Switching: Proportion vs Exam Set Mode vs Custom Mode ───
     function switchExamGenerationMode(mode) {
@@ -6191,7 +6212,7 @@
       const checked = SimState.studentScores[stationNum] || [];
       const { currentScore, totalScore } = calculateStationScore(c.checklist, checked);
       
-      const formatScore = (num) => Number.isInteger(num) ? num.toString() : num.toFixed(2);
+      const formatScore = safeFormatScore;
       document.getElementById('exam-score').textContent = `${formatScore(currentScore)} / ${formatScore(totalScore)}`;
       if (totalScore > 0) {
         const pct = Math.round((currentScore / totalScore) * 100);
@@ -6557,8 +6578,8 @@
             name: partName || 'ผู้เข้าสอบ',
             emoji: pEmoji,
             detail: `โต๊ะ ${tableId} (ผู้ประเมิน: ${examinerName})`,
-            earned: Number.isInteger(totalEarned) ? totalEarned : totalEarned.toFixed(2),
-            max: Number.isInteger(totalMax) ? totalMax : totalMax.toFixed(2),
+            earned: safeFormatScore(totalEarned),
+            max: safeFormatScore(totalMax),
             percent: overallPct,
             passedStations: passedStations,
             totalStations: stationsList.length,
@@ -6616,8 +6637,8 @@
             name: pData.name || 'ผู้เข้าสอบ',
             emoji: pEmoji,
             detail: pData.startStation ? `เริ่มต้นที่สถานี ${pData.startStation}` : 'แลปกิ๊งหมุนเวียน',
-            earned: Number.isInteger(totalEarned) ? totalEarned : totalEarned.toFixed(2),
-            max: Number.isInteger(totalMax) ? totalMax : totalMax.toFixed(2),
+            earned: safeFormatScore(totalEarned),
+            max: safeFormatScore(totalMax),
             percent: overallPct,
             passedStations: passedStations,
             totalStations: stationsList.length,
@@ -6663,8 +6684,8 @@
             name: p.name || 'ผู้เข้าสอบ',
             emoji: p.emoji || '👤',
             detail: 'ผู้เข้าสอบ',
-            earned: Number.isInteger(totalEarned) ? totalEarned : totalEarned.toFixed(2),
-            max: Number.isInteger(totalMax) ? totalMax : totalMax.toFixed(2),
+            earned: safeFormatScore(totalEarned),
+            max: safeFormatScore(totalMax),
             percent: overallPct,
             passedStations: passedStations,
             totalStations: stationsList.length,
@@ -6877,7 +6898,7 @@
         const stationsList = SimState.stations || [];
         const totalStationsCount = stationsList.length || SimState.totalStations || 0;
         
-        const formatScore = (num) => Number.isInteger(num) ? num.toString() : num.toFixed(2);
+        const formatScore = safeFormatScore;
         
         stationsList.forEach(st => {
           const c = st.case || {};
@@ -7504,7 +7525,10 @@
       try {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         if (!AudioContextClass) return;
-        const ctx = new AudioContextClass();
+        if (!_unlockedAudioCtx) {
+          _unlockedAudioCtx = new AudioContextClass();
+        }
+        const ctx = _unlockedAudioCtx;
         if (ctx.state === 'suspended') ctx.resume().catch(() => {});
         const now = ctx.currentTime;
         [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
