@@ -3841,32 +3841,46 @@ function writeOspeTemplateToTargetDoc(targetDocId, tabName, passcode) {
     // สารบัญ
     addH1('📑 สารบัญคู่มือ');
     addBullet('1. ภาพรวมโครงสร้างของเอกสารเคส (Case Document Structure)');
-    addBullet('2. ส่วนหัวข้อมูลเคส (Case Metadata) & กฎการระบุหมวด');
-    addBullet('3. การเขียนสถานการณ์ (Scenario) & ข้อมูลผู้ป่วย');
-    addBullet('4. ระบบข้อสอบเติมคำอัจฉริยะ (Interactive Fill-in-the-Blank System)');
-    addBullet('5. การเขียน Checklist & ระบบเกณฑ์คะแนนย่อย (Rubric / Subset System)');
-    addBullet('6. การเชื่อมโยงสถานีต่อเนื่อง (Linked Stations: A ➔ B)');
-    addBullet('7. การใส่สื่อมัลติมีเดีย (รูปภาพ, คลิปวิดีโอ YouTube / Google Drive)');
-    addBullet('8. ตารางสรุปข้อผิดพลาดที่พบบ่อยและข้อห้ามเด็ดขาด (Common Pitfalls & Prohibitions)');
-    addBullet('9. แม่แบบสำเร็จรูปพร้อมใช้งาน (Ready-to-Use Templates)');
+    addBullet('2. หัวข้อเคส (Case Title) และ รหัสเคส [OSPE-...]');
+    addBullet('3. ส่วนหัวข้อมูลเคส (Case Metadata) & กฎการระบุหมวด');
+    addBullet('4. การเขียนสถานการณ์ (Scenario) & ข้อมูลเสริม (ผู้ป่วย / สิ่งที่มีให้ในสถานี)');
+    addBullet('5. ระบบข้อสอบเติมคำอัจฉริยะ (Interactive Fill-in-the-Blank System)');
+    addBullet('6. การเขียน Checklist & ระบบเกณฑ์คะแนนย่อย (Rubric / Subset System)');
+    addBullet('7. การเชื่อมโยงสถานีต่อเนื่อง (Linked Stations: A ➔ B)');
+    addBullet('8. การใส่สื่อมัลติมีเดีย (รูปภาพ, คลิปวิดีโอ YouTube / Google Drive)');
+    addBullet('9. ตารางสรุปข้อผิดพลาดที่พบบ่อยและข้อห้ามเด็ดขาด (Common Pitfalls & Prohibitions)');
+    addBullet('10. แม่แบบสำเร็จรูปพร้อมใช้งาน (Ready-to-Use Templates)');
     targetBody.appendHorizontalRule();
     
     // Section 1
     addH1('1. ภาพรวมโครงสร้างของเอกสารเคส');
-    addP('เอกสาร Google Docs ของแต่ละเคส จะต้องแบ่งออกเป็น 6 ส่วนหลัก ตามลำดับนี้เสมอ (หากไม่มีข้อมูลในส่วนใด เช่น ไม่มีข้อมูลผู้ป่วย หรือไม่มีสิ่งของ ให้ข้ามหัวข้อนั้นไปเลย ห้ามสร้าง Heading เปล่าทิ้งไว้):');
-    addCalloutBox('📌 โครงสร้าง 6 ส่วนมาตรฐาน (Clean Plain Text — ไร้ดอกจัน **)', [
-      '1. [ส่วนหัวข้อมูลเคส / Metadata] (ระบุด้วยรายการ Bullet - ด้านบนสุด)',
-      '2. ## สถานการณ์ (Scenario / โจทย์ที่ผู้เข้าสอบเห็น)',
-      '3. ## ข้อมูลผู้ป่วย (Patient Profile / ถ้ามีคนไข้)',
-      '4. ## สิ่งที่มีให้ในสถานี (Equipment / Station Materials / ถ้ามี)',
-      '5. ## Checklist (เกณฑ์การให้คะแนนสำหรับผู้ประเมิน รวม 10.0 คะแนนเต็ม)',
-      '6. ## ข้อมูลผู้ตรวจ (Examiner Notes / เฉลย / บทบาทคนไข้จำลอง SP)'
+    addP('เอกสาร Google Docs ของแต่ละเคส จะต้องแบ่งออกเป็น 7 ส่วนหลัก ตามลำดับนี้เสมอ (หากไม่มีข้อมูลในส่วนใด เช่น ไม่มีข้อมูลผู้ป่วย หรือไม่มีสิ่งของ ให้ข้ามหัวข้อนั้นไปเลย ห้ามสร้าง Heading เปล่าทิ้งไว้):');
+    addCalloutBox('📌 โครงสร้าง 7 ส่วนมาตรฐาน (Clean Plain Text — ไร้ดอกจัน **)', [
+      '1. # [รหัสเคส] ชื่อเคสสถานีสอบ (Heading 1 หรือ บรรทัดแรกสุดของเคส)',
+      '2. [ส่วนหัวข้อมูลเคส / Metadata] (ระบุด้วยรายการ Bullet - ใต้ชื่อเคส)',
+      '3. ## สถานการณ์ (Scenario / โจทย์ที่ผู้เข้าสอบเห็น)',
+      '4. ## ข้อมูลผู้ป่วย (Patient Profile / ถ้ามีคนไข้)',
+      '5. ## สิ่งที่มีให้ในสถานี (Equipment / Station Materials / ถ้ามี)',
+      '6. ## Checklist (เกณฑ์การให้คะแนนสำหรับผู้ประเมิน รวม 10.0 คะแนนเต็ม)',
+      '7. ## ข้อมูลผู้ตรวจ (Examiner Notes / เฉลย / บทบาทคนไข้จำลอง SP)'
     ]);
     
-    // Section 2
-    addH1('2. ส่วนหัวข้อมูลเคส (Case Metadata)');
-    addP('อยู่บรรทัดบนสุดของไฟล์เสมอ ใช้เครื่องหมายขีด - นำหน้า:');
-    addCalloutBox('ตัวอย่าง Metadata ด้านบนสุดของเคส', [
+    // Section 2: Case Title and ID
+    addH1('2. หัวข้อเคส (Case Title) และ รหัสเคส (Case ID)');
+    addP('บรรทัดแรกสุดของแต่ละเคส ต้องตั้งเป็น Heading 1 พร้อมระบุรหัสเคสในวงเล็บก้ามปู [OSPE-...] นำหน้าชื่อเคสเสมอ เพื่อให้ระบบสแกนและดึงเข้าสู่คลังข้อสอบอัตโนมัติ:');
+    addCalloutBox('รูปแบบชื่อเคสมาตรฐาน', [
+      '# [OSPE-CL001] Warfarin Counseling — AF รายใหม่',
+      '# [OSPE-CL002] การจ่ายยาปรับเปลี่ยนขนาดยา Warfarin (ต่อจาก OSPE-CL001)'
+    ]);
+    addBullet('Clinic: ขึ้นต้นด้วย [OSPE-CL...] เช่น [OSPE-CL001], [OSPE-CL6601]');
+    addBullet('Product: ขึ้นต้นด้วย [OSPE-PD...] เช่น [OSPE-PD001], [OSPE-PD6601]');
+    addBullet('SAP: ขึ้นต้นด้วย [OSPE-SP...] หรือ [OSPE-SAP...] เช่น [OSPE-SP001]');
+    addBullet('Mock Exam: ใส่รหัสปีหรือรหัสชุด เช่น [OSPE-MOCK01], [OSPE-CL-MOCK1]');
+    
+    // Section 3: Metadata
+    addH1('3. ส่วนหัวข้อมูลเคส (Case Metadata)');
+    addP('อยู่ใต้ชื่อเคสเสมอ ใช้เครื่องหมายขีด - นำหน้า:');
+    addCalloutBox('ตัวอย่าง Metadata ใต้ชื่อเคส', [
       '- หมวด: Clinic (หรือ Product / SAP)',
       '- Course Group: การบริบาลทางเภสัชกรรมผู้ป่วยนอก',
       '- โรค/หัวข้อ: Hypertension with CKD',
@@ -3881,13 +3895,13 @@ function writeOspeTemplateToTargetDoc(targetDocId, tabName, passcode) {
     addBullet('Case status: Active = พร้อมให้นิสิตฝึกซ้อม / Unactive = ร่างอยู่');
     addBullet('Linked Next Case: รหัสเคสสถานีถัดไป (เช่น OSPE-CL6602) เมื่อมีสถานีต่อเนื่อง');
     
-    // Section 3
-    addH1('3. การเขียนสถานการณ์ (Scenario) & ข้อมูลผู้ป่วย');
+    // Section 4
+    addH1('4. การเขียนสถานการณ์ (Scenario) & ข้อมูลเสริม (ผู้ป่วย / สิ่งที่มีให้ในสถานี)');
     addH2('3.1 หัวข้อ ## สถานการณ์');
     addP('ข้อความหรือคำสั่งที่ผู้เข้าสอบจะอ่านจากหน้าห้องสอบ (ระยะเวลาอ่าน 1 นาที / ปฏิบัติ 4 นาที): ระบุบริบทและคำสั่งให้ชัดเจน (เช่น จงซักประวัติและให้คำแนะนำ, จงคำนวณและตั้งสูตรตำรับ, จงระบุรูปแบบยาและความไม่คงตัว)');
-    addH2('3.2 หัวข้อ ## ข้อมูลผู้ป่วย (Optional)');
-    addP('• หากมี: ใส่ตารางประวัติ, Vital signs, ผล Lab, หรือรายการยาเดิม');
-    addP('• หากไม่มี (เช่น ข้อสอบ Product/Identification): ห้ามใส่ ## ข้อมูลผู้ป่วย โดยเด็ดขาด ระบบจะซ่อนส่วนนี้ให้อัตโนมัติ');
+    addH2('3.2 หัวข้อ ## ข้อมูลผู้ป่วย และ ## สิ่งที่มีให้ในสถานี (Optional / ข้ามได้หากไม่มี)');
+    addP('• ## ข้อมูลผู้ป่วย (Optional): หากมีให้ใส่ตารางประวัติ, Vital signs, ผล Lab หรือรายการยาเดิม หากไม่มี (เช่น ข้อสอบ Product/Identification) ให้ข้ามหัวข้อนี้ไปเลย ห้ามใส่ทิ้งไว้เปล่าๆ');
+    addP('• ## สิ่งที่มีให้ในสถานี (Optional): หากมีให้ระบุรายการสิ่งของหรืออุปกรณ์ที่วางบนโต๊ะสอบ หากไม่มีให้ข้ามหัวข้อนี้ไปเลยเช่นกัน ระบบจะซ่อนกล่องให้อัตโนมัติ');
     
     // Section 4
     addH1('4. ระบบข้อสอบเติมคำอัจฉริยะ (Interactive Blank)');

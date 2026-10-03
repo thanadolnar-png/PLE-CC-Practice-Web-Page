@@ -1,13 +1,13 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Version: v_20261003_142000
- * Generated on 2026-10-03 14:20:00
+ * Version: v_20261003_145931
+ * Generated on 2026-10-03 14:59:31
  */
 
 const OFFLINE_DATA = {
-  "version": "v_20261003_040842",
-  "generatedAt": "2026-10-03 04:08:42",
-  "totalCases": 353,
+  "version": "v_20261003_145931",
+  "generatedAt": "2026-10-03 14:59:31",
+  "totalCases": 355,
   "cases": [
     {
       "caseId": "OSPE-CL4801",
@@ -820,7 +820,7 @@ const OFFLINE_DATA = {
       "caseStatus": "Active"
     },
     {
-      "caseId": "OSPE-CL5529",
+      "caseId": "OSPE-CL5528",
       "title": "ซักประวัติและจ่ายยาเกลื้อน",
       "category": "Clinic",
       "mainGroup": "การซักประวัติและจ่ายยา",
@@ -830,6 +830,21 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "หยก",
       "createdDate": "02/08/2026",
+      "source": "ข้อสอบจริง ปี 2555",
+      "isActive": true,
+      "caseStatus": "Active"
+    },
+    {
+      "caseId": "OSPE-CL5529",
+      "title": "แนะนำยาเทคนิคพิเศษ Accuhaler",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Accuhaler",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ฟ้าใส",
+      "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2555",
       "isActive": true,
       "caseStatus": "Active"
@@ -1270,6 +1285,36 @@ const OFFLINE_DATA = {
       "caseStatus": "Active"
     },
     {
+      "caseId": "OSPE-CL5902",
+      "title": "การซักประวัติจ่ายยาผู้ป่วยในร้านยา  GERD and muscle pain",
+      "category": "clinic",
+      "mainGroup": "การซักประวัติและจ่ายยา",
+      "subTopic": "",
+      "disease": "GERD and muscle pain",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ส้มส้ม",
+      "createdDate": "3/10/2569",
+      "source": "ข้อสอบจริง ปี 2559",
+      "isActive": true,
+      "caseStatus": "Active"
+    },
+    {
+      "caseId": "OSPE-CL5904",
+      "title": "การตรวจสอบใบสั่งยาโรค Hypertension",
+      "category": "clinic and product",
+      "mainGroup": "การค้นข้อมูลและประสานงาน",
+      "subTopic": "",
+      "disease": "Oncology",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "ส้มส้ม",
+      "createdDate": "3/10/2569",
+      "source": "ข้อสอบจริง ปี 2559",
+      "isActive": true,
+      "caseStatus": "Active"
+    },
+    {
       "caseId": "OSPE-CL5910",
       "title": "ซักประวัติและจ่ายยา Drug allergy",
       "category": "clinic",
@@ -1288,13 +1333,13 @@ const OFFLINE_DATA = {
       "caseId": "OSPE-CL5911",
       "title": "การนับเม็ดยา Bisacodyl",
       "category": "clinic",
-      "mainGroup": "การซักประวัติและจ่ายยา",
+      "mainGroup": "การนับเม็ดยาและเขียนฉลากยา",
       "subTopic": "",
-      "disease": "GERD and muscle pain",
+      "disease": "Constipation",
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ส้มส้ม",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ข้อสอบจริง ปี 2559",
       "isActive": true,
       "caseStatus": "Active"
@@ -1361,15 +1406,15 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-CL6014",
-      "title": "ส่งมอบยาเทคนิคพิเศษ Vaginal Tablet",
-      "category": "Clinic",
+      "title": "การส่งมอบยาเทคนิคพิเศษ Suppository",
+      "category": "clinic",
       "mainGroup": "การใช้ยาเทคนิคพิเศษ",
       "subTopic": "",
-      "disease": "Vaginal Tablet",
+      "disease": "Constipation",
       "difficulty": 2,
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
-      "author": "มีน",
-      "createdDate": "16/07/2026",
+      "author": "ส้มส้ม",
+      "createdDate": "3/10/2569",
       "source": "ข้อสอบจริง ปี 2560",
       "isActive": true,
       "caseStatus": "Active"
@@ -3574,7 +3619,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24",
       "author": "RxCU84",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "Mock Exam 2569 (Week 1) ชุด A",
       "isActive": true,
       "caseStatus": "Active",
@@ -3591,7 +3636,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24",
       "author": "RxCU84",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "Mock Exam 2569 (Week 1) ชุด B",
       "isActive": true,
       "caseStatus": "Active",
@@ -3608,7 +3653,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24",
       "author": "RxCU84",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "Mock Exam 2569 (Week 1) ชุด A",
       "isActive": true,
       "caseStatus": "Active",
@@ -3625,7 +3670,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24",
       "author": "RxCU84",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "Mock Exam 2569 (Week 1) ชุด B",
       "isActive": true,
       "caseStatus": "Active",
@@ -3642,7 +3687,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24",
       "author": "RxCU84",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "Mock Exam 2569 (Week 1) ชุด A",
       "isActive": true,
       "caseStatus": "Active",
@@ -3659,7 +3704,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24",
       "author": "RxCU84",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "Mock Exam 2569 (Week 1) ชุด B",
       "isActive": true,
       "caseStatus": "Active",
@@ -3796,7 +3841,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ตอง",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -3811,7 +3856,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ตอง",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -3826,7 +3871,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ตอง",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -3841,7 +3886,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ออมสิน",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -3856,7 +3901,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "นีนนี่",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -3871,7 +3916,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ดับบลิว & โฟ๊คสุดหล่อ",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -3886,7 +3931,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "บีเอ็ม",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -3901,7 +3946,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "บีเอ็ม",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -3916,7 +3961,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "บีเอ็ม",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -3931,7 +3976,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "บีเอ็ม",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -3946,7 +3991,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -3961,7 +4006,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -3976,7 +4021,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -3991,7 +4036,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4006,7 +4051,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4021,7 +4066,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4036,7 +4081,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4051,7 +4096,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4066,7 +4111,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "มิ้นท์",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4081,7 +4126,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "มิ้นท์",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4096,7 +4141,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "บีเอ็ม",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4111,7 +4156,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "บีเอ็ม",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4126,7 +4171,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ไข่มุก",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4141,7 +4186,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ไข่มุก",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4156,7 +4201,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ไข่มุก",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4171,7 +4216,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ไข่มุก",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4186,7 +4231,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ไข่มุก",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4201,7 +4246,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ไข่มุก",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4216,7 +4261,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ทิว",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4231,7 +4276,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4246,7 +4291,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ใบตอง",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4261,7 +4306,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ใบตอง",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4276,7 +4321,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4291,7 +4336,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4306,7 +4351,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4321,7 +4366,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4336,7 +4381,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4351,7 +4396,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ใบตอง",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4366,7 +4411,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4381,7 +4426,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4396,7 +4441,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4411,7 +4456,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ใบตอง",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4426,7 +4471,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4441,7 +4486,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "วีวี่",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4456,7 +4501,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ทิว",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4471,7 +4516,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ทิว",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4486,7 +4531,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ทิว",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4501,7 +4546,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ทิว",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4516,7 +4561,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ตะวัน",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4531,7 +4576,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ตะวัน",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4546,7 +4591,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ตะวัน",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4561,7 +4606,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ยูจีน",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4576,7 +4621,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ยูจีน",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -4591,7 +4636,7 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ยูจีน",
-      "createdDate": "2/10/2569",
+      "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
       "caseStatus": "Active"
@@ -5298,21 +5343,6 @@ const OFFLINE_DATA = {
       "author": "RxCU",
       "createdDate": "01/10/2026",
       "source": "ข้อสอบจริง ปี 2568",
-      "isActive": true,
-      "caseStatus": "Active"
-    },
-    {
-      "caseId": "OSPE-PR8301",
-      "title": "Dosage Forms & Drug Instability",
-      "category": "Product",
-      "mainGroup": "การค้นข้อมูลและประสานงาน",
-      "subTopic": "",
-      "disease": "Dosage Forms & Drug Instability",
-      "difficulty": 2,
-      "docId": "1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg",
-      "author": "RxCU83",
-      "createdDate": "30/09/2026",
-      "source": "Mock RxCU83 Clinic ครั้งที่ 1",
       "isActive": true,
       "caseStatus": "Active"
     }
