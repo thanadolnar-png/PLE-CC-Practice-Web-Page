@@ -5840,7 +5840,6 @@ body.is-printing #batch-print-execution-area {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   border-radius: 9999px;
   padding: 0.35rem 0.65rem 0.35rem 0.45rem;
-  display: flex;
   align-items: center;
   gap: 0.5rem;
   font-family: inherit;
@@ -5848,7 +5847,6 @@ body.is-printing #batch-print-execution-area {
   transition: all 0.2s ease;
   user-select: none;
 }
-
 
 .ple-bgm-pill.is-visible {
   display: flex !important;
@@ -5988,17 +5986,26 @@ body.is-printing #batch-print-execution-area {
   border: none;
   color: var(--text-secondary);
   cursor: pointer;
-  font-size: 0.72rem;
-  padding: 0.2rem 0.35rem;
-  border-radius: 4px;
+  font-size: 0.85rem;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  flex-shrink: 0;
 }
 
 .ple-bgm-close-btn:hover {
-  background: #f1f5f9;
+  background: #e2e8f0;
   color: var(--text-primary);
+  transform: scale(1.1);
+}
+
+.ple-bgm-close-btn:active {
+  transform: scale(0.92);
 }
 
 .ple-bgm-pill.is-minimized .ple-bgm-info,

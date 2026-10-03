@@ -262,9 +262,15 @@ const BgmManager = {
     const pill = document.getElementById('ple-bgm-floating-bar');
     if (this.isPlaying) {
       this.pause();
-      if (pill) pill.classList.remove('is-visible');
+      if (pill) {
+        pill.classList.remove('is-visible');
+        pill.style.display = 'none';
+      }
     } else {
-      if (pill) pill.classList.add('is-visible');
+      if (pill) {
+        pill.style.display = 'flex';
+        pill.classList.add('is-visible');
+      }
       this.play().catch(() => {});
     }
   },
@@ -272,7 +278,13 @@ const BgmManager = {
   toggleWidgetVisibility() {
     const pill = document.getElementById('ple-bgm-floating-bar');
     if (pill) {
-      pill.classList.toggle('is-visible');
+      const isShown = pill.classList.contains('is-visible') && pill.style.display !== 'none';
+      if (isShown) {
+        this.close();
+      } else {
+        pill.style.display = 'flex';
+        pill.classList.add('is-visible');
+      }
     }
   },
 
@@ -337,9 +349,22 @@ const BgmManager = {
         <div class="ple-bgm-vol-wrap">
           <input type="range" class="ple-bgm-slider" id="ple-bgm-slider" min="0" max="1" step="0.05" value="${this.volume}" oninput="BgmManager.setVolume(this.value)" title="ปรับระดับเสียงดนตรี">
         </div>
-        <button type="button" class="ple-bgm-close-btn" onclick="BgmManager.minimize()" title="ย่อแถบเพลง">✕</button>
+        <button type="button" class="ple-bgm-close-btn" id="ple-bgm-close-btn" onclick="BgmManager.close(event)" title="ปิดแถบเพลง">✕</button>
       </div>
     `;
+    
+    // Attach direct click handler with stopPropagation to ensure closing works reliably
+    const closeBtn = pill.querySelector('.ple-bgm-close-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', (e) => {
+        if (e) {
+          e.stopPropagation();
+          e.preventDefault();
+        }
+        BgmManager.close(e);
+      });
+    }
+
     document.body.appendChild(pill);
 
     // 2. Inject Topbar Music button if topbar-right exists
@@ -390,11 +415,20 @@ const BgmManager = {
     }
   },
 
-  minimize() {
+  close(e) {
+    if (e && typeof e.stopPropagation === 'function') {
+      e.stopPropagation();
+      e.preventDefault();
+    }
     const pill = document.getElementById('ple-bgm-floating-bar');
     if (pill) {
       pill.classList.remove('is-visible');
+      pill.style.display = 'none';
     }
+  },
+
+  minimize(e) {
+    this.close(e);
   }
 };
 window.BgmManager = BgmManager;
