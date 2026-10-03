@@ -1786,10 +1786,12 @@ function parseTableToHtml(table) {
       const numParas = cell.getNumChildren();
       for (let p = 0; p < numParas; p++) {
         const item = cell.getChild(p);
-        if (item.getType() === DocumentApp.ElementType.PARAGRAPH || item.getType() === DocumentApp.ElementType.LIST_ITEM) {
-          const numGrandChildren = item.asParagraph().getNumChildren();
+        const itemType = item.getType();
+        if (itemType === DocumentApp.ElementType.PARAGRAPH || itemType === DocumentApp.ElementType.LIST_ITEM) {
+          const container = (itemType === DocumentApp.ElementType.PARAGRAPH) ? item.asParagraph() : item.asListItem();
+          const numGrandChildren = container.getNumChildren();
           for (let gc = 0; gc < numGrandChildren; gc++) {
-            if (item.asParagraph().getChild(gc).getType() === DocumentApp.ElementType.INLINE_IMAGE) {
+            if (container.getChild(gc).getType() === DocumentApp.ElementType.INLINE_IMAGE) {
               hasImages = true;
               break;
             }
@@ -1818,15 +1820,29 @@ function parseTableToHtml(table) {
       const cell = row.getCell(c);
       const cellParas = [];
       const numParas = cell.getNumChildren();
+      let inList = false;
       for (let p = 0; p < numParas; p++) {
         const para = cell.getChild(p);
-        if (para.getType() === DocumentApp.ElementType.PARAGRAPH) {
+        const pType = para.getType();
+        if (pType === DocumentApp.ElementType.PARAGRAPH) {
+          if (inList) {
+            cellParas.push('</ul>');
+            inList = false;
+          }
           const paraHtml = parseParagraphToHtml(para.asParagraph());
           if (paraHtml) cellParas.push(paraHtml);
-        } else if (para.getType() === DocumentApp.ElementType.LIST_ITEM) {
-          const paraHtml = parseParagraphToHtml(para.asListItem());
-          if (paraHtml) cellParas.push(paraHtml);
+        } else if (pType === DocumentApp.ElementType.LIST_ITEM) {
+          if (!inList) {
+            cellParas.push('<ul style="margin:4px 0;padding-left:20px;text-align:left;">');
+            inList = true;
+          }
+          const liText = parseParagraphToHtml(para.asListItem());
+          if (liText) cellParas.push(`<li>${liText}</li>`);
         }
+      }
+      if (inList) {
+        cellParas.push('</ul>');
+        inList = false;
       }
       let cellHtml = cellParas.join('');
       if (!cellHtml) cellHtml = escapeHtml(cell.getText().trim());

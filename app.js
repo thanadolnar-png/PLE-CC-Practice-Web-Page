@@ -770,6 +770,13 @@ async function fetchCaseDetail(caseId, forceLive = false) {
     clearTimeout(timeoutId);
     const json = await res.json();
     if (json.success && json.data) {
+      // Validate that returned data is not an error string
+      const cHtml = (json.data.contentHtml || '') + '';
+      if (cHtml.includes('โหลดเนื้อหาไม่ได้') || cHtml.includes('Exception:')) {
+        console.warn('Live API returned error content for', cleanId, cHtml);
+        return null;
+      }
+
       // Update in memory & IndexedDB
       if (typeof saveCaseToIndexedDB === 'function') {
         saveCaseToIndexedDB(json.data);
@@ -831,7 +838,7 @@ async function updateCurrentCaseFromDoc() {
       }
     } else {
       if (typeof showToast === 'function') {
-        showToast('⚠️ ไม่สามารถดึงข้อมูลล่าสุดจาก Google Docs ได้ หรือโครงสร้างไม่ถูกต้อง', 'warning');
+        showToast('⚠️ ไม่สามารถดึงข้อมูลล่าสุดจาก Google Docs ได้ หรือโครงสร้างไม่ถูกต้อง (ระบบยังคงแสดงข้อมูลออฟไลน์เดิม)', 'warning');
       }
     }
   } catch (e) {
