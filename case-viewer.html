@@ -320,9 +320,9 @@
   </div><!-- /.page-viewport -->
 </div><!-- /.app-shell -->
 
-  <script src="case-data-offline.js?v=v_20261003_150349"></script>
-  <script src="case-details-offline.js?v=v_20261003_150349"></script>
-  <script src="app.js?v=v_20261003_150349"></script>
+  <script src="case-data-offline.js?v=v_20261003_150931"></script>
+  <script src="case-details-offline.js?v=v_20261003_150931"></script>
+  <script src="app.js?v=v_20261003_150931"></script>
   <script src="scratchpad.js?v=20261002_205600"></script>
 
   <script>
@@ -595,7 +595,17 @@
                   if (!updatedCase.linkedFromCase && offlineCase.linkedFromCase) updatedCase.linkedFromCase = offlineCase.linkedFromCase;
                   if (!updatedCase.title && offlineCase.title) updatedCase.title = offlineCase.title;
                   if (!updatedCase.caseId) updatedCase.caseId = offlineCase.caseId;
-                  if (!updatedCase.equipmentHtml && offlineCase.equipmentHtml) updatedCase.equipmentHtml = offlineCase.equipmentHtml;
+                  
+                  // รักษารูปแบบที่มีความสมบูรณ์สูงกว่าของ equipmentHtml
+                  if (offlineCase.equipmentHtml) {
+                    if (!updatedCase.equipmentHtml || 
+                        (offlineCase.equipmentHtml.includes('<ol') && !updatedCase.equipmentHtml.includes('<ol')) ||
+                        (offlineCase.equipmentHtml.includes('<ul') && !updatedCase.equipmentHtml.includes('<ul')) ||
+                        (offlineCase.equipmentHtml.includes('<table') && !updatedCase.equipmentHtml.includes('<table'))) {
+                      updatedCase.equipmentHtml = offlineCase.equipmentHtml;
+                    }
+                  }
+                  
                   const offlineImgCount = ((offlineCase.contentHtml || '').match(/<img/g) || []).length;
                   const updatedImgCount = ((updatedCase.contentHtml || '').match(/<img/g) || []).length;
                   if (offlineImgCount > updatedImgCount || (!updatedCase.contentHtml && offlineCase.contentHtml)) {
@@ -608,6 +618,9 @@
                   }
                   if ((!updatedCase.checklist || updatedCase.checklist.length === 0) && offlineCase.checklist && offlineCase.checklist.length > 0) {
                     updatedCase.checklist = offlineCase.checklist;
+                  }
+                  if (offlineCase.noteHtml && (!updatedCase.noteHtml || (offlineCase.noteHtml.includes('<img') && !updatedCase.noteHtml.includes('<img')))) {
+                    updatedCase.noteHtml = offlineCase.noteHtml;
                   }
                 }
                 
@@ -957,16 +970,34 @@
           
           container.appendChild(el);
           
-          // ตารางพิมพ์ (ไม่มีคอลัมน์กลุ่มแยกเดี่ยวซ้ายสุดแล้ว)
-          printTableHtml += `
-            <tr>
-              <td style="vertical-align: middle; padding: 0.45rem 0.6rem;">${item.textHtml || escapeHtml(item.text)}${imgHtml ? `<div style="margin-top:0.25rem;">${imgHtml}</div>` : ''}</td>
-              <td class="print-center-cell" style="font-weight: bold; text-align: center; vertical-align: middle;">${item.score}</td>
-              <td class="print-center-cell" style="text-align: center; vertical-align: middle;">
-                <span class="print-eval-box"></span>
-              </td>
-            </tr>
-          `;
+          // ตารางพิมพ์: แยกรูปแบบ Parent Item vs Subset Item ให้สวยงามเหมือนหน้าเว็บ
+          if (isSubset) {
+            printTableHtml += `
+              <tr class="print-row-subset">
+                <td style="vertical-align: middle; padding: 0.35rem 0.6rem 0.35rem 2rem; color: #334155; font-size: 9pt;">
+                  <span style="display: inline-block; width: 14px; height: 14px; border: 1.5px solid #64748b; border-radius: 50%; vertical-align: middle; margin-right: 0.45rem; background: #fff;"></span>
+                  ${item.textHtml || escapeHtml(item.text)}${imgHtml ? `<div style="margin-top:0.25rem;">${imgHtml}</div>` : ''}
+                </td>
+                <td class="print-center-cell" style="font-weight: 600; color: #475569; text-align: center; vertical-align: middle; font-size: 9pt;">${item.score}</td>
+                <td class="print-center-cell" style="text-align: center; vertical-align: middle;">
+                  <span class="print-eval-box" style="display: inline-block; width: 15px; height: 15px; border: 1.5px solid #475569; border-radius: 3px;"></span>
+                </td>
+              </tr>
+            `;
+          } else {
+            printTableHtml += `
+              <tr class="print-row-parent" style="background-color: #f8fafc;">
+                <td style="vertical-align: middle; padding: 0.5rem 0.6rem; font-weight: 700; color: #0f172a;">
+                  <span style="display: inline-block; width: 14px; height: 14px; border: 1.5px solid #0f172a; border-radius: 3px; vertical-align: middle; margin-right: 0.45rem; background: #fff;"></span>
+                  ${item.textHtml || escapeHtml(item.text)}${imgHtml ? `<div style="margin-top:0.25rem;">${imgHtml}</div>` : ''}
+                </td>
+                <td class="print-center-cell" style="font-weight: 800; color: #0f172a; text-align: center; vertical-align: middle; font-size: 10pt;">${item.score}</td>
+                <td class="print-center-cell" style="text-align: center; vertical-align: middle;">
+                  <span class="print-eval-box" style="display: inline-block; width: 15px; height: 15px; border: 1.5px solid #0f172a; border-radius: 3px;"></span>
+                </td>
+              </tr>
+            `;
+          }
         });
       });
       

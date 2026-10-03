@@ -1087,6 +1087,7 @@ body.is-fullscreen {
 }
 
 /* Scenario, Patient, Equipment & Exam Lists (Universal Bullet & Numbered Support) */
+/* Scenario, Patient, Equipment & Exam Lists (Universal Bullet & Numbered Support) */
 ul.bullet-list,
 #case-scenario-content ul,
 #case-patient-content ul,
@@ -1098,8 +1099,9 @@ ul.bullet-list,
 #exam-note-content-area ul,
 .print-section-content ul {
   list-style-type: disc !important;
-  padding-left: 1.5rem !important;
-  margin: 0.4rem 0 !important;
+  padding-left: 1.35rem !important;
+  margin: 0.25rem 0 !important;
+  white-space: normal !important;
 }
 
 ol.ordered-list,
@@ -1113,8 +1115,9 @@ ol.ordered-list,
 #exam-note-content-area ol,
 .print-section-content ol {
   list-style-type: decimal !important;
-  padding-left: 1.5rem !important;
-  margin: 0.4rem 0 !important;
+  padding-left: 1.35rem !important;
+  margin: 0.25rem 0 !important;
+  white-space: normal !important;
 }
 
 /* Nested lists */
@@ -1127,8 +1130,9 @@ ul.bullet-list ul,
 #exam-equipment-content ul ul,
 .print-section-content ul ul {
   list-style-type: circle !important;
-  margin-top: 0.25rem !important;
-  margin-bottom: 0.25rem !important;
+  margin: 0.15rem 0 0.15rem 0 !important;
+  padding-left: 1.25rem !important;
+  white-space: normal !important;
 }
 
 ul.bullet-list ol,
@@ -1141,8 +1145,9 @@ ol.ordered-list ol,
 #exam-equipment-content ul ol,
 .print-section-content ul ol {
   list-style-type: decimal !important;
-  margin-top: 0.25rem !important;
-  margin-bottom: 0.25rem !important;
+  margin: 0.15rem 0 0.15rem 0 !important;
+  padding-left: 1.25rem !important;
+  white-space: normal !important;
 }
 
 ul.bullet-list li,
@@ -1156,8 +1161,9 @@ ol.ordered-list li,
 #exam-equipment-content li,
 #exam-note-content-area li,
 .print-section-content li {
-  margin-bottom: 0.25rem !important;
-  line-height: 1.6 !important;
+  margin-bottom: 0.15rem !important;
+  line-height: 1.45 !important;
+  white-space: normal !important;
 }
 
 /* Checklist Styling */
@@ -2381,6 +2387,34 @@ ol.ordered-list li,
 
   .print-center-cell {
     text-align: center !important;
+  }
+
+  table.print-checklist-table tr.print-row-parent {
+    background-color: #f1f5f9 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  table.print-checklist-table tr.print-row-parent td {
+    font-weight: 700 !important;
+    color: #0f172a !important;
+  }
+
+  table.print-checklist-table tr.print-row-subset {
+    background-color: #ffffff !important;
+  }
+
+  table.print-checklist-table tr.print-row-subset td:first-child {
+    padding-left: 2rem !important;
+    color: #334155 !important;
+  }
+
+  table.print-checklist-table tr.print-table-group-row td {
+    background-color: #e2e8f0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    font-weight: 800 !important;
+    color: #1e293b !important;
   }
 
   .print-page-break {
