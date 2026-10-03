@@ -718,6 +718,51 @@
 
     function renderCaseDetail(c) {
       const caseId = c.caseId || activeCaseId || '';
+
+      // Auto-extract checklist items if checklist is empty but items leaked into patientInfoHtml or contentHtml
+      if ((!c.checklist || c.checklist.length === 0) && (c.patientInfoHtml || c.contentHtml)) {
+        const rawHtml = c.patientInfoHtml || c.contentHtml || '';
+        if (rawHtml.includes('(1)') || rawHtml.includes('(2)') || rawHtml.includes('กลุ่ม:')) {
+          const pMatches = rawHtml.match(/<p[^>]*>[\s\S]*?<\/p>/gi) || [];
+          const newParas = [];
+          const extractedList = [];
+          let currentGroup = 'ทั่วไป';
+
+          pMatches.forEach(pTag => {
+            const inner = pTag.replace(/<p[^>]*>/gi, '').replace(/<\/p>/gi, '').trim();
+            const grpMatch = inner.match(/\(กลุ่ม:\s*([^)]+)\)/) || inner.match(/กลุ่ม:\s*(.*)$/);
+            if (grpMatch && !inner.startsWith('-') && !inner.startsWith('(')) {
+              currentGroup = grpMatch[1].replace(/\*/g, '').trim();
+              return;
+            }
+            const chkMatch = inner.match(/^(?:-\s*)?\((\d+(?:\.\d+)?)\)\s*(.+)$/) || inner.match(/^(?:-\s*)\[\s*\]\s*(.+)$/);
+            if (chkMatch) {
+              const score = chkMatch[1] && !isNaN(parseFloat(chkMatch[1])) ? parseFloat(chkMatch[1]) : 1.0;
+              const text = (chkMatch[2] || chkMatch[1] || '').trim();
+              const cleanText = text.replace(/<[^>]+>/g, '').trim();
+              extractedList.push({
+                id: 'chk_' + Math.random().toString(36).substring(2, 10),
+                text: cleanText,
+                textHtml: text,
+                score: score,
+                group: currentGroup,
+                checked: false,
+                isSubset: false,
+                imageHtml: ''
+              });
+            } else {
+              newParas.push(pTag);
+            }
+          });
+
+          if (extractedList.length > 0) {
+            c.checklist = extractedList;
+            if (c.patientInfoHtml) c.patientInfoHtml = newParas.join('');
+            else if (c.contentHtml) c.contentHtml = newParas.join('');
+          }
+        }
+      }
+
       const rawTitle = (c.title && c.title !== 'undefined') ? c.title : ((c.disease && c.disease !== '-' && c.disease !== 'undefined') ? c.disease : (c.mainGroup || 'เคสข้อสอบ'));
       const displayTitle = (caseId && !rawTitle.startsWith(`[${caseId}]`)) ? `[${caseId}] ${rawTitle}` : rawTitle;
       document.getElementById('case-title').textContent = displayTitle;
@@ -976,11 +1021,12 @@
               <tr class="print-row-subset">
                 <td style="vertical-align: middle; padding: 0.35rem 0.6rem 0.35rem 2rem; color: #334155; font-size: 9pt;">
                   <span style="display: inline-block; width: 14px; height: 14px; border: 1.5px solid #64748b; border-radius: 50%; vertical-align: middle; margin-right: 0.45rem; background: #fff;"></span>
-                  ${item.textHtml || escapeHtml(item.text)}${imgHtml ? `<div style="margin-top:0.25rem;">${imgHtml}</div>` : ''}
+                  <span style="vertical-align: middle;">${item.textHtml || escapeHtml(item.text)}</span>
+                  ${imgHtml ? `<div style="margin-top:0.25rem;">${imgHtml}</div>` : ''}
                 </td>
-                <td class="print-center-cell" style="font-weight: 600; color: #475569; text-align: center; vertical-align: middle; font-size: 9pt;">${item.score}</td>
-                <td class="print-center-cell" style="text-align: center; vertical-align: middle;">
-                  <span class="print-eval-box" style="display: inline-block; width: 15px; height: 15px; border: 1.5px solid #475569; border-radius: 3px;"></span>
+                <td class="print-center-cell" style="font-weight: 600; color: #475569; text-align: center; vertical-align: middle; font-size: 9pt; line-height: 1;">${item.score}</td>
+                <td class="print-center-cell" style="text-align: center; vertical-align: middle; line-height: 1;">
+                  <span class="print-eval-box" style="display: inline-block; width: 16px; height: 16px; border: 1.5px solid #475569; border-radius: 3px; vertical-align: middle; background: #fff;"></span>
                 </td>
               </tr>
             `;
@@ -989,11 +1035,12 @@
               <tr class="print-row-parent" style="background-color: #f8fafc;">
                 <td style="vertical-align: middle; padding: 0.5rem 0.6rem; font-weight: 700; color: #0f172a;">
                   <span style="display: inline-block; width: 14px; height: 14px; border: 1.5px solid #0f172a; border-radius: 3px; vertical-align: middle; margin-right: 0.45rem; background: #fff;"></span>
-                  ${item.textHtml || escapeHtml(item.text)}${imgHtml ? `<div style="margin-top:0.25rem;">${imgHtml}</div>` : ''}
+                  <span style="vertical-align: middle;">${item.textHtml || escapeHtml(item.text)}</span>
+                  ${imgHtml ? `<div style="margin-top:0.25rem;">${imgHtml}</div>` : ''}
                 </td>
-                <td class="print-center-cell" style="font-weight: 800; color: #0f172a; text-align: center; vertical-align: middle; font-size: 10pt;">${item.score}</td>
-                <td class="print-center-cell" style="text-align: center; vertical-align: middle;">
-                  <span class="print-eval-box" style="display: inline-block; width: 15px; height: 15px; border: 1.5px solid #0f172a; border-radius: 3px;"></span>
+                <td class="print-center-cell" style="font-weight: 800; color: #0f172a; text-align: center; vertical-align: middle; font-size: 10pt; line-height: 1;">${item.score}</td>
+                <td class="print-center-cell" style="text-align: center; vertical-align: middle; line-height: 1;">
+                  <span class="print-eval-box" style="display: inline-block; width: 16px; height: 16px; border: 1.5px solid #0f172a; border-radius: 3px; vertical-align: middle; background: #fff;"></span>
                 </td>
               </tr>
             `;

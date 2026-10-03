@@ -2387,6 +2387,22 @@ ol.ordered-list li,
 
   .print-center-cell {
     text-align: center !important;
+    vertical-align: middle !important;
+    padding: 0.4rem 0.2rem !important;
+  }
+
+  .print-eval-box {
+    display: inline-block !important;
+    width: 16px !important;
+    height: 16px !important;
+    margin: 0 auto !important;
+    vertical-align: middle !important;
+    line-height: 1 !important;
+  }
+
+  table.print-checklist-table td.print-center-cell {
+    text-align: center !important;
+    vertical-align: middle !important;
   }
 
   table.print-checklist-table tr.print-row-parent {

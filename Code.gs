@@ -881,9 +881,16 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
           }
         }
 
-        if (currentSection === 'CHECKLIST') {
-          const gm = text.match(/\(กลุ่ม:\s*([^)]+)\)/) || text.match(/กลุ่ม:\s*(.*)$/);
-          if (gm) { currentGroup = gm[1].replace(/\*/g,'').trim(); continue; }
+        const gm = text.match(/\(กลุ่ม:\s*([^)]+)\)/) || text.match(/กลุ่ม:\s*(.*)$/);
+        if (gm && (text.startsWith('(กลุ่ม:') || text.startsWith('กลุ่ม:') || text.startsWith('**กลุ่ม:') || text.startsWith('###') || currentSection === 'CHECKLIST')) {
+          currentSection = 'CHECKLIST';
+          currentGroup = gm[1].replace(/\*/g,'').trim();
+          continue;
+        }
+
+        const isExplicitChkItem = /^(?:[-*•☐☑]|\[\s*\]|\[x\])?\s*\(\d+(\.\d+)?\)\s+/.test(text.trim());
+        if (isExplicitChkItem && currentSection !== 'CHECKLIST' && currentSection !== 'NOTE') {
+          currentSection = 'CHECKLIST';
         }
 
         if (currentSection === 'SCENARIO') {

@@ -1,8 +1,13 @@
 /**
- * RxCU OSPE Hub — Compounding Videos Database
- * Domain: Product (เทคนิคเภสัชกรรมในการเตรียมยา)
- * Source: ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาฯ
- * Total Videos: 46
+ * RxCU OSPE Hub — Practical Video Database (คลังคลิปวิดีโอเพื่อการฝึกทักษะ OSPE)
+ * Domains: 
+ *   - Product (เทคนิคเภสัชกรรมและการเตรียมยา Compounding)
+ *   - Clinic (เทคนิคการบริหารยาพิเศษ หัตถการ และคำแนะนำผู้ป่วย)
+ * Sources: 
+ *   - ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาฯ
+ *   - โอสถศาลา คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย
+ *   - สื่อการสอนสาธิตทางการแพทย์และโรงพยาบาลมหาวิทยาลัยชั้นนำ (รพ.ศิครินทร์, ม.ขอนแก่น, ม.สงขลานครินทร์, ศิริราช, มหิดล, รพ.มหาชัย, รพ.วิชัยเวช)
+ * Total Videos: 77 (Product: 46, Clinic: 31)
  */
 
 const COMPOUNDING_VIDEOS = [
@@ -879,12 +884,666 @@ const COMPOUNDING_VIDEOS = [
       "Course",
       "OSPE"
     ]
+  },
+  {
+    "id": "CL-CU01",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: สื่อการสอนโอสถศาลา คณะเภสัชฯ จุฬาฯ",
+    "dosageForm": "หมากฝรั่งนิโคติน (Nicotine gum)",
+    "title": "การใช้หมากฝรั่งนิโคติน (Nicotine gum) อย่างถูกวิธี โดยโอสถศาลา",
+    "chapter": "โอสถศาลา จุฬาฯ",
+    "url": "https://www.youtube.com/watch?v=v6uPOBu2Eq0",
+    "type": "youtube",
+    "videoId": "v6uPOBu2Eq0",
+    "driveId": "",
+    "faculty": "โอสถศาลา คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Smoking Cessation",
+      "Nicotine gum",
+      "โอสถศาลา",
+      "จุฬาฯ"
+    ]
+  },
+  {
+    "id": "CL-CU02",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: สื่อการสอนโอสถศาลา คณะเภสัชฯ จุฬาฯ",
+    "dosageForm": "แผ่นแปะนิโคติน (Nicotine Patch)",
+    "title": "การใช้แผ่นแปะนิโคติน (Nicotine patch) อย่างถูกวิธี โดยโอสถศาลา",
+    "chapter": "โอสถศาลา จุฬาฯ",
+    "url": "https://www.youtube.com/watch?v=FqVYJOwwyFU",
+    "type": "youtube",
+    "videoId": "FqVYJOwwyFU",
+    "driveId": "",
+    "faculty": "โอสถศาลา คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Smoking Cessation",
+      "Nicotine patch",
+      "โอสถศาลา",
+      "จุฬาฯ"
+    ]
+  },
+  {
+    "id": "CL-CU03",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: สื่อการสอนโอสถศาลา คณะเภสัชฯ จุฬาฯ",
+    "dosageForm": "ยาหยอดหู (Ear Drops)",
+    "title": "วิธีการใช้ยาหยอดหูอย่างถูกวิธี โดยโอสถศาลา",
+    "chapter": "โอสถศาลา จุฬาฯ",
+    "url": "https://www.youtube.com/watch?v=84WH6mOJaxE",
+    "type": "youtube",
+    "videoId": "84WH6mOJaxE",
+    "driveId": "",
+    "faculty": "โอสถศาลา คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Ear Drops",
+      "ยาหยอดหู",
+      "โอสถศาลา",
+      "จุฬาฯ"
+    ]
+  },
+  {
+    "id": "CL-CU04",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: สื่อการสอนโอสถศาลา คณะเภสัชฯ จุฬาฯ",
+    "dosageForm": "ยาหยอดตา (Eye Drops)",
+    "title": "วิธีการใช้ยาหยอดตาอย่างถูกวิธี โดยโอสถศาลา",
+    "chapter": "โอสถศาลา จุฬาฯ",
+    "url": "https://www.youtube.com/watch?v=YvDNl0nNga0",
+    "type": "youtube",
+    "videoId": "YvDNl0nNga0",
+    "driveId": "",
+    "faculty": "โอสถศาลา คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Eye Drops",
+      "ยาหยอดตา",
+      "โอสถศาลา",
+      "จุฬาฯ"
+    ]
+  },
+  {
+    "id": "CL-CU05",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: สื่อการสอนโอสถศาลา คณะเภสัชฯ จุฬาฯ",
+    "dosageForm": "ยาพ่นจมูก (Nasal Spray)",
+    "title": "การใช้ยาพ่นจมูก (Nasal Spray) อย่างถูกต้อง โดยโอสถศาลา",
+    "chapter": "โอสถศาลา จุฬาฯ",
+    "url": "https://www.youtube.com/watch?v=SeG0XAT1akM",
+    "type": "youtube",
+    "videoId": "SeG0XAT1akM",
+    "driveId": "",
+    "faculty": "โอสถศาลา คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Nasal Spray",
+      "ยาพ่นจมูก",
+      "โอสถศาลา",
+      "จุฬาฯ"
+    ]
+  },
+  {
+    "id": "CL-CU06",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: สื่อการสอนโอสถศาลา คณะเภสัชฯ จุฬาฯ",
+    "dosageForm": "การล้างจมูก (Nasal Irrigation)",
+    "title": "การล้างจมูกด้วยกระบอกฉีดยาอย่างถูกวิธี โดยโอสถศาลา",
+    "chapter": "โอสถศาลา จุฬาฯ",
+    "url": "https://www.youtube.com/watch?v=vCCNvcFipus",
+    "type": "youtube",
+    "videoId": "vCCNvcFipus",
+    "driveId": "",
+    "faculty": "โอสถศาลา คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Nasal Irrigation",
+      "การล้างจมูก",
+      "โอสถศาลา",
+      "จุฬาฯ"
+    ]
+  },
+  {
+    "id": "CL-CU07",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: สื่อการสอนโอสถศาลา คณะเภสัชฯ จุฬาฯ",
+    "dosageForm": "การตรวจร่างกายและส่องคอ (Throat Exam)",
+    "title": "วิธีการส่องคอใน 1 นาที (Physical Examination) โดยโอสถศาลา",
+    "chapter": "โอสถศาลา จุฬาฯ",
+    "url": "https://www.youtube.com/watch?v=fPRLE6RKxgg",
+    "type": "youtube",
+    "videoId": "fPRLE6RKxgg",
+    "driveId": "",
+    "faculty": "โอสถศาลา คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Physical Examination",
+      "การตรวจร่างกาย",
+      "โอสถศาลา",
+      "จุฬาฯ"
+    ]
+  },
+  {
+    "id": "CL-CU08",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: สื่อการสอนโอสถศาลา คณะเภสัชฯ จุฬาฯ",
+    "dosageForm": "ยากินกลุ่ม Bisphosphonate",
+    "title": "การรับประทานยากลุ่ม Bisphosphonate (เช่น Alendronate) ให้ถูกต้อง โดยโอสถศาลา",
+    "chapter": "โอสถศาลา จุฬาฯ",
+    "url": "https://www.youtube.com/watch?v=cme17aHzKc0",
+    "type": "youtube",
+    "videoId": "cme17aHzKc0",
+    "driveId": "",
+    "faculty": "โอสถศาลา คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Bisphosphonate",
+      "Alendronate",
+      "Osteoporosis",
+      "โอสถศาลา",
+      "จุฬาฯ"
+    ]
+  },
+  {
+    "id": "CL-CU09",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: สื่อการสอนโอสถศาลา คณะเภสัชฯ จุฬาฯ",
+    "dosageForm": "ยาเม็ดคุมกำเนิด (Oral Contraceptive Pills)",
+    "title": "วิธีใช้ยาเม็ดคุมกำเนิดแบบฮอร์โมนรวม (Combined Oral Contraceptives) โดยโอสถศาลา",
+    "chapter": "โอสถศาลา จุฬาฯ",
+    "url": "https://www.youtube.com/watch?v=M66Duy8kdbI",
+    "type": "youtube",
+    "videoId": "M66Duy8kdbI",
+    "driveId": "",
+    "faculty": "โอสถศาลา คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Oral Contraceptives",
+      "ยาคุมกำเนิด",
+      "โอสถศาลา",
+      "จุฬาฯ"
+    ]
+  },
+  {
+    "id": "CL-INH01",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: เทคนิคการใช้ยาสูดพ่นทางเดินหายใจ (Inhalers)",
+    "dosageForm": "ยาสูดพ่น MDI (Evohaler)",
+    "title": "How to Use | วิธีการสูดยา Evohaler (MDI) สำหรับโรคหอบหืด/ถุงลมโป่งพอง",
+    "chapter": "ยาสูดพ่นทางเดินหายใจ",
+    "url": "https://www.youtube.com/watch?v=6jxrupDmhKY",
+    "type": "youtube",
+    "videoId": "6jxrupDmhKY",
+    "driveId": "",
+    "faculty": "โรงพยาบาลศิครินทร์ (Sikarin Hospital)",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "MDI",
+      "Evohaler",
+      "Inhaler",
+      "Asthma",
+      "COPD",
+      "ศิครินทร์"
+    ]
+  },
+  {
+    "id": "CL-INH02",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: เทคนิคการใช้ยาสูดพ่นทางเดินหายใจ (Inhalers)",
+    "dosageForm": "ยาสูดพ่น MDI ร่วมกับกระบอกต่อ (Spacer / Aerochamber)",
+    "title": "วิธีการใช้ยาพ่นสูด MDI ร่วมกับอุปกรณ์ช่วยพ่นยา (Spacer / AeroChamber)",
+    "chapter": "ยาสูดพ่นทางเดินหายใจ",
+    "url": "https://www.youtube.com/watch?v=-BL1cdEvlGk",
+    "type": "youtube",
+    "videoId": "-BL1cdEvlGk",
+    "driveId": "",
+    "faculty": "คลินิกสูดพ่น MDKKU คณะแพทยศาสตร์ มหาวิทยาลัยขอนแก่น",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "MDI with Spacer",
+      "Aerochamber",
+      "Asthma",
+      "Pediatrics"
+    ]
+  },
+  {
+    "id": "CL-INH03",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: เทคนิคการใช้ยาสูดพ่นทางเดินหายใจ (Inhalers)",
+    "dosageForm": "ยาสูดพ่น Turbuhaler (DPI)",
+    "title": "วิธีการใช้ยาพ่นสูดชนิดผงแห้ง Turbuhaler (Dry Powder Inhaler)",
+    "chapter": "ยาสูดพ่นทางเดินหายใจ",
+    "url": "https://www.youtube.com/watch?v=oAHNJ2ghLTw",
+    "type": "youtube",
+    "videoId": "oAHNJ2ghLTw",
+    "driveId": "",
+    "faculty": "กลุ่มงานเภสัชกรรม โรงพยาบาลสงขลานครินทร์",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Turbuhaler",
+      "DPI",
+      "Symbicort",
+      "Asthma",
+      "COPD"
+    ]
+  },
+  {
+    "id": "CL-INH04A",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: เทคนิคการใช้ยาสูดพ่นทางเดินหายใจ (Inhalers)",
+    "dosageForm": "ยาสูดพ่น Accuhaler / Diskus (DPI)",
+    "title": "วิธีการใช้ยาพ่นสูดชนิดผงแห้ง Accuhaler (Diskus Inhaler) โดย รพ. มหาชัย",
+    "chapter": "ยาสูดพ่นทางเดินหายใจ",
+    "url": "https://www.youtube.com/watch?v=uxP-ctq5ZwE",
+    "type": "youtube",
+    "videoId": "uxP-ctq5ZwE",
+    "driveId": "",
+    "faculty": "โรงพยาบาลมหาชัย (Mahachai Hospital)",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Accuhaler",
+      "Diskus",
+      "Seretide",
+      "Asthma",
+      "COPD"
+    ]
+  },
+  {
+    "id": "CL-INH04B",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: เทคนิคการใช้ยาสูดพ่นทางเดินหายใจ (Inhalers)",
+    "dosageForm": "ยาสูดพ่น Accuhaler / Diskus (DPI)",
+    "title": "How to Use | วิธีการสูดยา Accuhaler สำหรับโรคหอบหืดและปอดอุดกั้นเรื้อรัง",
+    "chapter": "ยาสูดพ่นทางเดินหายใจ",
+    "url": "https://www.youtube.com/watch?v=h_cI9-QfKSg",
+    "type": "youtube",
+    "videoId": "h_cI9-QfKSg",
+    "driveId": "",
+    "faculty": "โรงพยาบาลศิครินทร์ (Sikarin Hospital)",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Accuhaler",
+      "Diskus",
+      "Asthma",
+      "COPD",
+      "ศิครินทร์"
+    ]
+  },
+  {
+    "id": "CL-INH05",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: เทคนิคการใช้ยาสูดพ่นทางเดินหายใจ (Inhalers)",
+    "dosageForm": "ยาสูดพ่นละอองละเอียด Respimat (SMI)",
+    "title": "วิธีการประกอบและใช้งานเครื่องพ่นยาละอองละเอียด Respimat Soft Mist Inhaler",
+    "chapter": "ยาสูดพ่นทางเดินหายใจ",
+    "url": "https://www.youtube.com/watch?v=c-1CtfVISbA",
+    "type": "youtube",
+    "videoId": "c-1CtfVISbA",
+    "driveId": "",
+    "faculty": "ศูนย์การแพทย์กาญจนาภิเษก คณะแพทยศาสตร์ศิริราชพยาบาล",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Respimat",
+      "Soft Mist Inhaler",
+      "Spiriva",
+      "Combivent",
+      "COPD"
+    ]
+  },
+  {
+    "id": "CL-INH06",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: เทคนิคการใช้ยาสูดพ่นทางเดินหายใจ (Inhalers)",
+    "dosageForm": "ยาสูดพ่นแบบบรรจุแคปซูล Handihaler (DPI)",
+    "title": "How to Use | วิธีการสูดยา Handihaler ชนิดแคปซูล สำหรับผู้ป่วยโรคหอบหืด/ปอดอุดกั้น",
+    "chapter": "ยาสูดพ่นทางเดินหายใจ",
+    "url": "https://www.youtube.com/watch?v=I8YEutsONBU",
+    "type": "youtube",
+    "videoId": "I8YEutsONBU",
+    "driveId": "",
+    "faculty": "โรงพยาบาลศิครินทร์ (Sikarin Hospital)",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Handihaler",
+      "Spiriva Handihaler",
+      "DPI",
+      "COPD",
+      "ศิครินทร์"
+    ]
+  },
+  {
+    "id": "CL-INH07",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: เทคนิคการใช้ยาสูดพ่นทางเดินหายใจ (Inhalers)",
+    "dosageForm": "ยาสูดพ่นแบบบรรจุแคปซูล Breezhaler (DPI)",
+    "title": "วิธีการใช้ยาพ่นสูดชนิดแคปซูล Breezhaler Inhaler",
+    "chapter": "ยาสูดพ่นทางเดินหายใจ",
+    "url": "https://www.youtube.com/watch?v=tqajOb1gQdE",
+    "type": "youtube",
+    "videoId": "tqajOb1gQdE",
+    "driveId": "",
+    "faculty": "โรงพยาบาลมหาชัย (Mahachai Hospital)",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Breezhaler",
+      "Onbrez",
+      "Ultibro",
+      "COPD"
+    ]
+  },
+  {
+    "id": "CL-INH08",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: เทคนิคการใช้ยาสูดพ่นทางเดินหายใจ (Inhalers)",
+    "dosageForm": "ยาสูดพ่นชนิดผงแห้ง Ellipta (DPI)",
+    "title": "วิธีการใช้ยาพ่นสูดชนิดผงแห้ง Ellipta Inhaler",
+    "chapter": "ยาสูดพ่นทางเดินหายใจ",
+    "url": "https://www.youtube.com/watch?v=G8ROaHZ2Xrk",
+    "type": "youtube",
+    "videoId": "G8ROaHZ2Xrk",
+    "driveId": "",
+    "faculty": "ศูนย์การแพทย์กาญจนาภิเษก คณะแพทยศาสตร์ศิริราชพยาบาล",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Ellipta",
+      "Relvar",
+      "Trelegy",
+      "Anoro",
+      "Asthma",
+      "COPD"
+    ]
+  },
+  {
+    "id": "CL-INH09",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: เทคนิคการใช้ยาสูดพ่นทางเดินหายใจ (Inhalers)",
+    "dosageForm": "ยาสูดพ่นชนิดผงแห้ง Easyhaler (DPI)",
+    "title": "How to Use | วิธีการสูดยา Easyhaler ชนิดผงแห้ง สำหรับโรคหอบหืด/ปอดอุดกั้น",
+    "chapter": "ยาสูดพ่นทางเดินหายใจ",
+    "url": "https://www.youtube.com/watch?v=ymFTH6e4FVU",
+    "type": "youtube",
+    "videoId": "ymFTH6e4FVU",
+    "driveId": "",
+    "faculty": "โรงพยาบาลศิครินทร์ (Sikarin Hospital)",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Easyhaler",
+      "Bufomix",
+      "Asthma",
+      "COPD",
+      "ศิครินทร์"
+    ]
+  },
+  {
+    "id": "CL-EXT01",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: ยาใช้ภายนอกและหัตถการเฉพาะทาง (Special Dosage Forms)",
+    "dosageForm": "ยาพ่นจมูก (Nasal Spray)",
+    "title": "วิธีการใช้ยาพ่นจมูก (Nasal Spray) อย่างถูกวิธี",
+    "chapter": "ยาใช้เฉพาะที่และภายนอก",
+    "url": "https://www.youtube.com/watch?v=dgoOHV5AfQM",
+    "type": "youtube",
+    "videoId": "dgoOHV5AfQM",
+    "driveId": "",
+    "faculty": "Nasol Spray สื่อสาธิตการใช้ยาพ่นจมูก",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Nasal Spray",
+      "Allergic Rhinitis"
+    ]
+  },
+  {
+    "id": "CL-EXT02",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: ยาใช้ภายนอกและหัตถการเฉพาะทาง (Special Dosage Forms)",
+    "dosageForm": "การล้างจมูก (Nasal Irrigation)",
+    "title": "ขั้นตอนการล้างจมูกด้วยน้ำเกลือและไซริงค์อย่างถูกวิธีและปลอดภัย",
+    "chapter": "ยาใช้เฉพาะที่และภายนอก",
+    "url": "https://www.youtube.com/watch?v=cSCRXFlqgfc",
+    "type": "youtube",
+    "videoId": "cSCRXFlqgfc",
+    "driveId": "",
+    "faculty": "We Mahidol มหาวิทยาลัยมหิดล",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Nasal Irrigation",
+      "NSS Flush",
+      "Sinusitis"
+    ]
+  },
+  {
+    "id": "CL-EXT03",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: ยาใช้ภายนอกและหัตถการเฉพาะทาง (Special Dosage Forms)",
+    "dosageForm": "ยาหยอดตา (Eye Drops)",
+    "title": "วิธีการใช้ยาหยอดตา (Eye Drops) อย่างถูกวิธีและไม่ปนเปื้อน",
+    "chapter": "ยาใช้เฉพาะที่และภายนอก",
+    "url": "https://www.youtube.com/watch?v=vRokfQV4GP8",
+    "type": "youtube",
+    "videoId": "vRokfQV4GP8",
+    "driveId": "",
+    "faculty": "โรงพยาบาลวิชัยเวช อินเตอร์เนชั่นแนล หนองแขม",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Eye Drops",
+      "Ophthalmic",
+      "Glaucoma"
+    ]
+  },
+  {
+    "id": "CL-EXT04",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: ยาใช้ภายนอกและหัตถการเฉพาะทาง (Special Dosage Forms)",
+    "dosageForm": "ยาป้ายตา (Eye Ointment)",
+    "title": "วิธีการใช้ยาป้ายตา (Eye Ointment) อย่างถูกต้องตามหลักวิชาชีพ",
+    "chapter": "ยาใช้เฉพาะที่และภายนอก",
+    "url": "https://www.youtube.com/watch?v=gLb7rgmSxDw",
+    "type": "youtube",
+    "videoId": "gLb7rgmSxDw",
+    "driveId": "",
+    "faculty": "โรงพยาบาลวิชัยเวช อินเตอร์เนชั่นแนล หนองแขม",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Eye Ointment",
+      "Ophthalmic"
+    ]
+  },
+  {
+    "id": "CL-EXT05",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: ยาใช้ภายนอกและหัตถการเฉพาะทาง (Special Dosage Forms)",
+    "dosageForm": "ยาหยอดหู (Ear Drops)",
+    "title": "วิธีการใช้ยาหยอดหู (Ear Drops) ในผู้ใหญ่และเด็กเล็ก",
+    "chapter": "ยาใช้เฉพาะที่และภายนอก",
+    "url": "https://www.youtube.com/watch?v=5uXbyzIh3qU",
+    "type": "youtube",
+    "videoId": "5uXbyzIh3qU",
+    "driveId": "",
+    "faculty": "โรงพยาบาลวิชัยเวช อินเตอร์เนชั่นแนล หนองแขม",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Ear Drops",
+      "Otitis Externa",
+      "Otitis Media"
+    ]
+  },
+  {
+    "id": "CL-EXT06",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: ยาใช้ภายนอกและหัตถการเฉพาะทาง (Special Dosage Forms)",
+    "dosageForm": "ยาเหน็บทวารหนัก (Rectal Suppositories)",
+    "title": "วิธีการใช้ยาเหน็บทวารหนัก (Rectal Suppository) อย่างถูกต้อง",
+    "chapter": "ยาใช้เฉพาะที่และภายนอก",
+    "url": "https://www.youtube.com/watch?v=7IGB-C-3XRE",
+    "type": "youtube",
+    "videoId": "7IGB-C-3XRE",
+    "driveId": "",
+    "faculty": "โรงพยาบาลวิชัยเวช อินเตอร์เนชั่นแนล หนองแขม",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Rectal Suppository",
+      "Hemorrhoids",
+      "Fever"
+    ]
+  },
+  {
+    "id": "CL-EXT07",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: ยาใช้ภายนอกและหัตถการเฉพาะทาง (Special Dosage Forms)",
+    "dosageForm": "ยาเหน็บช่องคลอด (Vaginal Suppositories)",
+    "title": "วิธีการใช้ยาเหน็บช่องคลอดและอุปกรณ์ช่วยสอด (Vaginal Suppository)",
+    "chapter": "ยาใช้เฉพาะที่และภายนอก",
+    "url": "https://www.youtube.com/watch?v=K40ePLM8Wak",
+    "type": "youtube",
+    "videoId": "K40ePLM8Wak",
+    "driveId": "",
+    "faculty": "โรงพยาบาลวิชัยเวช อินเตอร์เนชั่นแนล หนองแขม",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Vaginal Suppository",
+      "Vaginitis",
+      "Candidiasis"
+    ]
+  },
+  {
+    "id": "CL-EXT08",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: ยาใช้ภายนอกและหัตถการเฉพาะทาง (Special Dosage Forms)",
+    "dosageForm": "ยาสวนทวารหนัก (Enema)",
+    "title": "วิธีการใช้ยาสวนทวารหนักสำหรับอาการท้องผูก (Enema)",
+    "chapter": "ยาใช้เฉพาะที่และภายนอก",
+    "url": "https://www.youtube.com/watch?v=nBgFRDndJkI",
+    "type": "youtube",
+    "videoId": "nBgFRDndJkI",
+    "driveId": "",
+    "faculty": "กลุ่มงานเภสัชกรรม โรงพยาบาลเมตตาประชารักษ์ (วัดไร่ขิง)",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Enema",
+      "Constipation",
+      "ยาสวนทวาร"
+    ]
+  },
+  {
+    "id": "CL-INJ01A",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: ยาฉีดและยาอมใต้ลิ้น (Injections & Special Administration)",
+    "dosageForm": "ปากกาฉีดยาอินซูลิน (Insulin Pen)",
+    "title": "How to Use | วิธีการฉีดยาอินซูลิน (แบบปากกา Insulin Pen) สำหรับผู้ป่วยเบาหวาน",
+    "chapter": "ยาฉีดและยาเฉพาะทาง",
+    "url": "https://www.youtube.com/watch?v=W_fRodT5VT4",
+    "type": "youtube",
+    "videoId": "W_fRodT5VT4",
+    "driveId": "",
+    "faculty": "โรงพยาบาลศิครินทร์ (Sikarin Hospital)",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Insulin Pen",
+      "Diabetes",
+      "Subcutaneous Injection",
+      "ศิครินทร์"
+    ]
+  },
+  {
+    "id": "CL-INJ01B",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: ยาฉีดและยาอมใต้ลิ้น (Injections & Special Administration)",
+    "dosageForm": "กระบอกฉีดยาอินซูลิน (Insulin Syringe)",
+    "title": "How to Use | วิธีการฉีดยาอินซูลิน (แบบขวด & ไซริงค์) สำหรับผู้ป่วยเบาหวาน",
+    "chapter": "ยาฉีดและยาเฉพาะทาง",
+    "url": "https://www.youtube.com/watch?v=JQD6JMq_vgU",
+    "type": "youtube",
+    "videoId": "JQD6JMq_vgU",
+    "driveId": "",
+    "faculty": "โรงพยาบาลศิครินทร์ (Sikarin Hospital)",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Insulin Syringe",
+      "Diabetes",
+      "Insulin Vial",
+      "ศิครินทร์"
+    ]
+  },
+  {
+    "id": "CL-INJ02",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: ยาฉีดและยาอมใต้ลิ้น (Injections & Special Administration)",
+    "dosageForm": "กระบอกฉีดยาอินซูลิน (Insulin Syringe)",
+    "title": "วิธีการดูดยาและการฉีดอินซูลินด้วยไซริงค์ (Insulin Syringe & Vial)",
+    "chapter": "ยาฉีดและยาเฉพาะทาง",
+    "url": "https://www.youtube.com/watch?v=NQrADpM77js",
+    "type": "youtube",
+    "videoId": "NQrADpM77js",
+    "driveId": "",
+    "faculty": "โรงพยาบาลวิชัยเวช อินเตอร์เนชั่นแนล อ้อมน้อย",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Insulin Syringe",
+      "Diabetes",
+      "Insulin Vial"
+    ]
+  },
+  {
+    "id": "CL-INJ03",
+    "domain": "Clinic",
+    "majorGroup": "หมวดคลินิก: ยาฉีดและยาอมใต้ลิ้น (Injections & Special Administration)",
+    "dosageForm": "ยาอมใต้ลิ้น (Sublingual Nitrate / ISDN / NTG)",
+    "title": "วิธีการใช้ยาอมใต้ลิ้นรักษาอาการแน่นหน้าอก (Nitroglycerin / ISDN Sublingual)",
+    "chapter": "ยาฉีดและยาเฉพาะทาง",
+    "url": "https://www.youtube.com/watch?v=YHcCpEi-vfs",
+    "type": "youtube",
+    "videoId": "YHcCpEi-vfs",
+    "driveId": "",
+    "faculty": "ศูนย์โรคหัวใจสิริกิติ์ โรงพยาบาลสงขลานครินทร์ (THE HEART BY QSHC)",
+    "tags": [
+      "Clinic",
+      "OSPE",
+      "Sublingual Nitrate",
+      "ISDN",
+      "NTG",
+      "Angina Pectoris",
+      "CAD"
+    ]
   }
 ];
 
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
   window.COMPOUNDING_VIDEOS = COMPOUNDING_VIDEOS;
+  window.OSPE_VIDEO_DATABASE = COMPOUNDING_VIDEOS;
 }
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = COMPOUNDING_VIDEOS;
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { COMPOUNDING_VIDEOS, OSPE_VIDEO_DATABASE: COMPOUNDING_VIDEOS };
 }
