@@ -14,23 +14,27 @@
     /* ─── Big Domain Selector Tabs ─── */
     .domain-selector-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 0.75rem;
       margin-bottom: 1.25rem;
+      width: 100%;
+      box-sizing: border-box;
     }
     .domain-select-card {
       background: var(--surface);
       border: 2px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 1rem 1.15rem;
+      padding: 0.85rem 1rem;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 0.85rem;
+      gap: 0.75rem;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       user-select: none;
       box-shadow: var(--shadow-sm);
+      min-width: 0;
+      box-sizing: border-box;
     }
     .domain-select-card:hover {
       border-color: var(--primary);
@@ -43,13 +47,13 @@
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15), var(--shadow-md);
     }
     .domain-card-icon {
-      font-size: 2rem;
+      font-size: 1.85rem;
       line-height: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 48px;
-      height: 48px;
+      width: 44px;
+      height: 44px;
       border-radius: var(--radius-md);
       background: var(--bg-secondary);
       flex-shrink: 0;
@@ -62,22 +66,26 @@
     .domain-card-body {
       flex: 1;
       min-width: 0;
+      overflow: hidden;
     }
     .domain-card-title {
       font-family: var(--font-title);
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 800;
       color: var(--text-primary);
       margin: 0 0 0.15rem 0;
       display: flex;
       align-items: center;
       gap: 0.4rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .domain-select-card.active .domain-card-title {
       color: var(--primary);
     }
     .domain-card-desc {
-      font-size: 0.76rem;
+      font-size: 0.74rem;
       color: var(--text-secondary);
       line-height: 1.35;
       margin: 0;
@@ -96,6 +104,7 @@
       padding: 2px 8px;
       border-radius: 9999px;
       margin-left: auto;
+      flex-shrink: 0;
     }
     .domain-select-card.active .domain-count-badge {
       background: var(--primary);
@@ -610,6 +619,28 @@
       text-align: center;
       padding: 3rem 1.5rem;
       color: var(--text-secondary);
+    }
+
+    /* ─── Tablet / Intermediate Responsiveness (Screens <= 1024px) ─── */
+    @media (max-width: 1024px) {
+      .domain-selector-grid {
+        gap: 0.5rem;
+      }
+      .domain-select-card {
+        padding: 0.7rem 0.8rem;
+        gap: 0.55rem;
+      }
+      .domain-card-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 1.5rem;
+      }
+      .domain-card-title {
+        font-size: 0.88rem;
+      }
+      .domain-card-desc {
+        font-size: 0.7rem;
+      }
     }
 
     /* ─── Mobile Responsiveness & Polish (Screens < 768px) ─── */
