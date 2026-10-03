@@ -1,13 +1,13 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Version: v_20261003_170832
- * Generated on 2026-10-03 17:08:32
+ * Version: v_20261003_185558
+ * Generated on 2026-10-03 18:55:58
  */
 
 const OFFLINE_DATA = {
-  "version": "v_20261003_170832",
-  "generatedAt": "2026-10-03 17:08:32",
-  "totalCases": 355,
+  "version": "v_20261003_185558",
+  "generatedAt": "2026-10-03 18:55:58",
+  "totalCases": 353,
   "cases": [
     {
       "caseId": "OSPE-CL4801",
@@ -3255,7 +3255,7 @@ const OFFLINE_DATA = {
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
       "subTopic": "",
-      "disease": "ทักษะการชั่งสารกึ่งแข็ง (Semisolid Weighing), การคำนวณหักลบผงยา, การพับกระทงชั่งกระดาษไขซ้อนกระดาษขาว, เทคนิคการใช้ Spatula คู่, ช่วงความคลาดเคลื่อน $\\pm 5\\%$",
+      "disease": "ทักษะการชั่งสารกึ่งแข็ง (Semisolid Weighing), การคำนวณหักลบผงยา, การพับกระทงชั่งกระดาษไขซ้อนกระดาษขาว, เทคนิคการใช้ Spatula คู่,",
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ทีม CC2-Product RxCU83",
@@ -3803,11 +3803,11 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PD84W203",
-      "title": "Cream Preparation Part 2: Cream Base Weighing Technique",
+      "title": "Cream Preparation Part 2: Cream Base Weighing Technique (ต่อจาก PD84W202)",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
       "subTopic": "",
-      "disease": "ทักษะการชั่งสารกึ่งแข็ง (Semisolid Weighing), การใช้ Spatula คู่, การปรับสมดุล Tare, เกณฑ์ความคลาดเคลื่อน $\\pm 5\\%$",
+      "disease": "ทักษะการชั่งสารกึ่งแข็ง (Semisolid Weighing), การใช้ Spatula คู่, การปรับสมดุล Tare,",
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ทีม CC2-Product RxCU84",
@@ -3878,7 +3878,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDLQ04",
-      "title": "Syrup",
+      "title": "Syrup Paracetamol",
       "category": "Product",
       "mainGroup": "Liquid Dosage Form",
       "subTopic": "",
@@ -3893,7 +3893,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDLQ05",
-      "title": "Syrup",
+      "title": "Syrup Ferrouse sulfate",
       "category": "Product",
       "mainGroup": "Liquid Dosage Form",
       "subTopic": "",
@@ -3908,7 +3908,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDLQ06",
-      "title": "Suspension",
+      "title": "Suspension  Ibuprofen",
       "category": "Product",
       "mainGroup": "Liquid Dosage Form",
       "subTopic": "",
@@ -3923,7 +3923,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDSS01",
-      "title": "Cream",
+      "title": "Cream Calamine 1",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
       "subTopic": "",
@@ -3938,7 +3938,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDSS02",
-      "title": "Cream",
+      "title": "Cream Calamine 2",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
       "subTopic": "",
@@ -4013,7 +4013,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDSS07",
-      "title": "Ointment",
+      "title": "Ointment  Calamine",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
       "subTopic": "",
@@ -4028,7 +4028,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDSS08",
-      "title": "Ointment",
+      "title": "Ointment Calamine Lavigating",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
       "subTopic": "",
@@ -4043,7 +4043,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDSS09",
-      "title": "ointment",
+      "title": "ointment Mipirocin ชั่ง",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
       "subTopic": "",
@@ -4058,7 +4058,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDSS10",
-      "title": "ointment",
+      "title": "ointment Mupirocin ผสม (ต่อจาก PDSS09)",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
       "subTopic": "",
@@ -4073,7 +4073,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDSS11",
-      "title": "Ointment",
+      "title": "Ointment Sulfur ชั่ง",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
       "subTopic": "",
@@ -4088,7 +4088,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDSS12",
-      "title": "Ointment",
+      "title": "Ointment  Sulfur ผสม (ต่อจาก-PDSS11)",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
       "subTopic": "",
@@ -4096,36 +4096,6 @@ const OFFLINE_DATA = {
       "difficulty": 2,
       "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
       "author": "ป่าน",
-      "createdDate": "3/10/2569",
-      "source": "ไม่ระบุ",
-      "isActive": true,
-      "caseStatus": "Active"
-    },
-    {
-      "caseId": "OSPE-PDSS13",
-      "title": "Paste",
-      "category": "Product",
-      "mainGroup": "Semisolid Dosage Form",
-      "subTopic": "",
-      "disease": "Paste",
-      "difficulty": 2,
-      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
-      "author": "มิ้นท์",
-      "createdDate": "3/10/2569",
-      "source": "ไม่ระบุ",
-      "isActive": true,
-      "caseStatus": "Active"
-    },
-    {
-      "caseId": "OSPE-PDSS14",
-      "title": "Paste",
-      "category": "Product",
-      "mainGroup": "Semisolid Dosage Form",
-      "subTopic": "",
-      "disease": "Paste",
-      "difficulty": 2,
-      "docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw",
-      "author": "มิ้นท์",
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
@@ -4163,7 +4133,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDSS17",
-      "title": "Cream",
+      "title": "Cream  Oxytetrazoline ชั่ง",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
       "subTopic": "",
@@ -4178,7 +4148,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDSS18",
-      "title": "Cream",
+      "title": "Cream  Oxytetrazoline ผสม (ต่อจาก PDSS17)",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
       "subTopic": "",
@@ -4193,7 +4163,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDSS19",
-      "title": "Cream",
+      "title": "Cream Urea ชั่ง",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
       "subTopic": "",
@@ -4208,7 +4178,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDSS20",
-      "title": "Cream",
+      "title": "Cream Urea ผสม (ต่อจาก PDSS19)",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
       "subTopic": "",
@@ -4223,7 +4193,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDSS21",
-      "title": "ointment",
+      "title": "ointment SA ชั่ง",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
       "subTopic": "",
@@ -4238,7 +4208,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDSS22",
-      "title": "ointment (ต่อจาก PDSS21)",
+      "title": "ointment ผสม (ต่อจาก PDSS21)",
       "category": "Product",
       "mainGroup": "Semisolid Dosage Form",
       "subTopic": "",
@@ -4253,7 +4223,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDT01",
-      "title": "testเฉยๆ",
+      "title": "นับเม็ดยา Tetracycline",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
       "subTopic": "",
@@ -4493,7 +4463,7 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PDT17",
-      "title": "Untitled Case",
+      "title": "ชั่ง Cream base",
       "category": "Product",
       "mainGroup": "เทคนิคพิเศษ",
       "subTopic": "",
