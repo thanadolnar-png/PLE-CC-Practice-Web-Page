@@ -1,12 +1,12 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Version: v_20261003_185558
- * Generated on 2026-10-03 18:55:58
+ * Version: v_20261004_015336
+ * Generated on 2026-10-04 01:53:36
  */
 
 const OFFLINE_DATA = {
-  "version": "v_20261003_185558",
-  "generatedAt": "2026-10-03 18:55:58",
+  "version": "v_20261004_015336",
+  "generatedAt": "2026-10-04 01:53:36",
   "totalCases": 353,
   "cases": [
     {
@@ -1881,8 +1881,7 @@ const OFFLINE_DATA = {
       "author": "RxCU83",
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 1",
-      "isActive": true,
-      "caseStatus": "Active"
+      "isActive": true
     },
     {
       "caseId": "OSPE-CL83M107",
