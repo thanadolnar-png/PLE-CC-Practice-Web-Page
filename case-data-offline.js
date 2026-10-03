@@ -1,13 +1,13 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Version: v_20261003_040842
- * Generated on 2026-10-03 04:08:42
+ * Version: v_20261003_142000
+ * Generated on 2026-10-03 14:20:00
  */
 
 const OFFLINE_DATA = {
   "version": "v_20261003_040842",
   "generatedAt": "2026-10-03 04:08:42",
-  "totalCases": 352,
+  "totalCases": 353,
   "cases": [
     {
       "caseId": "OSPE-CL4801",
@@ -5298,6 +5298,21 @@ const OFFLINE_DATA = {
       "author": "RxCU",
       "createdDate": "01/10/2026",
       "source": "ข้อสอบจริง ปี 2568",
+      "isActive": true,
+      "caseStatus": "Active"
+    },
+    {
+      "caseId": "OSPE-PR8301",
+      "title": "Dosage Forms & Drug Instability",
+      "category": "Product",
+      "mainGroup": "การค้นข้อมูลและประสานงาน",
+      "subTopic": "",
+      "disease": "Dosage Forms & Drug Instability",
+      "difficulty": 2,
+      "docId": "1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg",
+      "author": "RxCU83",
+      "createdDate": "30/09/2026",
+      "source": "Mock RxCU83 Clinic ครั้งที่ 1",
       "isActive": true,
       "caseStatus": "Active"
     }

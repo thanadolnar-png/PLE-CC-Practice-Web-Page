@@ -2893,3 +2893,182 @@ function playStationTimeoutAlarm(type = 'alarm') {
 window.playStationTimeoutAlarm = playStationTimeoutAlarm;
 window.getSharedAudioContext = getSharedAudioContext;
 
+// ──────────────────────────────────────────────────────────────
+// INTERACTIVE FILL-IN-THE-BLANK / AUTO-CHECK SYSTEM
+// Tag Format: [BLANK: Answer1, Answer2 | Score | #Tag]
+// ──────────────────────────────────────────────────────────────
+function renderInteractiveBlanks(htmlOrText, options = {}) {
+  if (!htmlOrText) return '';
+  const isExamineeOnly = options.isExamineeOnly || false;
+  const isExaminer = options.isExaminer || false;
+  const stationNum = options.stationNum || null;
+  const caseId = options.caseId || '';
+
+  // Regex matches [BLANK: accepted_answers | score | #tag] or [BLANK: answers]
+  const blankRegex = /\[BLANK:\s*([^|\]]+)(?:\s*\|\s*([^|\]]+))?(?:\s*\|\s*#?([^\]]+))?\]/gi;
+  let blankIndex = 0;
+
+  let processed = htmlOrText.replace(blankRegex, (match, answersStr, scoreStr, tagStr) => {
+    blankIndex++;
+    const answers = (answersStr || '').split(/[,/]/).map(a => a.trim()).filter(Boolean);
+    const score = parseFloat(scoreStr) || 1.0;
+    const tag = (tagStr || '').trim();
+    const inputId = `blank-input-${tag || blankIndex}`;
+    const encAnswers = encodeURIComponent(JSON.stringify(answers));
+
+    if (isExaminer) {
+      // Examiner View: Display clean answer badge & points
+      return `
+        <span class="interactive-blank-examiner-badge" data-tag="${escapeHtml(tag)}">
+          <span class="blank-ans-label">🔑 เฉลย: <strong>${escapeHtml(answers.join(' / '))}</strong></span>
+          <span class="blank-score-label">(${score} คะแนน)</span>
+        </span>
+      `;
+    }
+
+    // Examinee / Solo / Practice View:
+    // Render an interactive input with instant check button
+    return `
+      <span class="interactive-blank-wrapper" data-tag="${escapeHtml(tag)}" data-score="${score}" data-answers="${encAnswers}">
+        <input type="text" 
+               class="interactive-blank-input" 
+               id="${inputId}" 
+               placeholder="พิมพ์คำตอบที่นี่..." 
+               autocomplete="off" 
+               spellcheck="false" 
+               onkeydown="if(event.key === 'Enter'){ checkSingleInteractiveBlank(this.parentElement); }"
+               oninput="handleInteractiveBlankInput(this)" />
+        <button type="button" class="btn-check-blank" onclick="checkSingleInteractiveBlank(this.parentElement)" title="กดเพื่อตรวจคำตอบ">
+          🔍 ตรวจ
+        </button>
+        <span class="blank-status-badge"></span>
+      </span>
+    `;
+  });
+
+  return processed;
+}
+
+function normalizeAnswerText(str) {
+  if (!str) return '';
+  return str.toLowerCase()
+    .replace(/[\s\-_.,/()]/g, '') // remove spaces, dashes, dots, punctuation
+    .trim();
+}
+
+function handleInteractiveBlankInput(inputEl) {
+  const wrapper = inputEl.closest('.interactive-blank-wrapper');
+  if (!wrapper) return;
+  // Reset previous check status when user edits
+  wrapper.classList.remove('is-correct', 'is-wrong');
+  const badge = wrapper.querySelector('.blank-status-badge');
+  if (badge) {
+    badge.textContent = '';
+    badge.style.display = 'none';
+  }
+
+  // Dispatch custom event for multiplayer debounce sync
+  window.dispatchEvent(new CustomEvent('interactiveBlankChanged', {
+    detail: {
+      tag: wrapper.getAttribute('data-tag'),
+      value: inputEl.value,
+      wrapper: wrapper
+    }
+  }));
+}
+
+function checkSingleInteractiveBlank(wrapper) {
+  if (!wrapper) return;
+  const inputEl = wrapper.querySelector('.interactive-blank-input');
+  const badge = wrapper.querySelector('.blank-status-badge');
+  if (!inputEl) return;
+
+  const rawUserVal = inputEl.value.trim();
+  const normUserVal = normalizeAnswerText(rawUserVal);
+  const encAnswers = wrapper.getAttribute('data-answers') || '';
+  let accepted = [];
+  try {
+    accepted = JSON.parse(decodeURIComponent(encAnswers));
+  } catch (e) {
+    accepted = [];
+  }
+
+  if (!rawUserVal) {
+    wrapper.classList.remove('is-correct', 'is-wrong');
+    if (badge) {
+      badge.textContent = 'กรุณาพิมพ์คำตอบ';
+      badge.className = 'blank-status-badge is-empty';
+      badge.style.display = 'inline-flex';
+    }
+    return;
+  }
+
+  // Check matching
+  const isMatch = accepted.some(ans => {
+    const normAns = normalizeAnswerText(ans);
+    return normUserVal === normAns;
+  });
+
+  const tag = wrapper.getAttribute('data-tag');
+  const score = parseFloat(wrapper.getAttribute('data-score')) || 1.0;
+
+  if (isMatch) {
+    wrapper.classList.remove('is-wrong');
+    wrapper.classList.add('is-correct');
+    if (badge) {
+      badge.textContent = `✅ ถูกต้อง! (+${score} คะแนน)`;
+      badge.className = 'blank-status-badge is-correct';
+      badge.style.display = 'inline-flex';
+    }
+
+    // Auto-tick linked checklist item if exists
+    if (tag) {
+      autoCheckLinkedChecklistItem(tag, true);
+    }
+  } else {
+    wrapper.classList.remove('is-correct');
+    wrapper.classList.add('is-wrong');
+    if (badge) {
+      badge.textContent = '❌ ยังไม่ถูกต้อง';
+      badge.className = 'blank-status-badge is-wrong';
+      badge.style.display = 'inline-flex';
+    }
+    // Optionally un-tick if desired, or keep as is
+  }
+}
+
+function autoCheckLinkedChecklistItem(tag, shouldCheck = true) {
+  // Search for checklist items matching tag (data-tag or (ข้อ 1.1) in text)
+  const normTag = tag.replace(/^#/, '').trim();
+  
+  // Look in Case Viewer or Exam Simulation checklist containers
+  const items = document.querySelectorAll('.checklist-item');
+  items.forEach(item => {
+    const itemText = item.textContent || '';
+    const hasTagMatch = item.getAttribute('data-tag') === normTag || 
+                        itemText.includes(`(${normTag})`) || 
+                        itemText.includes(`(ข้อ ${normTag})`) ||
+                        itemText.includes(`ข้อ ${normTag}`) ||
+                        itemText.includes(` ${normTag} `) ||
+                        itemText.startsWith(normTag);
+
+    if (hasTagMatch) {
+      const isAlreadyChecked = item.classList.contains('checked');
+      if (shouldCheck && !isAlreadyChecked) {
+        // Trigger click on item
+        item.click();
+      }
+    }
+  });
+}
+
+function checkAllInteractiveBlanks() {
+  const wrappers = document.querySelectorAll('.interactive-blank-wrapper');
+  wrappers.forEach(w => checkSingleInteractiveBlank(w));
+}
+
+// Global exports
+window.renderInteractiveBlanks = renderInteractiveBlanks;
+window.checkSingleInteractiveBlank = checkSingleInteractiveBlank;
+window.checkAllInteractiveBlanks = checkAllInteractiveBlanks;
+window.handleInteractiveBlankInput = handleInteractiveBlankInput;

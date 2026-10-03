@@ -767,7 +767,11 @@
       }
 
       // Render Scenario & Patient Info
-      const cleanScenario = stripSectionHeaders(c.contentHtml || (c.scenario ? `<p>${c.scenario}</p>` : ''));
+      const rawScenario = stripSectionHeaders(c.contentHtml || (c.scenario ? `<p>${c.scenario}</p>` : ''));
+      const isExaminer = currentRole === 'examiner';
+      const cleanScenario = (typeof renderInteractiveBlanks === 'function') 
+        ? renderInteractiveBlanks(rawScenario, { isExaminer, caseId }) 
+        : rawScenario;
       document.getElementById('case-scenario-content').innerHTML = cleanScenario || '<p>ไม่มีข้อมูลสถานการณ์</p>';
       const cleanPatient = stripSectionHeaders(c.patientInfoHtml);
       document.getElementById('case-patient-content').innerHTML = cleanPatient || '<p>ไม่มีตารางข้อมูลผู้ป่วย</p>';
@@ -1030,6 +1034,24 @@
         resetViewerTimer();
         // ไม่ต้องเริ่มจับเวลาโดยอัตโนมัติ ให้ผู้ประเมินกดเริ่มเอง
         document.getElementById('viewer-timer-btn').textContent = '⏱️ เริ่มจับเวลา';
+      }
+
+      // Re-render scenario to reflect examiner keys vs interactive student blanks
+      if (AppState.currentCase) {
+        const c = AppState.currentCase;
+        const caseId = c.caseId || activeCaseId || '';
+        const rawScenario = (function(str) {
+          if (!str) return '';
+          return str
+            .replace(/<p[^>]*>\s*#+\s*(?:สถานการณ์|โจทย์|ข้อมูลผู้ป่วย|สิ่งที่มีให้|อุปกรณ์|Checklist|เกณฑ์ประเมิน|ข้อมูลผู้ตรวจ|เฉลย|หมายเหตุ|ข้อมูลเคส)[^<]*<\/p>/gi, '')
+            .replace(/^#+\s*(?:สถานการณ์|โจทย์|ข้อมูลผู้ป่วย|สิ่งที่มีให้|อุปกรณ์|Checklist|เกณฑ์ประเมิน|ข้อมูลผู้ตรวจ|เฉลย|หมายเหตุ|ข้อมูลเคส)[^\n]*\n?/gim, '');
+        })(c.contentHtml || (c.scenario ? `<p>${c.scenario}</p>` : ''));
+        const isExaminer = (role === 'examiner');
+        const cleanScenario = (typeof renderInteractiveBlanks === 'function') 
+          ? renderInteractiveBlanks(rawScenario, { isExaminer, caseId }) 
+          : rawScenario;
+        const scEl = document.getElementById('case-scenario-content');
+        if (scEl) scEl.innerHTML = cleanScenario || '<p>ไม่มีข้อมูลสถานการณ์</p>';
       }
     }
 

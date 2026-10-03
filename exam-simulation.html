@@ -1605,6 +1605,19 @@
               <p style="font-size: 0.8rem; line-height: 1.4;">เกณฑ์ Checklist และเฉลยถูกซ่อนไว้ ให้ผู้ประเมินซักถามและให้คะแนน</p>
             </div>
 
+            <!-- Examiner Live Examinee Submission Panel (For Written / Fill-in-the-Blank stations) -->
+            <div id="examiner-live-submission-panel" class="examiner-live-submission-panel" style="display: none; margin-bottom: 1.5rem; background: var(--surface); border: 1.5px solid var(--primary); border-radius: var(--radius-md); padding: 1rem 1.25rem; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
+                <div style="font-family: var(--font-title); font-weight: 700; color: var(--primary); font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
+                  <span>📝 คำตอบสดจากผู้เข้าสอบ (Live Examinee Answers)</span>
+                </div>
+                <span id="live-examinee-name-badge" class="badge" style="background: rgba(99, 102, 241, 0.12); color: var(--primary); font-size: 0.78rem;">กำลังพิมพ์...</span>
+              </div>
+              <div id="examiner-live-submission-list" style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.88rem;">
+                <!-- Dynamically populated live answers with auto-match status -->
+              </div>
+            </div>
+
             <!-- Examiner Notes Container -->
             <div class="note-container" id="exam-note-container" style="display: none; margin-bottom: 1.5rem;">
               <button class="btn btn-secondary" style="width: 100%; font-size: 0.85rem; padding: 0.5rem;" id="exam-toggle-note-btn" onclick="toggleExamNote()">
@@ -5642,7 +5655,12 @@
           .replace(/^#+\s*(?:สถานการณ์|โจทย์|ข้อมูลผู้ป่วย|สิ่งที่มีให้|อุปกรณ์|Checklist|เกณฑ์ประเมิน|ข้อมูลผู้ตรวจ|เฉลย|หมายเหตุ|ข้อมูลเคส)[^\n]*\n?/gim, '');
       }
 
-      document.getElementById('exam-scenario-content').innerHTML = stripSectionHeaders(c.contentHtml || (c.scenario ? `<p>${c.scenario}</p>` : ''));
+      const rawScenario = stripSectionHeaders(c.contentHtml || (c.scenario ? `<p>${c.scenario}</p>` : ''));
+      const isExaminer = (SimState.role === 'examiner');
+      const cleanScenario = (typeof renderInteractiveBlanks === 'function')
+        ? renderInteractiveBlanks(rawScenario, { isExaminer, stationNum: st.stationNumber, caseId: c.caseId })
+        : rawScenario;
+      document.getElementById('exam-scenario-content').innerHTML = cleanScenario;
 
       // Render patientInfoHtml — convert inner ##Header markers to styled headings while stripping section tag
       const rawPatient = stripSectionHeaders(c.patientInfoHtml) || '<p>ไม่มีตารางข้อมูลผู้ป่วย</p>';
@@ -5741,6 +5759,16 @@
           const finishBtn = document.getElementById('btn-finish-exam');
           if (finishBtn) finishBtn.style.display = (isStandardRoom || SimState.isHost) ? 'block' : 'none';
         }
+
+        // Examiner Live Examinee Submission Panel
+        setupExaminerLiveSubmissionListener(st.stationNumber, c);
+      }
+      
+      // Examinee Setup for interactive blanks sync
+      if (SimState.role === 'examinee' || SimState.role === 'solo') {
+        const livePanel = document.getElementById('examiner-live-submission-panel');
+        if (livePanel) livePanel.style.display = 'none';
+        setupExamineeInteractiveBlanksSync(st.stationNumber, c);
       }
       
       // Minimap — แสดงทุก mode (solo + lobby)
@@ -6195,6 +6223,189 @@
         renderStation(prevIdx);
         if (SimState.cachedRoom && SimState.cachedRoom.isSuperHost && SimState.isHost) {
           renderSuperHostMonitor(SimState.cachedRoom);
+        }
+      }
+    }
+
+    // ─── Live Fill-in-the-Blank Multiplayer Synchronization ───
+    let _examineeBlankDebounceTimer = null;
+    let _activeExaminerLiveRef = null;
+
+    function getExamineeSubmissionFirebasePath(stationNum) {
+      if (!SimState.isLobby || !SimState.roomId || typeof _fbDb === 'undefined') return null;
+      if (SimState.examMode === 'cohort_breakout' && SimState.myBreakoutTableId) {
+        return `rooms/${SimState.roomId}/breakouts/${SimState.myBreakoutTableId}/examineeAnswers/st_${stationNum}`;
+      } else if (SimState.examMode === 'carousel_rotation') {
+        const myId = SimState.lobbyPlayerId || 'part';
+        return `rooms/${SimState.roomId}/participantAnswers/${myId}/st_${stationNum}`;
+      } else {
+        return `rooms/${SimState.roomId}/examineeAnswers/st_${stationNum}`;
+      }
+    }
+
+    function setupExamineeInteractiveBlanksSync(stationNum, c) {
+      if (!SimState.writtenAnswers) SimState.writtenAnswers = {};
+      if (!SimState.writtenAnswers[stationNum]) SimState.writtenAnswers[stationNum] = {};
+
+      // Restore previously entered values if any
+      const currentSaved = SimState.writtenAnswers[stationNum];
+      Object.entries(currentSaved).forEach(([tag, val]) => {
+        const inp = document.querySelector(`.interactive-blank-wrapper[data-tag="${tag}"] .interactive-blank-input`);
+        if (inp && !inp.value) {
+          inp.value = val;
+        }
+      });
+
+      // Attach listener for examinee typing
+      const container = document.getElementById('exam-scenario-content');
+      if (!container) return;
+
+      const onBlankChange = (e) => {
+        const wrappers = container.querySelectorAll('.interactive-blank-wrapper');
+        const payload = {};
+        wrappers.forEach(w => {
+          const t = w.getAttribute('data-tag') || 'ans';
+          const inp = w.querySelector('.interactive-blank-input');
+          if (inp) payload[t] = inp.value;
+        });
+
+        SimState.writtenAnswers[stationNum] = payload;
+
+        // Firebase Sync with 400ms Debounce
+        if (SimState.isLobby && SimState.roomId && typeof _fbDb !== 'undefined') {
+          if (_examineeBlankDebounceTimer) clearTimeout(_examineeBlankDebounceTimer);
+          _examineeBlankDebounceTimer = setTimeout(() => {
+            const fbPath = getExamineeSubmissionFirebasePath(stationNum);
+            if (fbPath) {
+              _fbDb.ref(fbPath).set({
+                answers: payload,
+                senderName: SimState.lobbyPlayerName || 'Examinee',
+                updatedAt: Date.now()
+              });
+            }
+          }, 400);
+        }
+      };
+
+      // Listen to both DOM input and custom event
+      container.addEventListener('input', onBlankChange);
+      window.addEventListener('interactiveBlankChanged', onBlankChange);
+    }
+
+    function setupExaminerLiveSubmissionListener(stationNum, c) {
+      const panel = document.getElementById('examiner-live-submission-panel');
+      const listEl = document.getElementById('examiner-live-submission-list');
+      const nameBadge = document.getElementById('live-examinee-name-badge');
+      if (!panel || !listEl) return;
+
+      // Check if this station case has blanks
+      const hasBlanks = c.scenario && c.scenario.includes('[BLANK:');
+      if (!hasBlanks) {
+        panel.style.display = 'none';
+        return;
+      }
+
+      panel.style.display = 'block';
+
+      // Parse blanks from scenario to prepare cards
+      const blankRegex = /\[BLANK:\s*([^|\]]+)(?:\s*\|\s*([^|\]]+))?(?:\s*\|\s*#?([^\]]+))?\]/gi;
+      const blankDefs = [];
+      let m;
+      while ((m = blankRegex.exec(c.scenario || '')) !== null) {
+        const answers = (m[1] || '').split(/[,/]/).map(a => a.trim()).filter(Boolean);
+        const score = parseFloat(m[2]) || 1.0;
+        const tag = (m[3] || '').trim();
+        blankDefs.push({ tag, answers, score });
+      }
+
+      function renderLiveCards(liveAnswers = {}) {
+        if (!blankDefs || blankDefs.length === 0) {
+          listEl.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;">ไม่มีข้อคำถามชนิดเติมคำในสถานีนี้</div>';
+          return;
+        }
+
+        let html = '';
+        blankDefs.forEach((b, idx) => {
+          const userVal = (liveAnswers[b.tag] || '').trim();
+          const normVal = (typeof normalizeAnswerText === 'function') ? normalizeAnswerText(userVal) : userVal.toLowerCase().trim();
+          
+          let isMatch = false;
+          if (normVal) {
+            isMatch = b.answers.some(ans => {
+              const nAns = (typeof normalizeAnswerText === 'function') ? normalizeAnswerText(ans) : ans.toLowerCase().trim();
+              return normVal === nAns;
+            });
+          }
+
+          let statusTag = `<span class="badge" style="background:var(--bg-secondary);color:var(--text-muted);font-size:0.75rem;">รอกรอก</span>`;
+          if (userVal) {
+            if (isMatch) {
+              statusTag = `<span class="badge" style="background:rgba(16,185,129,0.15);color:var(--success);font-size:0.75rem;font-weight:700;">✅ ถูกต้องตรงคีย์ (+${b.score})</span>`;
+            } else {
+              statusTag = `<span class="badge" style="background:rgba(239,68,68,0.12);color:var(--danger);font-size:0.75rem;">⚠️ รอพิจารณา / ไม่ตรงคีย์</span>`;
+            }
+          }
+
+          html += `
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.6rem 0.75rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+              <div style="flex:1;min-width:200px;">
+                <div style="font-weight:700;color:var(--text-primary);font-size:0.85rem;margin-bottom:0.2rem;">
+                  ข้อ ${escapeHtml(b.tag || (idx + 1))} <span style="font-weight:normal;color:var(--text-muted);font-size:0.8rem;">(เฉลย: ${escapeHtml(b.answers.join(' / '))})</span>
+                </div>
+                <div style="font-family:var(--font-mono, monospace);font-size:0.92rem;color:${userVal ? 'var(--primary)' : 'var(--text-muted)'};font-weight:600;">
+                  ✍️ คำตอบผู้เข้าสอบ: <strong>${escapeHtml(userVal || '- ยังไม่ได้พิมพ์ -')}</strong>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:0.4rem;">
+                ${statusTag}
+              </div>
+            </div>
+          `;
+        });
+
+        listEl.innerHTML = html;
+      }
+
+      // Initial render with current saved
+      const initialAnswers = (SimState.writtenAnswers && SimState.writtenAnswers[stationNum]) || {};
+      renderLiveCards(initialAnswers);
+
+      // Listen to Firebase Realtime Stream if in Multiplayer Lobby
+      if (_activeExaminerLiveRef) {
+        _activeExaminerLiveRef.off();
+        _activeExaminerLiveRef = null;
+      }
+
+      if (SimState.isLobby && SimState.roomId && typeof _fbDb !== 'undefined') {
+        let livePath = null;
+        if (SimState.examMode === 'cohort_breakout' && SimState.myBreakoutTableId) {
+          livePath = `rooms/${SimState.roomId}/breakouts/${SimState.myBreakoutTableId}/examineeAnswers/st_${stationNum}`;
+        } else if (SimState.examMode === 'carousel_rotation') {
+          const r = SimState.currentIdx || 0;
+          const N = SimState.stations.length || 1;
+          const assignedStationNum = SimState.myCarouselStation || stationNum;
+          const startNum = ((assignedStationNum - 1 - r + N) % N) + 1;
+          const partId = SimState.cachedRoom?.carouselPosts?.['st_' + startNum]?.startParticipantId;
+          if (partId) {
+            livePath = `rooms/${SimState.roomId}/participantAnswers/${partId}/st_${assignedStationNum}`;
+          }
+        } else {
+          livePath = `rooms/${SimState.roomId}/examineeAnswers/st_${stationNum}`;
+        }
+
+        if (livePath) {
+          _activeExaminerLiveRef = _fbDb.ref(livePath);
+          _activeExaminerLiveRef.on('value', snap => {
+            const data = snap.val();
+            if (data && data.answers) {
+              if (nameBadge && data.senderName) {
+                nameBadge.textContent = `🟢 ตอบสด: ${data.senderName}`;
+                nameBadge.style.background = 'rgba(16,185,129,0.15)';
+                nameBadge.style.color = 'var(--success)';
+              }
+              renderLiveCards(data.answers);
+            }
+          });
         }
       }
     }
