@@ -577,8 +577,15 @@
 
     /* ═══════════════════════════════════════════════════════════
        UNIVERSAL STATION CHAT & DIALOGUE STYLES
+    /* Hide standalone Scratchpad FAB in simulation — unified hub will control it */
+    #scratchpad-fab-btn {
+      display: none !important;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       UNIFIED EXAM ACTION HUB & MINI POPUP MENU
        ═══════════════════════════════════════════════════════════ */
-    .st-chat-trigger-btn {
+    .unified-tools-fab, .st-chat-trigger-btn {
       position: fixed;
       bottom: 24px;
       right: 24px;
@@ -586,9 +593,9 @@
       display: none; /* Show only when active exam station renders */
       align-items: center;
       gap: 8px;
-      background: linear-gradient(135deg, var(--primary) 0%, #4338ca 100%);
+      background: linear-gradient(135deg, var(--primary) 0%, #312e81 100%);
       color: #fff;
-      border: none;
+      border: 1.5px solid rgba(255,255,255,0.25);
       padding: 10px 18px;
       border-radius: 9999px;
       font-family: var(--font-title);
@@ -596,11 +603,15 @@
       font-size: 0.92rem;
       cursor: pointer;
       box-shadow: 0 8px 24px -4px rgba(79, 70, 229, 0.45);
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .st-chat-trigger-btn:hover {
+    .unified-tools-fab:hover, .st-chat-trigger-btn:hover {
       transform: translateY(-2px) scale(1.03);
       box-shadow: 0 12px 28px -4px rgba(79, 70, 229, 0.55);
+    }
+    .unified-tools-fab.active {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+      border-color: rgba(255,255,255,0.5);
     }
     .st-chat-badge {
       background: #ef4444;
@@ -612,14 +623,51 @@
       display: none;
       animation: pulse 1.5s infinite;
     }
+    .unified-tools-menu {
+      position: fixed;
+      bottom: 78px;
+      right: 24px;
+      width: 290px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 16px 36px -6px rgba(0,0,0,0.28);
+      padding: 0.55rem;
+      z-index: 9998;
+      display: none;
+      flex-direction: column;
+      gap: 0.4rem;
+      animation: previewPopIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .unified-tool-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.7rem 0.85rem;
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      background: var(--bg);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: left;
+    }
+    .unified-tool-item:hover {
+      background: rgba(99, 102, 241, 0.09);
+      border-color: var(--primary);
+      transform: translateX(-2px);
+    }
     .st-chat-drawer {
       position: fixed;
       bottom: 84px;
       right: 24px;
-      width: 380px;
+      width: 440px;
       max-width: calc(100vw - 32px);
-      height: 520px;
-      max-height: calc(100vh - 120px);
+      height: 580px;
+      max-height: calc(100vh - 110px);
+      resize: both;
+      overflow: hidden;
+      min-width: 360px;
+      min-height: 440px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
@@ -627,8 +675,12 @@
       z-index: 9998;
       display: none;
       flex-direction: column;
-      overflow: hidden;
       animation: previewPopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .st-chat-drawer.maximized {
+      width: 720px !important;
+      height: calc(100vh - 110px) !important;
+      max-width: 95vw !important;
     }
     .st-chat-header {
       padding: 0.75rem 1rem;
@@ -3158,8 +3210,10 @@
           SimState.isHost = true;
           SimState.isLobby = true;
           try {
-            localStorage.setItem('ple_player_id', myPlayerId);
-            localStorage.setItem('ple_room_id', randomRoomId);
+            sessionStorage.setItem('ple_session_player_id', myPlayerId);
+            sessionStorage.setItem('ple_session_room_id', randomRoomId);
+            localStorage.removeItem('ple_player_id');
+            localStorage.removeItem('ple_room_id');
           } catch (e) {}
 
           const selectedExamMode = document.querySelector('input[name="lobby-exam-mode"]:checked')?.value || 'standard';
@@ -3305,10 +3359,18 @@
           }
 
           // Check if this person was ALREADY an admitted member of this room (for reconnecting)
-          const savedPlayerId = localStorage.getItem('ple_player_id');
-          const savedRoomId = localStorage.getItem('ple_room_id');
-          const existingById = (savedRoomId === roomIdInput && savedPlayerId && roomData.players && roomData.players[savedPlayerId]);
-          const existingByName = playerName && Object.values(roomData.players || {}).find(p => p.name && p.name.trim().toLowerCase() === playerName.trim().toLowerCase());
+          const savedPlayerId = sessionStorage.getItem('ple_session_player_id');
+          const savedRoomId = sessionStorage.getItem('ple_session_room_id');
+          const existingById = (savedRoomId === roomIdInput && savedPlayerId && roomData.players && roomData.players[savedPlayerId] && (roomData.players[savedPlayerId].name?.trim().toLowerCase() === playerName.trim().toLowerCase())) ? roomData.players[savedPlayerId] : null;
+          const existingByName = playerName ? Object.values(roomData.players || {}).find(p => p.name && p.name.trim().toLowerCase() === playerName.trim().toLowerCase()) : null;
+
+          // Prevent name collision in Lobby: if someone else in the room already has this name and it's not our tab's session
+          if (roomData.status === 'setup' && !existingById && existingByName) {
+            showGlobalLoader(false);
+            alert(`ชื่อ "${playerName}" มีผู้ใช้งานอยู่ในห้องสอบนี้แล้ว กรุณาใช้ชื่ออื่นเพื่อไม่ให้ซ้ำกันครับ`);
+            return;
+          }
+
           const isExistingMember = Boolean(existingById || existingByName);
 
           // If exam is in progress (running or countdown) and this is NOT an existing member: BLOCK!
@@ -3341,27 +3403,35 @@
           let myPlayerId;
           let playerEmoji;
           let playerRole = 'examinee';
+          let isPlayerHost = false;
+
           if (existingById) {
             myPlayerId = savedPlayerId;
             playerEmoji = existingById.emoji || '💊';
             playerRole = existingById.role || 'examinee';
+            isPlayerHost = Boolean(existingById.isHost);
           } else if (existingByName) {
             myPlayerId = existingByName.id;
             playerEmoji = existingByName.emoji || '💊';
             playerRole = existingByName.role || 'examinee';
+            isPlayerHost = Boolean(existingByName.isHost && (roomData.hostId === existingByName.id));
           } else {
             myPlayerId = 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
             playerEmoji = localStorage.getItem('ple_player_emoji') || '💊';
+            playerRole = 'examinee';
+            isPlayerHost = false;
           }
 
           SimState.myPlayerId = myPlayerId;
-          SimState.isHost = false;
+          SimState.isHost = isPlayerHost;
           SimState.isLobby = true;
           SimState.myEmoji = playerEmoji;
 
           try {
-            localStorage.setItem('ple_player_id', myPlayerId);
-            localStorage.setItem('ple_room_id', roomIdInput);
+            sessionStorage.setItem('ple_session_player_id', myPlayerId);
+            sessionStorage.setItem('ple_session_room_id', roomIdInput);
+            localStorage.removeItem('ple_player_id');
+            localStorage.removeItem('ple_room_id');
           } catch (e) {}
 
           const newPlayer = {
@@ -3369,7 +3439,7 @@
             name: playerName,
             emoji: playerEmoji,
             role: playerRole,
-            isHost: false,
+            isHost: isPlayerHost,
             joinedAt: (existingById?.joinedAt || existingByName?.joinedAt || Date.now())
           };
           
@@ -3658,6 +3728,8 @@
         SimState.hasDoneCountdown = false;
         SimState.roleSelectedThisSession = false;
         try {
+          sessionStorage.removeItem('ple_session_room_id');
+          sessionStorage.removeItem('ple_session_player_id');
           localStorage.removeItem('ple_room_id');
           localStorage.removeItem('ple_player_id');
         } catch (e) {}
@@ -3674,13 +3746,18 @@
         const stickyHeader = document.getElementById('exam-sticky-top-header');
         if (stickyHeader) stickyHeader.style.display = 'none';
         
-        // Cleanup Station Chat
+        // Cleanup Station Chat & Unified Tools
         if (typeof StationChatController !== 'undefined') {
           StationChatController.cleanupListeners();
-          const triggerBtn = document.getElementById('btn-toggle-station-chat');
+          const triggerBtn = document.getElementById('btn-unified-exam-tools') || document.getElementById('btn-toggle-station-chat');
           if (triggerBtn) triggerBtn.style.display = 'none';
+          const menu = document.getElementById('unified-exam-tools-menu');
+          if (menu) menu.style.display = 'none';
           const drawer = document.getElementById('station-chat-drawer');
-          if (drawer) drawer.style.display = 'none';
+          if (drawer) {
+            drawer.style.display = 'none';
+            drawer.classList.remove('maximized');
+          }
           StationChatController.isOpen = false;
         }
 
@@ -3693,8 +3770,11 @@
 
     async function toggleRoomLock() {
       if (!SimState.isHost || !SimState.roomId || typeof _fbDb === 'undefined' || !_fbDb) return;
-      const currentLocked = Boolean(SimState.cachedRoom?.isLocked);
+      const currentLocked = Boolean(SimState.cachedRoom?.isLocked || (document.getElementById('room-lock-icon')?.textContent === '🔒'));
       const newLocked = !currentLocked;
+      if (SimState.cachedRoom) {
+        SimState.cachedRoom.isLocked = newLocked;
+      }
       try {
         await _fbDb.ref(`rooms/${SimState.roomId}`).update({
           isLocked: newLocked,
@@ -3703,6 +3783,9 @@
         showToast(newLocked ? '🔒 ล็อกห้องสอบแล้ว (ห้ามคนนอกเข้า)' : '🔓 ปลดล็อกห้องสอบแล้ว (เปิดรับสมาชิก)', 'info');
       } catch (err) {
         console.error('Toggle room lock error:', err);
+        if (SimState.cachedRoom) {
+          SimState.cachedRoom.isLocked = currentLocked;
+        }
         alert('ไม่สามารถเปลี่ยนสถานะล็อกห้องได้: ' + err.toString());
       }
     }
@@ -3878,6 +3961,7 @@
 
     async function applyRoomState(room) {
       try {
+        SimState.cachedRoom = room;
         // Parse all connected players
         let playersList = [];
         if (room.players && typeof room.players === 'object') {
@@ -6782,7 +6866,7 @@
         this.currentStationNum = stNum;
 
         // Ensure floating button is visible during active station
-        const triggerBtn = document.getElementById('btn-toggle-station-chat');
+        const triggerBtn = document.getElementById('btn-unified-exam-tools') || document.getElementById('btn-toggle-station-chat');
         if (triggerBtn) triggerBtn.style.display = 'flex';
 
         // Update Header Titles
@@ -7035,13 +7119,23 @@
       },
 
       updateUnreadUI() {
-        const badge = document.getElementById('st-chat-unread-badge');
+        const badge = document.getElementById('unified-tools-unread-badge') || document.getElementById('st-chat-unread-badge');
+        const menuBadge = document.getElementById('menu-chat-unread-badge');
+        const countText = this.unreadCount > 99 ? '99+' : this.unreadCount;
         if (badge) {
           if (this.unreadCount > 0) {
-            badge.textContent = this.unreadCount > 99 ? '99+' : this.unreadCount;
+            badge.textContent = countText;
             badge.style.display = 'inline-block';
           } else {
             badge.style.display = 'none';
+          }
+        }
+        if (menuBadge) {
+          if (this.unreadCount > 0) {
+            menuBadge.textContent = countText;
+            menuBadge.style.display = 'inline-block';
+          } else {
+            menuBadge.style.display = 'none';
           }
         }
       },
@@ -7067,6 +7161,64 @@
     function toggleStationChatDrawer() {
       StationChatController.toggleDrawer();
     }
+
+    // ─── Unified Exam Action Hub Helpers ───
+    function toggleUnifiedExamToolsMenu(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById('unified-exam-tools-menu');
+      const fab = document.getElementById('btn-unified-exam-tools');
+      if (!menu) return;
+      const isOpen = menu.style.display === 'flex';
+      menu.style.display = isOpen ? 'none' : 'flex';
+      if (fab) {
+        if (!isOpen) fab.classList.add('active');
+        else fab.classList.remove('active');
+      }
+    }
+
+    function closeUnifiedExamToolsMenu() {
+      const menu = document.getElementById('unified-exam-tools-menu');
+      const fab = document.getElementById('btn-unified-exam-tools');
+      if (menu) menu.style.display = 'none';
+      if (fab) fab.classList.remove('active');
+    }
+
+    function openChatFromMenu() {
+      closeUnifiedExamToolsMenu();
+      if (!StationChatController.isOpen) {
+        StationChatController.toggleDrawer();
+      }
+    }
+
+    function openScratchpadFromMenu() {
+      closeUnifiedExamToolsMenu();
+      if (typeof toggleSimScratchpad === 'function') {
+        toggleSimScratchpad();
+      } else if (window.Scratchpad && typeof window.Scratchpad.toggle === 'function') {
+        window.Scratchpad.toggle();
+      }
+    }
+
+    function toggleMaximizeStationChat() {
+      const drawer = document.getElementById('station-chat-drawer');
+      const btn = document.getElementById('btn-maximize-chat');
+      if (!drawer) return;
+      const isMax = drawer.classList.toggle('maximized');
+      if (btn) btn.textContent = isMax ? '🗗' : '⛶';
+      const container = document.getElementById('station-chat-messages');
+      if (container) container.scrollTop = container.scrollHeight;
+    }
+
+    // Auto-close Unified Tools Menu when clicking anywhere else
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('unified-exam-tools-menu');
+      const fab = document.getElementById('btn-unified-exam-tools');
+      if (menu && menu.style.display === 'flex') {
+        if (!menu.contains(e.target) && (!fab || !fab.contains(e.target))) {
+          closeUnifiedExamToolsMenu();
+        }
+      }
+    });
 
     function sendStationChatFromInput() {
       const inp = document.getElementById('station-chat-input');
@@ -7377,13 +7529,18 @@
       if (SimState.timerSyncInterval) clearInterval(SimState.timerSyncInterval);
       if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
       
-      // Cleanup Station Chat
+      // Cleanup Station Chat & Unified Tools
       if (typeof StationChatController !== 'undefined') {
         StationChatController.cleanupListeners();
-        const triggerBtn = document.getElementById('btn-toggle-station-chat');
+        const triggerBtn = document.getElementById('btn-unified-exam-tools') || document.getElementById('btn-toggle-station-chat');
         if (triggerBtn) triggerBtn.style.display = 'none';
+        const menu = document.getElementById('unified-exam-tools-menu');
+        if (menu) menu.style.display = 'none';
         const drawer = document.getElementById('station-chat-drawer');
-        if (drawer) drawer.style.display = 'none';
+        if (drawer) {
+          drawer.style.display = 'none';
+          drawer.classList.remove('maximized');
+        }
         StationChatController.isOpen = false;
       }
 
@@ -10056,14 +10213,38 @@
   </div>
 
   <!-- ═══════════════════════════════════════════
-       UNIVERSAL STATION CHAT & LIVE DIALOGUE SYSTEM
+       UNIFIED EXAM ACTION HUB & LIVE DIALOGUE SYSTEM
        ═══════════════════════════════════════════ -->
-  <!-- Floating Chat Trigger Button -->
-  <button id="btn-toggle-station-chat" class="st-chat-trigger-btn" onclick="toggleStationChatDrawer()" title="เปิด/ปิด แชทสนทนากับผู้ประเมินหรือผู้สอบประจำสถานี">
-    <span style="font-size: 1.15rem; line-height: 1;">💬</span>
-    <span>แชทสถานี</span>
-    <span id="st-chat-unread-badge" class="st-chat-badge">0</span>
+  <!-- Unified Floating Action Hub -->
+  <button id="btn-unified-exam-tools" class="unified-tools-fab" onclick="toggleUnifiedExamToolsMenu(event)" title="เครื่องมือช่วยสอบ (แชทสถานี / กระดาษทด)">
+    <span style="font-size: 1.15rem; line-height: 1;">⚡</span>
+    <span>เครื่องมือสอบ</span>
+    <span id="unified-tools-unread-badge" class="st-chat-badge">0</span>
   </button>
+
+  <!-- Mini Popup Menu Animation -->
+  <div id="unified-exam-tools-menu" class="unified-tools-menu" onclick="event.stopPropagation()">
+    <div style="font-size: 0.74rem; font-weight: 700; color: var(--text-muted); padding: 0.2rem 0.5rem 0.1rem; text-transform: uppercase; letter-spacing: 0.04em;">
+      เครื่องมือประจำสถานี
+    </div>
+    <div class="unified-tool-item" onclick="openChatFromMenu()">
+      <span style="font-size: 1.35rem; line-height: 1;">💬</span>
+      <div style="flex: 1;">
+        <div style="font-weight: 700; font-size: 0.88rem; color: var(--text-primary); display: flex; align-items: center; justify-content: space-between;">
+          <span>แชทสถานี (Station Chat)</span>
+          <span id="menu-chat-unread-badge" class="badge" style="display: none; background: #ef4444; color: #fff; font-size: 0.68rem; padding: 1px 5px; border-radius: 9999px;">0</span>
+        </div>
+        <div style="font-size: 0.73rem; color: var(--text-secondary); margin-top: 1px;">ซักประวัติคนไข้ / สนทนากับผู้ประเมิน</div>
+      </div>
+    </div>
+    <div class="unified-tool-item" onclick="openScratchpadFromMenu()">
+      <span style="font-size: 1.35rem; line-height: 1;">📝</span>
+      <div style="flex: 1;">
+        <div style="font-weight: 700; font-size: 0.88rem; color: var(--text-primary);">กระดาษทด (Scratchpad)</div>
+        <div style="font-size: 0.73rem; color: var(--text-secondary); margin-top: 1px;">วาดรูป เขียนสูตรคำนวณ จดบันทึก</div>
+      </div>
+    </div>
+  </div>
 
   <!-- Floating Chat Drawer -->
   <div id="station-chat-drawer" class="st-chat-drawer">
@@ -10076,7 +10257,10 @@
           <div id="st-chat-header-subtitle" style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; line-height: 1.2;">กำลังเชื่อมต่อ...</div>
         </div>
       </div>
-      <button type="button" class="btn btn-ghost" onclick="toggleStationChatDrawer()" title="ย่อหน้าต่างแชท" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-muted); line-height: 1; padding: 0.1rem 0.4rem; border-radius: var(--radius-sm); transition: color 0.15s;">&times;</button>
+      <div style="display: flex; align-items: center; gap: 4px;">
+        <button type="button" id="btn-maximize-chat" class="btn btn-ghost" onclick="toggleMaximizeStationChat()" title="ขยายเต็มจอ / ย่อขนาดเดิม" style="background: none; border: none; font-size: 0.95rem; cursor: pointer; color: var(--text-muted); line-height: 1; padding: 0.2rem 0.4rem; border-radius: var(--radius-sm); transition: color 0.15s;">⛶</button>
+        <button type="button" class="btn btn-ghost" onclick="toggleStationChatDrawer()" title="ย่อหน้าต่างแชท" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-muted); line-height: 1; padding: 0.1rem 0.4rem; border-radius: var(--radius-sm); transition: color 0.15s;">&times;</button>
+      </div>
     </div>
 
     <!-- Quick Role-play Prompts (Clinical Shortcuts) -->
