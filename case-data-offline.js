@@ -1,12 +1,12 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Version: v_20261004_015336
- * Generated on 2026-10-04 01:53:36
+ * Version: v_20261004_021952
+ * Generated on 2026-10-04 02:19:52
  */
 
 const OFFLINE_DATA = {
-  "version": "v_20261004_015336",
-  "generatedAt": "2026-10-04 01:53:36",
+  "version": "v_20261004_021952",
+  "generatedAt": "2026-10-04 02:19:52",
   "totalCases": 353,
   "cases": [
     {
@@ -22,6 +22,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/08/2026",
       "source": "ข้อสอบจริง ปี 2548",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -37,6 +39,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/08/2026",
       "source": "ข้อสอบจริง ปี 2548",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -52,6 +56,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/08/2026",
       "source": "ข้อสอบจริง ปี 2548",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -67,6 +73,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/08/2026",
       "source": "ข้อสอบจริง ปี 2548",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -82,6 +90,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/08/2026",
       "source": "ข้อสอบจริง ปี 2548",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -97,6 +107,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/08/2026",
       "source": "ข้อสอบจริง ปี 2548",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -112,6 +124,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/08/2026",
       "source": "ข้อสอบจริง ปี 2548",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -127,6 +141,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/08/2026",
       "source": "ข้อสอบจริง ปี 2548",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -142,6 +158,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/08/2026",
       "source": "ข้อสอบจริง ปี 2552",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -157,6 +175,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/08/2026",
       "source": "ข้อสอบจริง ปี 2552",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -172,6 +192,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/08/2026",
       "source": "ข้อสอบจริง ปี 2552",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -187,6 +209,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/08/2026",
       "source": "ข้อสอบจริง ปี 2552",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -202,6 +226,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/08/2026",
       "source": "ข้อสอบจริง ปี 2552",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -217,6 +243,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/08/2026",
       "source": "ข้อสอบจริง ปี 2552",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -232,6 +260,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/08/2026",
       "source": "ข้อสอบจริง ปี 2552",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -247,6 +277,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/08/2026",
       "source": "ข้อสอบจริง ปี 2552",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -262,6 +294,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2552",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -277,6 +311,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2552",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -292,6 +328,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2552",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -307,6 +345,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2552",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -322,6 +362,8 @@ const OFFLINE_DATA = {
       "createdDate": "29/07/2026",
       "source": "ข้อสอบจริง ปี 2553",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -337,6 +379,8 @@ const OFFLINE_DATA = {
       "createdDate": "29/07/2026",
       "source": "ข้อสอบจริง ปี 2553",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -352,6 +396,8 @@ const OFFLINE_DATA = {
       "createdDate": "29/07/2026",
       "source": "ข้อสอบจริง ปี 2553",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -367,6 +413,8 @@ const OFFLINE_DATA = {
       "createdDate": "29/07/2026",
       "source": "ข้อสอบจริง ปี 2553",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -382,6 +430,8 @@ const OFFLINE_DATA = {
       "createdDate": "29/07/2026",
       "source": "ข้อสอบจริง ปี 2553",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -397,6 +447,8 @@ const OFFLINE_DATA = {
       "createdDate": "29/07/2026",
       "source": "ข้อสอบจริง ปี 2553",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -412,6 +464,8 @@ const OFFLINE_DATA = {
       "createdDate": "29/07/2026",
       "source": "ข้อสอบจริง ปี 2553",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -427,6 +481,8 @@ const OFFLINE_DATA = {
       "createdDate": "29/07/2026",
       "source": "ข้อสอบจริง ปี 2553",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -442,6 +498,8 @@ const OFFLINE_DATA = {
       "createdDate": "29/07/2026",
       "source": "ข้อสอบจริง ปี 2553",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -457,6 +515,8 @@ const OFFLINE_DATA = {
       "createdDate": "29/07/2026",
       "source": "ข้อสอบจริง ปี 2553",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -472,6 +532,8 @@ const OFFLINE_DATA = {
       "createdDate": "29/07/2026",
       "source": "ข้อสอบจริง ปี 2553",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -487,6 +549,8 @@ const OFFLINE_DATA = {
       "createdDate": "26/07/2026",
       "source": "ข้อสอบจริง ปี 2554",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -502,6 +566,8 @@ const OFFLINE_DATA = {
       "createdDate": "26/07/2026",
       "source": "ข้อสอบจริง ปี 2554",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -517,6 +583,8 @@ const OFFLINE_DATA = {
       "createdDate": "26/07/2026",
       "source": "ข้อสอบจริง ปี 2554",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -532,6 +600,8 @@ const OFFLINE_DATA = {
       "createdDate": "26/07/2026",
       "source": "ข้อสอบจริง ปี 2554",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -547,6 +617,8 @@ const OFFLINE_DATA = {
       "createdDate": "26/07/2026",
       "source": "ข้อสอบจริง ปี 2554",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -562,6 +634,8 @@ const OFFLINE_DATA = {
       "createdDate": "26/07/2026",
       "source": "ข้อสอบจริง ปี 2554",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -577,6 +651,8 @@ const OFFLINE_DATA = {
       "createdDate": "26/07/2026",
       "source": "ข้อสอบจริง ปี 2554",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -592,6 +668,8 @@ const OFFLINE_DATA = {
       "createdDate": "26/07/2026",
       "source": "ข้อสอบจริง ปี 2554",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -607,6 +685,8 @@ const OFFLINE_DATA = {
       "createdDate": "26/07/2026",
       "source": "ข้อสอบจริง ปี 2554",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -622,6 +702,8 @@ const OFFLINE_DATA = {
       "createdDate": "26/07/2026",
       "source": "ข้อสอบจริง ปี 2554",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -637,6 +719,8 @@ const OFFLINE_DATA = {
       "createdDate": "26/07/2026",
       "source": "ข้อสอบจริง ปี 2554",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -652,6 +736,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2555",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -667,6 +753,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2555",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -682,6 +770,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2555",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -697,6 +787,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2555",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -712,6 +804,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2555",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -727,6 +821,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2555",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -742,6 +838,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2555",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -757,6 +855,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2555",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -772,6 +872,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2555",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -787,6 +889,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2555",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -802,6 +906,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2555",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -817,6 +923,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2555",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -832,6 +940,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2555",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -847,6 +957,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2555",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -862,6 +974,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2556",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -877,6 +991,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2556",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -892,6 +1008,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2556",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -907,6 +1025,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2556",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -922,6 +1042,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2556",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -937,6 +1059,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2556",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -952,6 +1076,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2556",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -967,6 +1093,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2556",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -982,6 +1110,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2556",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -997,6 +1127,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2556",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1012,6 +1144,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2557",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1027,6 +1161,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2557",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1042,6 +1178,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2557",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1057,6 +1195,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2557",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1072,6 +1212,8 @@ const OFFLINE_DATA = {
       "createdDate": "04/07/2026",
       "source": "ข้อสอบจริง ปี 2557",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1087,6 +1229,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2557",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1102,6 +1246,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2557",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1117,6 +1263,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2557",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1132,6 +1280,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2557",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1147,6 +1297,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2557",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1162,6 +1314,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2557",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1177,6 +1331,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2557",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1192,6 +1348,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2557",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1207,6 +1365,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2558",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1222,6 +1382,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2558",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1237,6 +1399,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2558",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1252,6 +1416,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2558",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1267,6 +1433,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2558",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1282,6 +1450,8 @@ const OFFLINE_DATA = {
       "createdDate": "03/08/2026",
       "source": "ข้อสอบจริง ปี 2558",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1297,6 +1467,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ข้อสอบจริง ปี 2559",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1312,6 +1484,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ข้อสอบจริง ปี 2559",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1327,6 +1501,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/08/2026",
       "source": "ข้อสอบจริง ปี 2559",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1342,6 +1518,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ข้อสอบจริง ปี 2559",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1357,6 +1535,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/08/2026",
       "source": "ข้อสอบจริง ปี 2559",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1372,6 +1552,8 @@ const OFFLINE_DATA = {
       "createdDate": "13/07/2026",
       "source": "ข้อสอบจริง ปี 2560",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1387,6 +1569,8 @@ const OFFLINE_DATA = {
       "createdDate": "16/07/2026",
       "source": "ข้อสอบจริง ปี 2560",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1402,6 +1586,8 @@ const OFFLINE_DATA = {
       "createdDate": "16/07/2026",
       "source": "ข้อสอบจริง ปี 2560",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1417,6 +1603,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ข้อสอบจริง ปี 2560",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1432,6 +1620,8 @@ const OFFLINE_DATA = {
       "createdDate": "16/07/2026",
       "source": "ข้อสอบจริง ปี 2560",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1447,6 +1637,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2561",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1462,6 +1654,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2561",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1477,6 +1671,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2561",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1492,6 +1688,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2561",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1507,6 +1705,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2561",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1522,6 +1722,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2561",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1537,6 +1739,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2561",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1552,6 +1756,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2561",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1567,6 +1773,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2561",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1582,6 +1790,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2561",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1597,6 +1807,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2561",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1612,6 +1824,8 @@ const OFFLINE_DATA = {
       "createdDate": "13/07/2026",
       "source": "ข้อสอบจริง ปี 2562",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1627,6 +1841,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2562",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1642,6 +1858,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2562",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1657,6 +1875,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2562",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1672,6 +1892,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2562",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1687,6 +1909,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/8/69",
       "source": "ข้อสอบจริง ปี 2566",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1702,6 +1926,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/8/69",
       "source": "ข้อสอบจริง ปี 2566",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1717,6 +1943,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/08/2026",
       "source": "ข้อสอบจริง ปี 2566",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1732,6 +1960,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/8/69",
       "source": "ข้อสอบจริง ปี 2566",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1747,6 +1977,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/8/69",
       "source": "ข้อสอบจริง ปี 2566",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1762,6 +1994,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/8/69",
       "source": "ข้อสอบจริง ปี 2568",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1777,6 +2011,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/8/69",
       "source": "ข้อสอบจริง ปี 2568",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1792,6 +2028,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/8/69",
       "source": "ข้อสอบจริง ปี 2568",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1807,6 +2045,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1822,6 +2062,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1837,6 +2079,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1852,6 +2096,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1867,6 +2113,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1881,7 +2129,9 @@ const OFFLINE_DATA = {
       "author": "RxCU83",
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 1",
-      "isActive": true
+      "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": ""
     },
     {
       "caseId": "OSPE-CL83M107",
@@ -1896,6 +2146,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1911,6 +2163,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2583",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1926,6 +2180,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1941,6 +2197,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1956,6 +2214,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1971,6 +2231,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -1986,6 +2248,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2001,6 +2265,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2016,6 +2282,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2031,6 +2299,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2046,6 +2316,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2061,6 +2333,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2076,6 +2350,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2091,6 +2367,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2106,6 +2384,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2121,6 +2401,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2136,6 +2418,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2151,6 +2435,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU83 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2166,6 +2452,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2181,6 +2469,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2196,6 +2486,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2211,6 +2503,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2226,6 +2520,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2241,6 +2537,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2256,6 +2554,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2271,6 +2571,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2286,6 +2588,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2301,6 +2605,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2316,6 +2622,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2331,6 +2639,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2346,6 +2656,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2361,6 +2673,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2376,6 +2690,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2391,6 +2707,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2406,6 +2724,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2421,6 +2741,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2436,6 +2758,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2451,6 +2775,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2466,6 +2792,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2481,6 +2809,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2496,6 +2826,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2511,6 +2843,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2526,6 +2860,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2541,6 +2877,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2556,6 +2894,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2571,6 +2911,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2586,6 +2928,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2601,6 +2945,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2616,6 +2962,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2631,6 +2979,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2646,6 +2996,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2661,6 +3013,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2676,6 +3030,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2691,6 +3047,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2706,6 +3064,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2721,6 +3081,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2736,6 +3098,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2751,6 +3115,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2766,6 +3132,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2781,6 +3149,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2796,6 +3166,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2811,6 +3183,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2826,6 +3200,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2841,6 +3217,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2856,6 +3234,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2871,6 +3251,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2886,6 +3268,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2901,6 +3285,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2916,6 +3302,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2931,6 +3319,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2946,6 +3336,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2961,6 +3353,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2976,6 +3370,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -2991,6 +3387,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3006,6 +3404,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3021,6 +3421,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3036,6 +3438,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3051,6 +3455,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3066,6 +3472,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3081,6 +3489,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3096,6 +3506,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3111,6 +3523,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3126,6 +3540,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3141,6 +3557,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3156,6 +3574,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3171,6 +3591,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3186,6 +3608,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "Mock RxCU84 Clinic ครั้งที่ 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3201,6 +3625,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "MOCK RxCU83 CC2 PRODUCT (7 NOV 2025)",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3216,6 +3642,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "MOCK RxCU83 CC2 PRODUCT (7 NOV 2025)",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3231,6 +3659,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "MOCK RxCU83 CC2 PRODUCT (7 NOV 2025)",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3246,6 +3676,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "MOCK RxCU83 CC2 PRODUCT (7 NOV 2025)",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3261,6 +3693,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "MOCK RxCU83 CC2 PRODUCT (7 NOV 2025)",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3276,6 +3710,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "MOCK RxCU83 CC2 PRODUCT (7 NOV 2025)",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3291,6 +3727,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "MOCK RxCU83 CC2 PRODUCT (7 NOV 2025)",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3306,6 +3744,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "MOCK RxCU83 CC2 PRODUCT (7 NOV 2025)",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3321,6 +3761,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3336,6 +3778,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3351,6 +3795,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 1",
       "isActive": true,
+      "linkedNextCase": "OSPE-PD83W104",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3366,6 +3812,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "OSPE-PD83W103",
       "caseStatus": "Active"
     },
     {
@@ -3381,6 +3829,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 1",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3396,6 +3846,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3411,6 +3863,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3426,6 +3880,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 2",
       "isActive": true,
+      "linkedNextCase": "OSPE-PD83W204",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3441,6 +3897,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "OSPE-PD83W203",
       "caseStatus": "Active"
     },
     {
@@ -3456,6 +3914,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 2",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3471,6 +3931,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 3",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3486,6 +3948,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 3",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3501,6 +3965,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 3",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3516,6 +3982,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 3",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3531,6 +3999,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 3",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3546,6 +4016,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 4",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3561,6 +4033,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 4",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3576,6 +4050,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 4",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3591,6 +4067,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 4",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3606,6 +4084,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "RxCU83 Practice Week 4",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3621,6 +4101,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "Mock Exam 2569 (Week 1) ชุด A",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active",
       "isProtected": true,
       "hasPassword": true
@@ -3638,6 +4120,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "Mock Exam 2569 (Week 1) ชุด B",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active",
       "isProtected": true,
       "hasPassword": true
@@ -3655,6 +4139,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "Mock Exam 2569 (Week 1) ชุด A",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active",
       "isProtected": true,
       "hasPassword": true
@@ -3672,6 +4158,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "Mock Exam 2569 (Week 1) ชุด B",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active",
       "isProtected": true,
       "hasPassword": true
@@ -3689,6 +4177,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "Mock Exam 2569 (Week 1) ชุด A",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active",
       "isProtected": true,
       "hasPassword": true
@@ -3706,6 +4196,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "Mock Exam 2569 (Week 1) ชุด B",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active",
       "isProtected": true,
       "hasPassword": true
@@ -3723,6 +4215,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/10/2026",
       "source": "โจทย์ซ้อม Week 1 (RxCU84)",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3738,6 +4232,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/10/2026",
       "source": "โจทย์ซ้อม Week 1 (RxCU84)",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3753,6 +4249,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/10/2026",
       "source": "โจทย์ซ้อม Week 1 (RxCU84)",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3768,6 +4266,8 @@ const OFFLINE_DATA = {
       "createdDate": "02/10/2026",
       "source": "โจทย์ซ้อม Week 1 (RxCU84)",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3783,6 +4283,8 @@ const OFFLINE_DATA = {
       "createdDate": "09/10/2026",
       "source": "โจทย์ซ้อม Week 2 (RxCU84)",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3798,6 +4300,8 @@ const OFFLINE_DATA = {
       "createdDate": "09/10/2026",
       "source": "โจทย์ซ้อม Week 2 (RxCU84)",
       "isActive": true,
+      "linkedNextCase": "OSPE-PD84W203",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3813,6 +4317,8 @@ const OFFLINE_DATA = {
       "createdDate": "09/10/2026",
       "source": "โจทย์ซ้อม Week 2 (RxCU84)",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "OSPE-PD84W202",
       "caseStatus": "Active"
     },
     {
@@ -3828,6 +4334,8 @@ const OFFLINE_DATA = {
       "createdDate": "09/10/2026",
       "source": "โจทย์ซ้อม Week 2 (RxCU84)",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3843,6 +4351,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3858,6 +4368,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3873,6 +4385,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3888,6 +4402,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3903,6 +4419,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3918,6 +4436,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3933,6 +4453,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3948,6 +4470,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3963,6 +4487,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3978,6 +4504,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -3993,6 +4521,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4008,6 +4538,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4023,6 +4555,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4038,6 +4572,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4053,6 +4589,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "OSPE-PDSS10",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4068,6 +4606,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "OSPE-PDSS09",
       "caseStatus": "Active"
     },
     {
@@ -4083,6 +4623,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4098,6 +4640,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4113,6 +4657,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4128,6 +4674,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4143,6 +4691,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "OSPE-PDSS18",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4158,6 +4708,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "OSPE-PDSS17",
       "caseStatus": "Active"
     },
     {
@@ -4173,6 +4725,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "OSPE-PDSS20",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4188,6 +4742,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "OSPE-PDSS19",
       "caseStatus": "Active"
     },
     {
@@ -4203,6 +4759,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "OSPE-PDSS22",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4218,6 +4776,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "OSPE-PDSS21",
       "caseStatus": "Active"
     },
     {
@@ -4233,6 +4793,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4248,6 +4810,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4263,6 +4827,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4278,6 +4844,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4293,6 +4861,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4308,6 +4878,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4323,6 +4895,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4338,6 +4912,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4353,6 +4929,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4368,6 +4946,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4383,6 +4963,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4398,6 +4980,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4413,6 +4997,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4428,6 +5014,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4443,6 +5031,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4458,6 +5048,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4473,6 +5065,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4488,6 +5082,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4503,6 +5099,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4518,6 +5116,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4533,6 +5133,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4548,6 +5150,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4563,6 +5167,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4578,6 +5184,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4593,6 +5201,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4608,6 +5218,8 @@ const OFFLINE_DATA = {
       "createdDate": "3/10/2569",
       "source": "ไม่ระบุ",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4623,6 +5235,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2548",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4638,6 +5252,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2548",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4653,6 +5269,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2549",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4668,6 +5286,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2549",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4683,6 +5303,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2549",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4698,6 +5320,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2550",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4713,6 +5337,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2550",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4728,6 +5354,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2550",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4743,6 +5371,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2550",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4758,6 +5388,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2550",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4773,6 +5405,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2551",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4788,6 +5422,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2551",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4803,6 +5439,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2552",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4818,6 +5456,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2552",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4833,6 +5473,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2552",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4848,6 +5490,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2553",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4863,6 +5507,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2553",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4878,6 +5524,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2553",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4893,6 +5541,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2553",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4908,6 +5558,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2554",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4923,6 +5575,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2554",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4938,6 +5592,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2554",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4953,6 +5609,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2555",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4968,6 +5626,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2555",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4983,6 +5643,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2555",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -4998,6 +5660,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2555",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5013,6 +5677,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2556",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5028,6 +5694,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2556",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5043,6 +5711,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2556",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5058,6 +5728,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2556",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5073,6 +5745,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2557",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5088,6 +5762,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2557",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5103,6 +5779,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2557",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5118,6 +5796,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2558",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5133,6 +5813,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2558",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5148,6 +5830,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2558",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5163,6 +5847,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2558",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5178,6 +5864,8 @@ const OFFLINE_DATA = {
       "createdDate": "30/09/2026",
       "source": "ข้อสอบจริง ปี 2559",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5193,6 +5881,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/10/2026",
       "source": "ข้อสอบจริง ปี 2560",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5208,6 +5898,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/10/2026",
       "source": "ข้อสอบจริง ปี 2561",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5223,6 +5915,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/10/2026",
       "source": "ข้อสอบจริง ปี 2562",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5238,6 +5932,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/10/2026",
       "source": "ข้อสอบจริง ปี 2563",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5253,6 +5949,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/10/2026",
       "source": "ข้อสอบจริง ปี 2564",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5268,6 +5966,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/10/2026",
       "source": "ข้อสอบจริง ปี 2565",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5283,6 +5983,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/10/2026",
       "source": "ข้อสอบจริง ปี 2566",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5298,6 +6000,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/10/2026",
       "source": "ข้อสอบจริง ปี 2567",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     },
     {
@@ -5313,6 +6017,8 @@ const OFFLINE_DATA = {
       "createdDate": "01/10/2026",
       "source": "ข้อสอบจริง ปี 2568",
       "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
       "caseStatus": "Active"
     }
   ]

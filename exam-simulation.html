@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU</title>
   <link rel="stylesheet" href="style.css?v=1791019915">
-  <script src="case-data-offline.js?v=v_20261004_015336"></script>
-  <script src="case-details-offline.js?v=v_20261004_015336"></script>
-  <script src="app.js?v=v_20261004_015336"></script>
+  <script src="case-data-offline.js?v=v_20261004_021952"></script>
+  <script src="case-details-offline.js?v=v_20261004_021952"></script>
+  <script src="app.js?v=v_20261004_021952"></script>
   <script src="scratchpad.js?v=v_20261003_020800"></script>
   <style>
     /* Simulation Source and Topic Selector */
@@ -1496,6 +1496,7 @@
               <span class="station-badge" id="exam-station-badge">STATION 1</span>
               <h2 id="exam-case-title">โหลดเคส...</h2>
               <span class="station-code" id="exam-case-id">OSPE-CL001</span>
+              <span id="exam-linked-badge" class="badge" style="display: none; margin-left: 0.5rem; font-size: 0.75rem; vertical-align: middle; padding: 0.25rem 0.6rem; border-radius: 9999px;"></span>
             </div>
             <button class="gdocs-link btn btn-secondary no-print" onclick="updateSimCurrentCaseFromDoc()" id="btn-update-sim-doc">
               🔄 อัปเดตข้อมูลจาก Google เอกสาร
@@ -2291,6 +2292,20 @@
         SimState.customSelectedCases.push(c.caseId);
         existingSet.add(c.caseId);
         added++;
+
+        // Append linked chain if available
+        let curr = c;
+        while (curr.linkedNextCase) {
+          const nextC = AppState.cases.find(x => x.caseId === curr.linkedNextCase);
+          if (nextC && !existingSet.has(nextC.caseId)) {
+            SimState.customSelectedCases.push(nextC.caseId);
+            existingSet.add(nextC.caseId);
+            added++;
+            curr = nextC;
+          } else {
+            break;
+          }
+        }
       }
 
       renderCustomSelectedTray();
@@ -5178,7 +5193,10 @@
       for (let i = 0; i < loadedCases.length; i++) {
         SimState.stations.push({ stationNumber: stationNumCounter++, isRest: false, case: loadedCases[i] });
         
-        if (restCount > 0 && (i + 1) % restInterval === 0 && restInserted < restCount) {
+        // Never insert a REST station between linked consecutive stations
+        const isCurrentLinkedToNext = Boolean(loadedCases[i].linkedNextCase && i + 1 < loadedCases.length && loadedCases[i + 1].caseId === loadedCases[i].linkedNextCase);
+
+        if (restCount > 0 && !isCurrentLinkedToNext && (i + 1) % restInterval === 0 && restInserted < restCount) {
           restInserted++;
           SimState.stations.push({
             stationNumber: stationNumCounter++,
@@ -5293,6 +5311,33 @@
         const catPool = pools[cat] || [];
         let pickedForCat = 0;
 
+        function addCaseWithChain(c, gKey, topic) {
+          selectedCases.push(c);
+          addedIds.add(c.caseId);
+          if (gKey) courseGroupCounts[gKey] = (courseGroupCounts[gKey] || 0) + 1;
+          if (topic) usedTopics.add(topic);
+          pickedForCat++;
+
+          // Handle linked chain cases (e.g. multi-part consecutive stations)
+          let curr = c;
+          while (curr.linkedNextCase) {
+            const nextC = AppState.cases.find(x => x.caseId === curr.linkedNextCase);
+            if (nextC && !addedIds.has(nextC.caseId)) {
+              selectedCases.push(nextC);
+              addedIds.add(nextC.caseId);
+              const nextGrp = nextC.mainGroup || 'ทั่วไป';
+              const nextGKey = `${nextC.category || 'Clinic'}:::${nextGrp}`;
+              courseGroupCounts[nextGKey] = (courseGroupCounts[nextGKey] || 0) + 1;
+              curr = nextC;
+              if ((nextC.category || 'Clinic') === cat) {
+                pickedForCat++;
+              }
+            } else {
+              break;
+            }
+          }
+        }
+
         // Pass 1: Strict constraints (Course Group < 2 AND Topic strictly unique)
         for (const c of catPool) {
           if (pickedForCat >= targetCount) break;
@@ -5304,27 +5349,7 @@
           const grpCount = courseGroupCounts[gKey] || 0;
 
           if (grpCount < 2 && !usedTopics.has(topic)) {
-            selectedCases.push(c);
-            addedIds.add(c.caseId);
-            courseGroupCounts[gKey] = grpCount + 1;
-            usedTopics.add(topic);
-            pickedForCat++;
-
-            // Handle linked chain cases (e.g. multi-part consecutive stations)
-            let curr = c;
-            while (curr.linkedNextCase) {
-              const nextC = AppState.cases.find(x => x.caseId === curr.linkedNextCase);
-              if (nextC && !addedIds.has(nextC.caseId)) {
-                selectedCases.push(nextC);
-                addedIds.add(nextC.caseId);
-                const nextGrp = nextC.mainGroup || 'ทั่วไป';
-                const nextGKey = `${nextC.category || 'Clinic'}:::${nextGrp}`;
-                courseGroupCounts[nextGKey] = (courseGroupCounts[nextGKey] || 0) + 1;
-                curr = nextC;
-              } else {
-                break;
-              }
-            }
+            addCaseWithChain(c, gKey, topic);
           }
         }
 
@@ -5339,11 +5364,7 @@
             const topic = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
 
             if (!usedTopics.has(topic)) {
-              selectedCases.push(c);
-              addedIds.add(c.caseId);
-              courseGroupCounts[gKey] = (courseGroupCounts[gKey] || 0) + 1;
-              usedTopics.add(topic);
-              pickedForCat++;
+              addCaseWithChain(c, gKey, topic);
             }
           }
         }
@@ -5353,9 +5374,7 @@
           for (const c of catPool) {
             if (pickedForCat >= targetCount) break;
             if (addedIds.has(c.caseId)) continue;
-            selectedCases.push(c);
-            addedIds.add(c.caseId);
-            pickedForCat++;
+            addCaseWithChain(c, null, null);
           }
         }
       }
@@ -5364,10 +5383,34 @@
       pickFromCategory('Product', product);
       pickFromCategory('SAP', sap);
 
-      // Return shuffled stations
-      const finalShuffled = shuffle(selectedCases);
+      // Group contiguous linked chains into indivisible blocks before shuffling
+      const caseBlocks = [];
+      const visitedInBlocks = new Set();
 
-      return finalShuffled.map((c, idx) => ({
+      for (const c of selectedCases) {
+        if (visitedInBlocks.has(c.caseId)) continue;
+        const block = [c];
+        visitedInBlocks.add(c.caseId);
+
+        let curr = c;
+        while (curr.linkedNextCase) {
+          const nextC = selectedCases.find(x => x.caseId === curr.linkedNextCase) || AppState.cases.find(x => x.caseId === curr.linkedNextCase);
+          if (nextC && !visitedInBlocks.has(nextC.caseId)) {
+            block.push(nextC);
+            visitedInBlocks.add(nextC.caseId);
+            curr = nextC;
+          } else {
+            break;
+          }
+        }
+        caseBlocks.push(block);
+      }
+
+      // Shuffle blocks so linked chains stay strictly consecutive
+      const shuffledBlocks = shuffle(caseBlocks);
+      const finalOrderedCases = shuffledBlocks.flat();
+
+      return finalOrderedCases.map((c, idx) => ({
         stationNumber: idx + 1,
         caseId: c.caseId,
         title: c.title,
@@ -5644,6 +5687,28 @@
         document.getElementById('exam-case-title').textContent = c.title;
         document.getElementById('exam-case-id').textContent = c.caseId;
         document.getElementById('exam-case-id').style.display = 'inline';
+      }
+
+      // Display Linked Case Badge
+      const linkedBadgeEl = document.getElementById('exam-linked-badge');
+      if (linkedBadgeEl) {
+        if (!st.isRest && c && (c.linkedNextCase || c.linkedFromCase)) {
+          if (c.linkedNextCase) {
+            linkedBadgeEl.textContent = '🔗 มีสถานีต่อเนื่อง (ตอนที่ 1)';
+            linkedBadgeEl.style.background = 'rgba(245, 158, 11, 0.15)';
+            linkedBadgeEl.style.color = '#b45309';
+            linkedBadgeEl.style.border = '1px solid rgba(245, 158, 11, 0.4)';
+            linkedBadgeEl.style.display = 'inline-block';
+          } else if (c.linkedFromCase) {
+            linkedBadgeEl.textContent = '🔗 สถานีต่อเนื่อง (ตอนที่ 2)';
+            linkedBadgeEl.style.background = 'rgba(16, 185, 129, 0.15)';
+            linkedBadgeEl.style.color = '#047857';
+            linkedBadgeEl.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+            linkedBadgeEl.style.display = 'inline-block';
+          }
+        } else {
+          linkedBadgeEl.style.display = 'none';
+        }
       }
 
       if (window.Scratchpad) {

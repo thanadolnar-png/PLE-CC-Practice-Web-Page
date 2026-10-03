@@ -1822,7 +1822,7 @@ if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
 const DB_NAME = 'RxCU_OSPE_DB';
 const DB_VERSION = 1;
 const STORE_NAME = 'case_details';
-const DB_VERSION_STR = 'v_20261004_015336'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
+const DB_VERSION_STR = 'v_20261004_021952'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
 
 function openIndexedDB() {
   return new Promise((resolve, reject) => {
@@ -2062,6 +2062,7 @@ function openBatchPrintModal() {
   }
   if (modal) {
     modal.style.display = 'flex';
+    populateBatchFilterDropdowns();
     renderBatchCaseSelectionList();
   }
 }
@@ -2077,7 +2078,7 @@ function createBatchPrintModalDOM() {
   div.className = 'print-modal-overlay no-print';
   div.style.display = 'none';
   div.innerHTML = `
-    <div class="print-modal-card" style="max-width: 1040px;">
+    <div class="print-modal-card" style="max-width: 1060px;">
       <div class="print-modal-header">
         <h3 style="margin: 0; font-family: var(--font-title); font-size: 1.15rem; display: flex; align-items: center; gap: 0.5rem;">
           🖨️ เครื่องมือสั่งพิมพ์หลายเคสพร้อมกัน (Batch Print Tools)
@@ -2087,27 +2088,49 @@ function createBatchPrintModalDOM() {
 
       <div class="print-modal-body">
         <div class="print-options-grid">
-          <!-- 1. Selection & Filter -->
+          <!-- 1. Selection & Filter (4 Dimensions) -->
           <div class="print-option-group" style="grid-column: span 2;">
-            <div class="print-option-title" style="justify-content: space-between;">
-              <span>📦 1. เลือกเคสข้อสอบที่ต้องการพิมพ์</span>
+            <div class="print-option-title" style="justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+              <span>📦 1. ตัวกรองละเอียด & เลือกเคสที่ต้องการพิมพ์ (4D Filters)</span>
               <span id="batch-selected-count-badge" style="font-size: 0.82rem; font-weight: 700; background: var(--primary); color: white; padding: 2px 8px; border-radius: 12px;">เลือกแล้ว 0 เคส</span>
             </div>
 
-            <div style="display: flex; gap: 0.75rem; margin-bottom: 0.85rem; flex-wrap: wrap;">
-              <input type="text" id="batch-search-input" class="form-control" placeholder="🔍 ค้นหาชื่อเคส, ตัวยา, โรค..." style="flex: 2; min-width: 200px; padding: 0.45rem 0.75rem; font-size: 0.88rem;" oninput="renderBatchCaseSelectionList()">
-              <select id="batch-cat-select" class="form-control" style="flex: 1; min-width: 130px; padding: 0.45rem 0.75rem; font-size: 0.88rem;" onchange="renderBatchCaseSelectionList()">
-                <option value="All">ทุกหมวด (All Category)</option>
-                <option value="Clinic">Clinic (คลินิก)</option>
-                <option value="Product">Product (ผลิต)</option>
-                <option value="SAP">SAP (สังคมฯ)</option>
-              </select>
-              <button class="btn btn-secondary" onclick="selectAllBatchCases(true)" style="padding: 4px 10px; font-size: 0.82rem;">☑️ เลือกทั้งหมด</button>
-              <button class="btn btn-secondary" onclick="selectAllBatchCases(false)" style="padding: 4px 10px; font-size: 0.82rem;">☐ ล้างทั้งหมด</button>
+            <!-- Filter Row 1: Dropdowns -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.5rem; margin-bottom: 0.6rem;">
+              <div>
+                <label style="font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 2px;">📂 หมวดวิชาหลัก:</label>
+                <select id="batch-cat-select" class="form-control" style="width: 100%; padding: 0.4rem 0.6rem; font-size: 0.82rem;" onchange="onBatchCategoryChange()">
+                  <option value="All">ทุกหมวด (All Category)</option>
+                  <option value="Clinic">Clinic (คลินิก)</option>
+                  <option value="Product">Product (ผลิต)</option>
+                  <option value="SAP">SAP (สังคมฯ)</option>
+                </select>
+              </div>
+
+              <div>
+                <label style="font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 2px;">📚 กลุ่มโรค / วิชา (Course Group):</label>
+                <select id="batch-group-select" class="form-control" style="width: 100%; padding: 0.4rem 0.6rem; font-size: 0.82rem;" onchange="renderBatchCaseSelectionList()">
+                  <option value="All">ทุกกลุ่มโรค / วิชา (All Groups)</option>
+                </select>
+              </div>
+
+              <div>
+                <label style="font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 2px;">🏷️ แหล่งที่มา / ปีข้อสอบ (Source):</label>
+                <select id="batch-source-select" class="form-control" style="width: 100%; padding: 0.4rem 0.6rem; font-size: 0.82rem;" onchange="renderBatchCaseSelectionList()">
+                  <option value="All">ทุกแหล่งที่มา / ปี (All Sources)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Filter Row 2: Search + Action Buttons -->
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap; align-items: center;">
+              <input type="text" id="batch-search-input" class="form-control" placeholder="🔍 ค้นหาชื่อเคส, ตัวยา, รหัสเคส (เช่น CL5324), ชื่อผู้แต่ง..." style="flex: 2; min-width: 220px; padding: 0.4rem 0.65rem; font-size: 0.84rem;" oninput="renderBatchCaseSelectionList()">
+              <button class="btn btn-secondary" onclick="selectAllBatchCases(true)" style="padding: 4px 10px; font-size: 0.8rem; white-space: nowrap;">☑️ เลือกทั้งหมดที่กรอง</button>
+              <button class="btn btn-secondary" onclick="selectAllBatchCases(false)" style="padding: 4px 10px; font-size: 0.8rem; white-space: nowrap;">☐ ล้างการเลือก</button>
             </div>
 
             <!-- Scrollable Case Checkbox Rail -->
-            <div id="batch-case-checkbox-list" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.5rem; background: var(--bg-primary); display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.4rem;">
+            <div id="batch-case-checkbox-list" style="max-height: 220px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.5rem; background: var(--bg-primary); display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 0.4rem;">
               <!-- Filled dynamically by JS -->
             </div>
           </div>
@@ -2180,12 +2203,57 @@ function createBatchPrintModalDOM() {
   document.body.appendChild(div);
 }
 
+function populateBatchFilterDropdowns() {
+  const allCases = AppState.cases || [];
+  const cat = document.getElementById('batch-cat-select')?.value || 'All';
+  const groupSelect = document.getElementById('batch-group-select');
+  const sourceSelect = document.getElementById('batch-source-select');
+
+  if (groupSelect) {
+    const currentVal = groupSelect.value;
+    const groups = new Set();
+    allCases.forEach(c => {
+      if (cat === 'All' || (c.category || '').toLowerCase() === cat.toLowerCase()) {
+        if (c.mainGroup && c.mainGroup.trim()) groups.add(c.mainGroup.trim());
+      }
+    });
+    const sortedGroups = Array.from(groups).sort((a, b) => a.localeCompare(b, 'th'));
+    let groupHtml = '<option value="All">ทุกกลุ่มโรค / วิชา (All Groups)</option>';
+    sortedGroups.forEach(g => {
+      groupHtml += `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`;
+    });
+    groupSelect.innerHTML = groupHtml;
+    if (groups.has(currentVal)) groupSelect.value = currentVal;
+    else groupSelect.value = 'All';
+  }
+
+  if (sourceSelect && sourceSelect.options.length <= 1) {
+    const sources = new Set();
+    allCases.forEach(c => {
+      if (c.source && c.source.trim()) sources.add(c.source.trim());
+    });
+    const sortedSources = Array.from(sources).sort((a, b) => a.localeCompare(b, 'th'));
+    let srcHtml = '<option value="All">ทุกแหล่งที่มา / ปี (All Sources)</option>';
+    sortedSources.forEach(s => {
+      srcHtml += `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`;
+    });
+    sourceSelect.innerHTML = srcHtml;
+  }
+}
+
+function onBatchCategoryChange() {
+  populateBatchFilterDropdowns();
+  renderBatchCaseSelectionList();
+}
+
 function renderBatchCaseSelectionList() {
   const container = document.getElementById('batch-case-checkbox-list');
   if (!container) return;
 
   const search = (document.getElementById('batch-search-input')?.value || '').toLowerCase().trim();
   const cat = document.getElementById('batch-cat-select')?.value || 'All';
+  const group = document.getElementById('batch-group-select')?.value || 'All';
+  const source = document.getElementById('batch-source-select')?.value || 'All';
 
   let allCases = AppState.cases || [];
   if (allCases.length === 0 && typeof OFFLINE_CASE_DETAILS !== 'undefined') {
@@ -2197,11 +2265,16 @@ function renderBatchCaseSelectionList() {
 
   const filtered = allCases.filter(c => {
     const matchCat = cat === 'All' || (c.category || '').toLowerCase() === cat.toLowerCase();
+    const matchGroup = group === 'All' || (c.mainGroup || '').trim() === group;
+    const matchSource = source === 'All' || (c.source || '').trim() === source;
     const matchSearch = !search || 
       (c.caseId || '').toLowerCase().includes(search) || 
       (c.title || '').toLowerCase().includes(search) || 
-      (c.disease || '').toLowerCase().includes(search);
-    return matchCat && matchSearch;
+      (c.disease || '').toLowerCase().includes(search) ||
+      (c.subTopic || '').toLowerCase().includes(search) ||
+      (c.mainGroup || '').toLowerCase().includes(search) ||
+      (c.author || '').toLowerCase().includes(search);
+    return matchCat && matchGroup && matchSource && matchSearch;
   });
 
   container.innerHTML = '';
@@ -2241,6 +2314,8 @@ function toggleBatchCaseSelection(caseId, isChecked) {
 function selectAllBatchCases(select) {
   const search = (document.getElementById('batch-search-input')?.value || '').toLowerCase().trim();
   const cat = document.getElementById('batch-cat-select')?.value || 'All';
+  const group = document.getElementById('batch-group-select')?.value || 'All';
+  const source = document.getElementById('batch-source-select')?.value || 'All';
   let allCases = AppState.cases || [];
 
   if (allCases.length === 0 && typeof OFFLINE_CASE_DETAILS !== 'undefined') {
@@ -2252,11 +2327,17 @@ function selectAllBatchCases(select) {
 
   allCases.forEach(c => {
     const matchCat = cat === 'All' || (c.category || '').toLowerCase() === cat.toLowerCase();
+    const matchGroup = group === 'All' || (c.mainGroup || '').trim() === group;
+    const matchSource = source === 'All' || (c.source || '').trim() === source;
     const matchSearch = !search || 
       (c.caseId || '').toLowerCase().includes(search) || 
       (c.title || '').toLowerCase().includes(search) || 
-      (c.disease || '').toLowerCase().includes(search);
-    if (matchCat && matchSearch) {
+      (c.disease || '').toLowerCase().includes(search) ||
+      (c.subTopic || '').toLowerCase().includes(search) ||
+      (c.mainGroup || '').toLowerCase().includes(search) ||
+      (c.author || '').toLowerCase().includes(search);
+
+    if (matchCat && matchGroup && matchSource && matchSearch) {
       if (select) selectedBatchCaseIds.add(c.caseId);
       else selectedBatchCaseIds.delete(c.caseId);
     }
