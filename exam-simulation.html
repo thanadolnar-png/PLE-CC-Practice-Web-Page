@@ -664,10 +664,9 @@
       max-width: calc(100vw - 32px);
       height: 580px;
       max-height: calc(100vh - 110px);
-      resize: both;
       overflow: hidden;
-      min-width: 360px;
-      min-height: 440px;
+      min-width: 320px;
+      min-height: 340px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
@@ -677,10 +676,83 @@
       flex-direction: column;
       animation: previewPopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    .st-chat-drawer.dragging {
+      user-select: none;
+      opacity: 0.96;
+      box-shadow: 0 26px 52px -10px rgba(0,0,0,0.42);
+      transition: none !important;
+    }
+    .st-chat-drawer.resizing {
+      user-select: none;
+      transition: none !important;
+    }
     .st-chat-drawer.maximized {
-      width: 720px !important;
-      height: calc(100vh - 110px) !important;
+      width: min(780px, calc(100vw - 32px)) !important;
+      height: calc(100vh - 100px) !important;
       max-width: 95vw !important;
+      max-height: calc(100vh - 100px) !important;
+    }
+    .st-chat-drawer.maximized .st-chat-resizer {
+      display: none !important;
+    }
+    /* 8-Direction Resizers */
+    .st-chat-resizer {
+      position: absolute;
+      z-index: 40;
+      touch-action: none;
+    }
+    .st-chat-resizer-t {
+      top: 0; left: 0; right: 0; height: 8px; cursor: ns-resize;
+    }
+    .st-chat-resizer-b {
+      bottom: 0; left: 0; right: 0; height: 8px; cursor: ns-resize;
+    }
+    .st-chat-resizer-l {
+      top: 0; bottom: 0; left: 0; width: 8px; cursor: ew-resize;
+    }
+    .st-chat-resizer-r {
+      top: 0; bottom: 0; right: 0; width: 8px; cursor: ew-resize;
+    }
+    .st-chat-resizer-tl {
+      top: 0; left: 0; width: 22px; height: 22px; cursor: nwse-resize; z-index: 42;
+    }
+    .st-chat-resizer-tr {
+      top: 0; right: 0; width: 22px; height: 22px; cursor: nesw-resize; z-index: 42;
+    }
+    .st-chat-resizer-bl {
+      bottom: 0; left: 0; width: 22px; height: 22px; cursor: nesw-resize; z-index: 42;
+    }
+    .st-chat-resizer-br {
+      bottom: 0; right: 0; width: 22px; height: 22px; cursor: nwse-resize; z-index: 42;
+    }
+    /* Visual Corner Grips */
+    .st-chat-corner-grip {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      pointer-events: none;
+      opacity: 0.6;
+      transition: opacity 0.15s ease, border-color 0.15s ease;
+    }
+    .st-chat-resizer:hover .st-chat-corner-grip,
+    .st-chat-drawer.resizing .st-chat-corner-grip {
+      opacity: 1;
+    }
+    .st-chat-corner-grip.tl {
+      top: 3px; left: 3px;
+      border-top: 2.5px solid var(--text-secondary);
+      border-left: 2.5px solid var(--text-secondary);
+      border-top-left-radius: 4px;
+    }
+    .st-chat-corner-grip.br {
+      bottom: 3px; right: 3px;
+      border-bottom: 2.5px solid var(--text-secondary);
+      border-right: 2.5px solid var(--text-secondary);
+      border-bottom-right-radius: 4px;
+    }
+    .st-chat-resizer:hover .st-chat-corner-grip.tl,
+    .st-chat-resizer:hover .st-chat-corner-grip.br {
+      border-color: var(--primary);
     }
     .st-chat-header {
       padding: 0.75rem 1rem;
@@ -689,6 +761,27 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      cursor: grab;
+      user-select: none;
+    }
+    .st-chat-header:active {
+      cursor: grabbing;
+    }
+    .st-chat-drag-indicator {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      color: var(--text-muted);
+      cursor: grab;
+      font-size: 1rem;
+      opacity: 0.65;
+      margin-right: 2px;
+      transition: opacity 0.15s ease, color 0.15s ease;
+    }
+    .st-chat-header:hover .st-chat-drag-indicator {
+      opacity: 1;
+      color: var(--primary);
     }
     .st-chat-title {
       font-family: var(--font-title);
@@ -3756,7 +3849,7 @@
           const drawer = document.getElementById('station-chat-drawer');
           if (drawer) {
             drawer.style.display = 'none';
-            drawer.classList.remove('maximized');
+            drawer.classList.remove('maximized', 'dragging', 'resizing');
           }
           StationChatController.isOpen = false;
         }
@@ -7104,6 +7197,8 @@
         if (drawer) {
           drawer.style.display = this.isOpen ? 'flex' : 'none';
           if (this.isOpen) {
+            initStationChatDragAndResize();
+            applyStoredStationChatLayout();
             this.resetUnread();
             const input = document.getElementById('station-chat-input');
             if (input) input.focus();
@@ -7205,8 +7300,241 @@
       if (!drawer) return;
       const isMax = drawer.classList.toggle('maximized');
       if (btn) btn.textContent = isMax ? '🗗' : '⛶';
+      if (!isMax) {
+        applyStoredStationChatLayout();
+      }
       const container = document.getElementById('station-chat-messages');
       if (container) container.scrollTop = container.scrollHeight;
+    }
+
+    // ─── Station Chat Drag & Resize Controller (Scratchpad-style) ───
+    const ST_CHAT_LAYOUT_KEY = 'ple_ospe_station_chat_layout_v2';
+
+    function initStationChatDragAndResize() {
+      const drawer = document.getElementById('station-chat-drawer');
+      const header = document.getElementById('st-chat-header');
+      if (!drawer || !header) return;
+      if (drawer.dataset.dragInit === 'true') return;
+      drawer.dataset.dragInit = 'true';
+
+      // 1. Header Drag-to-Move
+      let isDragging = false;
+      let startX = 0, startY = 0;
+      let startLeft = 0, startTop = 0;
+
+      header.addEventListener('pointerdown', function (e) {
+        if (e.target.closest('button, input, textarea, a, .btn, .st-chat-quick-chip')) return;
+        if (drawer.classList.contains('maximized')) return;
+        if (window.innerWidth <= 768) return; // Keep mobile bottom-sheet styling
+
+        e.preventDefault();
+        try { header.setPointerCapture(e.pointerId); } catch (_) {}
+
+        isDragging = true;
+        drawer.classList.add('dragging');
+
+        // Normalize positioning from bottom/right to left/top/width/height
+        const rect = drawer.getBoundingClientRect();
+        drawer.style.bottom = 'auto';
+        drawer.style.right = 'auto';
+        drawer.style.left = rect.left + 'px';
+        drawer.style.top = rect.top + 'px';
+        drawer.style.width = rect.width + 'px';
+        drawer.style.height = rect.height + 'px';
+
+        startX = e.clientX;
+        startY = e.clientY;
+        startLeft = rect.left;
+        startTop = rect.top;
+      });
+
+      header.addEventListener('pointermove', function (e) {
+        if (!isDragging) return;
+        e.preventDefault();
+
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        const maxLeft = Math.max(10, window.innerWidth - drawer.offsetWidth - 8);
+        const maxTop = Math.max(10, window.innerHeight - 48);
+
+        const newLeft = Math.max(8, Math.min(maxLeft, startLeft + dx));
+        const newTop = Math.max(8, Math.min(maxTop, startTop + dy));
+
+        drawer.style.left = Math.round(newLeft) + 'px';
+        drawer.style.top = Math.round(newTop) + 'px';
+      });
+
+      const stopDrag = function (e) {
+        if (!isDragging) return;
+        isDragging = false;
+        drawer.classList.remove('dragging');
+        try { header.releasePointerCapture(e.pointerId); } catch (_) {}
+        saveStationChatLayout();
+      };
+
+      header.addEventListener('pointerup', stopDrag);
+      header.addEventListener('pointercancel', stopDrag);
+
+      // Double-click header to quickly toggle maximize/restore
+      header.addEventListener('dblclick', function (e) {
+        if (e.target.closest('button, input, textarea, a, .btn')) return;
+        toggleMaximizeStationChat();
+      });
+
+      // 2. 8-Direction Resizers
+      const resizers = drawer.querySelectorAll('.st-chat-resizer');
+      let isResizing = false;
+      let activeDir = null;
+      let rStartX = 0, rStartY = 0;
+      let rStartLeft = 0, rStartTop = 0;
+      let rStartWidth = 0, rStartHeight = 0;
+
+      resizers.forEach(resizer => {
+        resizer.addEventListener('pointerdown', function (e) {
+          if (drawer.classList.contains('maximized')) return;
+          if (window.innerWidth <= 768) return;
+
+          e.preventDefault();
+          e.stopPropagation();
+          try { resizer.setPointerCapture(e.pointerId); } catch (_) {}
+
+          isResizing = true;
+          activeDir = this.getAttribute('data-direction');
+          drawer.classList.add('resizing');
+
+          const rect = drawer.getBoundingClientRect();
+          drawer.style.bottom = 'auto';
+          drawer.style.right = 'auto';
+          drawer.style.left = rect.left + 'px';
+          drawer.style.top = rect.top + 'px';
+          drawer.style.width = rect.width + 'px';
+          drawer.style.height = rect.height + 'px';
+
+          rStartX = e.clientX;
+          rStartY = e.clientY;
+          rStartLeft = rect.left;
+          rStartTop = rect.top;
+          rStartWidth = rect.width;
+          rStartHeight = rect.height;
+        });
+
+        resizer.addEventListener('pointermove', function (e) {
+          if (!isResizing || !activeDir) return;
+          e.preventDefault();
+
+          const dx = e.clientX - rStartX;
+          const dy = e.clientY - rStartY;
+
+          const minW = 320;
+          const minH = 340;
+          const maxW = window.innerWidth - 20;
+          const maxH = window.innerHeight - 20;
+
+          let newWidth = rStartWidth;
+          let newHeight = rStartHeight;
+          let newLeft = rStartLeft;
+          let newTop = rStartTop;
+
+          // Horizontal resize
+          if (activeDir.includes('r')) {
+            newWidth = Math.max(minW, Math.min(maxW - rStartLeft, rStartWidth + dx));
+          } else if (activeDir.includes('l')) {
+            const proposedW = rStartWidth - dx;
+            if (proposedW >= minW && rStartLeft + dx >= 8) {
+              newWidth = proposedW;
+              newLeft = rStartLeft + dx;
+            } else if (proposedW < minW) {
+              newWidth = minW;
+              newLeft = rStartLeft + (rStartWidth - minW);
+            }
+          }
+
+          // Vertical resize
+          if (activeDir.includes('b')) {
+            newHeight = Math.max(minH, Math.min(maxH - rStartTop, rStartHeight + dy));
+          } else if (activeDir.includes('t')) {
+            const proposedH = rStartHeight - dy;
+            if (proposedH >= minH && rStartTop + dy >= 8) {
+              newHeight = proposedH;
+              newTop = rStartTop + dy;
+            } else if (proposedH < minH) {
+              newHeight = minH;
+              newTop = rStartTop + (rStartHeight - minH);
+            }
+          }
+
+          drawer.style.width = Math.round(newWidth) + 'px';
+          drawer.style.height = Math.round(newHeight) + 'px';
+          drawer.style.left = Math.round(newLeft) + 'px';
+          drawer.style.top = Math.round(newTop) + 'px';
+        });
+
+        const stopResize = function (e) {
+          if (!isResizing) return;
+          isResizing = false;
+          activeDir = null;
+          drawer.classList.remove('resizing');
+          try { resizer.releasePointerCapture(e.pointerId); } catch (_) {}
+          saveStationChatLayout();
+        };
+
+        resizer.addEventListener('pointerup', stopResize);
+        resizer.addEventListener('pointercancel', stopResize);
+      });
+    }
+
+    function saveStationChatLayout() {
+      const drawer = document.getElementById('station-chat-drawer');
+      if (!drawer || drawer.classList.contains('maximized')) return;
+      if (window.innerWidth <= 768) return;
+      try {
+        const layout = {
+          width: drawer.offsetWidth,
+          height: drawer.offsetHeight,
+          left: drawer.offsetLeft,
+          top: drawer.offsetTop
+        };
+        localStorage.setItem(ST_CHAT_LAYOUT_KEY, JSON.stringify(layout));
+      } catch (_) {}
+    }
+
+    function applyStoredStationChatLayout() {
+      if (window.innerWidth <= 768) return;
+      const drawer = document.getElementById('station-chat-drawer');
+      if (!drawer || drawer.classList.contains('maximized')) return;
+
+      try {
+        const raw = localStorage.getItem(ST_CHAT_LAYOUT_KEY);
+        if (!raw) return;
+        const layout = JSON.parse(raw);
+        if (layout && layout.width && layout.height) {
+          const minW = 320;
+          const minH = 340;
+          const w = Math.max(minW, Math.min(window.innerWidth - 32, layout.width || 440));
+          const h = Math.max(minH, Math.min(window.innerHeight - 32, layout.height || 580));
+          drawer.style.width = w + 'px';
+          drawer.style.height = h + 'px';
+
+          if (layout.left !== undefined && layout.top !== undefined) {
+            const maxLeft = Math.max(10, window.innerWidth - w - 8);
+            const maxTop = Math.max(10, window.innerHeight - 48);
+            const left = Math.max(8, Math.min(maxLeft, layout.left));
+            const top = Math.max(8, Math.min(maxTop, layout.top));
+            drawer.style.left = left + 'px';
+            drawer.style.top = top + 'px';
+            drawer.style.right = 'auto';
+            drawer.style.bottom = 'auto';
+          }
+        }
+      } catch (_) {}
+    }
+
+    // Auto-init on page load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initStationChatDragAndResize);
+    } else {
+      setTimeout(initStationChatDragAndResize, 200);
     }
 
     // Auto-close Unified Tools Menu when clicking anywhere else
@@ -7539,7 +7867,7 @@
         const drawer = document.getElementById('station-chat-drawer');
         if (drawer) {
           drawer.style.display = 'none';
-          drawer.classList.remove('maximized');
+          drawer.classList.remove('maximized', 'dragging', 'resizing');
         }
         StationChatController.isOpen = false;
       }
@@ -10248,9 +10576,24 @@
 
   <!-- Floating Chat Drawer -->
   <div id="station-chat-drawer" class="st-chat-drawer">
-    <!-- Header -->
-    <div class="st-chat-header">
+    <!-- 8 Dynamic Resizers (Scratchpad-style) -->
+    <div class="st-chat-resizer st-chat-resizer-t" data-direction="t"></div>
+    <div class="st-chat-resizer st-chat-resizer-b" data-direction="b"></div>
+    <div class="st-chat-resizer st-chat-resizer-l" data-direction="l"></div>
+    <div class="st-chat-resizer st-chat-resizer-r" data-direction="r"></div>
+    <div class="st-chat-resizer st-chat-resizer-tl" data-direction="tl" title="คลิกลากเพื่อย่อ-ขยายขนาด (Resize)">
+      <div class="st-chat-corner-grip tl"></div>
+    </div>
+    <div class="st-chat-resizer st-chat-resizer-tr" data-direction="tr"></div>
+    <div class="st-chat-resizer st-chat-resizer-bl" data-direction="bl"></div>
+    <div class="st-chat-resizer st-chat-resizer-br" data-direction="br" title="คลิกลากเพื่อย่อ-ขยายขนาด (Resize)">
+      <div class="st-chat-corner-grip br"></div>
+    </div>
+
+    <!-- Header (Draggable) -->
+    <div class="st-chat-header" id="st-chat-header" title="คลิกลากเพื่อย้ายหน้าต่าง | ดับเบิ้ลคลิกเพื่อย่อ/ขยายเต็มจอ">
       <div class="st-chat-title">
+        <span class="st-chat-drag-indicator" title="แถบจับย้ายตำแหน่ง">⋮⋮</span>
         <span style="font-size: 1.15rem;">💬</span>
         <div>
           <div id="st-chat-header-title" style="font-size: 0.95rem; font-weight: 700; line-height: 1.2;">แชทสนทนาประจำสถานี</div>
