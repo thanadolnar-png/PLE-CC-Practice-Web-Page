@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU</title>
   <link rel="stylesheet" href="style.css?v=1791019915">
-  <script src="case-data-offline.js?v=v_20261004_160727"></script>
-  <script src="case-details-offline.js?v=v_20261004_160727"></script>
-  <script src="app.js?v=v_20261004_160727"></script>
+  <script src="case-data-offline.js?v=v_20261004_163121"></script>
+  <script src="case-details-offline.js?v=v_20261004_163121"></script>
+  <script src="app.js?v=v_20261004_163121"></script>
   <script src="scratchpad.js?v=v_20261003_020800"></script>
   <style>
     /* Simulation Source and Topic Selector */
@@ -1772,6 +1772,7 @@
                   <button class="btn ghost btn-sm" id="timer-toggle-btn" onclick="toggleTimer()">⏸ พักตัวจับเวลา</button>
                   <button class="btn outline btn-sm" id="timer-reset-btn" onclick="resetTimer()">🔄 เริ่มต้นใหม่</button>
                   <button type="button" class="btn primary btn-sm" id="btn-exam-scratchpad" onclick="toggleSimScratchpad()" style="font-weight: 700; background: var(--primary); color: #fff;">📝 กระดาษทด</button>
+                  <button type="button" class="btn btn-sm" id="btn-sticky-abort-exam" onclick="abortExamSimulation()" style="color: var(--danger); font-weight: 600; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25);" title="ยุติการสอบและกลับสู่หน้าตั้งค่า">🛑 ยุติการสอบ</button>
                 </div>
               </div>
 
@@ -1817,12 +1818,15 @@
               </div>
 
               <!-- 2. Control Action Buttons (Compact inline) -->
-              <div class="control-actions" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+              <div class="control-actions" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
                 <div class="exam-nav" style="display: flex; gap: 6px;">
                   <button class="btn outline" id="btn-prev-station" onclick="prevStation()" style="padding: 5px 12px; font-size: 12.5px;">← ก่อนหน้า</button>
                   <button class="btn primary" id="btn-next-station" onclick="nextStation()" style="padding: 5px 12px; font-size: 12.5px;">ถัดไป →</button>
                 </div>
-                <button class="btn danger" id="btn-finish-exam" onclick="finishExamSimulation()" style="padding: 5px 12px; font-size: 12.5px;">🏁 สิ้นสุดการสอบ</button>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                  <button type="button" class="btn" id="btn-abort-exam" onclick="abortExamSimulation()" style="padding: 5px 12px; font-size: 12.5px; background: rgba(239,68,68,0.08); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); border-radius: var(--radius-sm); font-weight: 600;">🛑 ยุติการสอบ</button>
+                  <button class="btn danger" id="btn-finish-exam" onclick="finishExamSimulation()" style="padding: 5px 12px; font-size: 12.5px;">🏁 สิ้นสุดการสอบ</button>
+                </div>
               </div>
             </div>
 
@@ -1948,8 +1952,11 @@
             <!-- Examinee Notice Card -->
             <div id="exam-examinee-notice" style="display: none; padding: 1.5rem; text-align: center; border: 1px dashed var(--border); border-radius: var(--radius-lg); background: var(--surface); color: var(--text-secondary); margin-bottom: 1.5rem;">
               <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">✍️</span>
-              <h4 style="font-family: var(--font-title); font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; font-size: 0.9rem;">คุณกำลังเข้าสอบ</h4>
-              <p style="font-size: 0.8rem; line-height: 1.4;">เกณฑ์ Checklist และเฉลยถูกซ่อนไว้ ให้ผู้ประเมินซักถามและให้คะแนน</p>
+              <h4 style="font-family: var(--font-title); font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; font-size: 0.9rem;">คุณกำลังเข้าสอบ (Examinee Mode)</h4>
+              <p style="font-size: 0.8rem; line-height: 1.4; margin-bottom: 0.8rem;">เกณฑ์ Checklist และเฉลยถูกซ่อนไว้ ให้ผู้ประเมินซักถามและให้คะแนน</p>
+              <button type="button" class="btn" onclick="abortExamSimulation()" style="padding: 6px 14px; font-size: 0.82rem; font-weight: 600; background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); border-radius: var(--radius-sm); cursor: pointer;">
+                🛑 ออกจากการสอบจำลอง
+              </button>
             </div>
 
             <!-- Examiner Live Examinee Submission Panel (For Written / Fill-in-the-Blank stations) -->
@@ -6860,6 +6867,27 @@
     // ─── Live Fill-in-the-Blank Multiplayer Synchronization ───
     let _examineeBlankDebounceTimer = null;
     let _activeExaminerLiveRef = null;
+    let _examineeBlankHandler = null;
+
+    function encodeFirebaseKey(k) {
+      return String(k)
+        .replace(/\./g, '__dot__')
+        .replace(/\//g, '__slash__')
+        .replace(/#/g, '__hash__')
+        .replace(/\$/g, '__dollar__')
+        .replace(/\[/g, '__lbr__')
+        .replace(/\]/g, '__rbr__');
+    }
+
+    function decodeFirebaseKey(k) {
+      return String(k)
+        .replace(/__dot__/g, '.')
+        .replace(/__slash__/g, '/')
+        .replace(/__hash__/g, '#')
+        .replace(/__dollar__/g, '$')
+        .replace(/__lbr__/g, '[')
+        .replace(/__rbr__/g, ']');
+    }
 
     function getExamineeSubmissionFirebasePath(stationNum) {
       if (!SimState.isLobby || !SimState.roomId || typeof _fbDb === 'undefined') return null;
@@ -6886,11 +6914,37 @@
         }
       });
 
-      // Attach listener for examinee typing
       const container = document.getElementById('exam-scenario-content');
       if (!container) return;
 
-      const onBlankChange = (e) => {
+      // Detach old listener if any
+      if (_examineeBlankHandler) {
+        container.removeEventListener('input', _examineeBlankHandler);
+        window.removeEventListener('interactiveBlankChanged', _examineeBlankHandler);
+        _examineeBlankHandler = null;
+      }
+
+      const syncToFirebaseNow = (payload) => {
+        if (!SimState.isLobby || !SimState.roomId || typeof _fbDb === 'undefined') return;
+        const fbPath = getExamineeSubmissionFirebasePath(stationNum);
+        if (!fbPath) return;
+
+        // Encode keys to prevent Firebase "." key restriction errors
+        const safePayload = {};
+        Object.entries(payload).forEach(([k, v]) => {
+          safePayload[encodeFirebaseKey(k)] = v;
+        });
+
+        _fbDb.ref(fbPath).set({
+          answers: safePayload,
+          senderName: SimState.lobbyPlayerName || 'Examinee',
+          updatedAt: Date.now()
+        }).catch(err => {
+          console.warn('Live examinee blank sync error:', err);
+        });
+      };
+
+      _examineeBlankHandler = (e) => {
         const wrappers = container.querySelectorAll('.interactive-blank-wrapper');
         const payload = {};
         wrappers.forEach(w => {
@@ -6901,25 +6955,24 @@
 
         SimState.writtenAnswers[stationNum] = payload;
 
-        // Firebase Sync with 400ms Debounce
-        if (SimState.isLobby && SimState.roomId && typeof _fbDb !== 'undefined') {
-          if (_examineeBlankDebounceTimer) clearTimeout(_examineeBlankDebounceTimer);
+        const isImmediate = Boolean(e && e.detail && e.detail.immediate);
+        if (_examineeBlankDebounceTimer) {
+          clearTimeout(_examineeBlankDebounceTimer);
+          _examineeBlankDebounceTimer = null;
+        }
+
+        if (isImmediate) {
+          syncToFirebaseNow(payload);
+        } else {
           _examineeBlankDebounceTimer = setTimeout(() => {
-            const fbPath = getExamineeSubmissionFirebasePath(stationNum);
-            if (fbPath) {
-              _fbDb.ref(fbPath).set({
-                answers: payload,
-                senderName: SimState.lobbyPlayerName || 'Examinee',
-                updatedAt: Date.now()
-              });
-            }
-          }, 400);
+            syncToFirebaseNow(payload);
+          }, 350);
         }
       };
 
       // Listen to both DOM input and custom event
-      container.addEventListener('input', onBlankChange);
-      window.addEventListener('interactiveBlankChanged', onBlankChange);
+      container.addEventListener('input', _examineeBlankHandler);
+      window.addEventListener('interactiveBlankChanged', _examineeBlankHandler);
     }
 
     function setupExaminerLiveSubmissionListener(stationNum, c) {
@@ -6928,8 +6981,9 @@
       const nameBadge = document.getElementById('live-examinee-name-badge');
       if (!panel || !listEl) return;
 
-      // Check if this station case has blanks
-      const hasBlanks = c.scenario && c.scenario.includes('[BLANK:');
+      // Check if this station case has blanks (check scenario, contentHtml, and scenarioHtml)
+      const rawScenarioContent = (c.scenario || '') + ' ' + (c.contentHtml || '') + ' ' + (c.scenarioHtml || '');
+      const hasBlanks = rawScenarioContent.includes('[BLANK:');
       if (!hasBlanks) {
         panel.style.display = 'none';
         return;
@@ -6940,9 +6994,10 @@
       // Parse blanks from scenario to prepare cards
       const blankRegex = /\[BLANK:\s*([^|\]]+)(?:\s*\|\s*([^|\]]+))?(?:\s*\|\s*([^|\]]+))?(?:\s*\|\s*([^\]]+))?\]/gi;
       const blankDefs = [];
+      const seenTags = new Set();
       let m;
       let bIdx = 0;
-      while ((m = blankRegex.exec(c.scenario || '')) !== null) {
+      while ((m = blankRegex.exec(rawScenarioContent)) !== null) {
         bIdx++;
         const answers = (m[1] || '').split(/[,/]/).map(a => a.trim()).filter(Boolean);
         const rawParts = [m[2], m[3], m[4]].filter(Boolean);
@@ -6964,12 +7019,15 @@
         const cleanDisplayTag = tag.startsWith('ข้อ') ? tag : `ข้อ ${tag}`;
         const cleanDataTag = tag.replace(/^ข้อ\s*/, '').trim();
 
-        blankDefs.push({ 
-          tag: cleanDataTag, 
-          displayTag: cleanDisplayTag, 
-          answers, 
-          score 
-        });
+        if (!seenTags.has(cleanDataTag)) {
+          seenTags.add(cleanDataTag);
+          blankDefs.push({ 
+            tag: cleanDataTag, 
+            displayTag: cleanDisplayTag, 
+            answers, 
+            score 
+          });
+        }
       }
 
       function renderLiveCards(liveAnswers = {}) {
@@ -6989,6 +7047,15 @@
               const nAns = (typeof normalizeAnswerText === 'function') ? normalizeAnswerText(ans) : ans.toLowerCase().trim();
               return normVal === nAns;
             });
+          }
+
+          // Auto-tick linked checklist item on Examiner side
+          if (typeof autoCheckLinkedChecklistItem === 'function') {
+            if (userVal && isMatch) {
+              autoCheckLinkedChecklistItem(b.tag, true);
+            } else if (userVal && !isMatch) {
+              autoCheckLinkedChecklistItem(b.tag, false);
+            }
           }
 
           let statusTag = `<span class="badge" style="background:var(--bg-secondary);color:var(--text-muted);font-size:0.75rem;">รอกรอก</span>`;
@@ -7057,7 +7124,12 @@
                 nameBadge.style.background = 'rgba(16,185,129,0.15)';
                 nameBadge.style.color = 'var(--success)';
               }
-              renderLiveCards(data.answers);
+              // Decode Firebase keys
+              const decodedAnswers = {};
+              Object.entries(data.answers).forEach(([k, v]) => {
+                decodedAnswers[decodeFirebaseKey(k)] = v;
+              });
+              renderLiveCards(decodedAnswers);
             }
           });
         }
@@ -7991,6 +8063,74 @@
         });
       }
     }
+
+    // ─── Abort / Exit Exam Simulation ─────────────────────────
+    async function abortExamSimulation() {
+      if (SimState.isLobby && SimState.roomId) {
+        if (SimState.isHost) {
+          const opt = confirm('⚠️ คุณเป็น Host ของห้องสอบนี้\n\nกด "ตกลง (OK)" เพื่อยุบห้องสอบ (Dissolve) และพาผู้เข้าสอบทุกคนกลับสู่หน้าแรก\nหรือกด "ยกเลิก (Cancel)" หากไม่ต้องการออก');
+          if (!opt) return;
+          await dissolveExamRoom();
+        } else {
+          const opt = confirm('⚠️ คุณต้องการออกจากการสอบจำลองและกลับสู่หน้าหลักหรือไม่?');
+          if (!opt) return;
+          await leaveExamRoom(false);
+        }
+      } else {
+        const opt = confirm('⚠️ คุณต้องการยุติการสอบจำลอง (Solo Practice) และกลับสู่หน้าตั้งค่าหรือไม่?\n(ความคืบหน้าของรอบนี้จะถูกรีเซ็ต)');
+        if (!opt) return;
+        resetExamToSetup();
+      }
+    }
+
+    function resetExamToSetup() {
+      stopTimeoutAlarmSound();
+      if (typeof closeManualTimeoutOverlay === 'function') closeManualTimeoutOverlay();
+      if (window.Scratchpad) Scratchpad.close();
+      if (SimState.timerInterval) clearInterval(SimState.timerInterval);
+      if (SimState.timerSyncInterval) clearInterval(SimState.timerSyncInterval);
+      if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
+      SimState.timerInterval = null;
+      SimState.timerSyncInterval = null;
+      SimState.timerRunning = false;
+      SimState.isLobby = false;
+
+      // Cleanup Station Chat & Unified Tools
+      if (typeof StationChatController !== 'undefined') {
+        StationChatController.cleanupListeners();
+        const triggerBtn = document.getElementById('btn-unified-exam-tools') || document.getElementById('btn-toggle-station-chat');
+        if (triggerBtn) triggerBtn.style.display = 'none';
+        const menu = document.getElementById('unified-exam-tools-menu');
+        if (menu) menu.style.display = 'none';
+        const drawer = document.getElementById('station-chat-drawer');
+        if (drawer) {
+          drawer.style.display = 'none';
+          drawer.classList.remove('maximized', 'dragging', 'resizing');
+        }
+        StationChatController.isOpen = false;
+      }
+
+      document.getElementById('exam-running-view').style.display = 'none';
+      document.getElementById('exam-setup-view').style.display = 'block';
+      const lobbyWaiting = document.getElementById('lobby-waiting-screen');
+      if (lobbyWaiting) lobbyWaiting.style.display = 'none';
+      const stickyTimer = document.getElementById('exam-sticky-timer-bar');
+      if (stickyTimer) stickyTimer.style.display = 'none';
+      const stickyHeader = document.getElementById('exam-sticky-top-header');
+      if (stickyHeader) stickyHeader.style.display = 'none';
+
+      // Remove URL query params without page reload
+      try {
+        const url = new URL(window.location.href);
+        url.search = '';
+        window.history.replaceState({}, document.title, url.toString());
+      } catch (e) {}
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.abortExamSimulation = abortExamSimulation;
+    window.resetExamToSetup = resetExamToSetup;
 
     // ─── Finish exam ──────────────────────────────────────────
     async function finishExamSimulation() {

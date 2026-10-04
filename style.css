@@ -5282,6 +5282,7 @@ body.is-printing #batch-print-execution-area {
   background: rgba(96, 165, 250, 0.08);
 }
 
+sup, sub,
 .doc-equation sub,
 .doc-equation sup {
   font-size: 0.75em;
@@ -5290,10 +5291,12 @@ body.is-printing #batch-print-execution-area {
   vertical-align: baseline;
 }
 
+sup,
 .doc-equation sup {
   top: -0.45em;
 }
 
+sub,
 .doc-equation sub {
   bottom: -0.22em;
 }

@@ -604,8 +604,16 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
   }
 
   function applyTs_(ts, txt) {
-    if (!ts || !txt || txt === '\n') return escapeHtml(txt || '');
+    if (!txt || txt === '\n') return escapeHtml(txt || '');
     let escaped = escapeHtml(txt);
+
+    // Preserve tabs and multiple consecutive spaces for columnar equations/alignment
+    escaped = escaped.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+    escaped = escaped.replace(/ {2,}/g, function(match) {
+      return '&nbsp;'.repeat(match.length);
+    });
+
+    if (!ts) return escaped;
     const styles = [];
 
     // 1. Foreground Color
@@ -651,6 +659,8 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
     if (ts.italic) escaped = '<em>' + escaped + '</em>';
     if (ts.underline) escaped = '<u>' + escaped + '</u>';
     if (ts.strikethrough) escaped = '<del>' + escaped + '</del>';
+    if (ts.baselineOffset === 'SUPERSCRIPT') escaped = '<sup>' + escaped + '</sup>';
+    if (ts.baselineOffset === 'SUBSCRIPT') escaped = '<sub>' + escaped + '</sub>';
     if (ts.link && ts.link.url) escaped = '<a href="' + escapeHtml(ts.link.url) + '" target="_blank" rel="noopener noreferrer">' + escaped + '</a>';
     return escaped;
   }

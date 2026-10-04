@@ -2067,7 +2067,7 @@ if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
 const DB_NAME = 'RxCU_OSPE_DB';
 const DB_VERSION = 1;
 const STORE_NAME = 'case_details';
-const DB_VERSION_STR = 'v_20261004_160727'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
+const DB_VERSION_STR = 'v_20261004_163121'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
 
 function openIndexedDB() {
   return new Promise((resolve, reject) => {
@@ -3374,6 +3374,26 @@ function renderInteractiveBlanks(htmlOrText, options = {}) {
   return processed;
 }
 
+function encodeFirebaseKey(k) {
+  return String(k)
+    .replace(/\./g, '__dot__')
+    .replace(/\//g, '__slash__')
+    .replace(/#/g, '__hash__')
+    .replace(/\$/g, '__dollar__')
+    .replace(/\[/g, '__lbr__')
+    .replace(/\]/g, '__rbr__');
+}
+
+function decodeFirebaseKey(k) {
+  return String(k)
+    .replace(/__dot__/g, '.')
+    .replace(/__slash__/g, '/')
+    .replace(/__hash__/g, '#')
+    .replace(/__dollar__/g, '$')
+    .replace(/__lbr__/g, '[')
+    .replace(/__rbr__/g, ']');
+}
+
 function normalizeAnswerText(str) {
   if (!str) return '';
   return str.toLowerCase()
@@ -3404,7 +3424,8 @@ function handleInteractiveBlankInput(inputEl) {
     detail: {
       tag: wrapper.getAttribute('data-tag'),
       value: inputEl.value,
-      wrapper: wrapper
+      wrapper: wrapper,
+      immediate: false
     }
   }));
 }
@@ -3425,6 +3446,9 @@ function checkSingleInteractiveBlank(wrapper) {
     accepted = [];
   }
 
+  const tag = wrapper.getAttribute('data-tag');
+  const score = parseFloat(wrapper.getAttribute('data-score')) || 1.0;
+
   if (!rawUserVal) {
     wrapper.classList.remove('is-correct', 'is-wrong');
     if (badge) {
@@ -3432,6 +3456,11 @@ function checkSingleInteractiveBlank(wrapper) {
       badge.className = 'blank-status-badge is-empty';
       badge.style.display = 'inline-flex';
     }
+    if (tag) autoCheckLinkedChecklistItem(tag, false);
+    // Dispatch immediate sync
+    window.dispatchEvent(new CustomEvent('interactiveBlankChanged', {
+      detail: { tag, value: '', wrapper, immediate: true }
+    }));
     return;
   }
 
@@ -3440,9 +3469,6 @@ function checkSingleInteractiveBlank(wrapper) {
     const normAns = normalizeAnswerText(ans);
     return normUserVal === normAns;
   });
-
-  const tag = wrapper.getAttribute('data-tag');
-  const score = parseFloat(wrapper.getAttribute('data-score')) || 1.0;
 
   if (isMatch) {
     wrapper.classList.remove('is-wrong');
@@ -3465,8 +3491,21 @@ function checkSingleInteractiveBlank(wrapper) {
       badge.className = 'blank-status-badge is-wrong';
       badge.style.display = 'inline-flex';
     }
-    // Optionally un-tick if desired, or keep as is
+    if (tag) {
+      autoCheckLinkedChecklistItem(tag, false);
+    }
   }
+
+  // Dispatch immediate sync to Firebase
+  window.dispatchEvent(new CustomEvent('interactiveBlankChanged', {
+    detail: {
+      tag,
+      value: inputEl.value,
+      wrapper,
+      isMatch,
+      immediate: true
+    }
+  }));
 }
 
 function autoCheckLinkedChecklistItem(tag, shouldCheck = true) {
@@ -3494,6 +3533,8 @@ function autoCheckLinkedChecklistItem(tag, shouldCheck = true) {
       if (shouldCheck && !isAlreadyChecked) {
         // Trigger click on item to auto-tick and update score
         item.click();
+      } else if (!shouldCheck && isAlreadyChecked) {
+        item.click();
       }
     }
   });
@@ -3505,6 +3546,10 @@ function checkAllInteractiveBlanks() {
 }
 
 // Global exports
+window.encodeFirebaseKey = encodeFirebaseKey;
+window.decodeFirebaseKey = decodeFirebaseKey;
+window.normalizeAnswerText = normalizeAnswerText;
+window.autoCheckLinkedChecklistItem = autoCheckLinkedChecklistItem;
 window.renderInteractiveBlanks = renderInteractiveBlanks;
 window.checkSingleInteractiveBlank = checkSingleInteractiveBlank;
 window.checkAllInteractiveBlanks = checkAllInteractiveBlanks;
