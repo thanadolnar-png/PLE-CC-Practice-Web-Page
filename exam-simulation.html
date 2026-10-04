@@ -6310,17 +6310,37 @@
       return '';
     }
 
+    function isChecklistItemSubset(item, prevItem, inSubsetSequence) {
+      if (typeof item.isSubset === 'boolean') return item.isSubset;
+      const isParentHeader = ['หัวข้อล่าง', 'ดังต่อไปนี้', 'เลือกตอบ', 'ถามอย่างน้อย'].some(x => item.text && item.text.indexOf(x) !== -1);
+      if (isParentHeader) return false;
+      if (inSubsetSequence) return true;
+      if (item.text && (item.text.trim().startsWith('-') || item.text.trim().startsWith('•') || item.text.trim().startsWith('○'))) return true;
+      if (item.score === 0 && item.text && !item.text.startsWith('(')) return true;
+      return false;
+    }
+
     function calculateStationScore(checklist, checkedIds) {
       if (!checklist || checklist.length === 0) return { currentScore: 0, totalScore: 0 };
       const checkedSet = new Set(checkedIds || []);
       
       const groups = [];
       let currentGroup = null;
+      let isCurrentSubsetSequence = false;
       
-      checklist.forEach(item => {
+      checklist.forEach((item, idx) => {
         const rawScore = parseFloat(item.score);
         const score = isNaN(rawScore) ? 1.0 : rawScore;
-        const isSubset = !!item.isSubset;
+        const prevItem = idx > 0 ? checklist[idx - 1] : null;
+        
+        if (item.isSubset === false && isCurrentSubsetSequence) {
+          isCurrentSubsetSequence = false;
+        }
+        if (prevItem && ['หัวข้อล่าง', 'ดังต่อไปนี้', 'เลือกตอบ', 'ถามอย่างน้อย'].some(x => prevItem.text && prevItem.text.includes(x))) {
+          isCurrentSubsetSequence = true;
+        }
+        
+        const isSubset = isChecklistItemSubset(item, prevItem, isCurrentSubsetSequence);
         
         if (!isSubset) {
           if (currentGroup) groups.push(currentGroup);
@@ -6405,11 +6425,21 @@
         grpHdr.textContent = `กลุ่ม: ${groupName}`;
         chkContainer.appendChild(grpHdr);
         
-        groups[groupName].forEach(item => {
+        let isCurrentSubsetSequence = false;
+        groups[groupName].forEach((item, itemIdx) => {
           const globalIdx = itemGlobalIndices.get(item) || 0;
           const isChecked = checkedList.includes(item.id);
           const imgHtml = getExamChecklistItemImage(item, globalIdx, c);
-          const isSubset = !!item.isSubset;
+          
+          const prevItem = itemIdx > 0 ? groups[groupName][itemIdx - 1] : null;
+          if (item.isSubset === false && isCurrentSubsetSequence) {
+            isCurrentSubsetSequence = false;
+          }
+          if (prevItem && ['หัวข้อล่าง', 'ดังต่อไปนี้', 'เลือกตอบ', 'ถามอย่างน้อย'].some(x => prevItem.text && prevItem.text.includes(x))) {
+            isCurrentSubsetSequence = true;
+          }
+          
+          const isSubset = isChecklistItemSubset(item, prevItem, isCurrentSubsetSequence);
           const el = document.createElement('div');
           el.className = `checklist-item ${isChecked ? 'checked' : ''} ${isSubset ? 'is-subset' : ''}`;
           el.setAttribute('data-id', item.id);

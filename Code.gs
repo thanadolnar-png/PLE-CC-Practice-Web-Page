@@ -933,7 +933,7 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
   for (const { title, content, inlineObjects, lists } of sections) {
     let recording = false, currentSection = 'METADATA', caseSource = '';
     let scenario = '', contentHtml = '', patientInfoHtml = '', equipmentHtml = '', noteHtml = '';
-    const checklist = []; let currentGroup = '';
+    const checklist = []; let currentGroup = ''; let isCurrentSubsetSequence = false;
 
     // Check if section contains equations
     let currentTabEqs = null;
@@ -1045,7 +1045,25 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
           const nestLvl = (para.bullet && para.bullet.nestingLevel) || 0;
           const indentMag = (para.paragraphStyle && para.paragraphStyle.indentStart && para.paragraphStyle.indentStart.magnitude) || 0;
           const isParentHeader = ['หัวข้อล่าง', 'ดังต่อไปนี้', 'เลือกตอบ', 'ถามอย่างน้อย'].some(x => itemText.indexOf(x) !== -1);
-          const isSubset = isParentHeader ? false : (nestLvl > 0 || indentMag >= 70);
+          
+          let isSubset = false;
+          if (isParentHeader) {
+            isSubset = false;
+            isCurrentSubsetSequence = true;
+          } else {
+            const hasSubsetBullet = /^[-*•☐☑]\s+/.test(text.trim()) || text.trim().startsWith('- ') || text.trim().startsWith('• ');
+            if (nestLvl > 0 || indentMag >= 36 || hasSubsetBullet || isCurrentSubsetSequence) {
+              isSubset = true;
+            } else {
+              isSubset = false;
+              isCurrentSubsetSequence = false;
+            }
+          }
+
+          let finalScore = sc;
+          if (!sm && (nestLvl >= 2 || indentMag > 80 || isCurrentSubsetSequence)) {
+            finalScore = 0.0;
+          }
 
           let imgHtml = '';
           for (const el of (para.elements || [])) {
@@ -1058,7 +1076,7 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
             id: 'chk_' + simpleHash(itemText).substring(0, 10),
             text: itemText,
             textHtml: itemHtml || itemText,
-            score: sc,
+            score: finalScore,
             group: currentGroup,
             checked: false,
             isSubset: isSubset,
@@ -1347,6 +1365,7 @@ function getCaseContentFromDoc(docId, targetCaseId) {
     
     const checklist = [];
     let currentGroup = 'ทั่วไป';
+    let isCurrentSubsetSequence = false;
     
     let recording = false;
     let hasFoundCase = false;
@@ -1495,7 +1514,7 @@ function getCaseContentFromDoc(docId, targetCaseId) {
             }
           }
 
-          const isChecklistItem = type === DocumentApp.ElementType.LIST_ITEM || text.startsWith('[ ]') || text.startsWith('[x]') || text.startsWith('\u2610') || text.startsWith('\u2611') || text.startsWith('\u2705') || text.startsWith('\u2714') || text.startsWith('\u25cb') || text.startsWith('-') || text.startsWith('*') || /^\\d+\\./.test(text);
+          const isChecklistItem = type === DocumentApp.ElementType.LIST_ITEM || text.startsWith('[ ]') || text.startsWith('[x]') || text.startsWith('\u2610') || text.startsWith('\u2611') || text.startsWith('\u2705') || text.startsWith('\u2714') || text.startsWith('\u25cb') || text.startsWith('-') || text.startsWith('*') || /^\d+\./.test(text);
           if (isChecklistItem && text.length > 3) {
             let cleanText = text.replace(/^([-*\u2022\u2710\u2705\u2714\u2610\u2611]|\[\s*\]|\[x\]|\d+\.)\s*/, '').trim();
             const scoreMatch = cleanText.match(/^\((\d+(\.\d+)?)\)\s*(.*)$/);
@@ -1507,6 +1526,33 @@ function getCaseContentFromDoc(docId, targetCaseId) {
               itemText = scoreMatch[3].trim();
             }
 
+            let nestLvl = 0;
+            let indentStart = 0;
+            if (type === DocumentApp.ElementType.LIST_ITEM) {
+              nestLvl = child.asListItem().getNestingLevel();
+            } else if (type === DocumentApp.ElementType.PARAGRAPH) {
+              indentStart = child.asParagraph().getIndentStart() || 0;
+            }
+
+            const isParentHeader = ['หัวข้อล่าง', 'ดังต่อไปนี้', 'เลือกตอบ', 'ถามอย่างน้อย'].some(x => itemText.indexOf(x) !== -1);
+            let isSubset = false;
+            if (isParentHeader) {
+              isSubset = false;
+              isCurrentSubsetSequence = true;
+            } else {
+              const hasSubsetBullet = text.startsWith('-') || text.startsWith('*') || text.startsWith('\u2022');
+              if (nestLvl > 0 || indentStart >= 36 || hasSubsetBullet || isCurrentSubsetSequence) {
+                isSubset = true;
+              } else {
+                isSubset = false;
+                isCurrentSubsetSequence = false;
+              }
+            }
+
+            if (!scoreMatch && (nestLvl >= 2 || indentStart > 80 || isCurrentSubsetSequence)) {
+              score = 0.0;
+            }
+
             const itemId = 'chk_' + simpleHash(itemText).substring(0, 10);
             checklist.push({
               id: itemId,
@@ -1514,6 +1560,7 @@ function getCaseContentFromDoc(docId, targetCaseId) {
               score: score,
               group: currentGroup,
               checked: false,
+              isSubset: isSubset,
               imageHtml: itemImageHtml || ''
             });
           }
