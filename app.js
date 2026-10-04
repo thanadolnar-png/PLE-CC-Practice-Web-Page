@@ -900,16 +900,32 @@ async function fetchCaseDetail(caseId, forceLive = false) {
                 OFFLINE_CASE_DETAILS[ospeId.toUpperCase()];
     if (det) {
       if (det.isEncrypted) {
-        const cached = sessionStorage.getItem('ple_unlocked_' + ospeId) || sessionStorage.getItem('ple_unlocked_' + cleanId);
+        const curVer = (typeof DB_VERSION_STR !== 'undefined' ? DB_VERSION_STR : '') || (typeof OFFLINE_DATA !== 'undefined' ? OFFLINE_DATA.version : '');
+        const cached = sessionStorage.getItem('ple_unlocked_' + ospeId) || 
+                       sessionStorage.getItem('ple_unlocked_' + cleanId) ||
+                       sessionStorage.getItem('viewer_unlocked_' + ospeId) ||
+                       sessionStorage.getItem('viewer_unlocked_' + cleanId);
         if (cached) {
           try {
             const decCase = JSON.parse(cached);
-            const idx = AppState.cases.findIndex(c => c.caseId && (c.caseId.trim() === cleanId || c.caseId.trim() === ospeId));
-            if (idx !== -1) {
-              AppState.cases[idx] = Object.assign({}, AppState.cases[idx], decCase);
-              return AppState.cases[idx];
+            if (curVer && decCase._db_version && decCase._db_version !== curVer) {
+              sessionStorage.removeItem('ple_unlocked_' + ospeId);
+              sessionStorage.removeItem('ple_unlocked_' + cleanId);
+              sessionStorage.removeItem('viewer_unlocked_' + ospeId);
+              sessionStorage.removeItem('viewer_unlocked_' + cleanId);
+            } else if (!decCase._db_version && curVer) {
+              sessionStorage.removeItem('ple_unlocked_' + ospeId);
+              sessionStorage.removeItem('ple_unlocked_' + cleanId);
+              sessionStorage.removeItem('viewer_unlocked_' + ospeId);
+              sessionStorage.removeItem('viewer_unlocked_' + cleanId);
+            } else {
+              const idx = AppState.cases.findIndex(c => c.caseId && (c.caseId.trim() === cleanId || c.caseId.trim() === ospeId));
+              if (idx !== -1) {
+                AppState.cases[idx] = Object.assign({}, AppState.cases[idx], decCase);
+                return AppState.cases[idx];
+              }
+              return decCase;
             }
-            return decCase;
           } catch (e) {}
         }
         return det;

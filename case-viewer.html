@@ -517,7 +517,14 @@
           const dec = await window.decryptCaseData(encryptedCase, pwd);
           if (!dec) throw new Error('Decryption failed');
           
-          sessionStorage.setItem('viewer_unlocked_' + caseId, JSON.stringify(dec));
+          const curVer = (typeof DB_VERSION_STR !== 'undefined' ? DB_VERSION_STR : '') || (typeof OFFLINE_DATA !== 'undefined' ? OFFLINE_DATA.version : '');
+          const wrapped = Object.assign({}, dec, { _db_version: curVer });
+          sessionStorage.setItem('ple_unlocked_' + caseId, JSON.stringify(wrapped));
+          sessionStorage.setItem('viewer_unlocked_' + caseId, JSON.stringify(wrapped));
+          if (!caseId.startsWith('OSPE-')) {
+            sessionStorage.setItem('ple_unlocked_OSPE-' + caseId, JSON.stringify(wrapped));
+            sessionStorage.setItem('viewer_unlocked_OSPE-' + caseId, JSON.stringify(wrapped));
+          }
           modal.remove();
           
           AppState.currentCase = dec;
@@ -551,15 +558,36 @@
 
       // Check if case is protected / encrypted
       if (offlineCase && (offlineCase.isEncrypted || offlineCase.isProtected || offlineCase.hasPassword)) {
-        const cached = sessionStorage.getItem('viewer_unlocked_' + cleanId);
-        if (cached) {
+        const curVer = (typeof DB_VERSION_STR !== 'undefined' ? DB_VERSION_STR : '') || (typeof OFFLINE_DATA !== 'undefined' ? OFFLINE_DATA.version : '');
+        const ospeId = cleanId.startsWith('OSPE-') ? cleanId : ('OSPE-' + cleanId);
+        const cachedRaw = sessionStorage.getItem('ple_unlocked_' + cleanId) || 
+                          sessionStorage.getItem('ple_unlocked_' + ospeId) ||
+                          sessionStorage.getItem('viewer_unlocked_' + cleanId) ||
+                          sessionStorage.getItem('viewer_unlocked_' + ospeId);
+        if (cachedRaw) {
           try {
-            const decCase = JSON.parse(cached);
-            AppState.currentCase = decCase;
-            renderCaseDetail(decCase);
-            setViewerRole(currentRole);
-            showGlobalLoader(false);
-            return;
+            const parsed = JSON.parse(cachedRaw);
+            // ตรวจสอบว่าแคชที่ปลดล็อกไว้ตรงกับเวอร์ชันปัจจุบันหรือไม่
+            if (curVer && parsed._db_version && parsed._db_version !== curVer) {
+              console.log('[Case Viewer] Outdated unlocked cache detected. Discarding to load latest subscripts & equations...');
+              sessionStorage.removeItem('ple_unlocked_' + cleanId);
+              sessionStorage.removeItem('ple_unlocked_' + ospeId);
+              sessionStorage.removeItem('viewer_unlocked_' + cleanId);
+              sessionStorage.removeItem('viewer_unlocked_' + ospeId);
+            } else if (!parsed._db_version && curVer) {
+              // แคชรุ่นเก่าที่ไม่มีการระบุเวอร์ชัน -> ปลดล็อกใหม่เพื่อให้ได้ตัวห้อยและสมการล่าสุด
+              console.log('[Case Viewer] Legacy unversioned unlocked cache discarded.');
+              sessionStorage.removeItem('ple_unlocked_' + cleanId);
+              sessionStorage.removeItem('ple_unlocked_' + ospeId);
+              sessionStorage.removeItem('viewer_unlocked_' + cleanId);
+              sessionStorage.removeItem('viewer_unlocked_' + ospeId);
+            } else {
+              AppState.currentCase = parsed;
+              renderCaseDetail(parsed);
+              setViewerRole(currentRole);
+              showGlobalLoader(false);
+              return;
+            }
           } catch (e) {}
         }
         showCasePasscodeModal(offlineCase, cleanId);
