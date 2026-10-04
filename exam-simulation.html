@@ -5233,9 +5233,35 @@
               }
               targetIdx = Math.max(0, Math.min(N - 1, assignedStationNum - 1));
               const startNum = ((assignedStationNum - 1 - r + N) % N) + 1;
+              const partId = room.carouselPosts?.['st_' + startNum]?.startParticipantId;
               const partName = room.carouselPosts?.['st_' + startNum]?.startParticipantName || 'ยังไม่มีผู้เข้าสอบ';
               const badge = document.getElementById('exam-station-badge');
               if (badge) badge.textContent = `STATION ${assignedStationNum} (ประจำฐาน) · ผู้เข้าสอบ: ${partName}`;
+
+              // Detect Carousel Round Transition for Examiner
+              const isInitialRound = (SimState.lastCarouselRound === undefined);
+              const roundChanged = (!isInitialRound && SimState.lastCarouselRound !== r);
+              SimState.lastCarouselRound = r;
+
+              if (roundChanged) {
+                // Reset/Load checklist specifically for the new incoming candidate
+                const participantProgress = (partId && room.participantScores?.[partId]?.stations?.[assignedStationNum]?.checkedProgress) || [];
+                SimState.studentScores[assignedStationNum] = participantProgress;
+                
+                const currentCase = SimState.stations[targetIdx]?.case;
+                if (currentCase) {
+                  renderExamChecklist(assignedStationNum, currentCase);
+                  updateExamProgressUI(assignedStationNum, currentCase);
+                }
+
+                // Switch station chat to the new round / candidate
+                if (typeof StationChatController !== 'undefined' && StationChatController.currentInstance) {
+                  StationChatController.currentInstance.initStation(assignedStationNum, currentCase);
+                }
+
+                if (typeof closeManualTimeoutOverlay === 'function') closeManualTimeoutOverlay();
+                playStationTimeoutAlarm('bell');
+              }
             } else {
               let startNum = 1;
               if (room.carouselPosts) {
@@ -5310,6 +5336,20 @@
                   SimState.studentScores[sNum] = s;
                 }
               });
+            }
+          } else if (room.examMode === 'carousel_rotation' && SimState.role === 'examiner') {
+            const r = room.currentStationIdx !== undefined ? room.currentStationIdx : 0;
+            const N = SimState.stations.length || 1;
+            let assignedStationNum = 1;
+            if (room.carouselPosts) {
+              const post = Object.values(room.carouselPosts).find(p => p.examinerId === SimState.myPlayerId || p.examinerName === SimState.lobbyPlayerName);
+              if (post) assignedStationNum = post.stationNumber;
+            }
+            const startNum = ((assignedStationNum - 1 - r + N) % N) + 1;
+            const partId = room.carouselPosts?.['st_' + startNum]?.startParticipantId;
+            if (partId && room.participantScores?.[partId]?.stations?.[assignedStationNum]) {
+              const pScore = room.participantScores[partId].stations[assignedStationNum];
+              SimState.studentScores[assignedStationNum] = pScore.checkedProgress || pScore.checkedIds || [];
             }
           }
           
