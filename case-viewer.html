@@ -1068,7 +1068,7 @@
   <script src="case-details-offline.js?v=v_20261004_190718"></script>
   <script src="app.js?v=v_20261004_190718"></script>
   <script src="scratchpad.js?v=20261004_201700"></script>
-  <script src="station-chat.js?v=20261004_222000"></script>
+  <script src="station-chat.js?v=20261004_233600"></script>
 
   <script>
     // ─ Fullscreen helper ─
@@ -1808,10 +1808,13 @@
       // อัปเดต UI Progress bar ตอนเริ่มต้น
       updateChecklistUI(c.caseId);
 
-      // Initialize Station Chat for Case Viewer
+      // Initialize Station Chat for Case Viewer — pass full case object for AI context
       if (typeof StationChatController !== 'undefined' && typeof StationChatController.initStation === 'function') {
         try {
-          StationChatController.initStation(c.caseId || activeCaseId || '1');
+          // Set global fallback so callGeminiAI can always access case data
+          window._currentCaseDetail = c;
+          // Pass caseId + full case object (scenario, patient info, checklist, notes, etc.)
+          StationChatController.initStation(c.caseId || activeCaseId || '1', c);
         } catch (err) {
           console.warn('StationChatController init in viewer error:', err);
         }
