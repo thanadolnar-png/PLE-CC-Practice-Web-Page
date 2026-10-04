@@ -9646,6 +9646,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
           if (!partName && !partId) return; // Skip empty tables without participants
           const examinerName = t.examinerName || 'ไม่ระบุ';
           let totalEarned = 0, totalMax = 0, passedStations = 0;
+          let sumStationPct = 0, activeStationCount = 0;
 
           stationsList.forEach(st => {
             const c = st.case || {};
@@ -9668,13 +9669,18 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             totalEarned += earned;
             totalMax += max;
             const pct = max > 0 ? Math.round((earned / max) * 100) : 0;
+            if (!isRest && max > 0) {
+              sumStationPct += pct;
+              activeStationCount++;
+            }
             if (isRest || pct >= 80) passedStations++;
           });
 
           const pObj = Object.values(room.players || {}).find(p => p.id === partId || p.name === partName);
           const pEmoji = pObj?.emoji || '👤';
 
-          const overallPct = totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0;
+          // Equal-weight average percentage across active stations
+          const overallPct = activeStationCount > 0 ? Math.round(sumStationPct / activeStationCount) : (totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0);
           leaderboard.push({
             id: partId || tableId,
             name: partName || 'ผู้เข้าสอบ',
@@ -9737,6 +9743,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
         Object.entries(partMap).forEach(([pId, pData]) => {
           let totalEarned = 0, totalMax = 0, passedStations = 0;
+          let sumStationPct = 0, activeStationCount = 0;
           stationsList.forEach(st => {
             const c = st.case || {};
             const isRest = st.isRest || ((c.category || '').toUpperCase() === 'REST');
@@ -9752,13 +9759,18 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             totalEarned += earned;
             totalMax += max;
             const pct = max > 0 ? Math.round((earned / max) * 100) : 0;
+            if (!isRest && max > 0) {
+              sumStationPct += pct;
+              activeStationCount++;
+            }
             if (isRest || pct >= 80) passedStations++;
           });
 
           const pObj = Object.values(room.players || {}).find(p => p.id === pId || p.name === pData.name);
           const pEmoji = pObj?.emoji || '👤';
 
-          const overallPct = totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0;
+          // Equal-weight average percentage across active stations
+          const overallPct = activeStationCount > 0 ? Math.round(sumStationPct / activeStationCount) : (totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0);
           leaderboard.push({
             id: pId,
             name: pData.name || 'ผู้เข้าสอบ',
@@ -9795,6 +9807,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
         examinees.forEach(p => {
           let totalEarned = 0, totalMax = 0, passedStations = 0;
+          let sumStationPct = 0, activeStationCount = 0;
           stationsList.forEach(st => {
             const c = st.case || {};
             const isRest = st.isRest || ((c.category || '').toUpperCase() === 'REST');
@@ -9803,9 +9816,14 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             totalEarned += earned;
             totalMax += max;
             const pct = max > 0 ? Math.round((earned / max) * 100) : 0;
+            if (!isRest && max > 0) {
+              sumStationPct += pct;
+              activeStationCount++;
+            }
             if (isRest || pct >= 80) passedStations++;
           });
-          const overallPct = totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0;
+          // Equal-weight average percentage across active stations
+          const overallPct = activeStationCount > 0 ? Math.round(sumStationPct / activeStationCount) : (totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0);
           leaderboard.push({
             id: p.id || p.name,
             name: p.name || 'ผู้เข้าสอบ',
@@ -10119,6 +10137,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       
       try {
         let passedStations = 0, totalMaxScore = 0, totalEarnedScore = 0;
+        let sumStationPct = 0, activeStationCount = 0;
         const tbody = document.getElementById('results-stations-tbody');
         if (tbody) tbody.innerHTML = '';
         
@@ -10137,6 +10156,10 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
           totalEarnedScore += earned;
           const isRest = st.isRest || ((c.category || '').toUpperCase() === 'REST');
           const pct = max > 0 ? Math.round((earned / max) * 100) : 0;
+          if (!isRest && max > 0) {
+            sumStationPct += pct;
+            activeStationCount++;
+          }
           const isPassed = isRest ? true : (pct >= 80);
           if (isPassed) passedStations++;
           
@@ -10164,7 +10187,8 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         const scoreValEl = document.getElementById('results-score-val');
         if (scoreValEl) scoreValEl.textContent = `${formatScore(totalEarnedScore)}/${formatScore(totalMaxScore)}`;
         
-        const totalPct = totalMaxScore > 0 ? Math.round((totalEarnedScore / totalMaxScore) * 100) : 0;
+        // Equal-weight average percentage across active stations
+        const totalPct = activeStationCount > 0 ? Math.round(sumStationPct / activeStationCount) : (totalMaxScore > 0 ? Math.round((totalEarnedScore / totalMaxScore) * 100) : 0);
         const scorePctEl = document.getElementById('results-score-pct');
         if (scorePctEl) scorePctEl.textContent = `${totalPct}%`;
         
@@ -10177,7 +10201,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         
         const summaryDescEl = document.getElementById('results-summary-desc');
         if (summaryDescEl) {
-          summaryDescEl.textContent = `ผ่านการประเมินวิชาชีพทั้งหมด ${passedStations} จาก ${totalStationsCount} สถานีสอบ (ผ่านเมื่อสอบได้คะแนนตั้งแต่ร้อยละ 80 ขึ้นไปต่อสถานี)`;
+          summaryDescEl.textContent = `ผ่านการประเมินวิชาชีพทั้งหมด ${passedStations} จาก ${totalStationsCount} สถานีสอบ (คิดน้ำหนักแต่ละสถานีเท่ากัน • เกณฑ์ผ่านร้อยละ 80 ต่อสถานี)`;
         }
 
         // Render Podium & Leaderboard if multiplayer room
