@@ -1051,8 +1051,9 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
             isSubset = false;
             isCurrentSubsetSequence = true;
           } else {
-            const hasSubsetBullet = /^[-*•☐☑]\s+/.test(text.trim()) || text.trim().startsWith('- ') || text.trim().startsWith('• ');
-            if (nestLvl > 0 || indentMag >= 36 || hasSubsetBullet || isCurrentSubsetSequence) {
+            if (nestLvl > 0 || indentMag >= 60) {
+              isSubset = true;
+            } else if (isCurrentSubsetSequence && (!para.bullet || nestLvl > 0)) {
               isSubset = true;
             } else {
               isSubset = false;
@@ -1540,8 +1541,9 @@ function getCaseContentFromDoc(docId, targetCaseId) {
               isSubset = false;
               isCurrentSubsetSequence = true;
             } else {
-              const hasSubsetBullet = text.startsWith('-') || text.startsWith('*') || text.startsWith('\u2022');
-              if (nestLvl > 0 || indentStart >= 36 || hasSubsetBullet || isCurrentSubsetSequence) {
+              if (nestLvl > 0 || indentStart >= 60) {
+                isSubset = true;
+              } else if (isCurrentSubsetSequence && (type !== DocumentApp.ElementType.LIST_ITEM || nestLvl > 0)) {
                 isSubset = true;
               } else {
                 isSubset = false;
