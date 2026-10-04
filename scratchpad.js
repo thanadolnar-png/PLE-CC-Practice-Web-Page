@@ -1,12 +1,14 @@
 /**
- * PLE-CC OSPE Practice System — Digital Scratchpad & Drawing Canvas
+ * PLE-CC OSPE Practice System — Digital Scratchpad & Multi-Label Prescription Canvas
  * File: scratchpad.js
  * =================================================================
  * High-performance, offline-first digital scratchpad for OSPE candidates.
  * Supports:
  * - Freehand drawing with stylus/touch/mouse (Black, Red, Green, Blue, Pen sizes)
  * - Text typing notepad with auto-save
- * - Per-station state memory (station notes persist across station switches)
+ * - RxCU Drug Label Canvas with Multi-Sheet support (ฉลากยา 1, ฉลากยา 2, ...)
+ * - One-click submit to Station Chat for Examiner Grading & Review
+ * - Per-station state memory (station notes & labels persist across station switches)
  * - Dynamic Resizing: Drag any border or corner to resize dynamically
  * - Dynamic Drag & Drop: Drag header to move scratchpad anywhere on screen
  * - Mobile pull-to-resize dynamic bottom sheet
@@ -32,19 +34,34 @@
   };
 
   const LAYOUT_STORAGE_KEY = 'ple_ospe_scratchpad_layout_v2';
+  const DRUG_LABEL_IMG_SRC = 'rxcu-drug-label-template.png';
 
   const Scratchpad = {
     initialized: false,
     isOpen: false,
     isMinimized: false,
     isMaximized: false,
-    activeTab: 'draw', // 'draw' | 'type'
+    activeTab: 'draw', // 'draw' | 'type' | 'label'
     currentColor: COLORS.black,
     currentSize: PEN_SIZES.medium,
     isEraser: false,
     currentStationKey: 'default',
+
+    // Preloaded Drug Label Image template
+    labelTemplateImg: null,
+    isLabelImgLoaded: false,
+
+    // Multi-Label tracking for active station
+    activeLabelIndex: 0,
     
-    // Per-station storage: { [stationKey]: { canvasData: string, text: string, undoStack: [] } }
+    // Per-station storage: 
+    // { [stationKey]: { 
+    //     canvasData: string, 
+    //     text: string, 
+    //     labels: [ { id: 1, name: 'ฉลากยา 1', canvasData: string, undoStack: [] } ], 
+    //     activeLabelIndex: 0,
+    //     undoStack: [] 
+    // } }
     storage: {},
 
     // DOM references
@@ -58,6 +75,10 @@
       undoBtn: null,
       tabDrawBtn: null,
       tabTypeBtn: null,
+      tabLabelBtn: null,
+      labelSubNav: null,
+      labelTabsWrap: null,
+      btnSendLabelChat: null,
       colorPickers: [],
       sizePickers: []
     },
@@ -75,6 +96,7 @@
     init: function () {
       if (this.initialized) return;
 
+      this.preloadLabelTemplate();
       this.createDOM();
       this.bindEvents();
       this.initialized = true;
@@ -83,6 +105,25 @@
       if (this.currentStationKey) {
         this.loadStationData(this.currentStationKey);
       }
+    },
+
+    /**
+     * Preload RxCU Drug Label Template image into memory
+     */
+    preloadLabelTemplate: function () {
+      if (this.labelTemplateImg) return;
+      const img = new Image();
+      img.onload = () => {
+        this.isLabelImgLoaded = true;
+        if (this.activeTab === 'label' && this.isOpen) {
+          this.renderActiveLabel();
+        }
+      };
+      img.onerror = () => {
+        console.warn('Could not load RxCU drug label image template:', DRUG_LABEL_IMG_SRC);
+      };
+      img.src = DRUG_LABEL_IMG_SRC;
+      this.labelTemplateImg = img;
     },
 
     /**
@@ -144,6 +185,9 @@
             <button type="button" class="sp-tab-btn" id="sp-tab-type" data-tab="type">
               พิมพ์โน้ต
             </button>
+            <button type="button" class="sp-tab-btn sp-tab-label-btn" id="sp-tab-label" data-tab="label" title="เขียนฉลากยาโรงพยาบาล RxCU">
+              🏷️ ฉลากยา
+            </button>
           </div>
 
           <!-- Window Controls -->
@@ -163,10 +207,25 @@
           </div>
         </div>
 
+        <!-- Multi-Label Secondary Subbar (Visible only on 'label' tab) -->
+        <div class="sp-label-subbar" id="sp-label-subbar" style="display: none;">
+          <div class="sp-label-tabs" id="sp-label-tabs-list">
+            <!-- Dynamic Label Tabs inserted here -->
+          </div>
+          <div class="sp-label-actions">
+            <button type="button" class="sp-label-add-btn" id="sp-btn-add-label" title="เพิ่มฉลากยาใบใหม่">
+              ＋ เพิ่มฉลาก
+            </button>
+            <button type="button" class="sp-label-send-btn" id="sp-btn-send-label-chat" title="แปลงและส่งภาพฉลากยานี้เข้าแชทสถานีสอบทันที">
+              📤 ส่งเข้าแชทสถานี
+            </button>
+          </div>
+        </div>
+
         <!-- Panel Body -->
         <div class="sp-body">
           
-          <!-- DRAW VIEW -->
+          <!-- DRAW / LABEL VIEW -->
           <div class="sp-view sp-view-draw active" id="sp-draw-view">
             <!-- Drawing Toolbar -->
             <div class="sp-toolbar">
@@ -202,7 +261,7 @@
                 <button type="button" class="sp-action-btn" id="sp-tool-undo" title="ย้อนกลับ (Undo)">
                   ↩️ ย้อน
                 </button>
-                <button type="button" class="sp-action-btn sp-action-danger" id="sp-tool-clear" title="ล้างกระดาน">
+                <button type="button" class="sp-action-btn sp-action-danger" id="sp-tool-clear" title="ล้างกระดาน/ฉลากปัจจุบัน">
                   🗑️ ล้าง
                 </button>
               </div>
@@ -247,6 +306,10 @@
       this.dom.stationTitle = panel.querySelector('#sp-station-title');
       this.dom.tabDrawBtn = panel.querySelector('#sp-tab-draw');
       this.dom.tabTypeBtn = panel.querySelector('#sp-tab-type');
+      this.dom.tabLabelBtn = panel.querySelector('#sp-tab-label');
+      this.dom.labelSubNav = panel.querySelector('#sp-label-subbar');
+      this.dom.labelTabsWrap = panel.querySelector('#sp-label-tabs-list');
+      this.dom.btnSendLabelChat = panel.querySelector('#sp-btn-send-label-chat');
       this.dom.undoBtn = panel.querySelector('#sp-tool-undo');
     },
 
@@ -274,9 +337,21 @@
       const resetBtn = this.dom.panel.querySelector('#sp-btn-reset-layout');
       if (resetBtn) resetBtn.addEventListener('click', () => self.resetLayout());
 
-      // Tabs
+      // Main Tabs
       this.dom.tabDrawBtn.addEventListener('click', () => self.switchTab('draw'));
       this.dom.tabTypeBtn.addEventListener('click', () => self.switchTab('type'));
+      if (this.dom.tabLabelBtn) {
+        this.dom.tabLabelBtn.addEventListener('click', () => self.switchTab('label'));
+      }
+
+      // Multi-Label Subbar Buttons
+      const btnAddLabel = this.dom.panel.querySelector('#sp-btn-add-label');
+      if (btnAddLabel) {
+        btnAddLabel.addEventListener('click', () => self.addNewLabel());
+      }
+      if (this.dom.btnSendLabelChat) {
+        this.dom.btnSendLabelChat.addEventListener('click', () => self.sendCurrentLabelToChat());
+      }
 
       // Color pickers
       const colorBtns = this.dom.panel.querySelectorAll('.sp-color-btn');
@@ -326,7 +401,11 @@
       const clearBtn = this.dom.panel.querySelector('#sp-tool-clear');
       if (clearBtn) {
         clearBtn.addEventListener('click', function () {
-          if (confirm('คุณต้องการล้างกระดานวาดของสถานีนี้ใช่หรือไม่?')) {
+          const isLabel = self.activeTab === 'label';
+          const msg = isLabel 
+            ? 'คุณต้องการล้างสิ่งที่เขียนบนฉลากยานี้ใช่หรือไม่?'
+            : 'คุณต้องการล้างกระดานวาดของสถานีนี้ใช่หรือไม่?';
+          if (confirm(msg)) {
             self.clearCanvas();
             self.saveCurrentStation();
           }
@@ -554,7 +633,7 @@
           try { resizer.releasePointerCapture(e.pointerId); } catch (_) {}
 
           // Finalize canvas dimensions without blurriness
-          if (self.activeTab === 'draw') {
+          if (self.activeTab === 'draw' || self.activeTab === 'label') {
             self.resizeCanvas(true);
           }
 
@@ -608,7 +687,9 @@
         if (h < 180) {
           self.toggleMinimize();
         } else {
-          if (self.activeTab === 'draw') self.resizeCanvas(true);
+          if (self.activeTab === 'draw' || self.activeTab === 'label') {
+            self.resizeCanvas(true);
+          }
         }
       };
 
@@ -682,8 +763,14 @@
       ctx.lineJoin = 'round';
 
       if (this.isEraser) {
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = this.currentSize * 4; // Wider stroke for eraser
+        if (this.activeTab === 'label') {
+          // On label, eraser draws white with slight opacity or white overlay
+          ctx.strokeStyle = '#FFFFFF';
+          ctx.lineWidth = this.currentSize * 4;
+        } else {
+          ctx.strokeStyle = '#FFFFFF';
+          ctx.lineWidth = this.currentSize * 4; // Wider stroke for eraser
+        }
       } else {
         ctx.strokeStyle = this.currentColor;
         ctx.lineWidth = this.currentSize;
@@ -734,8 +821,57 @@
       const rect = canvas.getBoundingClientRect();
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, rect.width, rect.height);
+
+      // If in label mode, redraw background template image
+      if (this.activeTab === 'label') {
+        this.drawLabelTemplateBackground();
+      }
+
       if (resetUndo) {
         this.undoStack = [];
+      }
+    },
+
+    /**
+     * Draw the RxCU Drug Label template background image into the canvas
+     */
+    drawLabelTemplateBackground: function () {
+      if (!this.dom.canvas || !this.dom.ctx) return;
+      const canvas = this.dom.canvas;
+      const ctx = this.dom.ctx;
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+
+      if (this.labelTemplateImg && this.isLabelImgLoaded) {
+        // Fit template into canvas preserving aspect ratio
+        const imgW = this.labelTemplateImg.naturalWidth || 800;
+        const imgH = this.labelTemplateImg.naturalHeight || 500;
+        const scale = Math.min(w / imgW, h / imgH) * 0.96;
+        const drawW = imgW * scale;
+        const drawH = imgH * scale;
+        const offsetX = (w - drawW) / 2;
+        const offsetY = (h - drawH) / 2;
+
+        ctx.fillStyle = '#F8FAFC';
+        ctx.fillRect(0, 0, w, h);
+
+        // Soft drop shadow around label sheet
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.08)';
+        ctx.shadowBlur = 12;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 3;
+        ctx.drawImage(this.labelTemplateImg, offsetX, offsetY, drawW, drawH);
+        ctx.restore();
+      } else {
+        // Fallback placeholder while loading
+        ctx.fillStyle = '#F1F5F9';
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#64748B';
+        ctx.font = '14px Bai Jamjuree, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('กำลังโหลดแม่แบบฉลากยา RxCU...', w / 2, h / 2);
       }
     },
 
@@ -770,11 +906,16 @@
 
       this.dom.ctx.scale(dpr, dpr);
 
-      // Fill white background
+      // Fill background
       this.dom.ctx.fillStyle = '#FFFFFF';
       this.dom.ctx.fillRect(0, 0, width, height);
 
-      // Restore image if preserved at 1:1 scale (gives more blank paper when enlarged)
+      // If in label mode, redraw background template
+      if (this.activeTab === 'label') {
+        this.drawLabelTemplateBackground();
+      }
+
+      // Restore image if preserved at 1:1 scale
       if (prevImg) {
         const img = new Image();
         img.onload = () => {
@@ -785,26 +926,240 @@
     },
 
     /**
-     * Switch view between 'draw' and 'type'
+     * Switch view between 'draw', 'type', and 'label'
      */
     switchTab: function (tab) {
+      // Save current state before switching
+      this.saveCurrentStation();
+
+      const prevTab = this.activeTab;
       this.activeTab = tab;
+
       const drawView = this.dom.panel.querySelector('#sp-draw-view');
       const typeView = this.dom.panel.querySelector('#sp-type-view');
+      const labelSubbar = this.dom.labelSubNav;
 
-      if (tab === 'draw') {
-        this.dom.tabDrawBtn.classList.add('active');
-        this.dom.tabTypeBtn.classList.remove('active');
-        drawView.style.display = 'flex';
-        typeView.style.display = 'none';
-        setTimeout(() => this.resizeCanvas(true), 50);
-      } else {
-        this.dom.tabTypeBtn.classList.add('active');
-        this.dom.tabDrawBtn.classList.remove('active');
-        typeView.style.display = 'flex';
-        drawView.style.display = 'none';
-        this.dom.textarea.focus();
+      this.dom.tabDrawBtn.classList.toggle('active', tab === 'draw');
+      this.dom.tabTypeBtn.classList.toggle('active', tab === 'type');
+      if (this.dom.tabLabelBtn) {
+        this.dom.tabLabelBtn.classList.toggle('active', tab === 'label');
       }
+
+      if (tab === 'type') {
+        if (labelSubbar) labelSubbar.style.display = 'none';
+        drawView.style.display = 'none';
+        typeView.style.display = 'flex';
+        this.dom.textarea.focus();
+      } else if (tab === 'label') {
+        if (labelSubbar) labelSubbar.style.display = 'flex';
+        typeView.style.display = 'none';
+        drawView.style.display = 'flex';
+        this.renderLabelSubbarTabs();
+        this.renderActiveLabel();
+      } else { // 'draw'
+        if (labelSubbar) labelSubbar.style.display = 'none';
+        typeView.style.display = 'none';
+        drawView.style.display = 'flex';
+        this.loadDrawingCanvas();
+      }
+    },
+
+    /**
+     * Ensure current station has label storage structure initialized
+     */
+    ensureStationData: function (stationKey) {
+      const key = stationKey || this.currentStationKey;
+      if (!this.storage[key]) {
+        this.storage[key] = {
+          canvasData: null,
+          text: '',
+          labels: [
+            { id: 1, name: 'ฉลากยา 1', canvasData: null, undoStack: [] }
+          ],
+          activeLabelIndex: 0,
+          undoStack: []
+        };
+      }
+      if (!Array.isArray(this.storage[key].labels) || this.storage[key].labels.length === 0) {
+        this.storage[key].labels = [
+          { id: 1, name: 'ฉลากยา 1', canvasData: null, undoStack: [] }
+        ];
+        this.storage[key].activeLabelIndex = 0;
+      }
+      return this.storage[key];
+    },
+
+    /**
+     * Render Multi-Label Tabs in Subbar
+     */
+    renderLabelSubbarTabs: function () {
+      const wrap = this.dom.labelTabsWrap;
+      if (!wrap) return;
+
+      const stData = this.ensureStationData();
+      wrap.innerHTML = '';
+
+      stData.labels.forEach((lbl, idx) => {
+        const tabBtn = document.createElement('div');
+        tabBtn.className = `sp-label-tab ${idx === stData.activeLabelIndex ? 'active' : ''}`;
+        tabBtn.innerHTML = `
+          <span class="sp-lbl-title">${lbl.name || `ฉลากยา ${idx + 1}`}</span>
+          ${stData.labels.length > 1 ? `<button type="button" class="sp-lbl-del" title="ลบฉลากนี้" data-del-idx="${idx}">✕</button>` : ''}
+        `;
+
+        tabBtn.addEventListener('click', (e) => {
+          if (e.target.closest('.sp-lbl-del')) return;
+          this.switchActiveLabel(idx);
+        });
+
+        const delBtn = tabBtn.querySelector('.sp-lbl-del');
+        if (delBtn) {
+          delBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.deleteLabel(idx);
+          });
+        }
+
+        wrap.appendChild(tabBtn);
+      });
+    },
+
+    /**
+     * Add a new drug label sheet to current station
+     */
+    addNewLabel: function () {
+      const stData = this.ensureStationData();
+      this.saveCurrentStation(); // Save active one
+
+      const nextNum = stData.labels.length + 1;
+      const newLabel = {
+        id: Date.now(),
+        name: `ฉลากยา ${nextNum}`,
+        canvasData: null,
+        undoStack: []
+      };
+
+      stData.labels.push(newLabel);
+      this.switchActiveLabel(stData.labels.length - 1);
+    },
+
+    /**
+     * Delete a drug label sheet
+     */
+    deleteLabel: function (idx) {
+      const stData = this.ensureStationData();
+      if (stData.labels.length <= 1) return;
+
+      const lbl = stData.labels[idx];
+      if (!confirm(`คุณต้องการลบ "${lbl.name || 'ฉลากยานี้'}" ใช่หรือไม่?`)) return;
+
+      this.saveCurrentStation();
+      stData.labels.splice(idx, 1);
+
+      if (stData.activeLabelIndex >= stData.labels.length) {
+        stData.activeLabelIndex = Math.max(0, stData.labels.length - 1);
+      }
+
+      this.renderLabelSubbarTabs();
+      this.renderActiveLabel();
+    },
+
+    /**
+     * Switch active label within Label Mode
+     */
+    switchActiveLabel: function (idx) {
+      const stData = this.ensureStationData();
+      if (idx < 0 || idx >= stData.labels.length) return;
+
+      this.saveCurrentStation();
+      stData.activeLabelIndex = idx;
+      this.renderLabelSubbarTabs();
+      this.renderActiveLabel();
+    },
+
+    /**
+     * Render the active label sheet onto canvas
+     */
+    renderActiveLabel: function () {
+      const stData = this.ensureStationData();
+      const currentLbl = stData.labels[stData.activeLabelIndex];
+      if (!currentLbl) return;
+
+      this.undoStack = currentLbl.undoStack || [];
+      this.resizeCanvas(false);
+      this.clearCanvas(false);
+
+      if (currentLbl.canvasData) {
+        const img = new Image();
+        img.onload = () => {
+          const rect = this.dom.canvas.getBoundingClientRect();
+          this.dom.ctx.drawImage(img, 0, 0, rect.width, rect.height);
+        };
+        img.src = currentLbl.canvasData;
+      }
+    },
+
+    /**
+     * Load normal drawing canvas
+     */
+    loadDrawingCanvas: function () {
+      const stData = this.ensureStationData();
+      this.undoStack = stData.undoStack || [];
+      this.resizeCanvas(false);
+      this.clearCanvas(false);
+
+      if (stData.canvasData) {
+        const img = new Image();
+        img.onload = () => {
+          const rect = this.dom.canvas.getBoundingClientRect();
+          this.dom.ctx.drawImage(img, 0, 0, rect.width, rect.height);
+        };
+        img.src = stData.canvasData;
+      }
+    },
+
+    /**
+     * Export completed drug label and submit directly into Station Chat
+     */
+    sendCurrentLabelToChat: function () {
+      if (!this.dom.canvas) return;
+      this.saveCurrentStation();
+
+      const stData = this.ensureStationData();
+      const currentLbl = stData.labels[stData.activeLabelIndex] || { name: 'ฉลากยา RxCU' };
+      const labelDataUrl = this.dom.canvas.toDataURL('image/png');
+
+      // Check if StationChatController exists
+      if (window.StationChatController && typeof window.StationChatController.sendDrugLabelMessage === 'function') {
+        window.StationChatController.sendDrugLabelMessage({
+          labelIndex: stData.activeLabelIndex + 1,
+          labelName: currentLbl.name,
+          imageData: labelDataUrl
+        });
+        
+        // Show brief confirmation toast
+        this.showToast(`✅ ส่ง "${currentLbl.name}" เข้าแชทสถานีสอบแล้ว!`);
+      } else {
+        // Fallback: alert
+        alert(`บันทึกภาพ "${currentLbl.name}" เรียบร้อยแล้ว (จะปรากฏในแชทเมื่อเริ่มสถานีสอบ)`);
+      }
+    },
+
+    /**
+     * Lightweight Toast notification inside Scratchpad
+     */
+    showToast: function (msg) {
+      let toast = this.dom.panel.querySelector('.sp-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.className = 'sp-toast';
+        this.dom.panel.appendChild(toast);
+      }
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
     },
 
     /**
@@ -851,15 +1206,22 @@
     saveCurrentStation: function () {
       if (!this.initialized || !this.currentStationKey) return;
 
-      const canvasData = this.dom.canvas ? this.dom.canvas.toDataURL() : null;
-      const textData = this.dom.textarea ? this.dom.textarea.value : '';
+      const stData = this.ensureStationData();
+      const currentCanvasUrl = this.dom.canvas ? this.dom.canvas.toDataURL() : null;
 
-      this.storage[this.currentStationKey] = {
-        canvasData: canvasData,
-        text: textData,
-        hasDrawing: this.undoStack.length > 0 || !!canvasData,
-        timestamp: Date.now()
-      };
+      if (this.activeTab === 'draw') {
+        stData.canvasData = currentCanvasUrl;
+        stData.undoStack = [...this.undoStack];
+      } else if (this.activeTab === 'label') {
+        if (stData.labels && stData.labels[stData.activeLabelIndex]) {
+          stData.labels[stData.activeLabelIndex].canvasData = currentCanvasUrl;
+          stData.labels[stData.activeLabelIndex].undoStack = [...this.undoStack];
+        }
+      }
+
+      stData.text = this.dom.textarea ? this.dom.textarea.value : '';
+      stData.hasDrawing = (this.undoStack.length > 0 || !!stData.canvasData || (stData.labels && stData.labels.some(l => !!l.canvasData)));
+      stData.timestamp = Date.now();
     },
 
     /**
@@ -868,29 +1230,20 @@
     loadStationData: function (stationKey) {
       if (!this.initialized) return;
 
-      const data = this.storage[stationKey] || { canvasData: null, text: '' };
+      const stData = this.ensureStationData(stationKey);
 
       // Load text
       if (this.dom.textarea) {
-        this.dom.textarea.value = data.text || '';
+        this.dom.textarea.value = stData.text || '';
         this.updateCharCount();
       }
 
-      // Load canvas
-      this.undoStack = [];
-      if (data.canvasData) {
-        const img = new Image();
-        img.onload = () => {
-          this.resizeCanvas(false);
-          const rect = this.dom.canvas.getBoundingClientRect();
-          this.dom.ctx.drawImage(img, 0, 0, rect.width, rect.height);
-        };
-        img.src = data.canvasData;
-      } else {
-        setTimeout(() => {
-          this.resizeCanvas(false);
-          this.clearCanvas(true);
-        }, 50);
+      // Load canvas based on current active tab
+      if (this.activeTab === 'label') {
+        this.renderLabelSubbarTabs();
+        this.renderActiveLabel();
+      } else if (this.activeTab === 'draw') {
+        this.loadDrawingCanvas();
       }
     },
 
@@ -941,8 +1294,8 @@
 
       const minW = 320;
       const minH = 240;
-      const w = Math.max(minW, Math.min(window.innerWidth - 32, layout.width || 480));
-      const h = Math.max(minH, Math.min(window.innerHeight - 32, layout.height || 540));
+      const w = Math.max(minW, Math.min(window.innerWidth - 32, layout.width || 500));
+      const h = Math.max(minH, Math.min(window.innerHeight - 32, layout.height || 560));
 
       panel.style.width = w + 'px';
       panel.style.height = h + 'px';
@@ -986,14 +1339,16 @@
       if (maxIcon) maxIcon.textContent = '⛶';
 
       setTimeout(() => {
-        if (this.activeTab === 'draw') this.resizeCanvas(true);
+        if (this.activeTab === 'draw' || this.activeTab === 'label') {
+          this.resizeCanvas(true);
+        }
       }, 100);
     },
 
     /**
-     * Open scratchpad
+     * Open scratchpad (supports optional default tab switch e.g. open('station-1', 'Label', 'label'))
      */
-    open: function (stationKey, stationLabel) {
+    open: function (stationKey, stationLabel, initialTab) {
       if (!this.initialized) this.init();
       if (stationKey) this.setStation(stationKey, stationLabel);
 
@@ -1008,8 +1363,12 @@
 
       if (this.dom.fabBtn) this.dom.fabBtn.classList.add('active');
 
+      if (initialTab && (initialTab === 'draw' || initialTab === 'type' || initialTab === 'label')) {
+        this.switchTab(initialTab);
+      }
+
       setTimeout(() => {
-        if (this.activeTab === 'draw') {
+        if (this.activeTab === 'draw' || this.activeTab === 'label') {
           this.resizeCanvas(true);
         } else {
           this.dom.textarea.focus();
@@ -1031,11 +1390,11 @@
     /**
      * Toggle open/close
      */
-    toggle: function (stationKey, stationLabel) {
+    toggle: function (stationKey, stationLabel, initialTab) {
       if (this.isOpen) {
         this.close();
       } else {
-        this.open(stationKey, stationLabel);
+        this.open(stationKey, stationLabel, initialTab);
       }
     },
 
@@ -1046,7 +1405,7 @@
       this.isMinimized = !this.isMinimized;
       this.dom.panel.classList.toggle('minimized', this.isMinimized);
       this.updateMinimizeIcon();
-      if (!this.isMinimized && this.activeTab === 'draw') {
+      if (!this.isMinimized && (this.activeTab === 'draw' || this.activeTab === 'label')) {
         setTimeout(() => this.resizeCanvas(true), 100);
       }
     },
@@ -1075,7 +1434,9 @@
       }
 
       setTimeout(() => {
-        if (this.activeTab === 'draw') this.resizeCanvas(true);
+        if (this.activeTab === 'draw' || this.activeTab === 'label') {
+          this.resizeCanvas(true);
+        }
       }, 150);
     },
 
