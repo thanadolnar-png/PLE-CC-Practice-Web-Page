@@ -2188,6 +2188,12 @@ async function loadOfflineDetailsWithProgress() {
     }
     
     // B. หากเป็นเวอร์ชันใหม่ (เพิ่ง compile มาเพิ่มเคส):
+    try {
+      Object.keys(sessionStorage).forEach(k => {
+        if (k.startsWith('ple_unlocked_')) sessionStorage.removeItem(k);
+      });
+    } catch (e) {}
+
     // 1) ดึงแคชเดิมที่มีอยู่แล้วขึ้นมาแสดงก่อนทันที 0ms เพื่อไม่ให้ผู้ใช้ต้องรอ!
     const existingDetails = await getCasesFromDB(db);
     if (existingDetails && Object.keys(existingDetails).length > 0) {
