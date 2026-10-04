@@ -497,11 +497,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // เริ่มต้นเครื่องเล่นเพลงประกอบพื้นหลัง
   BgmManager.init();
   
-  // โหลดฐานข้อมูลรายละเอียดออฟไลน์พร้อม Progress Bar แบบ Asynchronous
-  loadOfflineDetailsWithProgress();
-  
-  // โหลดข้อมูลเคสเบื้องต้น (แบบสรุป)
+  // โหลดข้อมูลเคสเบื้องต้น (แบบสรุป) ทันที 0ms
   loadCasesData();
+
+  // โหลดฐานข้อมูลรายละเอียดออฟไลน์: ถ้าอยู่หน้า Viewer หรือ Exam ให้โหลดทันที ถ้าอยู่หน้าอื่นให้ Lazy-load ตอนเครื่องว่าง
+  const isDetailHeavyPage = window.location.pathname.includes('case-viewer') || window.location.pathname.includes('exam-simulation');
+  if (isDetailHeavyPage) {
+    loadOfflineDetailsWithProgress();
+  } else {
+    // พรีโหลดเงียบๆ ตอนเบราว์เซอร์ว่าง (Idle) เพื่อไม่ให้กระทบความเร็วการเปิดหน้า
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(() => loadOfflineDetailsWithProgress(), { timeout: 3500 });
+    } else {
+      setTimeout(() => loadOfflineDetailsWithProgress(), 2500);
+    }
+  }
 
   // จัดการหน้าปัจจุบัน
   detectCurrentPage();
@@ -2057,7 +2067,7 @@ if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
 const DB_NAME = 'RxCU_OSPE_DB';
 const DB_VERSION = 1;
 const STORE_NAME = 'case_details';
-const DB_VERSION_STR = 'v_20261004_155529'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
+const DB_VERSION_STR = 'v_20261004_160727'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
 
 function openIndexedDB() {
   return new Promise((resolve, reject) => {

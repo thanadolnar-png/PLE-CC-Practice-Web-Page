@@ -1,13 +1,13 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Version: v_20261004_155529
- * Generated on 2026-10-04 15:55:29
+ * Version: v_20261004_160727
+ * Generated on 2026-10-04 16:07:27
  */
 
 const OFFLINE_DATA = {
-  "version": "v_20261004_155529",
-  "generatedAt": "2026-10-04 15:55:29",
-  "totalCases": 353,
+  "version": "v_20261004_160727",
+  "generatedAt": "2026-10-04 16:07:27",
+  "totalCases": 354,
   "cases": [
     {
       "caseId": "OSPE-CL4801",
@@ -1591,7 +1591,7 @@ const OFFLINE_DATA = {
       "caseStatus": "Active"
     },
     {
-      "caseId": "OSPE-CL6014",
+      "caseId": "OSPE-CL6014S",
       "title": "การส่งมอบยาเทคนิคพิเศษ Suppository",
       "category": "clinic",
       "mainGroup": "การใช้ยาเทคนิคพิเศษ",
@@ -1601,6 +1601,23 @@ const OFFLINE_DATA = {
       "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
       "author": "ส้มส้ม",
       "createdDate": "4/10/2569",
+      "source": "ข้อสอบจริง ปี 2560",
+      "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
+      "caseStatus": "Active"
+    },
+    {
+      "caseId": "OSPE-CL6014V",
+      "title": "ส่งมอบยาเทคนิคพิเศษ Vaginal Tablet",
+      "category": "Clinic",
+      "mainGroup": "การใช้ยาเทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Vaginal Tablet",
+      "difficulty": 2,
+      "docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g",
+      "author": "มีน",
+      "createdDate": "16/07/2026",
       "source": "ข้อสอบจริง ปี 2560",
       "isActive": true,
       "linkedNextCase": "",
