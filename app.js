@@ -2471,7 +2471,8 @@ function createBatchPrintModalDOM() {
 }
 
 function populateBatchFilterDropdowns() {
-  const allCases = AppState.cases || [];
+  const allCases = (AppState.cases && AppState.cases.length > 0) ? AppState.cases : 
+                   ((typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases && OFFLINE_DATA.cases.length > 0) ? OFFLINE_DATA.cases : []);
   const cat = document.getElementById('batch-cat-select')?.value || 'All';
   const groupSelect = document.getElementById('batch-group-select');
   const sourceSelect = document.getElementById('batch-source-select');
@@ -2494,10 +2495,13 @@ function populateBatchFilterDropdowns() {
     else groupSelect.value = 'All';
   }
 
-  if (sourceSelect && sourceSelect.options.length <= 1) {
+  if (sourceSelect) {
+    const currentVal = sourceSelect.value;
     const sources = new Set();
     allCases.forEach(c => {
-      if (c.source && c.source.trim()) sources.add(c.source.trim());
+      if (cat === 'All' || (c.category || '').toLowerCase() === cat.toLowerCase()) {
+        if (c.source && c.source.trim()) sources.add(c.source.trim());
+      }
     });
     const sortedSources = Array.from(sources).sort((a, b) => a.localeCompare(b, 'th'));
     let srcHtml = '<option value="All">ทุกแหล่งที่มา / ปี (All Sources)</option>';
@@ -2505,6 +2509,8 @@ function populateBatchFilterDropdowns() {
       srcHtml += `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`;
     });
     sourceSelect.innerHTML = srcHtml;
+    if (sources.has(currentVal)) sourceSelect.value = currentVal;
+    else sourceSelect.value = 'All';
   }
 }
 
@@ -2522,7 +2528,9 @@ function renderBatchCaseSelectionList() {
   const group = document.getElementById('batch-group-select')?.value || 'All';
   const source = document.getElementById('batch-source-select')?.value || 'All';
 
-  let allCases = AppState.cases || [];
+  let allCases = (AppState.cases && AppState.cases.length > 0) ? AppState.cases : 
+                 ((typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases && OFFLINE_DATA.cases.length > 0) ? OFFLINE_DATA.cases : []);
+
   if (allCases.length === 0 && typeof OFFLINE_CASE_DETAILS !== 'undefined') {
     allCases = Object.keys(OFFLINE_CASE_DETAILS).map(cid => {
       const details = OFFLINE_CASE_DETAILS[cid] || {};
@@ -2583,7 +2591,8 @@ function selectAllBatchCases(select) {
   const cat = document.getElementById('batch-cat-select')?.value || 'All';
   const group = document.getElementById('batch-group-select')?.value || 'All';
   const source = document.getElementById('batch-source-select')?.value || 'All';
-  let allCases = AppState.cases || [];
+  let allCases = (AppState.cases && AppState.cases.length > 0) ? AppState.cases : 
+                 ((typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases && OFFLINE_DATA.cases.length > 0) ? OFFLINE_DATA.cases : []);
 
   if (allCases.length === 0 && typeof OFFLINE_CASE_DETAILS !== 'undefined') {
     allCases = Object.keys(OFFLINE_CASE_DETAILS).map(cid => {
@@ -2620,7 +2629,7 @@ function updateBatchSelectedCountBadge() {
   }
 }
 
-function executeBatchPrint() {
+async function executeBatchPrint() {
   if (selectedBatchCaseIds.size === 0) {
     alert('กรุณาเลือกอย่างน้อย 1 เคสเพื่อทำการสั่งพิมพ์');
     return;
@@ -2649,6 +2658,60 @@ function executeBatchPrint() {
 
   showGlobalLoader(true, `กำลังจัดเตรียมชุดเอกสารสั่งพิมพ์ (${count} เคส)...`);
 
+  const offlineMap = (typeof OFFLINE_CASE_DETAILS !== 'undefined') ? OFFLINE_CASE_DETAILS : {};
+  const allMeta = (AppState.cases && AppState.cases.length > 0) ? AppState.cases : 
+                  ((typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) ? OFFLINE_DATA.cases : []);
+
+  const caseList = [];
+  for (const cid of Array.from(selectedBatchCaseIds)) {
+    const base = allMeta.find(x => x.caseId === cid) || { caseId: cid };
+    let details = offlineMap[cid] || offlineMap[cid.toUpperCase()] || offlineMap[cid.toLowerCase()] || {};
+
+    // Check if case is protected / encrypted
+    if (details && (details.isEncrypted || details.isProtected || details.hasPassword)) {
+      const ospeId = cid.startsWith('OSPE-') ? cid : ('OSPE-' + cid);
+      const cachedRaw = sessionStorage.getItem('ple_unlocked_' + cid) || 
+                        sessionStorage.getItem('ple_unlocked_' + ospeId) ||
+                        sessionStorage.getItem('viewer_unlocked_' + cid) ||
+                        sessionStorage.getItem('viewer_unlocked_' + ospeId);
+      if (cachedRaw) {
+        try {
+          const parsed = JSON.parse(cachedRaw);
+          const dec = (parsed && parsed._case_data) ? parsed._case_data : parsed;
+          if (dec && (dec.scenario || dec.checklist)) {
+            details = Object.assign({}, details, dec);
+          }
+        } catch(e) {}
+      }
+
+      // If still encrypted, prompt for passcode
+      if (details.isEncrypted && (!details.scenario && !details.checklist)) {
+        showGlobalLoader(false);
+        const pwd = prompt(`🔒 เคส ${cid} เป็นข้อสอบลับที่มีรหัสผ่าน\nกรุณากรอกรหัสผ่านเพื่อปลดล็อกเนื้อหาสำหรับพิมพ์:`);
+        if (pwd && typeof window.decryptCaseData === 'function') {
+          showGlobalLoader(true, `กำลังถอดรหัสเคส ${cid}...`);
+          try {
+            const dec = await window.decryptCaseData(details, pwd.trim());
+            if (dec && (dec.scenario || dec.checklist)) {
+              const curVer = (typeof DB_VERSION_STR !== 'undefined' ? DB_VERSION_STR : '');
+              const wrapped = Object.assign({}, dec, { _db_version: curVer });
+              sessionStorage.setItem('ple_unlocked_' + cid, JSON.stringify(wrapped));
+              sessionStorage.setItem('viewer_unlocked_' + cid, JSON.stringify(wrapped));
+              details = Object.assign({}, details, dec);
+            } else {
+              alert(`❌ รหัสผ่านของเคส ${cid} ไม่ถูกต้อง เคสนี้จะไม่ถูกพิมพ์เนื้อหา`);
+            }
+          } catch(err) {
+            alert(`❌ ไม่สามารถถอดรหัสเคส ${cid} ได้: รหัสผ่านไม่ถูกต้อง`);
+          }
+        }
+      }
+    }
+    caseList.push(Object.assign({}, base, details));
+  }
+
+  showGlobalLoader(true, `กำลังสร้างหน้าเอกสารพร้อมพิมพ์ (${count} เคส)...`);
+
   setTimeout(() => {
     let printArea = document.getElementById('batch-print-execution-area');
     if (!printArea) {
@@ -2658,13 +2721,6 @@ function executeBatchPrint() {
       document.body.appendChild(printArea);
     }
     printArea.innerHTML = '';
-
-    const offlineMap = (typeof OFFLINE_CASE_DETAILS !== 'undefined') ? OFFLINE_CASE_DETAILS : {};
-    const caseList = Array.from(selectedBatchCaseIds).map(cid => {
-      const base = (AppState.cases || []).find(x => x.caseId === cid) || { caseId: cid };
-      const details = offlineMap[cid] || offlineMap[cid.toUpperCase()] || offlineMap[cid.toLowerCase()] || {};
-      return Object.assign({}, base, details);
-    });
 
     const fragment = document.createDocumentFragment();
 
