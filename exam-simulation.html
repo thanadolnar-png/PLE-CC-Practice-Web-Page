@@ -2474,7 +2474,7 @@
       <!-- 3. EXAM RESULTS SCREEN -->
       <section class="results-screen" id="exam-results-view" style="display:none;">
         <div class="results-card">
-          <h2 style="text-align: center; margin-bottom: 1.75rem; font-family: var(--font-title); font-size: 1.5rem; font-weight: 700;">📋 รายงานสรุปผลการสอบ OSPE</h2>
+          <h2 style="text-align: center; margin-bottom: 1.75rem; font-family: var(--font-title); font-size: 1.5rem; font-weight: 700;">📋 ผลสอบ OSPE</h2>
           
           <!-- Multi-player participant banner in results -->
           <div id="results-participants-bar" style="display: none; margin-bottom: 1.5rem; padding: 1rem 1.25rem; border-radius: var(--radius-md); background: var(--bg-secondary); border: 1px solid var(--border); text-align: left;">
@@ -2490,12 +2490,12 @@
           <!-- Host Room Summary Banner (Only shown if Host in Multiplayer) -->
           <div id="results-host-summary-banner" style="display: none; margin-bottom: 1.5rem; padding: 1.25rem; background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(16, 185, 129, 0.08)); border: 1px solid var(--border); border-radius: var(--radius-lg); text-align: center;">
             <div style="font-size: 2rem; margin-bottom: 0.35rem;">👑</div>
-            <h3 style="font-family: var(--font-title); font-size: 1.25rem; color: var(--text-primary); margin-bottom: 0.25rem;">ภาพรวมการสอบระดับห้องรวม (Super Host Summary)</h3>
-            <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 0.75rem;" id="results-host-summary-stats">ผู้เข้าสอบทั้งหมด 0 คน · ผ่านเกณฑ์ 0 คน (0%)</p>
+            <h3 style="font-family: var(--font-title); font-size: 1.25rem; color: var(--text-primary); margin-bottom: 0.25rem;">สรุปผลการสอบ</h3>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 0.75rem;" id="results-host-summary-stats">ผู้เข้าสอบ 0 คน · 🟢 PASSED 0 (0%) · 🔴 FAILED 0 (0%)</p>
             <div style="display: inline-flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center;">
               <span class="badge" style="background: var(--surface); border: 1px solid var(--border); font-size: 0.85rem; padding: 0.35rem 0.75rem;" id="host-badge-total-part">👤 0 คน</span>
-              <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: var(--success); font-size: 0.85rem; padding: 0.35rem 0.75rem;" id="host-badge-passed-count">✅ ผ่าน 0 คน</span>
-              <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: var(--danger); font-size: 0.85rem; padding: 0.35rem 0.75rem;" id="host-badge-failed-count">❌ ตก 0 คน</span>
+              <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: var(--success); font-size: 0.85rem; padding: 0.35rem 0.75rem; font-weight: 700;" id="host-badge-passed-count">✓ PASSED 0 (0%)</span>
+              <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: var(--danger); font-size: 0.85rem; padding: 0.35rem 0.75rem; font-weight: 700;" id="host-badge-failed-count">✕ FAILED 0 (0%)</span>
             </div>
           </div>
 
@@ -2517,14 +2517,13 @@
 
             <!-- Full Ranking Table (ตารางสรุปคะแนนผู้เข้าสอบทุกคน) -->
             <div id="podium-full-table-wrapper" style="margin-top: 1.5rem; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.25rem 1rem;">
-              <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text-primary); font-family: var(--font-title);">📊 ตารางจัดอันดับผู้เข้าสอบทั้งหมด (Full Leaderboard)</h4>
+              <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text-primary); font-family: var(--font-title);">📊 Leaderboard</h4>
               <div class="table-responsive">
                 <table class="breakdown-table" style="font-size: 0.88rem; width: 100%;">
                   <thead>
                     <tr>
                       <th style="width: 70px; text-align: center;">อันดับ</th>
                       <th>ผู้เข้าสอบ</th>
-                      <th>รายละเอียดกลุ่ม</th>
                       <th style="text-align: right;">คะแนนรวม</th>
                       <th style="text-align: center;">ร้อยละ</th>
                       <th style="text-align: center;">ผ่านสถานี</th>
@@ -6619,7 +6618,7 @@
       // follow the active station, even if rendering code below throws on a malformed case.
       if (typeof StationChatController !== 'undefined') {
         try {
-          StationChatController.initStation(st.stationNumber);
+          StationChatController.initStation(st.stationNumber, st.case);
         } catch (e) {
           console.warn('StationChatController.initStation failed:', e);
         }
@@ -7585,9 +7584,9 @@
           let statusTag = `<span class="badge" style="background:var(--bg-secondary);color:var(--text-muted);font-size:0.75rem;">รอกรอก</span>`;
           if (userVal) {
             if (isMatch) {
-              statusTag = `<span class="badge" style="background:rgba(16,185,129,0.15);color:var(--success);font-size:0.75rem;font-weight:700;">✅ ถูกต้องตรงคีย์ (+${b.score})</span>`;
+              statusTag = `<span class="badge" style="background:rgba(16,185,129,0.15);color:var(--success);font-size:0.75rem;font-weight:700;">✅ Correct (+${b.score})</span>`;
             } else {
-              statusTag = `<span class="badge" style="background:rgba(239,68,68,0.12);color:var(--danger);font-size:0.75rem;">⚠️ รอพิจารณา / ไม่ตรงคีย์</span>`;
+              statusTag = `<span class="badge" style="background:rgba(239,68,68,0.12);color:var(--danger);font-size:0.75rem;font-weight:600;">❌ Wrong</span>`;
             }
           }
 
@@ -7676,11 +7675,11 @@
       typingTimeout: null,
       unreadCount: 0,
       soloMessages: {},
-      aiEnabled: false,
-      aiRole: localStorage.getItem('_ple_ai_role') || 'examiner', // 'examiner' | 'cheater'
+      aiEnabled: localStorage.getItem('_ple_ai_enabled') !== 'false', // default true
+      aiRole: localStorage.getItem('_ple_ai_role') || 'guru', // 'guru' | 'examiner'
       aiSoundEnabled: localStorage.getItem('_ple_ai_sound') !== 'false', // default true
       currentAvatarIndex: 0,
-      currentAvatarType: 'prof', // 'prof' | 'patient' | 'cheater'
+      currentAvatarType: 'guru',
       isListeningVoice: false,
       speechRecognition: null,
       _aiTypingEl: null,
@@ -8176,12 +8175,17 @@
         this._aiTypingEl = null;
       },
 
-      renderAIMessage(replyText) {
+      renderAIMessage(replyText, existingId, skipPush) {
         const container = document.getElementById('station-chat-messages');
         if (!container) return;
+
+        const msgId = existingId || ('ai_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5));
+        if (container.querySelector(`[data-msg-id="${msgId}"]`)) return;
+
         const timeStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
         const el = document.createElement('div');
         el.className = 'st-chat-msg theirs ai-msg';
+        el.setAttribute('data-msg-id', msgId);
 
         const isGuru = (this.aiRole === 'guru');
         const senderEmoji = isGuru ? '🧠' : '👨‍🏫';
@@ -8247,11 +8251,12 @@
         container.appendChild(el);
         container.scrollTop = container.scrollHeight;
 
-        // Also save to soloMessages if in solo mode so history stays intact
-        if (!this.getChatPath(this.currentStationNum)) {
+        const path = this.getChatPath(this.currentStationNum);
+        if (!path) {
+          // Solo Practice Mode: Save to local history
           if (!this.soloMessages[this.currentStationNum]) this.soloMessages[this.currentStationNum] = [];
           this.soloMessages[this.currentStationNum].push({
-            id: 'ai_' + Date.now(),
+            id: msgId,
             senderId: 'gemini_ai_' + this.aiRole,
             senderName: senderTitle,
             senderRole: isGuru ? 'guru' : 'examiner',
@@ -8261,6 +8266,23 @@
             stationNumber: this.currentStationNum,
             isAi: true
           });
+        } else if (!skipPush && typeof _fbDb !== 'undefined' && _fbDb) {
+          // Multiplayer Mode: Push AI message to Firebase for all participants
+          try {
+            _fbDb.ref(path + '/messages').push({
+              id: msgId,
+              senderId: 'gemini_ai_' + this.aiRole,
+              senderName: senderTitle,
+              senderRole: isGuru ? 'guru' : 'examiner',
+              senderEmoji: senderEmoji,
+              text: replyText,
+              timestamp: Date.now(),
+              stationNumber: this.currentStationNum,
+              isAi: true
+            });
+          } catch (e) {
+            console.error('Failed to push AI message to Firebase:', e);
+          }
         }
 
         // 🔊 Speak out loud via Web Speech Synthesis (iOS/Cross-platform)
@@ -8277,7 +8299,9 @@
 
         // 1. Resolve active station & case
         try {
-          if (SimState.stations && SimState.stations.length > 0) {
+          if (this.activeCaseData) {
+            matchedCase = this.activeCaseData;
+          } else if (SimState.stations && SimState.stations.length > 0) {
             let st = null;
             if (SimState.stations[SimState.currentIdx] && SimState.stations[SimState.currentIdx].stationNumber === stNum) {
               st = SimState.stations[SimState.currentIdx];
@@ -8545,9 +8569,10 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         }
       },
 
-      initStation(stNum) {
+      initStation(stNum, caseDataObj) {
         const stationChanged = this.currentStationNum !== stNum;
         this.currentStationNum = stNum;
+        this.activeCaseData = caseDataObj || null;
         this.updateAIBadge();
 
         // Stop anything left over from the previous station (speech, mic, half-typed text)
@@ -8642,7 +8667,12 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             if (msg) {
               const placeholder = document.getElementById('st-chat-empty-placeholder');
               if (placeholder) placeholder.style.display = 'none';
-              this.renderMessage(msg);
+
+              if (msg.isAi) {
+                this.renderAIMessage(msg.text, msg.id, true);
+              } else {
+                this.renderMessage(msg);
+              }
 
               const myId = SimState.myPlayerId || SimState.lobbyPlayerId;
               const isMine = (msg.senderId && msg.senderId === myId) || 
@@ -8740,6 +8770,11 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
           this.setTyping(false);
         } catch (e) {
           console.error('Failed to send station chat message to Firebase:', e);
+        }
+
+        // Multiplayer Mode: If AI is ON, invoke Gemini AI Guru so AI responds!
+        if (this.aiEnabled) {
+          this.callGeminiAI(cleanText);
         }
       },
 
@@ -9675,14 +9710,14 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       const passRate = totalExaminees > 0 ? Math.round((passedCount / totalExaminees) * 100) : 0;
 
       const statsEl = document.getElementById('results-host-summary-stats');
-      if (statsEl) statsEl.textContent = `ผู้เข้าสอบทั้งหมด ${totalExaminees} คน · ผ่านเกณฑ์ ${passedCount} คน (${passRate}%) · ไม่ผ่าน ${failedCount} คน`;
+      if (statsEl) statsEl.textContent = `ผู้เข้าสอบ ${totalExaminees} คน · 🟢 PASSED ${passedCount} (${passRate}%) · 🔴 FAILED ${failedCount} (${totalExaminees > 0 ? (100 - passRate) : 0}%)`;
 
       const bTot = document.getElementById('host-badge-total-part');
-      if (bTot) bTot.textContent = `👤 ผู้เข้าสอบ ${totalExaminees} คน`;
+      if (bTot) bTot.textContent = `👤 ${totalExaminees} คน`;
       const bPass = document.getElementById('host-badge-passed-count');
-      if (bPass) bPass.textContent = `✅ ผ่านเกณฑ์ ${passedCount} คน (${passRate}%)`;
+      if (bPass) bPass.textContent = `✓ PASSED ${passedCount} (${passRate}%)`;
       const bFail = document.getElementById('host-badge-failed-count');
-      if (bFail) bFail.textContent = `❌ ไม่ผ่านเกณฑ์ ${failedCount} คน`;
+      if (bFail) bFail.textContent = `✕ FAILED ${failedCount} (${totalExaminees > 0 ? (100 - passRate) : 0}%)`;
     }
 
     function renderPodiumLeaderboard(leaderboard) {
@@ -9710,11 +9745,10 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
               <span style="font-size: 1.1rem;">${escapeHtml(item.emoji || '👤')}</span>
               <span>${escapeHtml(item.name)}</span>
             </div>
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.35rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(item.detail || '')}</div>
-            <div style="font-size: ${rank === 1 ? '1.25rem' : '1.1rem'}; font-weight: 900; color: ${color}; line-height: 1;">${item.percent}%</div>
+            <div style="font-size: ${rank === 1 ? '1.25rem' : '1.1rem'}; font-weight: 900; color: ${color}; line-height: 1; margin-top: 0.35rem;">${item.percent}%</div>
             <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 0.2rem;">${item.earned} / ${item.max} คะแนน</div>
             <div style="margin-top: 0.4rem;">
-              <span class="badge" style="background: ${isPassed ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)'}; color: ${isPassed ? 'var(--success)' : 'var(--danger)'}; font-size: 0.72rem; padding: 0.15rem 0.45rem;">${isPassed ? 'ผ่านเกณฑ์' : 'ไม่ผ่าน'}</span>
+              <span class="badge" style="background: ${isPassed ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)'}; color: ${isPassed ? 'var(--success)' : 'var(--danger)'}; font-size: 0.72rem; padding: 0.15rem 0.45rem; font-weight: 700;">${isPassed ? 'PASSED' : 'FAILED'}</span>
             </div>
           </div>
           <div style="background: ${color}; color: white; height: ${height}px; display: flex; align-items: center; justify-content: center; font-size: ${rank === 1 ? '2.4rem' : '2rem'}; font-weight: 900; border-radius: 0 0 var(--radius-md) var(--radius-md); box-shadow: inset 0 2px 4px rgba(0,0,0,0.18); font-family: var(--font-title);">${rank}</div>
@@ -9727,7 +9761,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         if (slot3) slot3.innerHTML = renderSlot(null, 3, '🥉', '#d97706', 65, '#b45309');
         const tbody = document.getElementById('podium-full-tbody');
         if (tbody) {
-          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:1.5rem;color:var(--text-muted);">ยังไม่มีข้อมูลคะแนนของผู้เข้าสอบในห้องนี้</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:1.5rem;color:var(--text-muted);">ยังไม่มีข้อมูลคะแนนของผู้เข้าสอบในห้องนี้</td></tr>';
         }
         return;
       }
@@ -9753,11 +9787,10 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
           tr.innerHTML = `
             <td style="text-align: center; font-weight: 800; color: ${rank <= 3 ? 'var(--primary)' : 'var(--text-muted)'};">${medal}#${rank}</td>
             <td><span style="font-size:1.15rem;margin-right:0.35rem;">${escapeHtml(item.emoji || '👤')}</span><strong>${escapeHtml(item.name)}</strong>${isMe ? ' <span style="font-size:0.72rem;background:var(--primary);color:white;padding:0.1rem 0.35rem;border-radius:4px;">คุณ</span>' : ''}</td>
-            <td style="color: var(--text-secondary); font-size: 0.84rem;">${escapeHtml(item.detail || '-')}</td>
             <td style="text-align: right; font-weight: 700;">${item.earned} / ${item.max}</td>
             <td style="text-align: center; font-weight: 800; color: ${item.percent >= 80 ? 'var(--success)' : 'var(--danger)'};">${item.percent}%</td>
             <td style="text-align: center; color: var(--text-secondary);">${item.passedStations} / ${item.totalStations}</td>
-            <td style="text-align: center;"><span class="badge" style="background:${item.isPassed ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)'};color:${item.isPassed ? 'var(--success)' : 'var(--danger)'};font-size:0.75rem;">${item.isPassed ? 'ผ่าน' : 'ตก'}</span></td>
+            <td style="text-align: center;"><span class="badge" style="background:${item.isPassed ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)'};color:${item.isPassed ? 'var(--success)' : 'var(--danger)'};font-size:0.75rem;font-weight:700;">${item.isPassed ? 'PASSED' : 'FAILED'}</span></td>
           `;
           tbody.appendChild(tr);
         });
