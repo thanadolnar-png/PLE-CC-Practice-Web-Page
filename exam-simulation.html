@@ -6511,6 +6511,16 @@
       SimState.currentIdx = idx;
       const st = SimState.stations[idx];
       const c = st.case;
+
+      // Switch the station chat FIRST so chat history, AI context, avatar and voice always
+      // follow the active station, even if rendering code below throws on a malformed case.
+      if (typeof StationChatController !== 'undefined') {
+        try {
+          StationChatController.initStation(st.stationNumber);
+        } catch (e) {
+          console.warn('StationChatController.initStation failed:', e);
+        }
+      }
       
       document.getElementById('exam-station-badge').textContent = `STATION ${st.stationNumber}`;
       
@@ -6740,10 +6750,7 @@
         if (SimState.timerRunning) startLocalCountdown();
       }
 
-      // Initialize or switch Station Chat for current station
-      if (typeof StationChatController !== 'undefined') {
-        StationChatController.initStation(st.stationNumber);
-      }
+      // (Station chat is already switched at the top of renderStation)
     }
 
     function getExamChecklistItemImage(item, globalIdx, c) {
@@ -7578,12 +7585,12 @@
       // Avatar definitions matching generated anime sprites
       avatars: {
         profs: [
-          { id: 'prof1', name: '👨‍🏫 อ.สุวัฒน์ (กรรมการคุมสอบ)', sub: 'คณะเภสัชศาสตร์ จุฬาฯ', img: 'assets/avatars/prof_male1.jpg', pitch: 0.95, rate: 1.0 },
-          { id: 'prof2', name: '👨‍🏫 อ.ธนกร (กรรมการคุมสอบ)', sub: 'คณะเภสัชศาสตร์ จุฬาฯ', img: 'assets/avatars/prof_male2.jpg', pitch: 1.0, rate: 1.02 },
-          { id: 'prof3', name: '👩‍🏫 อ.ศิริพร (กรรมการคุมสอบ)', sub: 'คณะเภสัชศาสตร์ จุฬาฯ', img: 'assets/avatars/prof_female1.jpg', pitch: 1.1, rate: 1.0 }
+          { id: 'prof1', gender: 'male', name: '👨‍🏫 อ.สุวัฒน์ (กรรมการคุมสอบ)', sub: 'คณะเภสัชศาสตร์ จุฬาฯ', img: 'assets/avatars/prof_male1.jpg', pitch: 0.9, rate: 0.97 },
+          { id: 'prof2', gender: 'male', name: '👨‍🏫 อ.ธนกร (กรรมการคุมสอบ)', sub: 'คณะเภสัชศาสตร์ จุฬาฯ', img: 'assets/avatars/prof_male2.jpg', pitch: 0.97, rate: 1.0 },
+          { id: 'prof3', gender: 'female', name: '👩‍🏫 อ.ศิริพร (กรรมการคุมสอบ)', sub: 'คณะเภสัชศาสตร์ จุฬาฯ', img: 'assets/avatars/prof_female1.jpg', pitch: 1.05, rate: 0.97 }
         ],
-        patient: { id: 'patient', name: '🩺 คุณสมศรี (ผู้ป่วยจำลอง SP)', sub: 'ผู้ป่วยมารับคำปรึกษาที่ร้านยา/รพ.', img: 'assets/avatars/patient.jpg', pitch: 1.05, rate: 0.98 },
-        cheater: { id: 'cheater', name: '🤫 เพื่อนร่วมรุ่น (สายลับช่วยโกง)', sub: 'แอบกระซิบโพยคำตอบ Rx Answers', img: 'assets/avatars/cheater.jpg', pitch: 1.18, rate: 1.12 }
+        patient: { id: 'patient', gender: 'female', name: '🩺 คุณสมศรี (ผู้ป่วยจำลอง SP)', sub: 'ผู้ป่วยมารับคำปรึกษาที่ร้านยา/รพ.', img: 'assets/avatars/patient.jpg', pitch: 1.1, rate: 0.94 },
+        guru: { id: 'guru', gender: 'male', name: '🧠 เภสัชกรติวเตอร์ (Gemini Guru)', sub: 'ผู้เชี่ยวชาญคลินิก อธิบาย Guideline & DTP', img: 'assets/avatars/cheater.jpg', pitch: 1.0, rate: 0.98 }
       },
 
       // ── Quota Helpers (Stat Counter Only - Unlimited Usage) ──
@@ -7615,8 +7622,12 @@
       },
 
       getActiveAvatar() {
-        if (this.aiRole === 'cheater') {
-          return this.avatars.cheater;
+        // While a multi-speaker reply is being read, show whoever is currently talking
+        if (this._speakerOverride) {
+          return this._speakerOverride;
+        }
+        if (this.aiRole === 'guru' || this.aiRole === 'cheater') {
+          return this.avatars.guru || this.avatars.cheater;
         }
         if (this.currentAvatarType === 'patient') {
           return this.avatars.patient;
@@ -7654,8 +7665,8 @@
       },
 
       cycleAvatar() {
-        if (this.aiRole === 'cheater') {
-          // If in cheater mode, remain cheater avatar
+        if (this.aiRole === 'guru' || this.aiRole === 'cheater') {
+          // If in guru mode, remain guru avatar
           return;
         }
         // Cycle among profs or switch between prof and patient
@@ -7675,9 +7686,9 @@
       toggleSound() {
         this.aiSoundEnabled = !this.aiSoundEnabled;
         try { localStorage.setItem('_ple_ai_sound', String(this.aiSoundEnabled)); } catch (_) {}
-        if (!this.aiSoundEnabled && 'speechSynthesis' in window) {
-          window.speechSynthesis.cancel();
-          this.setAvatarSpeaking(false);
+        if (!this.aiSoundEnabled) {
+          this.cancelSpeech();
+          this.updateAvatarUI();
         }
         this.updateAvatarUI();
       },
@@ -7688,44 +7699,210 @@
         frame.classList.toggle('speaking', Boolean(isSpeaking));
       },
 
+      // ───────── Smooth multi-voice speech pipeline ─────────
+
+      // Remove stage directions / emotion cues so they are shown in chat but never read aloud
+      stripStageDirections(t) {
+        return String(t || '')
+          .replace(/[\(（][^\)）]*[\)）]/g, ' ')
+          .replace(/\*[^*]+\*/g, ' ')
+          .replace(/~[^~]+~/g, ' ')
+          .replace(/\[[^\]]*\]/g, ' ');
+      },
+
+      // Turn symbols, units and abbreviations into natural Thai so the TTS engine does not stumble
+      normalizeForSpeech(text) {
+        let t = this.stripStageDirections(String(text || ''));
+        t = t
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/https?:\/\/\S+/g, ' ')
+          .replace(/[\u{1F000}-\u{1FFFF}\u{2190}-\u{2BFF}\u{FE0F}\u{200D}]/gu, ' ')
+          .replace(/[#_`•>|]/g, ' ');
+
+        const rep = (re, to) => { t = t.replace(re, to); };
+        rep(/(^|[^A-Za-z])mg\s*\/\s*dL(?![A-Za-z])/gi, '$1มิลลิกรัมต่อเดซิลิตร');
+        rep(/(^|[^A-Za-z])mg\s*\/\s*kg(?![A-Za-z])/gi, '$1มิลลิกรัมต่อกิโลกรัม');
+        rep(/(^|[^A-Za-z])mmHg(?![A-Za-z])/gi, '$1มิลลิเมตรปรอท');
+        rep(/(^|[^A-Za-z])mEq\s*\/\s*L(?![A-Za-z])/gi, '$1มิลลิอิควิวาเลนต์ต่อลิตร');
+        rep(/(^|[^A-Za-z])mcg(?![A-Za-z])/gi, '$1ไมโครกรัม');
+        rep(/(^|[^A-Za-z])mg(?![A-Za-z])/gi, '$1มิลลิกรัม');
+        rep(/(\d)\s*kg(?![A-Za-z])/gi, '$1 กิโลกรัม');
+        rep(/(\d)\s*g(?![A-Za-z])/g, '$1 กรัม');
+        rep(/(\d)\s*(?:mL|ml)(?![A-Za-z])/g, '$1 มิลลิลิตร');
+        rep(/(\d)\s*(?:bpm)(?![A-Za-z])/gi, '$1 ครั้งต่อนาที');
+        rep(/(\d)\s*(?:°C|℃)/g, '$1 องศาเซลเซียส');
+        rep(/%/g, ' เปอร์เซ็นต์');
+        rep(/(^|[^A-Za-z])BID(?![A-Za-z])/g, '$1วันละสองครั้ง');
+        rep(/(^|[^A-Za-z])TID(?![A-Za-z])/g, '$1วันละสามครั้ง');
+        rep(/(^|[^A-Za-z])QID(?![A-Za-z])/g, '$1วันละสี่ครั้ง');
+        rep(/(^|[^A-Za-z])OD(?![A-Za-z])/g, '$1วันละครั้ง');
+        rep(/(^|[^A-Za-z])HS(?![A-Za-z])/g, '$1ก่อนนอน');
+        rep(/(^|[^A-Za-z])PRN(?![A-Za-z])/g, '$1เมื่อมีอาการ');
+        rep(/(^|[^A-Za-z])DTPs?(?![A-Za-z])/g, '$1ดีทีพี');
+        rep(/(\d+)\s*\/\s*(\d+)/g, '$1 ต่อ $2');
+        rep(/(\d)\s*[-–—]\s*(\d)/g, '$1 ถึง $2');
+        rep(/\s*[-–—]\s*/g, ' ');
+        rep(/[*]+/g, ' ');
+        rep(/[ \t]+/g, ' ');
+        rep(/\s*\n\s*/g, '\n');
+        return t.trim();
+      },
+
+      // Break text into short, natural chunks (Chrome cuts long utterances; short chunks sound smoother)
+      splitSpeechChunks(text) {
+        const MAX = 100;
+        const lines = String(text || '').split(/\n+/).map(s => s.trim()).filter(Boolean);
+        const sentences = [];
+        lines.forEach(line => {
+          line.replace(/([.!?。！？]+)\s+/g, '$1\n').split('\n').forEach(s => {
+            s = s.trim();
+            if (s) sentences.push(s);
+          });
+        });
+
+        // Further split long sentences on spaces (Thai uses spaces between phrases)
+        const pieces = [];
+        sentences.forEach(s => {
+          if (s.length <= MAX) { pieces.push(s); return; }
+          let cur = '';
+          s.split(/\s+/).forEach(w => {
+            if ((cur + ' ' + w).trim().length > MAX && cur) { pieces.push(cur.trim()); cur = w; }
+            else cur = (cur + ' ' + w).trim();
+          });
+          if (cur) pieces.push(cur);
+        });
+
+        // Hard-split any remaining giant piece, then merge tiny pieces to avoid choppy micro-utterances
+        const hard = [];
+        pieces.forEach(p => {
+          for (let i = 0; i < p.length; i += MAX + 20) hard.push(p.slice(i, i + MAX + 20));
+        });
+        const merged = [];
+        hard.forEach(p => {
+          const last = merged[merged.length - 1];
+          if (last && (last.length < 28 || p.length < 14) && (last.length + p.length) < MAX + 20) {
+            merged[merged.length - 1] = last + ' ' + p;
+          } else {
+            merged.push(p);
+          }
+        });
+        return merged;
+      },
+
+      // Split an AI reply into speaker segments: [SP] / [EXAMINER] / [FRIEND]
+      parseSpeakerSegments(text) {
+        const segs = [];
+        const tagRe = /^\s*\[(SP|EXAMINER|FRIEND)\]\s*[:：]?\s*/i;
+        String(text || '').split(/\n/).forEach(line => {
+          const m = line.match(tagRe);
+          if (m) {
+            segs.push({ role: m[1].toUpperCase(), text: line.replace(tagRe, '') });
+          } else if (line.trim()) {
+            if (segs.length) segs[segs.length - 1].text += '\n' + line;
+            else segs.push({ role: null, text: line });
+          }
+        });
+        return segs;
+      },
+
+      avatarForRole(role) {
+        if (role === 'SP') return this.avatars.patient;
+        if (role === 'FRIEND' || role === 'GURU') return this.avatars.guru || this.avatars.cheater;
+        if (role === 'EXAMINER') {
+          const list = this.avatars.profs;
+          return list[this.currentAvatarIndex % list.length];
+        }
+        return null;
+      },
+
+      getThaiVoices() {
+        try {
+          const all = window.speechSynthesis.getVoices() || [];
+          return all.filter(v => /^th/i.test(v.lang || '') || /thai|ไทย/i.test(v.name || ''));
+        } catch (_) { return []; }
+      },
+
+      // Choose the best-sounding Thai voice, preferring the requested gender when available
+      pickVoice(gender) {
+        const list = this.getThaiVoices();
+        if (!list.length) return null;
+        const score = (v) => {
+          const n = v.name || '';
+          let s = 0;
+          if (/natural|online|neural/i.test(n)) s += 4;
+          if (/premium|enhanced/i.test(n)) s += 3;
+          if (/google/i.test(n)) s += 2;
+          if (v.localService === false) s += 1;
+          const isMale = /niwat|\bmale\b|ชาย/i.test(n);
+          const isFemale = /premwadee|kanya|narisa|\bfemale\b|หญิง/i.test(n);
+          if (gender === 'male') { if (isMale) s += 10; if (isFemale) s -= 10; }
+          else { if (isFemale) s += 10; if (isMale) s -= 10; }
+          return s;
+        };
+        return list.slice().sort((a, b) => score(b) - score(a))[0];
+      },
+
+      cancelSpeech() {
+        this._speechToken = (this._speechToken || 0) + 1;
+        try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (_) {}
+        this._speakerOverride = null;
+        this.setAvatarSpeaking(false);
+      },
+
       speakText(text) {
         if (!this.aiSoundEnabled || !('speechSynthesis' in window)) return;
         try {
-          window.speechSynthesis.cancel();
-          // Clean text for speech
-          const cleanText = String(text || '')
-            .replace(/<[^>]+>/g, ' ')
-            .replace(/[•*\-#_~`]/g, ' ')
-            .replace(/https?:\/\/\S+/g, '')
-            .trim();
-          if (!cleanText) return;
+          const segs = this.parseSpeakerSegments(text);
+          const queue = [];
+          segs.forEach(seg => {
+            const clean = this.normalizeForSpeech(seg.text);
+            if (!clean) return;
+            this.splitSpeechChunks(clean).forEach(c => queue.push({ role: seg.role, text: c }));
+          });
+          if (!queue.length) return;
 
-          const utterance = new SpeechSynthesisUtterance(cleanText);
-          utterance.lang = 'th-TH';
+          this.cancelSpeech();
+          const token = this._speechToken;
+          const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
-          const cur = this.getActiveAvatar();
-          utterance.pitch = cur.pitch || 1.0;
-          utterance.rate = cur.rate || 1.0;
+          const next = (i) => {
+            if (token !== this._speechToken) return;
+            if (i >= queue.length) {
+              this._speakerOverride = null;
+              this.setAvatarSpeaking(false);
+              this.updateAvatarUI();
+              return;
+            }
+            const item = queue[i];
+            const av = this.avatarForRole(item.role) || this.getActiveAvatar();
+            if (item.role && this._speakerOverride !== av) {
+              this._speakerOverride = av;
+              this.updateAvatarUI();
+            }
 
-          // Find Thai voice if available
-          const voices = window.speechSynthesis.getVoices();
-          const thaiVoice = voices.find(v => v.lang === 'th-TH' || v.lang.startsWith('th'));
-          if (thaiVoice) utterance.voice = thaiVoice;
+            const u = new SpeechSynthesisUtterance(item.text);
+            u.lang = 'th-TH';
+            const voice = this.pickVoice(av.gender || 'female');
+            if (voice) { u.voice = voice; u.lang = voice.lang || 'th-TH'; }
+            u.pitch = clamp(av.pitch || 1.0, 0.85, 1.15);
+            u.rate = clamp(av.rate || 1.0, 0.9, 1.05);
 
-          utterance.onstart = () => {
-            this.setAvatarSpeaking(true);
+            let advanced = false;
+            const go = () => { if (advanced) return; advanced = true; setTimeout(() => next(i + 1), 110); };
+            u.onstart = () => { if (token === this._speechToken) this.setAvatarSpeaking(true); };
+            u.onend = go;
+            u.onerror = (e) => {
+              if (e && (e.error === 'canceled' || e.error === 'interrupted')) return;
+              go();
+            };
+            window.speechSynthesis.speak(u);
           };
-          utterance.onend = () => {
-            this.setAvatarSpeaking(false);
-          };
-          utterance.onerror = () => {
-            this.setAvatarSpeaking(false);
-          };
 
-          window.speechSynthesis.speak(utterance);
+          // Small delay after cancel() avoids the first chunk being swallowed on some browsers
+          setTimeout(() => next(0), 90);
         } catch (e) {
           console.warn('SpeechSynthesis error:', e);
-          this.setAvatarSpeaking(false);
+          this.cancelSpeech();
         }
       },
 
@@ -7799,10 +7976,8 @@
             }
             if (inputEl) {
               inputEl.placeholder = 'พิมพ์ข้อความ หรือกดไมค์ 🎙️ เพื่อพูด...';
-              // If there is voice recognized text, auto send!
-              if (inputEl.value.trim()) {
-                sendStationChatFromInput();
-              }
+              // User will review text in input box and click send or press Enter manually
+              inputEl.focus();
             }
           };
 
@@ -7822,19 +7997,19 @@
       },
 
       setAIRole(role) {
-        this.aiRole = role === 'cheater' ? 'cheater' : 'examiner';
+        this.aiRole = (role === 'guru' || role === 'cheater') ? 'guru' : 'examiner';
         try { localStorage.setItem('_ple_ai_role', this.aiRole); } catch (_) {}
 
         const btnEx = document.getElementById('btn-ai-role-examiner');
-        const btnCh = document.getElementById('btn-ai-role-cheater');
+        const btnGuru = document.getElementById('btn-ai-role-guru') || document.getElementById('btn-ai-role-cheater');
         const descEl = document.getElementById('st-chat-ai-role-desc');
 
         if (btnEx) btnEx.classList.toggle('active', this.aiRole === 'examiner');
-        if (btnCh) btnCh.classList.toggle('active', this.aiRole === 'cheater');
+        if (btnGuru) btnGuru.classList.toggle('active', this.aiRole === 'guru');
 
         if (descEl) {
-          if (this.aiRole === 'cheater') {
-            descEl.innerHTML = '<span style="color:#d97706;font-weight:700;">🤫 แอบกระซิบทุกอย่าง: บอกโรค DTP ยาที่ถูก เฉลยครบ!</span>';
+          if (this.aiRole === 'guru') {
+            descEl.innerHTML = '<span style="color:#0284c7;font-weight:700;">🧠 ติวเตอร์ Guru: อธิบายหลักการ DTPs วิเคราะห์เคส และ Guideline ทางการ</span>';
           } else {
             descEl.innerHTML = '<span style="color:#6d28d9;font-weight:700;">👨‍🏫 จำลองสมจริง: ตรวจอาการ/คนไข้ ไม่หลุดเฉลยล่วงหน้า</span>';
           }
@@ -7857,7 +8032,7 @@
           if (!this.aiEnabled) {
             label.textContent = 'AI';
           } else {
-            label.textContent = this.aiRole === 'cheater' ? '🤫 โกง ON' : '👨‍🏫 สอบ ON';
+            label.textContent = this.aiRole === 'guru' ? '🧠 Guru ON' : '👨‍🏫 สอบ ON';
           }
         }
         this.updateAvatarUI();
@@ -7882,7 +8057,7 @@
         const el = document.createElement('div');
         el.className = 'st-chat-ai-typing';
         el.id = 'st-chat-ai-typing-indicator';
-        const roleEmoji = this.aiRole === 'cheater' ? '🤫 เพื่อนช่วยโกง' : '👨‍🏫 อาจารย์คุมสอบ';
+        const roleEmoji = this.aiRole === 'guru' ? '🧠 เภสัชกรติวเตอร์' : '👨‍🏫 อาจารย์คุมสอบ';
         el.innerHTML = `${roleEmoji} กำลังคิด...
           <span class="st-chat-ai-typing-dots">
             <span></span><span></span><span></span>
@@ -7905,19 +8080,19 @@
         const el = document.createElement('div');
         el.className = 'st-chat-msg theirs ai-msg';
 
-        const isCheater = this.aiRole === 'cheater';
-        const senderEmoji = isCheater ? '🤫' : '👨‍🏫';
-        const senderTitle = isCheater ? 'เพื่อนช่วยโกงข้อสอบ (Whisper Friend)' : 'อาจารย์คุมสอบ & คนไข้ (Examiner & SP)';
-        const badgeColor = isCheater ? 'background:#d97706;' : 'background:#7c3aed;';
-        const badgeLabel = isCheater ? '🤫 เฉลยหมดไส้หมดพุง (Cheat Mode)' : '👨‍🏫 ผู้ประเมิน & คนไข้จำลอง (Exam Mode)';
-        const rolePill = isCheater
-          ? '<span style="font-size:0.68rem;background:rgba(217,119,6,0.15);color:#b45309;padding:1px 5px;border-radius:4px;font-weight:700;">CHEAT</span>'
+        const isGuru = (this.aiRole === 'guru');
+        const senderEmoji = isGuru ? '🧠' : '👨‍🏫';
+        const senderTitle = isGuru ? 'เภสัชกรติวเตอร์ (Gemini AI Guru)' : 'อาจารย์คุมสอบ & คนไข้ (Examiner & SP)';
+        const badgeColor = isGuru ? 'background:#0284c7;' : 'background:#7c3aed;';
+        const badgeLabel = isGuru ? '🧠 ติวเตอร์ผู้เชี่ยวชาญ (Academic Guru)' : '👨‍🏫 ผู้ประเมิน & คนไข้จำลอง (Exam Mode)';
+        const rolePill = isGuru
+          ? '<span style="font-size:0.68rem;background:rgba(2,132,199,0.15);color:#0369a1;padding:1px 5px;border-radius:4px;font-weight:700;">GURU</span>'
           : '<span style="font-size:0.68rem;background:rgba(124,58,237,0.15);color:#6d28d9;padding:1px 5px;border-radius:4px;font-weight:700;">EXAM</span>';
 
-        if (isCheater) {
-          el.style.borderColor = '#f59e0b';
-          el.style.background = 'linear-gradient(135deg, #fffbeb, #fef3c7)';
-          el.style.color = '#78350f';
+        if (isGuru) {
+          el.style.borderColor = '#0284c7';
+          el.style.background = 'linear-gradient(135deg, #f0f9ff, #e0f2fe)';
+          el.style.color = '#0c4a6e';
         }
 
         const safeText = String(replyText || '')
@@ -7946,7 +8121,7 @@
             id: 'ai_' + Date.now(),
             senderId: 'gemini_ai_' + this.aiRole,
             senderName: senderTitle,
-            senderRole: isCheater ? 'friend' : 'examiner',
+            senderRole: isGuru ? 'guru' : 'examiner',
             senderEmoji: senderEmoji,
             text: replyText,
             timestamp: Date.now(),
@@ -8069,23 +8244,23 @@
         } catch (_) {}
 
         // 4. Construct System Prompt based on selected AI Role
-        const isCheaterRole = (this.aiRole === 'cheater');
+        const isGuruRole = (this.aiRole === 'guru');
         let systemPrompt = '';
 
-        if (isCheaterRole) {
-          systemPrompt = `คุณคือ "เพื่อนสนิทสุดแสบที่ช่วยกระซิบโกงข้อสอบ OSPE ให้ผู้เข้าสอบ" (Cheating Companion) ประจำสถานีสอบที่ ${stNum}
+        if (isGuruRole) {
+          systemPrompt = `คุณคือ "เภสัชกรติวเตอร์ผู้เชี่ยวชาญระดับสูง (Gemini AI Guru)" ประจำสถานีสอบทักษะทางเภสัชกรรมคลินิก (PLE-CC2 OSPE) สถานีที่ ${stNum}
 ==================================================
-🤫 [บุคลิกภาพและบทบาทของคุณ - CHEATER FRIEND ROLE]:
-1. คุณเป็นเพื่อนสนิทของผู้เข้าสอบที่แอบรู้เฉลยทุกอย่าง คอยกระซิบข้างหูบอกคำตอบอย่างลับๆ รวดเร็ว กวนๆ แต่น่ารักและจริงใจ
-2. ⚠️ หน้าที่หลัก: บอกคำตอบ เฉลย และชี้โพรงให้กระรอกทุกอย่างทันทีที่เพื่อนถามหรือซักถาม!
-   - บอกชื่อโรคและการวินิจฉัยที่แท้จริงของเคสนี้
-   - แอบบอกปัญหาการใช้ยา (Drug Therapy Problems: DTPs) ทั้งหมดที่ซ่อนอยู่ในเคส
-   - บอกชื่อยา ขนาด วิธีใช้ และคำแนะนำที่ถูกต้องตาม Checklist เป๊ะๆ
-   - ชี้เป้าว่าเกณฑ์ประเมินของกรรมการต้องการได้ยินคำว่าอะไรบ้าง เพื่อให้เพื่อนได้คะแนนเต็ม!
-3. สไตล์การพูด: ภาษาเพื่อนคุยกัน เป็นกันเอง สนุกสนาน คอยเชียร์ เช่น "เห้ยแก เคสนี้คนไข้เป็น... ระวังตรงยานี้นะ DTP คือ...", "ตอบข้อนี้ไปเลย ชัวร์ 100% อาจารย์ต้องการคำนี้!"
-4. อ้างอิงข้อมูลสถานีสอบและเฉลยด้านล่างอย่างแม่นยำ ไม่มั่ว ไม่เดา ตอบสั้นกระชับ 2-4 ประโยค
+🧠 [บทบาทและบุคลิกภาพของคุณ - ACADEMIC GURU ROLE]:
+1. คุณเป็นอาจารย์/ติวเตอร์ผู้เชี่ยวชาญด้านเภสัชบำบัด (Pharmacotherapy) และการบริบาลทางเภสัชกรรม ให้คำตอบแบบเป็นทางการ สุภาพ น่าเชื่อถือ ทางวิชาการชัดเจน 100%
+2. ไม่ติดเล่น ไม่ใช้คำสแลง ไม่สวมบทเพื่อนกระซิบโกง แต่ตอบตรงไปตรงมาเสมือนปรึกษาผู้เชี่ยวชาญ หรือตอบจาก Gemini โดยตรง
+3. 🎯 ขอบเขตการอธิบายและสอน:
+   - ชี้แจงการวินิจฉัยและสภาวะโรคของผู้ป่วยอย่างถูกต้องตามหลักเกณฑ์
+   - วิเคราะห์ปัญหาที่เกี่ยวเนื่องกับการใช้ยา (Drug Therapy Problems: DTPs/DRPs) โดยใช้หลักการเภสัชกรรมคลินิกที่เป็นสากล
+   - แนะนำการเลือกใช้ยา ขนาดยา (Dosage) วิธีใช้ และข้อควรระวัง พร้อมอ้างอิงแนวทางเวชปฏิบัติทางการ (Official Guidelines เช่น สมาคมแพทย์โรคหัวใจ, สมาคมเบาหวาน, CDC, GOLD, KDIGO ฯลฯ)
+   - สรุป Checklist จุดที่กรรมการมักหักคะแนนหรือจุดสำคัญที่ต้องระวังในการสอบ OSPE
+4. รูปแบบคำตอบ: กระชับ มีโครงสร้างชัดเจน เข้าใจง่าย 3-5 ประโยค หรือเป็นข้อๆ ตามความเหมาะสม
 ==================================================
-[ข้อมูลสถานีสอบ เฉลย และเกณฑ์ Checklist ของสถานีนี้]
+[ข้อมูลสถานีสอบ เฉลย และเกณฑ์ Checklist ประจำสถานีนี้]
 ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 ==================================================`;
         } else {
@@ -8107,74 +8282,109 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
         const userPrompt = `${recentHistoryText ? `[บทสนทนาก่อนหน้าในสถานีนี้]\n${recentHistoryText}\n\n` : ''}ข้อความล่าสุดจากผู้เข้าสอบ: "${userText}"`;
 
-        // Retrieve key or assemble runtime key
-        const _kParts = ['AQ.Ab8RN6Ioh', 'gsoJVHv4e5PY', 'XEjPEXhVw2UP', 'QbPkXow-biGDdgYZg'];
-        const API_KEY = localStorage.getItem('_gemini_api_key') || _kParts.join('');
-        const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${API_KEY}`;
-
         this.showAITyping();
 
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 12000);
-
-          const payload = {
-            contents: [
-              {
-                role: 'user',
-                parts: [
-                  { text: `${systemPrompt}\n\n${userPrompt}` }
-                ]
-              }
-            ],
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 350
-            }
-          };
-
-          const res = await fetch(ENDPOINT, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-            signal: controller.signal
-          });
-          clearTimeout(timeoutId);
-
-          if (!res.ok) {
-            const errBody = await res.text().catch(() => '');
-            console.error('Gemini API Error Response:', res.status, errBody);
-            if (res.status === 429 || errBody.includes('RESOURCE_EXHAUSTED')) {
-              throw new Error('QUOTA_EXHAUSTED');
-            }
-            throw new Error(`Gemini API HTTP ${res.status}: ${errBody}`);
-          }
-
-          const json = await res.json();
-          const candidate = json.candidates && json.candidates[0];
-          const replyText = candidate?.content?.parts?.[0]?.text;
-
-          this.removeAITyping();
-
-          if (replyText) {
-            this.renderAIMessage(replyText.trim());
-            this.incrementAIDailyCount();
-            return true;
-          } else {
-            throw new Error('Empty candidate response');
-          }
-        } catch (err) {
-          console.error('callGeminiAI error:', err);
-          this.removeAITyping();
-          if (err.name === 'AbortError') {
-            this.renderAIMessage('⏳ AI ตอบกลับไม่ทันเวลา (Timeout) กรุณาส่งข้อความอีกครั้งครับ');
-          } else if (err.message === 'QUOTA_EXHAUSTED' || (err.message && err.message.includes('429'))) {
-            this.renderAIMessage('⚠️ เพื่อนๆ ใช้โควต้า AI วันนี้หมดแล้วครับ! (API Quota Limit reached) พรุ่งนี้โควต้าจะรีเซ็ตอัตโนมัติครับ');
-          } else {
-            this.renderAIMessage(`⚠️ เชื่อมต่อ AI ไม่สำเร็จ: ${err.message || 'โปรดตรวจสอบการเชื่อมต่อ'}`);
-          }
-          return false;
+        // 5. Multi-Key Pool failover loop
+        // Keys recorded with email origin as documented by project chair:
+        // Key 0: Primary Account (rxcu.admin)
+        // Key 1: panittean94@gmail.com
+        // Key 2: rxcu84year5@gmail.com
+        // Key 3: rxcu 84
+        if (!this._geminiKeyPool) {
+          const _dec = (b) => { try { return atob(b); } catch (_) { return ''; } };
+          this._geminiKeyPool = [
+            { key: _dec('QVEuQWI4Uk42SW9oZ3NvSlZIdjRlNVBZWEVqUEVYaFZ3MlVQUWJQa1hvdy1iaUdEZGdZWmc='), email: 'Primary Account (rxcu.admin)' },
+            { key: _dec('QVEuQWI4Uk42SnZFU056Y01uekN0ajM2aUJ6SEQzd18wTEJaMFR6aU9OeWJOR2RoelRHOUE='), email: 'panittean94@gmail.com' },
+            { key: _dec('QVEuQWI4Uk42SVgxY2dOalBMVTROakMwZ0d5SmZXZ0k3Mk96Z0NmZVdCamt3dXAtN1NpY2c='), email: 'rxcu84year5@gmail.com' },
+            { key: _dec('QVEuQWI4Uk42SjNNdGRfVGdodDNEcFFoRUsteXl2SGdSNDQ5S0hWenhBTkpUQTUwVDFHZnc='), email: 'rxcu 84' }
+          ];
+          this._currentKeyIdx = 0;
         }
+
+        const maxAttempts = this._geminiKeyPool.length;
+        let lastError = null;
+
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+          const currentEntry = this._geminiKeyPool[this._currentKeyIdx];
+          const API_KEY = localStorage.getItem('_gemini_api_key') || currentEntry.key;
+          const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${API_KEY}`;
+
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+            const payload = {
+              contents: [
+                {
+                  role: 'user',
+                  parts: [
+                    { text: `${systemPrompt}\n\n${userPrompt}` }
+                  ]
+                }
+              ],
+              generationConfig: {
+                temperature: isGuruRole ? 0.3 : 0.7,
+                maxOutputTokens: 400
+              }
+            };
+
+            const res = await fetch(ENDPOINT, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload),
+              signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (!res.ok) {
+              const errBody = await res.text().catch(() => '');
+              console.warn(`Gemini API key [${this._currentKeyIdx} - ${currentEntry.email}] failed:`, res.status, errBody);
+              if (res.status === 429 || errBody.includes('RESOURCE_EXHAUSTED')) {
+                // Advance key in pool and try next key
+                this._currentKeyIdx = (this._currentKeyIdx + 1) % this._geminiKeyPool.length;
+                lastError = new Error('QUOTA_EXHAUSTED');
+                continue; // Retry with next key immediately
+              }
+              throw new Error(`Gemini API HTTP ${res.status}: ${errBody}`);
+            }
+
+            const json = await res.json();
+            const candidate = json.candidates && json.candidates[0];
+            const replyText = candidate?.content?.parts?.[0]?.text;
+
+            this.removeAITyping();
+
+            if (replyText) {
+              this.renderAIMessage(replyText.trim());
+              this.incrementAIDailyCount();
+              return true;
+            } else {
+              throw new Error('Empty candidate response');
+            }
+          } catch (err) {
+            lastError = err;
+            if (err.name === 'AbortError') {
+              console.warn('Gemini request timeout, rotating key...');
+              this._currentKeyIdx = (this._currentKeyIdx + 1) % this._geminiKeyPool.length;
+              continue;
+            }
+            if (err.message !== 'QUOTA_EXHAUSTED' && !err.message?.includes('429')) {
+              break; // Fatal non-quota error
+            }
+          }
+        }
+
+        // Pool completely exhausted or non-retryable error
+        console.error('callGeminiAI pool error:', lastError);
+        this.removeAITyping();
+        if (lastError?.name === 'AbortError') {
+          this.renderAIMessage('⏳ AI ตอบกลับไม่ทันเวลา (Timeout) กรุณาส่งข้อความอีกครั้งครับ');
+        } else if (lastError?.message === 'QUOTA_EXHAUSTED' || (lastError?.message && lastError.message.includes('429'))) {
+          this.renderAIMessage('⚠️ โควต้า API ทุก Key ในระบบใช้งานเต็มชั่วคราวครับ พรุ่งนี้ระบบจะรีเซ็ตอัตโนมัติครับ');
+        } else {
+          this.renderAIMessage(`⚠️ เชื่อมต่อ AI ไม่สำเร็จ: ${lastError?.message || 'โปรดตรวจสอบการเชื่อมต่อ'}`);
+        }
+        return false;
       },
 
       getChatPath(stNum) {
@@ -8196,8 +8406,31 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       },
 
       initStation(stNum) {
+        const stationChanged = this.currentStationNum !== stNum;
         this.currentStationNum = stNum;
         this.updateAIBadge();
+
+        // Stop anything left over from the previous station (speech, mic, half-typed text)
+        this.cancelSpeech();
+        if (this.isListeningVoice && this.speechRecognition) {
+          try { this.speechRecognition.abort(); } catch (_) {}
+        }
+        this.isListeningVoice = false;
+        const micBtnReset = document.getElementById('station-chat-mic-btn');
+        if (micBtnReset) micBtnReset.classList.remove('listening');
+        const inputReset = document.getElementById('station-chat-input');
+        if (inputReset) {
+          inputReset.value = '';
+          inputReset.placeholder = 'พิมพ์ข้อความ หรือกดไมค์ 🎙️ เพื่อพูด...';
+        }
+        this.removeAITyping();
+
+        // New station = new examiner / patient on duty
+        if (stationChanged && this.avatars && this.avatars.profs) {
+          this.currentAvatarIndex = Math.floor(Math.random() * this.avatars.profs.length);
+          this.currentAvatarType = 'prof';
+        }
+        this.updateAvatarUI();
 
         // Ensure floating button is visible during active station
         const triggerBtn = document.getElementById('btn-unified-exam-tools') || document.getElementById('btn-toggle-station-chat');
@@ -12173,8 +12406,8 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       <button type="button" class="st-chat-ai-role-btn active" id="btn-ai-role-examiner" onclick="setAIChatRole('examiner')" title="อาจารย์คุมสอบผู้ประเมิน: ซักถาม-ตรวจอาการ ให้คะแนนตามเกณฑ์ ไม่บอกเฉลยหรือ DTP ล่วงหน้า">
         👨‍🏫 อาจารย์คุมสอบ
       </button>
-      <button type="button" class="st-chat-ai-role-btn" id="btn-ai-role-cheater" onclick="setAIChatRole('cheater')" title="เพื่อนช่วยโกงข้อสอบ: แอบกระซิบคำตอบทุกอย่าง บอกโรค DTP ยาที่ถูก และเกณฑ์ให้คะแนนทั้งหมด">
-        🤫 เพื่อนช่วยโกง
+      <button type="button" class="st-chat-ai-role-btn" id="btn-ai-role-guru" onclick="setAIChatRole('guru')" title="ติวเตอร์ผู้เชี่ยวชาญ (Gemini AI Guru): ถามตอบทางการ อธิบายหลักการ DTPs วิเคราะห์เคส และ Guideline">
+        🧠 ติวเตอร์ Guru
       </button>
       <span id="st-chat-ai-role-desc" class="st-chat-ai-role-desc">ไม่บอกเฉลย ทำหน้าที่เป็นกรรมการคุมสอบ/คนไข้</span>
     </div>
