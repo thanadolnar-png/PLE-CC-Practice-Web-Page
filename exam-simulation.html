@@ -2185,7 +2185,7 @@
               <span style="font-size: 0.88rem; color: var(--text-muted); margin-left: 0.5rem;" id="sh-mode-title">ห้องสอบรวม</span>
             </div>
             <div style="display: flex; gap: 0.5rem; align-items: center;">
-              <button type="button" class="btn btn-secondary" style="font-size: 1rem; padding: 0.35rem 0.65rem;" onclick="playStationTimeoutAlarm('bell')" title="สั่นกริ่งเตือน">🔔</button>
+              <button type="button" class="btn btn-secondary" style="font-size: 1rem; padding: 0.35rem 0.65rem;" onclick="broadcastBellSignal()" title="สั่นกริ่งเตือนทุกคนในห้อง">🔔</button>
               <button type="button" class="btn btn-outline" style="font-size: 1rem; padding: 0.35rem 0.65rem;" onclick="toggleSuperHostFullscreen()" title="เต็มจอ Projector">🖥️</button>
               <button type="button" class="btn btn-sm" onclick="abortExamSimulation()" style="color: #ffffff; font-weight: 700; background: #dc2626; border: 1px solid #b91c1c; padding: 0.35rem 0.75rem; border-radius: var(--radius-sm);" title="ยุบห้องสอบและพาผู้เข้าสอบทุกคนกลับหน้าแรก">🛑 ยุติห้องสอบ (Super Host)</button>
             </div>
@@ -4592,6 +4592,15 @@
           SimState.timeoutTransitionMode = room.timeoutTransitionMode;
         }
 
+        // Real-time synchronization of Super Host Bell Chime across all participants
+        if (room.bellSignal && room.bellSignal !== SimState.lastReceivedBellSignal) {
+          const isInitialLoad = !SimState.lastReceivedBellSignal;
+          SimState.lastReceivedBellSignal = room.bellSignal;
+          if (!isInitialLoad && !isHost) {
+            playStationTimeoutAlarm('bell');
+          }
+        }
+
         // Auto-detect breakout table membership for current player
         let foundInBreakout = false;
         if (room.breakouts) {
@@ -6753,7 +6762,7 @@
         document.getElementById('exam-note-content-area').classList.remove('show');
         document.getElementById('exam-toggle-note-btn').textContent = '🔑 แสดงเฉลย / ข้อมูลผู้ตรวจ / บทบาทผู้ป่วยจำลอง';
         renderExamChecklist(st.stationNumber, c);
-      } else if (SimState.role === 'examinee') {
+      } else if (SimState.role === 'examinee' || SimState.role === 'participant') {
         progressCard.style.display = 'none';
         noticeCard.style.display = 'block';
         chkContainer.style.display = 'none';
@@ -6866,6 +6875,15 @@
       renderMiniMap(true);
       
       // Nav buttons
+      // In super-host modes, hide nav for non-controller players (participant/examinee)
+      if (SimState.isLobby && SimState.cachedRoom?.isSuperHost) {
+        const canControl = SimState.isHost || SimState.role === 'examiner';
+        const examNav = document.querySelector('.exam-nav');
+        if (examNav) examNav.style.display = canControl ? 'flex' : 'none';
+        const finishBtn = document.getElementById('btn-finish-exam');
+        if (finishBtn) finishBtn.style.display = canControl ? 'block' : 'none';
+      }
+
       document.getElementById('btn-prev-station').disabled = idx === 0;
       const nextBtn = document.getElementById('btn-next-station');
       if (idx === SimState.stations.length - 1) {
@@ -6878,6 +6896,7 @@
         nextBtn.className = 'btn btn-primary btn-' + nextCat.toLowerCase();
         nextBtn.onclick = nextStation;
       }
+
       
       // Timer per station (solo only, lobby handled separately)
       if (!SimState.isLobby) {
@@ -7340,6 +7359,8 @@
     function nextStation() {
       stopTimeoutAlarmSound();
       if (typeof closeManualTimeoutOverlay === 'function') closeManualTimeoutOverlay();
+      // In Carousel Rotation, only Super Host can change rounds (Examiner stays fixed at their post)
+      if (SimState.examMode === 'carousel_rotation' && SimState.isLobby && !SimState.isHost) return;
       if (SimState.currentIdx < SimState.stations.length - 1) {
         const nextIdx = SimState.currentIdx + 1;
         playStationTimeoutAlarm('bell');
@@ -7383,6 +7404,8 @@
     function prevStation() {
       stopTimeoutAlarmSound();
       if (typeof closeManualTimeoutOverlay === 'function') closeManualTimeoutOverlay();
+      // In Carousel Rotation, only Super Host can change rounds
+      if (SimState.examMode === 'carousel_rotation' && SimState.isLobby && !SimState.isHost) return;
       if (SimState.currentIdx > 0) {
         const prevIdx = SimState.currentIdx - 1;
         playStationTimeoutAlarm('bell');
@@ -10686,6 +10709,20 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       }
     }
     window.playStationTimeoutAlarm = playStationTimeoutAlarm;
+
+    async function broadcastBellSignal() {
+      playStationTimeoutAlarm('bell');
+      if (SimState.isLobby && SimState.roomId && typeof _fbDb !== 'undefined') {
+        try {
+          await _fbDb.ref('rooms/' + SimState.roomId).update({
+            bellSignal: Date.now()
+          });
+        } catch (e) {
+          console.warn('broadcastBellSignal error:', e);
+        }
+      }
+    }
+    window.broadcastBellSignal = broadcastBellSignal;
 
     // ═════════════════════════════════════════════════════════════════
     // CUSTOM EXAM SET ADJUSTER (ปรับแต่งสถานีในชุดข้อสอบ)
