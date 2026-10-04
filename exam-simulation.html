@@ -7461,7 +7461,7 @@ ${caseContext ? '\n[ข้อมูลสถานีสอบปัจจุบ
         // Retrieve key or assemble runtime key
         const _kParts = ['AQ.Ab8RN6Ioh', 'gsoJVHv4e5PY', 'XEjPEXhVw2UP', 'QbPkXow-biGDdgYZg'];
         const API_KEY = localStorage.getItem('_gemini_api_key') || _kParts.join('');
-        const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${API_KEY}`;
+        const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${API_KEY}`;
 
         this.showAITyping();
 
@@ -7493,7 +7493,9 @@ ${caseContext ? '\n[ข้อมูลสถานีสอบปัจจุบ
           clearTimeout(timeoutId);
 
           if (!res.ok) {
-            throw new Error(`Gemini API HTTP ${res.status}`);
+            const errBody = await res.text().catch(() => '');
+            console.error('Gemini API Error Response:', res.status, errBody);
+            throw new Error(`Gemini API HTTP ${res.status}: ${errBody}`);
           }
 
           const json = await res.json();
@@ -7516,7 +7518,7 @@ ${caseContext ? '\n[ข้อมูลสถานีสอบปัจจุบ
           if (err.name === 'AbortError') {
             this.renderAIMessage('⏳ AI ตอบกลับไม่ทันเวลา (Timeout) กรุณาส่งข้อความอีกครั้งครับ');
           } else {
-            this.renderAIMessage('⚠️ ระบบ AI ติดขัดชั่วคราว จึงสลับเป็นข้อความจำลองปกติครับ');
+            this.renderAIMessage(`⚠️ เชื่อมต่อ AI ไม่สำเร็จ: ${err.message || 'โปรดตรวจสอบการเชื่อมต่อ'}`);
           }
           return false;
         }
@@ -7689,34 +7691,20 @@ ${caseContext ? '\n[ข้อมูลสถานีสอบปัจจุบ
 
         const path = this.getChatPath(stNum);
         if (!path) {
-          // Solo Practice Mode: Store locally and simulate prompt response
+          // Solo Practice Mode: Store locally and record user message
           if (!this.soloMessages[stNum]) this.soloMessages[stNum] = [];
           this.soloMessages[stNum].push(msgObj);
           const placeholder = document.getElementById('st-chat-empty-placeholder');
           if (placeholder) placeholder.style.display = 'none';
           this.renderMessage(msgObj);
 
-          // If AI is ON, call Gemini 2.0 Flash Lite
+          // If AI is ON, call Gemini 3.5 Flash Lite
           if (this.aiEnabled) {
             this.callGeminiAI(cleanText);
             return;
           }
 
-          // Simulated SP/Examiner acknowledge response in solo mode
-          setTimeout(() => {
-            const replyObj = {
-              id: 'reply_' + Date.now(),
-              senderId: 'simulated_sp',
-              senderName: 'ผู้ป่วยจำลอง (SP Simulated)',
-              senderRole: 'examiner',
-              senderEmoji: '🩺',
-              text: `รับทราบ: "${cleanText.length > 32 ? cleanText.slice(0, 32) + '...' : cleanText}" (บันทึกข้อมูลเข้าสู่ประวัติสถานีที่ ${stNum} เรียบร้อย)`,
-              timestamp: Date.now(),
-              stationNumber: stNum
-            };
-            this.soloMessages[stNum].push(replyObj);
-            this.renderMessage(replyObj);
-          }, 800);
+          // In Solo mode when AI is OFF: do not post simulated acknowledge spam
           return;
         }
 
@@ -7770,7 +7758,7 @@ ${caseContext ? '\n[ข้อมูลสถานีสอบปัจจุบ
 
         const path = this.getChatPath(stNum);
         if (!path) {
-          // Solo Practice Mode: Store locally and simulate prompt response
+          // Solo Practice Mode: Store locally
           if (!this.soloMessages[stNum]) this.soloMessages[stNum] = [];
           this.soloMessages[stNum].push(msgObj);
           const placeholder = document.getElementById('st-chat-empty-placeholder');
@@ -7781,22 +7769,6 @@ ${caseContext ? '\n[ข้อมูลสถานีสอบปัจจุบ
           if (!this.isOpen) {
             this.toggleDrawer();
           }
-
-          // Simulated SP/Examiner response in solo mode
-          setTimeout(() => {
-            const replyObj = {
-              id: 'reply_' + Date.now(),
-              senderId: 'simulated_sp',
-              senderName: 'ผู้ประเมิน (Examiner Simulated)',
-              senderRole: 'examiner',
-              senderEmoji: '🩺',
-              text: `✅ ได้รับ "${msgObj.labelName}" เรียบร้อยแล้ว (กำลังตรวจความถูกต้องของฉลากยาและคำแนะนำ)`,
-              timestamp: Date.now(),
-              stationNumber: stNum
-            };
-            this.soloMessages[stNum].push(replyObj);
-            this.renderMessage(replyObj);
-          }, 900);
           return;
         }
 
@@ -7929,6 +7901,7 @@ ${caseContext ? '\n[ข้อมูลสถานีสอบปัจจุบ
         } catch (e) {}
       }
     };
+    window.StationChatController = StationChatController;
 
     function toggleStationChatDrawer() {
       StationChatController.toggleDrawer();

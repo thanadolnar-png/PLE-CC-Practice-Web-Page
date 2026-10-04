@@ -1129,9 +1129,10 @@
       const currentLbl = stData.labels[stData.activeLabelIndex] || { name: 'ฉลากยา RxCU' };
       const labelDataUrl = this.dom.canvas.toDataURL('image/png');
 
-      // Check if StationChatController exists
-      if (window.StationChatController && typeof window.StationChatController.sendDrugLabelMessage === 'function') {
-        window.StationChatController.sendDrugLabelMessage({
+      const chatCtrl = window.StationChatController || (typeof StationChatController !== 'undefined' ? StationChatController : null);
+
+      if (chatCtrl && typeof chatCtrl.sendDrugLabelMessage === 'function') {
+        chatCtrl.sendDrugLabelMessage({
           labelIndex: stData.activeLabelIndex + 1,
           labelName: currentLbl.name,
           imageData: labelDataUrl
@@ -1140,8 +1141,8 @@
         // Show brief confirmation toast
         this.showToast(`✅ ส่ง "${currentLbl.name}" เข้าแชทสถานีสอบแล้ว!`);
       } else {
-        // Fallback: alert
-        alert(`บันทึกภาพ "${currentLbl.name}" เรียบร้อยแล้ว (จะปรากฏในแชทเมื่อเริ่มสถานีสอบ)`);
+        // If chat controller isn't accessible (e.g. standalone case viewer)
+        this.showToast(`💾 บันทึกภาพ "${currentLbl.name}" เรียบร้อยแล้ว`);
       }
     },
 
