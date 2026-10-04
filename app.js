@@ -764,6 +764,7 @@ async function refreshCaseLibraryFromLive(showToasts = true) {
 }
 window.refreshCaseLibraryFromLive = refreshCaseLibraryFromLive;
 
+/**
  * Decrypt AES-256-GCM encrypted case data with PBKDF2 key derivation
  */
 async function decryptCaseData(encryptedObj, password) {
