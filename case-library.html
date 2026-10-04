@@ -110,8 +110,11 @@
               </button>
             </div>
             
-            <!-- Action Buttons: Print & Report -->
+            <!-- Action Buttons: Sync Live Data, Print & Report -->
             <div class="filter-actions-row">
+              <button type="button" class="btn-filter-action" onclick="refreshCaseLibraryFromLive(true)" id="btn-sync-live-library" title="ดึงข้อมูลเคสล่าสุดจาก Google Sheets/Docs">
+                🔄 อัปเดตข้อมูล
+              </button>
               <button type="button" class="btn-filter-action btn-print-action" onclick="openBatchPrintModal()" title="สั่งพิมพ์หลายเคส">
                 🖨️ สั่งพิมพ์
               </button>
@@ -119,6 +122,7 @@
                 🚨 แจ้งปัญหา
               </button>
             </div>
+
           </div>
         </aside>
 

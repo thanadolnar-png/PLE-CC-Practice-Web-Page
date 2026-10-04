@@ -711,8 +711,59 @@ async function loadCasesData() {
   }
 }
 
-
 /**
+ * refreshCaseLibraryFromLive — ปุ่มดึงข้อมูลคลังเคสสดจาก Google Apps Script API
+ */
+async function refreshCaseLibraryFromLive(showToasts = true) {
+  const btn = document.getElementById('btn-sync-live-library');
+  const origText = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '⏳ กำลังอัปเดต...';
+  }
+  if (showToasts && typeof showToast === 'function') {
+    showToast('⏳ กำลังดึงข้อมูลเคสล่าสุดจาก Google Apps Script...', 'info');
+  }
+  try {
+    const cacheBuster = new Date().getTime();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
+    const response = await fetch(`${currentApiUrl}?action=getCaseList&_cb=${cacheBuster}`, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    const result = await response.json();
+    if (result.success && result.data && result.data.cases && result.data.cases.length > 0) {
+      let fetchedCases = result.data.cases;
+      if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+        fetchedCases = fetchedCases.map(apiCase => {
+          const offlineMatch = OFFLINE_DATA.cases.find(o => o.caseId === apiCase.caseId);
+          return offlineMatch ? Object.assign({}, offlineMatch, apiCase) : apiCase;
+        });
+      }
+      AppState.cases = fetchedCases.filter(isCaseActive);
+      safeSetLocalStorage('ospe_cached_case_list', JSON.stringify(AppState.cases));
+      onCasesLoaded();
+      if (showToasts && typeof showToast === 'function') {
+        showToast(`✅ อัปเดตคลังเคสสำเร็จ! (พบทั้งหมด ${AppState.cases.length} เคส)`, 'success');
+      }
+    } else {
+      if (showToasts && typeof showToast === 'function') {
+        showToast('⚠️ ไม่พบข้อมูลเคสใหม่จาก Google Docs (ใช้ข้อมูลเดิมในเครื่อง)', 'warning');
+      }
+    }
+  } catch (e) {
+    console.error('Refresh case library failed:', e);
+    if (showToasts && typeof showToast === 'function') {
+      showToast('❌ ไม่สามารถเชื่อมต่อ Google API ได้ในขณะนี้', 'error');
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = origText;
+    }
+  }
+}
+window.refreshCaseLibraryFromLive = refreshCaseLibraryFromLive;
+
  * Decrypt AES-256-GCM encrypted case data with PBKDF2 key derivation
  */
 async function decryptCaseData(encryptedObj, password) {
