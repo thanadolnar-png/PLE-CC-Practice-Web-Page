@@ -34,13 +34,15 @@
 
     avatars: {
       profs: [
-        { id: 'prof1', gender: 'male', name: '👨‍🏫 อ.สุวัฒน์ (กรรมการคุมสอบ)', sub: 'คณะเภสัชศาสตร์ จุฬาฯ', img: 'assets/avatars/prof_male1.jpg', pitch: 0.9, rate: 0.97 },
-        { id: 'prof2', gender: 'male', name: '👨‍🏫 อ.ธนกร (กรรมการคุมสอบ)', sub: 'คณะเภสัชศาสตร์ จุฬาฯ', img: 'assets/avatars/prof_male2.jpg', pitch: 0.97, rate: 1.0 },
-        { id: 'prof3', gender: 'female', name: '👩‍🏫 อ.ศิริพร (กรรมการคุมสอบ)', sub: 'คณะเภสัชศาสตร์ จุฬาฯ', img: 'assets/avatars/prof_female1.jpg', pitch: 1.05, rate: 0.97 }
+        { id: 'prof1', gender: 'male', name: '👨‍🏫 อ.สุวัฒน์ (กรรมการคุมสอบ)', sub: 'คณะเภสัชศาสตร์ จุฬาฯ', img: 'assets/avatars/prof_male1.jpg', pitch: 0.9, rate: 0.97, geminiVoice: 'Charon', stylePrompt: 'พูดด้วยน้ำเสียงสุขุม เป็นทางการ ชัดถ้อยชัดคำ เคร่งขรึม ราวกับอาจารย์เภสัชศาสตร์ผู้ทรงคุณวุฒิ' },
+        { id: 'prof2', gender: 'male', name: '👨‍🏫 อ.ธนกร (กรรมการคุมสอบ)', sub: 'คณะเภสัชศาสตร์ จุฬาฯ', img: 'assets/avatars/prof_male2.jpg', pitch: 0.97, rate: 1.0, geminiVoice: 'Fenrir', stylePrompt: 'พูดด้วยน้ำเสียงเข้มงวด ช่างสังเกต ตั้งคำถามกระตุ้นความคิดอย่างจริงจัง' },
+        { id: 'prof3', gender: 'female', name: '👩‍🏫 อ.ศิริพร (กรรมการคุมสอบ)', sub: 'คณะเภสัชศาสตร์ จุฬาฯ', img: 'assets/avatars/prof_female1.jpg', pitch: 1.05, rate: 0.97, geminiVoice: 'Aoede', stylePrompt: 'พูดด้วยน้ำเสียงอาจารย์หญิง เมตตาแต่รอบคอบ ให้คำแนะนำทางวิชาการอย่างละเอียดอ่อน' }
       ],
-      patient: { id: 'patient', gender: 'female', name: '🩺 คุณสมศรี (ผู้ป่วยจำลอง SP)', sub: 'ผู้ป่วยมารับคำปรึกษาที่ร้านยา/รพ.', img: 'assets/avatars/patient.jpg', pitch: 1.1, rate: 0.94 },
-      guru: { id: 'guru', gender: 'male', name: '🧠 เภสัชกรติวเตอร์ (Gemini Guru)', sub: 'ผู้เชี่ยวชาญคลินิก อธิบาย Guideline & DTP', img: 'assets/avatars/cheater.jpg', pitch: 1.0, rate: 0.98 }
+      patient: { id: 'patient', gender: 'female', name: '🩺 คุณสมศรี (ผู้ป่วยจำลอง SP)', sub: 'ผู้ป่วยมารับคำปรึกษาที่ร้านยา/รพ.', img: 'assets/avatars/patient.jpg', pitch: 1.1, rate: 0.94, geminiVoice: 'Kore', stylePrompt: 'พูดด้วยน้ำเสียงคนไข้ มีความกังวล เหนื่อยล้า หรือเจ็บปวดตามอาการ แสดงอารมณ์สมจริงเหมือนผู้ป่วยจริงที่มาพบเภสัชกร' },
+      guru: { id: 'guru', gender: 'male', name: '🧠 เภสัชกรติวเตอร์ (Gemini Guru)', sub: 'ผู้เชี่ยวชาญคลินิก อธิบาย Guideline & DTP', img: 'assets/avatars/cheater.jpg', pitch: 1.0, rate: 0.98, geminiVoice: 'Puck', stylePrompt: 'พูดด้วยน้ำเสียงกระฉับกระเฉง อบอุ่น มั่นใจ เป็นกันเอง เชิงติวเตอร์ผู้เชี่ยวชาญคลินิก' }
     },
+    _geminiAudioCache: {},
+    _currentAudioEl: null,
 
     getAIDailyCount() {
       try {
@@ -271,13 +273,142 @@
 
     cancelSpeech() {
       this._speechToken = (this._speechToken || 0) + 1;
+      if (this._currentAudioEl) {
+        try {
+          this._currentAudioEl.pause();
+          this._currentAudioEl.currentTime = 0;
+          this._currentAudioEl = null;
+        } catch (_) {}
+      }
       try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (_) {}
       this._speakerOverride = null;
       this.setAvatarSpeaking(false);
     },
 
-    speakText(text) {
-      if (!this.aiSoundEnabled || !('speechSynthesis' in window)) return;
+    async fetchGeminiAudioWav(cleanText, av) {
+      if (!cleanText || !cleanText.trim()) return null;
+      const voiceName = av.geminiVoice || 'Charon';
+      const cacheKey = `${voiceName}:${cleanText.trim()}`;
+      if (this._geminiAudioCache[cacheKey]) {
+        return this._geminiAudioCache[cacheKey];
+      }
+
+      if (!this._geminiKeyPool) {
+        const _dec = (b) => { try { return atob(b); } catch (_) { return ''; } };
+        this._geminiKeyPool = [
+          { key: _dec('QVEuQWI4Uk42SW9oZ3NvSlZIdjRlNVBZWEVqUEVYaFZ3MlVQUWJQa1hvdy1iaUdEZGdZWmc='), email: 'Primary Account (rxcu.admin)' },
+          { key: _dec('QVEuQWI4Uk42SnZFU056Y01uekN0ajM2aUJ6SEQzd18wTEJaMFR6aU9OeWJOR2RoelRHOUE='), email: 'panittean94@gmail.com' },
+          { key: _dec('QVEuQWI4Uk42SVgxY2dOalBMVTROakMwZ0d5SmZXZ0k3Mk96Z0NmZVdCamt3dXAtN1NpY2c='), email: 'rxcu84year5@gmail.com' },
+          { key: _dec('QVEuQWI4Uk42SjNNdGRfVGdodDNEcFFoRUsteXl2SGdSNDQ5S0hWenhBTkpUQTUwVDFHZnc='), email: 'rxcu 84' }
+        ];
+        this._currentKeyIdx = 0;
+      }
+
+      const styleInstr = av.stylePrompt ? `[คำสั่งน้ำเสียงและอารมณ์: ${av.stylePrompt}]\n` : '';
+      const promptText = `${styleInstr}${cleanText}`;
+
+      const maxAttempts = this._geminiKeyPool.length;
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const currentEntry = this._geminiKeyPool[this._currentKeyIdx];
+        const API_KEY = localStorage.getItem('_gemini_api_key') || currentEntry.key;
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash-lite-tts:generateContent?key=${API_KEY}`;
+
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+          const payload = {
+            contents: [{ role: 'user', parts: [{ text: promptText }] }],
+            generationConfig: {
+              responseModalities: ['AUDIO'],
+              speechConfig: {
+                voiceConfig: {
+                  prebuiltVoiceConfig: {
+                    voiceName: voiceName
+                  }
+                }
+              }
+            }
+          };
+
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+
+          if (!res.ok) {
+            if (res.status === 429) {
+              this._currentKeyIdx = (this._currentKeyIdx + 1) % this._geminiKeyPool.length;
+              continue;
+            }
+            break;
+          }
+
+          const json = await res.json();
+          const base64Data = json.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+          const mimeType = json.candidates?.[0]?.content?.parts?.[0]?.inlineData?.mimeType || 'audio/wav';
+
+          if (base64Data) {
+            const dataUrl = `data:${mimeType};base64,${base64Data}`;
+            this._geminiAudioCache[cacheKey] = dataUrl;
+            return dataUrl;
+          }
+        } catch (fetchErr) {
+          if (fetchErr.name === 'AbortError') {
+            this._currentKeyIdx = (this._currentKeyIdx + 1) % this._geminiKeyPool.length;
+            continue;
+          }
+        }
+      }
+      return null;
+    },
+
+    playFallbackSpeech(queue, token) {
+      if (token !== this._speechToken) return;
+      if (!('speechSynthesis' in window)) return;
+      const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
+      const nextFallback = (i) => {
+        if (token !== this._speechToken) return;
+        if (i >= queue.length) {
+          this._speakerOverride = null;
+          this.setAvatarSpeaking(false);
+          this.updateAvatarUI();
+          return;
+        }
+        const item = queue[i];
+        const av = this.avatarForRole(item.role) || this.getActiveAvatar();
+        if (item.role && this._speakerOverride !== av) {
+          this._speakerOverride = av;
+          this.updateAvatarUI();
+        }
+
+        const u = new SpeechSynthesisUtterance(item.text);
+        u.lang = 'th-TH';
+        const voice = this.pickVoice(av.gender || 'female');
+        if (voice) { u.voice = voice; u.lang = voice.lang || 'th-TH'; }
+        u.pitch = clamp(av.pitch || 1.0, 0.85, 1.15);
+        u.rate = clamp(av.rate || 1.0, 0.9, 1.05);
+
+        let advanced = false;
+        const go = () => { if (advanced) return; advanced = true; setTimeout(() => nextFallback(i + 1), 110); };
+        u.onstart = () => { if (token === this._speechToken) this.setAvatarSpeaking(true); };
+        u.onend = go;
+        u.onerror = (e) => {
+          if (e && (e.error === 'canceled' || e.error === 'interrupted')) return;
+          go();
+        };
+        window.speechSynthesis.speak(u);
+      };
+
+      setTimeout(() => nextFallback(0), 50);
+    },
+
+    async speakText(text) {
+      if (!this.aiSoundEnabled) return;
       try {
         const segs = this.parseSpeakerSegments(text);
         const queue = [];
@@ -290,9 +421,9 @@
 
         this.cancelSpeech();
         const token = this._speechToken;
-        const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
-        const next = (i) => {
+        // Step 1: Try Gemini AI Audio TTS (Realistic Human Voices with Emotions)
+        const playGeminiChain = async (i) => {
           if (token !== this._speechToken) return;
           if (i >= queue.length) {
             this._speakerOverride = null;
@@ -307,27 +438,42 @@
             this.updateAvatarUI();
           }
 
-          const u = new SpeechSynthesisUtterance(item.text);
-          u.lang = 'th-TH';
-          const voice = this.pickVoice(av.gender || 'female');
-          if (voice) { u.voice = voice; u.lang = voice.lang || 'th-TH'; }
-          u.pitch = clamp(av.pitch || 1.0, 0.85, 1.15);
-          u.rate = clamp(av.rate || 1.0, 0.9, 1.05);
+          const audioUrl = await this.fetchGeminiAudioWav(item.text, av);
+          if (token !== this._speechToken) return;
 
-          let advanced = false;
-          const go = () => { if (advanced) return; advanced = true; setTimeout(() => next(i + 1), 110); };
-          u.onstart = () => { if (token === this._speechToken) this.setAvatarSpeaking(true); };
-          u.onend = go;
-          u.onerror = (e) => {
-            if (e && (e.error === 'canceled' || e.error === 'interrupted')) return;
-            go();
-          };
-          window.speechSynthesis.speak(u);
+          if (audioUrl) {
+            // Play realistic audio
+            const audio = new Audio(audioUrl);
+            this._currentAudioEl = audio;
+            audio.onplay = () => {
+              if (token === this._speechToken) this.setAvatarSpeaking(true);
+            };
+            audio.onended = () => {
+              if (token === this._speechToken) {
+                this.setAvatarSpeaking(false);
+                setTimeout(() => playGeminiChain(i + 1), 120);
+              }
+            };
+            audio.onerror = () => {
+              // Single piece error -> fallback rest to Web Speech API
+              this.playFallbackSpeech(queue.slice(i), token);
+            };
+            try {
+              await audio.play();
+            } catch (playErr) {
+              console.warn('Audio play prevented or error, falling back:', playErr);
+              this.playFallbackSpeech(queue.slice(i), token);
+            }
+          } else {
+            // Gemini TTS quota exhausted (429) or offline -> Fallback seamlessly to native browser TTS
+            console.info('Gemini TTS unavailable, fallback to Web Speech API');
+            this.playFallbackSpeech(queue.slice(i), token);
+          }
         };
 
-        setTimeout(() => next(0), 90);
+        playGeminiChain(0);
       } catch (e) {
-        console.warn('SpeechSynthesis error:', e);
+        console.warn('speakText error:', e);
         this.cancelSpeech();
       }
     },
