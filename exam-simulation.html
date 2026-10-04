@@ -5033,6 +5033,7 @@
 
             // If we reached here, decryption test passed! Decrypt all locked stations in the set
             const unlockedMap = {};
+            sessionStorage.setItem('ple_saved_passcode', pwd);
             for (const st of stillLocked) {
               const cleanId = (st.case.caseId || '').trim();
               let encObj = st.case;
@@ -5048,6 +5049,10 @@
                     st.case = Object.assign({}, st.case, dec);
                     SimState.unlockedCases[cleanId] = dec;
                     sessionStorage.setItem('sim_unlocked_' + cleanId, JSON.stringify(dec));
+                    sessionStorage.setItem('ple_unlocked_' + cleanId, JSON.stringify(dec));
+                    if (!cleanId.startsWith('OSPE-')) {
+                      sessionStorage.setItem('ple_unlocked_OSPE-' + cleanId, JSON.stringify(dec));
+                    }
                     unlockedMap[cleanId] = dec;
                   }
                 } catch(decErr) {
@@ -10264,7 +10269,11 @@
       const raw = (window.OFFLINE_CASE_DETAILS && (window.OFFLINE_CASE_DETAILS[cleanId] || window.OFFLINE_CASE_DETAILS[cleanId.toLowerCase()] || window.OFFLINE_CASE_DETAILS[cleanId.toUpperCase()])) || (typeof AppState !== 'undefined' && AppState.cases && AppState.cases.find(x => x.caseId && x.caseId.toLowerCase() === cleanId.toLowerCase()));
       
       if (raw && (raw.password === pwd || (raw.password && raw.password.toLowerCase() === pwd.toLowerCase()))) {
+        sessionStorage.setItem('ple_saved_passcode', pwd);
         sessionStorage.setItem('ple_unlocked_' + cleanId, JSON.stringify(raw));
+        if (!cleanId.startsWith('OSPE-')) {
+          sessionStorage.setItem('ple_unlocked_OSPE-' + cleanId, JSON.stringify(raw));
+        }
         openStationCasePreview(cleanId, stNum);
         return;
       }
@@ -10273,7 +10282,11 @@
         try {
           const dec = await window.decryptCaseData(raw, pwd);
           if (dec) {
+            sessionStorage.setItem('ple_saved_passcode', pwd);
             sessionStorage.setItem('ple_unlocked_' + cleanId, JSON.stringify(dec));
+            if (!cleanId.startsWith('OSPE-')) {
+              sessionStorage.setItem('ple_unlocked_OSPE-' + cleanId, JSON.stringify(dec));
+            }
             openStationCasePreview(cleanId, stNum);
             return;
           }

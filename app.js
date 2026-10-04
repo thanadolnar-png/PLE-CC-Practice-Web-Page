@@ -2662,6 +2662,7 @@ async function executeBatchPrint() {
   const allMeta = (AppState.cases && AppState.cases.length > 0) ? AppState.cases : 
                   ((typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) ? OFFLINE_DATA.cases : []);
 
+  let lastUsedPasscode = sessionStorage.getItem('ple_saved_passcode') || '';
   const caseList = [];
   for (const cid of Array.from(selectedBatchCaseIds)) {
     const base = allMeta.find(x => x.caseId === cid) || { caseId: cid };
@@ -2684,19 +2685,41 @@ async function executeBatchPrint() {
         } catch(e) {}
       }
 
-      // If still encrypted, prompt for passcode
+      // 1. Try saved / previously entered passcode first (No prompt needed!)
+      if (details.isEncrypted && (!details.scenario && !details.checklist) && lastUsedPasscode && typeof window.decryptCaseData === 'function') {
+        try {
+          const dec = await window.decryptCaseData(details, lastUsedPasscode.trim());
+          if (dec && (dec.scenario || dec.checklist)) {
+            const curVer = (typeof DB_VERSION_STR !== 'undefined' ? DB_VERSION_STR : '');
+            const wrapped = Object.assign({}, dec, { _db_version: curVer });
+            sessionStorage.setItem('ple_unlocked_' + cid, JSON.stringify(wrapped));
+            sessionStorage.setItem('viewer_unlocked_' + cid, JSON.stringify(wrapped));
+            if (!cid.startsWith('OSPE-')) {
+              sessionStorage.setItem('ple_unlocked_OSPE-' + cid, JSON.stringify(wrapped));
+            }
+            details = Object.assign({}, details, dec);
+          }
+        } catch(e) {}
+      }
+
+      // 2. If still encrypted, prompt for passcode ONCE
       if (details.isEncrypted && (!details.scenario && !details.checklist)) {
         showGlobalLoader(false);
-        const pwd = prompt(`🔒 เคส ${cid} เป็นข้อสอบลับที่มีรหัสผ่าน\nกรุณากรอกรหัสผ่านเพื่อปลดล็อกเนื้อหาสำหรับพิมพ์:`);
+        const pwd = prompt(`🔒 มีข้อสอบลับที่มีรหัสผ่าน (เช่น เคส ${cid})\nกรุณากรอกรหัสผ่านเพื่อปลดล็อกเนื้อหาสำหรับพิมพ์ (ระบบจะใช้รหัสนี้ปลดล็อกเคสอื่นในชุดเดียวกันอัตโนมัติ):`);
         if (pwd && typeof window.decryptCaseData === 'function') {
+          lastUsedPasscode = pwd.trim();
+          sessionStorage.setItem('ple_saved_passcode', lastUsedPasscode);
           showGlobalLoader(true, `กำลังถอดรหัสเคส ${cid}...`);
           try {
-            const dec = await window.decryptCaseData(details, pwd.trim());
+            const dec = await window.decryptCaseData(details, lastUsedPasscode);
             if (dec && (dec.scenario || dec.checklist)) {
               const curVer = (typeof DB_VERSION_STR !== 'undefined' ? DB_VERSION_STR : '');
               const wrapped = Object.assign({}, dec, { _db_version: curVer });
               sessionStorage.setItem('ple_unlocked_' + cid, JSON.stringify(wrapped));
               sessionStorage.setItem('viewer_unlocked_' + cid, JSON.stringify(wrapped));
+              if (!cid.startsWith('OSPE-')) {
+                sessionStorage.setItem('ple_unlocked_OSPE-' + cid, JSON.stringify(wrapped));
+              }
               details = Object.assign({}, details, dec);
             } else {
               alert(`❌ รหัสผ่านของเคส ${cid} ไม่ถูกต้อง เคสนี้จะไม่ถูกพิมพ์เนื้อหา`);

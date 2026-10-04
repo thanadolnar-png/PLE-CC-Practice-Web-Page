@@ -519,6 +519,7 @@
           
           const curVer = (typeof DB_VERSION_STR !== 'undefined' ? DB_VERSION_STR : '') || (typeof OFFLINE_DATA !== 'undefined' ? OFFLINE_DATA.version : '');
           const wrapped = Object.assign({}, dec, { _db_version: curVer });
+          sessionStorage.setItem('ple_saved_passcode', pwd);
           sessionStorage.setItem('ple_unlocked_' + caseId, JSON.stringify(wrapped));
           sessionStorage.setItem('viewer_unlocked_' + caseId, JSON.stringify(wrapped));
           if (!caseId.startsWith('OSPE-')) {
@@ -590,6 +591,29 @@
             }
           } catch (e) {}
         }
+
+        // Try saved passcode from session automatically before prompting
+        const savedPasscode = sessionStorage.getItem('ple_saved_passcode');
+        if (savedPasscode && typeof window.decryptCaseData === 'function') {
+          try {
+            const dec = await window.decryptCaseData(offlineCase, savedPasscode.trim());
+            if (dec && (dec.scenario || dec.checklist)) {
+              const wrapped = Object.assign({}, dec, { _db_version: curVer });
+              sessionStorage.setItem('ple_unlocked_' + cleanId, JSON.stringify(wrapped));
+              sessionStorage.setItem('viewer_unlocked_' + cleanId, JSON.stringify(wrapped));
+              if (!cleanId.startsWith('OSPE-')) {
+                sessionStorage.setItem('ple_unlocked_OSPE-' + cleanId, JSON.stringify(wrapped));
+                sessionStorage.setItem('viewer_unlocked_OSPE-' + cleanId, JSON.stringify(wrapped));
+              }
+              AppState.currentCase = dec;
+              renderCaseDetail(dec);
+              setViewerRole(currentRole);
+              showGlobalLoader(false);
+              return;
+            }
+          } catch(e) {}
+        }
+
         showCasePasscodeModal(offlineCase, cleanId);
         return;
       }
@@ -1290,11 +1314,29 @@
     }
 
     // ─── Single Case Custom Print System ──────────────────────────────────
-    function openSingleCasePrintModal() {
-      const c = AppState.currentCase;
+    async function openSingleCasePrintModal() {
+      let c = AppState.currentCase;
       if (c && (c.isEncrypted || c.isProtected || c.hasPassword) && (!c.scenario && !c.checklist)) {
-        showCasePasscodeModal(c, c.caseId || activeCaseId);
-        return;
+        const savedPasscode = sessionStorage.getItem('ple_saved_passcode');
+        if (savedPasscode && typeof window.decryptCaseData === 'function') {
+          try {
+            const dec = await window.decryptCaseData(c, savedPasscode.trim());
+            if (dec && (dec.scenario || dec.checklist)) {
+              const curVer = (typeof DB_VERSION_STR !== 'undefined' ? DB_VERSION_STR : '') || (typeof OFFLINE_DATA !== 'undefined' ? OFFLINE_DATA.version : '');
+              const wrapped = Object.assign({}, dec, { _db_version: curVer });
+              const cid = c.caseId || activeCaseId;
+              sessionStorage.setItem('ple_unlocked_' + cid, JSON.stringify(wrapped));
+              sessionStorage.setItem('viewer_unlocked_' + cid, JSON.stringify(wrapped));
+              AppState.currentCase = dec;
+              renderCaseDetail(dec);
+              c = dec;
+            }
+          } catch(e) {}
+        }
+        if (c && (c.isEncrypted || c.isProtected || c.hasPassword) && (!c.scenario && !c.checklist)) {
+          showCasePasscodeModal(c, c.caseId || activeCaseId);
+          return;
+        }
       }
       const modal = document.getElementById('single-case-print-modal');
       if (modal) {
