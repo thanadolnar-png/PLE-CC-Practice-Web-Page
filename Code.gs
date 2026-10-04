@@ -1044,7 +1044,7 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
 
           const nestLvl = (para.bullet && para.bullet.nestingLevel) || 0;
           const indentMag = (para.paragraphStyle && para.paragraphStyle.indentStart && para.paragraphStyle.indentStart.magnitude) || 0;
-          const isParentHeader = ['หัวข้อล่าง', 'ดังต่อไปนี้', 'เลือกตอบ', 'ถามอย่างน้อย'].some(x => itemText.indexOf(x) !== -1);
+          const isParentHeader = ['หัวข้อล่าง', 'ดังต่อไปนี้', 'เลือกตอบ', 'ถามอย่างน้อย', '[additive]', '(additive)', '[rubric]', '(rubric)'].some(x => itemText.toLowerCase().indexOf(x.toLowerCase()) !== -1);
           
           let isSubset = false;
           if (isParentHeader) {
@@ -1535,7 +1535,7 @@ function getCaseContentFromDoc(docId, targetCaseId) {
               indentStart = child.asParagraph().getIndentStart() || 0;
             }
 
-            const isParentHeader = ['หัวข้อล่าง', 'ดังต่อไปนี้', 'เลือกตอบ', 'ถามอย่างน้อย'].some(x => itemText.indexOf(x) !== -1);
+            const isParentHeader = ['หัวข้อล่าง', 'ดังต่อไปนี้', 'เลือกตอบ', 'ถามอย่างน้อย', '[additive]', '(additive)', '[rubric]', '(rubric)'].some(x => itemText.toLowerCase().indexOf(x.toLowerCase()) !== -1);
             let isSubset = false;
             if (isParentHeader) {
               isSubset = false;

@@ -1275,6 +1275,39 @@ ol.ordered-list li,
   background-color: var(--bg-primary);
 }
 
+/* Rubric Single-Choice Tier (Radio Style) */
+.checklist-item.is-subset.is-rubric .checkbox-custom {
+  border-radius: 50% !important;
+}
+
+.checklist-item.is-subset.is-rubric.checked .checkbox-custom {
+  background-color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+}
+
+.checklist-item.is-subset.is-rubric.checked .checkbox-custom::after {
+  content: "●" !important;
+  font-size: 0.72rem !important;
+  font-weight: 900 !important;
+  line-height: 1;
+}
+
+/* Additive Multi-Choice (Checkbox Style) */
+.checklist-item.is-subset.is-additive .checkbox-custom {
+  border-radius: var(--radius-sm) !important;
+}
+
+.checklist-item.is-subset.is-additive.checked .checkbox-custom {
+  background-color: var(--success) !important;
+  border-color: var(--success) !important;
+}
+
+.checklist-item.is-subset.is-additive.checked .checkbox-custom::after {
+  content: "✓" !important;
+  font-size: 0.9rem !important;
+  font-weight: 700 !important;
+}
+
 /* Progress area */
 .progress-card {
   background-color: var(--bg-secondary);
@@ -2285,14 +2318,13 @@ ol.ordered-list li,
 .viewer-grid.examiner-layout .checklist-container,
 .exam-layout.examiner-layout #exam-checklist-container,
 .exam-layout.examiner-layout .checklist-container {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)) !important;
-  gap: 1rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.75rem !important;
 }
 
 .viewer-grid.examiner-layout .checklist-group-title,
 .exam-layout.examiner-layout .checklist-group-title {
-  grid-column: 1 / -1 !important;
   margin-top: 1rem !important;
   border-left: 4px solid var(--primary);
   padding-left: 0.5rem;

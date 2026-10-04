@@ -517,7 +517,7 @@
           const dec = await window.decryptCaseData(encryptedCase, pwd);
           if (!dec) throw new Error('Decryption failed');
           
-          sessionStorage.setItem('ple_unlocked_' + caseId, JSON.stringify(dec));
+          sessionStorage.setItem('viewer_unlocked_' + caseId, JSON.stringify(dec));
           modal.remove();
           
           AppState.currentCase = dec;
@@ -551,7 +551,7 @@
 
       // Check if case is protected / encrypted
       if (offlineCase && (offlineCase.isEncrypted || offlineCase.isProtected || offlineCase.hasPassword)) {
-        const cached = sessionStorage.getItem('ple_unlocked_' + cleanId);
+        const cached = sessionStorage.getItem('viewer_unlocked_' + cleanId);
         if (cached) {
           try {
             const decCase = JSON.parse(cached);
@@ -908,14 +908,37 @@
           </tr>
         `;
         
-        // 2. รายการในกลุ่ม
+        // 2. รายการในกลุ่ม: วิเคราะห์ประเภทข้อย่อย (Rubric vs Additive)
+        let currentParentItem = null;
+        let currentSubsets = [];
+        const itemSubsetTypeMap = new Map();
+
+        for (let i = 0; i < groups[groupName].length; i++) {
+          const it = groups[groupName][i];
+          if (!it.isSubset) {
+            if (currentParentItem && currentSubsets.length > 0) {
+              const gType = typeof getSubsetGroupType === 'function' ? getSubsetGroupType(currentParentItem, currentSubsets) : 'additive';
+              currentSubsets.forEach(sub => itemSubsetTypeMap.set(sub, gType));
+            }
+            currentParentItem = it;
+            currentSubsets = [];
+          } else {
+            currentSubsets.push(it);
+          }
+        }
+        if (currentParentItem && currentSubsets.length > 0) {
+          const gType = typeof getSubsetGroupType === 'function' ? getSubsetGroupType(currentParentItem, currentSubsets) : 'additive';
+          currentSubsets.forEach(sub => itemSubsetTypeMap.set(sub, gType));
+        }
+
         groups[groupName].forEach((item, itemIdx) => {
           const globalIdx = itemGlobalIndices.get(item) || 0;
           const isChecked = checkedList.includes(item.id);
           const imgHtml = getChecklistItemImage(item, globalIdx, c);
           const isSubset = !!item.isSubset;
+          const subType = isSubset ? (itemSubsetTypeMap.get(item) || 'additive') : '';
           const el = document.createElement('div');
-          el.className = `checklist-item ${isChecked ? 'checked' : ''} ${isSubset ? 'is-subset' : ''}`;
+          el.className = `checklist-item ${isChecked ? 'checked' : ''} ${isSubset ? ('is-subset is-' + subType) : ''}`;
           el.setAttribute('data-id', item.id);
           el.setAttribute('data-score', item.score);
           el.addEventListener('click', () => {

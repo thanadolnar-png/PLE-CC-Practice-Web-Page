@@ -3600,6 +3600,10 @@
     }
 
     async function confirmLobbyRole(role) {
+      if (role === 'super_host' && !SimState.isHost) {
+        alert('เฉพาะ Host ผู้สร้างห้องเท่านั้นที่สามารถเลือกเป็น Super Host ได้');
+        return;
+      }
       SimState.role = role;
       SimState.lobbyRole = role;
       SimState.roleSelectedThisSession = true;
@@ -4328,6 +4332,11 @@
                   item.style.background = 'var(--primary-light)';
                 }
 
+                // 1-click role switch button for current player
+                const roleSwitchBtnHtml = isMe
+                  ? `<button type="button" class="sim-btn-xs" style="font-size: 0.72rem; padding: 0.18rem 0.5rem; background: ${p.role === 'examiner' ? '#dcfce7' : '#e0f2fe'}; color: ${p.role === 'examiner' ? '#15803d' : '#0369a1'}; border: 1px solid ${p.role === 'examiner' ? '#bbf7d0' : '#bae6fd'}; cursor: pointer; border-radius: 4px; font-weight: 600;" onclick="confirmLobbyRole('${p.role === 'examiner' ? 'examinee' : 'examiner'}')" title="คลิกเพื่อสลับบทบาท">${p.role === 'examiner' ? '🔄 เป็นผู้เข้าสอบ' : '🔄 เป็นผู้ประเมิน'}</button>`
+                  : '';
+
                 item.innerHTML = `
                   <div style="display: flex; align-items: center; gap: 0.5rem; min-width: 0;">
                     <span style="font-size: 1.15rem; line-height: 1;">${escapeHtml(pEmoji)}</span>
@@ -4344,6 +4353,7 @@
                     </div>
                   </div>
                   <div style="display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0;">
+                    ${roleSwitchBtnHtml}
                     ${statusTagHtml}
                     ${kickBtnHtml}
                   </div>
@@ -4878,11 +4888,12 @@
 
     /**
      * Unlock stations if any of them are password-protected (Confidential Mock Exam)
-     * Prompts the user ONCE for passcode, decrypts all protected stations in the set,
-     * and saves to sessionStorage so subsequent loads in this session don't ask again.
+     * Prompts the host ONCE for passcode, decrypts all protected stations in the set,
+     * and saves to sim_unlocked_ (scoped to simulation session only) and syncs to room for peers.
      */
     async function unlockStationsIfProtected(stations) {
       if (!stations || stations.length === 0) return true;
+      SimState.unlockedCases = SimState.unlockedCases || {};
 
       // 1. Check for any protected station
       const protectedStations = stations.filter(st => {
@@ -4893,20 +4904,33 @@
 
       if (protectedStations.length === 0) return true;
 
-      // 2. Check if already decrypted and cached in sessionStorage
+      // 2. Check if already decrypted and cached in simulation scope or synced from host
       for (const st of protectedStations) {
         const cleanId = (st.case.caseId || '').trim();
-        const cached = sessionStorage.getItem('ple_unlocked_' + cleanId);
-        if (cached) {
+        const rawId = cleanId.replace(/^OSPE-/i, '');
+        const hostDec = (SimState.cachedRoom && SimState.cachedRoom.unlockedCaseDetails) 
+          ? (SimState.cachedRoom.unlockedCaseDetails[cleanId] || SimState.cachedRoom.unlockedCaseDetails[rawId]) 
+          : null;
+        const simCached = SimState.unlockedCases[cleanId] || sessionStorage.getItem('sim_unlocked_' + cleanId);
+        
+        let decCase = null;
+        if (hostDec) {
+          decCase = hostDec;
+        } else if (simCached) {
           try {
-            const decCase = JSON.parse(cached);
-            st.case = Object.assign({}, st.case, decCase);
-            if (typeof AppState !== 'undefined' && AppState.cases) {
-              const idx = AppState.cases.findIndex(c => c && c.caseId && c.caseId.trim() === cleanId);
-              if (idx !== -1) AppState.cases[idx] = Object.assign({}, AppState.cases[idx], decCase);
-            }
+            decCase = typeof simCached === 'string' ? JSON.parse(simCached) : simCached;
           } catch(e) {}
         }
+
+        if (decCase) {
+          st.case = Object.assign({}, st.case, decCase);
+          SimState.unlockedCases[cleanId] = decCase;
+        }
+      }
+
+      // If in multiplayer and user is NOT Host, NEVER prompt with password modal (Host manages access)
+      if (SimState.roomId && !SimState.isHost) {
+        return true;
       }
 
       // Check if any station is still encrypted / locked (i.e. lacks scenario/checklist)
@@ -5001,6 +5025,7 @@
             }
 
             // If we reached here, decryption test passed! Decrypt all locked stations in the set
+            const unlockedMap = {};
             for (const st of stillLocked) {
               const cleanId = (st.case.caseId || '').trim();
               let encObj = st.case;
@@ -5014,15 +5039,28 @@
                   const dec = await window.decryptCaseData(encObj, pwd);
                   if (dec) {
                     st.case = Object.assign({}, st.case, dec);
-                    sessionStorage.setItem('ple_unlocked_' + cleanId, JSON.stringify(dec));
-                    if (typeof AppState !== 'undefined' && AppState.cases) {
-                      const idx = AppState.cases.findIndex(c => c && c.caseId && c.caseId.trim() === cleanId);
-                      if (idx !== -1) AppState.cases[idx] = Object.assign({}, AppState.cases[idx], dec);
-                    }
+                    SimState.unlockedCases[cleanId] = dec;
+                    sessionStorage.setItem('sim_unlocked_' + cleanId, JSON.stringify(dec));
+                    unlockedMap[cleanId] = dec;
                   }
                 } catch(decErr) {
                   console.warn('Error decrypting case:', cleanId, decErr);
                 }
+              }
+            }
+
+            // If in multiplayer room and user is host, sync unlockedCaseDetails to Firebase
+            if (SimState.roomId && SimState.isHost && typeof _fbDb !== 'undefined') {
+              try {
+                const fbUpdates = {};
+                Object.keys(unlockedMap).forEach(k => {
+                  fbUpdates[`rooms/${SimState.roomId}/unlockedCaseDetails/${k}`] = unlockedMap[k];
+                });
+                if (Object.keys(fbUpdates).length > 0) {
+                  await _fbDb.ref().update(fbUpdates);
+                }
+              } catch(fbSyncErr) {
+                console.warn('Error syncing unlocked cases to room:', fbSyncErr);
               }
             }
 
@@ -5068,42 +5106,43 @@
       SimState.totalStations = fullExamSet.length;
       
       for (let i = 0; i < fullExamSet.length; i++) {
-        SimState.studentScores[fullExamSet[i].stationNumber] = [];
+        const stNum = fullExamSet[i].stationNumber;
+        SimState.studentScores[stNum] = [];
         if (fullExamSet[i].caseId === 'REST') {
-          SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: true, case: getRestCaseData() });
+          SimState.stations.push({ stationNumber: stNum, isRest: true, case: getRestCaseData() });
         } else {
           const targetCaseId = (fullExamSet[i].caseId || '').trim();
-          let matchedCase = AppState.cases.find(c => c.caseId && c.caseId.trim() === targetCaseId);
-          
-          // ── Lazy-fetch: ถ้าเคสไม่มี content ให้ดึงเพิ่มจาก API ──
-          if (matchedCase && !matchedCase.contentHtml && !matchedCase.scenario && !(matchedCase.checklist && matchedCase.checklist.length > 0)) {
-            console.log(`[LazyFetch] ${targetCaseId} has no content — fetching from API...`);
-            setDataReadyBar('loading', `⏳ กำลังโหลดโจทย์ ${targetCaseId}...`);
-            try {
-              const fetched = typeof fetchCaseDetail !== 'undefined' ? await fetchCaseDetail(targetCaseId) : null;
-              if (fetched) {
-                matchedCase = fetched;
-                console.log(`[LazyFetch] ${targetCaseId} — loaded successfully!`);
-              } else {
-                console.warn(`[LazyFetch] ${targetCaseId} — fetch returned null`);
-              }
-            } catch(fetchErr) {
-              console.warn('[LazyFetch] Error fetching case detail:', fetchErr);
-            }
+          const rawId = targetCaseId.replace(/^OSPE-/i, '');
+          const ospeId = targetCaseId.startsWith('OSPE-') ? targetCaseId : ('OSPE-' + targetCaseId);
+
+          let matchedCase = null;
+
+          // 1. Check if unlocked payload is provided directly by Host in room state
+          if (room.unlockedCaseDetails && (room.unlockedCaseDetails[targetCaseId] || room.unlockedCaseDetails[rawId] || room.unlockedCaseDetails[ospeId])) {
+            matchedCase = room.unlockedCaseDetails[targetCaseId] || room.unlockedCaseDetails[rawId] || room.unlockedCaseDetails[ospeId];
+          }
+
+          // 2. Check offline case details (0ms instant)
+          if (!matchedCase && typeof OFFLINE_CASE_DETAILS !== 'undefined') {
+            matchedCase = OFFLINE_CASE_DETAILS[targetCaseId] || OFFLINE_CASE_DETAILS[ospeId] || OFFLINE_CASE_DETAILS[rawId];
+          }
+
+          // 3. Check AppState.cases
+          if (!matchedCase && typeof AppState !== 'undefined' && AppState.cases) {
+            matchedCase = AppState.cases.find(c => c.caseId && (c.caseId.trim() === targetCaseId || c.caseId.trim() === ospeId || c.caseId.trim() === rawId));
           }
           
-          // ── Fallback: ถ้ายังไม่พบเคสเลย ใช้ OFFLINE_DATA โดยตรง ──
+          // 4. Fallback to OFFLINE_DATA
           if (!matchedCase && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
-            matchedCase = OFFLINE_DATA.cases.find(c => c.caseId && c.caseId.trim() === targetCaseId);
+            matchedCase = OFFLINE_DATA.cases.find(c => c.caseId && (c.caseId.trim() === targetCaseId || c.caseId.trim() === ospeId || c.caseId.trim() === rawId));
           }
           
-          // ── Last resort: ใช้ AppState.cases[0] ──
-          if (!matchedCase) {
+          // 5. Last resort: AppState.cases[0]
+          if (!matchedCase && typeof AppState !== 'undefined' && AppState.cases && AppState.cases.length > 0) {
             matchedCase = AppState.cases[0];
-            console.warn(`[buildStationsFromRoom] Case ${targetCaseId} not found — falling back to first case`);
           }
           
-          SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: false, case: matchedCase });
+          SimState.stations.push({ stationNumber: stNum, isRest: false, case: matchedCase || { caseId: targetCaseId, title: 'สถานีสอบ' } });
         }
       }
       await unlockStationsIfProtected(SimState.stations);
@@ -6329,15 +6368,17 @@
         if (!isSubset) {
           if (currentGroup) groups.push(currentGroup);
           currentGroup = {
+            parentItem: item,
             parentId: item.id,
             parentScore: score,
             subsets: []
           };
         } else {
           if (currentGroup) {
-            currentGroup.subsets.push({ id: item.id, score: score });
+            currentGroup.subsets.push(item);
           } else {
             groups.push({
+              parentItem: item,
               parentId: item.id,
               parentScore: score,
               subsets: []
@@ -6358,11 +6399,14 @@
             currentScore += g.parentScore;
           }
         } else {
-          const isRubric = g.subsets.some(s => s.score === 0 || s.score === g.parentScore);
-          if (isRubric) {
+          const groupType = typeof getSubsetGroupType === 'function' 
+            ? getSubsetGroupType(g.parentItem, g.subsets) 
+            : 'additive';
+
+          if (groupType === 'rubric') {
             const checkedSubsets = g.subsets.filter(s => checkedSet.has(s.id));
             if (checkedSubsets.length > 0) {
-              const maxEarned = Math.max(...checkedSubsets.map(s => s.score));
+              const maxEarned = Math.max(...checkedSubsets.map(s => parseFloat(s.score) || 0));
               currentScore += Math.min(maxEarned, g.parentScore);
             } else if (checkedSet.has(g.parentId)) {
               currentScore += g.parentScore;
@@ -6372,7 +6416,7 @@
               currentScore += g.parentScore;
             } else {
               const checkedSubsets = g.subsets.filter(s => checkedSet.has(s.id));
-              const subsetsScore = checkedSubsets.reduce((sum, s) => sum + s.score, 0);
+              const subsetsScore = checkedSubsets.reduce((sum, s) => sum + (parseFloat(s.score) || 0), 0);
               currentScore += Math.min(subsetsScore, g.parentScore);
             }
           }
@@ -6413,13 +6457,37 @@
         grpHdr.textContent = `กลุ่ม: ${groupName}`;
         chkContainer.appendChild(grpHdr);
         
+        // Analyze subsets in group
+        let currentParentItem = null;
+        let currentSubsets = [];
+        const itemSubsetTypeMap = new Map();
+
+        for (let i = 0; i < groups[groupName].length; i++) {
+          const it = groups[groupName][i];
+          if (!it.isSubset) {
+            if (currentParentItem && currentSubsets.length > 0) {
+              const gType = typeof getSubsetGroupType === 'function' ? getSubsetGroupType(currentParentItem, currentSubsets) : 'additive';
+              currentSubsets.forEach(sub => itemSubsetTypeMap.set(sub, gType));
+            }
+            currentParentItem = it;
+            currentSubsets = [];
+          } else {
+            currentSubsets.push(it);
+          }
+        }
+        if (currentParentItem && currentSubsets.length > 0) {
+          const gType = typeof getSubsetGroupType === 'function' ? getSubsetGroupType(currentParentItem, currentSubsets) : 'additive';
+          currentSubsets.forEach(sub => itemSubsetTypeMap.set(sub, gType));
+        }
+
         groups[groupName].forEach((item, itemIdx) => {
           const globalIdx = itemGlobalIndices.get(item) || 0;
           const isChecked = checkedList.includes(item.id);
           const imgHtml = getExamChecklistItemImage(item, globalIdx, c);
           const isSubset = !!item.isSubset;
+          const subType = isSubset ? (itemSubsetTypeMap.get(item) || 'additive') : '';
           const el = document.createElement('div');
-          el.className = `checklist-item ${isChecked ? 'checked' : ''} ${isSubset ? 'is-subset' : ''}`;
+          el.className = `checklist-item ${isChecked ? 'checked' : ''} ${isSubset ? ('is-subset is-' + subType) : ''}`;
           el.setAttribute('data-id', item.id);
           el.setAttribute('data-score', item.score);
           el.addEventListener('click', () => toggleExamChecklistItem(stationNum, item.id, item.score));
@@ -6452,60 +6520,121 @@
       const isSubset = clickedEl.classList.contains('is-subset');
       const index = currentChecked.indexOf(itemId);
       const isChecking = index === -1;
+      const allItems = Array.from(document.querySelectorAll('.checklist-item'));
+      const clickedIdx = allItems.indexOf(clickedEl);
       
       if (isSubset) {
         // Find parent and sibling subsets
         let parentEl = null;
-        let prev = clickedEl.previousElementSibling;
-        while (prev && prev.classList.contains('checklist-item')) {
-          if (!prev.classList.contains('is-subset')) {
-            parentEl = prev;
+        let siblingSubsets = [];
+        for (let i = clickedIdx - 1; i >= 0; i--) {
+          if (!allItems[i].classList.contains('is-subset')) {
+            parentEl = allItems[i];
             break;
           }
-          prev = prev.previousElementSibling;
         }
-        
-        let siblingSubsets = [];
         if (parentEl) {
-          let n = parentEl.nextElementSibling;
-          while (n && n.classList.contains('is-subset')) {
-            siblingSubsets.push(n);
-            n = n.nextElementSibling;
+          const parentIdx = allItems.indexOf(parentEl);
+          for (let i = parentIdx + 1; i < allItems.length; i++) {
+            if (allItems[i].classList.contains('is-subset')) {
+              siblingSubsets.push(allItems[i]);
+            } else {
+              break;
+            }
           }
         }
         
         const parentScore = parentEl ? (parseFloat(parentEl.getAttribute('data-score')) || 1.0) : 1.0;
-        const hasRubricScores = siblingSubsets.some(s => {
-          const sc = parseFloat(s.getAttribute('data-score'));
-          return sc === 0 || sc === parentScore;
-        });
+        const groupType = typeof getSubsetGroupType === 'function'
+          ? getSubsetGroupType(parentEl, siblingSubsets)
+          : 'additive';
         
-        if (isChecking) {
-          if (hasRubricScores) {
-            // Rubric single-choice: uncheck other sibling subsets first
+        if (groupType === 'rubric') {
+          // Rubric single-choice (Radio style)
+          if (isChecking) {
             siblingSubsets.forEach(sib => {
               const sId = sib.getAttribute('data-id');
               const sIdx = currentChecked.indexOf(sId);
               if (sIdx > -1) currentChecked.splice(sIdx, 1);
             });
-          }
-          currentChecked.push(itemId);
-          
-          if (parentEl) {
-            const pId = parentEl.getAttribute('data-id');
-            const pIdx = currentChecked.indexOf(pId);
-            if (itemScore >= parentScore) {
-              if (pIdx === -1) currentChecked.push(pId);
-            } else {
+            currentChecked.push(itemId);
+            
+            if (parentEl) {
+              const pId = parentEl.getAttribute('data-id');
+              const pIdx = currentChecked.indexOf(pId);
+              if (itemScore >= parentScore) {
+                if (pIdx === -1) currentChecked.push(pId);
+              } else {
+                if (pIdx > -1) currentChecked.splice(pIdx, 1);
+              }
+            }
+          } else {
+            currentChecked.splice(index, 1);
+            if (parentEl) {
+              const pId = parentEl.getAttribute('data-id');
+              const pIdx = currentChecked.indexOf(pId);
               if (pIdx > -1) currentChecked.splice(pIdx, 1);
             }
           }
         } else {
-          currentChecked.splice(index, 1);
-          if (parentEl) {
-            const pId = parentEl.getAttribute('data-id');
-            const pIdx = currentChecked.indexOf(pId);
-            if (pIdx > -1) currentChecked.splice(pIdx, 1);
+          // Additive multi-choice (Checkbox style)
+          if (isChecking) {
+            if (itemScore === 0) {
+              // Zero-score penalty: uncheck all positive sibling subsets and parent
+              siblingSubsets.forEach(sib => {
+                const sId = sib.getAttribute('data-id');
+                const sIdx = currentChecked.indexOf(sId);
+                if (sIdx > -1) currentChecked.splice(sIdx, 1);
+              });
+              currentChecked.push(itemId);
+              if (parentEl) {
+                const pId = parentEl.getAttribute('data-id');
+                const pIdx = currentChecked.indexOf(pId);
+                if (pIdx > -1) currentChecked.splice(pIdx, 1);
+              }
+            } else {
+              // Positive item: uncheck any 0-score option
+              siblingSubsets.forEach(sib => {
+                const sibSc = parseFloat(sib.getAttribute('data-score')) || 0;
+                if (sibSc === 0) {
+                  const sId = sib.getAttribute('data-id');
+                  const sIdx = currentChecked.indexOf(sId);
+                  if (sIdx > -1) currentChecked.splice(sIdx, 1);
+                }
+              });
+              currentChecked.push(itemId);
+
+              // Calculate earned sum of subsets
+              const earned = siblingSubsets
+                .filter(sib => currentChecked.includes(sib.getAttribute('data-id')))
+                .reduce((sum, sib) => sum + (parseFloat(sib.getAttribute('data-score')) || 0), 0);
+
+              if (parentEl) {
+                const pId = parentEl.getAttribute('data-id');
+                const pIdx = currentChecked.indexOf(pId);
+                if (earned >= parentScore) {
+                  if (pIdx === -1) currentChecked.push(pId);
+                } else {
+                  if (pIdx > -1) currentChecked.splice(pIdx, 1);
+                }
+              }
+            }
+          } else {
+            // Unchecking
+            currentChecked.splice(index, 1);
+            const earned = siblingSubsets
+              .filter(sib => currentChecked.includes(sib.getAttribute('data-id')))
+              .reduce((sum, sib) => sum + (parseFloat(sib.getAttribute('data-score')) || 0), 0);
+
+            if (parentEl) {
+              const pId = parentEl.getAttribute('data-id');
+              const pIdx = currentChecked.indexOf(pId);
+              if (earned >= parentScore) {
+                if (pIdx === -1) currentChecked.push(pId);
+              } else {
+                if (pIdx > -1) currentChecked.splice(pIdx, 1);
+              }
+            }
           }
         }
       } else {
@@ -6519,11 +6648,11 @@
             nextEl = nextEl.nextElementSibling;
           }
           const parentScore = parseFloat(clickedEl.getAttribute('data-score')) || 1.0;
-          const isRubric = subsets.some(s => {
-            const sc = parseFloat(s.getAttribute('data-score'));
-            return sc === 0 || sc === parentScore;
-          });
-          if (isRubric) {
+          const groupType = typeof getSubsetGroupType === 'function'
+            ? getSubsetGroupType(clickedEl, subsets)
+            : 'additive';
+
+          if (groupType === 'rubric') {
             let bestSubset = subsets[0];
             let bestScore = -1;
             subsets.forEach(s => {
@@ -6538,9 +6667,16 @@
             });
             if (bestSubset) currentChecked.push(bestSubset.getAttribute('data-id'));
           } else {
+            // Additive: select positive sub-items
             subsets.forEach(s => {
+              const sc = parseFloat(s.getAttribute('data-score')) || 0;
               const sId = s.getAttribute('data-id');
-              if (!currentChecked.includes(sId)) currentChecked.push(sId);
+              if (sc > 0) {
+                if (!currentChecked.includes(sId)) currentChecked.push(sId);
+              } else {
+                const sIdx = currentChecked.indexOf(sId);
+                if (sIdx > -1) currentChecked.splice(sIdx, 1);
+              }
             });
           }
         } else {
@@ -9472,28 +9608,12 @@
             ${partActionHtml}
           </div>
           <div style="margin-top: 0.35rem; padding-top: 0.25rem; border-top: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; gap: 0.25rem; font-size: 0.7rem; color: var(--primary); font-weight: 600;">
-            <span style="font-size: 0.78rem;">👁️</span> <span>ชี้หรือคลิกเพื่อดูโจทย์เคส</span>
+            <span style="font-size: 0.78rem;">👁️</span> <span>คลิกเพื่อดูโจทย์เคส</span>
           </div>
         `;
 
-        let hoverTimer = null;
-        card.addEventListener('mouseenter', () => {
-          hoverTimer = setTimeout(() => {
-            openStationCasePreview(p.caseId, stNum);
-          }, 350);
-        });
-        card.addEventListener('mouseleave', () => {
-          if (hoverTimer) {
-            clearTimeout(hoverTimer);
-            hoverTimer = null;
-          }
-        });
         card.addEventListener('click', (e) => {
           if (e.target.closest('button') || e.target.closest('.sim-btn-xs')) return;
-          if (hoverTimer) {
-            clearTimeout(hoverTimer);
-            hoverTimer = null;
-          }
           openStationCasePreview(p.caseId, stNum);
         });
 

@@ -735,16 +735,61 @@ async function decryptCaseData(encryptedObj, password) {
 }
 window.decryptCaseData = decryptCaseData;
 
+function getSubsetGroupType(parentItem, subsetItems) {
+  const pText = (typeof parentItem === 'string' ? parentItem : (parentItem ? (parentItem.text || parentItem.innerText || '') : '')).toLowerCase();
+  const subTexts = (subsetItems || []).map(s => {
+    if (typeof s === 'string') return s.toLowerCase();
+    if (!s) return '';
+    return (s.text || s.innerText || '').toLowerCase();
+  });
+  const allText = [pText, ...subTexts].join(' ');
+
+  // 1. Priority 1: Check Explicit Tags
+  const rubricKeywords = ['[rubric]', '(rubric)', '[เกณฑ์]', '(เกณฑ์)', '(เกณฑ์คะแนน)', '(เลือกข้อเดียว)', '(เลือกเพียง 1 ข้อ)', '(เลือกเพียงหนึ่งข้อ)', '(เลือก 1 ข้อ)', '(ระดับคะแนน)', 'เลือกข้อใดข้อหนึ่ง'];
+  const additiveKeywords = ['[additive]', '(additive)', '(รวมคะแนน)', '(เลือกหลายข้อ)', '(เลือกได้หลายข้อ)', '(ถามอย่างน้อย)', '(ตอบอย่างน้อย)', '(อย่างน้อย', 'อย่างน้อย'];
+
+  if (rubricKeywords.some(k => allText.includes(k))) return 'rubric';
+  if (additiveKeywords.some(k => allText.includes(k))) return 'additive';
+
+  // 2. Priority 2: Deterministic Heuristic based on score distribution
+  let parentScore = 1.0;
+  if (parentItem) {
+    if (typeof parentItem.score !== 'undefined') parentScore = parseFloat(parentItem.score) || 1.0;
+    else if (parentItem.getAttribute && parentItem.getAttribute('data-score')) parentScore = parseFloat(parentItem.getAttribute('data-score')) || 1.0;
+  }
+
+  const posScores = (subsetItems || []).map(s => {
+    let sc = 0;
+    if (typeof s === 'object' && s !== null) {
+      if (typeof s.score !== 'undefined') sc = parseFloat(s.score) || 0;
+      else if (s.getAttribute && s.getAttribute('data-score')) sc = parseFloat(s.getAttribute('data-score')) || 0;
+    }
+    return sc;
+  }).filter(sc => sc > 0);
+
+  if (posScores.length <= 1) return 'rubric';
+
+  // If multiple items have identical positive scores (e.g. [1, 1, 1] or [0.5, 0.5]) -> Additive
+  const hasDuplicateScores = posScores.some((sc, idx) => posScores.indexOf(sc) !== idx);
+  if (hasDuplicateScores) return 'additive';
+
+  // If no single subset reaches parent score -> Additive
+  const hasFullScoreItem = posScores.some(sc => sc >= parentScore);
+  if (!hasFullScoreItem) return 'additive';
+
+  // If one item reaches parentScore and others are distinct descending tiers -> Rubric
+  return 'rubric';
+}
+window.getSubsetGroupType = getSubsetGroupType;
+
 function resolveChecklistSubsets(checklist) {
   if (!checklist || !Array.isArray(checklist) || checklist.length === 0) return checklist;
-  
-  const explicitCount = checklist.filter(it => it && it.isSubset === true).length;
-  if (explicitCount > 0) return checklist;
   
   const parentKeywords = [
     'หัวข้อล่าง', 'ดังต่อไปนี้', 'เลือกตอบ', 'ถามอย่างน้อย', 'ขั้นตอน', 'ประวัติส่วนตัว', 
     'prime question', 'การกำหนดเวลา', 'เทคนิคการ', 'ข้อแตกต่าง', 'ความแตกต่าง',
-    'แนวทางกรณี', 'การจัดการกรณี', 'อันตรกิริยา', 'การอธิบาย', 'คำอธิบาย'
+    'แนวทางกรณี', 'การจัดการกรณี', 'อันตรกิริยา', 'การอธิบาย', 'คำอธิบาย',
+    '[additive]', '(additive)', '[rubric]', '(rubric)', 'อย่างน้อย', 'ต่อไปนี้'
   ];
   
   const childStartKeywords = [
@@ -760,7 +805,9 @@ function resolveChecklistSubsets(checklist) {
   for (let i = 0; i < n; i++) {
     const t = (checklist[i].text || '').trim();
     const sc = parseFloat(checklist[i].score) || 0;
-    if (sc === 0 || t.startsWith('-') || t.startsWith('•') || t.startsWith('○') || t.startsWith('o ')) {
+    if (checklist[i].isSubset === true) {
+      isSub[i] = true;
+    } else if (sc === 0 || t.startsWith('-') || t.startsWith('•') || t.startsWith('○') || t.startsWith('o ')) {
       isSub[i] = true;
     } else if (childStartKeywords.some(k => t.toLowerCase().startsWith(k.toLowerCase()) || (t.includes(':') && t.includes(k)))) {
       isSub[i] = true;
@@ -774,7 +821,7 @@ function resolveChecklistSubsets(checklist) {
     const isParentTitle = parentKeywords.some(k => t.toLowerCase().includes(k.toLowerCase()));
     const hasChildAhead = (i + 1 < n && isSub[i + 1]);
     
-    if ((isParentTitle || hasChildAhead) && sc > 0 && !t.startsWith('-') && !t.startsWith('•')) {
+    if ((isParentTitle || hasChildAhead) && sc > 0 && !t.startsWith('-') && !t.startsWith('•') && !t.startsWith('○')) {
       isSub[i] = false;
       let j = i + 1;
       while (j < n) {
@@ -782,7 +829,7 @@ function resolveChecklistSubsets(checklist) {
         const nextSc = parseFloat(checklist[j].score) || 0;
         const nextIsParent = parentKeywords.some(k => nextT.toLowerCase().includes(k.toLowerCase())) && nextSc > 0 && !isSub[j];
         if (nextIsParent) break;
-        if (nextSc > 1 && !isSub[j]) break;
+        if (nextSc > 1 && !isSub[j] && !parentKeywords.some(k => nextT.toLowerCase().includes(k.toLowerCase()))) break;
         isSub[j] = true;
         j++;
       }
@@ -1451,38 +1498,94 @@ function handleChecklistItemClick(caseId, itemId, itemScore) {
     }
 
     const parentScore = parentEl ? (parseFloat(parentEl.getAttribute('data-score')) || 1.0) : 1.0;
-    const hasRubricScores = siblingSubsets.some(s => {
-      const sc = parseFloat(s.getAttribute('data-score'));
-      return sc === 0 || sc === parentScore;
-    });
+    const groupType = getSubsetGroupType(parentEl, siblingSubsets);
 
-    if (isChecking) {
-      if (hasRubricScores) {
-        // Rubric single-choice (Radio style): uncheck other sibling subsets first
+    if (groupType === 'rubric') {
+      // Rubric mode: single-select radio button
+      if (isChecking) {
         siblingSubsets.forEach(sib => {
           const sId = sib.getAttribute('data-id');
           const sIdx = currentChecked.indexOf(sId);
           if (sIdx > -1) currentChecked.splice(sIdx, 1);
         });
-      }
-      currentChecked.push(itemId);
+        currentChecked.push(itemId);
 
-      // Auto-check parent ONLY IF this subset awards full parent score
-      if (parentEl) {
-        const pId = parentEl.getAttribute('data-id');
-        const pIdx = currentChecked.indexOf(pId);
-        if (itemScore >= parentScore) {
-          if (pIdx === -1) currentChecked.push(pId);
-        } else {
+        if (parentEl) {
+          const pId = parentEl.getAttribute('data-id');
+          const pIdx = currentChecked.indexOf(pId);
+          if (itemScore >= parentScore) {
+            if (pIdx === -1) currentChecked.push(pId);
+          } else {
+            if (pIdx > -1) currentChecked.splice(pIdx, 1);
+          }
+        }
+      } else {
+        currentChecked.splice(index, 1);
+        if (parentEl) {
+          const pId = parentEl.getAttribute('data-id');
+          const pIdx = currentChecked.indexOf(pId);
           if (pIdx > -1) currentChecked.splice(pIdx, 1);
         }
       }
     } else {
-      currentChecked.splice(index, 1);
-      if (parentEl) {
-        const pId = parentEl.getAttribute('data-id');
-        const pIdx = currentChecked.indexOf(pId);
-        if (pIdx > -1) currentChecked.splice(pIdx, 1);
+      // Additive mode: multi-select checkboxes
+      if (isChecking) {
+        if (itemScore === 0) {
+          // Zero point failure option: uncheck all positive sibling subsets and parent
+          siblingSubsets.forEach(sib => {
+            const sId = sib.getAttribute('data-id');
+            const sIdx = currentChecked.indexOf(sId);
+            if (sIdx > -1) currentChecked.splice(sIdx, 1);
+          });
+          currentChecked.push(itemId);
+          if (parentEl) {
+            const pId = parentEl.getAttribute('data-id');
+            const pIdx = currentChecked.indexOf(pId);
+            if (pIdx > -1) currentChecked.splice(pIdx, 1);
+          }
+        } else {
+          // Positive item: uncheck any 0-point sibling
+          siblingSubsets.forEach(sib => {
+            const sibSc = parseFloat(sib.getAttribute('data-score')) || 0;
+            if (sibSc === 0) {
+              const sId = sib.getAttribute('data-id');
+              const sIdx = currentChecked.indexOf(sId);
+              if (sIdx > -1) currentChecked.splice(sIdx, 1);
+            }
+          });
+          currentChecked.push(itemId);
+
+          // Calculate earned sum of subsets
+          const earned = siblingSubsets
+            .filter(sib => currentChecked.includes(sib.getAttribute('data-id')))
+            .reduce((sum, sib) => sum + (parseFloat(sib.getAttribute('data-score')) || 0), 0);
+
+          if (parentEl) {
+            const pId = parentEl.getAttribute('data-id');
+            const pIdx = currentChecked.indexOf(pId);
+            if (earned >= parentScore) {
+              if (pIdx === -1) currentChecked.push(pId);
+            } else {
+              if (pIdx > -1) currentChecked.splice(pIdx, 1);
+            }
+          }
+        }
+      } else {
+        // Unchecking
+        currentChecked.splice(index, 1);
+        const earned = siblingSubsets
+          .filter(sib => currentChecked.includes(sib.getAttribute('data-id')))
+          .reduce((sum, sib) => sum + (parseFloat(sib.getAttribute('data-score')) || 0), 0);
+
+        if (parentEl) {
+          const pId = parentEl.getAttribute('data-id');
+          const pIdx = currentChecked.indexOf(pId);
+          if (earned >= parentScore) {
+            if (pIdx === -1) currentChecked.push(pId);
+          } else {
+            if (pIdx > -1) currentChecked.splice(pIdx, 1);
+          }
+        }
       }
     }
   } else {
@@ -1496,12 +1599,9 @@ function handleChecklistItemClick(caseId, itemId, itemScore) {
         nextEl = nextEl.nextElementSibling;
       }
       const parentScore = parseFloat(clickedEl.getAttribute('data-score')) || 1.0;
-      const isRubric = subsets.some(s => {
-        const sc = parseFloat(s.getAttribute('data-score'));
-        return sc === 0 || sc === parentScore;
-      });
+      const groupType = getSubsetGroupType(clickedEl, subsets);
 
-      if (isRubric) {
+      if (groupType === 'rubric') {
         // Select highest scoring subset option
         let bestSubset = subsets[0];
         let bestScore = -1;
@@ -1517,9 +1617,16 @@ function handleChecklistItemClick(caseId, itemId, itemScore) {
         });
         if (bestSubset) currentChecked.push(bestSubset.getAttribute('data-id'));
       } else {
+        // Additive: select positive sub-items up to parent score (or all positive sub-items)
         subsets.forEach(s => {
+          const sc = parseFloat(s.getAttribute('data-score')) || 0;
           const sId = s.getAttribute('data-id');
-          if (!currentChecked.includes(sId)) currentChecked.push(sId);
+          if (sc > 0) {
+            if (!currentChecked.includes(sId)) currentChecked.push(sId);
+          } else {
+            const sIdx = currentChecked.indexOf(sId);
+            if (sIdx > -1) currentChecked.splice(sIdx, 1);
+          }
         });
       }
     } else {
@@ -1593,7 +1700,7 @@ function updateChecklistUI(caseId) {
     }
   });
   
-  // 4. Calculate total score and current score with rubric logic
+  // 4. Calculate total score and current score with rubric / additive logic
   let currentScore = 0;
   let totalScore = 0;
   
@@ -1605,7 +1712,10 @@ function updateChecklistUI(caseId) {
         currentScore += g.parentScore;
       }
     } else {
-      const isRubric = g.subsets.some(s => s.score === 0 || s.score === g.parentScore);
+      const parentEl = document.querySelector(`.checklist-item[data-id="${g.parentId}"]`);
+      const subEls = g.subsets.map(s => document.querySelector(`.checklist-item[data-id="${s.id}"]`)).filter(Boolean);
+      const isRubric = getSubsetGroupType(parentEl || { score: g.parentScore }, subEls.length > 0 ? subEls : g.subsets) === 'rubric';
+
       if (isRubric) {
         const checkedSubsets = g.subsets.filter(s => finalChecked.has(s.id));
         if (checkedSubsets.length > 0) {
