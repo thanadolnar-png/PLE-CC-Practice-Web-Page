@@ -735,6 +735,70 @@ async function decryptCaseData(encryptedObj, password) {
 }
 window.decryptCaseData = decryptCaseData;
 
+function resolveChecklistSubsets(checklist) {
+  if (!checklist || !Array.isArray(checklist) || checklist.length === 0) return checklist;
+  
+  const explicitCount = checklist.filter(it => it && it.isSubset === true).length;
+  if (explicitCount > 0) return checklist;
+  
+  const parentKeywords = [
+    'หัวข้อล่าง', 'ดังต่อไปนี้', 'เลือกตอบ', 'ถามอย่างน้อย', 'ขั้นตอน', 'ประวัติส่วนตัว', 
+    'prime question', 'การกำหนดเวลา', 'เทคนิคการ', 'ข้อแตกต่าง', 'ความแตกต่าง',
+    'แนวทางกรณี', 'การจัดการกรณี', 'อันตรกิริยา', 'การอธิบาย', 'คำอธิบาย'
+  ];
+  
+  const childStartKeywords = [
+    'แนะนำอย่างถูกต้อง', 'อธิบายชัดเจน', 'อธิบายขั้นตอน', 'อธิบายถูกต้อง', 'แนะนำถูกต้อง', 
+    'ชนิด 21', 'ชนิด 28', 'โรคประจำตัว', 'ยาที่ใช้', 'สมุนไพร', 'ชื่อ-นามสกุล', 'วันเกิด', 'hn', 
+    'วันนี้มาโรงพยาบาล', 'หมอได้บอก', 'รับประทานวันละ', 'รับประทานเฉพาะ', 'ให้รับประทาน', 
+    'อธิบายว่า', 'เตือนว่า', 'อธิบายผลข้างเคียง', 'ต้องใช้ถุงยาง', 'หากลืม', 'แนะนำวิธีทาน'
+  ];
+  
+  const n = checklist.length;
+  const isSub = new Array(n).fill(false);
+  
+  for (let i = 0; i < n; i++) {
+    const t = (checklist[i].text || '').trim();
+    const sc = parseFloat(checklist[i].score) || 0;
+    if (sc === 0 || t.startsWith('-') || t.startsWith('•') || t.startsWith('○') || t.startsWith('o ')) {
+      isSub[i] = true;
+    } else if (childStartKeywords.some(k => t.toLowerCase().startsWith(k.toLowerCase()) || (t.includes(':') && t.includes(k)))) {
+      isSub[i] = true;
+    }
+  }
+  
+  let i = 0;
+  while (i < n) {
+    const t = (checklist[i].text || '').trim();
+    const sc = parseFloat(checklist[i].score) || 0;
+    const isParentTitle = parentKeywords.some(k => t.toLowerCase().includes(k.toLowerCase()));
+    const hasChildAhead = (i + 1 < n && isSub[i + 1]);
+    
+    if ((isParentTitle || hasChildAhead) && sc > 0 && !t.startsWith('-') && !t.startsWith('•')) {
+      isSub[i] = false;
+      let j = i + 1;
+      while (j < n) {
+        const nextT = (checklist[j].text || '').trim();
+        const nextSc = parseFloat(checklist[j].score) || 0;
+        const nextIsParent = parentKeywords.some(k => nextT.toLowerCase().includes(k.toLowerCase())) && nextSc > 0 && !isSub[j];
+        if (nextIsParent) break;
+        if (nextSc > 1 && !isSub[j]) break;
+        isSub[j] = true;
+        j++;
+      }
+      i = j;
+    } else {
+      i++;
+    }
+  }
+  
+  for (let idx = 0; idx < n; idx++) {
+    checklist[idx].isSubset = isSub[idx];
+  }
+  return checklist;
+}
+window.resolveChecklistSubsets = resolveChecklistSubsets;
+
 /**
  * fetchCaseDetail — ดึงข้อมูล scenario/checklist เต็มของเคสจาก API แบบ on-demand
  * ใช้เมื่อ case ที่อยู่ใน AppState.cases ไม่มี contentHtml / scenario / checklist
@@ -802,6 +866,11 @@ async function fetchCaseDetail(caseId, forceLive = false) {
       if (cHtml.includes('โหลดเนื้อหาไม่ได้') || cHtml.includes('Exception:')) {
         console.warn('Live API returned error content for', cleanId, cHtml);
         return null;
+      }
+
+      // Auto resolve subsets if not explicitly defined
+      if (json.data.checklist && Array.isArray(json.data.checklist)) {
+        resolveChecklistSubsets(json.data.checklist);
       }
 
       // Update in memory & IndexedDB

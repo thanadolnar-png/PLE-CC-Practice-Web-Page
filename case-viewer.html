@@ -860,6 +860,10 @@
         return;
       }
       
+      if (typeof resolveChecklistSubsets === 'function') {
+        resolveChecklistSubsets(c.checklist);
+      }
+      
       // Map global index for each item
       const itemGlobalIndices = new Map();
       c.checklist.forEach((item, index) => itemGlobalIndices.set(item, index));
@@ -905,37 +909,11 @@
         `;
         
         // 2. รายการในกลุ่ม
-        let isCurrentSubsetSequence = false;
         groups[groupName].forEach((item, itemIdx) => {
           const globalIdx = itemGlobalIndices.get(item) || 0;
           const isChecked = checkedList.includes(item.id);
           const imgHtml = getChecklistItemImage(item, globalIdx, c);
-          
-          const prevItem = itemIdx > 0 ? groups[groupName][itemIdx - 1] : null;
-          // Reset subset sequence when an explicitly-non-subset item is encountered from the DB
-          if (item.isSubset === false && isCurrentSubsetSequence) {
-            isCurrentSubsetSequence = false;
-          }
-          // Set if previous item was a trigger phrase header
-          if (prevItem && ['หัวข้อล่าง', 'ดังต่อไปนี้', 'เลือกตอบ', 'ถามอย่างน้อย'].some(x => prevItem.text && prevItem.text.includes(x))) {
-            isCurrentSubsetSequence = true;
-          }
-          
-          let isSubset = false;
-          if (typeof item.isSubset === 'boolean') {
-            isSubset = item.isSubset;
-          } else {
-            const isParentHeader = ['หัวข้อล่าง', 'ดังต่อไปนี้', 'เลือกตอบ', 'ถามอย่างน้อย'].some(x => item.text && item.text.includes(x));
-            if (isParentHeader) {
-              isSubset = false;
-            } else if (isCurrentSubsetSequence && itemIdx > 0) {
-              isSubset = true;
-            } else if (item.text && (item.text.trim().startsWith('-') || item.text.trim().startsWith('•') || item.text.trim().startsWith('○'))) {
-              isSubset = true;
-            } else if (item.score === 0 && item.text && !item.text.startsWith('(')) {
-              isSubset = true;
-            }
-          }
+          const isSubset = !!item.isSubset;
           const el = document.createElement('div');
           el.className = `checklist-item ${isChecked ? 'checked' : ''} ${isSubset ? 'is-subset' : ''}`;
           el.setAttribute('data-id', item.id);
