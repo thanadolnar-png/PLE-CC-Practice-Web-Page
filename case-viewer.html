@@ -101,7 +101,760 @@
     @keyframes pulse {
       from { transform: scale(1); }
       to { transform: scale(1.05); }
-    }  </style>
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       UNIFIED EXAM ACTION HUB & LIVE STATION CHAT (CASE VIEWER)
+       ═══════════════════════════════════════════════════════════ */
+    .unified-tools-fab, .st-chat-trigger-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--primary) 0%, #312e81 100%);
+      color: #fff;
+      border: 1.5px solid rgba(255,255,255,0.25);
+      padding: 10px 18px;
+      border-radius: 9999px;
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      box-shadow: 0 8px 24px -4px rgba(79, 70, 229, 0.45);
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .unified-tools-fab:hover, .st-chat-trigger-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 12px 28px -4px rgba(79, 70, 229, 0.55);
+    }
+    .unified-tools-fab.active {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+      border-color: rgba(255,255,255,0.5);
+    }
+    .st-chat-badge {
+      background: #ef4444;
+      color: #fff;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 1px 6px;
+      display: none;
+      animation: pulse 1.5s infinite;
+    }
+    .unified-tools-menu {
+      position: fixed;
+      bottom: 78px;
+      right: 24px;
+      width: 290px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 16px 36px -6px rgba(0,0,0,0.28);
+      padding: 0.55rem;
+      z-index: 9998;
+      display: none;
+      flex-direction: column;
+      gap: 0.4rem;
+      animation: previewPopIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .unified-tool-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.7rem 0.85rem;
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      background: var(--bg);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: left;
+    }
+    .unified-tool-item:hover {
+      background: rgba(99, 102, 241, 0.09);
+      border-color: var(--primary);
+      transform: translateX(-2px);
+    }
+    .st-chat-drawer {
+      position: fixed;
+      bottom: 84px;
+      right: 24px;
+      width: 440px;
+      max-width: calc(100vw - 32px);
+      height: 580px;
+      max-height: calc(100vh - 110px);
+      overflow: hidden;
+      min-width: 320px;
+      min-height: 340px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 20px 40px -8px rgba(0,0,0,0.3);
+      z-index: 9998;
+      display: none;
+      flex-direction: column;
+      animation: previewPopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .st-chat-drawer.dragging {
+      user-select: none;
+      opacity: 0.96;
+      box-shadow: 0 26px 52px -10px rgba(0,0,0,0.42);
+      transition: none !important;
+    }
+    .st-chat-drawer.resizing {
+      user-select: none;
+      transition: none !important;
+    }
+    .st-chat-drawer.maximized {
+      width: min(780px, calc(100vw - 32px)) !important;
+      height: calc(100vh - 100px) !important;
+      max-width: 95vw !important;
+      max-height: calc(100vh - 100px) !important;
+    }
+    .st-chat-drawer.maximized .st-chat-resizer {
+      display: none !important;
+    }
+    /* 8-Direction Resizers */
+    .st-chat-resizer {
+      position: absolute;
+      z-index: 40;
+      touch-action: none;
+    }
+    .st-chat-resizer-t { top: 0; left: 0; right: 0; height: 8px; cursor: ns-resize; }
+    .st-chat-resizer-b { bottom: 0; left: 0; right: 0; height: 8px; cursor: ns-resize; }
+    .st-chat-resizer-l { top: 0; bottom: 0; left: 0; width: 8px; cursor: ew-resize; }
+    .st-chat-resizer-r { top: 0; bottom: 0; right: 0; width: 8px; cursor: ew-resize; }
+    .st-chat-resizer-tl { top: 0; left: 0; width: 22px; height: 22px; cursor: nwse-resize; z-index: 42; }
+    .st-chat-resizer-tr { top: 0; right: 0; width: 22px; height: 22px; cursor: nesw-resize; z-index: 42; }
+    .st-chat-resizer-bl { bottom: 0; left: 0; width: 22px; height: 22px; cursor: nesw-resize; z-index: 42; }
+    .st-chat-resizer-br { bottom: 0; right: 0; width: 22px; height: 22px; cursor: nwse-resize; z-index: 42; }
+    .st-chat-corner-grip {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      pointer-events: none;
+      opacity: 0.6;
+      transition: opacity 0.15s ease, border-color 0.15s ease;
+    }
+    .st-chat-resizer:hover .st-chat-corner-grip,
+    .st-chat-drawer.resizing .st-chat-corner-grip { opacity: 1; }
+    .st-chat-corner-grip.tl {
+      top: 3px; left: 3px;
+      border-top: 2.5px solid var(--text-secondary);
+      border-left: 2.5px solid var(--text-secondary);
+      border-top-left-radius: 4px;
+    }
+    .st-chat-corner-grip.br {
+      bottom: 3px; right: 3px;
+      border-bottom: 2.5px solid var(--text-secondary);
+      border-right: 2.5px solid var(--text-secondary);
+      border-bottom-right-radius: 4px;
+    }
+    .st-chat-resizer:hover .st-chat-corner-grip.tl,
+    .st-chat-resizer:hover .st-chat-corner-grip.br { border-color: var(--primary); }
+    .st-chat-header {
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: grab;
+      user-select: none;
+    }
+    .st-chat-header:active { cursor: grabbing; }
+    .st-chat-drag-indicator {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      color: var(--text-muted);
+      cursor: grab;
+      font-size: 1rem;
+      opacity: 0.65;
+      margin-right: 2px;
+      transition: opacity 0.15s ease, color 0.15s ease;
+    }
+    .st-chat-header:hover .st-chat-drag-indicator { opacity: 1; color: var(--primary); }
+    .st-chat-title {
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .st-chat-messages {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      background: var(--bg);
+    }
+    .st-chat-msg {
+      max-width: 82%;
+      padding: 0.6rem 0.85rem;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      line-height: 1.45;
+      word-break: break-word;
+      animation: fadeIn 0.15s ease;
+    }
+    .st-chat-msg.mine {
+      align-self: flex-end;
+      background: var(--primary);
+      color: #ffffff;
+      border-bottom-right-radius: 2px;
+    }
+    .st-chat-msg.theirs {
+      align-self: flex-start;
+      background: var(--surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 2px;
+    }
+    .st-chat-msg.drug-label-msg {
+      max-width: 92%;
+      padding: 0.65rem 0.85rem;
+      border: 1.5px solid #059669;
+      background: #f0fdf4 !important;
+      color: #065f46 !important;
+      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.12);
+    }
+    .st-chat-msg.mine.drug-label-msg { align-self: flex-end; border-color: #059669; }
+    .st-chat-msg.theirs.drug-label-msg { align-self: flex-start; border-color: #059669; }
+    .st-chat-label-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      margin-top: 0.35rem;
+    }
+    .st-chat-label-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: #059669;
+      color: #ffffff;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      width: fit-content;
+    }
+    .st-chat-label-img-wrap {
+      position: relative;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid rgba(5, 150, 105, 0.25);
+      background: #ffffff;
+      cursor: zoom-in;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .st-chat-label-img-wrap:hover {
+      transform: scale(1.01);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    .st-chat-label-img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 220px;
+      object-fit: contain;
+      background: #ffffff;
+    }
+    .st-chat-label-zoom-hint {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(4px);
+      color: #ffffff;
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+    .st-chat-msg.draw-note-msg {
+      max-width: 92%;
+      padding: 0.65rem 0.85rem;
+      border: 1.5px solid #2563eb;
+      background: #eff6ff !important;
+      color: #1e40af !important;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.12);
+    }
+    .st-chat-msg.type-note-msg {
+      max-width: 92%;
+      padding: 0.65rem 0.85rem;
+      border: 1.5px solid #d97706;
+      background: #fffbeb !important;
+      color: #92400e !important;
+      box-shadow: 0 4px 14px rgba(217, 119, 6, 0.12);
+    }
+    .st-chat-note-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      width: fit-content;
+      color: #ffffff;
+      margin-bottom: 0.35rem;
+    }
+    .st-chat-note-badge.draw { background: #2563eb; }
+    .st-chat-note-badge.type { background: #d97706; }
+    .st-chat-type-card-content {
+      white-space: pre-wrap;
+      font-family: var(--font-body);
+      font-size: 0.86rem;
+      line-height: 1.55;
+      background: #ffffff;
+      padding: 0.6rem 0.75rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(217, 119, 6, 0.25);
+    }
+    .st-chat-msg-sender {
+      font-size: 0.72rem;
+      margin-bottom: 0.2rem;
+      opacity: 0.85;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    #btn-ai-chat-toggle.ai-active {
+      background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+      border-color: #7c3aed !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 8px rgba(124,58,237,0.35);
+    }
+    .st-chat-ai-role-bar {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 0.35rem 0.75rem;
+      background: linear-gradient(135deg, rgba(124,58,237,0.06), rgba(99,102,241,0.04));
+      border-bottom: 1px solid rgba(124,58,237,0.12);
+      font-size: 0.72rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      transition: all 0.2s ease;
+    }
+    .st-chat-ai-role-bar::-webkit-scrollbar { display: none; }
+    .st-chat-ai-role-title {
+      font-weight: 700;
+      color: #6d28d9;
+      white-space: nowrap;
+      margin-right: 2px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .st-chat-ai-role-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0.22rem 0.55rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(124,58,237,0.22);
+      background: var(--surface, #ffffff);
+      color: var(--text-secondary, #475569);
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      line-height: 1.2;
+    }
+    .st-chat-ai-role-btn:hover {
+      border-color: #7c3aed;
+      color: #6d28d9;
+      background: rgba(124,58,237,0.08);
+    }
+    .st-chat-ai-role-btn.active {
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+      color: #ffffff;
+      border-color: #6d28d9;
+      box-shadow: 0 1.5px 5px rgba(109,40,217,0.3);
+    }
+    .st-chat-ai-role-desc {
+      font-size: 0.68rem;
+      color: #6d28d9;
+      opacity: 0.9;
+      margin-left: 2px;
+      white-space: nowrap;
+      font-style: italic;
+    }
+    .st-chat-avatar-spotlight {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0.45rem 0.85rem;
+      background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+      border-bottom: 1px solid var(--border, #e2e8f0);
+      transition: all 0.25s ease;
+    }
+    .st-chat-avatar-profile {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+    .st-chat-avatar-frame-wrap {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .st-chat-avatar-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #7c3aed;
+      background: #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: transform 0.25s ease, border-color 0.25s ease;
+      position: relative;
+      z-index: 2;
+    }
+    .st-chat-avatar-frame-wrap.breathing .st-chat-avatar-img {
+      animation: avatarBreath 3.5s ease-in-out infinite;
+    }
+    .st-chat-avatar-frame-wrap.speaking .st-chat-avatar-img {
+      animation: avatarSpeak 0.45s ease-in-out infinite alternate;
+      border-color: #10b981 !important;
+    }
+    .st-chat-avatar-pulse-ring {
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid rgba(16, 185, 129, 0.6);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .st-chat-avatar-frame-wrap.speaking .st-chat-avatar-pulse-ring {
+      animation: ringPulse 1.2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+    }
+    @keyframes avatarBreath {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+    @keyframes avatarSpeak {
+      0% { transform: scale(1) translateY(0); }
+      100% { transform: scale(1.06) translateY(-2px); }
+    }
+    @keyframes ringPulse {
+      0% { transform: scale(0.95); opacity: 0.9; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
+    .st-chat-avatar-meta { min-width: 0; }
+    .st-chat-avatar-name {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--text-primary, #1e293b);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .st-chat-avatar-sub {
+      font-size: 0.69rem;
+      color: var(--text-muted, #64748b);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .st-chat-avatar-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .st-chat-avatar-tool-btn {
+      background: var(--surface, #ffffff);
+      border: 1px solid var(--border, #cbd5e1);
+      border-radius: 6px;
+      padding: 0.2rem 0.45rem;
+      font-size: 0.72rem;
+      color: var(--text-secondary, #475569);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    .st-chat-avatar-tool-btn:hover {
+      background: #f1f5f9;
+      color: var(--text-primary, #0f172a);
+    }
+    .st-chat-avatar-tool-btn.active {
+      background: rgba(16, 185, 129, 0.12);
+      border-color: #10b981;
+      color: #047857;
+    }
+    .st-chat-mic-btn {
+      background: var(--surface, #ffffff);
+      border: 1px solid var(--border, #cbd5e1);
+      border-radius: var(--radius-sm, 6px);
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+      color: var(--text-secondary, #475569);
+      transition: all 0.18s ease;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .st-chat-mic-btn:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+      color: #0f172a;
+    }
+    .st-chat-mic-btn.listening {
+      background: #ef4444 !important;
+      border-color: #dc2626 !important;
+      color: #ffffff !important;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.35);
+      animation: micPulse 1.2s infinite alternate;
+    }
+    @keyframes micPulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.08); }
+    }
+    .st-chat-msg.ai-msg {
+      max-width: 90%;
+      padding: 0.65rem 0.85rem;
+      border: 1.5px solid #7c3aed;
+      background: linear-gradient(135deg, #faf5ff, #ede9fe) !important;
+      color: #4c1d95 !important;
+      box-shadow: 0 4px 14px rgba(124,58,237,0.12);
+      align-self: flex-start;
+    }
+    .st-chat-msg.ai-msg .st-chat-ai-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: #7c3aed; color: #fff;
+      padding: 0.15rem 0.45rem; border-radius: 5px;
+      font-size: 0.68rem; font-weight: 700;
+      margin-bottom: 0.35rem; width: fit-content;
+    }
+    .st-chat-ai-typing {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0.55rem 0.85rem; font-size: 0.79rem;
+      color: #7c3aed; font-style: italic;
+      border-left: 3px solid #7c3aed;
+      margin: 0.3rem 0; border-radius: 0 6px 6px 0;
+      background: rgba(124,58,237,0.05);
+    }
+    .st-chat-ai-typing-dots { display: inline-flex; gap: 3px; align-items: center; }
+    .st-chat-ai-typing-dots span {
+      display: inline-block; width: 6px; height: 6px;
+      background: #7c3aed; border-radius: 50%;
+      animation: aiDotBounce 1.1s infinite ease-in-out;
+    }
+    .st-chat-ai-typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .st-chat-ai-typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes aiDotBounce {
+      0%, 80%, 100% { transform: scale(0.65); opacity: 0.35; }
+      40% { transform: scale(1.15); opacity: 1; }
+    }
+    .st-chat-quick-wrap {
+      padding: 0.45rem 0.75rem;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 0.4rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .st-chat-quick-wrap::-webkit-scrollbar { display: none; }
+    .st-chat-quick-chip {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      padding: 0.25rem 0.65rem;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .st-chat-quick-chip:hover {
+      background: rgba(99, 102, 241, 0.12);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .st-chat-input-row {
+      padding: 0.65rem 0.85rem;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .st-chat-input {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: inherit;
+      outline: none;
+    }
+    .st-chat-input:focus { border-color: var(--primary); }
+    .st-chat-typing-bar {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      padding: 0 1rem 0.3rem;
+      background: var(--bg);
+      min-height: 18px;
+    }
+    .st-chat-send-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+    .st-chat-send-btn:hover { background: #4338ca; transform: scale(1.04); }
+    .st-chat-send-btn:active { transform: scale(0.96); }
+    .st-chat-empty-hint {
+      text-align: center;
+      color: var(--text-muted);
+      margin: auto;
+      padding: 1.5rem;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    /* Mobile Responsive Dock & Bottom Sheet */
+    @keyframes mobileSheetSlideUp {
+      from { transform: translateY(100%); opacity: 0.8; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .st-chat-mobile-drag-handle {
+      display: none;
+      width: 100%;
+      height: 24px;
+      cursor: grab;
+      touch-action: none;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .st-chat-mobile-drag-handle span {
+      display: block;
+      width: 44px;
+      height: 4.5px;
+      border-radius: 9999px;
+      background: var(--text-muted);
+      opacity: 0.55;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+    .st-chat-mobile-drag-handle:active span {
+      opacity: 0.9;
+      transform: scaleX(1.15);
+    }
+
+    @media (max-width: 768px) {
+      .unified-tools-fab, .st-chat-trigger-btn {
+        bottom: 14px !important;
+        right: auto !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        padding: 9px 20px !important;
+        font-size: 0.88rem !important;
+        box-shadow: 0 10px 28px rgba(79, 70, 229, 0.45), 0 2px 8px rgba(0,0,0,0.18) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        z-index: 10000 !important;
+      }
+      .unified-tools-fab:hover, .st-chat-trigger-btn:hover {
+        transform: translateX(-50%) translateY(-2px) scale(1.02) !important;
+      }
+      .unified-tools-fab:active, .st-chat-trigger-btn:active {
+        transform: translateX(-50%) scale(0.97) !important;
+      }
+
+      .unified-tools-menu {
+        bottom: 64px !important;
+        left: 12px !important;
+        right: 12px !important;
+        width: auto !important;
+        max-width: 440px !important;
+        margin: 0 auto !important;
+        border-radius: 18px !important;
+        box-shadow: 0 16px 36px rgba(0,0,0,0.32) !important;
+        animation: mobileSheetSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        z-index: 9999 !important;
+      }
+
+      .st-chat-drawer {
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 52vh !important;
+        max-height: 94vh !important;
+        min-height: 180px !important;
+        border-radius: 20px 20px 0 0 !important;
+        border-bottom: none !important;
+        border-left: none !important;
+        border-right: none !important;
+        box-shadow: 0 -10px 32px rgba(0, 0, 0, 0.28) !important;
+        animation: mobileSheetSlideUp 0.26s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        z-index: 10001 !important;
+      }
+      .st-chat-drawer.maximized {
+        height: 94vh !important;
+        max-height: 94vh !important;
+        border-radius: 20px 20px 0 0 !important;
+      }
+
+      .st-chat-mobile-drag-handle {
+        display: flex !important;
+      }
+      .st-chat-resizer {
+        display: none !important;
+      }
+      .st-chat-drag-indicator {
+        display: none !important;
+      }
+    }
+  </style>
 </head>
 <body>
 <div class="app-shell shell-viewer" id="appShell">
@@ -288,6 +1041,9 @@
               <button class="btn btn-secondary" id="toggle-note-btn" onclick="toggleNote()">
                 📄 เปิดเฉลย
               </button>
+              <button class="btn btn-primary" style="background: linear-gradient(135deg, #4f46e5, #4338ca); color: #fff;" onclick="toggleStationChatDrawer()">
+                💬 แชทสถานี (AI)
+              </button>
               <button class="btn btn-primary" style="background: var(--primary); color: #fff;" onclick="toggleViewerScratchpad('draw')">
                 📝 เปิดกระดาษ
               </button>
@@ -297,7 +1053,7 @@
               <button class="btn btn-secondary" onclick="openSingleCasePrintModal()">
                 🖨️ พิมพ์
               </button>
-              <button class="btn btn-danger" onclick="resetChecklistProgress()" style="grid-column: span 2;">
+              <button class="btn btn-danger" onclick="resetChecklistProgress()">
                 🔄 รีเซ็ต
               </button>
             </div>
@@ -327,6 +1083,7 @@
   <script src="case-details-offline.js?v=v_20261004_190718"></script>
   <script src="app.js?v=v_20261004_190718"></script>
   <script src="scratchpad.js?v=20261004_201700"></script>
+  <script src="station-chat.js?v=20261004_222000"></script>
 
   <script>
     // ─ Fullscreen helper ─
@@ -1065,6 +1822,15 @@
       
       // อัปเดต UI Progress bar ตอนเริ่มต้น
       updateChecklistUI(c.caseId);
+
+      // Initialize Station Chat for Case Viewer
+      if (typeof StationChatController !== 'undefined' && typeof StationChatController.initStation === 'function') {
+        try {
+          StationChatController.initStation(c.caseId || activeCaseId || '1');
+        } catch (err) {
+          console.warn('StationChatController init in viewer error:', err);
+        }
+      }
     }
 
     // ฟังก์ชันจัดการบทบาทการซ้อมสอบ (Solo / Examinee / Examiner)
@@ -1660,6 +2426,162 @@
           🖨️ ดำเนินการพิมพ์ (Print / Save PDF)
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       UNIFIED EXAM ACTION HUB & LIVE STATION CHAT (CASE VIEWER)
+       ═══════════════════════════════════════════ -->
+  <!-- Unified Floating Action Hub -->
+  <button id="btn-unified-exam-tools" class="unified-tools-fab" onclick="toggleUnifiedExamToolsMenu(event)" title="เครื่องมือประจำเคส (แชทสถานี / กระดาษทด)">
+    <span style="font-size: 1.15rem; line-height: 1;">⚡</span>
+    <span>เครื่องมือเคส</span>
+    <span id="unified-tools-unread-badge" class="st-chat-badge">0</span>
+  </button>
+
+  <!-- Mini Popup Menu Animation -->
+  <div id="unified-exam-tools-menu" class="unified-tools-menu" onclick="event.stopPropagation()">
+    <div style="font-size: 0.74rem; font-weight: 700; color: var(--text-muted); padding: 0.2rem 0.5rem 0.1rem; text-transform: uppercase; letter-spacing: 0.04em;">
+      เครื่องมือประจำสถานีเคสนี้
+    </div>
+    <div class="unified-tool-item" onclick="openChatFromMenu()">
+      <span style="font-size: 1.35rem; line-height: 1;">💬</span>
+      <div style="flex: 1;">
+        <div style="font-weight: 700; font-size: 0.88rem; color: var(--text-primary); display: flex; align-items: center; justify-content: space-between;">
+          <span>แชทสถานี (Station Chat)</span>
+          <span id="menu-chat-unread-badge" class="badge" style="display: none; background: #ef4444; color: #fff; font-size: 0.68rem; padding: 1px 5px; border-radius: 9999px;">0</span>
+        </div>
+        <div style="font-size: 0.73rem; color: var(--text-secondary); margin-top: 1px;">ถามตอบ AI Guru / ซักประวัติคนไข้จำลอง</div>
+      </div>
+    </div>
+    <div class="unified-tool-item" onclick="openScratchpadFromMenu()">
+      <span style="font-size: 1.35rem; line-height: 1;">📝</span>
+      <div style="flex: 1;">
+        <div style="font-weight: 700; font-size: 0.88rem; color: var(--text-primary);">กระดาษทด (Scratchpad)</div>
+        <div style="font-size: 0.73rem; color: var(--text-secondary); margin-top: 1px;">วาดรูป เขียนสูตรคำนวณ จดบันทึก และฉลากยา</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Chat Drawer -->
+  <div id="station-chat-drawer" class="st-chat-drawer">
+    <!-- Mobile Pull Handle for Half-Screen / Fullscreen Swiping -->
+    <div class="st-chat-mobile-drag-handle" id="st-chat-mobile-handle" title="รูดขึ้น-ลงเพื่อปรับขนาด (ครึ่งจอ / เต็มจอ)">
+      <span></span>
+    </div>
+
+    <!-- 8 Dynamic Resizers -->
+    <div class="st-chat-resizer st-chat-resizer-t" data-direction="t"></div>
+    <div class="st-chat-resizer st-chat-resizer-b" data-direction="b"></div>
+    <div class="st-chat-resizer st-chat-resizer-l" data-direction="l"></div>
+    <div class="st-chat-resizer st-chat-resizer-r" data-direction="r"></div>
+    <div class="st-chat-resizer st-chat-resizer-tl" data-direction="tl" title="คลิกลากเพื่อย่อ-ขยายขนาด (Resize)">
+      <div class="st-chat-corner-grip tl"></div>
+    </div>
+    <div class="st-chat-resizer st-chat-resizer-tr" data-direction="tr"></div>
+    <div class="st-chat-resizer st-chat-resizer-bl" data-direction="bl"></div>
+    <div class="st-chat-resizer st-chat-resizer-br" data-direction="br" title="คลิกลากเพื่อย่อ-ขยายขนาด (Resize)">
+      <div class="st-chat-corner-grip br"></div>
+    </div>
+
+    <!-- Header (Draggable) -->
+    <div class="st-chat-header" id="st-chat-header" title="คลิกลากเพื่อย้ายหน้าต่าง | ดับเบิ้ลคลิกเพื่อย่อ/ขยายเต็มจอ">
+      <div class="st-chat-title">
+        <span class="st-chat-drag-indicator" title="แถบจับย้ายตำแหน่ง">⋮⋮</span>
+        <span style="font-size: 1.15rem;">💬</span>
+        <div>
+          <div id="st-chat-header-title" style="font-size: 0.95rem; font-weight: 700; line-height: 1.2;">แชทสนทนาประจำสถานี</div>
+          <div id="st-chat-header-subtitle" style="font-size: 0.74rem; color: var(--text-muted); font-weight: 500; line-height: 1.2;">กำลังเชื่อมต่อ...</div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 4px;">
+        <button type="button" id="btn-ai-chat-toggle"
+          onclick="toggleAIChatMode()"
+          title="เปิด/ปิด Gemini AI ติวเตอร์และผู้ป่วยจำลอง (gemini-3.5-flash-lite)"
+          style="background: none; border: 1.5px solid var(--border-color, #e2e8f0);
+                 font-size: 0.73rem; cursor: pointer; color: var(--text-muted);
+                 line-height: 1; padding: 0.22rem 0.6rem; border-radius: 7px;
+                 transition: all 0.18s; white-space: nowrap; display: flex;
+                 align-items: center; gap: 4px; font-weight: 700;">
+          🤖 <span id="ai-toggle-label">AI</span>
+        </button>
+        <button type="button" id="btn-maximize-chat" class="btn btn-ghost" onclick="toggleMaximizeStationChat()" title="ขยายเต็มจอ / ย่อขนาดเดิม" style="background: none; border: none; font-size: 0.95rem; cursor: pointer; color: var(--text-muted); line-height: 1; padding: 0.2rem 0.4rem; border-radius: var(--radius-sm); transition: color 0.15s;">⛶</button>
+        <button type="button" class="btn btn-ghost" onclick="toggleStationChatDrawer()" title="ย่อหน้าต่างแชท" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-muted); line-height: 1; padding: 0.1rem 0.4rem; border-radius: var(--radius-sm); transition: color 0.15s;">&times;</button>
+      </div>
+    </div>
+
+    <!-- AI Role Mode Switcher Bar -->
+    <div id="st-chat-ai-role-bar" class="st-chat-ai-role-bar" style="display: none;">
+      <span class="st-chat-ai-role-title">🎭 โหมด AI:</span>
+      <button type="button" class="st-chat-ai-role-btn active" id="btn-ai-role-guru" onclick="setAIChatRole('guru')" title="ติวเตอร์ผู้เชี่ยวชาญ (Gemini AI Guru): ถามตอบทางการ อธิบายหลักการ DTPs วิเคราะห์เคส และ Guideline">
+        🧠 ติวเตอร์ Guru
+      </button>
+      <button type="button" class="st-chat-ai-role-btn" id="btn-ai-role-examiner" onclick="setAIChatRole('examiner')" title="อาจารย์คุมสอบผู้ประเมิน: ซักถาม-ตรวจอาการ ให้คะแนนตามเกณฑ์ ไม่บอกเฉลยหรือ DTP ล่วงหน้า">
+        👨‍🏫 อาจารย์คุมสอบ
+      </button>
+      <span id="st-chat-ai-role-desc" class="st-chat-ai-role-desc">🧠 ติวเตอร์ Guru: อธิบายหลักการ DTPs วิเคราะห์เคส และ Guideline ทางการ</span>
+    </div>
+
+    <!-- Animated Avatar Spotlight Bar -->
+    <div id="st-chat-avatar-spotlight" class="st-chat-avatar-spotlight" style="display: none;">
+      <div class="st-chat-avatar-profile">
+        <div class="st-chat-avatar-frame-wrap breathing" id="st-chat-avatar-frame" onclick="cycleAIAvatar()" title="คลิกเพื่อสุ่มเปลี่ยนตัวละคร">
+          <div class="st-chat-avatar-pulse-ring"></div>
+          <img id="st-chat-avatar-img" class="st-chat-avatar-img" src="assets/avatars/cheater.jpg" alt="Avatar">
+        </div>
+        <div class="st-chat-avatar-meta">
+          <div class="st-chat-avatar-name" id="st-chat-avatar-name">
+            <span>🧠 เภสัชกรติวเตอร์ (Gemini Guru)</span>
+          </div>
+          <div class="st-chat-avatar-sub" id="st-chat-avatar-sub">
+            <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#10b981;margin-right:2px;"></span>
+            <span>ประจำเคสนี้ • พร้อมไขข้อข้องใจ</span>
+          </div>
+        </div>
+      </div>
+      <div class="st-chat-avatar-actions">
+        <button type="button" id="btn-ai-sound-toggle" class="st-chat-avatar-tool-btn active" onclick="toggleAISound()" title="เปิด/ปิด เสียงพูดตอบกลับภาษาไทย (TTS Voice)">
+          🔊 <span id="ai-sound-status-text">เสียง ON</span>
+        </button>
+        <button type="button" class="st-chat-avatar-tool-btn" onclick="cycleAIAvatar()" title="สุ่มเปลี่ยนตัวละครใหม่">
+          🎲 สุ่ม
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Role-play Prompts (Clinical Shortcuts) -->
+    <div id="st-chat-quick-chips" class="st-chat-quick-wrap">
+      <button type="button" class="st-chat-quick-chip" onclick="sendQuickChatMessage('🩺 ช่วยวิเคราะห์ DTPs และปัญหาหลักของผู้ป่วยรายนี้ให้หน่อยครับ')">🔍 วิเคราะห์ DTPs</button>
+      <button type="button" class="st-chat-quick-chip" onclick="sendQuickChatMessage('💊 ยาและการรักษาที่เหมาะสมตาม Guideline ทางการของโรคนี้คืออะไร?')">📖 Guideline ยา</button>
+      <button type="button" class="st-chat-quick-chip" onclick="sendQuickChatMessage('📋 จุดสำคัญใน Checklist ที่กรรมการมักตรวจหรือหักคะแนนคืออะไร?')">✅ จุดสังเกต Checklist</button>
+      <button type="button" class="st-chat-quick-chip" onclick="sendQuickChatMessage('⚠️ มีประเด็น Drug Interaction หรือข้อควรระวังในการจ่ายยาอะไรบ้าง?')">⚠️ ข้อควรระวัง</button>
+      <button type="button" class="st-chat-quick-chip" onclick="sendQuickChatMessage('🩺 ขออนุญาตตรวจสัญญาณชีพ (V/S) และประวัติผู้ป่วยเพิ่มเติมครับ')">🩺 ขอตรวจ V/S</button>
+    </div>
+
+    <!-- Messages Container -->
+    <div id="station-chat-messages" class="st-chat-messages">
+      <div class="st-chat-empty-hint" id="st-chat-empty-placeholder">
+        <span style="font-size: 1.5rem; display: block; margin-bottom: 4px;">💬</span>
+        ยังไม่มีข้อความสนทนาในสถานีนี้<br>
+        <span style="font-size: 0.78rem; opacity: 0.8;">พิมพ์คำถาม ถามหลักการ Guideline หรือซักประวัติที่นี่ได้เลยครับ</span>
+      </div>
+    </div>
+
+    <!-- Typing Status Bar -->
+    <div id="station-chat-typing-status" class="st-chat-typing-bar"></div>
+
+    <!-- Input Row -->
+    <div class="st-chat-input-row">
+      <button type="button" id="station-chat-mic-btn" class="st-chat-mic-btn" onclick="toggleStationVoiceMic()" title="แตะเพื่อเปิดไมค์พูดคุยภาษาไทย (STT รองรับ iOS/iPad/PC)">
+        🎙️
+      </button>
+      <input type="text" id="station-chat-input" class="st-chat-input" placeholder="พิมพ์คำถาม หรือกดไมค์ 🎙️ เพื่อพูด..." onkeydown="handleStationChatKey(event)" oninput="handleStationChatTyping()">
+      <button type="button" id="station-chat-send-btn" class="st-chat-send-btn" onclick="sendStationChatFromInput()" title="ส่งข้อความ (Enter)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
     </div>
   </div>
   <!-- Vercel Web Analytics & Speed Insights -->
