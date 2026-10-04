@@ -7456,40 +7456,131 @@
 
       async callGeminiAI(userText) {
         // Unlimited Mode: No local cap, direct Google API usage
+        const stNum = this.currentStationNum;
+        let matchedCase = null;
+        let isRestStation = false;
 
-        // Build case context from current station
-        let caseContext = '';
+        // 1. Resolve active station & case
         try {
-          const stNum = this.currentStationNum;
-          let matchedCase = null;
           if (SimState.stations && SimState.stations.length > 0) {
-            const found = SimState.stations.find(s => s && s.stationNumber === stNum);
-            if (found && found.case) matchedCase = found.case;
+            let st = null;
+            if (SimState.stations[SimState.currentIdx] && SimState.stations[SimState.currentIdx].stationNumber === stNum) {
+              st = SimState.stations[SimState.currentIdx];
+            } else {
+              st = SimState.stations.find(s => s && s.stationNumber === stNum);
+            }
+            if (st) {
+              isRestStation = Boolean(st.isRest);
+              matchedCase = st.case || null;
+            }
           }
           if (!matchedCase && window._currentCaseDetail) {
             matchedCase = window._currentCaseDetail;
           }
 
-          if (matchedCase) {
-            const strip = (html) => String(html || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-            const parts = [];
-            if (matchedCase.title) parts.push(`สถานการณ์: ${matchedCase.title}`);
-            if (matchedCase.patientProfile || matchedCase.profile) parts.push(`ข้อมูลผู้ป่วย: ${strip(matchedCase.patientProfile || matchedCase.profile)}`);
-            if (matchedCase.note) parts.push(`รายละเอียดเคส: ${strip(matchedCase.note).slice(0, 1200)}`);
-            if (matchedCase.checklist) parts.push(`เกณฑ์ประเมินที่สำคัญ: ${strip(matchedCase.checklist).slice(0, 800)}`);
-            caseContext = parts.join('\n');
+          // If matchedCase has a caseId, enrich with OFFLINE_CASE_DETAILS if available
+          if (matchedCase && matchedCase.caseId && typeof OFFLINE_CASE_DETAILS !== 'undefined') {
+            const cId = String(matchedCase.caseId).trim();
+            const ospeId = cId.startsWith('OSPE-') ? cId : ('OSPE-' + cId);
+            const rawId = cId.replace(/^OSPE-/, '');
+            const offlineDetail = OFFLINE_CASE_DETAILS[cId] || OFFLINE_CASE_DETAILS[ospeId] || OFFLINE_CASE_DETAILS[rawId];
+            if (offlineDetail) {
+              matchedCase = Object.assign({}, offlineDetail, matchedCase);
+            }
           }
         } catch (e) {
-          console.warn('Cannot build case context:', e);
+          console.warn('Cannot resolve matchedCase for AI:', e);
         }
 
-        const systemPrompt = `คุณคือผู้ป่วยจำลอง (Simulated Patient) หรือติวเตอร์ประเมินสถานีสอบ OSPE คลินิก/เภสัชกรรม (PLE-CC2)
-ข้อกำหนดการตอบ:
-1. ตอบเป็นภาษาไทย ให้ความรู้สึกสมจริงตามบทบาทผู้ป่วยหรือติวเตอร์เภสัชกร
-2. ตอบกระชับ ชัดเจน ตรงจุด (ความยาวประมาณ 2-4 ประโยค)
-3. อย่าเฉลยคำตอบหรือเกณฑ์การสอบทั้งหมดในทันที ให้นิสิตซักประวัติ สอบถาม หรือให้คำแนะนำตามขั้นตอน
-4. หากนิสิตถามความรู้เภสัชกรรมภายนอก สามารถตอบเสริมหรือดึงข้อมูลทางการแพทย์ที่ถูกต้องและทันสมัยมาอธิบายได้
-${caseContext ? '\n[ข้อมูลสถานีสอบปัจจุบัน]\n' + caseContext : ''}`;
+        // 2. Build Rich Case Context
+        const strip = (html) => String(html || '')
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/&nbsp;/g, ' ')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&amp;/g, '&')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        let caseContext = '';
+        if (isRestStation) {
+          caseContext = 'สถานีนี้เป็น "สถานีพัก (Rest Station)" ผู้เข้าสอบไม่มีโจทย์หรือคนไข้จำลองในสถานีนี้ ให้นิสิตพักผ่อนเพื่อรอเข้าสถานีถัดไป';
+        } else if (matchedCase) {
+          const parts = [];
+          if (matchedCase.caseId) parts.push(`📌 รหัสเคส: ${matchedCase.caseId}`);
+          if (matchedCase.title) parts.push(`📌 ชื่อสถานการณ์/โจทย์เคส: ${matchedCase.title}`);
+          if (matchedCase.disease) parts.push(`📌 โรค/กลุ่มยาหลัก: ${matchedCase.disease}`);
+
+          const scenarioText = strip(matchedCase.scenario || matchedCase.contentHtml || '');
+          if (scenarioText) parts.push(`📋 โจทย์สถานการณ์ที่นิสิตได้รับ:\n"${scenarioText}"`);
+
+          const patientInfoText = strip(matchedCase.patientInfoHtml || matchedCase.patientProfile || matchedCase.profile || '');
+          if (patientInfoText) parts.push(`👤 ข้อมูลผู้ป่วย (Patient Profile & Vitals & Labs & Meds):\n${patientInfoText}`);
+
+          const spScriptText = strip(matchedCase.spScriptHtml || matchedCase.spScript || '');
+          if (spScriptText) parts.push(`🎭 บทผู้ป่วยจำลอง (SP Script - สิ่งที่คนไข้ต้องตอบเมื่อถูกซักประวัติ):\n${spScriptText}`);
+
+          const examinerText = strip(matchedCase.examinerInfoHtml || matchedCase.examinerInfo || '');
+          if (examinerText) parts.push(`👨‍⚕️ ข้อมูลผู้ประเมิน/สิ่งที่ผู้ตรวจมีให้:\n${examinerText}`);
+
+          const equipText = strip(matchedCase.equipmentHtml || matchedCase.equipment || '');
+          if (equipText) parts.push(`📦 อุปกรณ์/สิ่งที่มีให้ในสถานี:\n${equipText}`);
+
+          // Extract Checklist items
+          if (Array.isArray(matchedCase.checklist) && matchedCase.checklist.length > 0) {
+            const chkLines = matchedCase.checklist.slice(0, 20).map((item, idx) => {
+              const grp = item.group ? `[${item.group}] ` : '';
+              const txt = strip(item.text || item.textHtml || item.title || '');
+              return `${idx + 1}. ${grp}${txt}`;
+            }).filter(Boolean);
+            if (chkLines.length > 0) {
+              parts.push(`✅ เกณฑ์ประเมินและเฉลยของสถานีนี้ (Checklist & DTPs Key Solution):\n${chkLines.join('\n')}`);
+            }
+          } else if (matchedCase.checklistHtml || typeof matchedCase.checklist === 'string') {
+            const chkText = strip(matchedCase.checklistHtml || matchedCase.checklist);
+            if (chkText) parts.push(`✅ เกณฑ์ประเมินและเฉลย:\n${chkText.slice(0, 1000)}`);
+          }
+
+          const noteText = strip(matchedCase.noteHtml || matchedCase.note || '');
+          if (noteText) parts.push(`💡 หมายเหตุ/คำอธิบายเพิ่มเติม:\n${noteText.slice(0, 500)}`);
+
+          caseContext = parts.join('\n\n');
+        }
+
+        // 3. Extract recent conversation history in this station
+        let recentHistoryText = '';
+        try {
+          const currentMsgs = (this.soloMessages && this.soloMessages[stNum]) ? this.soloMessages[stNum] : [];
+          if (currentMsgs.length > 0) {
+            const lastMsgs = currentMsgs.slice(-6);
+            recentHistoryText = lastMsgs.map(m => {
+              const roleName = m.isAi ? 'ผู้ป่วยจำลอง' : (m.senderRole === 'examiner' ? 'ผู้ประเมิน' : 'นิสิต');
+              const txt = m.noteText || m.text || '';
+              return `${roleName}: ${txt}`;
+            }).join('\n');
+          }
+        } catch (_) {}
+
+        // 4. Construct System Prompt with strict case fidelity
+        const systemPrompt = `คุณคือระบบจำลองสถานีสอบทักษะปฏิบัติทางเภสัชกรรมคลินิก (PLE-CC2 OSPE Simulation) ประจำสถานีสอบที่ ${stNum}
+==================================================
+⚠️ [กฎเหล็กสำคัญสูงสุด - MANDATORY CASE CONSTRAINTS]:
+1. คุณต้องอ่าน "ข้อมูลสถานีสอบและเคสผู้ป่วยปัจจุบัน" ด้านล่างนี้อย่างละเอียด และตอบคำถามโดยยึดถือข้อมูลของเคสนี้เป็นหลัก 100% ห้ามสร้างข้อมูลที่ขัดแย้งหรือหลุดออกจากเคสเด็ดขาด!
+2. [บทบาทหลัก: ผู้ป่วยจำลอง (Simulated Patient) หรือญาติผู้ป่วย]:
+   - เมื่อนิสิตทักทาย ซักประวัติ ถามอาการ ยาเดิม หรือให้คำแนะนำ ให้คุณตอบในบทบาท "ผู้ป่วยจำลอง" (หรือญาติที่มาซื้อยาแทน ตามที่โจทย์ระบุ) ทันที!
+   - ตอบด้วยภาษาพูดที่เป็นธรรมชาติ สุภาพ สมจริง เสมือนผู้ป่วยคนหนึ่ง (เช่น มีอาการอะไร, เป็นมากี่วัน, ยาที่กินอยู่, ซื้อให้ใคร)
+   - ตอบเฉพาะสิ่งที่ผู้ป่วยรู้ตามข้อมูลในเคส ห้ามหลุดเฉลยโรคหรือบอก DTPs ตรงๆ ล่วงหน้าจนกว่านิสิตจะซักถามเจาะลึก
+3. [บทบาทผู้ประเมิน (Examiner)]:
+   - หากนิสิตแจ้งขอข้อมูลผู้ตรวจ (เช่น "ขอตรวจวัดความดัน", "ขอผลแล็บ", "ขอดูขวดยาเดิม") ให้คุณให้ข้อมูลตัวเลข/ผลตรวจตามที่มีในเคส
+4. [บทบาทอาจารย์ติวเตอร์ (Tutor)]:
+   - หากนิสิตถามเพื่อขอ Feedback ขอคำชี้แนะ หรือขอเฉลยสรุป ให้ตอบในบทบาทอาจารย์ติวเตอร์โดยอิงตามเกณฑ์ Checklist และเฉลยของเคสนี้
+5. ความยาวคำตอบ: กระชับ ตรงประเด็น สมจริง ประมาณ 2-4 ประโยค ตอบเป็นภาษาไทย
+==================================================
+[ข้อมูลสถานีสอบและเคสผู้ป่วยปัจจุบัน]
+${caseContext || '(ยังไม่มีข้อมูลเคส กรุณาให้คำแนะนำทั่วไป)'}
+==================================================`;
+
+        const userPrompt = `${recentHistoryText ? `[บทสนทนาก่อนหน้าในสถานีนี้]\n${recentHistoryText}\n\n` : ''}ข้อความล่าสุดจากนิสิต: "${userText}"`;
 
         // Retrieve key or assemble runtime key
         const _kParts = ['AQ.Ab8RN6Ioh', 'gsoJVHv4e5PY', 'XEjPEXhVw2UP', 'QbPkXow-biGDdgYZg'];
@@ -7507,7 +7598,7 @@ ${caseContext ? '\n[ข้อมูลสถานีสอบปัจจุบ
               {
                 role: 'user',
                 parts: [
-                  { text: `${systemPrompt}\n\nคำพูด/คำตอบจากนิสิตเข้าสอบ: "${userText}"` }
+                  { text: `${systemPrompt}\n\n${userPrompt}` }
                 ]
               }
             ],
