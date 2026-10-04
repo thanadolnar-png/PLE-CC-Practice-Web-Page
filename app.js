@@ -959,6 +959,60 @@ function buildPrintChecklistTable(c) {
 }
 window.buildPrintChecklistTable = buildPrintChecklistTable;
 
+function stripSectionHeaders(str) {
+  if (!str) return '';
+  return str
+    .replace(/<p[^>]*>\s*#+\s*(?:สถานการณ์|โจทย์|ข้อมูลผู้ป่วย|สิ่งที่มีให้|อุปกรณ์|Checklist|เกณฑ์ประเมิน|ข้อมูลผู้ตรวจ|เฉลย|หมายเหตุ|ข้อมูลเคส)[^<]*<\/p>/gi, '')
+    .replace(/^#+\s*(?:สถานการณ์|โจทย์|ข้อมูลผู้ป่วย|สิ่งที่มีให้|อุปกรณ์|Checklist|เกณฑ์ประเมิน|ข้อมูลผู้ตรวจ|เฉลย|หมายเหตุ|ข้อมูลเคส)[^\n]*\n?/gim, '');
+}
+window.stripSectionHeaders = stripSectionHeaders;
+
+function getFormattedCaseScenarioHtml(c) {
+  if (!c) return '<p>ไม่มีข้อมูลสถานการณ์</p>';
+  let raw = c.contentHtml || '';
+  if (!raw && c.scenario) {
+    raw = /<[a-z][\s\S]*>/i.test(c.scenario) ? c.scenario : `<p>${c.scenario.replace(/\r?\n/g, '<br>')}</p>`;
+  }
+  if (!raw && typeof document !== 'undefined' && document.getElementById('case-scenario-content')) {
+    raw = document.getElementById('case-scenario-content').innerHTML;
+  }
+  if (!raw) return '<p>ไม่มีข้อมูลสถานการณ์</p>';
+
+  raw = stripSectionHeaders(raw);
+  return raw;
+}
+window.getFormattedCaseScenarioHtml = getFormattedCaseScenarioHtml;
+
+function getFormattedCasePatientHtml(c) {
+  if (!c) return '';
+  let raw = c.patientInfoHtml || '';
+  if (!raw && typeof document !== 'undefined' && document.getElementById('case-patient-content')) {
+    raw = document.getElementById('case-patient-content').innerHTML;
+  }
+  if (!raw) return '';
+  raw = stripSectionHeaders(raw);
+  return (raw.trim() && raw.replace(/<[^>]*>/g, '').trim().length > 0) ? raw : '';
+}
+window.getFormattedCasePatientHtml = getFormattedCasePatientHtml;
+
+function getFormattedCaseEquipmentHtml(c) {
+  if (!c) return '';
+  let raw = c.equipmentHtml || '';
+  if (!raw && typeof document !== 'undefined' && document.getElementById('case-equipment-content')) {
+    raw = document.getElementById('case-equipment-content').innerHTML;
+  }
+  if (!raw) return '';
+  raw = stripSectionHeaders(raw).trim();
+  if (raw.startsWith('<li')) {
+    const isNumbered = /^\s*<li[^>]*>\s*(\d+[\.\)]|\(\d+\))/i.test(raw);
+    const tag = isNumbered ? 'ol' : 'ul';
+    const listClass = isNumbered ? 'ordered-list' : 'bullet-list';
+    return `<${tag} class="${listClass}" style="margin: 0.3rem 0; padding-left: 1.5rem;">${raw}</${tag}>`;
+  }
+  return raw;
+}
+window.getFormattedCaseEquipmentHtml = getFormattedCaseEquipmentHtml;
+
 /**
  * fetchCaseDetail — ดึงข้อมูล scenario/checklist เต็มของเคสจาก API แบบ on-demand
  * ใช้เมื่อ case ที่อยู่ใน AppState.cases ไม่มี contentHtml / scenario / checklist
@@ -2848,22 +2902,25 @@ async function executeBatchPrint() {
       </div>`;
 
       if (mode === 'full' || mode === 'question') {
+        const scenarioHtml = getFormattedCaseScenarioHtml(c);
         html += `<div style="margin-bottom:1.25rem;">
           <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #3b82f6; padding-left:0.5rem;">📌 สถานการณ์</h3>
-          <div style="font-size:0.95rem; line-height:1.5;">${c.scenario || '<p>ไม่มีข้อมูลสถานการณ์</p>'}</div>
+          <div style="font-size:0.95rem; line-height:1.5;">${scenarioHtml}</div>
         </div>`;
 
-        if (c.patientInfoHtml) {
+        const patientHtml = getFormattedCasePatientHtml(c);
+        if (patientHtml) {
           html += `<div style="margin-bottom:1.25rem;">
             <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #06b6d4; padding-left:0.5rem;">👤 ข้อมูลผู้ป่วย</h3>
-            <div style="font-size:0.95rem; line-height:1.5;">${c.patientInfoHtml}</div>
+            <div style="font-size:0.95rem; line-height:1.5;">${patientHtml}</div>
           </div>`;
         }
 
-        if (c.equipmentHtml && c.equipmentHtml.trim() !== '') {
+        const equipHtml = getFormattedCaseEquipmentHtml(c);
+        if (equipHtml) {
           html += `<div style="margin-bottom:1.25rem;">
             <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #8b5cf6; padding-left:0.5rem;">📦 สิ่งที่มีให้ในสถานี</h3>
-            <div style="font-size:0.95rem; line-height:1.5;">${c.equipmentHtml}</div>
+            <div style="font-size:0.95rem; line-height:1.5;">${equipHtml}</div>
           </div>`;
         }
       }

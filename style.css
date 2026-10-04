@@ -3999,6 +3999,26 @@ body.is-printing #batch-print-execution-area {
     break-after: page !important;
     padding-bottom: 2rem !important;
   }
+
+  .batch-print-case p,
+  .print-preview-paper p {
+    margin: 0 0 0.45rem 0 !important;
+    line-height: 1.55 !important;
+  }
+
+  .batch-print-case ul,
+  .batch-print-case ol,
+  .print-preview-paper ul,
+  .print-preview-paper ol {
+    margin: 0.35rem 0 !important;
+    padding-left: 1.6rem !important;
+  }
+
+  .batch-print-case li,
+  .print-preview-paper li {
+    margin-bottom: 0.3rem !important;
+    line-height: 1.45 !important;
+  }
 }
 
 

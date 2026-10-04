@@ -1390,13 +1390,18 @@
       </div>`;
 
       if (mode === 'full' || mode === 'question') {
-        const scenarioHtml = c.scenario || c.contentHtml || document.getElementById('case-scenario-content')?.innerHTML || '<p>ไม่มีข้อมูลสถานการณ์</p>';
+        const scenarioHtml = (typeof getFormattedCaseScenarioHtml === 'function') 
+          ? getFormattedCaseScenarioHtml(c) 
+          : (document.getElementById('case-scenario-content')?.innerHTML || c.contentHtml || (c.scenario ? `<p>${c.scenario.replace(/\r?\n/g, '<br>')}</p>` : '<p>ไม่มีข้อมูลสถานการณ์</p>'));
+        
         html += `<div style="margin-bottom:1rem;">
           <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #3b82f6; padding-left:0.5rem;">📌 สถานการณ์</h4>
           <div style="font-size:0.9rem; line-height:1.5;">${scenarioHtml}</div>
         </div>`;
 
-        const patientHtml = c.patientInfoHtml || document.getElementById('case-patient-content')?.innerHTML || '';
+        const patientHtml = (typeof getFormattedCasePatientHtml === 'function')
+          ? getFormattedCasePatientHtml(c)
+          : (c.patientInfoHtml || document.getElementById('case-patient-content')?.innerHTML || '');
         if (patientHtml && patientHtml.trim() !== '') {
           html += `<div style="margin-bottom:1rem;">
             <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #06b6d4; padding-left:0.5rem;">👤 ข้อมูลผู้ป่วย</h4>
@@ -1404,7 +1409,9 @@
           </div>`;
         }
 
-        const equipHtml = c.equipmentHtml || document.getElementById('case-equipment-content')?.innerHTML || '';
+        const equipHtml = (typeof getFormattedCaseEquipmentHtml === 'function')
+          ? getFormattedCaseEquipmentHtml(c)
+          : (c.equipmentHtml || document.getElementById('case-equipment-content')?.innerHTML || '');
         if (equipHtml && equipHtml.trim() !== '') {
           html += `<div style="margin-bottom:1rem;">
             <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #8b5cf6; padding-left:0.5rem;">📦 สิ่งที่มีให้ในสถานี</h4>
@@ -1481,13 +1488,18 @@
         </div>`;
 
       if (mode === 'full' || mode === 'question') {
-        const scenarioHtml = c.scenario || c.contentHtml || document.getElementById('case-scenario-content')?.innerHTML || '<p>ไม่มีข้อมูลสถานการณ์</p>';
+        const scenarioHtml = (typeof getFormattedCaseScenarioHtml === 'function') 
+          ? getFormattedCaseScenarioHtml(c) 
+          : (document.getElementById('case-scenario-content')?.innerHTML || c.contentHtml || (c.scenario ? `<p>${c.scenario.replace(/\r?\n/g, '<br>')}</p>` : '<p>ไม่มีข้อมูลสถานการณ์</p>'));
+
         html += `<div style="margin-bottom:1.25rem;">
           <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #3b82f6; padding-left:0.5rem;">📌 สถานการณ์</h3>
           <div style="font-size:0.95rem; line-height:1.5;">${scenarioHtml}</div>
         </div>`;
 
-        const patientHtml = c.patientInfoHtml || document.getElementById('case-patient-content')?.innerHTML || '';
+        const patientHtml = (typeof getFormattedCasePatientHtml === 'function')
+          ? getFormattedCasePatientHtml(c)
+          : (c.patientInfoHtml || document.getElementById('case-patient-content')?.innerHTML || '');
         if (patientHtml && patientHtml.trim() !== '') {
           html += `<div style="margin-bottom:1.25rem;">
             <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #06b6d4; padding-left:0.5rem;">👤 ข้อมูลผู้ป่วย</h3>
@@ -1495,7 +1507,9 @@
           </div>`;
         }
 
-        const equipHtml = c.equipmentHtml || document.getElementById('case-equipment-content')?.innerHTML || '';
+        const equipHtml = (typeof getFormattedCaseEquipmentHtml === 'function')
+          ? getFormattedCaseEquipmentHtml(c)
+          : (c.equipmentHtml || document.getElementById('case-equipment-content')?.innerHTML || '');
         if (equipHtml && equipHtml.trim() !== '') {
           html += `<div style="margin-bottom:1.25rem;">
             <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #8b5cf6; padding-left:0.5rem;">📦 สิ่งที่มีให้ในสถานี</h3>
