@@ -854,6 +854,8 @@
         display: none !important;
       }
     }
+    /* Hide floating scratchpad FAB — tools are accessible via unified dock */
+    #scratchpad-fab-btn { display: none !important; }
   </style>
 </head>
 <body>
@@ -902,9 +904,6 @@
           ย้อนกลับไปคลังเคสสอบ
         </a>
         <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-          <button class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.35rem 0.75rem; border-color: var(--primary); color: var(--primary);" onclick="updateCurrentCaseFromDoc()" id="btn-update-doc-top">
-            🔄 Update Data From Google Docs
-          </button>
           <a href="#" class="btn btn-secondary" style="color: #dc2626; border-color: #fca5a5; background: #fef2f2; font-size: 0.82rem; padding: 0.35rem 0.75rem;" onclick="goToReportCase(event)" title="แจ้งปัญหาเคสนี้">
             🚨 แจ้งปัญหาเคสนี้
           </a>
@@ -932,13 +931,8 @@
         <!-- Left Pane: Case description & Doc embed -->
         <section class="viewer-pane" id="left-pane">
           
-          <!-- Tabs selection (no-print) -->
-          <div class="viewer-tabs no-print" id="doc-tabs-bar">
-            <button class="viewer-tab-btn active" id="tab-btn-content" onclick="switchViewerTab('content')">📖 โจทย์และข้อมูลผู้ป่วย</button>
-            <button class="viewer-tab-btn" id="tab-btn-doc" onclick="switchViewerTab('doc')">📄 เอกสาร Google Doc ต้นฉบับ</button>
-          </div>
 
-          <!-- Tab Content 1: Case Detail HTML -->
+          <!-- Tab Content: Case Detail HTML (always visible, no tabs needed) -->
           <div id="view-tab-content-area" class="view-tab-content active print-hide-checklist">
             
             <h3 class="viewer-section-title" id="scenario-section-title">สถานการณ์</h3>
@@ -958,15 +952,7 @@
             
           </div>
 
-          <!-- Tab Content 2: Embedded Google Doc (no-print) -->
-          <div id="view-tab-doc-area" class="view-tab-content no-print">
-            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
-              หากเนื้อหาไม่แสดงหรือต้องการแก้ไขข้อมูล กรุณาคลิกเปิด <a href="" id="case-doc-direct-link" target="_blank" style="color: var(--primary); font-weight: 600; text-decoration: underline;">เปิด in Google Docs</a>
-            </p>
-            <div class="doc-iframe-wrapper">
-              <iframe id="doc-embed-iframe" class="doc-iframe" src="" title="Google Doc Embed"></iframe>
-            </div>
-          </div>
+
 
           <!-- Print layout only note (shows in print) -->
           <div class="print-only print-hide-question" id="print-checklist-wrapper" style="margin-top: 1rem;">
@@ -1044,19 +1030,11 @@
               <button class="btn btn-primary" style="background: linear-gradient(135deg, #4f46e5, #4338ca); color: #fff;" onclick="toggleStationChatDrawer()">
                 💬 แชทสถานี (AI)
               </button>
-              <button class="btn btn-primary" style="background: var(--primary); color: #fff;" onclick="toggleViewerScratchpad('draw')">
-                📝 เปิดกระดาษ
-              </button>
-              <button class="btn btn-secondary" style="border-color: #10b981; color: #047857; background: #ecfdf5; font-weight: 700;" onclick="toggleViewerScratchpad('label')">
-                🏷️ ฉลากยา RxCU
-              </button>
               <button class="btn btn-secondary" onclick="openSingleCasePrintModal()">
                 🖨️ พิมพ์
               </button>
-              <button class="btn btn-danger" onclick="resetChecklistProgress()">
-                🔄 รีเซ็ต
-              </button>
             </div>
+
           </div>
 
         </section>
@@ -2539,24 +2517,13 @@
           </div>
         </div>
       </div>
-      <div class="st-chat-avatar-actions">
+        <div class="st-chat-avatar-actions">
         <button type="button" id="btn-ai-sound-toggle" class="st-chat-avatar-tool-btn active" onclick="toggleAISound()" title="เปิด/ปิด เสียงพูดตอบกลับภาษาไทย (TTS Voice)">
-          🔊 <span id="ai-sound-status-text">เสียง ON</span>
-        </button>
-        <button type="button" class="st-chat-avatar-tool-btn" onclick="cycleAIAvatar()" title="สุ่มเปลี่ยนตัวละครใหม่">
-          🎲 สุ่ม
+          <span id="ai-sound-status-text">🔊</span>
         </button>
       </div>
     </div>
 
-    <!-- Quick Role-play Prompts (Clinical Shortcuts) -->
-    <div id="st-chat-quick-chips" class="st-chat-quick-wrap">
-      <button type="button" class="st-chat-quick-chip" onclick="sendQuickChatMessage('🩺 ช่วยวิเคราะห์ DTPs และปัญหาหลักของผู้ป่วยรายนี้ให้หน่อยครับ')">🔍 วิเคราะห์ DTPs</button>
-      <button type="button" class="st-chat-quick-chip" onclick="sendQuickChatMessage('💊 ยาและการรักษาที่เหมาะสมตาม Guideline ทางการของโรคนี้คืออะไร?')">📖 Guideline ยา</button>
-      <button type="button" class="st-chat-quick-chip" onclick="sendQuickChatMessage('📋 จุดสำคัญใน Checklist ที่กรรมการมักตรวจหรือหักคะแนนคืออะไร?')">✅ จุดสังเกต Checklist</button>
-      <button type="button" class="st-chat-quick-chip" onclick="sendQuickChatMessage('⚠️ มีประเด็น Drug Interaction หรือข้อควรระวังในการจ่ายยาอะไรบ้าง?')">⚠️ ข้อควรระวัง</button>
-      <button type="button" class="st-chat-quick-chip" onclick="sendQuickChatMessage('🩺 ขออนุญาตตรวจสัญญาณชีพ (V/S) และประวัติผู้ป่วยเพิ่มเติมครับ')">🩺 ขอตรวจ V/S</button>
-    </div>
 
     <!-- Messages Container -->
     <div id="station-chat-messages" class="st-chat-messages">

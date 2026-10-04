@@ -99,7 +99,7 @@
       }
       if (soundBtn && soundStatus) {
         soundBtn.classList.toggle('active', this.aiSoundEnabled);
-        soundStatus.textContent = this.aiSoundEnabled ? 'เสียง ON' : 'เสียง ปิด';
+        soundStatus.textContent = this.aiSoundEnabled ? '🔊' : '🔇';
       }
     },
 

@@ -404,8 +404,8 @@
         box-sizing: border-box !important;
       }
       .exam-modes-grid {
-        grid-template-columns: 1fr !important;
-        gap: 0.6rem !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 0.35rem !important;
       }
       .proportion-grid {
         grid-template-columns: 1fr !important;
@@ -1505,17 +1505,14 @@
 
           <!-- Tab Selector Buttons -->
           <div class="tabs-bar" style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.75rem;">
-            <button id="setup-tab-solo-btn" type="button" class="btn btn-primary" style="flex: 1; padding: 0.5rem;" onclick="toggleSetupView('solo')">👤 ซ้อมคนเดียว (Solo)</button>
-            <button id="setup-tab-lobby-btn" type="button" class="btn btn-secondary" style="flex: 1; padding: 0.5rem;" onclick="toggleSetupView('lobby')">👥 ซ้อมออนไลน์ (Lobby)</button>
+            <button id="setup-tab-solo-btn" type="button" class="btn btn-primary" style="flex: 1; padding: 0.5rem;" onclick="toggleSetupView('solo')">👤 Solo</button>
+            <button id="setup-tab-lobby-btn" type="button" class="btn btn-secondary" style="flex: 1; padding: 0.5rem;" onclick="toggleSetupView('lobby')">👥 Online</button>
           </div>
 
           <!-- ═══════════════════════════════════════════
                LOBBY MULTIPLAYER SETUP CONTAINER (TOP PRIORITY)
                ═══════════════════════════════════════════ -->
           <div id="setup-lobby-container" style="display: none; margin-bottom: 1.5rem;">
-            <div style="padding: 0.75rem 1rem; background: var(--primary-light); border-radius: var(--radius-md); margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--primary); line-height: 1.45;">
-              <strong>📡 โหมดออนไลน์ (Multiplayer):</strong> รองรับผู้เข้าร่วมไม่จำกัดจำนวนคน เพื่อนๆ สามารถเข้าร่วมห้องเดียวกัน ซ้อมพร้อมกัน หรือช่วยกันประเมิน และสรุปผลคะแนนร่วมกันแบบ Real-time
-            </div>
 
             <form id="lobby-setup-form" onsubmit="event.preventDefault(); submitLobbySetup();">
               <div class="form-group" style="margin-bottom: 1.25rem;">
@@ -1529,21 +1526,19 @@
               <!-- Mode Choice: Create vs Join (Large Touch-Friendly Cards) -->
               <div class="form-group" style="margin-bottom: 1.35rem;">
                 <label class="form-label" style="font-weight: 700; font-size: 0.96rem; margin-bottom: 0.65rem; display: block; color: var(--text-primary);">
-                  🌐 เลือกรูปแบบการเชื่อมต่อ (Connection Mode)
+                  🌐 เลือกรูปแบบการเชื่อมต่อ
                 </label>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
                   <label id="lobby-op-card-create" style="cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.25rem 0.85rem; border: 2.5px solid var(--primary); background: rgba(99, 102, 241, 0.08); border-radius: var(--radius-lg); text-align: center; transition: all 0.2s; box-shadow: 0 2px 8px rgba(99, 102, 241, 0.12);" onclick="selectLobbyOp('create')">
                     <input type="radio" name="lobby-op" value="create" checked style="display: none;">
                     <span style="font-size: 2.25rem; display: block; margin-bottom: 0.35rem; line-height: 1;">👑</span>
-                    <strong id="lobby-op-title-create" style="font-size: 1.05rem; color: var(--primary); display: block; margin-bottom: 0.25rem;">สร้างห้องใหม่ (Host)</strong>
-                    <span style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.35;">เปิดห้อง กำหนดข้อสอบ และคุมระบบ</span>
+                    <strong id="lobby-op-title-create" style="font-size: 1.05rem; color: var(--primary); display: block;">Host</strong>
                   </label>
 
                   <label id="lobby-op-card-join" style="cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.25rem 0.85rem; border: 2px solid var(--border); background: var(--surface); border-radius: var(--radius-lg); text-align: center; transition: all 0.2s;" onclick="selectLobbyOp('join')">
                     <input type="radio" name="lobby-op" value="join" style="display: none;">
                     <span style="font-size: 2.25rem; display: block; margin-bottom: 0.35rem; line-height: 1;">🚪</span>
-                    <strong id="lobby-op-title-join" style="font-size: 1.05rem; color: var(--text-primary); display: block; margin-bottom: 0.25rem;">เข้าร่วมห้องที่มีอยู่</strong>
-                    <span style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.35;">กรอกรหัส 4 หลัก เพื่อซ้อมกับเพื่อน</span>
+                    <strong id="lobby-op-title-join" style="font-size: 1.05rem; color: var(--text-primary); display: block;">Join</strong>
                   </label>
                 </div>
               </div>
@@ -1604,26 +1599,23 @@
             <!-- Mode Switcher: Mixed Proportion vs Exam Set Mode vs Custom Picker -->
             <div class="form-group" style="margin-bottom: 1.5rem;">
               <label class="form-label" style="margin-bottom: 0.6rem; display: block; font-weight: 600; font-size: 0.95rem;">
-                🎯 รูปแบบการจัดชุดข้อสอบ (Exam Generation Mode)
+                Exam Generation Mode
               </label>
               <div class="exam-modes-grid">
-                <label id="mode-opt-proportion" class="exam-mode-card active" onclick="switchExamGenerationMode('proportion')" style="cursor: pointer; border: 2px solid var(--primary); background: rgba(99, 102, 241, 0.08); padding: 0.85rem; border-radius: var(--radius-md); text-align: center; transition: all 0.2s;">
+                <label id="mode-opt-proportion" class="exam-mode-card active" onclick="switchExamGenerationMode('proportion')" style="cursor: pointer; border: 2px solid var(--primary); background: rgba(99, 102, 241, 0.08); padding: 0.6rem 0.4rem; border-radius: var(--radius-md); text-align: center; transition: all 0.2s;">
                   <input type="radio" name="exam-gen-mode" value="proportion" checked style="display: none;">
-                  <div style="font-size: 1.4rem; margin-bottom: 0.25rem;">🎲</div>
-                  <strong style="display: block; font-size: 0.95rem; color: var(--primary);">สุ่มผสมตามสัดส่วนหมวด</strong>
-                  <span style="font-size: 0.76rem; color: var(--text-muted);">Clinic / Product / SAP</span>
+                  <div style="font-size: 1.2rem; margin-bottom: 0.2rem;">🎲</div>
+                  <strong style="display: block; font-size: 0.82rem; color: var(--primary);">สุ่มผสม</strong>
                 </label>
-                <label id="mode-opt-set" class="exam-mode-card" onclick="switchExamGenerationMode('set')" style="cursor: pointer; border: 2px solid var(--border); background: var(--surface); padding: 0.85rem; border-radius: var(--radius-md); text-align: center; transition: all 0.2s;">
+                <label id="mode-opt-set" class="exam-mode-card" onclick="switchExamGenerationMode('set')" style="cursor: pointer; border: 2px solid var(--border); background: var(--surface); padding: 0.6rem 0.4rem; border-radius: var(--radius-md); text-align: center; transition: all 0.2s;">
                   <input type="radio" name="exam-gen-mode" value="set" style="display: none;">
-                  <div style="font-size: 1.4rem; margin-bottom: 0.25rem;">📦</div>
-                  <strong style="display: block; font-size: 0.95rem; color: var(--text-primary);">สอบเจาะจงเซ็ต / ปี</strong>
-                  <span style="font-size: 0.76rem; color: var(--text-muted);">ข้อสอบจริงรายปี / ชุด Mock</span>
+                  <div style="font-size: 1.2rem; margin-bottom: 0.2rem;">📦</div>
+                  <strong style="display: block; font-size: 0.82rem; color: var(--text-primary);">เจาะจงปี</strong>
                 </label>
-                <label id="mode-opt-custom" class="exam-mode-card" onclick="switchExamGenerationMode('custom')" style="cursor: pointer; border: 2px solid var(--border); background: var(--surface); padding: 0.85rem; border-radius: var(--radius-md); text-align: center; transition: all 0.2s;">
+                <label id="mode-opt-custom" class="exam-mode-card" onclick="switchExamGenerationMode('custom')" style="cursor: pointer; border: 2px solid var(--border); background: var(--surface); padding: 0.6rem 0.4rem; border-radius: var(--radius-md); text-align: center; transition: all 0.2s;">
                   <input type="radio" name="exam-gen-mode" value="custom" style="display: none;">
-                  <div style="font-size: 1.4rem; margin-bottom: 0.25rem;">🎯</div>
-                  <strong style="display: block; font-size: 0.95rem; color: var(--text-primary);">เลือกเคสเอง (Custom)</strong>
-                  <span style="font-size: 0.76rem; color: var(--text-muted);">ค้นหาและเจาะจงข้อจัดห้องสอบ</span>
+                  <div style="font-size: 1.2rem; margin-bottom: 0.2rem;">🎯</div>
+                  <strong style="display: block; font-size: 0.82rem; color: var(--text-primary);">เลือกเคส</strong>
                 </label>
               </div>
             </div>
@@ -1631,7 +1623,7 @@
             <!-- 1. Proportion Checkboxes + Number Inputs Container -->
             <div id="config-proportion-container" class="form-group">
               <label class="form-label" style="margin-bottom: 0.75rem; display: block; font-weight: 600;">
-                📊 สัดส่วนหมวดวิชา (เลือกหมวดที่ต้องการ &amp; ระบุจำนวนฐาน)
+                สัดส่วนหมวดวิชา
               </label>
               
               <div class="proportion-grid">
@@ -7771,7 +7763,7 @@
         }
         if (soundBtn && soundStatus) {
           soundBtn.classList.toggle('active', this.aiSoundEnabled);
-          soundStatus.textContent = this.aiSoundEnabled ? 'เสียง ON' : 'เสียง ปิด';
+          soundStatus.textContent = this.aiSoundEnabled ? '🔊' : '🔇';
         }
       },
 
@@ -12651,22 +12643,11 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       </div>
       <div class="st-chat-avatar-actions">
         <button type="button" id="btn-ai-sound-toggle" class="st-chat-avatar-tool-btn active" onclick="toggleAISound()" title="เปิด/ปิด เสียงพูดตอบกลับภาษาไทย (TTS Voice)">
-          🔊 <span id="ai-sound-status-text">เสียง ON</span>
-        </button>
-        <button type="button" class="st-chat-avatar-tool-btn" onclick="cycleAIAvatar()" title="สุ่มเปลี่ยนตัวละครใหม่">
-          🎲 สุ่ม
+          <span id="ai-sound-status-text">🔊</span>
         </button>
       </div>
     </div>
 
-    <!-- Quick Role-play Prompts (Clinical Shortcuts) -->
-    <div id="st-chat-quick-chips" class="st-chat-quick-wrap">
-      <button type="button" class="st-chat-quick-chip" onclick="sendQuickChatMessage('🩺 ขออนุญาตตรวจสัญญาณชีพ (V/S) ของผู้ป่วยครับ/ค่ะ')">🩺 ขอตรวจ V/S</button>
-      <button type="button" class="st-chat-quick-chip" onclick="sendQuickChatMessage('💊 ผู้ป่วยมียาเดิมที่ใช้อยู่ประจำ หรืออาหารเสริมอะไรบ้างครับ/ค่ะ?')">💊 สอบถามยาเดิม</button>
-      <button type="button" class="st-chat-quick-chip" onclick="sendQuickChatMessage('⚠️ มีประวัติแพ้ยา อาหาร หรือสารเคมีใดๆ มาก่อนไหมครับ/ค่ะ?')">⚠️ ประวัติแพ้ยา</button>
-      <button type="button" class="st-chat-quick-chip" onclick="sendQuickChatMessage('🧬 มีโรคประจำตัว หรือประวัติการเจ็บป่วยในครอบครัวไหมครับ/ค่ะ?')">🧬 โรคประจำตัว</button>
-      <button type="button" class="st-chat-quick-chip" onclick="sendQuickChatMessage('📋 สรุปแผนการใช้ยาและคำแนะนำการปฏิบัติตัวแก่ผู้ป่วยครับ/ค่ะ')">📋 คำแนะนำคนไข้</button>
-    </div>
 
     <!-- Messages Container -->
     <div id="station-chat-messages" class="st-chat-messages">
