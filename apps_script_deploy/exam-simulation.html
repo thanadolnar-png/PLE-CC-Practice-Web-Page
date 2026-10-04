@@ -2473,8 +2473,18 @@
               <span>👥 ผู้ร่วมซ้อมสอบในห้องนี้ (<span id="results-participants-count">0</span> คน)</span>
               <span id="results-room-id-tag" style="font-size: 0.8rem; background: var(--primary-light); color: var(--primary); padding: 0.2rem 0.6rem; border-radius: var(--radius-sm); font-weight: 800;">ห้อง: ----</span>
             </div>
-            <div id="results-participants-chips" style="display: flex; flex-wrap: wrap; gap: 0.45rem;">
-              <!-- Filled dynamically by JS -->
+            <!-- Super Host chip (pinned top) -->
+            <div id="results-participants-superhost" style="margin-bottom: 0.5rem;"></div>
+            <!-- 2-column layout: examinees left, examiners right -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 1rem;">
+              <div>
+                <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">✍️ ผู้เข้าสอบ</div>
+                <div id="results-participants-examinees" style="display: flex; flex-wrap: wrap; gap: 0.4rem;"></div>
+              </div>
+              <div>
+                <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">👨‍🏫 ผู้ประเมิน</div>
+                <div id="results-participants-examiners" style="display: flex; flex-wrap: wrap; gap: 0.4rem;"></div>
+              </div>
             </div>
           </div>
 
@@ -2533,8 +2543,8 @@
           <div id="results-personal-score-section">
             <div class="results-score-display">
               <div class="results-score-circle">
-                <span class="results-score-num" id="results-score-val">0/0</span>
-                <span class="results-score-pct" id="results-score-pct">0%</span>
+                <span class="results-score-num" id="results-score-val" style="display:none;">0/0</span>
+                <span class="results-score-pct" id="results-score-pct" style="font-size:2.6rem;font-weight:900;line-height:1;">0%</span>
               </div>
               <div class="results-status" id="results-status-text">FAILED</div>
               <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;" id="results-summary-desc">ผ่านการประเมิน 0 จาก 16 สถานี (เกณฑ์ผ่านสถานีต้องได้ >= 80%)</p>
@@ -10249,10 +10259,12 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
           });
         }
 
-        // Render participants chips in the results screen
+        // Render participants chips in the results screen (2-column: examinees | examiners)
         const rosterBar = document.getElementById('results-participants-bar');
         const rosterCount = document.getElementById('results-participants-count');
-        const rosterChips = document.getElementById('results-participants-chips');
+        const rosterSuperhost = document.getElementById('results-participants-superhost');
+        const rosterExaminees = document.getElementById('results-participants-examinees');
+        const rosterExaminers = document.getElementById('results-participants-examiners');
         const roomTag = document.getElementById('results-room-id-tag');
         
         if (SimState.isLobby) {
@@ -10268,18 +10280,29 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
           }
           
           if (rosterCount) rosterCount.textContent = pList.length;
-          if (rosterChips) {
-            rosterChips.innerHTML = '';
-            pList.forEach(p => {
-              const chip = document.createElement('span');
-              const isHost = p.isHost;
-              const isMe = p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName;
-              chip.className = 'lobby-player-chip ' + (isHost ? 'host' : (p.role === 'examiner' ? 'examiner' : 'examinee'));
-              const roleIcon = isHost ? '👑 Host' : (p.role === 'examiner' ? '👨‍🏫 ผู้ประเมิน' : '✍️ ผู้เข้าสอบ');
-              chip.innerHTML = `${roleIcon}: <strong>${escapeHtml(p.name)}</strong>${isMe ? ' <span class="me-badge">คุณ</span>' : ''}`;
-              rosterChips.appendChild(chip);
-            });
-          }
+          
+          const makeChip = (p, showMeBadge) => {
+            const chip = document.createElement('span');
+            const isMe = p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName;
+            chip.className = 'lobby-player-chip ' + (p.isHost ? 'host' : (p.role === 'examiner' ? 'examiner' : 'examinee'));
+            chip.innerHTML = `${escapeHtml(p.emoji || (p.isHost ? '👑' : (p.role === 'examiner' ? '👨‍🏫' : '✍️')))} <strong>${escapeHtml(p.name)}</strong>${(showMeBadge && isMe) ? ' <span class="me-badge">คุณ</span>' : ''}`;
+            return chip;
+          };
+
+          if (rosterSuperhost) rosterSuperhost.innerHTML = '';
+          if (rosterExaminees) rosterExaminees.innerHTML = '';
+          if (rosterExaminers) rosterExaminers.innerHTML = '';
+
+          pList.forEach(p => {
+            const isMe = p.id === SimState.myPlayerId || p.name === SimState.lobbyPlayerName;
+            if (p.isHost || p.role === 'host') {
+              if (rosterSuperhost) rosterSuperhost.appendChild(makeChip(p, true));
+            } else if (p.role === 'examiner') {
+              if (rosterExaminers) rosterExaminers.appendChild(makeChip(p, isMe));
+            } else {
+              if (rosterExaminees) rosterExaminees.appendChild(makeChip(p, isMe));
+            }
+          });
         } else {
           if (rosterBar) rosterBar.style.display = 'none';
         }
