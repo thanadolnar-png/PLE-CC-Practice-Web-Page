@@ -1321,7 +1321,20 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
     sendMessage(text) {
       if (!text || !text.trim()) return;
-      if (this._micWanted && this.speechRecognition) { try { this.speechRecognition.abort(); } catch (_) {} }
+
+      // Auto-off mic when sending a message as requested
+      if (this._micWanted || this.isListeningVoice) {
+        this._micWanted = false;
+        this.isListeningVoice = false;
+        if (this.speechRecognition) {
+          try { this.speechRecognition.stop(); } catch (_) {}
+          try { this.speechRecognition.abort(); } catch (_) {}
+        }
+        if (typeof this._resetMicUI === 'function') {
+          this._resetMicUI();
+        }
+      }
+
       const cleanText = text.trim();
       const stNum = this.currentStationNum;
 
