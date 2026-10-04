@@ -53,6 +53,7 @@
 
     // Multi-Label tracking for active station
     activeLabelIndex: 0,
+    _resizeTimer: null,
     
     // Per-station storage: 
     // { [stationKey]: { 
@@ -111,7 +112,7 @@
      * Preload RxCU Drug Label Template image into memory
      */
     preloadLabelTemplate: function () {
-      if (this.labelTemplateImg) return;
+      if (this.labelTemplateImg && this.isLabelImgLoaded) return;
       const img = new Image();
       img.onload = () => {
         this.isLabelImgLoaded = true;
@@ -123,6 +124,9 @@
         console.warn('Could not load RxCU drug label image template:', DRUG_LABEL_IMG_SRC);
       };
       img.src = DRUG_LABEL_IMG_SRC;
+      if (img.complete && img.naturalWidth > 0) {
+        this.isLabelImgLoaded = true;
+      }
       this.labelTemplateImg = img;
     },
 
@@ -740,6 +744,15 @@
 
         // Push current state to undo stack before starting new stroke
         self.pushUndoState();
+        if (self.activeTab === 'label') {
+          const stData = self.ensureStationData();
+          if (stData.labels && stData.labels[stData.activeLabelIndex]) {
+            stData.labels[stData.activeLabelIndex].hasDrawn = true;
+          }
+        } else if (self.activeTab === 'draw') {
+          const stData = self.ensureStationData();
+          stData.hasDrawn = true;
+        }
 
         // Draw initial dot for tap
         self.drawStroke(pos.x, pos.y, pos.x, pos.y);
@@ -813,7 +826,7 @@
      */
     undo: function () {
       if (this.undoStack.length === 0) {
-        this.clearCanvas();
+        this.clearCanvas(true);
         this.saveCurrentStation();
         return;
       }
@@ -822,7 +835,22 @@
       img.onload = () => {
         this.clearCanvas(false);
         const rect = this.dom.canvas.getBoundingClientRect();
-        this.dom.ctx.drawImage(img, 0, 0, rect.width, rect.height);
+        const w = rect.width || parseFloat(this.dom.canvas.style.width) || 400;
+        const h = rect.height || parseFloat(this.dom.canvas.style.height) || 300;
+        this.dom.ctx.drawImage(img, 0, 0, w, h);
+        if (this.undoStack.length === 0) {
+          if (this.activeTab === 'label') {
+            const stData = this.ensureStationData();
+            if (stData.labels && stData.labels[stData.activeLabelIndex]) {
+              stData.labels[stData.activeLabelIndex].hasDrawn = false;
+              stData.labels[stData.activeLabelIndex].canvasData = null;
+            }
+          } else if (this.activeTab === 'draw') {
+            const stData = this.ensureStationData();
+            stData.hasDrawn = false;
+            stData.canvasData = null;
+          }
+        }
         this.saveCurrentStation();
       };
       img.src = prevData;
@@ -835,8 +863,11 @@
       const canvas = this.dom.canvas;
       const ctx = this.dom.ctx;
       const rect = canvas.getBoundingClientRect();
+      const w = rect.width || parseFloat(canvas.style.width) || (canvas.width / (window.devicePixelRatio || 1)) || 400;
+      const h = rect.height || parseFloat(canvas.style.height) || (canvas.height / (window.devicePixelRatio || 1)) || 300;
+
       ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, rect.width, rect.height);
+      ctx.fillRect(0, 0, w, h);
 
       // If in label mode, redraw background template image
       if (this.activeTab === 'label') {
@@ -845,6 +876,19 @@
 
       if (resetUndo) {
         this.undoStack = [];
+        if (this.activeTab === 'label') {
+          const stData = this.ensureStationData();
+          if (stData.labels && stData.labels[stData.activeLabelIndex]) {
+            stData.labels[stData.activeLabelIndex].canvasData = null;
+            stData.labels[stData.activeLabelIndex].hasDrawn = false;
+            stData.labels[stData.activeLabelIndex].undoStack = [];
+          }
+        } else if (this.activeTab === 'draw') {
+          const stData = this.ensureStationData();
+          stData.canvasData = null;
+          stData.hasDrawn = false;
+          stData.undoStack = [];
+        }
       }
     },
 
@@ -856,13 +900,18 @@
       const canvas = this.dom.canvas;
       const ctx = this.dom.ctx;
       const rect = canvas.getBoundingClientRect();
-      const w = rect.width;
-      const h = rect.height;
+      const w = rect.width || parseFloat(canvas.style.width) || (canvas.width / (window.devicePixelRatio || 1)) || 400;
+      const h = rect.height || parseFloat(canvas.style.height) || (canvas.height / (window.devicePixelRatio || 1)) || 300;
+
+      // Ensure template image loaded status is accurate
+      if (!this.isLabelImgLoaded && this.labelTemplateImg && this.labelTemplateImg.complete && this.labelTemplateImg.naturalWidth > 0) {
+        this.isLabelImgLoaded = true;
+      }
 
       if (this.labelTemplateImg && this.isLabelImgLoaded) {
         // Fit template into canvas preserving aspect ratio
-        const imgW = this.labelTemplateImg.naturalWidth || 800;
-        const imgH = this.labelTemplateImg.naturalHeight || 500;
+        const imgW = this.labelTemplateImg.naturalWidth || 600;
+        const imgH = this.labelTemplateImg.naturalHeight || 733;
         const scale = Math.min(w / imgW, h / imgH) * 0.96;
         const drawW = imgW * scale;
         const drawH = imgH * scale;
@@ -881,6 +930,10 @@
         ctx.drawImage(this.labelTemplateImg, offsetX, offsetY, drawW, drawH);
         ctx.restore();
       } else {
+        // Trigger preloader if not yet running
+        if (!this.labelTemplateImg) {
+          this.preloadLabelTemplate();
+        }
         // Fallback placeholder while loading
         ctx.fillStyle = '#F1F5F9';
         ctx.fillRect(0, 0, w, h);
@@ -897,7 +950,7 @@
      */
     resizeCanvas: function (preserveContent = true) {
       const canvas = this.dom.canvas;
-      const wrapper = this.dom.panel.querySelector('#sp-canvas-wrapper');
+      const wrapper = this.dom.panel ? this.dom.panel.querySelector('#sp-canvas-wrapper') : null;
       if (!canvas || !wrapper) return;
 
       const rect = wrapper.getBoundingClientRect();
@@ -931,8 +984,9 @@
         this.drawLabelTemplateBackground();
       }
 
-      // Restore image if preserved at 1:1 scale
-      if (prevImg) {
+      // Restore image only when user has active drawing strokes
+      const shouldRestore = prevImg && (this.activeTab === 'draw' ? (this.undoStack.length > 0) : (this.undoStack.length > 0));
+      if (shouldRestore) {
         const img = new Image();
         img.onload = () => {
           this.dom.ctx.drawImage(img, 0, 0, prevWidth || width, prevHeight || height);
@@ -944,9 +998,17 @@
     /**
      * Switch view between 'draw', 'type', and 'label'
      */
-    switchTab: function (tab) {
-      // Save current state before switching
-      this.saveCurrentStation();
+    switchTab: function (tab, savePrev = true) {
+      // Save current state before switching ONLY if panel is currently open
+      if (savePrev && this.isOpen) {
+        this.saveCurrentStation();
+      }
+
+      // Clear any pending resize timers from earlier transitions
+      if (this._resizeTimer) {
+        clearTimeout(this._resizeTimer);
+        this._resizeTimer = null;
+      }
 
       const prevTab = this.activeTab;
       this.activeTab = tab;
@@ -1104,15 +1166,19 @@
       const currentLbl = stData.labels[stData.activeLabelIndex];
       if (!currentLbl) return;
 
-      this.undoStack = currentLbl.undoStack || [];
+      this.undoStack = [...(currentLbl.undoStack || [])];
       this.resizeCanvas(false);
       this.clearCanvas(false);
 
-      if (currentLbl.canvasData) {
+      if (currentLbl.canvasData && currentLbl.hasDrawn) {
         const img = new Image();
         img.onload = () => {
-          const rect = this.dom.canvas.getBoundingClientRect();
-          this.dom.ctx.drawImage(img, 0, 0, rect.width, rect.height);
+          if (this.activeTab === 'label' && this.isOpen) {
+            const rect = this.dom.canvas.getBoundingClientRect();
+            const w = rect.width || parseFloat(this.dom.canvas.style.width) || 400;
+            const h = rect.height || parseFloat(this.dom.canvas.style.height) || 300;
+            this.dom.ctx.drawImage(img, 0, 0, w, h);
+          }
         };
         img.src = currentLbl.canvasData;
       }
@@ -1123,15 +1189,19 @@
      */
     loadDrawingCanvas: function () {
       const stData = this.ensureStationData();
-      this.undoStack = stData.undoStack || [];
+      this.undoStack = [...(stData.undoStack || [])];
       this.resizeCanvas(false);
       this.clearCanvas(false);
 
-      if (stData.canvasData) {
+      if (stData.canvasData && stData.hasDrawn) {
         const img = new Image();
         img.onload = () => {
-          const rect = this.dom.canvas.getBoundingClientRect();
-          this.dom.ctx.drawImage(img, 0, 0, rect.width, rect.height);
+          if (this.activeTab === 'draw' && this.isOpen) {
+            const rect = this.dom.canvas.getBoundingClientRect();
+            const w = rect.width || parseFloat(this.dom.canvas.style.width) || 400;
+            const h = rect.height || parseFloat(this.dom.canvas.style.height) || 300;
+            this.dom.ctx.drawImage(img, 0, 0, w, h);
+          }
         };
         img.src = stData.canvasData;
       }
@@ -1245,8 +1315,8 @@
     setStation: function (stationKey, stationLabel) {
       if (!this.initialized) this.init();
 
-      // Save previous station
-      if (this.currentStationKey && this.currentStationKey !== stationKey) {
+      // Save previous station ONLY if scratchpad is currently open
+      if (this.isOpen && this.currentStationKey && this.currentStationKey !== stationKey) {
         this.saveCurrentStation();
       }
 
@@ -1257,31 +1327,40 @@
       const tag = this.dom.panel ? this.dom.panel.querySelector('#sp-station-tag') : null;
       if (tag) tag.textContent = title;
 
-      // Load station content
-      this.loadStationData(stationKey);
+      // Load station content ONLY if scratchpad is currently open
+      if (this.isOpen) {
+        this.loadStationData(stationKey);
+      }
     },
 
     /**
      * Save current active station data to memory
      */
     saveCurrentStation: function () {
-      if (!this.initialized || !this.currentStationKey) return;
+      if (!this.initialized || !this.currentStationKey || !this.isOpen) return;
 
       const stData = this.ensureStationData();
       const currentCanvasUrl = this.dom.canvas ? this.dom.canvas.toDataURL() : null;
 
       if (this.activeTab === 'draw') {
-        stData.canvasData = currentCanvasUrl;
         stData.undoStack = [...this.undoStack];
+        stData.hasDrawn = this.undoStack.length > 0;
+        if (stData.hasDrawn) {
+          stData.canvasData = currentCanvasUrl;
+        }
       } else if (this.activeTab === 'label') {
         if (stData.labels && stData.labels[stData.activeLabelIndex]) {
-          stData.labels[stData.activeLabelIndex].canvasData = currentCanvasUrl;
-          stData.labels[stData.activeLabelIndex].undoStack = [...this.undoStack];
+          const lbl = stData.labels[stData.activeLabelIndex];
+          lbl.undoStack = [...this.undoStack];
+          lbl.hasDrawn = this.undoStack.length > 0;
+          if (lbl.hasDrawn) {
+            lbl.canvasData = currentCanvasUrl;
+          }
         }
       }
 
       stData.text = this.dom.textarea ? this.dom.textarea.value : '';
-      stData.hasDrawing = (this.undoStack.length > 0 || !!stData.canvasData || (stData.labels && stData.labels.some(l => !!l.canvasData)));
+      stData.hasDrawing = (this.undoStack.length > 0 || (stData.hasDrawn && !!stData.canvasData) || (stData.labels && stData.labels.some(l => l.hasDrawn && !!l.canvasData)));
       stData.timestamp = Date.now();
     },
 
@@ -1299,12 +1378,14 @@
         this.updateCharCount();
       }
 
-      // Load canvas based on current active tab
-      if (this.activeTab === 'label') {
-        this.renderLabelSubbarTabs();
-        this.renderActiveLabel();
-      } else if (this.activeTab === 'draw') {
-        this.loadDrawingCanvas();
+      // Load canvas based on current active tab (only if panel is open)
+      if (this.isOpen) {
+        if (this.activeTab === 'label') {
+          this.renderLabelSubbarTabs();
+          this.renderActiveLabel();
+        } else if (this.activeTab === 'draw') {
+          this.loadDrawingCanvas();
+        }
       }
     },
 
@@ -1399,11 +1480,16 @@
       const maxIcon = panel.querySelector('#sp-maximize-icon');
       if (maxIcon) maxIcon.textContent = '⛶';
 
-      setTimeout(() => {
-        if (this.activeTab === 'draw' || this.activeTab === 'label') {
-          this.resizeCanvas(true);
+      if (this._resizeTimer) clearTimeout(this._resizeTimer);
+      this._resizeTimer = setTimeout(() => {
+        if (this.isOpen && !this.isMinimized) {
+          if (this.activeTab === 'draw') {
+            this.loadDrawingCanvas();
+          } else if (this.activeTab === 'label') {
+            this.renderActiveLabel();
+          }
         }
-      }, 100);
+      }, 80);
     },
 
     /**
@@ -1411,7 +1497,11 @@
      */
     open: function (stationKey, stationLabel, initialTab) {
       if (!this.initialized) this.init();
-      if (stationKey) this.setStation(stationKey, stationLabel);
+
+      if (this._resizeTimer) {
+        clearTimeout(this._resizeTimer);
+        this._resizeTimer = null;
+      }
 
       this.isOpen = true;
       this.dom.panel.style.display = 'flex';
@@ -1424,17 +1514,31 @@
 
       if (this.dom.fabBtn) this.dom.fabBtn.classList.add('active');
 
-      if (initialTab && (initialTab === 'draw' || initialTab === 'type' || initialTab === 'label')) {
-        this.switchTab(initialTab);
+      if (stationKey) {
+        this.currentStationKey = stationKey;
+        const title = stationLabel || `กระดาษทด (${stationKey})`;
+        if (this.dom.stationTitle) this.dom.stationTitle.textContent = title;
+        const tag = this.dom.panel ? this.dom.panel.querySelector('#sp-station-tag') : null;
+        if (tag) tag.textContent = title;
       }
 
-      setTimeout(() => {
-        if (this.activeTab === 'draw' || this.activeTab === 'label') {
-          this.resizeCanvas(true);
-        } else {
-          this.dom.textarea.focus();
+      const targetTab = (initialTab && (initialTab === 'draw' || initialTab === 'type' || initialTab === 'label'))
+        ? initialTab
+        : (this.activeTab || 'draw');
+
+      this.switchTab(targetTab, false);
+
+      this._resizeTimer = setTimeout(() => {
+        if (this.isOpen && !this.isMinimized) {
+          if (this.activeTab === 'draw') {
+            this.loadDrawingCanvas();
+          } else if (this.activeTab === 'label') {
+            this.renderActiveLabel();
+          } else {
+            if (this.dom.textarea) this.dom.textarea.focus();
+          }
         }
-      }, 100);
+      }, 60);
     },
 
     /**
@@ -1442,6 +1546,10 @@
      */
     close: function () {
       if (!this.isOpen) return;
+      if (this._resizeTimer) {
+        clearTimeout(this._resizeTimer);
+        this._resizeTimer = null;
+      }
       this.saveCurrentStation();
       this.isOpen = false;
       this.dom.panel.style.display = 'none';
