@@ -6557,62 +6557,55 @@
       const railFull = document.getElementById('railFull');
       if (!railMini) return;
       
-      const existingMiniCells = railMini.querySelectorAll('.station-cell');
-      if (existingMiniCells.length === SimState.stations.length && existingMiniCells.length > 0) {
-        SimState.stations.forEach((st, idx) => {
-          const isCurrent = idx === SimState.currentIdx;
-          const checked = SimState.studentScores[st.stationNumber] || [];
-          const isDone = checked.length > 0;
-          
-          const miniCell = existingMiniCells[idx];
-          if (miniCell) {
-            miniCell.classList.toggle('current', isCurrent);
-            miniCell.classList.toggle('done', isDone);
-            miniCell.textContent = isDone && !isCurrent ? '✓' : st.stationNumber;
-          }
-          
-          if (railFull && railFull.children[idx]) {
-            const fullCell = railFull.children[idx];
-            fullCell.classList.toggle('current', isCurrent);
-            fullCell.classList.toggle('done', isDone);
-            fullCell.textContent = isDone && !isCurrent ? '✓' : st.stationNumber;
-          }
-        });
-      } else {
-        railMini.innerHTML = '';
-        if (railFull) railFull.innerHTML = '';
-        
-        SimState.stations.forEach((st, idx) => {
-          const isCurrent = idx === SimState.currentIdx;
-          const checked = SimState.studentScores[st.stationNumber] || [];
-          const isDone = checked.length > 0;
-          
-          [railMini, railFull].forEach(container => {
-            if (!container) return;
-            const cell = document.createElement('div');
-            cell.className = 'station-cell';
-            if (isCurrent) cell.classList.add('current');
-            if (isDone) cell.classList.add('done');
-            if (st.isRest) cell.classList.add('rest');
-            
-            const cat = st.case && st.case.category ? st.case.category.toLowerCase() : '';
-            if (cat && !st.isRest) cell.setAttribute('data-cat', cat);
-            
-            cell.textContent = isDone && !isCurrent ? '✓' : st.stationNumber;
-            cell.title = st.isRest ? 'พักระหว่างสถานี' : (st.case && st.case.title ? st.case.title : 'สถานี ' + st.stationNumber);
-            
-            const canClick = SimState.role !== 'examinee';
-            if (canClick) {
-              cell.style.cursor = 'pointer';
-              cell.addEventListener('click', () => renderStation(idx));
-            } else {
-              cell.style.cursor = 'default';
-              cell.style.opacity = '0.85';
-            }
-            container.appendChild(cell);
-          });
-        });
+      const isParticipantOrExaminee = SimState.role === 'examinee' || SimState.role === 'participant';
+      const isMultiplayerNonStaff = Boolean(SimState.isLobby && isParticipantOrExaminee && !SimState.isHost);
+      const canClick = !isMultiplayerNonStaff;
+
+      // Update overview caption based on role
+      const overviewCaption = document.querySelector('.overview-caption');
+      if (overviewCaption) {
+        overviewCaption.textContent = canClick 
+          ? 'แตะสถานีเพื่อข้ามไปทำโดยตรง — เซลล์สีเขียวคือสถานีที่ทำคะแนนแล้ว'
+          : 'ผังสถานีสอบ — ผู้เข้าสอบจะหมุนเปลี่ยนสถานีตามรอบการสอบและสัญญาณกริ่งของ Super Host';
       }
+
+      railMini.innerHTML = '';
+      if (railFull) railFull.innerHTML = '';
+      
+      SimState.stations.forEach((st, idx) => {
+        const isCurrent = idx === SimState.currentIdx;
+        const checked = SimState.studentScores[st.stationNumber] || [];
+        const isDone = checked.length > 0;
+        
+        [railMini, railFull].forEach(container => {
+          if (!container) return;
+          const cell = document.createElement('div');
+          cell.className = 'station-cell';
+          if (isCurrent) cell.classList.add('current');
+          if (isDone) cell.classList.add('done');
+          if (st.isRest) cell.classList.add('rest');
+          
+          const cat = st.case && st.case.category ? st.case.category.toLowerCase() : '';
+          if (cat && !st.isRest) cell.setAttribute('data-cat', cat);
+          
+          cell.textContent = isDone && !isCurrent ? '✓' : st.stationNumber;
+          
+          if (isMultiplayerNonStaff && !isCurrent) {
+            cell.title = st.isRest ? 'พักระหว่างสถานี' : `🔒 สถานีที่ ${st.stationNumber} (ล็อกตามรอบการสอบ)`;
+          } else {
+            cell.title = st.isRest ? 'พักระหว่างสถานี' : (st.case && st.case.title ? st.case.title : 'สถานี ' + st.stationNumber);
+          }
+          
+          if (canClick) {
+            cell.style.cursor = 'pointer';
+            cell.addEventListener('click', () => renderStation(idx));
+          } else {
+            cell.style.cursor = 'not-allowed';
+            cell.style.opacity = isCurrent ? '1' : '0.55';
+          }
+          container.appendChild(cell);
+        });
+      });
       
       if (shouldCenter) {
         const activeInMini = railMini.querySelector('.station-cell.current');
