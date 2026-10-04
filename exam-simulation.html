@@ -7335,8 +7335,13 @@
           const assignedStationNum = SimState.myCarouselStation || stationNum;
           const startNum = ((assignedStationNum - 1 - r + N) % N) + 1;
           const partId = SimState.cachedRoom?.carouselPosts?.['st_' + startNum]?.startParticipantId;
+          const partName = SimState.cachedRoom?.carouselPosts?.['st_' + startNum]?.startParticipantName 
+            || SimState.cachedRoom?.players?.[partId]?.name 
+            || 'ผู้เข้าสอบ';
           if (partId) {
             const { currentScore, totalScore } = calculateStationScore(currentCase?.checklist || [], currentChecked);
+            _fbDb.ref(`rooms/${SimState.roomId}/participantScores/${partId}/participantId`).set(partId);
+            _fbDb.ref(`rooms/${SimState.roomId}/participantScores/${partId}/participantName`).set(partName);
             _fbDb.ref(`rooms/${SimState.roomId}/participantScores/${partId}/stations/${assignedStationNum}`).set({
               stationNumber: assignedStationNum,
               checkedProgress: currentChecked,
@@ -9629,8 +9634,11 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
       if (examMode === 'cohort_breakout' && room.breakouts) {
         Object.entries(room.breakouts).forEach(([tableId, t]) => {
-          const partName = t.participantName;
+          let partName = t.participantName;
           const partId = t.participantId;
+          if ((!partName || partName.startsWith('p_')) && partId && room.players?.[partId]?.name) {
+            partName = room.players[partId].name;
+          }
           if (!partName && !partId) return; // Skip empty tables without participants
           const examinerName = t.examinerName || 'ไม่ระบุ';
           let totalEarned = 0, totalMax = 0, passedStations = 0;
@@ -9680,20 +9688,45 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         const partMap = {};
         if (room.participantScores) {
           Object.entries(room.participantScores).forEach(([pId, pData]) => {
+            let pName = pData.participantName;
+            if (!pName || pName.startsWith('ผู้เข้าสอบ p_') || pName.startsWith('p_') || pName === pId) {
+              const playerObj = room.players ? Object.values(room.players).find(p => p.id === pId) : null;
+              if (playerObj && playerObj.name) {
+                pName = playerObj.name;
+              } else if (room.carouselPosts) {
+                const postObj = Object.values(room.carouselPosts).find(p => p.startParticipantId === pId);
+                if (postObj && postObj.startParticipantName) pName = postObj.startParticipantName;
+              }
+            }
             partMap[pId] = {
-              name: pData.participantName || ('ผู้เข้าสอบ ' + pId),
+              name: pName || 'ผู้เข้าสอบ',
               stations: pData.stations || {}
             };
           });
         }
         if (room.carouselPosts) {
           Object.values(room.carouselPosts).forEach(post => {
-            if (post.startParticipantId && !partMap[post.startParticipantId]) {
-              partMap[post.startParticipantId] = {
-                name: post.startParticipantName || ('ผู้เข้าสอบ ' + post.startParticipantId),
-                startStation: post.stationNumber,
-                stations: {}
-              };
+            if (post.startParticipantId) {
+              const pId = post.startParticipantId;
+              let pName = post.startParticipantName;
+              if (!pName || pName.startsWith('ผู้เข้าสอบ p_') || pName.startsWith('p_') || pName === pId) {
+                const playerObj = room.players ? Object.values(room.players).find(p => p.id === pId) : null;
+                if (playerObj && playerObj.name) pName = playerObj.name;
+              }
+              if (!partMap[pId]) {
+                partMap[pId] = {
+                  name: pName || 'ผู้เข้าสอบ',
+                  startStation: post.stationNumber,
+                  stations: {}
+                };
+              } else {
+                if (pName && (!partMap[pId].name || partMap[pId].name.startsWith('ผู้เข้าสอบ p_') || partMap[pId].name.startsWith('p_'))) {
+                  partMap[pId].name = pName;
+                }
+                if (!partMap[pId].startStation) {
+                  partMap[pId].startStation = post.stationNumber;
+                }
+              }
             }
           });
         }
