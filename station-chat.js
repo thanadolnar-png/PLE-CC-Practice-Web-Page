@@ -29,6 +29,8 @@
     typingTimeout: null,
     _speechToken: 0,
     _speakerOverride: null,
+    autoChecklistEnabled: localStorage.getItem('_ple_auto_checklist') === 'true', // default OFF
+    _autoChecklistBusy: false,
 
     avatars: {
       profs: [
@@ -457,7 +459,245 @@
           label.textContent = this.aiRole === 'guru' ? '🧠 Guru ON' : '👨‍🏫 สอบ ON';
         }
       }
+      this.updateAutoChecklistUI();
       this.updateAvatarUI();
+    },
+
+    canUseAutoChecklist() {
+      // 1. Must be enabled
+      if (!this.aiEnabled) return false;
+      // 2. Only in Examiner role (as user requested: GURU เอาไว้ถาม ไม่ classify)
+      if (this.aiRole !== 'examiner') return false;
+      // 3. Disable in cohort_breakout and carousel_rotation (as user requested)
+      if (typeof SimState !== 'undefined') {
+        const mode = SimState.examMode || 'standard';
+        if (mode === 'cohort_breakout' || mode === 'carousel_rotation') return false;
+      }
+      return true;
+    },
+
+    toggleAutoChecklist() {
+      this.autoChecklistEnabled = !this.autoChecklistEnabled;
+      try { localStorage.setItem('_ple_auto_checklist', String(this.autoChecklistEnabled)); } catch (_) {}
+      this.updateAutoChecklistUI();
+      if (this.autoChecklistEnabled) {
+        if (!this.canUseAutoChecklist()) {
+          const reason = this.aiRole !== 'examiner'
+            ? 'โหมดนี้ทำงานเฉพาะบทบาท "👨‍🏫 สอบ (Examiner)" เท่านั้น'
+            : 'โหมดนี้ถูกปิดการใช้งานในห้องสอบแบบกลุ่ม/วนรอบ';
+          this.showAutoChecklistToast(0, reason);
+        } else {
+          this.showAutoChecklistToast(-1, 'เปิดระบบ AI Auto-Checklist แล้ว 🤖');
+        }
+      } else {
+        this.showAutoChecklistToast(-1, 'ปิดระบบ AI Auto-Checklist แล้ว');
+      }
+    },
+
+    updateAutoChecklistUI() {
+      const bar = document.getElementById('st-chat-auto-checklist-bar');
+      const btn = document.getElementById('btn-auto-checklist-toggle');
+      const label = document.getElementById('auto-checklist-label');
+      
+      // Determine if in unsupported multiplayer mode
+      let isUnsupportedMode = false;
+      if (typeof SimState !== 'undefined') {
+        const mode = SimState.examMode || 'standard';
+        if (mode === 'cohort_breakout' || mode === 'carousel_rotation') {
+          isUnsupportedMode = true;
+        }
+      }
+
+      if (bar) {
+        // Hide bar completely if in unsupported mode or AI disabled
+        if (!this.aiEnabled || isUnsupportedMode) {
+          bar.style.display = 'none';
+        } else {
+          bar.style.display = 'flex';
+        }
+      }
+
+      if (btn && label) {
+        const canUse = this.canUseAutoChecklist();
+        const active = this.autoChecklistEnabled && canUse;
+        btn.classList.toggle('active', active);
+        
+        if (!canUse) {
+          btn.style.opacity = '0.6';
+          label.textContent = this.aiRole !== 'examiner' ? 'ต้องใช้บทบาทสอบ' : 'ไม่รองรับ';
+        } else {
+          btn.style.opacity = '1';
+          label.textContent = this.autoChecklistEnabled ? '🟢 ON' : 'OFF';
+        }
+      }
+    },
+
+    showAutoChecklistToast(count, customMsg) {
+      const existing = document.getElementById('auto-checklist-toast');
+      if (existing) existing.remove();
+      const t = document.createElement('div');
+      t.id = 'auto-checklist-toast';
+      t.style.cssText = `position:fixed;bottom:90px;right:20px;z-index:99999;
+        background:#0284c7;color:white;padding:0.5rem 1rem;border-radius:8px;
+        font-size:0.82rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,0.25);
+        animation:stChatToastSlide 0.3s ease;pointer-events:none;`;
+      if (customMsg) {
+        t.textContent = customMsg;
+      } else if (count > 0) {
+        t.innerHTML = `🤖 AI ตรวจพบและบันทึก <strong>${count}</strong> รายการเกณฑ์ ✓`;
+      } else {
+        t.textContent = 'ℹ️ ข้อความนี้ยังไม่ตรงกับเกณฑ์ Checklist ที่เหลือ';
+      }
+      document.body.appendChild(t);
+      setTimeout(() => { if (t && t.parentNode) t.remove(); }, 3500);
+    },
+
+    async classifyAndApplyChecklist(userText, replyText) {
+      if (this._autoChecklistBusy) return;
+      if (!this.canUseAutoChecklist() || !this.autoChecklistEnabled) return;
+
+      this._autoChecklistBusy = true;
+      try {
+        const matchedCase = this.activeCaseData 
+          || (window.AppState && AppState.currentCase) 
+          || window._currentCaseDetail 
+          || (typeof SimState !== 'undefined' && SimState.stations && SimState.stations[SimState.currentIdx]?.case)
+          || null;
+
+        if (!matchedCase || !Array.isArray(matchedCase.checklist) || matchedCase.checklist.length === 0) {
+          return;
+        }
+
+        // Get currently checked IDs
+        let checkedIds = [];
+        const stNum = this.currentStationNum;
+        if (typeof SimState !== 'undefined' && SimState.studentScores) {
+          checkedIds = SimState.studentScores[stNum] || SimState.studentScores[String(stNum)] || [];
+        } else if (typeof AppState !== 'undefined' && AppState.checklistProgress && matchedCase.caseId) {
+          checkedIds = AppState.checklistProgress[matchedCase.caseId] || [];
+        }
+
+        // Filter only unchecked checklist items (limit to 25 items to protect token usage)
+        const uncheckedItems = matchedCase.checklist
+          .filter(it => it && it.id && !checkedIds.includes(it.id))
+          .slice(0, 25);
+
+        if (uncheckedItems.length === 0) {
+          return; // All checklist items already checked
+        }
+
+        const strip = (s) => String(s || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        const checklistSummary = uncheckedItems.map((it, idx) => {
+          const cleanTxt = strip(it.textHtml || it.text || it.title || '');
+          return `${idx + 1}. [ID:${it.id}] ${cleanTxt.slice(0, 90)}`;
+        }).join('\n');
+
+        const systemClassifier = `คุณคือระบบประเมินเกณฑ์ OSPE อัตโนมัติ (Automated Checklist Classifier)
+หน้าที่: ตรวจสอบว่าในบทสนทนาล่าสุดด้านล่าง นิสิตผู้เข้าสอบได้ปฏิบัติหรือสื่อสารตรงตามข้อใดใน Checklist บ้าง
+กฎเหล็ก:
+1. ตอบกลับเป็น JSON ในรูปแบบนี้เท่านั้น: {"checked":["ID1","ID2"]}
+2. ใส่เฉพาะ ID ของข้อที่นิสิตได้ปฏิบัติจริงอย่างชัดเจน หากไม่มีข้อใดตรงให้ตอบ {"checked":[]}
+3. ห้ามพิมพ์ข้อความอื่นใดนอกเหนือจาก JSON เด็ดขาด ห้ามใส่ markdown หรือ backticks`;
+
+        const dialogueText = `[Checklist ที่รอประเมิน]\n${checklistSummary}\n\n[บทสนทนาล่าสุด]\nผู้เข้าสอบ: "${userText.slice(0, 300)}"\nอาจารย์/คนไข้: "${replyText.slice(0, 300)}"`;
+
+        // Multi-Key pool failover for classification
+        if (!this._geminiKeyPool) {
+          const _dec = (b) => { try { return atob(b); } catch (_) { return ''; } };
+          this._geminiKeyPool = [
+            { key: _dec('QVEuQWI4Uk42SW9oZ3NvSlZIdjRlNVBZWEVqUEVYaFZ3MlVQUWJQa1hvdy1iaUdEZGdZWmc='), email: 'Primary Account (rxcu.admin)' },
+            { key: _dec('QVEuQWI4Uk42SnZFU056Y01uekN0ajM2aUJ6SEQzd18wTEJaMFR6aU9OeWJOR2RoelRHOUE='), email: 'panittean94@gmail.com' },
+            { key: _dec('QVEuQWI4Uk42SVgxY2dOalBMVTROakMwZ0d5SmZXZ0k3Mk96Z0NmZVdCamt3dXAtN1NpY2c='), email: 'rxcu84year5@gmail.com' },
+            { key: _dec('QVEuQWI4Uk42SjNNdGRfVGdodDNEcFFoRUsteXl2SGdSNDQ5S0hWenhBTkpUQTUwVDFHZnc='), email: 'rxcu 84' }
+          ];
+          this._currentKeyIdx = 0;
+        }
+
+        const maxAttempts = this._geminiKeyPool.length;
+        let parsedResult = null;
+
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+          const currentEntry = this._geminiKeyPool[this._currentKeyIdx];
+          const API_KEY = localStorage.getItem('_gemini_api_key') || currentEntry.key;
+          const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${API_KEY}`;
+
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 9000);
+
+            const payload = {
+              contents: [
+                {
+                  role: 'user',
+                  parts: [
+                    { text: `${systemClassifier}\n\n${dialogueText}` }
+                  ]
+                }
+              ],
+              generationConfig: {
+                temperature: 0.1,
+                maxOutputTokens: 120
+              }
+            };
+
+            const res = await fetch(ENDPOINT, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload),
+              signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (!res.ok) {
+              const errBody = await res.text().catch(() => '');
+              if (res.status === 429 || errBody.includes('RESOURCE_EXHAUSTED')) {
+                this._currentKeyIdx = (this._currentKeyIdx + 1) % this._geminiKeyPool.length;
+                continue;
+              }
+              break;
+            }
+
+            const json = await res.json();
+            const textResp = json.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            const match = textResp.match(/\{[\s\S]*?\}/);
+            if (match) {
+              parsedResult = JSON.parse(match[0]);
+              break;
+            }
+          } catch (fetchErr) {
+            if (fetchErr.name === 'AbortError') {
+              this._currentKeyIdx = (this._currentKeyIdx + 1) % this._geminiKeyPool.length;
+              continue;
+            }
+          }
+        }
+
+        if (parsedResult && Array.isArray(parsedResult.checked) && parsedResult.checked.length > 0) {
+          const idsToMark = parsedResult.checked.filter(id => id && !checkedIds.includes(id));
+          let countMarked = 0;
+
+          idsToMark.forEach(itemId => {
+            // Priority 1: Exam simulation bridge
+            if (typeof window.aiAutoToggleChecklistItem === 'function') {
+              window.aiAutoToggleChecklistItem(stNum, itemId);
+              countMarked++;
+            }
+            // Priority 2: Case Viewer bridge
+            else if (typeof window.aiAutoToggleCaseViewerItem === 'function' && matchedCase.caseId) {
+              window.aiAutoToggleCaseViewerItem(matchedCase.caseId, itemId);
+              countMarked++;
+            }
+          });
+
+          if (countMarked > 0) {
+            this.showAutoChecklistToast(countMarked);
+          }
+        }
+      } catch (err) {
+        console.warn('classifyAndApplyChecklist non-critical error:', err);
+      } finally {
+        this._autoChecklistBusy = false;
+      }
     },
 
     toggleAI() {
@@ -773,6 +1013,10 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
           if (replyText) {
             this.renderAIMessage(replyText.trim());
             this.incrementAIDailyCount();
+            // Automatically classify checklist items if enabled
+            if (this.autoChecklistEnabled && this.canUseAutoChecklist()) {
+              this.classifyAndApplyChecklist(userText, replyText.trim());
+            }
             return true;
           } else {
             throw new Error('Empty candidate response');
@@ -1099,6 +1343,10 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
   window.setAIChatRole = function (role) {
     StationChatController.setAIRole(role);
+  };
+
+  window.toggleAutoChecklistMode = function () {
+    StationChatController.toggleAutoChecklist();
   };
 
   window.cycleAIAvatar = function () {

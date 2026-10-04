@@ -1697,7 +1697,7 @@ function saveChecklistProgress() {
   localStorage.setItem('ospe_checklist_progress', JSON.stringify(AppState.checklistProgress));
 }
 
-function handleChecklistItemClick(caseId, itemId, itemScore) {
+function handleChecklistItemClick(caseId, itemId, itemScore, aiTriggered = false) {
   if (!AppState.checklistProgress[caseId]) {
     AppState.checklistProgress[caseId] = [];
   }
@@ -1878,7 +1878,25 @@ function handleChecklistItemClick(caseId, itemId, itemScore) {
   
   saveChecklistProgress();
   updateChecklistUI(caseId);
+
+  // If triggered by AI, mark visually with .ai-checked
+  if (aiTriggered && clickedEl) {
+    clickedEl.classList.add('ai-checked');
+  }
 }
+
+// Global Bridge for Case Viewer AI Auto-Checklist
+window.aiAutoToggleCaseViewerItem = function(caseId, itemId) {
+  if (!AppState.checklistProgress[caseId]) {
+    AppState.checklistProgress[caseId] = [];
+  }
+  const currentChecked = AppState.checklistProgress[caseId];
+  if (currentChecked.includes(itemId)) return; // Already checked
+
+  const clickedEl = document.querySelector(`.checklist-item[data-id="${itemId}"]`);
+  const itemScore = clickedEl ? parseFloat(clickedEl.getAttribute('data-score') || '1.0') : 1.0;
+  handleChecklistItemClick(caseId, itemId, itemScore, true);
+};
 
 function updateChecklistUI(caseId) {
   const checkedItems = AppState.checklistProgress[caseId] || [];

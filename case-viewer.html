@@ -2493,6 +2493,17 @@
       <span id="st-chat-ai-role-desc" class="st-chat-ai-role-desc">🧠 ติวเตอร์ Guru: อธิบายหลักการ DTPs วิเคราะห์เคส และ Guideline ทางการ</span>
     </div>
 
+    <!-- AI Auto-Checklist Control Bar -->
+    <div id="st-chat-auto-checklist-bar" style="display: none; align-items: center; justify-content: space-between; padding: 0.35rem 0.85rem; background: rgba(14, 165, 233, 0.08); border-bottom: 1px solid rgba(14, 165, 233, 0.2); font-size: 0.78rem;">
+      <div style="display: flex; align-items: center; gap: 0.4rem; color: var(--text-primary);">
+        <span>🤖 <strong>AI Auto-Checklist</strong></span>
+        <span style="font-size: 0.7rem; color: var(--text-secondary);">(ติ๊กเกณฑ์ตามบทสนทนาอัตโนมัติ)</span>
+      </div>
+      <button type="button" id="btn-auto-checklist-toggle" onclick="toggleAutoChecklistMode()" style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.74rem; padding: 0.18rem 0.55rem; border-radius: 999px; border: 1.5px solid #0ea5e9; background: var(--surface); color: #0284c7; cursor: pointer; font-weight: 700; transition: all 0.2s;">
+        <span id="auto-checklist-label">OFF</span>
+      </button>
+    </div>
+
     <!-- Animated Avatar Spotlight Bar -->
     <div id="st-chat-avatar-spotlight" class="st-chat-avatar-spotlight" style="display: none;">
       <div class="st-chat-avatar-profile">
