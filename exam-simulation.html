@@ -952,6 +952,65 @@
       box-shadow: 0 2px 8px rgba(124,58,237,0.35);
     }
 
+    /* ── AI Role Selector Bar ── */
+    .st-chat-ai-role-bar {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 0.35rem 0.75rem;
+      background: linear-gradient(135deg, rgba(124,58,237,0.06), rgba(99,102,241,0.04));
+      border-bottom: 1px solid rgba(124,58,237,0.12);
+      font-size: 0.72rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      transition: all 0.2s ease;
+    }
+    .st-chat-ai-role-bar::-webkit-scrollbar { display: none; }
+    .st-chat-ai-role-title {
+      font-weight: 700;
+      color: #6d28d9;
+      white-space: nowrap;
+      margin-right: 2px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .st-chat-ai-role-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0.22rem 0.55rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(124,58,237,0.22);
+      background: var(--surface, #ffffff);
+      color: var(--text-secondary, #475569);
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      line-height: 1.2;
+    }
+    .st-chat-ai-role-btn:hover {
+      border-color: #7c3aed;
+      color: #6d28d9;
+      background: rgba(124,58,237,0.08);
+    }
+    .st-chat-ai-role-btn.active {
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+      color: #ffffff;
+      border-color: #6d28d9;
+      box-shadow: 0 1.5px 5px rgba(109,40,217,0.3);
+    }
+    .st-chat-ai-role-desc {
+      font-size: 0.68rem;
+      color: #6d28d9;
+      opacity: 0.9;
+      margin-left: 2px;
+      white-space: nowrap;
+      font-style: italic;
+    }
+
     /* ── AI Message Bubble ── */
     .st-chat-msg.ai-msg {
       max-width: 90%;
@@ -7351,6 +7410,7 @@
       unreadCount: 0,
       soloMessages: {},
       aiEnabled: false,
+      aiRole: localStorage.getItem('_ple_ai_role') || 'examiner', // 'examiner' | 'cheater'
       _aiTypingEl: null,
 
       // ── Quota Helpers (Stat Counter Only - Unlimited Usage) ──
@@ -7381,12 +7441,50 @@
         // Uncapped mode: keep button clean without badge
       },
 
-      toggleAI() {
-        this.aiEnabled = !this.aiEnabled;
+      setAIRole(role) {
+        this.aiRole = role === 'cheater' ? 'cheater' : 'examiner';
+        try { localStorage.setItem('_ple_ai_role', this.aiRole); } catch (_) {}
+
+        const btnEx = document.getElementById('btn-ai-role-examiner');
+        const btnCh = document.getElementById('btn-ai-role-cheater');
+        const descEl = document.getElementById('st-chat-ai-role-desc');
+
+        if (btnEx) btnEx.classList.toggle('active', this.aiRole === 'examiner');
+        if (btnCh) btnCh.classList.toggle('active', this.aiRole === 'cheater');
+
+        if (descEl) {
+          if (this.aiRole === 'cheater') {
+            descEl.innerHTML = '<span style="color:#d97706;font-weight:700;">🤫 แอบกระซิบทุกอย่าง: บอกโรค DTP ยาที่ถูก เฉลยครบ!</span>';
+          } else {
+            descEl.innerHTML = '<span style="color:#6d28d9;font-weight:700;">👨‍🏫 จำลองสมจริง: ตรวจอาการ/คนไข้ ไม่หลุดเฉลยล่วงหน้า</span>';
+          }
+        }
+        this.updateAIToggleUI();
+      },
+
+      updateAIToggleUI() {
         const btn = document.getElementById('btn-ai-chat-toggle');
         const label = document.getElementById('ai-toggle-label');
+        const roleBar = document.getElementById('st-chat-ai-role-bar');
+
         if (btn) btn.classList.toggle('ai-active', this.aiEnabled);
-        if (label) label.textContent = this.aiEnabled ? 'AI ON' : 'AI';
+        if (roleBar) roleBar.style.display = this.aiEnabled ? 'flex' : 'none';
+
+        if (label) {
+          if (!this.aiEnabled) {
+            label.textContent = 'AI';
+          } else {
+            label.textContent = this.aiRole === 'cheater' ? '🤫 โกง ON' : '👨‍🏫 สอบ ON';
+          }
+        }
+      },
+
+      toggleAI() {
+        this.aiEnabled = !this.aiEnabled;
+        this.updateAIToggleUI();
+        if (this.aiEnabled) {
+          this.setAIRole(this.aiRole);
+        }
       },
 
       showAITyping() {
@@ -7396,7 +7494,8 @@
         const el = document.createElement('div');
         el.className = 'st-chat-ai-typing';
         el.id = 'st-chat-ai-typing-indicator';
-        el.innerHTML = `🤖 Gemini กำลังคิด...
+        const roleEmoji = this.aiRole === 'cheater' ? '🤫 เพื่อนช่วยโกง' : '👨‍🏫 อาจารย์คุมสอบ';
+        el.innerHTML = `${roleEmoji} กำลังคิด...
           <span class="st-chat-ai-typing-dots">
             <span></span><span></span><span></span>
           </span>`;
@@ -7418,6 +7517,21 @@
         const el = document.createElement('div');
         el.className = 'st-chat-msg theirs ai-msg';
 
+        const isCheater = this.aiRole === 'cheater';
+        const senderEmoji = isCheater ? '🤫' : '👨‍🏫';
+        const senderTitle = isCheater ? 'เพื่อนช่วยโกงข้อสอบ (Whisper Friend)' : 'อาจารย์คุมสอบ & คนไข้ (Examiner & SP)';
+        const badgeColor = isCheater ? 'background:#d97706;' : 'background:#7c3aed;';
+        const badgeLabel = isCheater ? '🤫 เฉลยหมดไส้หมดพุง (Cheat Mode)' : '👨‍🏫 ผู้ประเมิน & คนไข้จำลอง (Exam Mode)';
+        const rolePill = isCheater
+          ? '<span style="font-size:0.68rem;background:rgba(217,119,6,0.15);color:#b45309;padding:1px 5px;border-radius:4px;font-weight:700;">CHEAT</span>'
+          : '<span style="font-size:0.68rem;background:rgba(124,58,237,0.15);color:#6d28d9;padding:1px 5px;border-radius:4px;font-weight:700;">EXAM</span>';
+
+        if (isCheater) {
+          el.style.borderColor = '#f59e0b';
+          el.style.background = 'linear-gradient(135deg, #fffbeb, #fef3c7)';
+          el.style.color = '#78350f';
+        }
+
         const safeText = String(replyText || '')
           .replace(/&/g, '&amp;')
           .replace(/</g, '&lt;')
@@ -7425,11 +7539,11 @@
           .replace(/\n/g, '<br>');
 
         el.innerHTML = `
-          <div class="st-chat-ai-badge">⚡ Gemini AI (2.0 Flash Lite)</div>
+          <div class="st-chat-ai-badge" style="${badgeColor}">⚡ ${badgeLabel}</div>
           <div class="st-chat-msg-sender">
-            <span>🤖</span>
-            <span>Gemini AI Tutor</span>
-            <span style="font-size:0.68rem;background:rgba(124,58,237,0.15);color:#6d28d9;padding:1px 5px;border-radius:4px;font-weight:700;">AI</span>
+            <span>${senderEmoji}</span>
+            <span>${senderTitle}</span>
+            ${rolePill}
             <span style="opacity:0.65;margin-left:2px;">${timeStr}</span>
           </div>
           <div style="line-height:1.55;">${safeText}</div>
@@ -7442,10 +7556,10 @@
           if (!this.soloMessages[this.currentStationNum]) this.soloMessages[this.currentStationNum] = [];
           this.soloMessages[this.currentStationNum].push({
             id: 'ai_' + Date.now(),
-            senderId: 'gemini_ai',
-            senderName: 'Gemini AI Tutor',
-            senderRole: 'examiner',
-            senderEmoji: '🤖',
+            senderId: 'gemini_ai_' + this.aiRole,
+            senderName: senderTitle,
+            senderRole: isCheater ? 'friend' : 'examiner',
+            senderEmoji: senderEmoji,
             text: replyText,
             timestamp: Date.now(),
             stationNumber: this.currentStationNum,
@@ -7561,26 +7675,44 @@
           }
         } catch (_) {}
 
-        // 4. Construct System Prompt with strict case fidelity
-        const systemPrompt = `คุณคือระบบจำลองสถานีสอบทักษะปฏิบัติทางเภสัชกรรมคลินิก (PLE-CC2 OSPE Simulation) ประจำสถานีสอบที่ ${stNum}
+        // 4. Construct System Prompt based on selected AI Role
+        const isCheaterRole = (this.aiRole === 'cheater');
+        let systemPrompt = '';
+
+        if (isCheaterRole) {
+          systemPrompt = `คุณคือ "เพื่อนสนิทสุดแสบที่ช่วยกระซิบโกงข้อสอบ OSPE ให้ผู้เข้าสอบ" (Cheating Companion) ประจำสถานีสอบที่ ${stNum}
 ==================================================
-⚠️ [กฎเหล็กสำคัญสูงสุด - MANDATORY CASE CONSTRAINTS]:
-1. คุณต้องอ่าน "ข้อมูลสถานีสอบและเคสผู้ป่วยปัจจุบัน" ด้านล่างนี้อย่างละเอียด และตอบคำถามโดยยึดถือข้อมูลของเคสนี้เป็นหลัก 100% ห้ามสร้างข้อมูลที่ขัดแย้งหรือหลุดออกจากเคสเด็ดขาด!
-2. [บทบาทหลัก: ผู้ป่วยจำลอง (Simulated Patient) หรือญาติผู้ป่วย]:
-   - เมื่อนิสิตทักทาย ซักประวัติ ถามอาการ ยาเดิม หรือให้คำแนะนำ ให้คุณตอบในบทบาท "ผู้ป่วยจำลอง" (หรือญาติที่มาซื้อยาแทน ตามที่โจทย์ระบุ) ทันที!
-   - ตอบด้วยภาษาพูดที่เป็นธรรมชาติ สุภาพ สมจริง เสมือนผู้ป่วยคนหนึ่ง (เช่น มีอาการอะไร, เป็นมากี่วัน, ยาที่กินอยู่, ซื้อให้ใคร)
-   - ตอบเฉพาะสิ่งที่ผู้ป่วยรู้ตามข้อมูลในเคส ห้ามหลุดเฉลยโรคหรือบอก DTPs ตรงๆ ล่วงหน้าจนกว่านิสิตจะซักถามเจาะลึก
-3. [บทบาทผู้ประเมิน (Examiner)]:
-   - หากนิสิตแจ้งขอข้อมูลผู้ตรวจ (เช่น "ขอตรวจวัดความดัน", "ขอผลแล็บ", "ขอดูขวดยาเดิม") ให้คุณให้ข้อมูลตัวเลข/ผลตรวจตามที่มีในเคส
-4. [บทบาทอาจารย์ติวเตอร์ (Tutor)]:
-   - หากนิสิตถามเพื่อขอ Feedback ขอคำชี้แนะ หรือขอเฉลยสรุป ให้ตอบในบทบาทอาจารย์ติวเตอร์โดยอิงตามเกณฑ์ Checklist และเฉลยของเคสนี้
-5. ความยาวคำตอบ: กระชับ ตรงประเด็น สมจริง ประมาณ 2-4 ประโยค ตอบเป็นภาษาไทย
+🤫 [บุคลิกภาพและบทบาทของคุณ - CHEATER FRIEND ROLE]:
+1. คุณเป็นเพื่อนสนิทของผู้เข้าสอบที่แอบรู้เฉลยทุกอย่าง คอยกระซิบข้างหูบอกคำตอบอย่างลับๆ รวดเร็ว กวนๆ แต่น่ารักและจริงใจ
+2. ⚠️ หน้าที่หลัก: บอกคำตอบ เฉลย และชี้โพรงให้กระรอกทุกอย่างทันทีที่เพื่อนถามหรือซักถาม!
+   - บอกชื่อโรคและการวินิจฉัยที่แท้จริงของเคสนี้
+   - แอบบอกปัญหาการใช้ยา (Drug Therapy Problems: DTPs) ทั้งหมดที่ซ่อนอยู่ในเคส
+   - บอกชื่อยา ขนาด วิธีใช้ และคำแนะนำที่ถูกต้องตาม Checklist เป๊ะๆ
+   - ชี้เป้าว่าเกณฑ์ประเมินของกรรมการต้องการได้ยินคำว่าอะไรบ้าง เพื่อให้เพื่อนได้คะแนนเต็ม!
+3. สไตล์การพูด: ภาษาเพื่อนคุยกัน เป็นกันเอง สนุกสนาน คอยเชียร์ เช่น "เห้ยแก เคสนี้คนไข้เป็น... ระวังตรงยานี้นะ DTP คือ...", "ตอบข้อนี้ไปเลย ชัวร์ 100% อาจารย์ต้องการคำนี้!"
+4. อ้างอิงข้อมูลสถานีสอบและเฉลยด้านล่างอย่างแม่นยำ ไม่มั่ว ไม่เดา ตอบสั้นกระชับ 2-4 ประโยค
+==================================================
+[ข้อมูลสถานีสอบ เฉลย และเกณฑ์ Checklist ของสถานีนี้]
+${caseContext || '(ยังไม่มีข้อมูลเคส)'}
+==================================================`;
+        } else {
+          systemPrompt = `คุณคือระบบจำลองสถานีสอบทักษะปฏิบัติทางเภสัชกรรมคลินิก (PLE-CC2 OSPE Simulation) ประจำสถานีสอบที่ ${stNum}
+==================================================
+👨‍🏫 [บุคลิกภาพและบทบาทของคุณ - EXAMINER & SIMULATED PATIENT]:
+⚠️ [กฎเหล็กสำคัญสูงสุด - ไม่บอกเฉลยหรือ DTP ล่วงหน้าเด็ดขาด]:
+1. คุณทำหน้าที่เป็น "อาจารย์คุมสอบผู้ประเมิน (Examiner)" และ "ผู้ป่วยจำลอง (Simulated Patient)" ประจำสถานีสอบ
+2. ห้ามบอกเฉลย ห้ามหลุดบอกชื่อโรคจริง ห้ามบอกปัญหา DTP หรือบอกคำตอบที่ถูกต้องล่วงหน้าเด็ดขาด! ผู้เข้าสอบต้องเป็นคนค้นหาและวินิจฉัยเอง
+3. เมื่อผู้เข้าสอบซักประวัติ/คุยกับคนไข้: ให้สวมบท "ผู้ป่วยจำลอง (SP)" ตอบเฉพาะอาการ ยาเดิม และข้อมูลตามที่โจทย์ระบุไว้เท่านั้น ตอบเสมือนคนไข้จริง
+4. เมื่อผู้เข้าสอบขอตรวจร่างกายหรือขอผลแล็บ: ให้สวมบท "อาจารย์คุมสอบ" รายงานตัวเลข Vitals/Lab ตามที่มีในโจทย์
+5. เมื่อผู้เข้าสอบตอบหรือให้คำแนะนำ: ให้รับฟังอย่างสุขุม และอาจถามจี้หรือกระตุ้นให้คิดตามบทผู้คุมสอบ แต่ไม่เฉลยคำตอบ
+6. ภาษาพูดสุภาพ เป็นทางการ สมจริง กระชับ 2-4 ประโยค
 ==================================================
 [ข้อมูลสถานีสอบและเคสผู้ป่วยปัจจุบัน]
-${caseContext || '(ยังไม่มีข้อมูลเคส กรุณาให้คำแนะนำทั่วไป)'}
+${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 ==================================================`;
+        }
 
-        const userPrompt = `${recentHistoryText ? `[บทสนทนาก่อนหน้าในสถานีนี้]\n${recentHistoryText}\n\n` : ''}ข้อความล่าสุดจากนิสิต: "${userText}"`;
+        const userPrompt = `${recentHistoryText ? `[บทสนทนาก่อนหน้าในสถานีนี้]\n${recentHistoryText}\n\n` : ''}ข้อความล่าสุดจากผู้เข้าสอบ: "${userText}"`;
 
         // Retrieve key or assemble runtime key
         const _kParts = ['AQ.Ab8RN6Ioh', 'gsoJVHv4e5PY', 'XEjPEXhVw2UP', 'QbPkXow-biGDdgYZg'];
@@ -8139,6 +8271,12 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส กรุ
     function toggleAIChatMode() {
       if (typeof StationChatController !== 'undefined') {
         StationChatController.toggleAI();
+      }
+    }
+
+    function setAIChatRole(role) {
+      if (typeof StationChatController !== 'undefined') {
+        StationChatController.setAIRole(role);
       }
     }
 
@@ -11616,6 +11754,18 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส กรุ
         <button type="button" id="btn-maximize-chat" class="btn btn-ghost" onclick="toggleMaximizeStationChat()" title="ขยายเต็มจอ / ย่อขนาดเดิม" style="background: none; border: none; font-size: 0.95rem; cursor: pointer; color: var(--text-muted); line-height: 1; padding: 0.2rem 0.4rem; border-radius: var(--radius-sm); transition: color 0.15s;">⛶</button>
         <button type="button" class="btn btn-ghost" onclick="toggleStationChatDrawer()" title="ย่อหน้าต่างแชท" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-muted); line-height: 1; padding: 0.1rem 0.4rem; border-radius: var(--radius-sm); transition: color 0.15s;">&times;</button>
       </div>
+    </div>
+
+    <!-- AI Role Mode Switcher Bar -->
+    <div id="st-chat-ai-role-bar" class="st-chat-ai-role-bar" style="display: none;">
+      <span class="st-chat-ai-role-title">🎭 โหมด AI:</span>
+      <button type="button" class="st-chat-ai-role-btn active" id="btn-ai-role-examiner" onclick="setAIChatRole('examiner')" title="อาจารย์คุมสอบผู้ประเมิน: ซักถาม-ตรวจอาการ ให้คะแนนตามเกณฑ์ ไม่บอกเฉลยหรือ DTP ล่วงหน้า">
+        👨‍🏫 อาจารย์คุมสอบ
+      </button>
+      <button type="button" class="st-chat-ai-role-btn" id="btn-ai-role-cheater" onclick="setAIChatRole('cheater')" title="เพื่อนช่วยโกงข้อสอบ: แอบกระซิบคำตอบทุกอย่าง บอกโรค DTP ยาที่ถูก และเกณฑ์ให้คะแนนทั้งหมด">
+        🤫 เพื่อนช่วยโกง
+      </button>
+      <span id="st-chat-ai-role-desc" class="st-chat-ai-role-desc">ไม่บอกเฉลย ทำหน้าที่เป็นกรรมการคุมสอบ/คนไข้</span>
     </div>
 
     <!-- Quick Role-play Prompts (Clinical Shortcuts) -->
