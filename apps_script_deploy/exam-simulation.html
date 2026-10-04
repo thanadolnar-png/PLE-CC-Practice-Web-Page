@@ -8142,85 +8142,100 @@
       },
 
       toggleVoiceMic() {
-        this.unlockAudio();
-        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRec) {
-          alert('เบราว์เซอร์ของคุณยังไม่รองรับระบบสั่งการด้วยเสียง (Web Speech API) กรุณาใช้ Chrome, Edge หรือ Safari บน iOS 14.5+ ครับ');
-          return;
+      this.unlockAudio();
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) {
+        alert('เบราว์เซอร์ของคุณยังไม่รองรับระบบสั่งการด้วยเสียง (Web Speech API) กรุณาใช้ Chrome, Edge หรือ Safari บน iOS 14.5+ ครับ');
+        return;
+      }
+      // User-controlled: tap once = ON (stays on until tapped again), tap again = OFF
+      if (this._micWanted || this.isListeningVoice) {
+        this._micWanted = false;
+        if (this.speechRecognition) {
+          try { this.speechRecognition.stop(); } catch (_) {}
         }
+        this.isListeningVoice = false;
+        this._resetMicUI();
+        return;
+      }
+      this._micWanted = true;
+      this._startRecognition(SpeechRec);
+    },
 
-        const micBtn = document.getElementById('station-chat-mic-btn');
-        const inputEl = document.getElementById('station-chat-input');
+    _resetMicUI() {
+      const micBtn = document.getElementById('station-chat-mic-btn');
+      const inputEl = document.getElementById('station-chat-input');
+      if (micBtn) {
+        micBtn.classList.remove('listening');
+        micBtn.title = 'แตะเพื่อเปิดไมค์พูดคุยภาษาไทย';
+      }
+      if (inputEl) inputEl.placeholder = 'พิมพ์คำถาม หรือกดไมค์ 🎙️ เพื่อพูด...';
+    },
 
-        if (this.isListeningVoice) {
-          if (this.speechRecognition) {
-            try { this.speechRecognition.stop(); } catch (_) {}
-          }
-          this.isListeningVoice = false;
+    _startRecognition(SpeechRecArg) {
+      const SpeechRec = SpeechRecArg || window.SpeechRecognition || window.webkitSpeechRecognition;
+      const micBtn = document.getElementById('station-chat-mic-btn');
+      const inputEl = document.getElementById('station-chat-input');
+      try {
+        const rec = new SpeechRec();
+        rec.lang = 'th-TH';
+        rec.continuous = true;   // keep listening through pauses
+        rec.interimResults = true;
+        this.speechRecognition = rec;
+        const baseText = (inputEl && inputEl.value) ? inputEl.value.trim() + ' ' : '';
+
+        rec.onstart = () => {
+          this.isListeningVoice = true;
           if (micBtn) {
-            micBtn.classList.remove('listening');
-            micBtn.title = 'แตะเพื่อเปิดไมค์พูดคุยภาษาไทย';
+            micBtn.classList.add('listening');
+            micBtn.title = '🔴 กำลังฟัง... (แตะอีกครั้งเพื่อปิดไมค์)';
           }
-          return;
-        }
+          if (inputEl) inputEl.placeholder = '🎙️ กำลังฟังเสียงภาษาไทยของคุณ... (แตะไมค์เพื่อปิด)';
+        };
 
-        try {
-          const rec = new SpeechRec();
-          rec.lang = 'th-TH';
-          rec.continuous = false;
-          rec.interimResults = true;
-          this.speechRecognition = rec;
+        rec.onresult = (evt) => {
+          let finalText = '';
+          let interim = '';
+          for (let i = 0; i < evt.results.length; ++i) {
+            const t = evt.results[i][0].transcript;
+            if (evt.results[i].isFinal) finalText += t; else interim += t;
+          }
+          if (inputEl) inputEl.value = baseText + finalText + interim;
+        };
 
-          rec.onstart = () => {
-            this.isListeningVoice = true;
-            if (micBtn) {
-              micBtn.classList.add('listening');
-              micBtn.title = '🔴 กำลังฟัง... (แตะอีกครั้งเพื่อหยุด)';
-            }
-            if (inputEl) {
-              inputEl.placeholder = '🎙️ กำลังฟังเสียงภาษาไทยของคุณ...';
-            }
-          };
-
-          rec.onresult = (evt) => {
-            let transcript = '';
-            for (let i = evt.resultIndex; i < evt.results.length; ++i) {
-              transcript += evt.results[i][0].transcript;
-            }
-            if (inputEl && transcript) {
-              inputEl.value = transcript;
-            }
-          };
-
-          rec.onend = () => {
-            this.isListeningVoice = false;
-            if (micBtn) {
-              micBtn.classList.remove('listening');
-              micBtn.title = 'แตะเพื่อเปิดไมค์พูดคุยภาษาไทย';
-            }
-            if (inputEl) {
-              inputEl.placeholder = 'พิมพ์ข้อความ หรือกดไมค์ 🎙️ เพื่อพูด...';
-              // User will review text in input box and click send or press Enter manually
-              inputEl.focus();
-            }
-          };
-
-          rec.onerror = (err) => {
-            console.warn('SpeechRecognition error:', err);
-            this.isListeningVoice = false;
-            if (micBtn) micBtn.classList.remove('listening');
-            if (inputEl) inputEl.placeholder = 'พิมพ์ข้อความ หรือกดไมค์ 🎙️ เพื่อพูด...';
-          };
-
-          rec.start();
-        } catch (err) {
-          console.error('Cannot start SpeechRecognition:', err);
+        rec.onend = () => {
           this.isListeningVoice = false;
-          if (micBtn) micBtn.classList.remove('listening');
-        }
-      },
+          if (this._micWanted) {
+            // Browser stopped on its own (silence/timeout): restart automatically
+            setTimeout(() => {
+              if (this._micWanted && !this.isListeningVoice) this._startRecognition(SpeechRec);
+            }, 250);
+          } else {
+            this._resetMicUI();
+          }
+        };
 
-      setAIRole(role) {
+        rec.onerror = (err) => {
+          const code = err && err.error;
+          if (code === 'not-allowed' || code === 'service-not-allowed' || code === 'audio-capture') {
+            this._micWanted = false;
+            this.isListeningVoice = false;
+            this._resetMicUI();
+            alert('ไม่สามารถเข้าถึงไมโครโฟนได้ กรุณาอนุญาตการใช้ไมค์ในเบราว์เซอร์ครับ');
+          }
+          // 'no-speech' / 'aborted' / 'network': onend will handle auto-restart if still wanted
+        };
+
+        rec.start();
+      } catch (err) {
+        console.error('Cannot start SpeechRecognition:', err);
+        this._micWanted = false;
+        this.isListeningVoice = false;
+        this._resetMicUI();
+      }
+    },
+
+    setAIRole(role) {
         this.aiRole = (role === 'guru' || role === 'cheater') ? 'guru' : 'examiner';
         try { localStorage.setItem('_ple_ai_role', this.aiRole); } catch (_) {}
 
@@ -8702,6 +8717,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         if (this.isListeningVoice && this.speechRecognition) {
           try { this.speechRecognition.abort(); } catch (_) {}
         }
+        this._micWanted = false;
         this.isListeningVoice = false;
         const micBtnReset = document.getElementById('station-chat-mic-btn');
         if (micBtnReset) micBtnReset.classList.remove('listening');
@@ -8851,6 +8867,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
       sendMessage(text) {
         if (!text || !text.trim()) return;
+      if (this._micWanted && this.speechRecognition) { try { this.speechRecognition.abort(); } catch (_) {} }
         const cleanText = text.trim();
         const stNum = this.currentStationNum;
         const myId = SimState.myPlayerId || SimState.lobbyPlayerId || 'local_user';
@@ -12905,16 +12922,16 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
     <!-- Input Row -->
     <div class="st-chat-input-row">
-      <button type="button" id="station-chat-mic-btn" class="st-chat-mic-btn" onclick="toggleStationVoiceMic()" title="แตะเพื่อเปิดไมค์พูดคุยภาษาไทย (STT รองรับ iOS/iPad/PC)">
+      <input type="text" id="station-chat-input" class="st-chat-input" placeholder="พิมพ์ข้อความ หรือกดไมค์ 🎙️ เพื่อพูด..." onkeydown="handleStationChatKey(event)" oninput="handleStationChatTyping()">
+      <div class="st-chat-btn-pair" style="display:flex;gap:0.3rem;flex-shrink:0;align-items:center;"><button type="button" id="station-chat-mic-btn" class="st-chat-mic-btn" onclick="toggleStationVoiceMic()" title="แตะเพื่อเปิดไมค์พูดคุยภาษาไทย (STT รองรับ iOS/iPad/PC)">
         🎙️
       </button>
-      <input type="text" id="station-chat-input" class="st-chat-input" placeholder="พิมพ์ข้อความ หรือกดไมค์ 🎙️ เพื่อพูด..." onkeydown="handleStationChatKey(event)" oninput="handleStationChatTyping()">
       <button type="button" id="station-chat-send-btn" class="st-chat-send-btn" onclick="sendStationChatFromInput()" title="ส่งข้อความ (Enter)">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="22" y1="2" x2="11" y2="13"></line>
           <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
         </svg>
-      </button>
+      </button></div>
     </div>
   </div>
 

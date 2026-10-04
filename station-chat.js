@@ -349,74 +349,90 @@
         alert('เบราว์เซอร์ของคุณยังไม่รองรับระบบสั่งการด้วยเสียง (Web Speech API) กรุณาใช้ Chrome, Edge หรือ Safari บน iOS 14.5+ ครับ');
         return;
       }
-
-      const micBtn = document.getElementById('station-chat-mic-btn');
-      const inputEl = document.getElementById('station-chat-input');
-
-      if (this.isListeningVoice) {
+      // User-controlled: tap once = ON (stays on until tapped again), tap again = OFF
+      if (this._micWanted || this.isListeningVoice) {
+        this._micWanted = false;
         if (this.speechRecognition) {
           try { this.speechRecognition.stop(); } catch (_) {}
         }
         this.isListeningVoice = false;
-        if (micBtn) {
-          micBtn.classList.remove('listening');
-          micBtn.title = 'แตะเพื่อเปิดไมค์พูดคุยภาษาไทย';
-        }
+        this._resetMicUI();
         return;
       }
+      this._micWanted = true;
+      this._startRecognition(SpeechRec);
+    },
 
+    _resetMicUI() {
+      const micBtn = document.getElementById('station-chat-mic-btn');
+      const inputEl = document.getElementById('station-chat-input');
+      if (micBtn) {
+        micBtn.classList.remove('listening');
+        micBtn.title = 'แตะเพื่อเปิดไมค์พูดคุยภาษาไทย';
+      }
+      if (inputEl) inputEl.placeholder = 'พิมพ์คำถาม หรือกดไมค์ 🎙️ เพื่อพูด...';
+    },
+
+    _startRecognition(SpeechRecArg) {
+      const SpeechRec = SpeechRecArg || window.SpeechRecognition || window.webkitSpeechRecognition;
+      const micBtn = document.getElementById('station-chat-mic-btn');
+      const inputEl = document.getElementById('station-chat-input');
       try {
         const rec = new SpeechRec();
         rec.lang = 'th-TH';
-        rec.continuous = false;
+        rec.continuous = true;   // keep listening through pauses
         rec.interimResults = true;
         this.speechRecognition = rec;
+        const baseText = (inputEl && inputEl.value) ? inputEl.value.trim() + ' ' : '';
 
         rec.onstart = () => {
           this.isListeningVoice = true;
           if (micBtn) {
             micBtn.classList.add('listening');
-            micBtn.title = '🔴 กำลังฟัง... (แตะอีกครั้งเพื่อหยุด)';
+            micBtn.title = '🔴 กำลังฟัง... (แตะอีกครั้งเพื่อปิดไมค์)';
           }
-          if (inputEl) {
-            inputEl.placeholder = '🎙️ กำลังฟังเสียงภาษาไทยของคุณ...';
-          }
+          if (inputEl) inputEl.placeholder = '🎙️ กำลังฟังเสียงภาษาไทยของคุณ... (แตะไมค์เพื่อปิด)';
         };
 
         rec.onresult = (evt) => {
-          let transcript = '';
-          for (let i = evt.resultIndex; i < evt.results.length; ++i) {
-            transcript += evt.results[i][0].transcript;
+          let finalText = '';
+          let interim = '';
+          for (let i = 0; i < evt.results.length; ++i) {
+            const t = evt.results[i][0].transcript;
+            if (evt.results[i].isFinal) finalText += t; else interim += t;
           }
-          if (inputEl && transcript) {
-            inputEl.value = transcript;
-          }
+          if (inputEl) inputEl.value = baseText + finalText + interim;
         };
 
         rec.onend = () => {
           this.isListeningVoice = false;
-          if (micBtn) {
-            micBtn.classList.remove('listening');
-            micBtn.title = 'แตะเพื่อเปิดไมค์พูดคุยภาษาไทย';
-          }
-          if (inputEl) {
-            inputEl.placeholder = 'พิมพ์คำถาม หรือกดไมค์ 🎙️ เพื่อพูด...';
-            inputEl.focus();
+          if (this._micWanted) {
+            // Browser stopped on its own (silence/timeout): restart automatically
+            setTimeout(() => {
+              if (this._micWanted && !this.isListeningVoice) this._startRecognition(SpeechRec);
+            }, 250);
+          } else {
+            this._resetMicUI();
           }
         };
 
         rec.onerror = (err) => {
-          console.warn('SpeechRecognition error:', err);
-          this.isListeningVoice = false;
-          if (micBtn) micBtn.classList.remove('listening');
-          if (inputEl) inputEl.placeholder = 'พิมพ์คำถาม หรือกดไมค์ 🎙️ เพื่อพูด...';
+          const code = err && err.error;
+          if (code === 'not-allowed' || code === 'service-not-allowed' || code === 'audio-capture') {
+            this._micWanted = false;
+            this.isListeningVoice = false;
+            this._resetMicUI();
+            alert('ไม่สามารถเข้าถึงไมโครโฟนได้ กรุณาอนุญาตการใช้ไมค์ในเบราว์เซอร์ครับ');
+          }
+          // 'no-speech' / 'aborted' / 'network': onend will handle auto-restart if still wanted
         };
 
         rec.start();
       } catch (err) {
         console.error('Cannot start SpeechRecognition:', err);
+        this._micWanted = false;
         this.isListeningVoice = false;
-        if (micBtn) micBtn.classList.remove('listening');
+        this._resetMicUI();
       }
     },
 
@@ -1054,6 +1070,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       if (this.isListeningVoice && this.speechRecognition) {
         try { this.speechRecognition.abort(); } catch (_) {}
       }
+      this._micWanted = false;
       this.isListeningVoice = false;
 
       const micBtnReset = document.getElementById('station-chat-mic-btn');
@@ -1107,6 +1124,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
     sendMessage(text) {
       if (!text || !text.trim()) return;
+      if (this._micWanted && this.speechRecognition) { try { this.speechRecognition.abort(); } catch (_) {} }
       const cleanText = text.trim();
       const stNum = this.currentStationNum;
 
