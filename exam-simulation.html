@@ -12001,7 +12001,6 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
           const item = document.createElement('div');
           item.style.cssText = 'background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-md);padding:0.75rem 0.85rem;font-size:0.84rem;box-shadow:var(--shadow-sm);cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;';
-          item.title = 'ชี้หรือคลิกเพื่อดูโจทย์เคสสถานีนี้';
           item.innerHTML = `
             <div style="font-weight:700;color:var(--primary);border-bottom:1px solid var(--border);padding-bottom:0.35rem;margin-bottom:0.35rem;display:flex;justify-content:space-between;align-items:center;">
               <span>สถานีที่ ${stNum}</span>
@@ -12020,22 +12019,12 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
               <span>${escapeHtml(p.startParticipantName || 'ไม่มี')}</span>
             </div>
             <div style="margin-top:0.3rem;padding-top:0.2rem;border-top:1px dashed var(--border);font-size:0.68rem;color:var(--primary);text-align:center;font-weight:600;">
-              👁️ ชี้/กดเพื่อดูโจทย์เคส
+              👁️ คลิกเพื่อดูโจทย์เคส
             </div>
           `;
 
-          let mHoverTimer = null;
-          item.addEventListener('mouseenter', () => {
-            mHoverTimer = setTimeout(() => {
-              openStationCasePreview(p.caseId, stNum);
-            }, 350);
-          });
-          item.addEventListener('mouseleave', () => {
-            if (mHoverTimer) { clearTimeout(mHoverTimer); mHoverTimer = null; }
-          });
           item.addEventListener('click', (e) => {
             if (e.target.closest('button')) return;
-            if (mHoverTimer) { clearTimeout(mHoverTimer); mHoverTimer = null; }
             openStationCasePreview(p.caseId, stNum);
           });
 
