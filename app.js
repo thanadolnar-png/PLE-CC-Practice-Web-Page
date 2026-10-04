@@ -879,6 +879,87 @@ function resolveChecklistSubsets(checklist) {
 window.resolveChecklistSubsets = resolveChecklistSubsets;
 
 /**
+ * buildPrintChecklistTable — สร้างตาราง Checklist สวยงามสำหรับระบบพิมพ์ (ใช้ร่วมกันทั้ง Single & Batch Print)
+ * รองรับการแบ่งกลุ่ม, แยก Parent (ช่องสี่เหลี่ยม) vs Subset (วงกลมวิทยุ + เยื้องย่อหน้า), และแสดงรูปภาพ/คะแนน
+ * @param {object} c Case object
+ * @returns {string} HTML table
+ */
+function buildPrintChecklistTable(c) {
+  if (!c || !c.checklist || c.checklist.length === 0) return '';
+  
+  if (typeof resolveChecklistSubsets === 'function') {
+    resolveChecklistSubsets(c.checklist);
+  }
+
+  // Map global index for each item
+  const itemGlobalIndices = new Map();
+  c.checklist.forEach((item, index) => itemGlobalIndices.set(item, index));
+
+  const groups = {};
+  c.checklist.forEach(item => {
+    const g = item.group || 'ทั่วไป';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(item);
+  });
+
+  let html = `<table class="print-checklist-table" style="width:100%; border-collapse:collapse; margin-top:0.5rem;">
+    <thead>
+      <tr style="background:#f8fafc;">
+        <th style="width:75%; border:1px solid #475569; padding:0.45rem 0.6rem; text-align:left; font-size:9.5pt;">รายละเอียดการปฏิบัติงาน / เกณฑ์ประเมิน</th>
+        <th style="width:12.5%; border:1px solid #475569; padding:0.45rem; text-align:center; vertical-align:middle; font-size:9.5pt;">คะแนน</th>
+        <th style="width:12.5%; border:1px solid #475569; padding:0.45rem; text-align:center; vertical-align:middle; font-size:9.5pt;">ผลประเมิน</th>
+      </tr>
+    </thead>
+    <tbody>`;
+
+  Object.keys(groups).forEach(gName => {
+    html += `<tr class="print-table-group-row">
+      <td colspan="3" style="background:#e2e8f0; font-weight:700; font-family:var(--font-title); border:1px solid #475569; padding:0.45rem 0.6rem; font-size:9pt; color:#0f172a;">
+        📁 หมวดประเมิน: ${escapeHtml(gName)}
+      </td>
+    </tr>`;
+
+    groups[gName].forEach(item => {
+      const isSubset = !!item.isSubset;
+      let imgHtml = item.imageHtml || '';
+      if (!imgHtml && typeof getChecklistItemImage === 'function') {
+        imgHtml = getChecklistItemImage(item, itemGlobalIndices.get(item) || 0, c);
+      }
+
+      if (isSubset) {
+        html += `<tr class="print-row-subset">
+          <td style="border:1px solid #475569; padding:0.35rem 0.6rem 0.35rem 2rem; color:#334155; font-size:9pt; vertical-align:middle;">
+            <span style="display:inline-block; width:13px; height:13px; border:1.5px solid #64748b; border-radius:50%; vertical-align:middle; margin-right:0.45rem; background:#fff;"></span>
+            <span style="vertical-align:middle;">${item.textHtml || escapeHtml(item.text)}</span>
+            ${imgHtml ? `<div style="margin-top:0.25rem;">${imgHtml}</div>` : ''}
+          </td>
+          <td class="print-center-cell" style="border:1px solid #475569; padding:0.35rem; text-align:center; vertical-align:middle; font-weight:600; color:#475569; font-size:9pt;">${item.score}</td>
+          <td class="print-center-cell" style="border:1px solid #475569; padding:0.35rem; text-align:center; vertical-align:middle;">
+            <span class="print-eval-box" style="display:inline-block; width:15px; height:15px; border:1.5px solid #475569; border-radius:3px; vertical-align:middle; background:#fff;"></span>
+          </td>
+        </tr>`;
+      } else {
+        html += `<tr class="print-row-parent" style="background-color:#f8fafc;">
+          <td style="border:1px solid #475569; padding:0.45rem 0.6rem; font-weight:700; color:#0f172a; font-size:9.5pt; vertical-align:middle;">
+            <span style="display:inline-block; width:13px; height:13px; border:1.5px solid #0f172a; border-radius:3px; vertical-align:middle; margin-right:0.45rem; background:#fff;"></span>
+            <span style="vertical-align:middle;">${item.textHtml || escapeHtml(item.text)}</span>
+            ${imgHtml ? `<div style="margin-top:0.25rem;">${imgHtml}</div>` : ''}
+          </td>
+          <td class="print-center-cell" style="border:1px solid #475569; padding:0.45rem; text-align:center; vertical-align:middle; font-weight:800; color:#0f172a; font-size:10pt;">${item.score}</td>
+          <td class="print-center-cell" style="border:1px solid #475569; padding:0.45rem; text-align:center; vertical-align:middle;">
+            <span class="print-eval-box" style="display:inline-block; width:15px; height:15px; border:1.5px solid #0f172a; border-radius:3px; vertical-align:middle; background:#fff;"></span>
+          </td>
+        </tr>`;
+      }
+    });
+  });
+
+  html += `</tbody></table>`;
+  return html;
+}
+window.buildPrintChecklistTable = buildPrintChecklistTable;
+
+/**
  * fetchCaseDetail — ดึงข้อมูล scenario/checklist เต็มของเคสจาก API แบบ on-demand
  * ใช้เมื่อ case ที่อยู่ใน AppState.cases ไม่มี contentHtml / scenario / checklist
  * (เช่น เคสใหม่ที่ยังไม่ได้อัปเดตใน offline file)
@@ -2420,7 +2501,11 @@ function createBatchPrintModalDOM() {
               </label>
             </div>
 
-            <div style="margin-top: 0.75rem; border-top: 1px dashed var(--border); padding-top: 0.5rem;">
+            <div style="margin-top: 0.75rem; border-top: 1px dashed var(--border); padding-top: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem;">
+              <label class="print-radio-label" style="background: var(--bg-secondary);">
+                <input type="checkbox" id="batch-split-key" checked>
+                <span>📄 <strong>แยกหน้าพิมพ์ระหว่าง Checklist และ เฉลย (Split Key to New Page)</strong><br><small style="color:var(--text-secondary);">ตัดขึ้นหน้าใหม่สำหรับเฉลย เพื่อให้ Checklist และเฉลยอยู่คนละหน้ากัน</small></span>
+              </label>
               <label class="print-radio-label" style="background: var(--bg-secondary);">
                 <input type="checkbox" id="batch-hide-title">
                 <span>🙈 <strong>ซ่อนชื่อเคส / ชื่อโรคในหัวกระดาษ</strong><br><small style="color:var(--text-secondary);">เพื่อซ่อนชื่อโรค/เฉลย เมื่อนำโจทย์ไปติดหน้าห้องสอบ</small></span>
@@ -2788,38 +2873,8 @@ async function executeBatchPrint() {
         
         html += `<div ${pageBreakAttr}>`;
 
-        if (c.checklist && c.checklist.length > 0) {
-          let chkTable = `<table class="print-checklist-table" style="width:100%; border-collapse:collapse; margin-top:0.5rem;">
-            <thead>
-              <tr>
-                <th style="width:75%; border:1px solid #475569; padding:0.4rem; text-align:left;">รายละเอียดการปฏิบัติงาน / เกณฑ์ประเมิน</th>
-                <th style="width:12.5%; border:1px solid #475569; padding:0.4rem; text-align:center; vertical-align:middle;">คะแนน</th>
-                <th style="width:12.5%; border:1px solid #475569; padding:0.4rem; text-align:center; vertical-align:middle;">ผลประเมิน</th>
-              </tr>
-            </thead>
-            <tbody>`;
-
-          const groups = {};
-          c.checklist.forEach(item => {
-            const g = item.group || 'ทั่วไป';
-            if (!groups[g]) groups[g] = [];
-            groups[g].push(item);
-          });
-
-          Object.keys(groups).forEach(gName => {
-            chkTable += `<tr style="background:#f1f5f9; font-weight:700;"><td colspan="3" style="border:1px solid #475569; padding:0.4rem;">📁 หมวดประเมิน: ${escapeHtml(gName)}</td></tr>`;
-            groups[gName].forEach(item => {
-              chkTable += `<tr>
-                <td style="border:1px solid #475569; padding:0.45rem 0.6rem; vertical-align:middle;">${item.textHtml || escapeHtml(item.text)}${item.imageHtml ? `<div style="margin-top:0.25rem;">${item.imageHtml}</div>` : ''}</td>
-                <td style="border:1px solid #475569; padding:0.4rem; text-align:center; vertical-align:middle; font-weight:bold;">${item.score}</td>
-                <td style="border:1px solid #475569; padding:0.4rem; text-align:center; vertical-align:middle;">
-                  <span class="print-eval-box"></span>
-                </td>
-              </tr>`;
-            });
-          });
-          chkTable += `</tbody></table>`;
-
+        const chkTable = (typeof buildPrintChecklistTable === 'function') ? buildPrintChecklistTable(c) : '';
+        if (chkTable) {
           html += `<div>
             <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #10b981; padding-left:0.5rem; page-break-after:avoid;">📋 รายการทักษะประเมิน</h3>
             ${chkTable}
@@ -2827,8 +2882,12 @@ async function executeBatchPrint() {
         }
 
         if (c.noteHtml && c.noteHtml.trim() !== '') {
+          const splitKey = document.getElementById('batch-split-key')?.checked !== false;
           const formattedNote = typeof renderRichNoteContent === 'function' ? renderRichNoteContent(c.noteHtml) : c.noteHtml;
-          html += `<div style="margin-top:1.25rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem;">
+          const noteBreakClass = splitKey ? 'print-page-break-before' : '';
+          const noteBreakStyle = splitKey ? 'page-break-before: always; margin-top: 1.25rem;' : 'margin-top: 1.25rem; border-top: 1px dashed #cbd5e1; padding-top: 0.75rem;';
+
+          html += `<div class="${noteBreakClass}" style="${noteBreakStyle}">
             <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #f59e0b; padding-left:0.5rem; page-break-after:avoid;">🔑 เฉลย / ข้อมูลผู้ตรวจ</h3>
             <div style="font-size:0.9rem; line-height:1.5;">${formattedNote}</div>
           </div>`;

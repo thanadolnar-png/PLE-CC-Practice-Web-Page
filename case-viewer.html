@@ -1057,7 +1057,7 @@
       `;
       
       if (printContainer) {
-        printContainer.innerHTML = printTableHtml;
+        printContainer.innerHTML = (typeof window.buildPrintChecklistTable === 'function') ? window.buildPrintChecklistTable(c) : printTableHtml;
       }
       
       // อัปเดต UI Progress bar ตอนเริ่มต้น
@@ -1414,19 +1414,15 @@
       }
 
       if (mode === 'full' || mode === 'checklist') {
+        const splitKey = document.getElementById('single-split-key')?.checked !== false;
+
         if (mode === 'full') {
-          html += `<div style="border-top: 2px dashed #94a3b8; margin: 1.5rem 0; padding-top: 0.5rem; text-align: center; color: #64748b; font-size: 0.8rem; font-weight: 600;">✂️ --- แยกหน้าพิมพ์สำหรับ Checklist & เฉลย (Page Break) --- ✂️</div>`;
+          html += `<div style="border-top: 2px dashed #94a3b8; margin: 1.5rem 0; padding-top: 0.5rem; text-align: center; color: #64748b; font-size: 0.8rem; font-weight: 600;">✂️ --- แยกหน้าพิมพ์สำหรับ Checklist & เกณฑ์ประเมิน (Page Break) --- ✂️</div>`;
         }
 
-        let printChkHtml = document.getElementById('print-checklist-list')?.innerHTML || '';
-        if (!printChkHtml && c.checklist && c.checklist.length > 0) {
-          // Construct fallback checklist table
-          printChkHtml = `<table class="print-checklist-table" style="width:100%; border-collapse:collapse; margin-top:0.5rem;"><tbody>`;
-          c.checklist.forEach(item => {
-            printChkHtml += `<tr><td style="border:1px solid #475569; padding:0.4rem;">${item.textHtml || escapeHtml(item.text)}</td><td style="border:1px solid #475569; padding:0.4rem; text-align:center; font-weight:bold;">${item.score}</td><td style="border:1px solid #475569; padding:0.4rem; text-align:center;"><span class="print-eval-box"></span></td></tr>`;
-          });
-          printChkHtml += `</tbody></table>`;
-        }
+        let printChkHtml = (typeof window.buildPrintChecklistTable === 'function') ? 
+          window.buildPrintChecklistTable(c) : 
+          (document.getElementById('print-checklist-list')?.innerHTML || '');
 
         if (printChkHtml) {
           html += `<div style="margin-top:1rem;">
@@ -1438,7 +1434,11 @@
         const rawNote = c.noteHtml || document.getElementById('note-content-area')?.innerHTML || '';
         const noteHtml = (typeof renderRichNoteContent === 'function') ? renderRichNoteContent(rawNote) : rawNote;
         if (noteHtml && noteHtml.trim() !== '') {
-          html += `<div style="margin-top:1rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem;">
+          if (splitKey) {
+            html += `<div style="border-top: 2px dashed #f59e0b; margin: 1.5rem 0; padding-top: 0.5rem; text-align: center; color: #d97706; font-size: 0.8rem; font-weight: 600;">✂️ --- แยกหน้าพิมพ์สำหรับ เฉลย / ข้อมูลผู้ตรวจ (Page Break) --- ✂️</div>`;
+          }
+          const noteBreakStyle = splitKey ? 'margin-top:1rem;' : 'margin-top:1rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem;';
+          html += `<div style="${noteBreakStyle}">
             <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #f59e0b; padding-left:0.5rem;">🔑 เฉลย / ข้อมูลผู้ตรวจ</h4>
             <div style="font-size:0.88rem; line-height:1.5;">${noteHtml}</div>
           </div>`;
@@ -1453,6 +1453,7 @@
       const orient = document.querySelector('input[name="single-print-orient"]:checked')?.value || 'portrait';
       const scale = document.getElementById('single-print-scale')?.value || '100';
       const hideTitle = document.getElementById('single-hide-title')?.checked || false;
+      const splitKey = document.getElementById('single-split-key')?.checked !== false;
 
       // Apply dynamic print style for landscape/portrait
       applyDynamicPrintStyle(orient);
@@ -1508,14 +1509,9 @@
         
         html += `<div ${pageBreakAttr}>`;
 
-        let printChkHtml = document.getElementById('print-checklist-list')?.innerHTML || '';
-        if (!printChkHtml && c.checklist && c.checklist.length > 0) {
-          printChkHtml = `<table class="print-checklist-table" style="width:100%; border-collapse:collapse; margin-top:0.5rem;"><tbody>`;
-          c.checklist.forEach(item => {
-            printChkHtml += `<tr><td style="border:1px solid #475569; padding:0.4rem;">${item.textHtml || escapeHtml(item.text)}</td><td style="border:1px solid #475569; padding:0.4rem; text-align:center; font-weight:bold;">${item.score}</td><td style="border:1px solid #475569; padding:0.4rem; text-align:center;"><span class="print-eval-box"></span></td></tr>`;
-          });
-          printChkHtml += `</tbody></table>`;
-        }
+        let printChkHtml = (typeof window.buildPrintChecklistTable === 'function') ? 
+          window.buildPrintChecklistTable(c) : 
+          (document.getElementById('print-checklist-list')?.innerHTML || '');
 
         if (printChkHtml) {
           html += `<div>
@@ -1527,7 +1523,9 @@
         const rawNote = c.noteHtml || document.getElementById('note-content-area')?.innerHTML || '';
         const noteHtml = (typeof renderRichNoteContent === 'function') ? renderRichNoteContent(rawNote) : rawNote;
         if (noteHtml && noteHtml.trim() !== '') {
-          html += `<div style="margin-top:1.25rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem;">
+          const noteBreakClass = splitKey ? 'print-page-break-before' : '';
+          const noteBreakStyle = splitKey ? 'page-break-before: always; margin-top: 1.25rem;' : 'margin-top: 1.25rem; border-top: 1px dashed #cbd5e1; padding-top: 0.75rem;';
+          html += `<div class="${noteBreakClass}" style="${noteBreakStyle}">
             <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #f59e0b; padding-left:0.5rem; page-break-after:avoid;">🔑 เฉลย / ข้อมูลผู้ตรวจ</h3>
             <div style="font-size:0.9rem; line-height:1.5;">${noteHtml}</div>
           </div>`;
@@ -1585,7 +1583,11 @@
               </label>
             </div>
 
-            <div style="margin-top: 0.75rem; border-top: 1px dashed var(--border); padding-top: 0.5rem;">
+            <div style="margin-top: 0.75rem; border-top: 1px dashed var(--border); padding-top: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem;">
+              <label class="print-radio-label" style="background: var(--bg-secondary);">
+                <input type="checkbox" id="single-split-key" checked onchange="updateSingleCasePrintPreview()">
+                <span>📄 <strong>แยกหน้าพิมพ์ระหว่าง Checklist และ เฉลย (Split Key to New Page)</strong><br><small style="color:var(--text-secondary);">ตัดขึ้นหน้าใหม่สำหรับเฉลย เพื่อให้ Checklist และเฉลยอยู่คนละหน้ากัน</small></span>
+              </label>
               <label class="print-radio-label" style="background: var(--bg-secondary);">
                 <input type="checkbox" id="single-hide-title" onchange="updateSingleCasePrintPreview()">
                 <span>🙈 <strong>ซ่อนชื่อเคส / ชื่อโรคในหัวกระดาษ</strong><br><small style="color:var(--text-secondary);">เพื่อซ่อนชื่อโรค/เฉลย เมื่อนำโจทย์ไปติดหน้าห้องสอบ</small></span>
