@@ -3882,7 +3882,20 @@
           SimState.role = hostInitialRole;
           SimState.alarmSound = roomData.alarmSound;
           SimState.timeoutTransitionMode = roomData.timeoutTransitionMode;
-          
+
+          // Sync any decrypted cases to Firebase now that roomId is set
+          // (the passcode modal sync was skipped earlier because SimState.roomId wasn't set yet)
+          if (SimState.unlockedCases && Object.keys(SimState.unlockedCases).length > 0) {
+            try {
+              const fbUpdates = {};
+              Object.entries(SimState.unlockedCases).forEach(([k, v]) => {
+                fbUpdates[`rooms/${randomRoomId}/unlockedCaseDetails/${k}`] = v;
+              });
+              await _fbDb.ref().update(fbUpdates);
+            } catch (syncErr) {
+              console.warn('Warning: could not sync unlockedCaseDetails to Firebase:', syncErr);
+            }
+          }
           // Set up local stations
           SimState.stations = [];
           for (let i = 0; i < fullExamSet.length; i++) {
