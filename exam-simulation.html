@@ -892,6 +892,48 @@
       pointer-events: none;
     }
 
+    /* ── Drawing Note & Typed Note in Chat ── */
+    .st-chat-msg.draw-note-msg {
+      max-width: 92%;
+      padding: 0.65rem 0.85rem;
+      border: 1.5px solid #2563eb;
+      background: #eff6ff !important;
+      color: #1e40af !important;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.12);
+    }
+    .st-chat-msg.type-note-msg {
+      max-width: 92%;
+      padding: 0.65rem 0.85rem;
+      border: 1.5px solid #d97706;
+      background: #fffbeb !important;
+      color: #92400e !important;
+      box-shadow: 0 4px 14px rgba(217, 119, 6, 0.12);
+    }
+    .st-chat-note-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      width: fit-content;
+      color: #ffffff;
+      margin-bottom: 0.35rem;
+    }
+    .st-chat-note-badge.draw { background: #2563eb; }
+    .st-chat-note-badge.type { background: #d97706; }
+    .st-chat-type-card-content {
+      white-space: pre-wrap;
+      font-family: var(--font-body);
+      font-size: 0.86rem;
+      line-height: 1.55;
+      background: #ffffff;
+      padding: 0.6rem 0.75rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(217, 119, 6, 0.25);
+    }
+
     .st-chat-msg-sender {
       font-size: 0.72rem;
       margin-bottom: 0.2rem;
@@ -7778,6 +7820,87 @@ ${caseContext ? '\n[ข้อมูลสถานีสอบปัจจุบ
         }
       },
 
+      sendDrawingNoteMessage(data) {
+        if (!data || !data.imageData) return;
+        const stNum = this.currentStationNum;
+        const myId = SimState.myPlayerId || SimState.lobbyPlayerId || 'local_user';
+        const myRole = SimState.role || 'examinee';
+        const myName = SimState.lobbyPlayerName || (myRole === 'examiner' ? 'ผู้ประเมิน' : 'ผู้เข้าสอบ');
+        const myEmoji = SimState.myEmoji || (myRole === 'examiner' ? '👨‍🏫' : '✍️');
+
+        const msgObj = {
+          id: 'msg_draw_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+          senderId: myId,
+          senderName: myName,
+          senderRole: myRole,
+          senderEmoji: myEmoji,
+          type: 'drawing_note',
+          imageData: data.imageData,
+          text: `🎨 ส่งภาพวาด/กระดาษทด: สถานีที่ ${stNum}`,
+          timestamp: Date.now(),
+          stationNumber: stNum
+        };
+
+        const path = this.getChatPath(stNum);
+        if (!path) {
+          if (!this.soloMessages[stNum]) this.soloMessages[stNum] = [];
+          this.soloMessages[stNum].push(msgObj);
+          const placeholder = document.getElementById('st-chat-empty-placeholder');
+          if (placeholder) placeholder.style.display = 'none';
+          this.renderMessage(msgObj);
+          if (!this.isOpen) this.toggleDrawer();
+          return;
+        }
+
+        try {
+          _fbDb.ref(path + '/messages').push(msgObj);
+          if (!this.isOpen) this.toggleDrawer();
+        } catch (e) {
+          console.error('Failed to send drawing note message to Firebase:', e);
+        }
+      },
+
+      sendTypedNoteMessage(text) {
+        if (!text || !text.trim()) return;
+        const cleanText = text.trim();
+        const stNum = this.currentStationNum;
+        const myId = SimState.myPlayerId || SimState.lobbyPlayerId || 'local_user';
+        const myRole = SimState.role || 'examinee';
+        const myName = SimState.lobbyPlayerName || (myRole === 'examiner' ? 'ผู้ประเมิน' : 'ผู้เข้าสอบ');
+        const myEmoji = SimState.myEmoji || (myRole === 'examiner' ? '👨‍🏫' : '✍️');
+
+        const msgObj = {
+          id: 'msg_type_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+          senderId: myId,
+          senderName: myName,
+          senderRole: myRole,
+          senderEmoji: myEmoji,
+          type: 'typed_note',
+          noteText: cleanText,
+          text: `📝 ส่งโน้ตข้อความ: สถานีที่ ${stNum}`,
+          timestamp: Date.now(),
+          stationNumber: stNum
+        };
+
+        const path = this.getChatPath(stNum);
+        if (!path) {
+          if (!this.soloMessages[stNum]) this.soloMessages[stNum] = [];
+          this.soloMessages[stNum].push(msgObj);
+          const placeholder = document.getElementById('st-chat-empty-placeholder');
+          if (placeholder) placeholder.style.display = 'none';
+          this.renderMessage(msgObj);
+          if (!this.isOpen) this.toggleDrawer();
+          return;
+        }
+
+        try {
+          _fbDb.ref(path + '/messages').push(msgObj);
+          if (!this.isOpen) this.toggleDrawer();
+        } catch (e) {
+          console.error('Failed to send typed note message to Firebase:', e);
+        }
+      },
+
       renderMessage(msg) {
         const container = document.getElementById('station-chat-messages');
         if (!container) return;
@@ -7794,24 +7917,44 @@ ${caseContext ? '\n[ข้อมูลสถานีสอบปัจจุบ
           ? '<span style="font-size:0.68rem;background:rgba(239,68,68,0.15);color:#b91c1c;padding:1px 5px;border-radius:4px;font-weight:700;">Examiner</span>'
           : '<span style="font-size:0.68rem;background:rgba(59,130,246,0.15);color:#1d4ed8;padding:1px 5px;border-radius:4px;font-weight:700;">Examinee</span>';
 
-        const isDrugLabel = (msg.type === 'drug_label' || !!msg.imageData);
+        const isDrugLabel = (msg.type === 'drug_label');
+        const isDrawNote = (msg.type === 'drawing_note');
+        const isTypeNote = (msg.type === 'typed_note');
+        const isImage = (isDrugLabel || isDrawNote || !!msg.imageData);
+
+        let cardClass = '';
+        if (isDrugLabel) cardClass = 'drug-label-msg';
+        else if (isDrawNote) cardClass = 'draw-note-msg';
+        else if (isTypeNote) cardClass = 'type-note-msg';
+
         const msgEl = document.createElement('div');
-        msgEl.className = `st-chat-msg ${isMine ? 'mine' : 'theirs'} ${isDrugLabel ? 'drug-label-msg' : ''}`;
+        msgEl.className = `st-chat-msg ${isMine ? 'mine' : 'theirs'} ${cardClass}`;
         if (msg.id) msgEl.setAttribute('data-msg-id', msg.id);
 
         let contentHtml = '';
-        if (isDrugLabel && msg.imageData) {
-          const lblName = (typeof escapeHtml === 'function')
-            ? escapeHtml(msg.labelName || 'ฉลากยา RxCU')
-            : String(msg.labelName || 'ฉลากยา RxCU').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-          
+        if (isImage && msg.imageData) {
+          const badgeText = isDrugLabel 
+            ? `🏷️ ${(typeof escapeHtml === 'function' ? escapeHtml(msg.labelName || 'ฉลากยา RxCU') : msg.labelName || 'ฉลากยา RxCU')}`
+            : `🎨 ภาพวาดกระดาษทด`;
+          const badgeClass = isDrugLabel ? 'st-chat-label-badge' : 'st-chat-note-badge draw';
+
           contentHtml = `
             <div class="st-chat-label-card">
-              <div class="st-chat-label-badge">🏷️ ${lblName}</div>
+              <div class="${badgeClass}">${badgeText}</div>
               <div class="st-chat-label-img-wrap" onclick="openDrugLabelZoomModal('${msg.id}')" title="คลิกเพื่อดูภาพขนาดเต็ม (Zoom)">
-                <img src="${msg.imageData}" alt="${lblName}" class="st-chat-label-img" id="img_${msg.id}">
+                <img src="${msg.imageData}" alt="${badgeText}" class="st-chat-label-img" id="img_${msg.id}">
                 <div class="st-chat-label-zoom-hint">🔍 คลิกดูภาพขยาย</div>
               </div>
+            </div>
+          `;
+        } else if (isTypeNote && msg.noteText) {
+          const safeNote = (typeof escapeHtml === 'function')
+            ? escapeHtml(msg.noteText)
+            : String(msg.noteText).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          contentHtml = `
+            <div style="margin-top: 0.25rem;">
+              <div class="st-chat-note-badge type">📝 บันทึกข้อความ (Note)</div>
+              <div class="st-chat-type-card-content">${safeNote}</div>
             </div>
           `;
         } else {

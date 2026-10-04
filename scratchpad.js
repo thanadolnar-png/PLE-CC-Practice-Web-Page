@@ -253,7 +253,7 @@
                 </button>
               </div>
 
-              <!-- Tools: Eraser, Undo, Clear -->
+              <!-- Tools: Eraser, Undo, Clear, Send -->
               <div class="sp-tool-group sp-actions-group">
                 <button type="button" class="sp-action-btn" id="sp-tool-eraser" title="ยางลบ">
                   🧹 ยางลบ
@@ -263,6 +263,9 @@
                 </button>
                 <button type="button" class="sp-action-btn sp-action-danger" id="sp-tool-clear" title="ล้างกระดาน/ฉลากปัจจุบัน">
                   🗑️ ล้าง
+                </button>
+                <button type="button" class="sp-label-send-btn" id="sp-btn-send-draw-chat" style="display: none;" title="ส่งภาพวาดกระดาษทดนี้เข้าแชทสถานี">
+                  📤 ส่งเข้าแชท
                 </button>
               </div>
             </div>
@@ -277,9 +280,14 @@
           <div class="sp-view sp-view-type" id="sp-type-view" style="display: none;">
             <div class="sp-type-toolbar">
               <span class="sp-type-hint">💡 พิมพ์บันทึกย่อ ขนาดยา คำถามซักประวัติ หรือลิสต์ DTPs</span>
-              <button type="button" class="sp-action-btn sp-action-danger" id="sp-type-clear" title="ล้างข้อความ">
-                🗑️ ล้างข้อความ
-              </button>
+              <div style="display: flex; gap: 0.35rem; align-items: center;">
+                <button type="button" class="sp-action-btn sp-action-danger" id="sp-type-clear" title="ล้างข้อความ">
+                  🗑️ ล้าง
+                </button>
+                <button type="button" class="sp-label-send-btn" id="sp-btn-send-type-chat" title="ส่งโน้ตข้อความนี้เข้าแชทสถานี">
+                  📤 ส่งเข้าแชท
+                </button>
+              </div>
             </div>
             <textarea
               id="sp-textarea"
@@ -310,6 +318,8 @@
       this.dom.labelSubNav = panel.querySelector('#sp-label-subbar');
       this.dom.labelTabsWrap = panel.querySelector('#sp-label-tabs-list');
       this.dom.btnSendLabelChat = panel.querySelector('#sp-btn-send-label-chat');
+      this.dom.btnSendDrawChat = panel.querySelector('#sp-btn-send-draw-chat');
+      this.dom.btnSendTypeChat = panel.querySelector('#sp-btn-send-type-chat');
       this.dom.undoBtn = panel.querySelector('#sp-tool-undo');
     },
 
@@ -351,6 +361,12 @@
       }
       if (this.dom.btnSendLabelChat) {
         this.dom.btnSendLabelChat.addEventListener('click', () => self.sendCurrentLabelToChat());
+      }
+      if (this.dom.btnSendDrawChat) {
+        this.dom.btnSendDrawChat.addEventListener('click', () => self.sendCurrentDrawToChat());
+      }
+      if (this.dom.btnSendTypeChat) {
+        this.dom.btnSendTypeChat.addEventListener('click', () => self.sendCurrentTypeToChat());
       }
 
       // Color pickers
@@ -947,17 +963,20 @@
 
       if (tab === 'type') {
         if (labelSubbar) labelSubbar.style.display = 'none';
+        if (this.dom.btnSendDrawChat) this.dom.btnSendDrawChat.style.display = 'none';
         drawView.style.display = 'none';
         typeView.style.display = 'flex';
         this.dom.textarea.focus();
       } else if (tab === 'label') {
         if (labelSubbar) labelSubbar.style.display = 'flex';
+        if (this.dom.btnSendDrawChat) this.dom.btnSendDrawChat.style.display = 'none';
         typeView.style.display = 'none';
         drawView.style.display = 'flex';
         this.renderLabelSubbarTabs();
         this.renderActiveLabel();
       } else { // 'draw'
         if (labelSubbar) labelSubbar.style.display = 'none';
+        if (this.dom.btnSendDrawChat) this.dom.btnSendDrawChat.style.display = 'inline-block';
         typeView.style.display = 'none';
         drawView.style.display = 'flex';
         this.loadDrawingCanvas();
@@ -1143,6 +1162,47 @@
       } else {
         // If chat controller isn't accessible (e.g. standalone case viewer)
         this.showToast(`💾 บันทึกภาพ "${currentLbl.name}" เรียบร้อยแล้ว`);
+      }
+    },
+
+    /**
+     * Export drawing canvas and submit directly into Station Chat
+     */
+    sendCurrentDrawToChat: function () {
+      if (!this.dom.canvas) return;
+      this.saveCurrentStation();
+
+      const drawDataUrl = this.dom.canvas.toDataURL('image/png');
+      const chatCtrl = window.StationChatController || (typeof StationChatController !== 'undefined' ? StationChatController : null);
+
+      if (chatCtrl && typeof chatCtrl.sendDrawingNoteMessage === 'function') {
+        chatCtrl.sendDrawingNoteMessage({
+          imageData: drawDataUrl
+        });
+        this.showToast('✅ ส่งภาพวาดกระดาษทดเข้าแชทสถานีแล้ว!');
+      } else {
+        this.showToast('💾 บันทึกภาพวาดเรียบร้อยแล้ว');
+      }
+    },
+
+    /**
+     * Submit typed notes from textarea directly into Station Chat
+     */
+    sendCurrentTypeToChat: function () {
+      const text = this.dom.textarea ? this.dom.textarea.value.trim() : '';
+      if (!text) {
+        this.showToast('⚠️ ยังไม่มีข้อความในกล่องโน้ต');
+        return;
+      }
+      this.saveCurrentStation();
+
+      const chatCtrl = window.StationChatController || (typeof StationChatController !== 'undefined' ? StationChatController : null);
+
+      if (chatCtrl && typeof chatCtrl.sendTypedNoteMessage === 'function') {
+        chatCtrl.sendTypedNoteMessage(text);
+        this.showToast('✅ ส่งโน้ตข้อความเข้าแชทสถานีแล้ว!');
+      } else {
+        this.showToast('💾 บันทึกข้อความเรียบร้อยแล้ว');
       }
     },
 
