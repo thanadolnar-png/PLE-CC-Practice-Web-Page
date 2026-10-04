@@ -288,13 +288,16 @@
               <button class="btn btn-secondary" id="toggle-note-btn" onclick="toggleNote()">
                 📄 เปิดเฉลย
               </button>
-              <button class="btn btn-primary" style="background: var(--primary); color: #fff;" onclick="toggleViewerScratchpad()">
+              <button class="btn btn-primary" style="background: var(--primary); color: #fff;" onclick="toggleViewerScratchpad('draw')">
                 📝 เปิดกระดาษ
+              </button>
+              <button class="btn btn-secondary" style="border-color: #10b981; color: #047857; background: #ecfdf5; font-weight: 700;" onclick="toggleViewerScratchpad('label')">
+                🏷️ ฉลากยา RxCU
               </button>
               <button class="btn btn-secondary" onclick="openSingleCasePrintModal()">
                 🖨️ พิมพ์
               </button>
-              <button class="btn btn-danger" onclick="resetChecklistProgress()">
+              <button class="btn btn-danger" onclick="resetChecklistProgress()" style="grid-column: span 2;">
                 🔄 รีเซ็ต
               </button>
             </div>
@@ -1557,12 +1560,12 @@
     }
 
     // Toggle Scratchpad in Case Viewer
-    function toggleViewerScratchpad() {
+    function toggleViewerScratchpad(initialTab) {
       if (window.Scratchpad) {
         const caseId = (AppState.currentCase && AppState.currentCase.caseId) || activeCaseId || 'default';
         const titleEl = document.getElementById('case-title');
         const label = titleEl ? titleEl.textContent : `เคส ${caseId}`;
-        Scratchpad.toggle('case-' + caseId, label);
+        Scratchpad.toggle('case-' + caseId, label, initialTab);
       }
     }
   </script>
