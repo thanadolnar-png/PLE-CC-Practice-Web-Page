@@ -822,8 +822,9 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       this.removeAITyping();
 
       this.currentAvatarType = (this.aiRole === 'guru') ? 'guru' : 'prof';
-      this.updateAvatarUI();
+      this.setAIRole(this.aiRole);
       this.updateAIToggleUI();
+      this.updateAvatarUI();
 
       const titleEl = document.getElementById('st-chat-header-title');
       const subtitleEl = document.getElementById('st-chat-header-subtitle');
@@ -1045,6 +1046,8 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
           initStationChatDragAndResize();
           applyStoredStationChatLayout();
           this.resetUnread();
+          this.setAIRole(this.aiRole);
+          this.updateAIToggleUI();
           const input = document.getElementById('station-chat-input');
           if (input) input.focus();
           const container = document.getElementById('station-chat-messages');

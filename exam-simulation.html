@@ -8688,6 +8688,8 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
           this.currentAvatarIndex = Math.floor(Math.random() * this.avatars.profs.length);
           this.currentAvatarType = 'prof';
         }
+        this.setAIRole(this.aiRole);
+        this.updateAIToggleUI();
         this.updateAvatarUI();
 
         // Ensure floating button is visible during active station
@@ -9104,6 +9106,8 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             initStationChatDragAndResize();
             applyStoredStationChatLayout();
             this.resetUnread();
+            this.setAIRole(this.aiRole);
+            this.updateAIToggleUI();
             const input = document.getElementById('station-chat-input');
             if (input) input.focus();
             const container = document.getElementById('station-chat-messages');
