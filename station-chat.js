@@ -222,26 +222,50 @@
 
     parseSpeakerSegments(text) {
       const segs = [];
-      const tagRe = /^\s*\[(SP|EXAMINER|FRIEND|GURU)\]\s*[:：]?\s*/i;
+      const tagRe = /^\s*\[(SP|EXAMINER|FRIEND|GURU|PATIENT|PROF)\]\s*[:：]?\s*/i;
       String(text || '').split(/\n/).forEach(line => {
         const m = line.match(tagRe);
         if (m) {
-          segs.push({ role: m[1].toUpperCase(), text: line.replace(tagRe, '') });
+          let roleTag = m[1].toUpperCase();
+          if (roleTag === 'PATIENT') roleTag = 'SP';
+          if (roleTag === 'PROF') roleTag = 'EXAMINER';
+          segs.push({ role: roleTag, text: line.replace(tagRe, '') });
         } else if (line.trim()) {
           if (segs.length) segs[segs.length - 1].text += '\n' + line;
           else segs.push({ role: null, text: line });
         }
       });
+
+      // Smart Heuristic: If no explicit tag was found, detect if text sounds like female patient (ค่ะ, ขา, ปวด, อาการ, คนไข้)
+      segs.forEach(seg => {
+        if (!seg.role) {
+          const t = seg.text || '';
+          const hasFemaleParticles = /(?:ค่ะ|นะคะ|คะ|ดิฉัน|หนู|ป้า|ยาย|แม่|ลูก)/.test(t);
+          const hasPatientSpeech = /(?:ปวด|เจ็บ|แน่น|เวียน|คลื่นไส้|ยาเดิม|กินยา|อาการ|หมอคะ|คุณหมอ)/.test(t);
+          const hasExaminerSpeech = /(?:mmHg|bpm|ตรวจร่างกาย|ผลแล็บ|lab|คะแนน|เกณฑ์|อุณหภูมิ|vitals)/i.test(t);
+
+          if (this.aiRole === 'examiner') {
+            if (hasFemaleParticles || hasPatientSpeech) {
+              seg.role = 'SP'; // Female Simulated Patient!
+            } else if (hasExaminerSpeech) {
+              seg.role = 'EXAMINER';
+            }
+          }
+        }
+      });
+
       return segs;
     },
 
     avatarForRole(role) {
-      if (role === 'SP') return this.avatars.patient;
+      if (role === 'SP' || role === 'PATIENT') return this.avatars.patient;
       if (role === 'FRIEND' || role === 'GURU') return this.avatars.guru;
-      if (role === 'EXAMINER') {
+      if (role === 'EXAMINER' || role === 'PROF') {
         const list = this.avatars.profs;
         return list[this.currentAvatarIndex % list.length];
       }
+      // If patient avatar is currently active on screen
+      if (this.currentAvatarType === 'patient') return this.avatars.patient;
       return null;
     },
 
@@ -1092,12 +1116,16 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 ==================================================
 👨‍🏫 [บุคลิกภาพและบทบาทของคุณ - EXAMINER & SIMULATED PATIENT]:
 ⚠️ [กฎเหล็กสำคัญสูงสุด - ไม่บอกเฉลยหรือ DTP ล่วงหน้าเด็ดขาด]:
-1. คุณทำหน้าที่เป็น "อาจารย์คุมสอบผู้ประเมิน (Examiner)" และ "ผู้ป่วยจำลอง (Simulated Patient)" ประจำสถานีสอบ
-2. ห้ามบอกเฉลย ห้ามหลุดบอกชื่อโรคจริง ห้ามบอกปัญหา DTP หรือบอกคำตอบที่ถูกต้องล่วงหน้าเด็ดขาด! ผู้เข้าสอบต้องเป็นคนค้นหาและวินิจฉัยเอง
-3. เมื่อผู้เข้าสอบซักประวัติ/คุยกับคนไข้: ให้สวมบท "ผู้ป่วยจำลอง (SP)" ตอบเฉพาะอาการ ยาเดิม และข้อมูลตามที่โจทย์ระบุไว้เท่านั้น ตอบเสมือนคนไข้จริง
-4. เมื่อผู้เข้าสอบขอตรวจร่างกายหรือขอผลแล็บ: ให้สวมบท "อาจารย์คุมสอบ" รายงานตัวเลข Vitals/Lab ตามที่มีในโจทย์
-5. เมื่อผู้เข้าสอบตอบหรือให้คำแนะนำ: ให้รับฟังอย่างสุขุม และอาจถามจี้หรือกระตุ้นให้คิดตามบทผู้คุมสอบ แต่ไม่เฉลยคำตอบ
-6. ภาษาพูดสุภาพ เป็นทางการ สมจริง กระชับ 2-4 ประโยค
+1. คุณทำหน้าที่สลับ 2 บทบาทหลักตามบทสนทนา:
+   - "ผู้ป่วยจำลอง (Simulated Patient)" เมื่อผู้เข้าสอบซักประวัติ ถามอาการ หรือคุยกับคนไข้
+   - "อาจารย์คุมสอบผู้ประเมิน (Examiner)" เมื่อผู้เข้าสอบขอตรวจร่างกาย ขอผลแล็บ หรือตอบสรุปกับกรรมการ
+2. 🏷️ [กฎการระบุตัวตนผู้พูด - สำคัญมากต่อระบบแปลงเสียง AI]:
+   - หากประโยคนี้กำลังสวมบทคนไข้ตอบ ให้ขึ้นต้นบรรทัดด้วย: [SP]: (เช่น "[SP]: สวัสดีค่ะคุณหมอ ปวดท้องมาสองวันแล้วค่ะ")
+   - หากประโยคนี้กำลังสวมบทอาจารย์คุมสอบ/รายงานผลแล็บ ให้ขึ้นต้นบรรทัดด้วย: [EXAMINER]: (เช่น "[EXAMINER]: ความดันโลหิต 140/90 mmHg ชีพจร 82 bpm ครับ")
+   - หากพูดทั้งสองบทบาทในข้อความเดียว ให้แยกบรรทัดและใส่แท็กระบุตัวตนให้ชัดเจน
+3. ห้ามบอกเฉลย ห้ามหลุดบอกชื่อโรคจริง ห้ามบอกปัญหา DTP หรือบอกคำตอบที่ถูกต้องล่วงหน้าเด็ดขาด!
+4. เมื่อสวมบทคนไข้ (SP): ตอบเฉพาะอาการ ยาเดิม และข้อมูลตามที่โจทย์ระบุไว้เท่านั้น ตอบเสมือนคนไข้จริง สุภาพและสมจริง
+5. ภาษาพูดกระชับ 2-4 ประโยค ไม่ยืดยาว
 ==================================================
 [ข้อมูลสถานีสอบและเคสผู้ป่วยปัจจุบัน]
 ${caseContext || '(ยังไม่มีข้อมูลเคส)'}

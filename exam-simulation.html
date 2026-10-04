@@ -8018,31 +8018,55 @@
 
       // Split an AI reply into speaker segments: [SP] / [EXAMINER] / [FRIEND]
       parseSpeakerSegments(text) {
-        const segs = [];
-        const tagRe = /^\s*\[(SP|EXAMINER|FRIEND)\]\s*[:：]?\s*/i;
-        String(text || '').split(/\n/).forEach(line => {
-          const m = line.match(tagRe);
-          if (m) {
-            segs.push({ role: m[1].toUpperCase(), text: line.replace(tagRe, '') });
-          } else if (line.trim()) {
-            if (segs.length) segs[segs.length - 1].text += '\n' + line;
-            else segs.push({ role: null, text: line });
-          }
-        });
-        return segs;
-      },
-
-      avatarForRole(role) {
-        if (role === 'SP') return this.avatars.patient;
-        if (role === 'FRIEND' || role === 'GURU') return this.avatars.guru || this.avatars.cheater;
-        if (role === 'EXAMINER') {
-          const list = this.avatars.profs;
-          return list[this.currentAvatarIndex % list.length];
+      const segs = [];
+      const tagRe = /^\s*\[(SP|EXAMINER|FRIEND|GURU|PATIENT|PROF)\]\s*[:：]?\s*/i;
+      String(text || '').split(/\n/).forEach(line => {
+        const m = line.match(tagRe);
+        if (m) {
+          let roleTag = m[1].toUpperCase();
+          if (roleTag === 'PATIENT') roleTag = 'SP';
+          if (roleTag === 'PROF') roleTag = 'EXAMINER';
+          segs.push({ role: roleTag, text: line.replace(tagRe, '') });
+        } else if (line.trim()) {
+          if (segs.length) segs[segs.length - 1].text += '\n' + line;
+          else segs.push({ role: null, text: line });
         }
-        return null;
-      },
+      });
 
-      getThaiVoices() {
+      // Smart Heuristic: If no explicit tag was found, detect if text sounds like female patient (ค่ะ, ขา, ปวด, อาการ, คนไข้)
+      segs.forEach(seg => {
+        if (!seg.role) {
+          const t = seg.text || '';
+          const hasFemaleParticles = /(?:ค่ะ|นะคะ|คะ|ดิฉัน|หนู|ป้า|ยาย|แม่|ลูก)/.test(t);
+          const hasPatientSpeech = /(?:ปวด|เจ็บ|แน่น|เวียน|คลื่นไส้|ยาเดิม|กินยา|อาการ|หมอคะ|คุณหมอ)/.test(t);
+          const hasExaminerSpeech = /(?:mmHg|bpm|ตรวจร่างกาย|ผลแล็บ|lab|คะแนน|เกณฑ์|อุณหภูมิ|vitals)/i.test(t);
+
+          if (this.aiRole === 'examiner') {
+            if (hasFemaleParticles || hasPatientSpeech) {
+              seg.role = 'SP'; // Female Simulated Patient!
+            } else if (hasExaminerSpeech) {
+              seg.role = 'EXAMINER';
+            }
+          }
+        }
+      });
+
+      return segs;
+    },
+
+    avatarForRole(role) {
+      if (role === 'SP' || role === 'PATIENT') return this.avatars.patient;
+      if (role === 'FRIEND' || role === 'GURU') return this.avatars.guru;
+      if (role === 'EXAMINER' || role === 'PROF') {
+        const list = this.avatars.profs;
+        return list[this.currentAvatarIndex % list.length];
+      }
+      // If patient avatar is currently active on screen
+      if (this.currentAvatarType === 'patient') return this.avatars.patient;
+      return null;
+    },
+
+    getThaiVoices() {
         try {
           const all = window.speechSynthesis.getVoices() || [];
           return all.filter(v => /^th/i.test(v.lang || '') || /thai|ไทย/i.test(v.name || ''));
