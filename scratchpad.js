@@ -34,7 +34,7 @@
   };
 
   const LAYOUT_STORAGE_KEY = 'ple_ospe_scratchpad_layout_v2';
-  const DRUG_LABEL_IMG_SRC = 'rxcu-drug-label-template.png';
+  const DRUG_LABEL_IMG_SRC = 'rxcu-drug-label-template.png?v=1791120874852';
 
   const Scratchpad = {
     initialized: false,
