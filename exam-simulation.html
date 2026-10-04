@@ -1011,6 +1011,163 @@
       font-style: italic;
     }
 
+    /* ── Animated Avatar Spotlight Bar ── */
+    .st-chat-avatar-spotlight {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0.45rem 0.85rem;
+      background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+      border-bottom: 1px solid var(--border, #e2e8f0);
+      transition: all 0.25s ease;
+    }
+    .st-chat-avatar-profile {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+    .st-chat-avatar-frame-wrap {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .st-chat-avatar-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #7c3aed;
+      background: #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: transform 0.25s ease, border-color 0.25s ease;
+      position: relative;
+      z-index: 2;
+    }
+    /* Speaking & Breathing Animations */
+    .st-chat-avatar-frame-wrap.breathing .st-chat-avatar-img {
+      animation: avatarBreath 3.5s ease-in-out infinite;
+    }
+    .st-chat-avatar-frame-wrap.speaking .st-chat-avatar-img {
+      animation: avatarSpeak 0.45s ease-in-out infinite alternate;
+      border-color: #10b981 !important;
+    }
+    .st-chat-avatar-pulse-ring {
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid rgba(16, 185, 129, 0.6);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .st-chat-avatar-frame-wrap.speaking .st-chat-avatar-pulse-ring {
+      animation: ringPulse 1.2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+    }
+    @keyframes avatarBreath {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+    @keyframes avatarSpeak {
+      0% { transform: scale(1) translateY(0); }
+      100% { transform: scale(1.06) translateY(-2px); }
+    }
+    @keyframes ringPulse {
+      0% { transform: scale(0.95); opacity: 0.9; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
+
+    .st-chat-avatar-meta {
+      min-width: 0;
+    }
+    .st-chat-avatar-name {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--text-primary, #1e293b);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .st-chat-avatar-sub {
+      font-size: 0.69rem;
+      color: var(--text-muted, #64748b);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .st-chat-avatar-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .st-chat-avatar-tool-btn {
+      background: var(--surface, #ffffff);
+      border: 1px solid var(--border, #cbd5e1);
+      border-radius: 6px;
+      padding: 0.2rem 0.45rem;
+      font-size: 0.72rem;
+      color: var(--text-secondary, #475569);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    .st-chat-avatar-tool-btn:hover {
+      background: #f1f5f9;
+      color: var(--text-primary, #0f172a);
+    }
+    .st-chat-avatar-tool-btn.active {
+      background: rgba(16, 185, 129, 0.12);
+      border-color: #10b981;
+      color: #047857;
+    }
+
+    /* ── Voice Mic Button Styling ── */
+    .st-chat-mic-btn {
+      background: var(--surface, #ffffff);
+      border: 1px solid var(--border, #cbd5e1);
+      border-radius: var(--radius-sm, 6px);
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+      color: var(--text-secondary, #475569);
+      transition: all 0.18s ease;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .st-chat-mic-btn:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+      color: #0f172a;
+    }
+    .st-chat-mic-btn.listening {
+      background: #ef4444 !important;
+      border-color: #dc2626 !important;
+      color: #ffffff !important;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.35);
+      animation: micPulse 1.2s infinite alternate;
+    }
+    @keyframes micPulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.08); }
+    }
+
     /* ── AI Message Bubble ── */
     .st-chat-msg.ai-msg {
       max-width: 90%;
@@ -7411,7 +7568,23 @@
       soloMessages: {},
       aiEnabled: false,
       aiRole: localStorage.getItem('_ple_ai_role') || 'examiner', // 'examiner' | 'cheater'
+      aiSoundEnabled: localStorage.getItem('_ple_ai_sound') !== 'false', // default true
+      currentAvatarIndex: 0,
+      currentAvatarType: 'prof', // 'prof' | 'patient' | 'cheater'
+      isListeningVoice: false,
+      speechRecognition: null,
       _aiTypingEl: null,
+
+      // Avatar definitions matching generated anime sprites
+      avatars: {
+        profs: [
+          { id: 'prof1', name: '👨‍🏫 อ.สุวัฒน์ (กรรมการคุมสอบ)', sub: 'คณะเภสัชศาสตร์ จุฬาฯ', img: 'assets/avatars/prof_male1.jpg', pitch: 0.95, rate: 1.0 },
+          { id: 'prof2', name: '👨‍🏫 อ.ธนกร (กรรมการคุมสอบ)', sub: 'คณะเภสัชศาสตร์ จุฬาฯ', img: 'assets/avatars/prof_male2.jpg', pitch: 1.0, rate: 1.02 },
+          { id: 'prof3', name: '👩‍🏫 อ.ศิริพร (กรรมการคุมสอบ)', sub: 'คณะเภสัชศาสตร์ จุฬาฯ', img: 'assets/avatars/prof_female1.jpg', pitch: 1.1, rate: 1.0 }
+        ],
+        patient: { id: 'patient', name: '🩺 คุณสมศรี (ผู้ป่วยจำลอง SP)', sub: 'ผู้ป่วยมารับคำปรึกษาที่ร้านยา/รพ.', img: 'assets/avatars/patient.jpg', pitch: 1.05, rate: 0.98 },
+        cheater: { id: 'cheater', name: '🤫 เพื่อนร่วมรุ่น (สายลับช่วยโกง)', sub: 'แอบกระซิบโพยคำตอบ Rx Answers', img: 'assets/avatars/cheater.jpg', pitch: 1.18, rate: 1.12 }
+      },
 
       // ── Quota Helpers (Stat Counter Only - Unlimited Usage) ──
       getAIDailyCount() {
@@ -7441,6 +7614,213 @@
         // Uncapped mode: keep button clean without badge
       },
 
+      getActiveAvatar() {
+        if (this.aiRole === 'cheater') {
+          return this.avatars.cheater;
+        }
+        if (this.currentAvatarType === 'patient') {
+          return this.avatars.patient;
+        }
+        const list = this.avatars.profs;
+        return list[this.currentAvatarIndex % list.length];
+      },
+
+      updateAvatarUI() {
+        const spotlight = document.getElementById('st-chat-avatar-spotlight');
+        if (spotlight) spotlight.style.display = this.aiEnabled ? 'flex' : 'none';
+
+        const cur = this.getActiveAvatar();
+        const imgEl = document.getElementById('st-chat-avatar-img');
+        const nameEl = document.getElementById('st-chat-avatar-name');
+        const subEl = document.getElementById('st-chat-avatar-sub');
+        const soundBtn = document.getElementById('btn-ai-sound-toggle');
+        const soundStatus = document.getElementById('ai-sound-status-text');
+
+        if (imgEl && cur.img) {
+          imgEl.src = cur.img;
+          imgEl.alt = cur.name;
+        }
+        if (nameEl && cur.name) {
+          nameEl.innerHTML = `<span>${cur.name}</span>`;
+        }
+        if (subEl) {
+          const stNum = this.currentStationNum;
+          subEl.innerHTML = `<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#10b981;margin-right:2px;"></span><span>ประจำสถานีที่ ${stNum} • ${cur.sub}</span>`;
+        }
+        if (soundBtn && soundStatus) {
+          soundBtn.classList.toggle('active', this.aiSoundEnabled);
+          soundStatus.textContent = this.aiSoundEnabled ? 'เสียง ON' : 'เสียง ปิด';
+        }
+      },
+
+      cycleAvatar() {
+        if (this.aiRole === 'cheater') {
+          // If in cheater mode, remain cheater avatar
+          return;
+        }
+        // Cycle among profs or switch between prof and patient
+        if (this.currentAvatarType === 'patient') {
+          this.currentAvatarType = 'prof';
+        } else {
+          this.currentAvatarIndex = (this.currentAvatarIndex + 1) % (this.avatars.profs.length + 1);
+          if (this.currentAvatarIndex === this.avatars.profs.length) {
+            this.currentAvatarType = 'patient';
+          } else {
+            this.currentAvatarType = 'prof';
+          }
+        }
+        this.updateAvatarUI();
+      },
+
+      toggleSound() {
+        this.aiSoundEnabled = !this.aiSoundEnabled;
+        try { localStorage.setItem('_ple_ai_sound', String(this.aiSoundEnabled)); } catch (_) {}
+        if (!this.aiSoundEnabled && 'speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          this.setAvatarSpeaking(false);
+        }
+        this.updateAvatarUI();
+      },
+
+      setAvatarSpeaking(isSpeaking) {
+        const frame = document.getElementById('st-chat-avatar-frame');
+        if (!frame) return;
+        frame.classList.toggle('speaking', Boolean(isSpeaking));
+      },
+
+      speakText(text) {
+        if (!this.aiSoundEnabled || !('speechSynthesis' in window)) return;
+        try {
+          window.speechSynthesis.cancel();
+          // Clean text for speech
+          const cleanText = String(text || '')
+            .replace(/<[^>]+>/g, ' ')
+            .replace(/[•*\-#_~`]/g, ' ')
+            .replace(/https?:\/\/\S+/g, '')
+            .trim();
+          if (!cleanText) return;
+
+          const utterance = new SpeechSynthesisUtterance(cleanText);
+          utterance.lang = 'th-TH';
+
+          const cur = this.getActiveAvatar();
+          utterance.pitch = cur.pitch || 1.0;
+          utterance.rate = cur.rate || 1.0;
+
+          // Find Thai voice if available
+          const voices = window.speechSynthesis.getVoices();
+          const thaiVoice = voices.find(v => v.lang === 'th-TH' || v.lang.startsWith('th'));
+          if (thaiVoice) utterance.voice = thaiVoice;
+
+          utterance.onstart = () => {
+            this.setAvatarSpeaking(true);
+          };
+          utterance.onend = () => {
+            this.setAvatarSpeaking(false);
+          };
+          utterance.onerror = () => {
+            this.setAvatarSpeaking(false);
+          };
+
+          window.speechSynthesis.speak(utterance);
+        } catch (e) {
+          console.warn('SpeechSynthesis error:', e);
+          this.setAvatarSpeaking(false);
+        }
+      },
+
+      unlockAudio() {
+        // iOS Safari Audio Unlock pattern
+        try {
+          if ('speechSynthesis' in window) {
+            const silent = new SpeechSynthesisUtterance('');
+            silent.volume = 0;
+            window.speechSynthesis.speak(silent);
+          }
+        } catch (_) {}
+      },
+
+      toggleVoiceMic() {
+        this.unlockAudio();
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRec) {
+          alert('เบราว์เซอร์ของคุณยังไม่รองรับระบบสั่งการด้วยเสียง (Web Speech API) กรุณาใช้ Chrome, Edge หรือ Safari บน iOS 14.5+ ครับ');
+          return;
+        }
+
+        const micBtn = document.getElementById('station-chat-mic-btn');
+        const inputEl = document.getElementById('station-chat-input');
+
+        if (this.isListeningVoice) {
+          if (this.speechRecognition) {
+            try { this.speechRecognition.stop(); } catch (_) {}
+          }
+          this.isListeningVoice = false;
+          if (micBtn) {
+            micBtn.classList.remove('listening');
+            micBtn.title = 'แตะเพื่อเปิดไมค์พูดคุยภาษาไทย';
+          }
+          return;
+        }
+
+        try {
+          const rec = new SpeechRec();
+          rec.lang = 'th-TH';
+          rec.continuous = false;
+          rec.interimResults = true;
+          this.speechRecognition = rec;
+
+          rec.onstart = () => {
+            this.isListeningVoice = true;
+            if (micBtn) {
+              micBtn.classList.add('listening');
+              micBtn.title = '🔴 กำลังฟัง... (แตะอีกครั้งเพื่อหยุด)';
+            }
+            if (inputEl) {
+              inputEl.placeholder = '🎙️ กำลังฟังเสียงภาษาไทยของคุณ...';
+            }
+          };
+
+          rec.onresult = (evt) => {
+            let transcript = '';
+            for (let i = evt.resultIndex; i < evt.results.length; ++i) {
+              transcript += evt.results[i][0].transcript;
+            }
+            if (inputEl && transcript) {
+              inputEl.value = transcript;
+            }
+          };
+
+          rec.onend = () => {
+            this.isListeningVoice = false;
+            if (micBtn) {
+              micBtn.classList.remove('listening');
+              micBtn.title = 'แตะเพื่อเปิดไมค์พูดคุยภาษาไทย';
+            }
+            if (inputEl) {
+              inputEl.placeholder = 'พิมพ์ข้อความ หรือกดไมค์ 🎙️ เพื่อพูด...';
+              // If there is voice recognized text, auto send!
+              if (inputEl.value.trim()) {
+                sendStationChatFromInput();
+              }
+            }
+          };
+
+          rec.onerror = (err) => {
+            console.warn('SpeechRecognition error:', err);
+            this.isListeningVoice = false;
+            if (micBtn) micBtn.classList.remove('listening');
+            if (inputEl) inputEl.placeholder = 'พิมพ์ข้อความ หรือกดไมค์ 🎙️ เพื่อพูด...';
+          };
+
+          rec.start();
+        } catch (err) {
+          console.error('Cannot start SpeechRecognition:', err);
+          this.isListeningVoice = false;
+          if (micBtn) micBtn.classList.remove('listening');
+        }
+      },
+
       setAIRole(role) {
         this.aiRole = role === 'cheater' ? 'cheater' : 'examiner';
         try { localStorage.setItem('_ple_ai_role', this.aiRole); } catch (_) {}
@@ -7460,15 +7840,18 @@
           }
         }
         this.updateAIToggleUI();
+        this.updateAvatarUI();
       },
 
       updateAIToggleUI() {
         const btn = document.getElementById('btn-ai-chat-toggle');
         const label = document.getElementById('ai-toggle-label');
         const roleBar = document.getElementById('st-chat-ai-role-bar');
+        const spotlight = document.getElementById('st-chat-avatar-spotlight');
 
         if (btn) btn.classList.toggle('ai-active', this.aiEnabled);
         if (roleBar) roleBar.style.display = this.aiEnabled ? 'flex' : 'none';
+        if (spotlight) spotlight.style.display = this.aiEnabled ? 'flex' : 'none';
 
         if (label) {
           if (!this.aiEnabled) {
@@ -7477,13 +7860,18 @@
             label.textContent = this.aiRole === 'cheater' ? '🤫 โกง ON' : '👨‍🏫 สอบ ON';
           }
         }
+        this.updateAvatarUI();
       },
 
       toggleAI() {
         this.aiEnabled = !this.aiEnabled;
+        this.unlockAudio();
         this.updateAIToggleUI();
         if (this.aiEnabled) {
           this.setAIRole(this.aiRole);
+        } else {
+          if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+          this.setAvatarSpeaking(false);
         }
       },
 
@@ -7565,6 +7953,11 @@
             stationNumber: this.currentStationNum,
             isAi: true
           });
+        }
+
+        // 🔊 Speak out loud via Web Speech Synthesis (iOS/Cross-platform)
+        if (this.aiSoundEnabled && replyText) {
+          this.speakText(replyText);
         }
       },
 
@@ -8277,6 +8670,24 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
     function setAIChatRole(role) {
       if (typeof StationChatController !== 'undefined') {
         StationChatController.setAIRole(role);
+      }
+    }
+
+    function cycleAIAvatar() {
+      if (typeof StationChatController !== 'undefined') {
+        StationChatController.cycleAvatar();
+      }
+    }
+
+    function toggleAISound() {
+      if (typeof StationChatController !== 'undefined') {
+        StationChatController.toggleSound();
+      }
+    }
+
+    function toggleStationVoiceMic() {
+      if (typeof StationChatController !== 'undefined') {
+        StationChatController.toggleVoiceMic();
       }
     }
 
@@ -11768,6 +12179,33 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       <span id="st-chat-ai-role-desc" class="st-chat-ai-role-desc">ไม่บอกเฉลย ทำหน้าที่เป็นกรรมการคุมสอบ/คนไข้</span>
     </div>
 
+    <!-- Animated Avatar Spotlight Bar -->
+    <div id="st-chat-avatar-spotlight" class="st-chat-avatar-spotlight" style="display: none;">
+      <div class="st-chat-avatar-profile">
+        <div class="st-chat-avatar-frame-wrap breathing" id="st-chat-avatar-frame" onclick="cycleAIAvatar()" title="คลิกเพื่อสุ่มเปลี่ยนตัวละคร">
+          <div class="st-chat-avatar-pulse-ring"></div>
+          <img id="st-chat-avatar-img" class="st-chat-avatar-img" src="assets/avatars/prof_male1.jpg" alt="Avatar">
+        </div>
+        <div class="st-chat-avatar-meta">
+          <div class="st-chat-avatar-name" id="st-chat-avatar-name">
+            <span>👨‍🏫 อ.สุวัฒน์ (กรรมการคุมสอบ)</span>
+          </div>
+          <div class="st-chat-avatar-sub" id="st-chat-avatar-sub">
+            <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#10b981;margin-right:2px;"></span>
+            <span>ประจำสถานีที่ 1 • พร้อมซักถาม</span>
+          </div>
+        </div>
+      </div>
+      <div class="st-chat-avatar-actions">
+        <button type="button" id="btn-ai-sound-toggle" class="st-chat-avatar-tool-btn active" onclick="toggleAISound()" title="เปิด/ปิด เสียงพูดตอบกลับภาษาไทย (TTS Voice)">
+          🔊 <span id="ai-sound-status-text">เสียง ON</span>
+        </button>
+        <button type="button" class="st-chat-avatar-tool-btn" onclick="cycleAIAvatar()" title="สุ่มเปลี่ยนตัวละครใหม่">
+          🎲 สุ่ม
+        </button>
+      </div>
+    </div>
+
     <!-- Quick Role-play Prompts (Clinical Shortcuts) -->
     <div id="st-chat-quick-chips" class="st-chat-quick-wrap">
       <button type="button" class="st-chat-quick-chip" onclick="sendQuickChatMessage('🩺 ขออนุญาตตรวจสัญญาณชีพ (V/S) ของผู้ป่วยครับ/ค่ะ')">🩺 ขอตรวจ V/S</button>
@@ -11791,7 +12229,10 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
     <!-- Input Row -->
     <div class="st-chat-input-row">
-      <input type="text" id="station-chat-input" class="st-chat-input" placeholder="พิมพ์ข้อความ / ซักประวัติ / ตอบคำถาม..." onkeydown="handleStationChatKey(event)" oninput="handleStationChatTyping()">
+      <button type="button" id="station-chat-mic-btn" class="st-chat-mic-btn" onclick="toggleStationVoiceMic()" title="แตะเพื่อเปิดไมค์พูดคุยภาษาไทย (STT รองรับ iOS/iPad/PC)">
+        🎙️
+      </button>
+      <input type="text" id="station-chat-input" class="st-chat-input" placeholder="พิมพ์ข้อความ หรือกดไมค์ 🎙️ เพื่อพูด..." onkeydown="handleStationChatKey(event)" oninput="handleStationChatTyping()">
       <button type="button" id="station-chat-send-btn" class="st-chat-send-btn" onclick="sendStationChatFromInput()" title="ส่งข้อความ (Enter)">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="22" y1="2" x2="11" y2="13"></line>
