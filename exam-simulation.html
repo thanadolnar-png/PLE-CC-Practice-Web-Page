@@ -6867,14 +6867,21 @@
       if (minimapCard) minimapCard.style.display = 'flex';
       renderMiniMap(true);
       
-      // Nav buttons
-      // In super-host modes, hide nav for non-controller players (participant/examinee)
-      if (SimState.isLobby && SimState.cachedRoom?.isSuperHost) {
-        const canControl = SimState.isHost || SimState.role === 'examiner';
-        const examNav = document.querySelector('.exam-nav');
-        if (examNav) examNav.style.display = canControl ? 'flex' : 'none';
-        const finishBtn = document.getElementById('btn-finish-exam');
-        if (finishBtn) finishBtn.style.display = canControl ? 'block' : 'none';
+      // Nav buttons visibility logic:
+      // In Super Host modes (Carousel Rotation / Cohort Breakout), Super Host alone controls station advancement and completion.
+      // Therefore, both Examiners and Examinees in the station view have the navigation buttons hidden.
+      // In Standard 1-on-1 mode, Examiner is the station controller.
+      // In Solo mode, user has full navigation controls.
+      const examNav = document.querySelector('.exam-nav');
+      const finishBtn = document.getElementById('btn-finish-exam');
+      if (SimState.isLobby) {
+        const isStandardRoom = (SimState.examMode === 'standard' || !SimState.examMode);
+        const canControlNav = Boolean(SimState.isHost || (isStandardRoom && SimState.role === 'examiner'));
+        if (examNav) examNav.style.display = canControlNav ? 'flex' : 'none';
+        if (finishBtn) finishBtn.style.display = canControlNav ? 'block' : 'none';
+      } else {
+        if (examNav) examNav.style.display = 'flex';
+        if (finishBtn) finishBtn.style.display = 'block';
       }
 
       document.getElementById('btn-prev-station').disabled = idx === 0;
