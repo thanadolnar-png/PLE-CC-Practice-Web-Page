@@ -8206,7 +8206,37 @@
           el.style.color = '#0c4a6e';
         }
 
-        const safeText = String(replyText || '')
+        // Format and clean AI reply: strip markdown asterisks and transform LaTeX/math into readable plain text equations
+        const formatCleanAIMessage = (raw) => {
+          let s = String(raw || '');
+          // 1. Convert LaTeX fractions \frac{A}{B} -> (A ÷ B)
+          s = s.replace(/\\frac\s*\{([^{}]+)\}\s*\{([^{}]+)\}/g, '($1 ÷ $2)');
+          // 2. Unpack LaTeX wrappers \text{...}, \mathbf{...}, \mathrm{...}, etc.
+          s = s.replace(/\\(?:text|mathbf|mathrm|mathit|textbf)\s*\{([^{}]+)\}/g, '$1');
+          // 3. Convert LaTeX math symbols to clear unicode symbols
+          s = s.replace(/\\times/g, ' × ');
+          s = s.replace(/\\div/g, ' ÷ ');
+          s = s.replace(/\\pm/g, ' ± ');
+          s = s.replace(/\\leq/g, ' ≤ ');
+          s = s.replace(/\\geq/g, ' ≥ ');
+          s = s.replace(/\\neq/g, ' ≠ ');
+          s = s.replace(/\\approx/g, ' ≈ ');
+          s = s.replace(/\\cdot/g, ' · ');
+          // 4. Remove unhandled LaTeX commands
+          s = s.replace(/\\[a-zA-Z]+/g, ' ');
+          // 5. Remove remaining braces and dollar signs without deleting equation content
+          s = s.replace(/[\{\}]/g, '');
+          s = s.replace(/\$/g, '');
+          // 6. Remove all markdown asterisks ** and * entirely as per user instruction
+          s = s.replace(/\*+/g, '');
+          // 7. Normalize multiple spaces
+          s = s.replace(/[ \t]{2,}/g, ' ');
+          return s.trim();
+        };
+
+        const cleanedReply = formatCleanAIMessage(replyText);
+
+        const safeText = cleanedReply
           .replace(/&/g, '&amp;')
           .replace(/</g, '&lt;')
           .replace(/>/g, '&gt;')
@@ -8369,7 +8399,14 @@
    - วิเคราะห์ปัญหาที่เกี่ยวเนื่องกับการใช้ยา (Drug Therapy Problems: DTPs/DRPs) โดยใช้หลักการเภสัชกรรมคลินิกที่เป็นสากล
    - แนะนำการเลือกใช้ยา ขนาดยา (Dosage) วิธีใช้ และข้อควรระวัง พร้อมอ้างอิงแนวทางเวชปฏิบัติทางการ (Official Guidelines เช่น สมาคมแพทย์โรคหัวใจ, สมาคมเบาหวาน, CDC, GOLD, KDIGO ฯลฯ)
    - สรุป Checklist จุดที่กรรมการมักหักคะแนนหรือจุดสำคัญที่ต้องระวังในการสอบ OSPE
-4. รูปแบบคำตอบ: กระชับ มีโครงสร้างชัดเจน เข้าใจง่าย 3-5 ประโยค หรือเป็นข้อๆ ตามความเหมาะสม
+4. ⚠️ [กฎเหล็กการจัดรูปแบบข้อความและการแสดงสูตรคำนวณ - STRICT CLEAN TEXT & MATH]:
+   - 🚫 ห้ามใช้เครื่องหมายดอกจัน (ห้ามมี ** หรือ *) ในข้อความโดยเด็ดขาด! ให้ใช้ข้อความธรรมดา ขึ้นบรรทัดใหม่ และลำดับตัวเลข 1. 2. 3. หรือขีด - แทน
+   - 🚫 ห้ามเขียนสมการเป็นรหัส LaTeX เด็ดขาด (ห้ามมี $, \\frac, \\text, \\mathbf, \\times, \\;)
+   - ✅ เขียนการคำนวณและสมการให้เป็นรูปแบบภาษาไทยและตัวเลขธรรมดาที่อ่านง่าย ชัดเจน สวยงาม เช่น:
+     • (2 × 15) ÷ 100 = 0.3 กรัม
+     • 100 - 2 = 98 กรัม
+     • 15 - 0.3 = 14.7 กรัม
+   - รูปแบบคำตอบ: กระชับ มีโครงสร้างสะอาดตา 3-5 ประโยค หรือเป็นข้อๆ ให้อ่านง่าย
 ==================================================
 [ข้อมูลสถานีสอบ เฉลย และเกณฑ์ Checklist ประจำสถานีนี้]
 ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
