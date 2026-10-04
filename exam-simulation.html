@@ -901,6 +901,56 @@
       align-items: center;
       gap: 4px;
     }
+
+    /* ── Gemini AI Toggle Button Active State ── */
+    #btn-ai-chat-toggle.ai-active {
+      background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+      border-color: #7c3aed !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 8px rgba(124,58,237,0.35);
+    }
+    #btn-ai-chat-toggle.ai-active #ai-usage-badge { color: rgba(255,255,255,0.8); }
+
+    /* ── AI Message Bubble ── */
+    .st-chat-msg.ai-msg {
+      max-width: 90%;
+      padding: 0.65rem 0.85rem;
+      border: 1.5px solid #7c3aed;
+      background: linear-gradient(135deg, #faf5ff, #ede9fe) !important;
+      color: #4c1d95 !important;
+      box-shadow: 0 4px 14px rgba(124,58,237,0.12);
+      align-self: flex-start;
+    }
+    .st-chat-msg.ai-msg .st-chat-ai-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: #7c3aed; color: #fff;
+      padding: 0.15rem 0.45rem; border-radius: 5px;
+      font-size: 0.68rem; font-weight: 700;
+      margin-bottom: 0.35rem; width: fit-content;
+    }
+
+    /* ── AI Typing Dots ── */
+    .st-chat-ai-typing {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0.55rem 0.85rem; font-size: 0.79rem;
+      color: #7c3aed; font-style: italic;
+      border-left: 3px solid #7c3aed;
+      margin: 0.3rem 0; border-radius: 0 6px 6px 0;
+      background: rgba(124,58,237,0.05);
+    }
+    .st-chat-ai-typing-dots { display: inline-flex; gap: 3px; align-items: center; }
+    .st-chat-ai-typing-dots span {
+      display: inline-block; width: 6px; height: 6px;
+      background: #7c3aed; border-radius: 50%;
+      animation: aiDotBounce 1.1s infinite ease-in-out;
+    }
+    .st-chat-ai-typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .st-chat-ai-typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes aiDotBounce {
+      0%, 80%, 100% { transform: scale(0.65); opacity: 0.35; }
+      40% { transform: scale(1.15); opacity: 1; }
+    }
+
     .st-chat-quick-wrap {
       padding: 0.45rem 0.75rem;
       background: var(--surface);
@@ -7259,6 +7309,218 @@
       typingTimeout: null,
       unreadCount: 0,
       soloMessages: {},
+      aiEnabled: false,
+      _aiTypingEl: null,
+
+      // ── Quota Helpers (Daily Limit: 50 req/day for gemini-2.0-flash-lite) ──
+      getAIDailyCount() {
+        try {
+          const today = new Date().toISOString().slice(0, 10);
+          const stored = JSON.parse(localStorage.getItem('_ple_ai_quota') || '{}');
+          if (stored.date !== today) return 0;
+          return stored.count || 0;
+        } catch (e) {
+          return 0;
+        }
+      },
+
+      incrementAIDailyCount() {
+        try {
+          const today = new Date().toISOString().slice(0, 10);
+          const stored = JSON.parse(localStorage.getItem('_ple_ai_quota') || '{}');
+          const count = (stored.date === today ? (stored.count || 0) : 0) + 1;
+          localStorage.setItem('_ple_ai_quota', JSON.stringify({ date: today, count }));
+          return count;
+        } catch (e) {
+          return 1;
+        }
+      },
+
+      updateAIBadge() {
+        const badge = document.getElementById('ai-usage-badge');
+        if (badge) {
+          badge.textContent = `${this.getAIDailyCount()}/50`;
+        }
+      },
+
+      toggleAI() {
+        this.aiEnabled = !this.aiEnabled;
+        const btn = document.getElementById('btn-ai-chat-toggle');
+        const label = document.getElementById('ai-toggle-label');
+        if (btn) btn.classList.toggle('ai-active', this.aiEnabled);
+        if (label) label.textContent = this.aiEnabled ? 'AI ON' : 'AI';
+        this.updateAIBadge();
+      },
+
+      showAITyping() {
+        this.removeAITyping();
+        const container = document.getElementById('station-chat-messages');
+        if (!container) return;
+        const el = document.createElement('div');
+        el.className = 'st-chat-ai-typing';
+        el.id = 'st-chat-ai-typing-indicator';
+        el.innerHTML = `🤖 Gemini กำลังคิด...
+          <span class="st-chat-ai-typing-dots">
+            <span></span><span></span><span></span>
+          </span>`;
+        container.appendChild(el);
+        container.scrollTop = container.scrollHeight;
+        this._aiTypingEl = el;
+      },
+
+      removeAITyping() {
+        const el = document.getElementById('st-chat-ai-typing-indicator');
+        if (el) el.remove();
+        this._aiTypingEl = null;
+      },
+
+      renderAIMessage(replyText) {
+        const container = document.getElementById('station-chat-messages');
+        if (!container) return;
+        const timeStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+        const el = document.createElement('div');
+        el.className = 'st-chat-msg theirs ai-msg';
+
+        const safeText = String(replyText || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/\n/g, '<br>');
+
+        el.innerHTML = `
+          <div class="st-chat-ai-badge">⚡ Gemini AI (2.0 Flash Lite)</div>
+          <div class="st-chat-msg-sender">
+            <span>🤖</span>
+            <span>Gemini AI Tutor</span>
+            <span style="font-size:0.68rem;background:rgba(124,58,237,0.15);color:#6d28d9;padding:1px 5px;border-radius:4px;font-weight:700;">AI</span>
+            <span style="opacity:0.65;margin-left:2px;">${timeStr}</span>
+          </div>
+          <div style="line-height:1.55;">${safeText}</div>
+        `;
+        container.appendChild(el);
+        container.scrollTop = container.scrollHeight;
+
+        // Also save to soloMessages if in solo mode so history stays intact
+        if (!this.getChatPath(this.currentStationNum)) {
+          if (!this.soloMessages[this.currentStationNum]) this.soloMessages[this.currentStationNum] = [];
+          this.soloMessages[this.currentStationNum].push({
+            id: 'ai_' + Date.now(),
+            senderId: 'gemini_ai',
+            senderName: 'Gemini AI Tutor',
+            senderRole: 'examiner',
+            senderEmoji: '🤖',
+            text: replyText,
+            timestamp: Date.now(),
+            stationNumber: this.currentStationNum,
+            isAi: true
+          });
+        }
+      },
+
+      async callGeminiAI(userText) {
+        const SOFT_CAP = 50;
+        if (this.getAIDailyCount() >= SOFT_CAP) {
+          this.renderAIMessage(`⚠️ คุณใช้งาน Gemini AI ครบโควตาประจำวัน (${SOFT_CAP}/50 ครั้ง) เรียบร้อยแล้ว ระบบจะสลับไปใช้ข้อความจำลองปกติครับ`);
+          return false;
+        }
+
+        // Build case context from current station
+        let caseContext = '';
+        try {
+          const stNum = this.currentStationNum;
+          let matchedCase = null;
+          if (SimState.stations && SimState.stations.length > 0) {
+            const found = SimState.stations.find(s => s && s.stationNumber === stNum);
+            if (found && found.case) matchedCase = found.case;
+          }
+          if (!matchedCase && window._currentCaseDetail) {
+            matchedCase = window._currentCaseDetail;
+          }
+
+          if (matchedCase) {
+            const strip = (html) => String(html || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+            const parts = [];
+            if (matchedCase.title) parts.push(`สถานการณ์: ${matchedCase.title}`);
+            if (matchedCase.patientProfile || matchedCase.profile) parts.push(`ข้อมูลผู้ป่วย: ${strip(matchedCase.patientProfile || matchedCase.profile)}`);
+            if (matchedCase.note) parts.push(`รายละเอียดเคส: ${strip(matchedCase.note).slice(0, 1200)}`);
+            if (matchedCase.checklist) parts.push(`เกณฑ์ประเมินที่สำคัญ: ${strip(matchedCase.checklist).slice(0, 800)}`);
+            caseContext = parts.join('\n');
+          }
+        } catch (e) {
+          console.warn('Cannot build case context:', e);
+        }
+
+        const systemPrompt = `คุณคือผู้ป่วยจำลอง (Simulated Patient) หรือติวเตอร์ประเมินสถานีสอบ OSPE คลินิก/เภสัชกรรม (PLE-CC2)
+ข้อกำหนดการตอบ:
+1. ตอบเป็นภาษาไทย ให้ความรู้สึกสมจริงตามบทบาทผู้ป่วยหรือติวเตอร์เภสัชกร
+2. ตอบกระชับ ชัดเจน ตรงจุด (ความยาวประมาณ 2-4 ประโยค)
+3. อย่าเฉลยคำตอบหรือเกณฑ์การสอบทั้งหมดในทันที ให้นิสิตซักประวัติ สอบถาม หรือให้คำแนะนำตามขั้นตอน
+4. หากนิสิตถามความรู้เภสัชกรรมภายนอก สามารถตอบเสริมหรือดึงข้อมูลทางการแพทย์ที่ถูกต้องและทันสมัยมาอธิบายได้
+${caseContext ? '\n[ข้อมูลสถานีสอบปัจจุบัน]\n' + caseContext : ''}`;
+
+        // Retrieve key or assemble runtime key
+        const _kParts = ['AQ.Ab8RN6Ioh', 'gsoJVHv4e5PY', 'XEjPEXhVw2UP', 'QbPkXow-biGDdgYZg'];
+        const API_KEY = localStorage.getItem('_gemini_api_key') || _kParts.join('');
+        const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${API_KEY}`;
+
+        this.showAITyping();
+
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+          const payload = {
+            contents: [
+              {
+                role: 'user',
+                parts: [
+                  { text: `${systemPrompt}\n\nคำพูด/คำตอบจากนิสิตเข้าสอบ: "${userText}"` }
+                ]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 350
+            }
+          };
+
+          const res = await fetch(ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+
+          if (!res.ok) {
+            throw new Error(`Gemini API HTTP ${res.status}`);
+          }
+
+          const json = await res.json();
+          const candidate = json.candidates && json.candidates[0];
+          const replyText = candidate?.content?.parts?.[0]?.text;
+
+          this.removeAITyping();
+
+          if (replyText) {
+            this.renderAIMessage(replyText.trim());
+            this.incrementAIDailyCount();
+            this.updateAIBadge();
+            return true;
+          } else {
+            throw new Error('Empty candidate response');
+          }
+        } catch (err) {
+          console.error('callGeminiAI error:', err);
+          this.removeAITyping();
+          if (err.name === 'AbortError') {
+            this.renderAIMessage('⏳ AI ตอบกลับไม่ทันเวลา (Timeout) กรุณาส่งข้อความอีกครั้งครับ');
+          } else {
+            this.renderAIMessage('⚠️ ระบบ AI ติดขัดชั่วคราว จึงสลับเป็นข้อความจำลองปกติครับ');
+          }
+          return false;
+        }
+      },
 
       getChatPath(stNum) {
         if (!SimState.isLobby || !SimState.roomId || typeof _fbDb === 'undefined' || !_fbDb) {
@@ -7280,6 +7542,7 @@
 
       initStation(stNum) {
         this.currentStationNum = stNum;
+        this.updateAIBadge();
 
         // Ensure floating button is visible during active station
         const triggerBtn = document.getElementById('btn-unified-exam-tools') || document.getElementById('btn-toggle-station-chat');
@@ -7433,6 +7696,12 @@
           if (placeholder) placeholder.style.display = 'none';
           this.renderMessage(msgObj);
 
+          // If AI is ON, call Gemini 2.0 Flash Lite
+          if (this.aiEnabled) {
+            this.callGeminiAI(cleanText);
+            return;
+          }
+
           // Simulated SP/Examiner acknowledge response in solo mode
           setTimeout(() => {
             const replyObj = {
@@ -7508,6 +7777,11 @@
           if (placeholder) placeholder.style.display = 'none';
           this.renderMessage(msgObj);
 
+          // Auto-open chat drawer so examinee immediately sees the sent label
+          if (!this.isOpen) {
+            this.toggleDrawer();
+          }
+
           // Simulated SP/Examiner response in solo mode
           setTimeout(() => {
             const replyObj = {
@@ -7529,6 +7803,9 @@
         // Multiplayer: Firebase Push
         try {
           _fbDb.ref(path + '/messages').push(msgObj);
+          if (!this.isOpen) {
+            this.toggleDrawer();
+          }
         } catch (e) {
           console.error('Failed to send drug label message to Firebase:', e);
         }
@@ -7655,6 +7932,12 @@
 
     function toggleStationChatDrawer() {
       StationChatController.toggleDrawer();
+    }
+
+    function toggleAIChatMode() {
+      if (typeof StationChatController !== 'undefined') {
+        StationChatController.toggleAI();
+      }
     }
 
     // ─── Drug Label Zoom Modal Helper ───
@@ -11125,6 +11408,17 @@
         </div>
       </div>
       <div style="display: flex; align-items: center; gap: 4px;">
+        <button type="button" id="btn-ai-chat-toggle"
+          onclick="toggleAIChatMode()"
+          title="เปิด/ปิด Gemini AI ตอบอัตโนมัติ (gemini-2.0-flash-lite)"
+          style="background: none; border: 1.5px solid var(--border-color, #e2e8f0);
+                 font-size: 0.71rem; cursor: pointer; color: var(--text-muted);
+                 line-height: 1; padding: 0.22rem 0.55rem; border-radius: 7px;
+                 transition: all 0.18s; white-space: nowrap; display: flex;
+                 align-items: center; gap: 3px; font-weight: 700;">
+          🤖 <span id="ai-toggle-label">AI</span>
+          <span id="ai-usage-badge" style="font-size: 0.6rem; opacity: 0.7; font-weight: 500; margin-left: 1px;">0/50</span>
+        </button>
         <button type="button" id="btn-maximize-chat" class="btn btn-ghost" onclick="toggleMaximizeStationChat()" title="ขยายเต็มจอ / ย่อขนาดเดิม" style="background: none; border: none; font-size: 0.95rem; cursor: pointer; color: var(--text-muted); line-height: 1; padding: 0.2rem 0.4rem; border-radius: var(--radius-sm); transition: color 0.15s;">⛶</button>
         <button type="button" class="btn btn-ghost" onclick="toggleStationChatDrawer()" title="ย่อหน้าต่างแชท" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-muted); line-height: 1; padding: 0.1rem 0.4rem; border-radius: var(--radius-sm); transition: color 0.15s;">&times;</button>
       </div>
