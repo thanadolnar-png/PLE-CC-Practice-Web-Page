@@ -5614,8 +5614,8 @@
           }
 
           // 2. Check offline case details (0ms instant)
-          if (!matchedCase && typeof OFFLINE_CASE_DETAILS !== 'undefined') {
-            matchedCase = OFFLINE_CASE_DETAILS[targetCaseId] || OFFLINE_CASE_DETAILS[ospeId] || OFFLINE_CASE_DETAILS[rawId];
+          if (!matchedCase && typeof OFFLINE_DETAILS !== 'undefined') {
+            matchedCase = OFFLINE_DETAILS[targetCaseId] || OFFLINE_DETAILS[ospeId] || OFFLINE_DETAILS[rawId];
           }
 
           // 3. Check AppState.cases
@@ -6781,21 +6781,46 @@
           if (finishBtn) finishBtn.style.display = (isStandardRoom || SimState.isHost) ? 'block' : 'none';
         }
 
-        // In multiplayer room, only Host / Super Host can abort/dissolve the shared exam
+        // In multiplayer room, control abort/leave button visibility
         if (SimState.isLobby) {
           const isStandardRoom = (SimState.examMode === 'standard' || !SimState.examMode);
           const isSuperHostMode = Boolean(SimState.cachedRoom && SimState.cachedRoom.isSuperHost);
           const canAbortRoom = Boolean(SimState.isHost || (isStandardRoom && SimState.role === 'examiner'));
-          
+
           const stickyAbortBtn = document.getElementById('btn-sticky-abort-exam');
-          if (stickyAbortBtn) {
-            // If in Super Host Mode (Breakout / Carousel), only Host sees the abort button
-            stickyAbortBtn.style.display = canAbortRoom ? 'inline-flex' : 'none';
+          const headerAbortBtn = document.getElementById('btn-abort-exam');
+
+          if (isSuperHostMode && !SimState.isHost) {
+            // Non-host player in Carousel/Cohort Breakout: show "leave room" button only (cannot dissolve)
+            if (stickyAbortBtn) {
+              stickyAbortBtn.style.display = 'inline-flex';
+              stickyAbortBtn.title = 'ออกจากห้องสอบและกลับสู่หน้าหลัก';
+              stickyAbortBtn.innerHTML = '🚪 ออกจากห้อง';
+            }
+            if (headerAbortBtn) {
+              headerAbortBtn.style.display = 'inline-flex';
+              headerAbortBtn.title = 'ออกจากห้องสอบและกลับสู่หน้าหลัก';
+              headerAbortBtn.innerHTML = '🚪 ออกจากห้อง';
+            }
+          } else {
+            // Host (all modes) or Examiner in standard mode: show abort/dissolve button
+            if (stickyAbortBtn) {
+              stickyAbortBtn.style.display = canAbortRoom ? 'inline-flex' : 'none';
+              stickyAbortBtn.title = 'ยุติการสอบและกลับสู่หน้าตั้งค่า';
+              stickyAbortBtn.innerHTML = '🛑 ยุติการสอบ';
+            }
+            if (headerAbortBtn) {
+              headerAbortBtn.style.display = canAbortRoom ? 'inline-flex' : 'none';
+              headerAbortBtn.innerHTML = '🛑 ยุติการสอบ';
+            }
           }
         } else {
-          // Solo mode: candidate can abort anytime
+          // Solo mode: show abort anytime
           const stickyAbortBtn = document.getElementById('btn-sticky-abort-exam');
-          if (stickyAbortBtn) stickyAbortBtn.style.display = 'inline-flex';
+          if (stickyAbortBtn) {
+            stickyAbortBtn.style.display = 'inline-flex';
+            stickyAbortBtn.innerHTML = '🛑 ยุติการสอบ';
+          }
         }
 
         // Examiner Live Examinee Submission Panel
@@ -9802,12 +9827,16 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       if (SimState.isLobby && SimState.roomId) {
         const isStandardMode = (SimState.examMode === 'standard' || !SimState.examMode);
         
-        // In Multi-station modes (Carousel Rotation / Cohort Breakout), only SUPER HOST has permission to terminate/abort the room
+        // In Multi-station modes (Carousel Rotation / Cohort Breakout)
         if (!isStandardMode) {
           if (!SimState.isHost) {
-            alert('⛔ สงวนสิทธิ์เฉพาะ Super Host เท่านั้นที่สามารถสั่งยุติการสอบทั้งห้องได้');
+            // Non-host: can leave the room individually (not dissolve)
+            const opt = confirm('⚠️ คุณต้องการออกจากห้องสอบและกลับสู่หน้าหลักหรือไม่?\n\n(ผู้เข้าสอบและผู้ประเมินคนอื่นยังคงสอบต่อไปได้ ห้องสอบจะยังเปิดอยู่)');
+            if (!opt) return;
+            await leaveExamRoom(false);
             return;
           }
+          // Super Host: dissolve entire room
           const opt = confirm('👑 คุณเป็น Super Host ของห้องสอบรวมนี้\n\nกด "ตกลง (OK)" เพื่อยุติการสอบทั้งห้องและยุบห้องสอบ (Dissolve)\nผู้เข้าสอบและผู้ประเมินทุกคนจะถูกพากลับสู่หน้าหลักพร้อมกัน\n\nหรือกด "ยกเลิก (Cancel)" หากต้องการสอบต่อ');
           if (!opt) return;
           await dissolveExamRoom();
