@@ -1774,9 +1774,10 @@
               <span class="badge" style="background: var(--primary); color: white; font-size: 0.82rem; padding: 0.2rem 0.6rem; border-radius: var(--radius-sm);">👑 Super Host Monitor</span>
               <span style="font-size: 0.88rem; color: var(--text-muted); margin-left: 0.5rem;" id="sh-mode-title">ห้องสอบรวม</span>
             </div>
-            <div style="display: flex; gap: 0.5rem;">
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
               <button type="button" class="btn btn-secondary" style="font-size: 1rem; padding: 0.35rem 0.65rem;" onclick="playStationTimeoutAlarm('bell')" title="สั่นกริ่งเตือน">🔔</button>
               <button type="button" class="btn btn-outline" style="font-size: 1rem; padding: 0.35rem 0.65rem;" onclick="toggleSuperHostFullscreen()" title="เต็มจอ Projector">🖥️</button>
+              <button type="button" class="btn btn-sm" onclick="abortExamSimulation()" style="color: #ffffff; font-weight: 700; background: #dc2626; border: 1px solid #b91c1c; padding: 0.35rem 0.75rem; border-radius: var(--radius-sm);" title="ยุบห้องสอบและพาผู้เข้าสอบทุกคนกลับหน้าแรก">🛑 ยุติห้องสอบ (Super Host)</button>
             </div>
           </div>
           
@@ -2023,7 +2024,7 @@
               <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">✍️</span>
               <h4 style="font-family: var(--font-title); font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; font-size: 0.9rem;">คุณกำลังเข้าสอบ (Examinee Mode)</h4>
               <p style="font-size: 0.8rem; line-height: 1.4; margin-bottom: 0.8rem;">เกณฑ์ Checklist และเฉลยถูกซ่อนไว้ ให้ผู้ประเมินซักถามและให้คะแนน</p>
-              <button type="button" class="btn" onclick="abortExamSimulation()" style="padding: 6px 14px; font-size: 0.82rem; font-weight: 600; background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); border-radius: var(--radius-sm); cursor: pointer;">
+              <button type="button" class="btn" id="btn-examinee-notice-abort" onclick="abortExamSimulation()" style="padding: 6px 14px; font-size: 0.82rem; font-weight: 600; background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); border-radius: var(--radius-sm); cursor: pointer;">
                 🛑 ออกจากการสอบจำลอง
               </button>
             </div>
@@ -6361,6 +6362,23 @@
           if (finishBtn) finishBtn.style.display = (isStandardRoom || SimState.isHost) ? 'block' : 'none';
         }
 
+        // In multiplayer room, only Host / Super Host can abort/dissolve the shared exam
+        if (SimState.isLobby) {
+          const isStandardRoom = (SimState.examMode === 'standard' || !SimState.examMode);
+          const isSuperHostMode = Boolean(SimState.cachedRoom && SimState.cachedRoom.isSuperHost);
+          const canAbortRoom = Boolean(SimState.isHost || (isStandardRoom && SimState.role === 'examiner'));
+          
+          const stickyAbortBtn = document.getElementById('btn-sticky-abort-exam');
+          if (stickyAbortBtn) {
+            // If in Super Host Mode (Breakout / Carousel), only Host sees the abort button
+            stickyAbortBtn.style.display = canAbortRoom ? 'inline-flex' : 'none';
+          }
+        } else {
+          // Solo mode: candidate can abort anytime
+          const stickyAbortBtn = document.getElementById('btn-sticky-abort-exam');
+          if (stickyAbortBtn) stickyAbortBtn.style.display = 'inline-flex';
+        }
+
         // Examiner Live Examinee Submission Panel
         setupExaminerLiveSubmissionListener(st.stationNumber, c);
       }
@@ -6370,6 +6388,21 @@
         const livePanel = document.getElementById('examiner-live-submission-panel');
         if (livePanel) livePanel.style.display = 'none';
         setupExamineeInteractiveBlanksSync(st.stationNumber, c);
+
+        // Hide abort button for candidate in multiplayer shared room
+        if (SimState.isLobby) {
+          const stickyAbortBtn = document.getElementById('btn-sticky-abort-exam');
+          if (stickyAbortBtn) stickyAbortBtn.style.display = 'none';
+
+          const noticeAbortBtn = document.getElementById('btn-examinee-notice-abort');
+          if (noticeAbortBtn) {
+            const isStandardRoom = (SimState.examMode === 'standard' || !SimState.examMode);
+            noticeAbortBtn.style.display = isStandardRoom ? 'inline-block' : 'none';
+          }
+        } else {
+          const noticeAbortBtn = document.getElementById('btn-examinee-notice-abort');
+          if (noticeAbortBtn) noticeAbortBtn.style.display = 'inline-block';
+        }
       }
       
       // Minimap — แสดงทุก mode (solo + lobby)
@@ -8260,6 +8293,21 @@
     // ─── Abort / Exit Exam Simulation ─────────────────────────
     async function abortExamSimulation() {
       if (SimState.isLobby && SimState.roomId) {
+        const isStandardMode = (SimState.examMode === 'standard' || !SimState.examMode);
+        
+        // In Multi-station modes (Carousel Rotation / Cohort Breakout), only SUPER HOST has permission to terminate/abort the room
+        if (!isStandardMode) {
+          if (!SimState.isHost) {
+            alert('⛔ สงวนสิทธิ์เฉพาะ Super Host เท่านั้นที่สามารถสั่งยุติการสอบทั้งห้องได้');
+            return;
+          }
+          const opt = confirm('👑 คุณเป็น Super Host ของห้องสอบรวมนี้\n\nกด "ตกลง (OK)" เพื่อยุติการสอบทั้งห้องและยุบห้องสอบ (Dissolve)\nผู้เข้าสอบและผู้ประเมินทุกคนจะถูกพากลับสู่หน้าหลักพร้อมกัน\n\nหรือกด "ยกเลิก (Cancel)" หากต้องการสอบต่อ');
+          if (!opt) return;
+          await dissolveExamRoom();
+          return;
+        }
+
+        // In 1-on-1 Standard Room
         if (SimState.isHost) {
           const opt = confirm('⚠️ คุณเป็น Host ของห้องสอบนี้\n\nกด "ตกลง (OK)" เพื่อยุบห้องสอบ (Dissolve) และพาผู้เข้าสอบทุกคนกลับสู่หน้าแรก\nหรือกด "ยกเลิก (Cancel)" หากไม่ต้องการออก');
           if (!opt) return;
