@@ -1004,10 +1004,15 @@
 
           <!-- Checklist section (no-print) -->
           <div id="checklist-and-notes-section" class="no-print">
-            <!-- Checklist Group -->
-            <h3 class="viewer-section-title" style="margin-top: 0; border-left-color: var(--success);">
-              รายการทักษะประเมิน
-            </h3>
+            <!-- Checklist Group Header with Reset Icon -->
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+              <h3 class="viewer-section-title" style="margin: 0; border-left-color: var(--success);">
+                รายการทักษะประเมิน
+              </h3>
+              <button type="button" class="btn btn-ghost" id="btn-reset-case-checklist" onclick="resetChecklistProgress()" title="รีเซ็ตการติ๊ก Checklist (ล้างคะแนนข้อนี้)" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.color='var(--primary)'; this.style.borderColor='var(--primary)';" onmouseout="this.style.color='var(--text-secondary)'; this.style.borderColor='var(--border)';">
+                🔄
+              </button>
+            </div>
             
             <div class="checklist-container" id="checklist-items-container">
               <!-- Filled dynamically by JS -->

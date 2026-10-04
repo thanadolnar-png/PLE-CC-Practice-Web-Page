@@ -2261,11 +2261,14 @@
               </div>
             </div>
 
-            <!-- Right: Score Chip Indicator -->
-            <div class="score-chip" id="exam-progress-card">
+            <!-- Right: Score Chip Indicator with Quick Reset Button -->
+            <div class="score-chip" id="exam-progress-card" style="display: flex; align-items: center; gap: 0.45rem;">
               <span>คะแนน</span>
               <strong id="exam-score">0 / 0</strong>
               <em id="exam-pct">0%</em>
+              <button type="button" class="btn btn-ghost" id="btn-quick-reset-score" onclick="resetCurrentStationChecklist()" title="รีเซ็ตคะแนนสถานีนี้" style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; padding: 0; border: none; background: transparent; cursor: pointer; font-size: 0.8rem; opacity: 0.7; transition: opacity 0.2s;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.7';">
+                🔄
+              </button>
               <div id="exam-bar-fill" class="progress-bar-fill" style="display:none;"></div>
             </div>
           </div>
@@ -2451,6 +2454,16 @@
               <div class="exam-note-content-area" id="exam-note-content-area">
                 <!-- Filled dynamically by JS -->
               </div>
+            </div>
+
+            <!-- Checklist Header with Reset Icon -->
+            <div id="exam-checklist-header-bar" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
+              <h3 class="viewer-section-title" style="margin: 0; border-left-color: var(--success); font-size: 1.05rem;">
+                📋 เกณฑ์การให้คะแนน (Checklist)
+              </h3>
+              <button type="button" class="btn btn-ghost" id="btn-reset-exam-checklist" onclick="resetCurrentStationChecklist()" title="รีเซ็ตการติ๊ก Checklist ของสถานีนี้ (ล้างคะแนนข้อนี้)" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.color='var(--primary)'; this.style.borderColor='var(--primary)';" onmouseout="this.style.color='var(--text-secondary)'; this.style.borderColor='var(--border)';">
+                🔄
+              </button>
             </div>
 
             <!-- Checklist container -->
@@ -7389,6 +7402,70 @@
         updatedEl.classList.add('ai-checked');
       }
     };
+
+    function resetCurrentStationChecklist() {
+      const curStation = SimState.stations[SimState.currentIdx];
+      const stationNum = curStation?.stationNumber || (SimState.currentIdx + 1);
+      
+      if (!confirm(`คุณต้องการรีเซ็ตการติ๊ก Checklist ของสถานีที่ ${stationNum} หรือไม่?`)) return;
+
+      // Clear student scores for this station
+      SimState.studentScores[stationNum] = [];
+      if (SimState.studentScores[String(stationNum)]) {
+        SimState.studentScores[String(stationNum)] = [];
+      }
+
+      // Uncheck all UI elements
+      document.querySelectorAll('.checklist-item').forEach(el => {
+        el.classList.remove('checked', 'ai-checked');
+      });
+
+      // Update score chip & progress UI
+      const currentCase = curStation?.case;
+      if (currentCase) {
+        updateExamProgressUI(stationNum, currentCase);
+      }
+      renderMiniMap(false);
+
+      // Sync Firebase if in lobby
+      if (SimState.isLobby && SimState.roomId && typeof _fbDb !== 'undefined') {
+        if (SimState.examMode === 'cohort_breakout' && SimState.myBreakoutTableId) {
+          const { currentScore, totalScore } = calculateStationScore(currentCase?.checklist || [], []);
+          _fbDb.ref(`rooms/${SimState.roomId}/breakouts/${SimState.myBreakoutTableId}/scores/${stationNum}`).set({
+            stationNumber: stationNum,
+            checkedProgress: [],
+            checkedIds: [],
+            score: currentScore,
+            earnedScore: currentScore,
+            maxScore: totalScore,
+            percent: 0,
+            examinerName: SimState.lobbyPlayerName || SimState.myBreakoutRole || 'Examiner',
+            updatedAt: Date.now()
+          });
+        } else if (SimState.examMode === 'carousel_rotation') {
+          const rotationRound = SimState.carouselCurrentRound || 1;
+          const examineeId = SimState.carouselRotationAssignments?.[`round_${rotationRound}`]?.[`station_${stationNum}`] || 'unknown';
+          const { currentScore, totalScore } = calculateStationScore(currentCase?.checklist || [], []);
+          _fbDb.ref(`rooms/${SimState.roomId}/carousel_scores/round_${rotationRound}/station_${stationNum}`).set({
+            stationNumber: stationNum,
+            examineeId: examineeId,
+            checkedProgress: [],
+            checkedIds: [],
+            score: currentScore,
+            earnedScore: currentScore,
+            maxScore: totalScore,
+            percent: 0,
+            examinerName: SimState.lobbyPlayerName || 'Examiner',
+            updatedAt: Date.now()
+          });
+        } else {
+          _fbDb.ref('rooms/' + SimState.roomId).update({
+            checklistProgress: [],
+            scoresByStation: JSON.stringify(SimState.studentScores)
+          });
+        }
+      }
+    }
 
     function updateExamProgressUI(stationNum, c) {
       const checked = SimState.studentScores[stationNum] || [];
