@@ -909,7 +909,6 @@
       color: #ffffff !important;
       box-shadow: 0 2px 8px rgba(124,58,237,0.35);
     }
-    #btn-ai-chat-toggle.ai-active #ai-usage-badge { color: rgba(255,255,255,0.8); }
 
     /* ── AI Message Bubble ── */
     .st-chat-msg.ai-msg {
@@ -7312,7 +7311,7 @@
       aiEnabled: false,
       _aiTypingEl: null,
 
-      // ── Quota Helpers (Daily Limit: 50 req/day for gemini-2.0-flash-lite) ──
+      // ── Quota Helpers (Stat Counter Only - Unlimited Usage) ──
       getAIDailyCount() {
         try {
           const today = new Date().toISOString().slice(0, 10);
@@ -7337,10 +7336,7 @@
       },
 
       updateAIBadge() {
-        const badge = document.getElementById('ai-usage-badge');
-        if (badge) {
-          badge.textContent = `${this.getAIDailyCount()}/50`;
-        }
+        // Uncapped mode: keep button clean without badge
       },
 
       toggleAI() {
@@ -7349,7 +7345,6 @@
         const label = document.getElementById('ai-toggle-label');
         if (btn) btn.classList.toggle('ai-active', this.aiEnabled);
         if (label) label.textContent = this.aiEnabled ? 'AI ON' : 'AI';
-        this.updateAIBadge();
       },
 
       showAITyping() {
@@ -7418,11 +7413,7 @@
       },
 
       async callGeminiAI(userText) {
-        const SOFT_CAP = 50;
-        if (this.getAIDailyCount() >= SOFT_CAP) {
-          this.renderAIMessage(`⚠️ คุณใช้งาน Gemini AI ครบโควตาประจำวัน (${SOFT_CAP}/50 ครั้ง) เรียบร้อยแล้ว ระบบจะสลับไปใช้ข้อความจำลองปกติครับ`);
-          return false;
-        }
+        // Unlimited Mode: No local cap, direct Google API usage
 
         // Build case context from current station
         let caseContext = '';
@@ -7495,6 +7486,9 @@ ${caseContext ? '\n[ข้อมูลสถานีสอบปัจจุบ
           if (!res.ok) {
             const errBody = await res.text().catch(() => '');
             console.error('Gemini API Error Response:', res.status, errBody);
+            if (res.status === 429 || errBody.includes('RESOURCE_EXHAUSTED')) {
+              throw new Error('QUOTA_EXHAUSTED');
+            }
             throw new Error(`Gemini API HTTP ${res.status}: ${errBody}`);
           }
 
@@ -7507,7 +7501,6 @@ ${caseContext ? '\n[ข้อมูลสถานีสอบปัจจุบ
           if (replyText) {
             this.renderAIMessage(replyText.trim());
             this.incrementAIDailyCount();
-            this.updateAIBadge();
             return true;
           } else {
             throw new Error('Empty candidate response');
@@ -7517,6 +7510,8 @@ ${caseContext ? '\n[ข้อมูลสถานีสอบปัจจุบ
           this.removeAITyping();
           if (err.name === 'AbortError') {
             this.renderAIMessage('⏳ AI ตอบกลับไม่ทันเวลา (Timeout) กรุณาส่งข้อความอีกครั้งครับ');
+          } else if (err.message === 'QUOTA_EXHAUSTED' || (err.message && err.message.includes('429'))) {
+            this.renderAIMessage('⚠️ เพื่อนๆ ใช้โควต้า AI วันนี้หมดแล้วครับ! (API Quota Limit reached) พรุ่งนี้โควต้าจะรีเซ็ตอัตโนมัติครับ');
           } else {
             this.renderAIMessage(`⚠️ เชื่อมต่อ AI ไม่สำเร็จ: ${err.message || 'โปรดตรวจสอบการเชื่อมต่อ'}`);
           }
@@ -11383,14 +11378,13 @@ ${caseContext ? '\n[ข้อมูลสถานีสอบปัจจุบ
       <div style="display: flex; align-items: center; gap: 4px;">
         <button type="button" id="btn-ai-chat-toggle"
           onclick="toggleAIChatMode()"
-          title="เปิด/ปิด Gemini AI ตอบอัตโนมัติ (gemini-2.0-flash-lite)"
+          title="เปิด/ปิด Gemini AI ติวเตอร์และผู้ป่วยจำลอง (gemini-3.5-flash-lite)"
           style="background: none; border: 1.5px solid var(--border-color, #e2e8f0);
-                 font-size: 0.71rem; cursor: pointer; color: var(--text-muted);
-                 line-height: 1; padding: 0.22rem 0.55rem; border-radius: 7px;
+                 font-size: 0.73rem; cursor: pointer; color: var(--text-muted);
+                 line-height: 1; padding: 0.22rem 0.6rem; border-radius: 7px;
                  transition: all 0.18s; white-space: nowrap; display: flex;
-                 align-items: center; gap: 3px; font-weight: 700;">
+                 align-items: center; gap: 4px; font-weight: 700;">
           🤖 <span id="ai-toggle-label">AI</span>
-          <span id="ai-usage-badge" style="font-size: 0.6rem; opacity: 0.7; font-weight: 500; margin-left: 1px;">0/50</span>
         </button>
         <button type="button" id="btn-maximize-chat" class="btn btn-ghost" onclick="toggleMaximizeStationChat()" title="ขยายเต็มจอ / ย่อขนาดเดิม" style="background: none; border: none; font-size: 0.95rem; cursor: pointer; color: var(--text-muted); line-height: 1; padding: 0.2rem 0.4rem; border-radius: var(--radius-sm); transition: color 0.15s;">⛶</button>
         <button type="button" class="btn btn-ghost" onclick="toggleStationChatDrawer()" title="ย่อหน้าต่างแชท" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-muted); line-height: 1; padding: 0.1rem 0.4rem; border-radius: var(--radius-sm); transition: color 0.15s;">&times;</button>
