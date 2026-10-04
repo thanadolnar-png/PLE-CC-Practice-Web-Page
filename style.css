@@ -1308,6 +1308,24 @@ ol.ordered-list li,
   font-weight: 700 !important;
 }
 
+/* Descriptive Sub-details (Nested Bullets within Checklist Items) */
+.checklist-sub-details {
+  margin: 0.4rem 0 0.1rem 1.25rem !important;
+  padding: 0 !important;
+  list-style-type: disc !important;
+  font-size: 0.88rem !important;
+  color: var(--text-secondary) !important;
+  line-height: 1.5 !important;
+}
+
+.checklist-sub-details li {
+  margin-bottom: 0.25rem !important;
+}
+
+.checklist-item.checked .checklist-sub-details {
+  color: var(--text-muted) !important;
+}
+
 /* Progress area */
 .progress-card {
   background-color: var(--bg-secondary);

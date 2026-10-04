@@ -320,9 +320,9 @@
   </div><!-- /.page-viewport -->
 </div><!-- /.app-shell -->
 
-  <script src="case-data-offline.js?v=v_20261004_153651"></script>
-  <script src="case-details-offline.js?v=v_20261004_153651"></script>
-  <script src="app.js?v=v_20261004_153651"></script>
+  <script src="case-data-offline.js?v=v_20261004_154906"></script>
+  <script src="case-details-offline.js?v=v_20261004_154906"></script>
+  <script src="app.js?v=v_20261004_154906"></script>
   <script src="scratchpad.js?v=20261002_205600"></script>
 
   <script>
@@ -677,6 +677,15 @@
                 isSubset: false,
                 imageHtml: ''
               });
+            } else if (extractedList.length > 0 && (inner.startsWith('■') || inner.startsWith('▫') || inner.startsWith('▪') || (inner.startsWith('-') && !inner.includes(':')))) {
+              const cleanSub = inner.replace(/^[-*•☐☑■○▪▫]\s*/, '').trim();
+              const prev = extractedList[extractedList.length - 1];
+              if (prev.textHtml && prev.textHtml.includes('<ul class="checklist-sub-details">')) {
+                prev.textHtml = prev.textHtml.replace(/<\/ul>$/, '') + `<li>${cleanSub}</li></ul>`;
+              } else {
+                prev.textHtml = `${prev.textHtml || prev.text}<ul class="checklist-sub-details"><li>${cleanSub}</li></ul>`;
+              }
+              prev.text += `\n  • ${cleanSub}`;
             } else {
               newParas.push(pTag);
             }

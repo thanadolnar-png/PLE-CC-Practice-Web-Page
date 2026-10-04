@@ -1517,22 +1517,40 @@ function getCaseContentFromDoc(docId, targetCaseId) {
 
           const isChecklistItem = type === DocumentApp.ElementType.LIST_ITEM || text.startsWith('[ ]') || text.startsWith('[x]') || text.startsWith('\u2610') || text.startsWith('\u2611') || text.startsWith('\u2705') || text.startsWith('\u2714') || text.startsWith('\u25cb') || text.startsWith('-') || text.startsWith('*') || /^\d+\./.test(text);
           if (isChecklistItem && text.length > 3) {
-            let cleanText = text.replace(/^([-*\u2022\u2710\u2705\u2714\u2610\u2611]|\[\s*\]|\[x\]|\d+\.)\s*/, '').trim();
+            let cleanText = text.replace(/^([-*\u2022\u2710\u2705\u2714\u2610\u2611\u25a0\u25aa\u25ab\u25cb]|\[\s*\]|\[x\]|\d+\.)\s*/, '').trim();
             const scoreMatch = cleanText.match(/^\((\d+(\.\d+)?)\)\s*(.*)$/);
-            let score = 1;
-            let itemText = cleanText;
-
-            if (scoreMatch) {
-              score = parseFloat(scoreMatch[1]);
-              itemText = scoreMatch[3].trim();
-            }
-
+            
             let nestLvl = 0;
             let indentStart = 0;
             if (type === DocumentApp.ElementType.LIST_ITEM) {
               nestLvl = child.asListItem().getNestingLevel();
             } else if (type === DocumentApp.ElementType.PARAGRAPH) {
               indentStart = child.asParagraph().getIndentStart() || 0;
+            }
+
+            // Check if this is a descriptive sub-bullet (e.g. nestLvl >= 1 or indent >= 36 or starts with ■/▫/▪) and has NO (score) prefix
+            if (!scoreMatch && checklist.length > 0 && (nestLvl >= 1 || indentStart >= 36 || text.startsWith('\u25a0') || text.startsWith('\u25aa') || text.startsWith('\u25ab'))) {
+              const subHtml = parseParagraphToHtml(para).replace(/^([-*\u2022\u2710\u2705\u2714\u2610\u2611\u25a0\u25aa\u25ab\u25cb]|\[\s*\]|\[x\]|\d+\.)\s*/, '').trim();
+              const prevItem = checklist[checklist.length - 1];
+              const prevHtml = prevItem.textHtml || prevItem.text;
+              if (prevHtml.indexOf('<ul class="checklist-sub-details">') !== -1) {
+                prevItem.textHtml = prevHtml.replace(/<\/ul>$/, '') + `<li>${subHtml}</li></ul>`;
+              } else {
+                prevItem.textHtml = `${prevHtml}<ul class="checklist-sub-details"><li>${subHtml}</li></ul>`;
+              }
+              prevItem.text = (prevItem.text || '') + `\n  • ${cleanText}`;
+              if (itemImageHtml) {
+                prevItem.imageHtml = (prevItem.imageHtml || '') + itemImageHtml;
+              }
+              continue;
+            }
+
+            let score = 1;
+            let itemText = cleanText;
+
+            if (scoreMatch) {
+              score = parseFloat(scoreMatch[1]);
+              itemText = scoreMatch[3].trim();
             }
 
             const isParentHeader = ['หัวข้อล่าง', 'ดังต่อไปนี้', 'เลือกตอบ', 'ถามอย่างน้อย', '[additive]', '(additive)', '[rubric]', '(rubric)'].some(x => itemText.toLowerCase().indexOf(x.toLowerCase()) !== -1);
@@ -1551,14 +1569,11 @@ function getCaseContentFromDoc(docId, targetCaseId) {
               }
             }
 
-            if (!scoreMatch && (nestLvl >= 2 || indentStart > 80 || isCurrentSubsetSequence)) {
-              score = 0.0;
-            }
-
             const itemId = 'chk_' + simpleHash(itemText).substring(0, 10);
             checklist.push({
               id: itemId,
               text: itemText,
+              textHtml: parseParagraphToHtml(para),
               score: score,
               group: currentGroup,
               checked: false,
