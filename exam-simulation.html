@@ -1293,6 +1293,117 @@
       font-size: 0.85rem;
       line-height: 1.5;
     }
+
+    /* ═══════════════════════════════════════════════════════════
+       MOBILE RESPONSIVE DOCK & HALF-SCREEN BOTTOM SHEET (<= 768px)
+       ═══════════════════════════════════════════════════════════ */
+    @keyframes mobileSheetSlideUp {
+      from {
+        transform: translateY(100%);
+        opacity: 0.8;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .st-chat-mobile-drag-handle {
+      display: none;
+      width: 100%;
+      height: 24px;
+      cursor: grab;
+      touch-action: none;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .st-chat-mobile-drag-handle span {
+      display: block;
+      width: 44px;
+      height: 4.5px;
+      border-radius: 9999px;
+      background: var(--text-muted);
+      opacity: 0.55;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+    .st-chat-mobile-drag-handle:active span {
+      opacity: 0.9;
+      transform: scaleX(1.15);
+    }
+
+    @media (max-width: 768px) {
+      /* Bottom-Center Floating Action Dock */
+      .unified-tools-fab, .st-chat-trigger-btn {
+        bottom: 14px !important;
+        right: auto !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        padding: 9px 20px !important;
+        font-size: 0.88rem !important;
+        box-shadow: 0 10px 28px rgba(79, 70, 229, 0.45), 0 2px 8px rgba(0,0,0,0.18) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        z-index: 10000 !important;
+      }
+      .unified-tools-fab:hover, .st-chat-trigger-btn:hover {
+        transform: translateX(-50%) translateY(-2px) scale(1.02) !important;
+      }
+      .unified-tools-fab:active, .st-chat-trigger-btn:active {
+        transform: translateX(-50%) scale(0.97) !important;
+      }
+
+      /* Mobile Action Menu Sheet */
+      .unified-tools-menu {
+        bottom: 64px !important;
+        left: 12px !important;
+        right: 12px !important;
+        width: auto !important;
+        max-width: 440px !important;
+        margin: 0 auto !important;
+        border-radius: 18px !important;
+        box-shadow: 0 16px 36px rgba(0,0,0,0.32) !important;
+        animation: mobileSheetSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        z-index: 9999 !important;
+      }
+
+      /* Half-Screen Bottom Sheet for Station Chat */
+      .st-chat-drawer {
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 52vh !important;
+        max-height: 94vh !important;
+        min-height: 180px !important;
+        border-radius: 20px 20px 0 0 !important;
+        border-bottom: none !important;
+        border-left: none !important;
+        border-right: none !important;
+        box-shadow: 0 -10px 32px rgba(0, 0, 0, 0.28) !important;
+        animation: mobileSheetSlideUp 0.26s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        z-index: 10001 !important;
+      }
+      .st-chat-drawer.maximized {
+        height: 94vh !important;
+        max-height: 94vh !important;
+        border-radius: 20px 20px 0 0 !important;
+      }
+
+      .st-chat-mobile-drag-handle {
+        display: flex !important;
+      }
+      .st-chat-resizer {
+        display: none !important;
+      }
+      .st-chat-drag-indicator {
+        display: none !important;
+      }
+    }
   </style>
 
   <!-- Firebase SDK (CDN) -->
@@ -9239,11 +9350,78 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       } catch (_) {}
     }
 
+    function setupMobileChatDrag() {
+      const handle = document.getElementById('st-chat-mobile-handle');
+      const drawer = document.getElementById('station-chat-drawer');
+      if (!handle || !drawer) return;
+      if (handle.dataset.touchInit === 'true') return;
+      handle.dataset.touchInit = 'true';
+
+      let isDragging = false;
+      let startY = 0;
+      let startHeight = 0;
+
+      handle.addEventListener('pointerdown', function (e) {
+        if (window.innerWidth > 768) return;
+        e.preventDefault();
+        try { handle.setPointerCapture(e.pointerId); } catch (_) {}
+        isDragging = true;
+        startY = e.clientY;
+        startHeight = drawer.offsetHeight;
+        drawer.style.transition = 'none';
+      });
+
+      handle.addEventListener('pointermove', function (e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        const dy = e.clientY - startY;
+        const minH = 140;
+        const maxH = window.innerHeight * 0.94;
+        const newH = Math.max(minH, Math.min(maxH, startHeight - dy));
+        drawer.style.height = Math.round(newH) + 'px';
+      });
+
+      const stopMobileDrag = function (e) {
+        if (!isDragging) return;
+        isDragging = false;
+        try { handle.releasePointerCapture(e.pointerId); } catch (_) {}
+        drawer.style.transition = 'height 0.22s cubic-bezier(0.16, 1, 0.3, 1)';
+
+        const currentH = drawer.offsetHeight;
+        const winH = window.innerHeight;
+
+        // Snapping logic:
+        // 1. Pulled down significantly (< 180px) -> Close drawer
+        // 2. Pulled high (> 72% screen) -> Snap to 94vh (Fullscreen)
+        // 3. Otherwise -> Snap to 52vh (Half screen)
+        if (currentH < 180) {
+          StationChatController.toggleDrawer();
+        } else if (currentH > winH * 0.72) {
+          drawer.style.height = '94vh';
+        } else {
+          drawer.style.height = '52vh';
+        }
+
+        setTimeout(() => {
+          drawer.style.transition = '';
+        }, 250);
+      };
+
+      handle.addEventListener('pointerup', stopMobileDrag);
+      handle.addEventListener('pointercancel', stopMobileDrag);
+    }
+
     // Auto-init on page load
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initStationChatDragAndResize);
+      document.addEventListener('DOMContentLoaded', () => {
+        initStationChatDragAndResize();
+        setupMobileChatDrag();
+      });
     } else {
-      setTimeout(initStationChatDragAndResize, 200);
+      setTimeout(() => {
+        initStationChatDragAndResize();
+        setupMobileChatDrag();
+      }, 200);
     }
 
     // Auto-close Unified Tools Menu when clicking anywhere else
@@ -12360,6 +12538,11 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
   <!-- Floating Chat Drawer -->
   <div id="station-chat-drawer" class="st-chat-drawer">
+    <!-- Mobile Pull Handle for Half-Screen / Fullscreen Swiping -->
+    <div class="st-chat-mobile-drag-handle" id="st-chat-mobile-handle" title="รูดขึ้น-ลงเพื่อปรับขนาด (ครึ่งจอ / เต็มจอ)">
+      <span></span>
+    </div>
+
     <!-- 8 Dynamic Resizers (Scratchpad-style) -->
     <div class="st-chat-resizer st-chat-resizer-t" data-direction="t"></div>
     <div class="st-chat-resizer st-chat-resizer-b" data-direction="b"></div>

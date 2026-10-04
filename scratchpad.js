@@ -704,13 +704,23 @@
         try { handle.releasePointerCapture(e.pointerId); } catch (_) {}
 
         const h = panel.offsetHeight;
+        const winH = window.innerHeight;
+        panel.style.transition = 'height 0.22s cubic-bezier(0.16, 1, 0.3, 1)';
+
         if (h < 180) {
-          self.toggleMinimize();
+          self.close();
+        } else if (h > winH * 0.72) {
+          panel.style.height = '94vh';
         } else {
+          panel.style.height = '52vh';
+        }
+
+        setTimeout(() => {
+          panel.style.transition = '';
           if (self.activeTab === 'draw' || self.activeTab === 'label') {
             self.resizeCanvas(true);
           }
-        }
+        }, 240);
       };
 
       handle.addEventListener('pointerup', stopMobileDrag);
