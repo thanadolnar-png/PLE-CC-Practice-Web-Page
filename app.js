@@ -786,20 +786,27 @@ function resolveChecklistSubsets(checklist) {
   if (!checklist || !Array.isArray(checklist) || checklist.length === 0) return checklist;
   
   const n = checklist.length;
-  const isSub = new Array(n).fill(false);
   
-  // 1. First pass: explicit flags, zero scores, and bullet characters
+  // 1. If explicit isSubset flags already exist from document bullet nesting (Level 0 vs Level 1+), preserve them!
+  const hasExplicitSubsets = checklist.some(item => item && item.isSubset === true);
+  if (hasExplicitSubsets) {
+    for (let idx = 0; idx < n; idx++) {
+      const sc = parseFloat(checklist[idx].score) || 0;
+      if (sc === 0) checklist[idx].isSubset = true;
+    }
+    return checklist;
+  }
+  
+  // 2. Heuristic Resolver for untagged / raw text
+  const isSub = new Array(n).fill(false);
   for (let i = 0; i < n; i++) {
     const t = (checklist[i].text || '').trim();
     const sc = parseFloat(checklist[i].score) || 0;
-    if (checklist[i].isSubset === true) {
-      isSub[i] = true;
-    } else if (sc === 0 || t.startsWith('-') || t.startsWith('•') || t.startsWith('○') || t.startsWith('o ') || t.startsWith('▪') || t.startsWith('▫')) {
+    if (sc === 0 || t.startsWith('-') || t.startsWith('•') || t.startsWith('○') || t.startsWith('o ') || t.startsWith('▪') || t.startsWith('▫')) {
       isSub[i] = true;
     }
   }
   
-  // 2. Second pass: Detect Parent + Subsets sequences (Rubric Tiers & Additive)
   let i = 0;
   while (i < n) {
     if (isSub[i]) {
@@ -810,25 +817,26 @@ function resolveChecklistSubsets(checklist) {
     const pScore = parseFloat(checklist[i].score) || 0;
     let j = i + 1;
     const subGroup = [];
-    let hasZeroScore = false;
     
     while (j < n) {
       const nextItem = checklist[j];
       const nextT = (nextItem.text || '').trim();
       const nextSc = parseFloat(nextItem.score) || 0;
       
-      if (isSub[j] || nextSc === 0 || nextT.startsWith('-') || nextT.startsWith('•') || nextT.startsWith('○')) {
+      if (nextSc === 0 || isSub[j] || nextT.startsWith('-') || nextT.startsWith('•') || nextT.startsWith('○')) {
         subGroup.push(j);
-        if (nextSc === 0) hasZeroScore = true;
         j++;
+        if (nextSc === 0) {
+          break; // Strict 0-score boundary: STOP rubric group immediately!
+        }
         continue;
       }
       
       // Lookahead check for 0-score or subset marker within next few items in this cluster
       let clusterHasZero = false;
-      for (let k = j; k < Math.min(n, j + 6); k++) {
+      for (let k = j; k < Math.min(n, j + 5); k++) {
         const kSc = parseFloat(checklist[k].score) || 0;
-        if (kSc === 0 || isSub[k]) {
+        if (kSc === 0) {
           clusterHasZero = true;
           break;
         }
@@ -842,7 +850,7 @@ function resolveChecklistSubsets(checklist) {
       }
     }
     
-    if (subGroup.length >= 1 && (hasZeroScore || subGroup.some(k => isSub[k]))) {
+    if (subGroup.length >= 1 && subGroup.some(k => (parseFloat(checklist[k].score) || 0) === 0)) {
       isSub[i] = false; // Confirmed parent
       for (const k of subGroup) {
         isSub[k] = true; // Confirmed subsets
@@ -2049,7 +2057,7 @@ if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
 const DB_NAME = 'RxCU_OSPE_DB';
 const DB_VERSION = 1;
 const STORE_NAME = 'case_details';
-const DB_VERSION_STR = 'v_20261004_153420'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
+const DB_VERSION_STR = 'v_20261004_153651'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
 
 function openIndexedDB() {
   return new Promise((resolve, reject) => {
