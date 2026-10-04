@@ -1291,6 +1291,11 @@
 
     // ─── Single Case Custom Print System ──────────────────────────────────
     function openSingleCasePrintModal() {
+      const c = AppState.currentCase;
+      if (c && (c.isEncrypted || c.isProtected || c.hasPassword) && (!c.scenario && !c.checklist)) {
+        showCasePasscodeModal(c, c.caseId || activeCaseId);
+        return;
+      }
       const modal = document.getElementById('single-case-print-modal');
       if (modal) {
         modal.style.display = 'flex';
@@ -1332,7 +1337,7 @@
 
       const c = AppState.currentCase || {};
       const cat = (c.category || 'CLINIC').toUpperCase();
-      const rawTitle = c.title || document.getElementById('case-title-display')?.textContent || 'ข้อสอบ OSPE';
+      const rawTitle = c.title || document.getElementById('case-title')?.textContent || 'ข้อสอบ OSPE';
       const displayTitle = hideTitle ? 'สถานีสอบ OSPE (OSPE Station)' : `${rawTitle} (${c.caseId || activeCaseId || ''})`;
 
       let html = `<div style="border-bottom: 2px solid #000; padding-bottom: 0.5rem; margin-bottom: 1rem;">
@@ -1343,13 +1348,14 @@
       </div>`;
 
       if (mode === 'full' || mode === 'question') {
+        const scenarioHtml = c.scenario || c.contentHtml || document.getElementById('case-scenario-content')?.innerHTML || '<p>ไม่มีข้อมูลสถานการณ์</p>';
         html += `<div style="margin-bottom:1rem;">
           <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #3b82f6; padding-left:0.5rem;">📌 สถานการณ์</h4>
-          <div style="font-size:0.9rem; line-height:1.5;">${c.scenario || document.getElementById('case-scenario-content')?.innerHTML || ''}</div>
+          <div style="font-size:0.9rem; line-height:1.5;">${scenarioHtml}</div>
         </div>`;
 
         const patientHtml = c.patientInfoHtml || document.getElementById('case-patient-content')?.innerHTML || '';
-        if (patientHtml) {
+        if (patientHtml && patientHtml.trim() !== '') {
           html += `<div style="margin-bottom:1rem;">
             <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #06b6d4; padding-left:0.5rem;">👤 ข้อมูลผู้ป่วย</h4>
             <div style="font-size:0.9rem; line-height:1.5;">${patientHtml}</div>
@@ -1370,7 +1376,16 @@
           html += `<div style="border-top: 2px dashed #94a3b8; margin: 1.5rem 0; padding-top: 0.5rem; text-align: center; color: #64748b; font-size: 0.8rem; font-weight: 600;">✂️ --- แยกหน้าพิมพ์สำหรับ Checklist & เฉลย (Page Break) --- ✂️</div>`;
         }
 
-        const printChkHtml = document.getElementById('print-checklist-list')?.innerHTML || '';
+        let printChkHtml = document.getElementById('print-checklist-list')?.innerHTML || '';
+        if (!printChkHtml && c.checklist && c.checklist.length > 0) {
+          // Construct fallback checklist table
+          printChkHtml = `<table class="print-checklist-table" style="width:100%; border-collapse:collapse; margin-top:0.5rem;"><tbody>`;
+          c.checklist.forEach(item => {
+            printChkHtml += `<tr><td style="border:1px solid #475569; padding:0.4rem;">${item.textHtml || escapeHtml(item.text)}</td><td style="border:1px solid #475569; padding:0.4rem; text-align:center; font-weight:bold;">${item.score}</td><td style="border:1px solid #475569; padding:0.4rem; text-align:center;"><span class="print-eval-box"></span></td></tr>`;
+          });
+          printChkHtml += `</tbody></table>`;
+        }
+
         if (printChkHtml) {
           html += `<div style="margin-top:1rem;">
             <h4 style="margin:0 0 0.3rem 0; font-size:1rem; font-family:var(--font-title); border-left:3px solid #10b981; padding-left:0.5rem;">📋 รายการทักษะประเมิน</h4>
@@ -1411,7 +1426,7 @@
 
       const c = AppState.currentCase || {};
       const cat = (c.category || 'CLINIC').toUpperCase();
-      const rawTitle = c.title || document.getElementById('case-title-display')?.textContent || 'ข้อสอบ OSPE';
+      const rawTitle = c.title || document.getElementById('case-title')?.textContent || 'ข้อสอบ OSPE';
       const displayTitle = hideTitle ? 'สถานีสอบ OSPE' : `${rawTitle} (${c.caseId || activeCaseId || ''})`;
 
       let html = `<div class="batch-print-case">
@@ -1423,13 +1438,14 @@
         </div>`;
 
       if (mode === 'full' || mode === 'question') {
+        const scenarioHtml = c.scenario || c.contentHtml || document.getElementById('case-scenario-content')?.innerHTML || '<p>ไม่มีข้อมูลสถานการณ์</p>';
         html += `<div style="margin-bottom:1.25rem;">
           <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #3b82f6; padding-left:0.5rem;">📌 สถานการณ์</h3>
-          <div style="font-size:0.95rem; line-height:1.5;">${c.scenario || document.getElementById('case-scenario-content')?.innerHTML || ''}</div>
+          <div style="font-size:0.95rem; line-height:1.5;">${scenarioHtml}</div>
         </div>`;
 
         const patientHtml = c.patientInfoHtml || document.getElementById('case-patient-content')?.innerHTML || '';
-        if (patientHtml) {
+        if (patientHtml && patientHtml.trim() !== '') {
           html += `<div style="margin-bottom:1.25rem;">
             <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #06b6d4; padding-left:0.5rem;">👤 ข้อมูลผู้ป่วย</h3>
             <div style="font-size:0.95rem; line-height:1.5;">${patientHtml}</div>
@@ -1450,7 +1466,15 @@
         
         html += `<div ${pageBreakAttr}>`;
 
-        const printChkHtml = document.getElementById('print-checklist-list')?.innerHTML || '';
+        let printChkHtml = document.getElementById('print-checklist-list')?.innerHTML || '';
+        if (!printChkHtml && c.checklist && c.checklist.length > 0) {
+          printChkHtml = `<table class="print-checklist-table" style="width:100%; border-collapse:collapse; margin-top:0.5rem;"><tbody>`;
+          c.checklist.forEach(item => {
+            printChkHtml += `<tr><td style="border:1px solid #475569; padding:0.4rem;">${item.textHtml || escapeHtml(item.text)}</td><td style="border:1px solid #475569; padding:0.4rem; text-align:center; font-weight:bold;">${item.score}</td><td style="border:1px solid #475569; padding:0.4rem; text-align:center;"><span class="print-eval-box"></span></td></tr>`;
+          });
+          printChkHtml += `</tbody></table>`;
+        }
+
         if (printChkHtml) {
           html += `<div>
             <h3 style="margin:0 0 0.4rem 0; font-size:1.1rem; font-family:var(--font-title); border-left:4px solid #10b981; padding-left:0.5rem; page-break-after:avoid;">📋 รายการทักษะประเมิน</h3>
