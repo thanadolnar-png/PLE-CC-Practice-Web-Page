@@ -8237,14 +8237,34 @@
         segs.forEach(seg => {
           const clean = this.normalizeForSpeech(seg.text);
           if (!clean) return;
-          this.splitSpeechChunks(clean).forEach(c => queue.push({ role: seg.role, text: c }));
+          // In Gemini AI Audio TTS, pass full coherent sentences (up to 400 chars) instead of tiny choppy chunks
+          if (clean.length <= 400) {
+            queue.push({ role: seg.role, text: clean });
+          } else {
+            this.splitSpeechChunks(clean).forEach(c => queue.push({ role: seg.role, text: c }));
+          }
         });
         if (!queue.length) return;
 
         this.cancelSpeech();
         const token = this._speechToken;
 
-        // Step 1: Try Gemini AI Audio TTS (Realistic Human Voices with Emotions)
+        // Preload / Pipeline: fetch audio for index i while index i-1 is playing
+        const audioPromises = new Map();
+        const getAudioPromise = (idx) => {
+          if (idx >= queue.length) return Promise.resolve(null);
+          if (!audioPromises.has(idx)) {
+            const it = queue[idx];
+            const a = this.avatarForRole(it.role) || this.getActiveAvatar();
+            audioPromises.set(idx, this.fetchGeminiAudioWav(it.text, a));
+          }
+          return audioPromises.get(idx);
+        };
+
+        // Start prefetching first 2 chunks immediately
+        getAudioPromise(0);
+        if (queue.length > 1) getAudioPromise(1);
+
         const playGeminiChain = async (i) => {
           if (token !== this._speechToken) return;
           if (i >= queue.length) {
@@ -8253,6 +8273,12 @@
             this.updateAvatarUI();
             return;
           }
+
+          // Preload next segment in background ahead of time
+          if (i + 1 < queue.length) {
+            getAudioPromise(i + 1);
+          }
+
           const item = queue[i];
           const av = this.avatarForRole(item.role) || this.getActiveAvatar();
           if (item.role && this._speakerOverride !== av) {
@@ -8260,11 +8286,10 @@
             this.updateAvatarUI();
           }
 
-          const audioUrl = await this.fetchGeminiAudioWav(item.text, av);
+          const audioUrl = await getAudioPromise(i);
           if (token !== this._speechToken) return;
 
           if (audioUrl) {
-            // Play realistic audio
             const audio = new Audio(audioUrl);
             this._currentAudioEl = audio;
             audio.onplay = () => {
@@ -8272,12 +8297,11 @@
             };
             audio.onended = () => {
               if (token === this._speechToken) {
-                this.setAvatarSpeaking(false);
-                setTimeout(() => playGeminiChain(i + 1), 120);
+                // Natural tight transition: only 25ms gap between sentences
+                setTimeout(() => playGeminiChain(i + 1), 25);
               }
             };
             audio.onerror = () => {
-              // Single piece error -> fallback rest to Web Speech API
               this.playFallbackSpeech(queue.slice(i), token);
             };
             try {
@@ -8287,7 +8311,6 @@
               this.playFallbackSpeech(queue.slice(i), token);
             }
           } else {
-            // Gemini TTS quota exhausted (429) or offline -> Fallback seamlessly to native browser TTS
             console.info('Gemini TTS unavailable, fallback to Web Speech API');
             this.playFallbackSpeech(queue.slice(i), token);
           }
