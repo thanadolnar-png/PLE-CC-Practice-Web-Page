@@ -6442,14 +6442,16 @@
     // ─── Timer ───────────────────────────────────────────────
     function startTimer() {
       if (SimState.timerInterval) clearInterval(SimState.timerInterval);
-      SimState.timerValue = 240;
+      const curSt = SimState.stations && SimState.stations[SimState.currentIdx];
+      const dur = parseCaseDurationSec(curSt && curSt.case);
+      SimState.timerValue = dur;
       SimState.timerRunning = true;
       document.getElementById('timer-toggle-btn').textContent = '⏸️ พักตัวจับเวลา';
       updateTimerDisplay();
       
       if (SimState.isLobby) {
         if (SimState.isHost || SimState.role === 'examiner') {
-          _fbDb.ref('rooms/' + SimState.roomId).update({ timerRunning: true, timerValue: 240 });
+          _fbDb.ref('rooms/' + SimState.roomId).update({ timerRunning: true, timerValue: dur });
         }
         startLocalCountdown();
         return;
@@ -6529,7 +6531,9 @@
         alert('เฉพาะ Host / Super Host เท่านั้นที่สามารถรีเซ็ตตัวจับเวลาส่วนกลางได้');
         return;
       }
-      SimState.timerValue = 240;
+      const curSt = SimState.stations && SimState.stations[SimState.currentIdx];
+      const dur = parseCaseDurationSec(curSt && curSt.case);
+      SimState.timerValue = dur;
       SimState.timerRunning = false;
       updateTimerDisplay();
       if (SimState.timerInterval) {
@@ -6538,8 +6542,8 @@
       }
       if (SimState.isLobby && SimState.isHost) {
         _fbDb.ref('rooms/' + SimState.roomId).update({
-          timerValue: 240,
-          timerDuration: 240,
+          timerValue: dur,
+          timerDuration: dur,
           timerStartedAt: null,
           timerRunning: false
         });
@@ -6671,6 +6675,12 @@
       if (curEl) curEl.textContent = SimState.currentIdx + 1;
       const totalEl = document.getElementById('totalNum');
       if (totalEl) totalEl.textContent = SimState.stations.length;
+    }
+
+    // ─── Duration Helper ─────────────────────────────────────
+    function parseCaseDurationSec(c) {
+      if (c && c.durationMin) return Math.round(parseFloat(c.durationMin) * 60);
+      return 240; // default 4 นาที
     }
 
     // ─── Render station ───────────────────────────────────────
@@ -7510,15 +7520,17 @@
         playStationTimeoutAlarm('bell');
         if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
           const now = Date.now();
-          SimState.timerValue = 240;
+          const nextSt = SimState.stations[nextIdx];
+          const nextDur = parseCaseDurationSec(nextSt && nextSt.case);
+          SimState.timerValue = nextDur;
           SimState.timerRunning = true;
           if (SimState.timerInterval) clearInterval(SimState.timerInterval);
           updateTimerDisplay();
           
           if (SimState.cachedRoom) {
             SimState.cachedRoom.currentStationIdx = nextIdx;
-            SimState.cachedRoom.timerValue = 240;
-            SimState.cachedRoom.timerDuration = 240;
+            SimState.cachedRoom.timerValue = nextDur;
+            SimState.cachedRoom.timerDuration = nextDur;
             SimState.cachedRoom.timerStartedAt = now;
             SimState.cachedRoom.timerRunning = true;
           }
@@ -7527,8 +7539,8 @@
           const updatePayload = {
             currentStationIdx: nextIdx,
             caseId: SimState.stations[nextIdx]?.case?.caseId || SimState.stations[nextIdx]?.caseId,
-            timerValue: 240,
-            timerDuration: 240,
+            timerValue: nextDur,
+            timerDuration: nextDur,
             timerStartedAt: now,
             timerRunning: true,
             status: 'running'
@@ -7555,15 +7567,17 @@
         playStationTimeoutAlarm('bell');
         if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
           const now = Date.now();
-          SimState.timerValue = 240;
+          const prevSt = SimState.stations[prevIdx];
+          const prevDur = parseCaseDurationSec(prevSt && prevSt.case);
+          SimState.timerValue = prevDur;
           SimState.timerRunning = true;
           if (SimState.timerInterval) clearInterval(SimState.timerInterval);
           updateTimerDisplay();
           
           if (SimState.cachedRoom) {
             SimState.cachedRoom.currentStationIdx = prevIdx;
-            SimState.cachedRoom.timerValue = 240;
-            SimState.cachedRoom.timerDuration = 240;
+            SimState.cachedRoom.timerValue = prevDur;
+            SimState.cachedRoom.timerDuration = prevDur;
             SimState.cachedRoom.timerStartedAt = now;
             SimState.cachedRoom.timerRunning = true;
           }
@@ -7572,8 +7586,8 @@
           const updatePayload = {
             currentStationIdx: prevIdx,
             caseId: SimState.stations[prevIdx]?.case?.caseId || SimState.stations[prevIdx]?.caseId,
-            timerValue: 240,
-            timerDuration: 240,
+            timerValue: prevDur,
+            timerDuration: prevDur,
             timerStartedAt: now,
             timerRunning: true,
             status: 'running'

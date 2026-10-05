@@ -941,7 +941,7 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
 
   // Parse each tab section
   for (const { title, content, inlineObjects, lists } of sections) {
-    let recording = false, currentSection = 'METADATA', caseSource = '';
+    let recording = false, currentSection = 'METADATA', caseSource = '', caseDurationMin = 0;
     let scenario = '', contentHtml = '', patientInfoHtml = '', equipmentHtml = '', noteHtml = '';
     const checklist = []; let currentGroup = ''; let isCurrentSubsetSequence = false;
 
@@ -986,6 +986,10 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
               const sVal = mStat[1].toLowerCase().replace(/\*/g, '').trim();
               caseStatus = (sVal.includes('unactive') || sVal.includes('inactive')) ? 'Unactive' : 'Active';
             }
+          }
+          if (text.includes('ระยะเวลา')) {
+            const mDur = text.match(/ระยะเวลา\s*:\s*(\d+(?:\.\d+)?)\s*นาที/);
+            if (mDur) caseDurationMin = parseFloat(mDur[1]);
           }
         }
 
@@ -1114,7 +1118,8 @@ function getCaseContentViaDocsRestApi(docId, targetCaseId) {
         checklist: checklist,
         noteHtml: wrapListItemsInHtml_(noteHtml),
         source: formatSourceName(cleanTarget, caseSource),
-        caseStatus: caseStatus || 'Active'
+        caseStatus: caseStatus || 'Active',
+        durationMin: caseDurationMin || 4
       };
     }
   }
@@ -1380,6 +1385,7 @@ function getCaseContentFromDoc(docId, targetCaseId) {
     
     let recording = false;
     let hasFoundCase = false;
+    let caseDurationMin2 = 0;
     
     const numChildren = body.getNumChildren();
     
@@ -1434,13 +1440,20 @@ function getCaseContentFromDoc(docId, targetCaseId) {
               contentHtml: contentHtml,
               checklist: checklist,
               noteHtml: noteHtml,
-              equipmentHtml: equipmentHtml
+              equipmentHtml: equipmentHtml,
+              durationMin: caseDurationMin2 || 4
             };
           }
         }
         
         if (!recording) continue;
         
+        // Parse METADATA fields
+        if (currentSection === 'METADATA' && text.includes('ระยะเวลา')) {
+          const mDur = text.match(/ระยะเวลา\s*:\s*(\d+(?:\.\d+)?)\s*นาที/);
+          if (mDur) caseDurationMin2 = parseFloat(mDur[1]);
+        }
+
         // ตรวจสอบหัวข้อหลักย่อย (ต้องไม่ใช่การระบุกลุ่มย่อยของ Checklist เช่น (กลุ่ม: ...))
         const cleanHeader = text.replace(/^[*_#\s]+/, '').trim();
 
@@ -1614,7 +1627,8 @@ function getCaseContentFromDoc(docId, targetCaseId) {
         contentHtml: contentHtml,
         checklist: checklist,
         noteHtml: noteHtml,
-        equipmentHtml: equipmentHtml
+        equipmentHtml: equipmentHtml,
+        durationMin: caseDurationMin2 || 4
       };
     }
   } // end for b loop

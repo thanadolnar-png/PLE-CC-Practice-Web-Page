@@ -1091,6 +1091,12 @@
     let activeCaseId = getUrlParam('id');
     let currentRole = 'solo'; // solo, examinee, examiner
 
+    // Helper: แปลง durationMin ในเคสเป็นวินาที (default 240 = 4 นาที)
+    function parseCaseDurationSec(c) {
+      if (c && c.durationMin) return Math.round(parseFloat(c.durationMin) * 60);
+      return 240;
+    }
+
     // ตัวแปรจับเวลาสำหรับหน้ารายละเอียดเคสเดี่ยว
     let viewerTimerVal = 240;
     let viewerTimerInterval = null;
@@ -1546,6 +1552,7 @@
         <span class="case-card-tag">โรค/หัวข้อ: ${diseaseVal}</span>
         ${sourceVal}
         <span class="case-card-tag">ผู้เขียน: ${authorVal}</span>
+        <span class="case-card-tag" style="background:rgba(16,185,129,0.12);color:#047857;border:1px solid rgba(16,185,129,0.3);">⏱ ${Math.round(parseCaseDurationSec(c) / 60)} นาที</span>
       `;
       
       function stripSectionHeaders(str) {
@@ -1994,7 +2001,8 @@
     }
 
     function resetViewerTimer() {
-      viewerTimerVal = 240; // 4 นาที
+      const c = (typeof AppState !== 'undefined') && AppState.currentCase;
+      viewerTimerVal = c ? parseCaseDurationSec(c) : 240;
       updateViewerTimerDisplay();
     }
 
