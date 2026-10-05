@@ -3809,13 +3809,19 @@ function autoCheckLinkedChecklistItem(tag, shouldCheck = true) {
     const itemText = item.textContent || '';
     const itemDataTag = item.getAttribute('data-tag') || '';
     
+    // Robust multi-format matching for e.g. (ข้อ 1.1), ข้อ 1.1, 1.1, [1.1], etc.
     const hasTagMatch = (itemDataTag === numOnly || itemDataTag === fullTextTag) ||
                         itemText.includes(`(${fullTextTag})`) ||
                         itemText.includes(`(${numOnly})`) ||
                         itemText.includes(`(ข้อ ${numOnly})`) ||
+                        itemText.includes(`[${fullTextTag}]`) ||
+                        itemText.includes(`[${numOnly}]`) ||
+                        itemText.includes(`[ข้อ ${numOnly}]`) ||
                         itemText.includes(fullTextTag) ||
                         itemText.includes(`ข้อ ${numOnly}`) ||
                         itemText.trim().startsWith(fullTextTag) ||
+                        itemText.trim().startsWith(`(${fullTextTag})`) ||
+                        itemText.trim().startsWith(`(${numOnly})`) ||
                         itemText.trim().startsWith(numOnly);
 
     if (hasTagMatch) {

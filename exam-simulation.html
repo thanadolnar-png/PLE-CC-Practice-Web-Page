@@ -6925,6 +6925,10 @@
 
         // Examiner Live Examinee Submission Panel
         setupExaminerLiveSubmissionListener(st.stationNumber, c);
+      } else if (SimState.role === 'solo') {
+        // In Solo Practice Mode: Setup blanks input sync so answers are recorded and live listener is active
+        setupExamineeInteractiveBlanksSync(st.stationNumber, c);
+        setupExaminerLiveSubmissionListener(st.stationNumber, c);
       }
       
       // Examinee Setup for interactive blanks sync
@@ -7631,6 +7635,7 @@
     let _examineeBlankDebounceTimer = null;
     let _activeExaminerLiveRef = null;
     let _examineeBlankHandler = null;
+    let _activeRenderLiveCards = null;
 
     function encodeFirebaseKey(k) {
       return String(k)
@@ -7717,6 +7722,12 @@
         });
 
         SimState.writtenAnswers[stationNum] = payload;
+
+        // In Solo mode or Examiner preview, immediately refresh live cards
+        const liveListEl = document.getElementById('examiner-live-submission-list');
+        if (liveListEl && typeof _activeRenderLiveCards === 'function') {
+          _activeRenderLiveCards(payload);
+        }
 
         const isImmediate = Boolean(e && e.detail && e.detail.immediate);
         if (_examineeBlankDebounceTimer) {
@@ -7849,6 +7860,8 @@
 
         listEl.innerHTML = html;
       }
+
+      _activeRenderLiveCards = renderLiveCards;
 
       // Initial render with current saved
       const initialAnswers = (SimState.writtenAnswers && SimState.writtenAnswers[stationNum]) || {};
@@ -10825,9 +10838,87 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             const titleText = escapeHtml(c.title || ('สถานี ' + st.stationNumber));
             const caseIdText = c.caseId ? escapeHtml(c.caseId) : '';
             const catText = c.category || (isRest ? 'REST' : 'CLINIC');
-            const detailRowId = `res-chk-detail-${st.stationNumber}`;
-            
-            const detailBtnHtml = (!isRest && checklist.length > 0)
+            // Check if station has blanks and answers
+            const rawScenarioContent = (c.scenario || '') + ' ' + (c.contentHtml || '') + ' ' + (c.scenarioHtml || '');
+            const hasBlanks = rawScenarioContent.includes('[BLANK:');
+            const stationWrittenAnswers = (SimState.writtenAnswers && SimState.writtenAnswers[st.stationNumber]) || {};
+
+            let blanksReviewHtml = '';
+            if (hasBlanks) {
+              const blankRegex = /\[BLANK:\s*([^|\]]+)(?:\s*\|\s*([^|\]]+))?(?:\s*\|\s*([^|\]]+))?(?:\s*\|\s*([^\]]+))?\]/gi;
+              let bMatch;
+              let bCount = 0;
+              const blankEntries = [];
+              const seenTags = new Set();
+              while ((bMatch = blankRegex.exec(rawScenarioContent)) !== null) {
+                bCount++;
+                const answers = (bMatch[1] || '').split(/[,/]/).map(a => a.trim()).filter(Boolean);
+                const rawParts = [bMatch[2], bMatch[3], bMatch[4]].filter(Boolean);
+                let score = 1.0;
+                let tag = '';
+                rawParts.forEach(p => {
+                  const t = p.trim();
+                  if (/^\d+(\.\d+)?$/.test(t)) score = parseFloat(t);
+                  else if (!/^len:/i.test(t)) tag = t.replace(/^#/, '').trim();
+                });
+                if (!tag) tag = `ข้อ ${bCount}`;
+                const cleanDisplayTag = tag.startsWith('ข้อ') ? tag : `ข้อ ${tag}`;
+                const cleanDataTag = tag.replace(/^ข้อ\s*/, '').trim();
+                if (!seenTags.has(cleanDataTag)) {
+                  seenTags.add(cleanDataTag);
+                  blankEntries.push({ tag: cleanDataTag, displayTag: cleanDisplayTag, answers, score });
+                }
+              }
+
+              if (blankEntries.length > 0) {
+                const blankCards = blankEntries.map((b, bIdx) => {
+                  const userVal = (stationWrittenAnswers[b.tag] || '').trim();
+                  const normVal = (typeof normalizeAnswerText === 'function') ? normalizeAnswerText(userVal) : userVal.toLowerCase().trim();
+                  let isMatch = false;
+                  if (normVal) {
+                    isMatch = b.answers.some(ans => {
+                      const nAns = (typeof normalizeAnswerText === 'function') ? normalizeAnswerText(ans) : ans.toLowerCase().trim();
+                      return normVal === nAns;
+                    });
+                  }
+
+                  const badgeHtml = userVal
+                    ? (isMatch 
+                        ? `<span style="color:#15803d;font-weight:700;background:#dcfce7;border:1px solid #86efac;border-radius:4px;padding:2px 7px;font-size:0.76rem;">✅ ถูกต้อง (+${b.score})</span>`
+                        : `<span style="color:#b91c1c;font-weight:700;background:#fee2e2;border:1px solid #fca5a5;border-radius:4px;padding:2px 7px;font-size:0.76rem;">❌ ยังไม่ถูก</span>`)
+                    : `<span style="color:var(--text-muted);font-weight:600;background:var(--bg-secondary);border:1px solid var(--border);border-radius:4px;padding:2px 7px;font-size:0.76rem;">ไม่ได้พิมพ์ตอบ</span>`;
+
+                  return `
+                    <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:0.55rem 0.75rem; margin-bottom:0.35rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+                      <div style="flex:1; min-width:180px; font-size:0.85rem;">
+                        <span style="font-weight:700; color:var(--text-primary); margin-right:4px;">${escapeHtml(b.displayTag)}:</span>
+                        <span style="font-family:var(--font-mono, monospace); font-weight:600; color:${userVal ? 'var(--primary)' : 'var(--text-muted)'};">
+                          ${escapeHtml(userVal || '(ไม่ได้พิมพ์ตอบ)')}
+                        </span>
+                        <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">
+                          เฉลย: <strong>${escapeHtml(b.answers.join(' / '))}</strong>
+                        </div>
+                      </div>
+                      <div>${badgeHtml}</div>
+                    </div>
+                  `;
+                }).join('');
+
+                blanksReviewHtml = `
+                  <div style="margin-bottom: 0.85rem; padding-bottom: 0.65rem; border-bottom: 1px dashed var(--border);">
+                    <div style="font-size: 0.84rem; font-weight: 700; color: var(--primary); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 4px;">
+                      <span>📝 คำตอบที่พิมพ์ในสถานีนี้ (Your Submitted Answers)</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                      ${blankCards}
+                    </div>
+                  </div>
+                `;
+              }
+            }
+
+            const canViewDetail = (!isRest && (checklist.length > 0 || hasBlanks));
+            const detailBtnHtml = canViewDetail
               ? `<button type="button" class="btn btn-outline btn-sm" onclick="toggleResultChecklistDetail('${detailRowId}')" style="padding: 0.25rem 0.55rem; font-size: 0.78rem; font-weight: 600; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 4px;">
                    🔍 <span>ตรวจข้อได้/เสีย</span>
                  </button>`
@@ -10835,7 +10926,12 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
             tr.innerHTML = `
               <td>สถานี ${st.stationNumber}</td>
-              <td><a href="case-viewer.html?id=${caseIdText}" target="_blank" style="color:var(--primary);font-weight:700;">${titleText}</a></td>
+              <td>
+                <span role="button" tabindex="0" onclick="toggleResultChecklistDetail('${detailRowId}')" onkeydown="if(event.key==='Enter')toggleResultChecklistDetail('${detailRowId}')" style="color:var(--primary);font-weight:700;cursor:pointer;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;" title="คลิกเพื่อดูผลคะแนนและเฉลยของสถานีนี้">
+                  <span>${titleText}</span>
+                  <span style="font-size:0.75rem;">🔍</span>
+                </span>
+              </td>
               <td><span class="badge badge-${catText.toLowerCase()}">${catText}</span></td>
               <td>${isRest ? '-' : formatScore(earned) + ' / ' + formatScore(max)}</td>
               <td>${isRest ? '-' : pct + '%'}</td>
@@ -10845,7 +10941,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             tbody.appendChild(tr);
 
             // Add Accordion Detail Row (Initially Hidden)
-            if (!isRest && checklist.length > 0) {
+            if (canViewDetail) {
               const detailTr = document.createElement('tr');
               detailTr.id = detailRowId;
               detailTr.style.display = 'none';
@@ -10885,6 +10981,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
                         ทำได้ <strong>${formatScore(earned)}</strong> จาก <strong>${formatScore(max)}</strong> คะแนน
                       </span>
                     </div>
+                    ${blanksReviewHtml}
                     <div style="display: flex; flex-direction: column; gap: 2px;">
                       ${itemsHtml}
                     </div>
