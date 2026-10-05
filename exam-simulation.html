@@ -2331,7 +2331,7 @@
           <!-- Full-Width Content Pane: Case info -->
           <div class="exam-content-pane" id="exam-left-pane" style="width: 100%;">
 
-            <h3 class="viewer-section-title" style="margin-top: 0;">โจทย์ / สถานการณ์</h3>
+            <h3 class="viewer-section-title" style="margin-top: 0;">สถานการณ์</h3>
             <div id="exam-scenario-content" style="margin-bottom: 2rem;">
               <!-- Scenario text dynamically generated -->
             </div>
@@ -2567,7 +2567,7 @@
               <table class="breakdown-table">
                 <thead>
                   <tr>
-                    <th>สถานี</th><th>ชื่อ</th><th>หมวดวิชา</th><th>คะแนนเต็ม</th><th>ได้ (%)</th><th>ผลประเมิน</th>
+                    <th>สถานี</th><th>ชื่อ</th><th>หมวดวิชา</th><th>คะแนนเต็ม</th><th>ได้ (%)</th><th>ผลประเมิน</th><th>รายละเอียดเกณฑ์</th>
                   </tr>
                 </thead>
                 <tbody id="results-stations-tbody"><!-- Filled dynamically --></tbody>
@@ -6812,6 +6812,10 @@
         noticeCard.style.display = 'block';
         chkContainer.style.display = 'none';
         noteContainer.style.display = 'none';
+        const chkHeaderResetBtn = document.getElementById('btn-reset-exam-checklist');
+        if (chkHeaderResetBtn) chkHeaderResetBtn.style.display = 'none';
+        const quickScoreResetBtn = document.getElementById('btn-quick-reset-score');
+        if (quickScoreResetBtn) quickScoreResetBtn.style.display = 'none';
         if (SimState.isLobby) {
           const toggleBtn = document.getElementById('timer-toggle-btn');
           if (toggleBtn) toggleBtn.style.display = 'none';
@@ -6827,6 +6831,10 @@
         noticeCard.style.display = 'none';
         chkContainer.style.display = 'block';
         noteContainer.style.display = 'block';
+        const chkHeaderResetBtn = document.getElementById('btn-reset-exam-checklist');
+        if (chkHeaderResetBtn) chkHeaderResetBtn.style.display = 'inline-flex';
+        const quickScoreResetBtn = document.getElementById('btn-quick-reset-score');
+        if (quickScoreResetBtn) quickScoreResetBtn.style.display = 'inline-flex';
         const rawNoteEx = c.noteHtml || c.note || '<p>ไม่มีเฉลย/รายละเอียดเพิ่มเติม</p>';
         document.getElementById('exam-note-content-area').innerHTML = (typeof renderRichNoteContent === 'function') ? renderRichNoteContent(rawNoteEx) : rawNoteEx;
         document.getElementById('exam-note-content-area').classList.add('show');
@@ -6849,26 +6857,19 @@
         // In multiplayer room, control abort/leave button visibility
         if (SimState.isLobby) {
           const isStandardRoom = (SimState.examMode === 'standard' || !SimState.examMode);
-          const isSuperHostMode = Boolean(SimState.cachedRoom && SimState.cachedRoom.isSuperHost);
-          const canAbortRoom = Boolean(SimState.isHost || (isStandardRoom && SimState.role === 'examiner'));
+          const isLargeGroup = Boolean(SimState.examMode === 'cohort_breakout' || SimState.examMode === 'carousel_rotation' || (SimState.cachedRoom && SimState.cachedRoom.isSuperHost));
 
           const stickyAbortBtn = document.getElementById('btn-sticky-abort-exam');
           const headerAbortBtn = document.getElementById('btn-abort-exam');
 
-          if (isSuperHostMode && !SimState.isHost) {
-            // Non-host player in Carousel/Cohort Breakout: show "leave room" button only (cannot dissolve)
-            if (stickyAbortBtn) {
-              stickyAbortBtn.style.display = 'inline-flex';
-              stickyAbortBtn.title = 'ออกจากห้องสอบและกลับสู่หน้าหลัก';
-              stickyAbortBtn.innerHTML = '🚪 ออกจากห้อง';
-            }
-            if (headerAbortBtn) {
-              headerAbortBtn.style.display = 'inline-flex';
-              headerAbortBtn.title = 'ออกจากห้องสอบและกลับสู่หน้าหลัก';
-              headerAbortBtn.innerHTML = '🚪 ออกจากห้อง';
-            }
+          if (isLargeGroup) {
+            // Large-group exam (Cohort Breakout & Carousel Rotation):
+            // Hide abort & exit buttons completely for both Examinee and Examiner to prevent accidental clicks
+            if (stickyAbortBtn) stickyAbortBtn.style.display = 'none';
+            if (headerAbortBtn) headerAbortBtn.style.display = 'none';
           } else {
-            // Host (all modes) or Examiner in standard mode: show abort/dissolve button
+            // Standard 1-on-1 mode: Host or Examiner can abort
+            const canAbortRoom = Boolean(SimState.isHost || SimState.role === 'examiner');
             if (stickyAbortBtn) {
               stickyAbortBtn.style.display = canAbortRoom ? 'inline-flex' : 'none';
               stickyAbortBtn.title = 'ยุติการสอบและกลับสู่หน้าตั้งค่า';
@@ -6876,6 +6877,7 @@
             }
             if (headerAbortBtn) {
               headerAbortBtn.style.display = canAbortRoom ? 'inline-flex' : 'none';
+              headerAbortBtn.title = 'ยุติการสอบและกลับสู่หน้าตั้งค่า';
               headerAbortBtn.innerHTML = '🛑 ยุติการสอบ';
             }
           }
@@ -6893,7 +6895,7 @@
       }
       
       // Examinee Setup for interactive blanks sync
-      if (SimState.role === 'examinee' || SimState.role === 'solo') {
+      if (SimState.role === 'examinee' || SimState.role === 'participant') {
         const livePanel = document.getElementById('examiner-live-submission-panel');
         if (livePanel) livePanel.style.display = 'none';
         setupExamineeInteractiveBlanksSync(st.stationNumber, c);
@@ -6906,7 +6908,9 @@
           const noticeAbortBtn = document.getElementById('btn-examinee-notice-abort');
           if (noticeAbortBtn) {
             const isStandardRoom = (SimState.examMode === 'standard' || !SimState.examMode);
-            noticeAbortBtn.style.display = isStandardRoom ? 'inline-block' : 'none';
+            // Hide completely in large-group modes
+            const isLargeGroup = Boolean(SimState.examMode === 'cohort_breakout' || SimState.examMode === 'carousel_rotation' || (SimState.cachedRoom && SimState.cachedRoom.isSuperHost));
+            noticeAbortBtn.style.display = (isStandardRoom && !isLargeGroup) ? 'inline-block' : 'none';
           }
         } else {
           const noticeAbortBtn = document.getElementById('btn-examinee-notice-abort');
@@ -7877,6 +7881,8 @@
       aiEnabled: localStorage.getItem('_ple_ai_enabled') !== 'false', // default true
       aiRole: localStorage.getItem('_ple_ai_role') || 'guru', // 'guru' | 'examiner'
       aiSoundEnabled: localStorage.getItem('_ple_ai_sound') !== 'false', // default true
+      ttsEngine: localStorage.getItem('_ple_tts_engine') || 'ai', // 'ai' | 'local'
+      _ttsExhaustedUntil: 0, // Circuit Breaker: timestamp until AI TTS is paused
       autoChecklistEnabled: localStorage.getItem('_ple_auto_checklist') === 'true', // AI Auto-Checklist
       _autoChecklistBusy: false,
       currentAvatarIndex: 0,
@@ -7968,6 +7974,21 @@
           soundBtn.classList.toggle('active', this.aiSoundEnabled);
           soundStatus.textContent = this.aiSoundEnabled ? '🔊' : '🔇';
         }
+        const ttsEngineBtn = document.getElementById('btn-tts-engine-toggle');
+        if (ttsEngineBtn) {
+          const isAI = this.ttsEngine !== 'local';
+          ttsEngineBtn.textContent = isAI ? '✨ AI' : '🔤 Local';
+          ttsEngineBtn.title = isAI ? 'เสียง AI (Gemini TTS) — คลิกเพื่อสลับเป็น Local' : 'เสียง Local (เบราว์เซอร์) — คลิกเพื่อสลับเป็น AI';
+          ttsEngineBtn.style.background = isAI ? 'linear-gradient(135deg,#6366f1,#8b5cf6)' : 'var(--surface)';
+          ttsEngineBtn.style.color = isAI ? '#fff' : 'var(--text-muted)';
+          ttsEngineBtn.style.borderColor = isAI ? '#6366f1' : 'var(--border-color,#e2e8f0)';
+        }
+      },
+
+      toggleTTSEngine() {
+        this.ttsEngine = (this.ttsEngine === 'ai') ? 'local' : 'ai';
+        localStorage.setItem('_ple_tts_engine', this.ttsEngine);
+        this.updateAvatarUI();
       },
 
       cycleAvatar() {
@@ -8209,10 +8230,11 @@
       const promptText = `${styleInstr}${cleanText}`;
 
       const maxAttempts = this._geminiKeyPool.length;
+      let consecutive429 = 0;
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         const currentEntry = this._geminiKeyPool[this._currentKeyIdx];
         const API_KEY = localStorage.getItem('_gemini_api_key') || currentEntry.key;
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash-lite-tts:generateContent?key=${API_KEY}`;
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash-tts:generateContent?key=${API_KEY}`;
 
         try {
           const controller = new AbortController();
@@ -8242,6 +8264,7 @@
 
           if (!res.ok) {
             if (res.status === 429) {
+              consecutive429++;
               this._currentKeyIdx = (this._currentKeyIdx + 1) % this._geminiKeyPool.length;
               continue;
             }
@@ -8263,6 +8286,10 @@
             continue;
           }
         }
+      }
+      if (consecutive429 >= maxAttempts) {
+        // All keys hit 429 — trip circuit breaker for 15 minutes
+        this._ttsExhaustedUntil = Date.now() + 15 * 60 * 1000;
       }
       return null;
     },
@@ -8327,6 +8354,17 @@
 
         this.cancelSpeech();
         const token = this._speechToken;
+
+        // LOCAL mode bypass — use browser TTS immediately
+        if (this.ttsEngine === 'local') {
+          this.playFallbackSpeech(queue, token);
+          return;
+        }
+        // Circuit Breaker — if all API keys exhausted, fall back to local TTS
+        if (this._ttsExhaustedUntil && Date.now() < this._ttsExhaustedUntil) {
+          this.playFallbackSpeech(queue, token);
+          return;
+        }
 
         // Preload / Pipeline: fetch audio for index i while index i-1 is playing
         const audioPromises = new Map();
@@ -9763,6 +9801,12 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       }
     }
 
+    function toggleTTSEngine() {
+      if (typeof StationChatController !== 'undefined') {
+        StationChatController.toggleTTSEngine();
+      }
+    }
+
     function toggleStationVoiceMic() {
       if (typeof StationChatController !== 'undefined') {
         StationChatController.toggleVoiceMic();
@@ -10744,7 +10788,14 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             const titleText = escapeHtml(c.title || ('สถานี ' + st.stationNumber));
             const caseIdText = c.caseId ? escapeHtml(c.caseId) : '';
             const catText = c.category || (isRest ? 'REST' : 'CLINIC');
+            const detailRowId = `res-chk-detail-${st.stationNumber}`;
             
+            const detailBtnHtml = (!isRest && checklist.length > 0)
+              ? `<button type="button" class="btn btn-outline btn-sm" onclick="toggleResultChecklistDetail('${detailRowId}')" style="padding: 0.25rem 0.55rem; font-size: 0.78rem; font-weight: 600; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 4px;">
+                   🔍 <span>ตรวจข้อได้/เสีย</span>
+                 </button>`
+              : `<span style="color: var(--text-muted); font-size: 0.78rem;">-</span>`;
+
             tr.innerHTML = `
               <td>สถานี ${st.stationNumber}</td>
               <td><a href="case-viewer.html?id=${caseIdText}" target="_blank" style="color:var(--primary);font-weight:700;">${titleText}</a></td>
@@ -10752,8 +10803,59 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
               <td>${isRest ? '-' : formatScore(earned) + ' / ' + formatScore(max)}</td>
               <td>${isRest ? '-' : pct + '%'}</td>
               <td>${statusHtml}</td>
+              <td>${detailBtnHtml}</td>
             `;
             tbody.appendChild(tr);
+
+            // Add Accordion Detail Row (Initially Hidden)
+            if (!isRest && checklist.length > 0) {
+              const detailTr = document.createElement('tr');
+              detailTr.id = detailRowId;
+              detailTr.style.display = 'none';
+              detailTr.className = 'results-checklist-detail-row';
+
+              const checkedSet = new Set(Array.isArray(checked) ? checked : []);
+
+              const itemsHtml = checklist.map((item, cIdx) => {
+                const isItemChecked = checkedSet.has(item.id) || checkedSet.has(String(item.id)) || checkedSet.has(cIdx) || checkedSet.has(String(cIdx));
+                const itemScore = item.score !== undefined ? safeFormatScore(item.score) : '1.0';
+                const itemText = (item.textHtml || item.text || item.title || '').trim();
+                const icon = isItemChecked ? '✅' : '❌';
+                const statusBadge = isItemChecked 
+                  ? `<span style="display: inline-flex; align-items: center; gap: 3px; color: #15803d; font-weight: 700; background: #dcfce7; border: 1px solid #86efac; border-radius: 4px; padding: 2px 7px; font-size: 0.76rem;">✓ ได้ +${itemScore} คะแนน</span>`
+                  : `<span style="display: inline-flex; align-items: center; gap: 3px; color: #b91c1c; font-weight: 700; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 4px; padding: 2px 7px; font-size: 0.76rem;">✗ เสีย +0 / ${itemScore} คะแนน</span>`;
+                
+                return `
+                  <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; padding: 0.55rem 0.75rem; background: ${isItemChecked ? 'rgba(34, 197, 94, 0.04)' : 'rgba(239, 68, 68, 0.04)'}; border-left: 3.5px solid ${isItemChecked ? '#22c55e' : '#ef4444'}; border-radius: 4px; margin-bottom: 0.35rem;">
+                    <div style="flex: 1; min-width: 0; font-size: 0.86rem; line-height: 1.5; color: var(--text-primary);">
+                      <strong style="margin-right: 4px;">${icon} ข้อ ${cIdx + 1}:</strong> ${itemText}
+                    </div>
+                    <div style="flex-shrink: 0;">
+                      ${statusBadge}
+                    </div>
+                  </div>
+                `;
+              }).join('');
+
+              detailTr.innerHTML = `
+                <td colspan="7" style="padding: 0.75rem 1rem; background: var(--bg-secondary); border-bottom: 1.5px solid var(--border);">
+                  <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.9rem 1rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem; border-bottom: 1px dashed var(--border); padding-bottom: 0.4rem;">
+                      <strong style="font-size: 0.88rem; color: var(--text-primary); font-family: var(--font-title); display: flex; align-items: center; gap: 4px;">
+                        <span>📋 เฉลยและรายงานคะแนน Checklist สถานีที่ ${st.stationNumber}</span>
+                      </strong>
+                      <span style="font-size: 0.8rem; color: var(--text-secondary);">
+                        ทำได้ <strong>${formatScore(earned)}</strong> จาก <strong>${formatScore(max)}</strong> คะแนน
+                      </span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                      ${itemsHtml}
+                    </div>
+                  </div>
+                </td>
+              `;
+              tbody.appendChild(detailTr);
+            }
           }
         });
         
@@ -10885,6 +10987,15 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
+
+    // Toggle checklist review accordion in results screen
+    function toggleResultChecklistDetail(rowId) {
+      const row = document.getElementById(rowId);
+      if (!row) return;
+      const isHidden = (row.style.display === 'none' || !row.style.display);
+      row.style.display = isHidden ? 'table-row' : 'none';
+    }
+    window.toggleResultChecklistDetail = toggleResultChecklistDetail;
 
     // Toggle Scratchpad in exam simulation
     function toggleSimScratchpad(initialTab) {
@@ -13072,7 +13183,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         bodyEl.innerHTML = `
           <div class="sim-preview-box" style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.9rem 1.1rem;">
             <strong style="color: var(--primary); font-size: 0.92rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.45rem;">
-              📋 สถานการณ์และคำสั่ง (Scenario & Questions)
+              📋 สถานการณ์
             </strong>
             <div class="case-rich-text" style="font-size: 0.9rem; line-height: 1.6;">${scenarioHtml || '<p style="color:var(--text-muted);">(ไม่มีข้อมูลสถานการณ์)</p>'}</div>
           </div>
@@ -13470,6 +13581,13 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         </div>
       </div>
       <div class="st-chat-avatar-actions">
+        <button type="button" id="btn-tts-engine-toggle" class="st-chat-avatar-tool-btn"
+          onclick="toggleTTSEngine()"
+          title="สลับโหมดเสียง: AI (Gemini TTS) / Local (เบราว์เซอร์)"
+          style="font-size:0.72rem; padding:0.2rem 0.5rem; border:1.5px solid #6366f1;
+                 background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff;
+                 border-radius:7px; cursor:pointer; font-weight:700; white-space:nowrap;
+                 transition:all 0.2s;">✨ AI</button>
         <button type="button" id="btn-ai-sound-toggle" class="st-chat-avatar-tool-btn active" onclick="toggleAISound()" title="เปิด/ปิด เสียงพูดตอบกลับภาษาไทย (TTS Voice)">
           <span id="ai-sound-status-text">🔊</span>
         </button>

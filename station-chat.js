@@ -21,6 +21,8 @@
     aiEnabled: true, // Default enabled for instant learning in Case Viewer & Simulation
     aiRole: localStorage.getItem('_ple_ai_role') || 'guru', // Default to guru in Case Viewer
     aiSoundEnabled: localStorage.getItem('_ple_ai_sound') !== 'false', // Default true
+    ttsEngine: localStorage.getItem('_ple_tts_engine') || 'ai', // 'ai' (Gemini 3.8 Flash TTS) | 'local' (Browser Speech)
+    _ttsExhaustedUntil: 0,
     currentAvatarIndex: 0,
     currentAvatarType: 'guru', // 'guru' | 'prof' | 'patient'
     isListeningVoice: false,
@@ -104,6 +106,24 @@
       if (soundBtn && soundStatus) {
         soundBtn.classList.toggle('active', this.aiSoundEnabled);
         soundStatus.textContent = this.aiSoundEnabled ? '🔊' : '🔇';
+      }
+      const ttsEngineBtn = document.getElementById('btn-tts-engine-toggle');
+      if (ttsEngineBtn) {
+        const isAI = (this.ttsEngine === 'ai');
+        ttsEngineBtn.innerHTML = isAI ? '✨ AI' : '⚡ LOCAL';
+        ttsEngineBtn.title = isAI ? 'โหมดเสียง: Gemini Neural AI (คลิกเพื่อเปลี่ยนเป็นเสียง LOCAL เบราว์เซอร์)' : 'โหมดเสียง: เบราว์เซอร์ LOCAL รวดเร็วทันที (คลิกเพื่อเปลี่ยนเป็นเสียง AI)';
+        ttsEngineBtn.style.color = isAI ? '#7c3aed' : '#0284c7';
+        ttsEngineBtn.style.borderColor = isAI ? 'rgba(124,58,237,0.35)' : 'rgba(2,132,199,0.35)';
+        ttsEngineBtn.style.background = isAI ? 'rgba(124,58,237,0.08)' : 'rgba(2,132,199,0.08)';
+      }
+    },
+
+    toggleTTSEngine() {
+      this.ttsEngine = (this.ttsEngine === 'ai') ? 'local' : 'ai';
+      try { localStorage.setItem('_ple_tts_engine', this.ttsEngine); } catch (_) {}
+      this.updateAvatarUI();
+      if (this.ttsEngine === 'local') {
+        this.cancelSpeech();
       }
     },
 
@@ -317,6 +337,10 @@
         return this._geminiAudioCache[cacheKey];
       }
 
+      if (this._ttsExhaustedUntil && Date.now() < this._ttsExhaustedUntil) {
+        return null;
+      }
+
       if (!this._geminiKeyPool) {
         const _dec = (b) => { try { return atob(b); } catch (_) { return ''; } };
         this._geminiKeyPool = [
@@ -332,10 +356,11 @@
       const promptText = `${styleInstr}${cleanText}`;
 
       const maxAttempts = this._geminiKeyPool.length;
+      let consecutive429 = 0;
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         const currentEntry = this._geminiKeyPool[this._currentKeyIdx];
         const API_KEY = localStorage.getItem('_gemini_api_key') || currentEntry.key;
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash-lite-tts:generateContent?key=${API_KEY}`;
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash-tts:generateContent?key=${API_KEY}`;
 
         try {
           const controller = new AbortController();
@@ -365,6 +390,7 @@
 
           if (!res.ok) {
             if (res.status === 429) {
+              consecutive429++;
               this._currentKeyIdx = (this._currentKeyIdx + 1) % this._geminiKeyPool.length;
               continue;
             }
@@ -386,6 +412,10 @@
             continue;
           }
         }
+      }
+      if (consecutive429 >= maxAttempts) {
+        // All keys hit 429, trip circuit breaker for 15 minutes to prevent waiting on retries
+        this._ttsExhaustedUntil = Date.now() + 15 * 60 * 1000;
       }
       return null;
     },
@@ -450,6 +480,12 @@
 
         this.cancelSpeech();
         const token = this._speechToken;
+
+        // If user explicitly chose LOCAL (Browser Web Speech API), play immediately with zero network latency
+        if (this.ttsEngine === 'local') {
+          this.playFallbackSpeech(queue, token);
+          return;
+        }
 
         // Preload / Pipeline: fetch audio for index i while index i-1 is playing
         const audioPromises = new Map();
@@ -1583,6 +1619,10 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
   window.toggleAISound = function () {
     StationChatController.toggleSound();
+  };
+
+  window.toggleTTSEngine = function () {
+    StationChatController.toggleTTSEngine();
   };
 
   window.toggleStationVoiceMic = function () {
