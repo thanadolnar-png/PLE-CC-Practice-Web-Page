@@ -677,8 +677,8 @@
       if (!this.aiEnabled) return false;
       // 2. Only in Examiner role (as user requested: GURU เอาไว้ถาม ไม่ classify)
       if (this.aiRole !== 'examiner') return false;
-      // 3. Disable in cohort_breakout and carousel_rotation (as user requested)
-      if (typeof SimState !== 'undefined') {
+      // 3. Disable ONLY in multiplayer cohort_breakout and carousel_rotation (supported in solo mode & case library)
+      if (typeof SimState !== 'undefined' && SimState.isLobby) {
         const mode = SimState.examMode || 'standard';
         if (mode === 'cohort_breakout' || mode === 'carousel_rotation') return false;
       }
@@ -710,7 +710,7 @@
       
       // Determine if in unsupported multiplayer mode
       let isUnsupportedMode = false;
-      if (typeof SimState !== 'undefined') {
+      if (typeof SimState !== 'undefined' && SimState.isLobby) {
         const mode = SimState.examMode || 'standard';
         if (mode === 'cohort_breakout' || mode === 'carousel_rotation') {
           isUnsupportedMode = true;
