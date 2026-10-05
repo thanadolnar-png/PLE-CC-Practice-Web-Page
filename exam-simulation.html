@@ -5020,7 +5020,7 @@
               }
 
               if (waitingTitle) waitingTitle.textContent = 'ห้องซ้อมสอบออนไลน์ (Standard Practice Room)';
-              if (waitingDesc) waitingDesc.textContent = 'โจทย์สถานการณ์และข้อมูลผู้ป่วยจะแสดงเมื่อเริ่มการสอบ';
+              if (waitingDesc) waitingDesc.textContent = 'สถานการณ์และข้อมูลผู้ป่วยจะแสดงเมื่อเริ่มการสอบ';
               if (waitingMsg) {
                 if (examinerPlayer) {
                   waitingMsg.textContent = `รอผู้ประเมิน (${escapeHtml(examinerPlayer.name)}) กดเริ่มการสอบ`;
@@ -6706,7 +6706,7 @@
       document.getElementById('exam-station-badge').textContent = `STATION ${st.stationNumber}`;
       
       if (SimState.role === 'examinee') {
-        document.getElementById('exam-case-title').textContent = st.isRest ? 'สถานีพัก' : 'โจทย์สถานีที่ ' + st.stationNumber;
+        document.getElementById('exam-case-title').textContent = st.isRest ? 'สถานีพัก' : 'สถานีที่ ' + st.stationNumber;
         document.getElementById('exam-case-id').style.display = 'none';
       } else {
         document.getElementById('exam-case-title').textContent = c.title;
@@ -6756,7 +6756,7 @@
       }
 
       if (window.Scratchpad) {
-        const titleText = (c && c.title) ? c.title : (st.isRest ? 'สถานีพัก' : ('โจทย์สถานีที่ ' + st.stationNumber));
+        const titleText = (c && c.title) ? c.title : (st.isRest ? 'สถานีพัก' : ('สถานีที่ ' + st.stationNumber));
         Scratchpad.setStation('station-' + st.stationNumber, `สถานีที่ ${st.stationNumber}: ${titleText}`);
       }
       
@@ -12397,7 +12397,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             ${partActionHtml}
           </div>
           <div style="margin-top: 0.35rem; padding-top: 0.25rem; border-top: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; gap: 0.25rem; font-size: 0.7rem; color: var(--primary); font-weight: 600;">
-            <span style="font-size: 0.78rem;">👁️</span> <span>คลิกเพื่อดูโจทย์เคส</span>
+            <span style="font-size: 0.78rem;">👁️</span> <span>คลิกเพื่อดูสถานการณ์เคส</span>
           </div>
         `;
 
@@ -12662,7 +12662,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
           const titleEl = document.getElementById('sh-station-title');
           if (titleEl) {
-            const rawTitle = currCase.title || (currSt.isRest ? 'สถานีพัก' : `โจทย์สถานีที่ ${SimState.currentIdx + 1}`);
+            const rawTitle = currCase.title || (currSt.isRest ? 'สถานีพัก' : `สถานีที่ ${SimState.currentIdx + 1}`);
             const displayTitle = (currCase.caseId && !rawTitle.startsWith(`[${currCase.caseId}]`)) ? `[${currCase.caseId}] ${rawTitle}` : rawTitle;
             titleEl.textContent = displayTitle;
           }
@@ -12684,6 +12684,11 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             }
             if (currCase.source) {
               metaHtml += `<span class="case-card-tag" style="background: rgba(99, 102, 241, 0.12); color: var(--primary); font-weight: 600; border: 1px solid rgba(99, 102, 241, 0.25); font-size:0.82rem; padding:0.2rem 0.6rem; border-radius:4px;">🏷️ ${escapeHtml(currCase.source)}</span>`;
+            }
+            if (!currSt.isRest) {
+              const stDurSec = parseCaseDurationSec(currCase);
+              const stDurMin = Math.round(stDurSec / 60);
+              metaHtml += `<span class="case-card-tag" style="background: rgba(16, 185, 129, 0.12); color: #047857; border: 1px solid rgba(16, 185, 129, 0.3); font-size:0.82rem; padding:0.2rem 0.6rem; border-radius:4px; font-weight:600;">⏱ ${stDurMin} นาที</span>`;
             }
             metaEl.innerHTML = metaHtml;
           }
@@ -12896,7 +12901,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
               <span>${escapeHtml(p.startParticipantName || 'ไม่มี')}</span>
             </div>
             <div style="margin-top:0.3rem;padding-top:0.2rem;border-top:1px dashed var(--border);font-size:0.68rem;color:var(--primary);text-align:center;font-weight:600;">
-              👁️ คลิกเพื่อดูโจทย์เคส
+              👁️ คลิกเพื่อดูสถานการณ์เคส
             </div>
           `;
 
@@ -13066,8 +13071,11 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       if (metaEl) {
         const diseaseVal = (c.disease && c.disease !== '-' && c.disease !== 'undefined') ? c.disease : (c.mainGroup || 'ทั่วไป');
         const authorVal = (c.author && c.author !== 'undefined') ? c.author : 'ไม่ระบุ';
+        const previewDurSec = parseCaseDurationSec(c);
+        const previewDurMin = Math.round(previewDurSec / 60);
         metaEl.innerHTML = `
           <span>🏷️ <strong>โรค/หัวข้อ:</strong> ${escapeHtml(diseaseVal)}</span>
+          <span>⏱ <strong>ระยะเวลา:</strong> ${previewDurMin} นาที</span>
           <span>✍️ <strong>ผู้เขียน:</strong> ${escapeHtml(authorVal)}</span>
           ${c.subTopic ? `<span>📂 <strong>ประเภทย่อย:</strong> ${escapeHtml(c.subTopic)}</span>` : ''}
         `;
@@ -13430,7 +13438,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
   </div>
 
   <!-- ═══════════════════════════════════════════
-       MODAL: STATION CASE DETAIL PREVIEW (ป็อปอัปดูโจทย์เคสกลางจอ)
+       MODAL: STATION CASE DETAIL PREVIEW (ป็อปอัปดูสถานการณ์เคสกลางจอ)
        ═══════════════════════════════════════════ -->
   <div id="modal-station-case-preview" class="exam-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.72); backdrop-filter: blur(5px); z-index: 100000; align-items: center; justify-content: center; padding: 1rem;" onclick="closeStationCasePreview(event)">
     <div class="modal-card st-preview-card" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-lg); max-width: 760px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 25px 60px -15px rgba(0,0,0,0.4); overflow: hidden;" onclick="event.stopPropagation()">

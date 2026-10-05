@@ -1644,6 +1644,8 @@ function renderCaseList() {
     const isProtected = Boolean(c.isProtected || c.hasPassword);
     const sourceBadge = c.source ? `<span class="case-card-tag" style="background: rgba(99, 102, 241, 0.12); color: var(--primary); font-weight: 600; border: 1px solid rgba(99, 102, 241, 0.25);">🏷️ ${c.source}</span>` : '';
     const lockBadge = isProtected ? `<span class="case-card-tag" style="background: rgba(239, 68, 68, 0.12); color: #ef4444; font-weight: 700; border: 1px solid rgba(239, 68, 68, 0.25);">🔒 ข้อสอบลับ</span>` : '';
+    const durMin = c.durationMin ? Math.round(parseFloat(c.durationMin)) : (c.durationSec ? Math.round(parseInt(c.durationSec, 10) / 60) : 4);
+    const durationBadge = `<span class="case-card-tag" style="background: rgba(16, 185, 129, 0.12); color: #047857; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 600;">⏱ ${durMin} นาที</span>`;
     const displayTitle = isProtected ? `🔒 ${c.caseId}` : c.title;
 
     card.innerHTML = `
@@ -1656,6 +1658,7 @@ function renderCaseList() {
         ${lockBadge}
         <span class="case-card-tag">${escapeHtml(isProtected ? "🔒 ล็อกด้วยรหัสผ่าน" : (c.mainGroup || "") + (c.subTopic ? " · " + c.subTopic : ""))}</span>
         ${sourceBadge}
+        ${isProtected ? '' : durationBadge}
       </div>
       <div class="case-card-meta">
         <span>ผู้เขียน: ${escapeHtml(isProtected ? "🔒 สงวนสิทธิ์" : (c.author || 'ไม่ระบุ'))}</span>
