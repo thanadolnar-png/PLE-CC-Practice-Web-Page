@@ -2318,6 +2318,7 @@
               <h2 id="exam-case-title">โหลดเคส...</h2>
               <span class="station-code" id="exam-case-id">OSPE-CL001</span>
               <span id="exam-linked-badge" class="badge" style="display: none; margin-left: 0.5rem; font-size: 0.75rem; vertical-align: middle; padding: 0.25rem 0.6rem; border-radius: 9999px;"></span>
+              <span id="exam-duration-badge" class="badge" style="display: none; margin-left: 0.5rem; font-size: 0.75rem; vertical-align: middle; padding: 0.25rem 0.6rem; border-radius: 9999px; background: rgba(16, 185, 129, 0.15); color: #047857; border: 1px solid rgba(16, 185, 129, 0.4);">⏱ 4 นาที</span>
             </div>
             <button class="gdocs-link btn btn-secondary no-print" onclick="updateSimCurrentCaseFromDoc()" id="btn-update-sim-doc">
               🔄 อัปเดตข้อมูลจาก Google เอกสาร
@@ -5864,15 +5865,17 @@
 
       showGlobalLoader(true);
       try {
-        const firstCaseId = SimState.stations[0]?.case?.caseId || null;
+        const firstCase = SimState.stations[0]?.case;
+        const firstCaseId = firstCase?.caseId || null;
+        const firstDur = parseCaseDurationSec(firstCase);
         const now = Date.now();
         await _fbDb.ref('rooms/' + SimState.roomId).update({
           status: 'running',
           isLocked: true,
           lockedAt: Date.now(),
           timerRunning: true,
-          timerValue: 240,
-          timerDuration: 240,
+          timerValue: firstDur,
+          timerDuration: firstDur,
           timerStartedAt: now + 3000, // Sync timer to start at the exact end of 3s countdown!
           currentStationIdx: 0,
           caseId: firstCaseId
@@ -6587,7 +6590,8 @@
       // Multi-color Fuse Bar Animation ("ชนวนระเบิด")
       const fuseFill = document.getElementById('timer-fuse-fill');
       if (fuseFill) {
-        const totalSecs = 240;
+        const curCase = SimState.stations && SimState.stations[SimState.currentIdx]?.case;
+        const totalSecs = (SimState.cachedRoom && SimState.cachedRoom.timerDuration) || parseCaseDurationSec(curCase) || 240;
         const frac = Math.max(0, Math.min(1, SimState.timerValue / totalSecs));
         const pct = (frac * 100).toFixed(1);
         fuseFill.style.width = `${pct}%`;
@@ -6730,6 +6734,25 @@
         } else {
           linkedBadgeEl.style.display = 'none';
         }
+      }
+
+      // Display Station Duration Badge
+      const durationBadgeEl = document.getElementById('exam-duration-badge');
+      const stDurSec = parseCaseDurationSec(c);
+      if (durationBadgeEl) {
+        if (!st.isRest && c) {
+          const stDurMin = Math.round(stDurSec / 60);
+          durationBadgeEl.textContent = `⏱ ${stDurMin} นาที`;
+          durationBadgeEl.style.display = 'inline-block';
+        } else {
+          durationBadgeEl.style.display = 'none';
+        }
+      }
+
+      // In Solo Practice Mode: If timer is not running, adjust timerValue to match this station's case duration
+      if (!SimState.isLobby && !SimState.timerRunning) {
+        SimState.timerValue = stDurSec;
+        updateTimerDisplay();
       }
 
       if (window.Scratchpad) {
