@@ -158,11 +158,11 @@
       
       <!-- Cinematic Quick Search Console -->
       <div class="cinematic-search-container">
-        <form class="cinematic-search-bar" onsubmit="handleHomeSearch(event)">
+        <form class="cinematic-search-bar" action="case-library.html" method="GET" onsubmit="handleHomeSearch(event)">
           <svg width="18" height="18" fill="none" stroke="#64748b" stroke-width="2.5" viewBox="0 0 24 24" style="margin-right: 0.25rem;">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
-          <input type="text" id="home-search-input" class="cinematic-search-input" placeholder="ค้นหาเคส, ยา, กลุ่มโรค หรือเทคนิคเตรียมยา..." autocomplete="off">
+          <input type="text" id="home-search-input" name="search" class="cinematic-search-input" placeholder="ค้นหาเคส, ยา, กลุ่มโรค หรือเทคนิคเตรียมยา..." autocomplete="off">
           <button type="submit" class="cinematic-search-btn">
             <span>ค้นหาเคส</span>
           </button>

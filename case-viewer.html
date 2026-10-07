@@ -827,7 +827,7 @@
         right: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        height: 52vh !important;
+        height: 65vh !important;
         max-height: 94vh !important;
         min-height: 180px !important;
         border-radius: 20px 20px 0 0 !important;
@@ -842,6 +842,13 @@
         height: 94vh !important;
         max-height: 94vh !important;
         border-radius: 20px 20px 0 0 !important;
+      }
+
+      .st-chat-header {
+        padding: 0.5rem 0.85rem !important;
+      }
+      .st-chat-ai-role-desc {
+        display: none !important;
       }
 
       .st-chat-mobile-drag-handle {
@@ -1093,7 +1100,14 @@
 
     // Helper: แปลง durationMin ในเคสเป็นวินาที (default 240 = 4 นาที)
     function parseCaseDurationSec(c) {
-      if (c && c.durationMin) return Math.round(parseFloat(c.durationMin) * 60);
+      if (typeof window.parseCaseDurationSec === 'function' && window.parseCaseDurationSec !== parseCaseDurationSec) {
+        return window.parseCaseDurationSec(c);
+      }
+      if (!c) return 240;
+      if (c.durationMin) return Math.round(parseFloat(c.durationMin) * 60);
+      const text = (c.content || '') + ' ' + (c.rawHtml || '') + ' ' + (c.scenario || '') + ' ' + (c.patientInfoHtml || '') + ' ' + (c.title || '');
+      const m = text.match(/(?:ระยะเวลา|เวลา)\s*[:：]?\s*(\d+)\s*นาที/);
+      if (m && m[1]) return parseInt(m[1], 10) * 60;
       return 240;
     }
 

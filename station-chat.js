@@ -18,7 +18,7 @@
     activeCaseData: null,
     unreadCount: 0,
     soloMessages: {},
-    aiEnabled: true, // Default enabled for instant learning in Case Viewer & Simulation
+    aiEnabled: localStorage.getItem('_ple_ai_enabled') === 'true', // Default Standard Chat (ธรรมดา) สะอาดตา ทุกที่
     aiRole: localStorage.getItem('_ple_ai_role') || 'guru', // Default to guru in Case Viewer
     aiSoundEnabled: localStorage.getItem('_ple_ai_sound') !== 'false', // Default true
     ttsEngine: localStorage.getItem('_ple_tts_engine') || 'ai', // 'ai' (Gemini 3.8 Flash TTS) | 'local' (Browser Speech)
@@ -947,6 +947,7 @@
 
     toggleAI() {
       this.aiEnabled = !this.aiEnabled;
+      try { localStorage.setItem('_ple_ai_enabled', String(this.aiEnabled)); } catch (_) {}
       this.unlockAudio();
       this.updateAIToggleUI();
       if (this.aiEnabled) {

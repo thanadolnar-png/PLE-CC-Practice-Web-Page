@@ -1377,7 +1377,7 @@
         right: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        height: 52vh !important;
+        height: 65vh !important;
         max-height: 94vh !important;
         min-height: 180px !important;
         border-radius: 20px 20px 0 0 !important;
@@ -1392,6 +1392,13 @@
         height: 94vh !important;
         max-height: 94vh !important;
         border-radius: 20px 20px 0 0 !important;
+      }
+
+      .st-chat-header {
+        padding: 0.5rem 0.85rem !important;
+      }
+      .st-chat-ai-role-desc {
+        display: none !important;
       }
 
       .st-chat-mobile-drag-handle {
@@ -6683,7 +6690,14 @@
 
     // ─── Duration Helper ─────────────────────────────────────
     function parseCaseDurationSec(c) {
-      if (c && c.durationMin) return Math.round(parseFloat(c.durationMin) * 60);
+      if (typeof window.parseCaseDurationSec === 'function' && window.parseCaseDurationSec !== parseCaseDurationSec) {
+        return window.parseCaseDurationSec(c);
+      }
+      if (!c) return 240;
+      if (c.durationMin) return Math.round(parseFloat(c.durationMin) * 60);
+      const text = (c.content || '') + ' ' + (c.rawHtml || '') + ' ' + (c.scenario || '') + ' ' + (c.patientInfoHtml || '') + ' ' + (c.title || '');
+      const m = text.match(/(?:ระยะเวลา|เวลา)\s*[:：]?\s*(\d+)\s*นาที/);
+      if (m && m[1]) return parseInt(m[1], 10) * 60;
       return 240; // default 4 นาที
     }
 
@@ -10949,26 +10963,54 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
               const checkedSet = new Set(Array.isArray(checked) ? checked : []);
 
-              const itemsHtml = checklist.map((item, cIdx) => {
-                const isItemChecked = checkedSet.has(item.id) || checkedSet.has(String(item.id)) || checkedSet.has(cIdx) || checkedSet.has(String(cIdx));
-                const itemScore = item.score !== undefined ? safeFormatScore(item.score) : '1.0';
-                const itemText = (item.textHtml || item.text || item.title || '').trim();
-                const icon = isItemChecked ? '✅' : '❌';
-                const statusBadge = isItemChecked 
-                  ? `<span style="display: inline-flex; align-items: center; gap: 3px; color: #15803d; font-weight: 700; background: #dcfce7; border: 1px solid #86efac; border-radius: 4px; padding: 2px 7px; font-size: 0.76rem;">✓ ได้ +${itemScore} คะแนน</span>`
-                  : `<span style="display: inline-flex; align-items: center; gap: 3px; color: #b91c1c; font-weight: 700; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 4px; padding: 2px 7px; font-size: 0.76rem;">✗ เสีย +0 / ${itemScore} คะแนน</span>`;
-                
-                return `
-                  <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; padding: 0.55rem 0.75rem; background: ${isItemChecked ? 'rgba(34, 197, 94, 0.04)' : 'rgba(239, 68, 68, 0.04)'}; border-left: 3.5px solid ${isItemChecked ? '#22c55e' : '#ef4444'}; border-radius: 4px; margin-bottom: 0.35rem;">
-                    <div style="flex: 1; min-width: 0; font-size: 0.86rem; line-height: 1.5; color: var(--text-primary);">
-                      <strong style="margin-right: 4px;">${icon} ข้อ ${cIdx + 1}:</strong> ${itemText}
-                    </div>
-                    <div style="flex-shrink: 0;">
-                      ${statusBadge}
-                    </div>
+              // จัดกลุ่มรายการ Checklist ตามหมวดหมู่ (item.group)
+              const groupMap = new Map();
+              checklist.forEach((item, cIdx) => {
+                const gName = (item.group || 'ทั่วไป').trim();
+                if (!groupMap.has(gName)) groupMap.set(gName, []);
+                groupMap.get(gName).push({ item, cIdx });
+              });
+
+              let itemsHtml = '';
+              for (const [gName, gItems] of groupMap.entries()) {
+                let gEarned = 0;
+                let gMax = 0;
+                gItems.forEach(({ item, cIdx }) => {
+                  const isItemChecked = checkedSet.has(item.id) || checkedSet.has(String(item.id)) || checkedSet.has(cIdx) || checkedSet.has(String(cIdx));
+                  const sc = item.score !== undefined ? parseFloat(item.score) : 1.0;
+                  gMax += sc;
+                  if (isItemChecked) gEarned += sc;
+                });
+
+                itemsHtml += `
+                  <div style="margin-top: 0.65rem; margin-bottom: 0.35rem; padding: 0.35rem 0.65rem; background: var(--bg-secondary); border-left: 3.5px solid var(--primary); border-radius: 4px; display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.84rem; font-weight: 700; color: var(--text-primary); font-family: var(--font-title);">📂 หมวด: ${escapeHtml(gName)}</span>
+                    <span style="font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); background: var(--surface); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--border);">ทำได้ ${safeFormatScore(gEarned)} / ${safeFormatScore(gMax)} คะแนน</span>
                   </div>
                 `;
-              }).join('');
+
+                itemsHtml += gItems.map(({ item, cIdx }) => {
+                  const isItemChecked = checkedSet.has(item.id) || checkedSet.has(String(item.id)) || checkedSet.has(cIdx) || checkedSet.has(String(cIdx));
+                  const itemScore = item.score !== undefined ? safeFormatScore(item.score) : '1.0';
+                  const itemText = (item.textHtml || item.text || item.title || '').trim();
+                  const icon = isItemChecked ? '✅' : '❌';
+                  const isSub = Boolean(item.isSubset);
+                  const statusBadge = isItemChecked 
+                    ? `<span style="display: inline-flex; align-items: center; gap: 3px; color: #15803d; font-weight: 700; background: #dcfce7; border: 1px solid #86efac; border-radius: 4px; padding: 2px 7px; font-size: 0.76rem;">✓ ได้ +${itemScore} คะแนน</span>`
+                    : `<span style="display: inline-flex; align-items: center; gap: 3px; color: #b91c1c; font-weight: 700; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 4px; padding: 2px 7px; font-size: 0.76rem;">✗ เสีย +0 / ${itemScore} คะแนน</span>`;
+                  
+                  return `
+                    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; padding: 0.5rem 0.75rem; ${isSub ? 'margin-left: 1.25rem; border-left: 2px dashed #94a3b8;' : 'border-left: 3.5px solid ' + (isItemChecked ? '#22c55e' : '#ef4444') + ';'}; background: ${isItemChecked ? 'rgba(34, 197, 94, 0.04)' : 'rgba(239, 68, 68, 0.04)'}; border-radius: 4px; margin-bottom: 0.3rem;">
+                      <div style="flex: 1; min-width: 0; font-size: 0.85rem; line-height: 1.45; color: var(--text-primary);">
+                        <strong style="margin-right: 4px;">${icon} ${isSub ? '↳ ข้อย่อย ' : 'ข้อ '}${cIdx + 1}:</strong> ${itemText}
+                      </div>
+                      <div style="flex-shrink: 0;">
+                        ${statusBadge}
+                      </div>
+                    </div>
+                  `;
+                }).join('');
+              }
 
               detailTr.innerHTML = `
                 <td colspan="7" style="padding: 0.75rem 1rem; background: var(--bg-secondary); border-bottom: 1.5px solid var(--border);">

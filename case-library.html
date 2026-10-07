@@ -277,20 +277,29 @@
       else document.body.classList.remove('is-fullscreen');
     });
 
-    // ดึง URL Parameter ถ้าต้องการฟิลเตอร์หมวดมาจากหน้าแรก หรือต้องการแสดง Report Modal ทันที
+    // ดึง URL Parameter ถ้าต้องการฟิลเตอร์หมวดมาจากหน้าแรก หรือต้องการค้นหา หรือแสดง Report Modal ทันที
     document.addEventListener('DOMContentLoaded', () => {
+      const searchParam = getUrlParam('search') || getUrlParam('q');
+      if (searchParam) {
+        const searchInput = document.getElementById('search-case');
+        if (searchInput) searchInput.value = searchParam;
+        AppState.activeFilters.search = searchParam;
+      }
+
       const catParam = getUrlParam('cat');
       if (catParam) {
         const selectCat = document.getElementById('filter-category');
         if (selectCat) {
           selectCat.value = catParam;
           AppState.activeFilters.category = catParam;
-          // รอการโหลดข้อมูลเคสผ่าน app.js และทำการฟิลเตอร์
-          setTimeout(() => {
-            applyFilters();
-            renderCaseList();
-          }, 350);
         }
+      }
+
+      if (searchParam || catParam) {
+        setTimeout(() => {
+          applyFilters();
+          renderCaseList();
+        }, 350);
       }
 
       // เปิด Report Modal อัตโนมัติ หากมี parameter ?report=CASE_ID

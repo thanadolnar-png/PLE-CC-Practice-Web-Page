@@ -807,6 +807,7 @@ def get_case_content_from_doc(doc_data, target_case_id, doc_equations=None):
         case_source = ''
         case_password = ''
         case_status = 'Active'
+        case_duration_min = None
         
         recording = False
         has_found_case = False
@@ -853,9 +854,10 @@ def get_case_content_from_doc(doc_data, target_case_id, doc_equations=None):
                         current_section = 'METADATA'
                         case_source = ""
                         case_password = ""
+                        case_duration_min = None
                         continue
                     elif recording:
-                        return {
+                        res_obj = {
                             "scenario": scenario.strip(),
                             "patientInfoHtml": wrap_list_items_in_html(patient_info_html),
                             "contentHtml": wrap_list_items_in_html(content_html),
@@ -866,6 +868,9 @@ def get_case_content_from_doc(doc_data, target_case_id, doc_equations=None):
                             "password": case_password,
                             "caseStatus": case_status
                         }
+                        if case_duration_min:
+                            res_obj["durationMin"] = case_duration_min
+                        return res_obj
                 
                 if not recording:
                     continue
@@ -932,6 +937,12 @@ def get_case_content_from_doc(doc_data, target_case_id, doc_equations=None):
                         m_pwd = re.search(r"(?:password|รหัส(?:ผ่าน)?)\s*:\s*(.*)$", text_strip, re.IGNORECASE)
                         if m_pwd:
                             case_password = m_pwd.group(1).replace('*', '').strip()
+                    m_dur = re.search(r"(?:ระยะเวลา|เวลา)\s*[:：]?\s*(\d+)\s*นาที", text_strip)
+                    if m_dur:
+                        try:
+                            case_duration_min = int(m_dur.group(1))
+                        except:
+                            pass
                     continue
                     
                 # Auto-transition to CHECKLIST if an item pattern with score like -(1) or (1) is encountered
@@ -1041,7 +1052,7 @@ def get_case_content_from_doc(doc_data, target_case_id, doc_equations=None):
                     checklist[0]['imageHtml'] = img_matches[0]
                     
             checklist = resolve_checklist_subsets_py(checklist)
-            return {
+            res_obj = {
                 "scenario": scenario.strip(),
                 "patientInfoHtml": wrap_list_items_in_html(patient_info_html),
                 "contentHtml": wrap_list_items_in_html(content_html),
@@ -1052,6 +1063,9 @@ def get_case_content_from_doc(doc_data, target_case_id, doc_equations=None):
                 "password": case_password,
                 "caseStatus": case_status
             }
+            if case_duration_min:
+                res_obj["durationMin"] = case_duration_min
+            return res_obj
             
     return None
 
@@ -1337,6 +1351,9 @@ def main():
                     if meta_status == 'Unactive':
                         meta['isActive'] = False
                         c_details['isActive'] = False
+
+                    if c_details.get('durationMin'):
+                        meta['durationMin'] = c_details['durationMin']
 
                     pwd = c_details.get('password')
                     if pwd:
