@@ -10362,6 +10362,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
           // Equal-weight average percentage across active stations
           const overallPct = activeStationCount > 0 ? Math.round(sumStationPct / activeStationCount) : (totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0);
+          const isAllPassed = (passedStations >= stationsList.length && stationsList.length > 0) || (overallPct >= 80 && activeStationCount > 0 && passedStations >= activeStationCount);
           leaderboard.push({
             id: partId || tableId,
             name: partName || 'ผู้เข้าสอบ',
@@ -10372,7 +10373,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             percent: overallPct,
             passedStations: passedStations,
             totalStations: stationsList.length,
-            isPassed: overallPct >= 80
+            isPassed: isAllPassed
           });
         });
       } else if (examMode === 'carousel_rotation') {
@@ -10452,6 +10453,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
           // Equal-weight average percentage across active stations
           const overallPct = activeStationCount > 0 ? Math.round(sumStationPct / activeStationCount) : (totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0);
+          const isAllPassed = (passedStations >= stationsList.length && stationsList.length > 0) || (overallPct >= 80 && activeStationCount > 0 && passedStations >= activeStationCount);
           leaderboard.push({
             id: pId,
             name: pData.name || 'ผู้เข้าสอบ',
@@ -10462,7 +10464,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             percent: overallPct,
             passedStations: passedStations,
             totalStations: stationsList.length,
-            isPassed: overallPct >= 80
+            isPassed: isAllPassed
           });
         });
       } else {
@@ -10505,6 +10507,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
           });
           // Equal-weight average percentage across active stations
           const overallPct = activeStationCount > 0 ? Math.round(sumStationPct / activeStationCount) : (totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0);
+          const isAllPassed = (passedStations >= stationsList.length && stationsList.length > 0) || (overallPct >= 80 && activeStationCount > 0 && passedStations >= activeStationCount);
           leaderboard.push({
             id: p.id || p.name,
             name: p.name || 'ผู้เข้าสอบ',
@@ -10515,7 +10518,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             percent: overallPct,
             passedStations: passedStations,
             totalStations: stationsList.length,
-            isPassed: overallPct >= 80
+            isPassed: isAllPassed
           });
         });
       }
@@ -10832,6 +10835,8 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
           const checked = SimState.studentScores[st.stationNumber] || SimState.studentScores[String(st.stationNumber)] || [];
           const checklist = Array.isArray(c.checklist) ? c.checklist : [];
           const { currentScore: earned, totalScore: max } = calculateStationScore(checklist, checked);
+          
+          const detailRowId = `res-chk-detail-${st.stationNumber}`;
           
           totalMaxScore += max;
           totalEarnedScore += earned;
