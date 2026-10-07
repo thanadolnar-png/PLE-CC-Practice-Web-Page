@@ -604,9 +604,49 @@ function isCaseActive(c) {
   if (!c) return false;
   if (c.isActive === false || c.isActive === 'FALSE' || String(c.isActive).toUpperCase() === 'FALSE') return false;
   if (c.caseStatus && (String(c.caseStatus).toLowerCase() === 'unactive' || String(c.caseStatus).toLowerCase() === 'inactive')) return false;
+  // Realtime kill-switch: ตรวจสอบ Set ที่ sync จาก Google Sheet แบบ realtime
+  if (typeof realtimeInactiveSet !== 'undefined' && realtimeInactiveSet.has && c.caseId && realtimeInactiveSet.has(c.caseId)) return false;
   return true;
 }
 window.isCaseActive = isCaseActive;
+
+// ──────────────────────────────────────────────────────────────
+// Realtime Kill-Switch: sync inactive cases จาก Google Sheet
+// ping ทุก 30 วินาที — payload เล็กมาก (แค่ list ของ caseId ที่ปิด)
+// ──────────────────────────────────────────────────────────────
+let realtimeInactiveSet = new Set();
+let _realtimeSyncTimer = null;
+
+async function syncRealtimeInactiveCases() {
+  if (!currentApiUrl) return;
+  try {
+    const r = await fetch(`${currentApiUrl}?action=getInactiveCases&_cb=${Date.now()}`, {
+      signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined
+    });
+    const j = await r.json();
+    if (j && j.success && j.data && Array.isArray(j.data.inactiveCaseIds)) {
+      const newSet = new Set(j.data.inactiveCaseIds);
+      // ถ้ามีการเปลี่ยนแปลง ให้ refresh list ที่แสดงอยู่
+      const changed = newSet.size !== realtimeInactiveSet.size ||
+        [...newSet].some(id => !realtimeInactiveSet.has(id));
+      realtimeInactiveSet = newSet;
+      if (changed && AppState.cases && AppState.cases.length > 0) {
+        // Re-filter AppState.cases และ re-render
+        if (typeof onCasesLoaded === 'function') onCasesLoaded();
+        console.info('[Realtime Kill-Switch] Updated — inactive:', [...realtimeInactiveSet]);
+      }
+    }
+  } catch (e) {
+    // Silent fail — ไม่กระทบ UX
+  }
+}
+
+function startRealtimeInactiveSync(intervalMs) {
+  intervalMs = intervalMs || 30000; // default 30s
+  syncRealtimeInactiveCases(); // immediate first ping
+  if (_realtimeSyncTimer) clearInterval(_realtimeSyncTimer);
+  _realtimeSyncTimer = setInterval(syncRealtimeInactiveCases, intervalMs);
+}
 
 // ──────────────────────────────────────────────────────────────
 // 2. Data Fetching & State
@@ -673,6 +713,7 @@ async function loadCasesData() {
         // Dispatch event so exam-simulation and other pages can react
         window.dispatchEvent(new CustomEvent('appDataReady', { detail: { count: fetchedCases.length } }));
         onCasesLoaded();
+        startRealtimeInactiveSync(30000); // เริ่ม realtime kill-switch ping ทุก 30s
         return;
       }
     } catch (e) {
@@ -2291,7 +2332,7 @@ if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
 const DB_NAME = 'RxCU_OSPE_DB';
 const DB_VERSION = 1;
 const STORE_NAME = 'case_details';
-const DB_VERSION_STR = 'v_20261005_150608'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
+const DB_VERSION_STR = 'v_20261005_152253'; // อัปเดตเวอร์ชันนี้เพื่อบังคับโหลดใหม่เมื่อมีเคสเพิ่มเติมในสคริปต์ออฟไลน์
 
 function openIndexedDB() {
   return new Promise((resolve, reject) => {

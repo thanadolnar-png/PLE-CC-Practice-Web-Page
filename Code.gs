@@ -185,6 +185,9 @@ function doGet(e) {
         case 'getReports':
           return buildResponse(getCaseReports(e.parameter));
 
+        case 'getInactiveCases':
+          return buildResponse(getInactiveCases());
+
         case 'testEquation':
         case 'getDocEquations':
           return buildResponse(getDocEquations(e.parameter.docId));
@@ -494,6 +497,39 @@ function getCaseList(params = {}) {
     cases: cases,
     source: loadedFromSheet ? 'Google Sheets' : 'Hardcoded Defaults'
   };
+}
+
+// ============================================================
+// getInactiveCases — Realtime Kill-Switch
+// คืนค่า list ของ caseId ที่มี isActive = FALSE เท่านั้น
+// ใช้โดย app.js เพื่อกรองเคสที่ปิดออกแบบ realtime
+// ============================================================
+function getInactiveCases() {
+  try {
+    const ss = getSpreadsheet();
+    const sheet = ss.getSheetByName(CONFIG.sheets.caseLibrary);
+    if (!sheet) return { inactiveCaseIds: [] };
+    const data = sheet.getDataRange().getValues();
+    if (data.length < 3) return { inactiveCaseIds: [] };
+    // Row 0 = banner, Row 1 = headers, Row 2+ = data
+    const headers = data[1] || [];
+    const caseIdIdx = headers.indexOf('caseId');
+    const isActiveIdx = headers.indexOf('isActive');
+    if (caseIdIdx === -1 || isActiveIdx === -1) return { inactiveCaseIds: [] };
+    const inactiveCaseIds = [];
+    for (let i = 2; i < data.length; i++) {
+      const row = data[i];
+      const caseId = row[caseIdIdx];
+      const isActive = row[isActiveIdx];
+      if (caseId && (isActive === false || String(isActive).toUpperCase() === 'FALSE')) {
+        inactiveCaseIds.push(String(caseId).trim());
+      }
+    }
+    return { inactiveCaseIds: inactiveCaseIds, timestamp: new Date().toISOString() };
+  } catch (e) {
+    Logger.log('getInactiveCases error: ' + e.toString());
+    return { inactiveCaseIds: [], error: e.toString() };
+  }
 }
 
 function getCase(caseId) {

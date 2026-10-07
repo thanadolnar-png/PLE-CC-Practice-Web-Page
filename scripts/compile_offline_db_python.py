@@ -17,6 +17,13 @@ sys.stdout.reconfigure(encoding='utf-8')
 CRED_FILE = r"c:\Users\thana\Desktop\PLE-CC\gemini-sheets-editor-497118-060a7f15daf9.json"
 spreadsheet_id = '1Fuakz3nCXa7klgQznrtGUNVRvNp_g9BJRfWNHD0awxI'
 
+KNOWN_SOURCE_DOCS = [
+    {"docId": "1ZNKvEBVAUeVcJ2GSH4gGKujA8whv7zY0fH4pXVEJa4g", "defaultCategory": "Clinic"},
+    {"docId": "1vgahUG5RDdSfTN4b97W2dB0aDTjEAnCOruH-S1lvWrw", "defaultCategory": "Product"},
+    {"docId": "1wUOsrGZiuBf6tpsoiGHvDeiwZCinUDvepYfdc2Onzrg", "defaultCategory": "SAP"},
+    {"docId": "1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24", "defaultCategory": "Product"}
+]
+
 def get_google_credentials(scopes):
     sa_json = os.environ.get('GCP_SA_KEY') or os.environ.get('COMPILE_AND_PUSH')
     if sa_json:
@@ -1221,10 +1228,36 @@ def main():
         print(f"Mode [SOURCE]: Matched {len(target_cases)} cases for source '{query}': {[c['caseId'] for c in target_cases]}")
 
     if not target_cases:
-        print(f"❌ No matching cases found for mode '{mode}' with query '{query}'! Aborting.")
-        return
+        if mode == "cases" and query:
+            print(f"⚠️ Case '{query}' not found in Sheet CaseLibrary! Activating Auto-Discovery from Google Docs...")
+            # Automatically check all KNOWN_SOURCE_DOCS for the requested case ID
+            requested_cids = [k.strip().upper() for k in re.split(r"[,;\s]+", query) if k.strip()]
+            for r_cid in requested_cids:
+                normalized_cid = r_cid if r_cid.startswith("OSPE-") else f"OSPE-{r_cid}"
+                dummy_meta = {
+                    "caseId": normalized_cid,
+                    "title": f"เคส {normalized_cid.replace('OSPE-', '')}",
+                    "category": "Clinic" if "CL" in normalized_cid else ("SAP" if "SP" in normalized_cid else "Product"),
+                    "mainGroup": "",
+                    "subTopic": "",
+                    "disease": "",
+                    "difficulty": 2,
+                    "docId": "",
+                    "author": "Auto-Discovered",
+                    "createdDate": time.strftime("%Y-%m-%d"),
+                    "source": format_source_name(normalized_cid),
+                    "isActive": True,
+                    "linkedNextCase": "",
+                    "linkedFromCase": "",
+                    "_isNewCase": True
+                }
+                target_cases.append(dummy_meta)
+                active_cases.append(dummy_meta)
+        else:
+            print(f"❌ No matching cases found for mode '{mode}' with query '{query}'! Aborting.")
+            return
 
-    # Map target Google Docs to target cases only
+    # Map target Google Docs to target cases
     doc_to_cases = {}
     for c in target_cases:
         doc_id = c.get("docId")
@@ -1232,6 +1265,14 @@ def main():
             if doc_id not in doc_to_cases:
                 doc_to_cases[doc_id] = []
             doc_to_cases[doc_id].append(c["caseId"])
+        elif c.get("_isNewCase"):
+            # Search all known docs for this new case
+            for kdoc in KNOWN_SOURCE_DOCS:
+                k_id = kdoc["docId"]
+                if k_id not in doc_to_cases:
+                    doc_to_cases[k_id] = []
+                if c["caseId"] not in doc_to_cases[k_id]:
+                    doc_to_cases[k_id].append(c["caseId"])
 
     print(f"Total Google Docs to download: {len(doc_to_cases)} document(s)")
 
@@ -1334,6 +1375,33 @@ def main():
                     clean_k = case_id.strip()
                     details_db[clean_k] = store_obj
                     print(f"    → Success! Checklist items: {len(c_details.get('checklist', []))}")
+                    
+                    # Auto-Register newly discovered case to Google Sheet CaseLibrary!
+                    if meta.get('_isNewCase'):
+                        try:
+                            print(f"    📝 Auto-registering new case {case_id} to Google Sheet CaseLibrary dashboard...")
+                            new_row = [
+                                case_id,
+                                meta.get('title') or c_details.get('title') or f"เคส {case_id.replace('OSPE-', '')}",
+                                c_details.get('category') or meta.get('category') or 'Product',
+                                meta.get('mainGroup') or '',
+                                meta.get('subTopic') or '',
+                                meta.get('disease') or '',
+                                meta.get('difficulty') or 2,
+                                doc_id,
+                                meta.get('author') or 'ไม่ระบุ',
+                                meta.get('createdDate') or time.strftime("%Y-%m-%d"),
+                                "TRUE",
+                                "",
+                                "",
+                                final_source
+                            ]
+                            ws.append_row(new_row)
+                            meta['_isNewCase'] = False
+                            meta['docId'] = doc_id
+                            print(f"    ✅ Successfully registered {case_id} in Google Sheet!")
+                        except Exception as reg_err:
+                            print(f"    ⚠️ Notice: Could not append new case to Sheet ({reg_err})")
                 else:
                     print(f"    → ⚠️ Warning: Case content not found in Google Doc.")
             except Exception as e:
