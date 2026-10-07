@@ -1933,10 +1933,10 @@ ol.ordered-list li,
 }
 
 .results-card {
-  max-width: 920px;
-  width: 100%;
+  max-width: 1280px;
+  width: min(1280px, 96vw);
   margin: 0 auto;
-  padding: 2.5rem 2.25rem !important;
+  padding: 2.25rem 2rem !important;
   box-sizing: border-box;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -1949,9 +1949,32 @@ ol.ordered-list li,
     padding: 1rem 0.5rem 2rem 0.5rem;
   }
   .results-card {
-    padding: 1.5rem 1rem !important;
+    width: 100%;
+    padding: 1.25rem 0.75rem !important;
     border-radius: var(--radius-md);
   }
+}
+
+.results-checklist-item-wrap {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 0.35rem;
+  box-sizing: border-box;
+}
+
+.results-checklist-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .results-score-display {
