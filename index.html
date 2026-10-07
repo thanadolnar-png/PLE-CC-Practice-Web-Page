@@ -108,265 +108,27 @@
       transform: translateY(-1px);
     }
 
-    /* Mascot Journey Showcase Section */
-    .journey-showcase-section {
-      padding: 2.25rem 1.5rem 3.5rem;
-      background: var(--bg);
-      display: flex;
-      justify-content: center;
+    /* Mascot Journey Video (Seamless edge-to-edge full width, no borders) */
+    .home-hero-video-wrapper {
       width: 100%;
-    }
-    .journey-container {
-      max-width: 1040px;
-      width: 100%;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 1.65rem;
-    }
-    .journey-header {
-      text-align: center;
-      max-width: 760px;
-      margin: 0 auto;
-    }
-    .journey-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.35rem 0.95rem;
-      background: #FFFFFF;
-      border: 1px solid var(--border);
-      border-radius: 9999px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--primary);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-      margin-bottom: 0.75rem;
-    }
-    .journey-badge-dot {
-      width: 8px;
-      height: 8px;
-      background: #10b981;
-      border-radius: 50%;
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-      animation: pulse 2s infinite;
-    }
-    .journey-title {
-      font-family: var(--font-title);
-      font-size: 1.45rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      line-height: 1.35;
-      margin: 0 0 0.45rem 0;
-    }
-    .journey-desc {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      line-height: 1.5;
       margin: 0;
-    }
-    .journey-card {
-      background: #FFFFFF;
-      border: 1px solid var(--border);
-      border-radius: 20px;
+      padding: 0;
+      background: var(--bg);
       overflow: hidden;
-      box-shadow: 0 20px 45px -15px rgba(15, 23, 42, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.03);
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-    }
-    .journey-card:hover {
-      box-shadow: 0 24px 50px -12px rgba(15, 23, 42, 0.14), 0 0 0 1px rgba(14, 116, 144, 0.2);
-    }
-    .journey-media-wrapper {
-      position: relative;
-      width: 100%;
-      background: #0f172a;
-      overflow: hidden;
-      aspect-ratio: 1024 / 338;
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
+      line-height: 0;
     }
-    .journey-media {
+    .home-hero-video {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      height: auto;
       display: block;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
       image-rendering: -webkit-optimize-contrast;
       image-rendering: pixelated;
-    }
-    .journey-media-overlay {
-      position: absolute;
-      top: 12px;
-      right: 14px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      z-index: 5;
-    }
-    .journey-ctrl-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: rgba(15, 23, 42, 0.65);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      border-radius: 9999px;
-      color: #FFFFFF;
-      font-size: 0.74rem;
-      font-weight: 600;
-      padding: 0.3rem 0.75rem;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      line-height: 1;
-    }
-    .journey-ctrl-btn:hover {
-      background: rgba(15, 23, 42, 0.9);
-      border-color: rgba(255, 255, 255, 0.45);
-      transform: translateY(-1px);
-    }
-    .journey-card-footer {
-      padding: 0.9rem 1.25rem;
-      background: #FFFFFF;
-      border-top: 1px solid var(--border);
-    }
-    .journey-timeline-steps {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-    .journey-step {
-      display: flex;
-      align-items: center;
-      gap: 0.45rem;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      padding: 0.35rem 0.65rem;
-      border-radius: 8px;
-      background: var(--bg);
-      border: 1px solid transparent;
-      transition: all 0.15s ease;
-    }
-    .journey-step.highlight {
-      background: #ecfdf5;
-      color: #065f46;
-      border-color: #a7f3d0;
-      font-weight: 700;
-    }
-    .journey-step-divider {
-      color: var(--text-muted);
-      font-size: 0.8rem;
-      opacity: 0.5;
-    }
-    .journey-pathway-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.15rem;
-      margin-top: 0.25rem;
-    }
-    .journey-pathway-card {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1.15rem 1.25rem;
-      background: #FFFFFF;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      text-decoration: none;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .journey-pathway-card:hover {
-      transform: translateY(-3px);
-      border-color: var(--primary);
-      box-shadow: 0 12px 28px -4px rgba(14, 116, 144, 0.16);
-    }
-    .pathway-icon-wrap {
-      width: 46px;
-      height: 46px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4rem;
-      flex-shrink: 0;
-    }
-    .pathway-icon-wrap.clinic {
-      background: #ecfeff;
-      border: 1px solid #a5f3fc;
-    }
-    .pathway-icon-wrap.exam {
-      background: #eef2ff;
-      border: 1px solid #c7d2fe;
-    }
-    .pathway-icon-wrap.video {
-      background: #fdf2f8;
-      border: 1px solid #fbcfe8;
-    }
-    .pathway-info {
-      flex: 1;
-      min-width: 0;
-    }
-    .pathway-title {
-      font-family: var(--font-title);
-      font-size: 0.96rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      line-height: 1.25;
-      margin-bottom: 0.2rem;
-    }
-    .pathway-desc {
-      font-size: 0.77rem;
-      color: var(--text-secondary);
-      line-height: 1.4;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .pathway-arrow {
-      color: var(--text-muted);
-      font-size: 1.15rem;
-      font-weight: 700;
-      transition: transform 0.2s ease, color 0.2s ease;
-      flex-shrink: 0;
-    }
-    .journey-pathway-card:hover .pathway-arrow {
-      transform: translateX(3px);
-      color: var(--primary);
-    }
-
-    @media (max-width: 900px) {
-      .journey-pathway-grid {
-        grid-template-columns: 1fr;
-        gap: 0.75rem;
-      }
-      .journey-timeline-steps {
-        justify-content: center;
-      }
-      .journey-title {
-        font-size: 1.25rem;
-      }
-    }
-    @media (max-width: 640px) {
-      .journey-step-divider {
-        display: none;
-      }
-      .journey-step {
-        width: 100%;
-        justify-content: center;
-      }
-      .journey-media-overlay {
-        top: 8px;
-        right: 8px;
-      }
-      .journey-ctrl-btn {
-        padding: 0.25rem 0.55rem;
-        font-size: 0.7rem;
-      }
     }
   </style>
 </head>
@@ -462,103 +224,13 @@
     </div>
   </header>
 
-  <!-- Mascot Journey Showcase Section (เส้นทางการเติบโตสู่เภสัชกรวิชาชีพ) -->
-  <section class="journey-showcase-section" id="journey-showcase">
-    <div class="container journey-container">
-
-      <!-- Header with Eyebrow, Title & Subtitle -->
-      <div class="journey-header">
-        <div class="journey-badge">
-          <span class="journey-badge-dot"></span>
-          <span>🎓 RxCU Pharmacy Journey • จากก้าวแรกสู่วิชาชีพเภสัชกรรม</span>
-        </div>
-        <h2 class="journey-title">ก้าวเดินสู่ความสำเร็จในการสอบใบประกอบวิชาชีพ PLE-CC</h2>
-        <p class="journey-desc">
-          ร่วมฝึกฝนและเตรียมความพร้อมไปกับระบบจำลองสถานีสอบ OSPE เสมือนจริง ครอบคลุมทั้งสายบริบาลและสายการผลิต
-        </p>
-      </div>
-
-      <!-- Media Showcase Card / Frame -->
-      <div class="journey-card">
-        <!-- Interactive Media Container -->
-        <div class="journey-media-wrapper">
-          <video id="journey-video" class="journey-media" autoplay loop muted playsinline poster="assets/tour_preview_frame.jpg" title="RxCU Mascot Journey Tour">
-            <source src="assets/tour_all_scenes.mp4" type="video/mp4">
-            <!-- Fallback GIF for browsers that don't autoplay video -->
-            <img src="assets/tour_all_scenes_lite.gif" alt="RxCU Mascot Journey Tour" class="journey-media">
-          </video>
-
-          <!-- Top-Right Media Overlay Controls -->
-          <div class="journey-media-overlay">
-            <button type="button" id="journey-toggle-play-btn" class="journey-ctrl-btn" onclick="toggleJourneyVideoPlayback()" title="พัก / เล่นวิดีโอต่อ">
-              <span id="journey-play-icon">⏸</span>
-              <span id="journey-play-text">หยุดชั่วคราว</span>
-            </button>
-            <button type="button" id="journey-source-btn" class="journey-ctrl-btn" onclick="toggleJourneyMediaFormat()" title="สลับระหว่าง VDO (HD 1024p) กับ GIF (Lite)">
-              <span id="journey-source-tag">HD 1024p</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Card Footer Caption / Interactive Story Milestones -->
-        <div class="journey-card-footer">
-          <div class="journey-timeline-steps">
-            <div class="journey-step">
-              <span class="step-icon">🐾</span>
-              <span class="step-text">ก้าวสู่นิสิตเภสัชฯ</span>
-            </div>
-            <div class="journey-step-divider">➔</div>
-            <div class="journey-step">
-              <span class="step-icon">📚</span>
-              <span class="step-text">ศึกษาทฤษฎี & ปฏิบัติ</span>
-            </div>
-            <div class="journey-step-divider">➔</div>
-            <div class="journey-step">
-              <span class="step-icon">🥼</span>
-              <span class="step-text">ฝึกงาน & จำลองสอบ OSPE</span>
-            </div>
-            <div class="journey-step-divider">➔</div>
-            <div class="journey-step highlight">
-              <span class="step-icon">🎉</span>
-              <span class="step-text">สอบผ่านใบประกอบฯ 2569</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Quick Action Pathway Cards (นำทางไปยัง 3 ฟีเจอร์หลัก) -->
-      <div class="journey-pathway-grid">
-        <a href="case-library.html" class="journey-pathway-card">
-          <div class="pathway-icon-wrap clinic">📖</div>
-          <div class="pathway-info">
-            <div class="pathway-title">คลังเคส OSPE รวม 347 เคส</div>
-            <div class="pathway-desc">ฝึกวิเคราะห์โจทย์ เฉลยละเอียดพร้อมแนวทางการให้คำแนะนำ</div>
-          </div>
-          <span class="pathway-arrow">→</span>
-        </a>
-
-        <a href="exam-simulation.html" class="journey-pathway-card">
-          <div class="pathway-icon-wrap exam">⏱️</div>
-          <div class="pathway-info">
-            <div class="pathway-title">ห้องซ้อมสอบเสมือนจริง</div>
-            <div class="pathway-desc">จับเวลา 4 นาทีต่อสถานี พร้อมระบบแชทซักประวัติและกระดาษทด</div>
-          </div>
-          <span class="pathway-arrow">→</span>
-        </a>
-
-        <a href="video-library.html" class="journey-pathway-card">
-          <div class="pathway-icon-wrap video">🎬</div>
-          <div class="pathway-info">
-            <div class="pathway-title">คลังคลิปวิดีโอเทคนิค</div>
-            <div class="pathway-desc">ชมสาธิตทักษะการซักประวัติ การจ่ายยา และเทคนิคเตรียมยาของสภาฯ</div>
-          </div>
-          <span class="pathway-arrow">→</span>
-        </a>
-      </div>
-
-    </div>
-  </section>
+  <!-- Mascot Journey Video (Seamless edge-to-edge full width, no borders, no text) -->
+  <div class="home-hero-video-wrapper">
+    <video id="journey-video" class="home-hero-video" autoplay loop muted playsinline poster="assets/tour_preview_frame.jpg" title="RxCU Mascot Journey Tour">
+      <source src="assets/tour_all_scenes.mp4" type="video/mp4">
+      <img src="assets/tour_all_scenes_lite.gif" alt="RxCU Mascot Journey Tour" class="home-hero-video">
+    </video>
+  </div>
 
   <!-- Global Loader -->
   <div id="global-loader" class="loader-container" style="display: none;">
@@ -612,60 +284,6 @@
       else document.body.classList.remove('is-fullscreen');
     });
 
-    // Mascot Journey Showcase Controls
-    let isJourneyUsingGif = false;
-
-    function toggleJourneyVideoPlayback() {
-      const vid = document.getElementById('journey-video');
-      const icon = document.getElementById('journey-play-icon');
-      const txt = document.getElementById('journey-play-text');
-      if (!vid) return;
-
-      if (vid.paused) {
-        vid.play().catch(() => {});
-        if (icon) icon.textContent = '⏸';
-        if (txt) txt.textContent = 'หยุดชั่วคราว';
-      } else {
-        vid.pause();
-        if (icon) icon.textContent = '▶';
-        if (txt) txt.textContent = 'เล่นวิดีโอ';
-      }
-    }
-
-    function toggleJourneyMediaFormat() {
-      const wrapper = document.querySelector('.journey-media-wrapper');
-      if (!wrapper) return;
-
-      isJourneyUsingGif = !isJourneyUsingGif;
-      if (isJourneyUsingGif) {
-        wrapper.innerHTML = `
-          <img src="assets/tour_all_scenes_lite.gif" alt="RxCU Mascot Journey Tour" class="journey-media">
-          <div class="journey-media-overlay">
-            <button type="button" class="journey-ctrl-btn" onclick="toggleJourneyMediaFormat()" title="สลับกลับเป็น VDO HD 1024p">
-              <span>GIF Lite (512p)</span>
-            </button>
-          </div>
-        `;
-      } else {
-        wrapper.innerHTML = `
-          <video id="journey-video" class="journey-media" autoplay loop muted playsinline poster="assets/tour_preview_frame.jpg" title="RxCU Mascot Journey Tour">
-            <source src="assets/tour_all_scenes.mp4" type="video/mp4">
-            <img src="assets/tour_all_scenes_lite.gif" alt="RxCU Mascot Journey Tour" class="journey-media">
-          </video>
-          <div class="journey-media-overlay">
-            <button type="button" id="journey-toggle-play-btn" class="journey-ctrl-btn" onclick="toggleJourneyVideoPlayback()" title="พัก / เล่นวิดีโอต่อ">
-              <span id="journey-play-icon">⏸</span>
-              <span id="journey-play-text">หยุดชั่วคราว</span>
-            </button>
-            <button type="button" id="journey-source-btn" class="journey-ctrl-btn" onclick="toggleJourneyMediaFormat()" title="สลับเป็น GIF Lite">
-              <span id="journey-source-tag">HD 1024p</span>
-            </button>
-          </div>
-        `;
-        const newVid = document.getElementById('journey-video');
-        if (newVid) newVid.play().catch(() => {});
-      }
-    }
 
     // Remove skeleton loading class after cases are loaded
     const _origOnCasesLoadedIndex = typeof onCasesLoaded === 'function' ? onCasesLoaded : null;
