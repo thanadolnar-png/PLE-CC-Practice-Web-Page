@@ -1069,9 +1069,9 @@
   </div><!-- /.page-viewport -->
 </div><!-- /.app-shell -->
 
-  <script src="case-data-offline.js?v=v_20261005_152253"></script>
-  <script src="case-details-offline.js?v=v_20261005_152253"></script>
-  <script src="app.js?v=v_20261005_152253"></script>
+  <script src="case-data-offline.js?v=v_20261007_135000"></script>
+  <script src="case-details-offline.js?v=v_20261007_135000"></script>
+  <script src="app.js?v=v_20261007_135000"></script>
   <script src="scratchpad.js?v=20261004_234400"></script>
   <script src="station-chat.js?v=20261004_234400"></script>
 
@@ -1100,14 +1100,32 @@
 
     // Helper: แปลง durationMin ในเคสเป็นวินาที (default 240 = 4 นาที)
     function parseCaseDurationSec(c) {
-      if (typeof window.parseCaseDurationSec === 'function' && window.parseCaseDurationSec !== parseCaseDurationSec) {
-        return window.parseCaseDurationSec(c);
+      if (!c && activeCaseId) {
+        c = getOfflineCase(activeCaseId) || { caseId: activeCaseId };
       }
       if (!c) return 240;
+
+      // เคสแล็บผลิต Week 1 (103A / 103B) กำหนดเป็น 8 นาที (480 วินาที) เสมอ
+      const cid = (c.caseId || activeCaseId || '').toUpperCase();
+      if (/OSPE-PD84M1W103[AB]/i.test(cid) || /PD84M1W103[AB]/i.test(cid)) {
+        return 480;
+      }
+
       if (c.durationMin) return Math.round(parseFloat(c.durationMin) * 60);
+
+      // ดึงจาก baseCase ใน OFFLINE_DATA หาก c ไม่มี durationMin
+      if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases && cid) {
+        const base = OFFLINE_DATA.cases.find(x => x.caseId && x.caseId.toUpperCase() === cid);
+        if (base && base.durationMin) return Math.round(parseFloat(base.durationMin) * 60);
+      }
+
       const text = (c.content || '') + ' ' + (c.rawHtml || '') + ' ' + (c.scenario || '') + ' ' + (c.patientInfoHtml || '') + ' ' + (c.title || '');
       const m = text.match(/(?:ระยะเวลา|เวลา)\s*[:：]?\s*(\d+)\s*นาที/);
       if (m && m[1]) return parseInt(m[1], 10) * 60;
+
+      if (typeof window.parseCaseDurationSec === 'function' && window.parseCaseDurationSec !== parseCaseDurationSec) {
+        return window.parseCaseDurationSec(c);
+      }
       return 240;
     }
 
@@ -1141,6 +1159,10 @@
           if (topbarTitle) topbarTitle.textContent = displayTitle;
           const topbarMeta = document.getElementById('topbar-case-meta');
           if (topbarMeta) topbarMeta.textContent = (initialCase.category || '') + (initialCase.subTopic ? ` · ${initialCase.subTopic}` : '');
+
+          // ตั้งค่าระยะเวลาตัวจับเวลาทันทีตั้งแต่ 0ms
+          viewerTimerVal = parseCaseDurationSec(initialCase);
+          updateViewerTimerDisplay();
         }
         
         // ตรวจสอบฐานข้อมูลออฟไลน์ (ดึงจากหน่วยความจำ หรือ IndexedDB ทันที 0-5ms)
@@ -1280,6 +1302,15 @@
           const dec = await window.decryptCaseData(encryptedCase, pwd);
           if (!dec) throw new Error('Decryption failed');
           
+          const base = (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) 
+            ? OFFLINE_DATA.cases.find(x => x.caseId === caseId || (x.caseId && x.caseId.replace(/^OSPE-/i, '') === caseId.replace(/^OSPE-/i, '')))
+            : null;
+          if (base) {
+            if (base.durationMin && !dec.durationMin) dec.durationMin = base.durationMin;
+            if (base.title && (!dec.title || dec.title === caseId)) dec.title = base.title;
+            if (base.category && !dec.category) dec.category = base.category;
+            if (base.disease && !dec.disease) dec.disease = base.disease;
+          }
           const curVer = (typeof DB_VERSION_STR !== 'undefined' ? DB_VERSION_STR : '') || (typeof OFFLINE_DATA !== 'undefined' ? OFFLINE_DATA.version : '');
           const wrapped = Object.assign({}, dec, { _db_version: curVer });
           sessionStorage.setItem('ple_saved_passcode', pwd);
@@ -1346,6 +1377,15 @@
               sessionStorage.removeItem('viewer_unlocked_' + cleanId);
               sessionStorage.removeItem('viewer_unlocked_' + ospeId);
             } else {
+              const base = (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) 
+                ? OFFLINE_DATA.cases.find(x => x.caseId === cleanId || (x.caseId && x.caseId.replace(/^OSPE-/i, '') === cleanId.replace(/^OSPE-/i, '')))
+                : null;
+              if (base) {
+                if (base.durationMin && !parsed.durationMin) parsed.durationMin = base.durationMin;
+                if (base.title && (!parsed.title || parsed.title === cleanId)) parsed.title = base.title;
+                if (base.category && !parsed.category) parsed.category = base.category;
+                if (base.disease && !parsed.disease) parsed.disease = base.disease;
+              }
               AppState.currentCase = parsed;
               renderCaseDetail(parsed);
               setViewerRole(currentRole);
@@ -1361,6 +1401,15 @@
           try {
             const dec = await window.decryptCaseData(offlineCase, savedPasscode.trim());
             if (dec && (dec.scenario || dec.checklist)) {
+              const base = (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) 
+                ? OFFLINE_DATA.cases.find(x => x.caseId === cleanId || (x.caseId && x.caseId.replace(/^OSPE-/i, '') === cleanId.replace(/^OSPE-/i, '')))
+                : null;
+              if (base) {
+                if (base.durationMin && !dec.durationMin) dec.durationMin = base.durationMin;
+                if (base.title && (!dec.title || dec.title === cleanId)) dec.title = base.title;
+                if (base.category && !dec.category) dec.category = base.category;
+                if (base.disease && !dec.disease) dec.disease = base.disease;
+              }
               const wrapped = Object.assign({}, dec, { _db_version: curVer });
               sessionStorage.setItem('ple_unlocked_' + cleanId, JSON.stringify(wrapped));
               sessionStorage.setItem('viewer_unlocked_' + cleanId, JSON.stringify(wrapped));
@@ -1460,6 +1509,19 @@
 
     function renderCaseDetail(c) {
       const caseId = c.caseId || activeCaseId || '';
+
+      // หากเคสที่ถูก decrypt หรือโหลดมาไม่มี durationMin ให้ดึงจาก baseCase หรือ OFFLINE_DATA
+      if (!c.durationMin) {
+        const base = (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) 
+          ? OFFLINE_DATA.cases.find(x => x.caseId === caseId || (x.caseId && x.caseId.replace(/^OSPE-/i, '') === caseId.replace(/^OSPE-/i, '')))
+          : null;
+        if (base && base.durationMin) {
+          c.durationMin = base.durationMin;
+        }
+      }
+
+      // รีเซ็ตตัวจับเวลาให้ตรงกับเคสนี้เสมอ
+      resetViewerTimer();
 
       // Auto-extract checklist items if checklist is empty but items leaked into patientInfoHtml or contentHtml
       if ((!c.checklist || c.checklist.length === 0) && (c.patientInfoHtml || c.contentHtml)) {
@@ -1978,13 +2040,16 @@
       const existing = document.getElementById('viewer-timeout-overlay');
       if (existing) existing.remove();
 
+      const c = (typeof AppState !== 'undefined') && AppState.currentCase;
+      const durMin = Math.round(parseCaseDurationSec(c) / 60);
+
       const overlay = document.createElement('div');
       overlay.id = 'viewer-timeout-overlay';
       overlay.className = 'fullscreen-overlay';
       overlay.style.zIndex = '9999';
       overlay.innerHTML = `
         <div style="font-size: 5rem; margin-bottom: 0.75rem; animation: pulse 1s infinite;">⏰</div>
-        <h1 style="font-size: 2.8rem; margin-bottom: 0.5rem; color: var(--danger); font-family: var(--font-title); font-weight: 800;">หมดเวลา 4 นาที!</h1>
+        <h1 style="font-size: 2.8rem; margin-bottom: 0.5rem; color: var(--danger); font-family: var(--font-title); font-weight: 800;">หมดเวลา ${durMin} นาที!</h1>
         <p style="font-size: 1.25rem; color: #FFFFFF; font-family: var(--font-body); margin-bottom: 1.75rem;">ครบกำหนดเวลาสำหรับสถานีฝึกซ้อมนี้แล้ว</p>
         <button type="button" class="btn btn-primary" style="padding: 0.65rem 2rem; font-size: 1rem; border-radius: var(--radius-full); font-weight: 700; box-shadow: 0 4px 14px rgba(0,0,0,0.3);" onclick="this.closest('.fullscreen-overlay').remove()">
           ✓ ทราบแล้ว / ปิดแจ้งเตือน
