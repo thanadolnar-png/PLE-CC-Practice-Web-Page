@@ -1,0 +1,111 @@
+{
+  "MOCK CC2 Product Week 1 ชุด A": [
+    {
+      "index": 0,
+      "preText": "% แอลกอฮอล์ในตำรับ = ",
+      "postText": "  = 72 %v/v",
+      "directText": "1825 x 100",
+      "html": "<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">18</span><span class=\"equation-denom\">25</span></span> x 100</span>"
+    },
+    {
+      "index": 1,
+      "preText": "roximate volume ของน้ำ = 50 − ",
+      "postText": " − 15 = 34.25 mL แบ่งเป็นน้ำ ¾",
+      "directText": "1.52",
+      "html": "<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">1.5</span><span class=\"equation-denom\">2</span></span></span>"
+    },
+    {
+      "index": 2,
+      "preText": "าณ NaHCO3 ที่ต้องใช้:   3 g x ",
+      "postText": "   = 1.5 g",
+      "directText": "50 mL100 mL",
+      "html": "<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">50 mL</span><span class=\"equation-denom\">100 mL</span></span></span>"
+    },
+    {
+      "index": 3,
+      "preText": "erol ที่ต้องใช้:   1 fl.oz. x ",
+      "postText": "  x ",
+      "directText": "30 mL1 fl.oz.",
+      "html": "<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">30 mL</span><span class=\"equation-denom\">1 fl.oz.</span></span></span>"
+    },
+    {
+      "index": 4,
+      "preText": "  x ",
+      "postText": "   = 15 mL",
+      "directText": "50 mL100 mL",
+      "html": "<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">50 mL</span><span class=\"equation-denom\">100 mL</span></span></span>"
+    },
+    {
+      "index": 5,
+      "preText": " Approximate volume):   (50 − ",
+      "postText": "  – 15) x ¾ = 25.6875 mL (อนุโ",
+      "directText": "1.52",
+      "html": "<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">1.5</span><span class=\"equation-denom\">2</span></span></span>"
+    },
+    {
+      "index": 6,
+      "preText": " Approximate volume):   (50 − ",
+      "postText": " – 15) x ¼ = 8.5625 mL (อนุโลม",
+      "directText": "1.52",
+      "html": "<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">1.5</span><span class=\"equation-denom\">2</span></span></span>"
+    }
+  ],
+  "MOCK CC2 Product Week 1 ชุด B": [
+    {
+      "index": 0,
+      "preText": "% แอลกอฮอล์ในตำรับ = ",
+      "postText": "  = 70 %v/v",
+      "directText": "1420 x 100",
+      "html": "<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">14</span><span class=\"equation-denom\">20</span></span> x 100</span>"
+    },
+    {
+      "index": 1,
+      "preText": "าตร 1 mL = จำนวนหยดของ 2 mL x ",
+      "postText": "",
+      "directText": "12",
+      "html": "<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">1</span><span class=\"equation-denom\">2</span></span></span>"
+    },
+    {
+      "index": 2,
+      "preText": "ร 0.4 mL = จำนวนหยดของ 2 mL x ",
+      "postText": "",
+      "directText": "0.62",
+      "html": "<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">0.6</span><span class=\"equation-denom\">2</span></span></span>"
+    },
+    {
+      "index": 3,
+      "preText": "roximate volume ของน้ำ = 30 – ",
+      "postText": " − 9 = 20.55 mL แบ่งเป็นน้ำ ¾ ",
+      "directText": "0.92",
+      "html": "<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">0.9</span><span class=\"equation-denom\">2</span></span></span>"
+    },
+    {
+      "index": 4,
+      "preText": "าณ NaHCO3 ที่ต้องใช้:   3 g x ",
+      "postText": "   = 0.9 g",
+      "directText": "30 mL100 mL",
+      "html": "<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">30 mL</span><span class=\"equation-denom\">100 mL</span></span></span>"
+    },
+    {
+      "index": 5,
+      "preText": "lycerol ที่ต้องใช้:   30 mL x ",
+      "postText": "   = 9 mL",
+      "directText": "30 mL100 mL",
+      "html": "<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">30 mL</span><span class=\"equation-denom\">100 mL</span></span></span>"
+    },
+    {
+      "index": 6,
+      "preText": " Approximate volume):   (30 – ",
+      "postText": " – 9) x ¾ = 15.4125 mL (อนุโลม",
+      "directText": "0.92",
+      "html": "<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">0.9</span><span class=\"equation-denom\">2</span></span></span>"
+    },
+    {
+      "index": 7,
+      "preText": " Approximate volume):   (30 – ",
+      "postText": " – 9) x ¼ = 5.1375 mL (อนุโลม ",
+      "directText": "0.92",
+      "html": "<span class=\"doc-equation\"><span class=\"equation-fraction\"><span class=\"equation-num\">0.9</span><span class=\"equation-denom\">2</span></span></span>"
+    }
+  ]
+}
