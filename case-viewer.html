@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบตรวจวิเคราะห์เคส OSPE | RxCU</title>
+  <meta name="description" content="ระบบตรวจวิเคราะห์เคส OSPE สำหรับฝึกทักษะการซักประวัติ ตรวจรักษา และประเมินเกณฑ์ Checklist">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💊</text></svg>">
   <link rel="stylesheet" href="style.css?v=20261004_234400">
   
   <style>
@@ -1039,7 +1041,7 @@
               ⏩ ไปยังสถานีต่อเนื่อง (ถัดไป)
             </button>
             <div class="viewer-actions-grid-2col">
-              <button class="btn btn-secondary" id="toggle-note-btn" onclick="toggleNote()">
+              <button class="btn btn-primary" id="toggle-note-btn" onclick="toggleNote()">
                 📄 เปิดเฉลย
               </button>
               <button class="btn btn-secondary" onclick="openSingleCasePrintModal()">
@@ -1579,6 +1581,7 @@
       const rawTitle = (c.title && c.title !== 'undefined') ? c.title : ((c.disease && c.disease !== '-' && c.disease !== 'undefined') ? c.disease : (c.mainGroup || 'เคสข้อสอบ'));
       const displayTitle = (caseId && !rawTitle.startsWith(`[${caseId}]`)) ? `[${caseId}] ${rawTitle}` : rawTitle;
       document.getElementById('case-title').textContent = displayTitle;
+      document.title = `${displayTitle} | RxCU OSPE`;
       const topbarTitle = document.getElementById('topbar-case-title');
       if (topbarTitle) topbarTitle.textContent = displayTitle;
       const topbarMeta = document.getElementById('topbar-case-meta');
@@ -1812,8 +1815,17 @@
           el.className = `checklist-item ${isChecked ? 'checked' : ''} ${isSubset ? ('is-subset is-' + subType) : ''}`;
           el.setAttribute('data-id', item.id);
           el.setAttribute('data-score', item.score);
+          el.setAttribute('tabindex', '0');
+          el.setAttribute('role', 'checkbox');
+          el.setAttribute('aria-checked', isChecked ? 'true' : 'false');
           el.addEventListener('click', () => {
             handleChecklistItemClick(c.caseId, item.id, item.score);
+          });
+          el.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+              e.preventDefault();
+              handleChecklistItemClick(c.caseId, item.id, item.score);
+            }
           });
           
           const scoreDisplay = (item.score !== undefined && item.score !== null) ? `<span class="checklist-item-score ${item.score === 0 ? 'zero-score' : ''}">(${item.score} คะแนน)</span>` : '';
@@ -1919,8 +1931,10 @@
         chkSection.style.display = 'block';
         noticeSection.style.display = 'none';
         progressCard.style.display = 'block';
-        timerCard.style.display = 'none';
+        timerCard.style.display = 'block';
         if (docTabs) docTabs.style.display = 'flex';
+        resetViewerTimer();
+        document.getElementById('viewer-timer-btn').textContent = '⏱️ เริ่มจับเวลา';
         
         // ซ่อนเฉลยตามดีฟอลต์ของโซโล่
         noteArea.classList.remove('show');

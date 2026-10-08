@@ -25,10 +25,10 @@
   /* ── Typography & Ink ── */
   --ink: #1C2320;
   --ink-soft: #555C54;
-  --ink-faint: #8E948A;
+  --ink-faint: #475569;
   --text-primary: #1C2320;
   --text-secondary: #555C54;
-  --text-muted: #8E948A;
+  --text-muted: #475569;
 
   /* ── Primary / Accent ── */
   --accent: #0E7490;
@@ -74,10 +74,12 @@
   --shadow-lg: 0 20px 48px rgba(0,0,0,0.10);
   --shadow-glow: 0 0 20px rgba(14, 116, 144, 0.15);
 
+  --radius-xs: 6px;
   --radius-sm: 10px;
   --radius-md: 14px;
   --radius-lg: 20px;
   --radius-full: 9999px;
+  --radius: 12px;
 
   --transition: all 0.25s cubic-bezier(0.2, 0.9, 0.3, 1);
 
@@ -505,13 +507,6 @@ body.is-fullscreen {
 .stat-card.product-stat .stat-num { color: #c4b5fd; }
 .stat-card.sap-stat .stat-num     { color: #fcd34d; }
 .stat-card.total-stat .stat-num   { color: #ffffff; }
-  line-height: 1.4;
-}
-
-.stat-card.clinic-stat .stat-num  { color: #67e8f9; }
-.stat-card.product-stat .stat-num { color: #c4b5fd; }
-.stat-card.sap-stat .stat-num     { color: #fcd34d; }
-.stat-card.total-stat .stat-num   { color: #a5b4fc; }
 
 /* Buttons & Navigation */
 .btn {
@@ -527,6 +522,25 @@ body.is-fullscreen {
   cursor: pointer;
   transition: var(--transition);
   border: none;
+}
+
+.btn:active,
+.icon-btn:active,
+.role-btn:active,
+.btn-filter-action:active,
+.cinematic-search-btn:active {
+  transform: scale(0.97) translateY(0);
+  filter: brightness(0.92);
+}
+
+.btn:focus-visible,
+.icon-btn:focus-visible,
+.role-btn:focus-visible,
+.topbar-nav-tab:focus-visible,
+.case-card:focus-visible,
+.checklist-item:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .btn-primary {
@@ -805,9 +819,9 @@ body.is-fullscreen {
   font-family: var(--font-title);
 }
 
-.badge-clinic { background-color: var(--clinic-light); color: var(--clinic); }
-.badge-product { background-color: var(--product-light); color: var(--product); }
-.badge-sap { background-color: var(--sap-light); color: var(--sap); }
+.badge-clinic { background-color: var(--clinic-light); color: #0e7490; font-weight: 700; border: 1px solid var(--clinic-border); }
+.badge-product { background-color: var(--product-light); color: #6d28d9; font-weight: 700; border: 1px solid var(--product-border); }
+.badge-sap { background-color: var(--sap-light); color: #78350f; font-weight: 700; border: 1px solid var(--sap-border); }
 
 /* --- Library / Filter Styles --- */
 .filter-bar {
@@ -1091,6 +1105,15 @@ body.is-fullscreen {
 .table-patient-info th:nth-child(2),
 .table-patient-info td:nth-child(2) {
   min-width: 60px;
+}
+
+#case-patient-content,
+#exam-patient-content,
+.case-content-body,
+.table-patient-info {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Scenario, Patient, Equipment & Exam Lists (Universal Bullet & Numbered Support) */
@@ -4495,12 +4518,13 @@ body.is-printing #batch-print-execution-area {
   }
 
   .exam-sticky-timer-bar .timer-action-btns {
-    gap: 4px !important;
+    gap: 8px !important;
   }
 
   .exam-sticky-timer-bar .timer-action-btns .btn {
-    padding: 3px 7px !important;
-    font-size: 11px !important;
+    padding: 6px 10px !important;
+    min-height: 38px !important;
+    font-size: 12px !important;
     border-radius: var(--radius-sm) !important;
     white-space: nowrap !important;
   }

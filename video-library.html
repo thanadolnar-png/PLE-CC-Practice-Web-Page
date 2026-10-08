@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>คลังคลิปวิดีโอเทคนิคการเตรียมยาและการใช้ยา (Product & Clinic) | RxCU OSPE</title>
   <meta name="description" content="คลังคลิปวิดีโอสาธิตเทคนิคทางเภสัชกรรม (Product) และเทคนิคการใช้ยาพิเศษ/หัตถการคลินิก (Clinic) จากคณะเภสัชฯ จุฬาฯ (โอสถศาลา) และโรงพยาบาลชั้นนำ สำหรับเตรียมสอบ PLE-CC2 OSPE">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💊</text></svg>">
   <link rel="stylesheet" href="style.css?v=1791019915">
   <script src="video-data.js?v=1791019915"></script>
   <script src="app.js?v=1791019915"></script>
@@ -979,7 +980,7 @@
           <button class="video-action-btn" id="theater-fav-toggle" onclick="toggleCurrentVideoFav()">
             ⭐ รายการโปรด
           </button>
-          <a href="#" target="_blank" rel="noopener noreferrer" class="video-action-btn" id="theater-external-link">
+          <a href="javascript:void(0)" target="_blank" rel="noopener noreferrer" class="video-action-btn" id="theater-external-link" style="display: none;">
             เปิดดูภายนอก ↗
           </a>
         </div>
@@ -1388,7 +1389,10 @@
     const metaEl = document.getElementById('theater-video-meta');
 
     if (titleEl) titleEl.textContent = `${v.chapter} • ${v.title}`;
-    if (extLink) extLink.href = v.url;
+    if (extLink) {
+      extLink.href = v.url;
+      extLink.style.display = 'inline-flex';
+    }
     if (metaEl) metaEl.textContent = `${v.majorGroup} • รูปแบบ: ${v.dosageForm}`;
 
     // Update Embed Iframe Player

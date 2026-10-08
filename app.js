@@ -1702,27 +1702,41 @@ function renderCaseList() {
         <div class="empty-icon">🔍</div>
         <h3>ไม่พบเคสสอบที่ตรงตามตัวเลือกของคุณ</h3>
         <p>ลองเปลี่ยนคำค้นหาหรือตัวกรองหมวดหมู่</p>
+        <button class="btn btn-primary" onclick="resetFilters()" style="margin-top: 0.85rem; font-size: 0.88rem; padding: 0.5rem 1.25rem;">
+          🔄 ล้างตัวกรองและแสดงเคสทั้งหมด
+        </button>
       </div>
     `;
     return;
   }
   
   AppState.filteredCases.forEach(c => {
-    const card = document.createElement('div');
-    card.className = 'case-card';
-    card.addEventListener('click', () => {
-      try {
-        sessionStorage.setItem('ple_case_library_scroll', window.scrollY.toString());
-      } catch (e) {}
-      window.location.href = `case-viewer.html?id=${encodeURIComponent(c.caseId)}`;
-    });
-    
     const isProtected = Boolean(c.isProtected || c.hasPassword);
     const sourceBadge = c.source ? `<span class="case-card-tag" style="background: rgba(99, 102, 241, 0.12); color: var(--primary); font-weight: 600; border: 1px solid rgba(99, 102, 241, 0.25);">🏷️ ${c.source}</span>` : '';
     const lockBadge = isProtected ? `<span class="case-card-tag" style="background: rgba(239, 68, 68, 0.12); color: #ef4444; font-weight: 700; border: 1px solid rgba(239, 68, 68, 0.25);">🔒 ข้อสอบลับ</span>` : '';
     const durMin = Math.round(parseCaseDurationSec(c) / 60);
     const durationBadge = `<span class="case-card-tag" style="background: rgba(16, 185, 129, 0.12); color: #047857; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 600;">⏱ ${durMin} นาที</span>`;
     const displayTitle = isProtected ? `🔒 ${c.caseId}` : c.title;
+
+    const card = document.createElement('div');
+    card.className = 'case-card';
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-label', `เปิดเคส ${c.caseId}: ${displayTitle}`);
+    
+    const openCase = () => {
+      try {
+        sessionStorage.setItem('ple_case_library_scroll', window.scrollY.toString());
+      } catch (e) {}
+      window.location.href = `case-viewer.html?id=${encodeURIComponent(c.caseId)}`;
+    };
+    card.addEventListener('click', openCase);
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openCase();
+      }
+    });
 
     card.innerHTML = `
       <div class="case-card-header">
@@ -2025,10 +2039,13 @@ function updateChecklistUI(caseId) {
   // 3. Update DOM classes for checkboxes
   items.forEach(el => {
     const itemId = el.getAttribute('data-id');
-    if (finalChecked.has(itemId)) {
+    const isChecked = finalChecked.has(itemId);
+    if (isChecked) {
       el.classList.add('checked');
+      el.setAttribute('aria-checked', 'true');
     } else {
       el.classList.remove('checked');
+      el.setAttribute('aria-checked', 'false');
     }
   });
   
@@ -3953,23 +3970,23 @@ function initMobileNavigation() {
       <button type="button" class="mobile-drawer-close" onclick="closeMobileNav()" title="ปิดเมนู (Esc)">✕</button>
     </div>
     <div class="mobile-drawer-nav-list">
-      <a href="index.html" class="mobile-drawer-item ${currentPath === 'index.html' || currentPath === '' ? 'active' : ''}">
+      <a href="index.html" onclick="closeMobileNav()" class="mobile-drawer-item ${currentPath === 'index.html' || currentPath === '' ? 'active' : ''}">
         <span class="mobile-drawer-icon">🏠</span>
         <span>หน้าแรก</span>
       </a>
-      <a href="case-library.html" class="mobile-drawer-item ${currentPath === 'case-library.html' ? 'active' : ''}">
+      <a href="case-library.html" onclick="closeMobileNav()" class="mobile-drawer-item ${currentPath === 'case-library.html' ? 'active' : ''}">
         <span class="mobile-drawer-icon">📚</span>
         <span>คลังเคสข้อสอบ</span>
       </a>
-      <a href="exam-simulation.html" class="mobile-drawer-item ${currentPath === 'exam-simulation.html' ? 'active' : ''}">
+      <a href="exam-simulation.html" onclick="closeMobileNav()" class="mobile-drawer-item ${currentPath === 'exam-simulation.html' ? 'active' : ''}">
         <span class="mobile-drawer-icon">🎯</span>
         <span>ซ้อมสอบ 16 สถานี</span>
       </a>
-      <a href="video-library.html" class="mobile-drawer-item ${currentPath === 'video-library.html' ? 'active' : ''}">
+      <a href="video-library.html" onclick="closeMobileNav()" class="mobile-drawer-item ${currentPath === 'video-library.html' ? 'active' : ''}">
         <span class="mobile-drawer-icon">🎬</span>
         <span>คลิปเทคนิค (Product & Clinic)</span>
       </a>
-      <a href="handbook-library.html" class="mobile-drawer-item ${currentPath === 'handbook-library.html' ? 'active' : ''}">
+      <a href="handbook-library.html" onclick="closeMobileNav()" class="mobile-drawer-item ${currentPath === 'handbook-library.html' ? 'active' : ''}">
         <span class="mobile-drawer-icon">📖</span>
         <span>คู่มือทักษะสภาฯ</span>
       </a>
@@ -3981,6 +3998,11 @@ function initMobileNavigation() {
 
   document.body.appendChild(overlay);
   document.body.appendChild(drawer);
+
+  // Bind Escape key listener to close drawer
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMobileNav();
+  });
 
   // Inject Hamburger button to topbar-right if not present
   const topbarRight = document.querySelector('.topbar-right');

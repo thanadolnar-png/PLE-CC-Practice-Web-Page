@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU</title>
+  <meta name="description" content="ระบบจำลองสอบ OSPE 16 สถานีเสมือนจริง พร้อมจับเวลา 4 นาที ติ๊ก Checklist และคำนวณผลคะแนน Leaderboard">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💊</text></svg>">
   <link rel="stylesheet" href="style.css?v=1791019915">
   <script src="case-data-offline.js?v=v_20261007_135000"></script>
   <script src="case-details-offline.js?v=v_20261007_135000"></script>
@@ -7182,7 +7184,16 @@
           el.className = `checklist-item ${isChecked ? 'checked' : ''} ${isSubset ? ('is-subset is-' + subType) : ''}`;
           el.setAttribute('data-id', item.id);
           el.setAttribute('data-score', item.score);
+          el.setAttribute('tabindex', '0');
+          el.setAttribute('role', 'checkbox');
+          el.setAttribute('aria-checked', isChecked ? 'true' : 'false');
           el.addEventListener('click', () => toggleExamChecklistItem(stationNum, item.id, item.score));
+          el.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+              e.preventDefault();
+              toggleExamChecklistItem(stationNum, item.id, item.score);
+            }
+          });
           
           const scoreDisplay = (item.score !== undefined && item.score !== null) 
             ? `<span class="checklist-item-score ${item.score === 0 ? 'zero-score' : ''}">(${item.score} คะแนน)</span>` 
@@ -7385,7 +7396,9 @@
       
       document.querySelectorAll('.checklist-item').forEach(el => {
         const id = el.getAttribute('data-id');
-        el.classList.toggle('checked', currentChecked.includes(id));
+        const isItemChecked = currentChecked.includes(id);
+        el.classList.toggle('checked', isItemChecked);
+        el.setAttribute('aria-checked', isItemChecked ? 'true' : 'false');
       });
       
       const currentCase = SimState.stations[SimState.currentIdx].case;
