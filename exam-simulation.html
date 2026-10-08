@@ -7,9 +7,9 @@
   <meta name="description" content="ระบบจำลองสอบ OSPE 16 สถานีเสมือนจริง พร้อมจับเวลา 4 นาที ติ๊ก Checklist และคำนวณผลคะแนน Leaderboard">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💊</text></svg>">
   <link rel="stylesheet" href="style.css?v=1791019915">
-  <script src="case-data-offline.js?v=v_20261007_135000"></script>
-  <script src="case-details-offline.js?v=v_20261007_135000"></script>
-  <script src="app.js?v=v_20261007_135000"></script>
+  <script src="case-data-offline.js?v=v_20261008_100023"></script>
+  <script src="case-details-offline.js?v=v_20261008_100023"></script>
+  <script src="app.js?v=v_20261008_100023"></script>
   <script src="scratchpad.js?v=20261004_201700"></script>
   <style>
     /* Simulation Source and Topic Selector */
@@ -2488,7 +2488,16 @@
       <!-- 3. EXAM RESULTS SCREEN -->
       <section class="results-screen" id="exam-results-view" style="display:none;">
         <div class="results-card">
-          <h2 style="text-align: center; margin-bottom: 1.75rem; font-family: var(--font-title); font-size: 1.5rem; font-weight: 700;">📋 ผลสอบ OSPE</h2>
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+            <h2 style="margin: 0; font-family: var(--font-title); font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+              <span>📋 ผลสอบ OSPE</span>
+            </h2>
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              <button type="button" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.88rem; font-weight: 700; border-color: var(--primary); color: var(--primary); display: inline-flex; align-items: center; gap: 0.4rem; background: var(--surface);" onclick="openOspePrintModal()">
+                <span>🖨️ พิมพ์รายงานผลการสอบ (Print Report)</span>
+              </button>
+            </div>
+          </div>
           
           <!-- Multi-player participant banner in results -->
           <div id="results-participants-bar" style="display: none; margin-bottom: 1.5rem; padding: 1rem 1.25rem; border-radius: var(--radius-md); background: var(--bg-secondary); border: 1px solid var(--border); text-align: left;">
@@ -2606,6 +2615,63 @@
 
   </div><!-- /.page-viewport -->
 </div><!-- /.app-shell -->
+
+  <!-- Dedicated Print Area for OSPE Simulation Results (Isolated in @media print) -->
+  <div id="ospe-results-print-area" class="print-only-block" style="display:none;"></div>
+
+  <!-- OSPE Results Print Modal -->
+  <div id="ospe-print-modal" class="modal-backdrop" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.65); z-index:99999; align-items:center; justify-content:center; padding:1rem; backdrop-filter:blur(4px);">
+    <div class="modal-card" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); max-width:540px; width:100%; padding:1.75rem; box-shadow:0 20px 25px -5px rgba(0,0,0,0.3); animation:fadeIn 0.2s ease;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
+        <h3 style="margin:0; font-family:var(--font-title); font-size:1.25rem; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:0.5rem;">
+          <span>🖨️ พิมพ์รายงานผลการสอบ OSPE</span>
+        </h3>
+        <button type="button" class="btn btn-icon" style="background:transparent; border:none; font-size:1.2rem; cursor:pointer; color:var(--text-secondary);" onclick="closeOspePrintModal()">✕</button>
+      </div>
+
+      <div style="margin-bottom:1.25rem;">
+        <label style="display:block; font-size:0.86rem; font-weight:700; margin-bottom:0.4rem; color:var(--text-primary);">
+          ชื่อ-นามสกุล / รหัสนิสิต (สำหรับพิมพ์บนหัวรายงาน):
+        </label>
+        <input type="text" id="ospe-print-student-name" class="form-input" style="width:100%; padding:0.6rem 0.85rem; border-radius:var(--radius-md); border:1px solid var(--border); background:var(--bg); color:var(--text-primary); font-size:0.92rem;" placeholder="ระบุชื่อนิสิต หรือปล่อยว่าง">
+      </div>
+
+      <div style="margin-bottom:1.5rem;">
+        <div style="font-size:0.86rem; font-weight:700; margin-bottom:0.6rem; color:var(--text-primary);">
+          เลือกรูปแบบรายงานที่ต้องการพิมพ์:
+        </div>
+        <div style="display:flex; flex-direction:column; gap:0.65rem;">
+          <label style="display:flex; align-items:flex-start; gap:0.75rem; padding:0.85rem; border:1.5px solid var(--primary); border-radius:var(--radius-md); background:rgba(37,99,235,0.05); cursor:pointer;">
+            <input type="radio" name="ospe-print-type" value="full" checked style="margin-top:0.25rem;">
+            <div>
+              <div style="font-weight:700; font-size:0.95rem; color:var(--text-primary);">📄 รายงานฉบับสมบูรณ์ (Full Checklist & Rubric Report)</div>
+              <div style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.2rem; line-height:1.4;">
+                พิมพ์สรุปคะแนนภาพรวม ตารางทุกสถานี พร้อมกางรายการ Checklist, Rubric และเฉลยเติมคำทุกสถานีอย่างละเอียด
+              </div>
+            </div>
+          </label>
+          <label style="display:flex; align-items:flex-start; gap:0.75rem; padding:0.85rem; border:1px solid var(--border); border-radius:var(--radius-md); background:var(--surface); cursor:pointer;">
+            <input type="radio" name="ospe-print-type" value="summary" style="margin-top:0.25rem;">
+            <div>
+              <div style="font-weight:700; font-size:0.95rem; color:var(--text-primary);">📊 สรุปย่อเฉพาะคะแนน (Summary Overview Only)</div>
+              <div style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.2rem; line-height:1.4;">
+                พิมพ์เฉพาะข้อมูลสรุปคะแนนรวม ร้อยละ และตารางผลการประเมินรายสถานี
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:0.75rem; justify-content:flex-end;">
+        <button type="button" class="btn btn-secondary" style="padding:0.6rem 1.2rem; font-size:0.9rem;" onclick="closeOspePrintModal()">
+          ยกเลิก
+        </button>
+        <button type="button" class="btn btn-primary" style="padding:0.6rem 1.4rem; font-size:0.9rem; font-weight:700;" onclick="executeOspePrint()">
+          🖨️ สั่งพิมพ์ (Print / PDF)
+        </button>
+      </div>
+    </div>
+  </div>
 
   <script>
     // ─ Fullscreen helper ─
@@ -11330,6 +11396,384 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         Scratchpad.toggle(key, label, initialTab);
       }
     }
+
+    // ══════════════════════════════════════════════════════════════
+    // OSPE RESULTS PRINT REPORT GENERATOR
+    // ══════════════════════════════════════════════════════════════
+    function openOspePrintModal() {
+      const modal = document.getElementById('ospe-print-modal');
+      if (!modal) return;
+      const nameInput = document.getElementById('ospe-print-student-name');
+      if (nameInput) {
+        const defaultName = SimState.lobbyPlayerName || SimState.myPlayerId || '';
+        nameInput.value = defaultName;
+      }
+      modal.style.display = 'flex';
+    }
+    window.openOspePrintModal = openOspePrintModal;
+
+    function closeOspePrintModal() {
+      const modal = document.getElementById('ospe-print-modal');
+      if (modal) modal.style.display = 'none';
+    }
+    window.closeOspePrintModal = closeOspePrintModal;
+
+    function executeOspePrint() {
+      const modal = document.getElementById('ospe-print-modal');
+      const nameInput = document.getElementById('ospe-print-student-name');
+      const studentName = (nameInput && nameInput.value.trim()) ? escapeHtml(nameInput.value.trim()) : 'นิสิตผู้เข้าสอบ';
+      
+      const printTypeRadio = document.querySelector('input[name="ospe-print-type"]:checked');
+      const printType = printTypeRadio ? printTypeRadio.value : 'full';
+
+      if (modal) modal.style.display = 'none';
+
+      generateAndPrintOspeReport(printType, studentName);
+    }
+    window.executeOspePrint = executeOspePrint;
+
+    function generateAndPrintOspeReport(printType, studentName) {
+      const printArea = document.getElementById('ospe-results-print-area');
+      if (!printArea) {
+        alert('ไม่พบคอนเทนเนอร์สำหรับพิมพ์รายงาน');
+        return;
+      }
+
+      const stationsList = SimState.stations || [];
+      const totalStationsCount = stationsList.length || SimState.totalStations || 0;
+      let totalEarnedScore = 0;
+      let totalMaxScore = 0;
+      let passedStations = 0;
+      let sumStationPct = 0;
+      let activeStationCount = 0;
+
+      const stationData = stationsList.map((st) => {
+        const c = st.case || {};
+        const checked = SimState.studentScores[st.stationNumber] || SimState.studentScores[String(st.stationNumber)] || [];
+        const checklist = Array.isArray(c.checklist) ? c.checklist : [];
+        const { currentScore: earned, totalScore: max } = calculateStationScore(checklist, checked);
+        const isRest = st.isRest || ((c.category || '').toUpperCase() === 'REST');
+        const pct = max > 0 ? Math.round((earned / max) * 100) : 0;
+        
+        totalMaxScore += max;
+        totalEarnedScore += earned;
+        if (!isRest && max > 0) {
+          sumStationPct += pct;
+          activeStationCount++;
+        }
+        const isPassed = isRest ? true : (pct >= 80);
+        if (isPassed) passedStations++;
+
+        return {
+          stationNumber: st.stationNumber,
+          title: c.title || ('สถานีที่ ' + st.stationNumber),
+          caseId: c.caseId || '',
+          category: c.category || (isRest ? 'REST' : 'CLINIC'),
+          earned,
+          max,
+          pct,
+          isPassed,
+          isRest,
+          checklist,
+          checked,
+          caseObj: c
+        };
+      });
+
+      const totalPct = activeStationCount > 0 ? Math.round(sumStationPct / activeStationCount) : (totalMaxScore > 0 ? Math.round((totalEarnedScore / totalMaxScore) * 100) : 0);
+      const isExamPassed = passedStations >= totalStationsCount && totalStationsCount > 0;
+      const now = new Date();
+      const printDateThai = now.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+      // Generate Station Summary Table HTML
+      let stationRowsHtml = '';
+      stationData.forEach(s => {
+        const statusText = s.isRest ? 'ผ่าน (พัก)' : (s.isPassed ? 'ผ่าน' : 'ไม่ผ่าน');
+        const statusColor = s.isRest ? '#475569' : (s.isPassed ? '#15803d' : '#b91c1c');
+        stationRowsHtml += `
+          <tr style="border-bottom: 1px solid #cbd5e1;">
+            <td style="padding: 6px 8px; text-align: center; font-weight: 700;">สถานีที่ ${s.stationNumber}</td>
+            <td style="padding: 6px 8px;">
+              <div style="font-weight: 600; color: #0f172a;">${escapeHtml(s.title)}</div>
+              ${s.caseId ? `<div style="font-size: 8pt; color: #64748b;">รหัสเคส: ${escapeHtml(s.caseId)}</div>` : ''}
+            </td>
+            <td style="padding: 6px 8px; text-align: center; font-size: 8.5pt;">${escapeHtml(s.category)}</td>
+            <td style="padding: 6px 8px; text-align: center;">${safeFormatScore(s.max)}</td>
+            <td style="padding: 6px 8px; text-align: center; font-weight: 700;">${safeFormatScore(s.earned)} (${s.pct}%)</td>
+            <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: ${statusColor};">${statusText}</td>
+          </tr>
+        `;
+      });
+
+      // Generate Full Checklist & Rubric Detail Section (if printType === 'full')
+      let checklistSectionsHtml = '';
+      if (printType === 'full') {
+        stationData.forEach(s => {
+          if (s.isRest) return;
+          const checkedSet = new Set(s.checked || []);
+          const rawItems = Array.isArray(s.checklist) ? s.checklist : [];
+
+          // Grouping logic (same as onscreen breakdown)
+          const groups = [];
+          let currentGroup = null;
+
+          rawItems.forEach((item, itemIdx) => {
+            const isChild = item.isChild || item.parentId != null || item.isSubItem;
+            if (!isChild) {
+              currentGroup = {
+                parent: item,
+                pIdx: itemIdx,
+                children: [],
+                groupType: item.scoringType || item.type || 'standard'
+              };
+              groups.push(currentGroup);
+            } else {
+              if (!currentGroup) {
+                currentGroup = {
+                  parent: item,
+                  pIdx: itemIdx,
+                  children: [],
+                  groupType: 'standard'
+                };
+                groups.push(currentGroup);
+              } else {
+                currentGroup.children.push({ item, cIdx: itemIdx });
+                if (item.scoringType === 'rubric' || currentGroup.parent.scoringType === 'rubric') {
+                  currentGroup.groupType = 'rubric';
+                }
+              }
+            }
+          });
+
+          let itemsReportHtml = '';
+          groups.forEach((block) => {
+            const pItem = block.parent;
+            const pIdx = block.pIdx;
+            const gType = block.groupType;
+            const hasChildren = block.children.length > 0;
+            const isPChecked = checkedSet.has(pItem.id) || checkedSet.has(String(pItem.id)) || checkedSet.has(pIdx) || checkedSet.has(String(pIdx));
+            const pScore = pItem.score !== undefined ? safeFormatScore(pItem.score) : '1.0';
+            const pText = escapeHtml(pItem.text || pItem.title || pItem.textHtml || '');
+
+            const anyChildChecked = block.children.some(({ item: cItem, cIdx: subIdx }) => 
+              checkedSet.has(cItem.id) || checkedSet.has(String(cItem.id)) || checkedSet.has(subIdx) || checkedSet.has(String(subIdx))
+            );
+            const isParentFulfilled = isPChecked || (gType === 'rubric' ? anyChildChecked : false);
+
+            let pBadge = '';
+            let pBorder = '';
+            let pBg = '';
+
+            if (hasChildren && gType === 'rubric') {
+              if (isParentFulfilled) {
+                pBadge = `<span style="color: #15803d; font-weight: 700; background: #dcfce7; border: 1px solid #86efac; border-radius: 3px; padding: 1px 6px; font-size: 8pt;">✓ ได้คะแนนเกณฑ์นี้</span>`;
+                pBorder = 'border-left: 3px solid #22c55e;';
+                pBg = 'background: #f0fdf4;';
+              } else {
+                pBadge = `<span style="color: #b91c1c; font-weight: 700; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 3px; padding: 1px 6px; font-size: 8pt;">✗ ไม่ได้คะแนน (+0 / ${pScore})</span>`;
+                pBorder = 'border-left: 3px solid #ef4444;';
+                pBg = 'background: #fef2f2;';
+              }
+            } else {
+              if (isPChecked) {
+                pBadge = `<span style="color: #15803d; font-weight: 700; background: #dcfce7; border: 1px solid #86efac; border-radius: 3px; padding: 1px 6px; font-size: 8pt;">✓ ได้ +${pScore} คะแนน</span>`;
+                pBorder = 'border-left: 3px solid #22c55e;';
+                pBg = 'background: #f0fdf4;';
+              } else {
+                pBadge = `<span style="color: #b91c1c; font-weight: 700; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 3px; padding: 1px 6px; font-size: 8pt;">✗ เสีย +0 / ${pScore} คะแนน</span>`;
+                pBorder = 'border-left: 3px solid #ef4444;';
+                pBg = 'background: #fef2f2;';
+              }
+            }
+
+            const pIcon = isParentFulfilled ? '✅' : '❌';
+            itemsReportHtml += `
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 4px 8px; margin-bottom: 3px; font-size: 8.5pt; ${pBorder} ${pBg}">
+                <div style="flex: 1;"><strong>${pIcon} ข้อ ${pIdx + 1}:</strong> ${pText}</div>
+                <div style="flex-shrink: 0;">${pBadge}</div>
+              </div>
+            `;
+
+            // Children
+            block.children.forEach(({ item: cItem, cIdx: subIdx }) => {
+              const isCChecked = checkedSet.has(cItem.id) || checkedSet.has(String(cItem.id)) || checkedSet.has(subIdx) || checkedSet.has(String(subIdx));
+              const cScore = cItem.score !== undefined ? safeFormatScore(cItem.score) : '1.0';
+              const cText = escapeHtml(cItem.text || cItem.title || cItem.textHtml || '');
+
+              let cBadge = '';
+              let cIcon = '';
+              let cStyle = '';
+
+              if (isCChecked) {
+                cIcon = '✅';
+                cBadge = `<span style="color: #15803d; font-weight: 700; background: #dcfce7; border: 1px solid #86efac; border-radius: 3px; padding: 1px 6px; font-size: 8pt;">✓ เลือกข้อนี้ (+${cScore})</span>`;
+                cStyle = 'margin-left: 1.25rem; border-left: 2px solid #22c55e; background: #f0fdf4;';
+              } else if (gType === 'rubric') {
+                cIcon = '⚪';
+                cBadge = `<span style="color: #64748b; font-weight: 500; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 3px; padding: 1px 6px; font-size: 7.5pt;">(ไม่ได้เลือก)</span>`;
+                cStyle = 'margin-left: 1.25rem; border-left: 2px dashed #94a3b8; background: #ffffff;';
+              } else {
+                cIcon = '❌';
+                cBadge = `<span style="color: #b91c1c; font-weight: 700; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 3px; padding: 1px 6px; font-size: 8pt;">✗ ไม่ได้ทำ (+0 / ${cScore})</span>`;
+                cStyle = 'margin-left: 1.25rem; border-left: 2px dashed #ef4444; background: #fef2f2;';
+              }
+
+              itemsReportHtml += `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 3px 8px; margin-bottom: 2px; font-size: 8pt; ${cStyle}">
+                  <div style="flex: 1;"><strong>${cIcon} ↳ ข้อย่อย ${subIdx + 1}:</strong> ${cText}</div>
+                  <div style="flex-shrink: 0;">${cBadge}</div>
+                </div>
+              `;
+            });
+          });
+
+          // Check blanks for this station
+          const c = s.caseObj;
+          const rawScenarioContent = (c.scenario || '') + ' ' + (c.contentHtml || '') + ' ' + (c.scenarioHtml || '');
+          const hasBlanks = rawScenarioContent.includes('[BLANK:');
+          const stationWrittenAnswers = (SimState.writtenAnswers && SimState.writtenAnswers[s.stationNumber]) || {};
+          let blanksReportHtml = '';
+
+          if (hasBlanks) {
+            const blankRegex = /\[BLANK:\s*([^|\]]+)(?:\s*\|\s*([^|\]]+))?(?:\s*\|\s*([^|\]]+))?(?:\s*\|\s*([^\]]+))?\]/gi;
+            let m;
+            let bIdx = 0;
+            let blanksRows = '';
+            while ((m = blankRegex.exec(rawScenarioContent)) !== null) {
+              bIdx++;
+              const bId = (m[1] || '').trim();
+              const bAns = (m[2] || '').trim();
+              const userAns = (stationWrittenAnswers[bId] != null ? String(stationWrittenAnswers[bId]) : '').trim();
+              const isFilled = userAns !== '';
+              blanksRows += `
+                <div style="display: flex; justify-content: space-between; font-size: 8pt; padding: 3px 6px; border-bottom: 1px dotted #e2e8f0;">
+                  <span><strong>ช่องที่ ${bIdx} (${escapeHtml(bId)}):</strong> ${escapeHtml(userAns || '(ไม่ได้ตอบ)')}</span>
+                  <span style="color: #1e3a8a;"><strong>เฉลย:</strong> ${escapeHtml(bAns)}</span>
+                </div>
+              `;
+            }
+            if (blanksRows) {
+              blanksReportHtml = `
+                <div style="margin-bottom: 6px; padding: 6px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px;">
+                  <div style="font-weight: 700; font-size: 8pt; color: #1e3a8a; margin-bottom: 3px;">✍️ รายงานคำตอบส่วนเติมคำ (Blanks & Answers):</div>
+                  ${blanksRows}
+                </div>
+              `;
+            }
+          }
+
+          checklistSectionsHtml += `
+            <div style="page-break-inside: avoid; break-inside: avoid; margin-top: 14px; border: 1px solid #94a3b8; border-radius: 4px; padding: 8px 10px; background: #ffffff;">
+              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #0f172a; padding-bottom: 4px; margin-bottom: 6px;">
+                <div style="font-size: 9.5pt; font-weight: 800; color: #0f172a;">
+                  สถานีที่ ${s.stationNumber}: ${escapeHtml(s.title)} (${escapeHtml(s.category)})
+                </div>
+                <div style="font-size: 8.5pt; font-weight: 700; color: ${s.isPassed ? '#15803d' : '#b91c1c'};">
+                  คะแนนที่ได้ ${safeFormatScore(s.earned)} / ${safeFormatScore(s.max)} (${s.pct}%) · ${s.isPassed ? 'ผ่าน' : 'ไม่ผ่าน'}
+                </div>
+              </div>
+              ${blanksReportHtml}
+              <div style="margin-top: 4px;">
+                ${itemsReportHtml || '<div style="font-size: 8pt; color: #64748b;">(ไม่มีรายการ Checklist ในสถานีนี้)</div>'}
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      // Final Full Print Document HTML
+      const printDocHtml = `
+        <div style="font-family: 'Bai Jamjuree', 'Sarabun', sans-serif; color: #000000; line-height: 1.4; padding: 10px;">
+          <!-- Formal Header -->
+          <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2.5px solid #1e3a8a; padding-bottom: 8px; margin-bottom: 12px;">
+            <div>
+              <div style="font-size: 13pt; font-weight: 800; color: #1e3a8a; letter-spacing: -0.01em;">
+                โครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม (PLE-CC) ปีการศึกษา 2569
+              </div>
+              <div style="font-size: 10.5pt; font-weight: 700; color: #0f172a; margin-top: 2px;">
+                รายงานผลการทดสอบทักษะทางวิชาชีพ OSPE (OSPE Simulation Score & Checklist Report)
+              </div>
+              <div style="font-size: 8.5pt; color: #475569; margin-top: 2px;">
+                คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย (RxCU OSPE Simulation System)
+              </div>
+            </div>
+            <div style="text-align: right; font-size: 8.5pt; color: #334155;">
+              <div><strong>วันที่สอบ:</strong> ${printDateThai}</div>
+              <div><strong>ผู้เข้าสอบ:</strong> ${studentName}</div>
+              ${SimState.roomId ? `<div><strong>รหัสห้องสอบ:</strong> ${escapeHtml(SimState.roomId)}</div>` : ''}
+            </div>
+          </div>
+
+          <!-- Score Executive Banner -->
+          <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 8px 14px; margin-bottom: 14px; page-break-inside: avoid;">
+            <div>
+              <div style="font-size: 8.5pt; color: #475569; text-transform: uppercase; font-weight: 700;">ผลการประเมินภาพรวม (Overall Result)</div>
+              <div style="font-size: 13pt; font-weight: 900; color: ${isExamPassed ? '#15803d' : '#b91c1c'}; margin-top: 1px;">
+                ${isExamPassed ? 'PASSED (ผ่านการประเมินวิชาชีพ)' : 'FAILED (ไม่ผ่านเกณฑ์การประเมิน)'}
+              </div>
+              <div style="font-size: 8pt; color: #64748b; margin-top: 2px;">
+                ผ่าน ${passedStations} จากทั้งหมด ${totalStationsCount} สถานีสอบ (เกณฑ์ผ่านร้อยละ 80 ต่อสถานี)
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 8.5pt; color: #475569; font-weight: 700;">คะแนนเฉลี่ยรวม</div>
+              <div style="font-size: 16pt; font-weight: 900; color: #0f172a; line-height: 1.1;">
+                ${totalPct}%
+              </div>
+              <div style="font-size: 8pt; color: #64748b;">
+                ${safeFormatScore(totalEarnedScore)} / ${safeFormatScore(totalMaxScore)} คะแนนดิบ
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Station Summary Table -->
+          <div style="margin-bottom: 12px; page-break-inside: avoid;">
+            <div style="font-size: 10pt; font-weight: 800; color: #0f172a; margin-bottom: 6px; border-left: 3.5px solid #1e3a8a; padding-left: 6px;">
+              ตารางสรุปผลคะแนนแต่ละสถานี (Station Breakdown Table)
+            </div>
+            <table style="width: 100%; border-collapse: collapse; font-size: 8.5pt;">
+              <thead>
+                <tr style="background: #f1f5f9; border-top: 1.5px solid #0f172a; border-bottom: 1.5px solid #0f172a;">
+                  <th style="padding: 6px 8px; text-align: center; width: 12%;">สถานี</th>
+                  <th style="padding: 6px 8px; text-align: left; width: 44%;">ชื่อสถานีสอบ</th>
+                  <th style="padding: 6px 8px; text-align: center; width: 12%;">หมวดวิชา</th>
+                  <th style="padding: 6px 8px; text-align: center; width: 10%;">เต็ม</th>
+                  <th style="padding: 6px 8px; text-align: center; width: 12%;">ได้ (%)</th>
+                  <th style="padding: 6px 8px; text-align: center; width: 10%;">ผลประเมิน</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${stationRowsHtml}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Section: Full Detailed Checklist (If Selected) -->
+          ${printType === 'full' ? `
+            <div style="margin-top: 18px;">
+              <div style="font-size: 10pt; font-weight: 800; color: #0f172a; margin-bottom: 6px; border-left: 3.5px solid #1e3a8a; padding-left: 6px;">
+                รายละเอียดเกณฑ์การตรวจประเมิน Checklist & Rubric รายสถานี (Detailed Evaluation Report)
+              </div>
+              ${checklistSectionsHtml}
+            </div>
+          ` : ''}
+
+          <!-- Footer Stamp -->
+          <div style="margin-top: 20px; padding-top: 8px; border-top: 1px solid #cbd5e1; font-size: 7.5pt; color: #64748b; display: flex; justify-content: space-between; page-break-inside: avoid;">
+            <span>เอกสารรายงานผลการสอบอย่างเป็นทางการ · โครงการเตรียมสอบใบประกอบวิชาชีพฯ นิสิตเภสัชฯ จุฬาฯ (RxCU84/85)</span>
+            <span>พิมพ์เมื่อ: ${printDateThai}</span>
+          </div>
+        </div>
+      `;
+
+      printArea.innerHTML = printDocHtml;
+
+      // Small delay to ensure DOM and fonts settle before triggering browser print dialog
+      setTimeout(() => {
+        window.print();
+      }, 150);
+    }
+    window.generateAndPrintOspeReport = generateAndPrintOspeReport;
 
     function restartSetup() {
       if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);

@@ -4005,7 +4005,7 @@ body.is-printing #batch-print-execution-area {
   }
 
   /* Universal Mobile (iOS Safari & Android Chrome) & Desktop Isolation */
-  body > *:not(#single-case-print-execution-area):not(#batch-print-execution-area) {
+  body > *:not(#single-case-print-execution-area):not(#batch-print-execution-area):not(#ospe-results-print-area) {
     display: none !important;
   }
 
@@ -4025,7 +4025,8 @@ body.is-printing #batch-print-execution-area {
   }
 
   #single-case-print-execution-area,
-  #batch-print-execution-area {
+  #batch-print-execution-area,
+  #ospe-results-print-area {
     display: block !important;
     position: static !important;
     width: 100% !important;
