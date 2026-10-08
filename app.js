@@ -615,6 +615,24 @@ window.isCaseActive = isCaseActive;
 function parseCaseDurationSec(c) {
   if (!c) return 240;
   if (c.durationMin) return Math.round(parseFloat(c.durationMin) * 60);
+
+  // Look up by caseId in AppState.cases or OFFLINE_DATA.cases if durationMin is not on c directly
+  const cId = c.caseId || (typeof c === 'string' ? c : null);
+  if (cId) {
+    const rawId = cId.replace(/^OSPE-/i, '');
+    const ospeId = cId.startsWith('OSPE-') ? cId : ('OSPE-' + cId);
+    let found = null;
+    if (typeof AppState !== 'undefined' && AppState.cases) {
+      found = AppState.cases.find(x => x && x.caseId && (x.caseId === cId || x.caseId === ospeId || x.caseId === rawId));
+    }
+    if (!found && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+      found = OFFLINE_DATA.cases.find(x => x && x.caseId && (x.caseId === cId || x.caseId === ospeId || x.caseId === rawId));
+    }
+    if (found && found.durationMin) {
+      return Math.round(parseFloat(found.durationMin) * 60);
+    }
+  }
+
   const text = (c.content || '') + ' ' + (c.rawHtml || '') + ' ' + (c.scenario || '') + ' ' + (c.patientInfoHtml || '') + ' ' + (c.title || '');
   const m = text.match(/(?:ระยะเวลา|เวลา)\s*[:：]?\s*(\d+)\s*นาที/);
   if (m && m[1]) return parseInt(m[1], 10) * 60;
@@ -3140,6 +3158,22 @@ async function executeBatchPrint() {
   }, 100);
 }
 
+// ─── Global Universal Dynamic Page Print Style Helper ────────────────────────
+function applyDynamicPrintStyle(orient) {
+  let styleEl = document.getElementById('dynamic-page-print-style');
+  if (!styleEl) {
+    styleEl = document.createElement('style');
+    styleEl.id = 'dynamic-page-print-style';
+    document.head.appendChild(styleEl);
+  }
+  if (orient === 'landscape') {
+    styleEl.textContent = '@media print { @page { size: A4 landscape !important; margin: 8mm !important; } }';
+  } else {
+    styleEl.textContent = '@media print { @page { size: A4 portrait !important; margin: 8mm !important; } }';
+  }
+}
+window.applyDynamicPrintStyle = applyDynamicPrintStyle;
+
 // ─── Global Universal Print Trigger (iOS Safari & Desktop) ───────────────────
 function triggerNativePrint(orient, scale, mode, printAreaId, onDone) {
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
@@ -3153,9 +3187,7 @@ function triggerNativePrint(orient, scale, mode, printAreaId, onDone) {
   else if (mode === 'checklist') document.body.classList.add('print-mode-checklist');
 
   // 2. Apply dynamic @page media query rules
-  if (typeof applyDynamicPrintStyle === 'function') {
-    applyDynamicPrintStyle(orient);
-  }
+  applyDynamicPrintStyle(orient);
 
   // 3. Define safe cleanup method
   let cleaned = false;
@@ -3189,6 +3221,7 @@ function triggerNativePrint(orient, scale, mode, printAreaId, onDone) {
     setTimeout(cleanup, isIOS ? 4000 : 1500);
   }, isIOS ? 350 : 150);
 }
+window.triggerNativePrint = triggerNativePrint;
 
 
 // ──────────────────────────────────────────────────────────────

@@ -2617,7 +2617,7 @@
 </div><!-- /.app-shell -->
 
   <!-- Dedicated Print Area for OSPE Simulation Results (Isolated in @media print) -->
-  <div id="ospe-results-print-area" class="print-only-block" style="display:none;"></div>
+  <div id="ospe-results-print-area" class="print-only-block"></div>
 
   <!-- OSPE Results Print Modal -->
   <div id="ospe-print-modal" class="modal-backdrop" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.65); z-index:99999; align-items:center; justify-content:center; padding:1rem; backdrop-filter:blur(4px);">
@@ -3938,6 +3938,8 @@
             joinedAt: Date.now()
           };
 
+          const initialCaseDur = parseCaseDurationSec(fullExamSet[0]);
+
           // Write room to Firebase
           const roomData = {
             roomId: randomRoomId,
@@ -3953,7 +3955,8 @@
             players: initialPlayers,
             currentStationIdx: 0,
             caseId: fullExamSet[0].caseId,
-            timerValue: 240,
+            timerValue: initialCaseDur,
+            timerDuration: initialCaseDur,
             timerRunning: false,
             status: 'setup',
             examSet: examSetJson,
@@ -3992,8 +3995,16 @@
             if (fullExamSet[i].caseId === 'REST') {
               SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: true, case: getRestCaseData() });
             } else {
-              let matchedCase = AppState.cases.find(c => c.caseId === fullExamSet[i].caseId) || AppState.cases[0];
-              SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: false, case: matchedCase });
+              const targetCaseId = (fullExamSet[i].caseId || '').trim();
+              const rawId = targetCaseId.replace(/^OSPE-/i, '');
+              const ospeId = targetCaseId.startsWith('OSPE-') ? targetCaseId : ('OSPE-' + targetCaseId);
+              let matchedCase = (typeof AppState !== 'undefined' && AppState.cases)
+                ? AppState.cases.find(c => c.caseId && (c.caseId.trim() === targetCaseId || c.caseId.trim() === ospeId || c.caseId.trim() === rawId))
+                : null;
+              if (!matchedCase && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+                matchedCase = OFFLINE_DATA.cases.find(c => c.caseId && (c.caseId.trim() === targetCaseId || c.caseId.trim() === ospeId || c.caseId.trim() === rawId));
+              }
+              SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: false, case: matchedCase || fullExamSet[i] });
             }
           }
           SimState.currentIdx = 0;
@@ -5239,25 +5250,27 @@
                   
                   // Compute initial timer immediately from Super Host's timerStartedAt
                   SimState.cachedRoom = room;
+                  const curCase = SimState.stations && SimState.stations[SimState.currentIdx]?.case;
+                  const fallbackDur = parseCaseDurationSec(curCase);
                   if (room.timerRunning) {
                     SimState.timerRunning = true;
                     if (room.timerStartedAt) {
                       const now = Date.now();
                       if (now < room.timerStartedAt) {
-                        SimState.timerValue = room.timerDuration || 240;
+                        SimState.timerValue = room.timerDuration || fallbackDur || 240;
                       } else {
                         const elapsed = Math.floor((now - room.timerStartedAt) / 1000);
-                        const totalDur = room.timerDuration || 240;
+                        const totalDur = room.timerDuration || fallbackDur || 240;
                         SimState.timerValue = Math.max(0, totalDur - elapsed);
                       }
                     } else {
-                      SimState.timerValue = room.timerValue !== undefined ? room.timerValue : 240;
+                      SimState.timerValue = room.timerValue !== undefined ? room.timerValue : (fallbackDur || 240);
                     }
                     updateTimerDisplay();
                     startLocalCountdown();
                   } else {
                     SimState.timerRunning = false;
-                    SimState.timerValue = room.timerValue !== undefined ? room.timerValue : 240;
+                    SimState.timerValue = room.timerValue !== undefined ? room.timerValue : (fallbackDur || 240);
                     updateTimerDisplay();
                   }
                 }
@@ -5270,23 +5283,25 @@
 
           // ── Synchronize timer from Super Host (Absolute Source of Truth) ──
           SimState.cachedRoom = room;
+          const curCase = SimState.stations && SimState.stations[SimState.currentIdx]?.case;
+          const fallbackDur = parseCaseDurationSec(curCase);
           if (room.timerRunning) {
             SimState.timerRunning = true;
             if (room.timerStartedAt) {
               const now = Date.now();
               if (now < room.timerStartedAt) {
-                SimState.timerValue = room.timerDuration || 240;
+                SimState.timerValue = room.timerDuration || fallbackDur || 240;
               } else {
                 const elapsed = Math.floor((now - room.timerStartedAt) / 1000);
-                const totalDur = room.timerDuration || 240;
+                const totalDur = room.timerDuration || fallbackDur || 240;
                 SimState.timerValue = Math.max(0, totalDur - elapsed);
               }
             } else {
-              SimState.timerValue = room.timerValue !== undefined ? room.timerValue : 240;
+              SimState.timerValue = room.timerValue !== undefined ? room.timerValue : (fallbackDur || 240);
             }
           } else {
             SimState.timerRunning = false;
-            SimState.timerValue = room.timerValue !== undefined ? room.timerValue : 240;
+            SimState.timerValue = room.timerValue !== undefined ? room.timerValue : (fallbackDur || 240);
           }
           updateTimerDisplay();
 
@@ -5678,13 +5693,16 @@
                   const dec = await window.decryptCaseData(encObj, pwd);
                   if (dec) {
                     st.case = Object.assign({}, st.case, dec);
-                    SimState.unlockedCases[cleanId] = dec;
-                    sessionStorage.setItem('sim_unlocked_' + cleanId, JSON.stringify(dec));
-                    sessionStorage.setItem('ple_unlocked_' + cleanId, JSON.stringify(dec));
-                    if (!cleanId.startsWith('OSPE-')) {
-                      sessionStorage.setItem('ple_unlocked_OSPE-' + cleanId, JSON.stringify(dec));
+                    if (!st.case.durationMin && encObj && encObj.durationMin) {
+                      st.case.durationMin = encObj.durationMin;
                     }
-                    unlockedMap[cleanId] = dec;
+                    SimState.unlockedCases[cleanId] = st.case;
+                    sessionStorage.setItem('sim_unlocked_' + cleanId, JSON.stringify(st.case));
+                    sessionStorage.setItem('ple_unlocked_' + cleanId, JSON.stringify(st.case));
+                    if (!cleanId.startsWith('OSPE-')) {
+                      sessionStorage.setItem('ple_unlocked_OSPE-' + cleanId, JSON.stringify(st.case));
+                    }
+                    unlockedMap[cleanId] = st.case;
                   }
                 } catch(decErr) {
                   console.warn('Error decrypting case:', cleanId, decErr);
@@ -5758,34 +5776,29 @@
           const rawId = targetCaseId.replace(/^OSPE-/i, '');
           const ospeId = targetCaseId.startsWith('OSPE-') ? targetCaseId : ('OSPE-' + targetCaseId);
 
-          let matchedCase = null;
+          let baseCase = null;
+          // Find base metadata from AppState.cases or OFFLINE_DATA.cases
+          if (typeof AppState !== 'undefined' && AppState.cases) {
+            baseCase = AppState.cases.find(c => c.caseId && (c.caseId.trim() === targetCaseId || c.caseId.trim() === ospeId || c.caseId.trim() === rawId));
+          }
+          if (!baseCase && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+            baseCase = OFFLINE_DATA.cases.find(c => c.caseId && (c.caseId.trim() === targetCaseId || c.caseId.trim() === ospeId || c.caseId.trim() === rawId));
+          }
 
+          let unlockedCase = null;
           // 1. Check if unlocked payload is provided directly by Host in room state
           if (room.unlockedCaseDetails && (room.unlockedCaseDetails[targetCaseId] || room.unlockedCaseDetails[rawId] || room.unlockedCaseDetails[ospeId])) {
-            matchedCase = room.unlockedCaseDetails[targetCaseId] || room.unlockedCaseDetails[rawId] || room.unlockedCaseDetails[ospeId];
+            unlockedCase = room.unlockedCaseDetails[targetCaseId] || room.unlockedCaseDetails[rawId] || room.unlockedCaseDetails[ospeId];
           }
 
           // 2. Check offline case details (0ms instant)
-          if (!matchedCase && typeof OFFLINE_DETAILS !== 'undefined') {
-            matchedCase = OFFLINE_DETAILS[targetCaseId] || OFFLINE_DETAILS[ospeId] || OFFLINE_DETAILS[rawId];
+          if (!unlockedCase && typeof OFFLINE_CASE_DETAILS !== 'undefined' && OFFLINE_CASE_DETAILS) {
+            unlockedCase = OFFLINE_CASE_DETAILS[targetCaseId] || OFFLINE_CASE_DETAILS[ospeId] || OFFLINE_CASE_DETAILS[rawId];
           }
 
-          // 3. Check AppState.cases
-          if (!matchedCase && typeof AppState !== 'undefined' && AppState.cases) {
-            matchedCase = AppState.cases.find(c => c.caseId && (c.caseId.trim() === targetCaseId || c.caseId.trim() === ospeId || c.caseId.trim() === rawId));
-          }
+          const matchedCase = Object.assign({}, baseCase || { caseId: targetCaseId, title: 'สถานีสอบ' }, unlockedCase || {});
           
-          // 4. Fallback to OFFLINE_DATA
-          if (!matchedCase && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
-            matchedCase = OFFLINE_DATA.cases.find(c => c.caseId && (c.caseId.trim() === targetCaseId || c.caseId.trim() === ospeId || c.caseId.trim() === rawId));
-          }
-          
-          // 5. Last resort: AppState.cases[0]
-          if (!matchedCase && typeof AppState !== 'undefined' && AppState.cases && AppState.cases.length > 0) {
-            matchedCase = AppState.cases[0];
-          }
-          
-          SimState.stations.push({ stationNumber: stNum, isRest: false, case: matchedCase || { caseId: targetCaseId, title: 'สถานีสอบ' } });
+          SimState.stations.push({ stationNumber: stNum, isRest: false, case: matchedCase });
         }
       }
       await unlockStationsIfProtected(SimState.stations);
@@ -6113,17 +6126,19 @@
         
         if (SimState.isLobby && SimState.cachedRoom) {
           const room = SimState.cachedRoom;
+          const curCase = SimState.stations && SimState.stations[SimState.currentIdx]?.case;
+          const fallbackDur = parseCaseDurationSec(curCase);
           if (room.timerRunning && room.timerStartedAt) {
             const now = Date.now();
             if (now < room.timerStartedAt) {
-              SimState.timerValue = room.timerDuration || 240;
+              SimState.timerValue = room.timerDuration || fallbackDur || 240;
             } else {
               const elapsed = Math.floor((now - room.timerStartedAt) / 1000);
-              const totalDur = room.timerDuration || 240;
+              const totalDur = room.timerDuration || fallbackDur || 240;
               SimState.timerValue = Math.max(0, totalDur - elapsed);
             }
           } else if (!room.timerRunning) {
-            SimState.timerValue = room.timerValue !== undefined ? room.timerValue : 240;
+            SimState.timerValue = room.timerValue !== undefined ? room.timerValue : (fallbackDur || 240);
           } else {
             SimState.timerValue = Math.max(0, SimState.timerValue - 1);
           }
@@ -6763,6 +6778,24 @@
       }
       if (!c) return 240;
       if (c.durationMin) return Math.round(parseFloat(c.durationMin) * 60);
+
+      // Look up by caseId in AppState.cases or OFFLINE_DATA.cases if durationMin is not on c directly
+      const cId = c.caseId || (typeof c === 'string' ? c : null);
+      if (cId) {
+        const rawId = cId.replace(/^OSPE-/i, '');
+        const ospeId = cId.startsWith('OSPE-') ? cId : ('OSPE-' + cId);
+        let found = null;
+        if (typeof AppState !== 'undefined' && AppState.cases) {
+          found = AppState.cases.find(x => x && x.caseId && (x.caseId === cId || x.caseId === ospeId || x.caseId === rawId));
+        }
+        if (!found && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+          found = OFFLINE_DATA.cases.find(x => x && x.caseId && (x.caseId === cId || x.caseId === ospeId || x.caseId === rawId));
+        }
+        if (found && found.durationMin) {
+          return Math.round(parseFloat(found.durationMin) * 60);
+        }
+      }
+
       const text = (c.content || '') + ' ' + (c.rawHtml || '') + ' ' + (c.scenario || '') + ' ' + (c.patientInfoHtml || '') + ' ' + (c.title || '');
       const m = text.match(/(?:ระยะเวลา|เวลา)\s*[:：]?\s*(\d+)\s*นาที/);
       if (m && m[1]) return parseInt(m[1], 10) * 60;
@@ -10441,7 +10474,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
           // Equal-weight average percentage across active stations
           const overallPct = activeStationCount > 0 ? Math.round(sumStationPct / activeStationCount) : (totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0);
-          const isAllPassed = (passedStations >= stationsList.length && stationsList.length > 0) || (overallPct >= 80 && activeStationCount > 0 && passedStations >= activeStationCount);
+          const isAllPassed = overallPct >= 80;
           leaderboard.push({
             id: partId || tableId,
             name: partName || 'ผู้เข้าสอบ',
@@ -10532,7 +10565,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
           // Equal-weight average percentage across active stations
           const overallPct = activeStationCount > 0 ? Math.round(sumStationPct / activeStationCount) : (totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0);
-          const isAllPassed = (passedStations >= stationsList.length && stationsList.length > 0) || (overallPct >= 80 && activeStationCount > 0 && passedStations >= activeStationCount);
+          const isAllPassed = overallPct >= 80;
           leaderboard.push({
             id: pId,
             name: pData.name || 'ผู้เข้าสอบ',
@@ -10586,7 +10619,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
           });
           // Equal-weight average percentage across active stations
           const overallPct = activeStationCount > 0 ? Math.round(sumStationPct / activeStationCount) : (totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0);
-          const isAllPassed = (passedStations >= stationsList.length && stationsList.length > 0) || (overallPct >= 80 && activeStationCount > 0 && passedStations >= activeStationCount);
+          const isAllPassed = overallPct >= 80;
           leaderboard.push({
             id: p.id || p.name,
             name: p.name || 'ผู้เข้าสอบ',
@@ -11259,14 +11292,14 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         
         const statusText = document.getElementById('results-status-text');
         if (statusText) {
-          const allPassed = passedStations >= totalStationsCount && totalStationsCount > 0;
+          const allPassed = totalPct >= 80;
           statusText.textContent = allPassed ? 'PASSED (ผ่านการประเมิน)' : 'FAILED (ไม่ผ่านเกณฑ์)';
           statusText.style.color = allPassed ? 'var(--success)' : 'var(--danger)';
         }
         
         const summaryDescEl = document.getElementById('results-summary-desc');
         if (summaryDescEl) {
-          summaryDescEl.textContent = `ผ่านการประเมินวิชาชีพทั้งหมด ${passedStations} จาก ${totalStationsCount} สถานีสอบ (คิดน้ำหนักแต่ละสถานีเท่ากัน • เกณฑ์ผ่านร้อยละ 80 ต่อสถานี)`;
+          summaryDescEl.textContent = `คะแนนเฉลี่ยถ่วงน้ำหนักทุกสถานี: ${totalPct}% · ทำได้ ${formatScore(totalEarnedScore)} จาก ${formatScore(totalMaxScore)} คะแนนดิบสะสม (คิดสัดส่วนน้ำหนักแต่ละสถานีเท่ากัน • เกณฑ์ผ่านร้อยละ 80)`;
         }
 
         // Render Podium & Leaderboard if multiplayer room
@@ -11481,7 +11514,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       });
 
       const totalPct = activeStationCount > 0 ? Math.round(sumStationPct / activeStationCount) : (totalMaxScore > 0 ? Math.round((totalEarnedScore / totalMaxScore) * 100) : 0);
-      const isExamPassed = passedStations >= totalStationsCount && totalStationsCount > 0;
+      const isExamPassed = totalPct >= 80;
       const now = new Date();
       const printDateThai = now.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
@@ -11510,122 +11543,174 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       if (printType === 'full') {
         stationData.forEach(s => {
           if (s.isRest) return;
-          const checkedSet = new Set(s.checked || []);
+          const checkedSet = new Set(Array.isArray(s.checked) ? s.checked : []);
           const rawItems = Array.isArray(s.checklist) ? s.checklist : [];
 
-          // Grouping logic (same as onscreen breakdown)
-          const groups = [];
-          let currentGroup = null;
+          if (typeof resolveChecklistSubsets === 'function') {
+            resolveChecklistSubsets(rawItems);
+          }
 
-          rawItems.forEach((item, itemIdx) => {
-            const isChild = item.isChild || item.parentId != null || item.isSubItem;
-            if (!isChild) {
-              currentGroup = {
-                parent: item,
-                pIdx: itemIdx,
-                children: [],
-                groupType: item.scoringType || item.type || 'standard'
-              };
-              groups.push(currentGroup);
-            } else {
-              if (!currentGroup) {
-                currentGroup = {
-                  parent: item,
-                  pIdx: itemIdx,
-                  children: [],
-                  groupType: 'standard'
-                };
-                groups.push(currentGroup);
-              } else {
-                currentGroup.children.push({ item, cIdx: itemIdx });
-                if (item.scoringType === 'rubric' || currentGroup.parent.scoringType === 'rubric') {
-                  currentGroup.groupType = 'rubric';
-                }
-              }
-            }
+          // จัดกลุ่มตามหมวดหมู่ (item.group)
+          const groupMap = new Map();
+          rawItems.forEach((item, cIdx) => {
+            const gName = (item.group || 'ทั่วไป').trim();
+            if (!groupMap.has(gName)) groupMap.set(gName, []);
+            groupMap.get(gName).push({ item, cIdx });
           });
 
           let itemsReportHtml = '';
-          groups.forEach((block) => {
-            const pItem = block.parent;
-            const pIdx = block.pIdx;
-            const gType = block.groupType;
-            const hasChildren = block.children.length > 0;
-            const isPChecked = checkedSet.has(pItem.id) || checkedSet.has(String(pItem.id)) || checkedSet.has(pIdx) || checkedSet.has(String(pIdx));
-            const pScore = pItem.score !== undefined ? safeFormatScore(pItem.score) : '1.0';
-            const pText = escapeHtml(pItem.text || pItem.title || pItem.textHtml || '');
+          for (const [gName, gItems] of groupMap.entries()) {
+            const rubricBlocks = [];
+            let curBlock = null;
 
-            const anyChildChecked = block.children.some(({ item: cItem, cIdx: subIdx }) => 
-              checkedSet.has(cItem.id) || checkedSet.has(String(cItem.id)) || checkedSet.has(subIdx) || checkedSet.has(String(subIdx))
-            );
-            const isParentFulfilled = isPChecked || (gType === 'rubric' ? anyChildChecked : false);
-
-            let pBadge = '';
-            let pBorder = '';
-            let pBg = '';
-
-            if (hasChildren && gType === 'rubric') {
-              if (isParentFulfilled) {
-                pBadge = `<span style="color: #15803d; font-weight: 700; background: #dcfce7; border: 1px solid #86efac; border-radius: 3px; padding: 1px 6px; font-size: 8pt;">✓ ได้คะแนนเกณฑ์นี้</span>`;
-                pBorder = 'border-left: 3px solid #22c55e;';
-                pBg = 'background: #f0fdf4;';
+            gItems.forEach(({ item, cIdx }) => {
+              const isSub = Boolean(item.isSubset);
+              if (!isSub) {
+                if (curBlock) rubricBlocks.push(curBlock);
+                curBlock = { parent: { item, cIdx }, children: [] };
               } else {
-                pBadge = `<span style="color: #b91c1c; font-weight: 700; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 3px; padding: 1px 6px; font-size: 8pt;">✗ ไม่ได้คะแนน (+0 / ${pScore})</span>`;
-                pBorder = 'border-left: 3px solid #ef4444;';
-                pBg = 'background: #fef2f2;';
+                if (curBlock) {
+                  curBlock.children.push({ item, cIdx });
+                } else {
+                  rubricBlocks.push({ parent: { item, cIdx }, children: [] });
+                }
               }
-            } else {
-              if (isPChecked) {
-                pBadge = `<span style="color: #15803d; font-weight: 700; background: #dcfce7; border: 1px solid #86efac; border-radius: 3px; padding: 1px 6px; font-size: 8pt;">✓ ได้ +${pScore} คะแนน</span>`;
-                pBorder = 'border-left: 3px solid #22c55e;';
-                pBg = 'background: #f0fdf4;';
-              } else {
-                pBadge = `<span style="color: #b91c1c; font-weight: 700; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 3px; padding: 1px 6px; font-size: 8pt;">✗ เสีย +0 / ${pScore} คะแนน</span>`;
-                pBorder = 'border-left: 3px solid #ef4444;';
-                pBg = 'background: #fef2f2;';
-              }
-            }
+            });
+            if (curBlock) rubricBlocks.push(curBlock);
 
-            const pIcon = isParentFulfilled ? '✅' : '❌';
+            let gEarned = 0;
+            let gMax = 0;
+
+            rubricBlocks.forEach(block => {
+              const pItem = block.parent.item;
+              const pIdx = block.parent.cIdx;
+              const pScore = pItem.score !== undefined ? parseFloat(pItem.score) : 1.0;
+              const isPChecked = checkedSet.has(pItem.id) || checkedSet.has(String(pItem.id)) || checkedSet.has(pIdx) || checkedSet.has(String(pIdx));
+              
+              if (block.children.length === 0) {
+                gMax += pScore;
+                if (isPChecked) gEarned += pScore;
+              } else {
+                const gType = typeof getSubsetGroupType === 'function'
+                  ? getSubsetGroupType(pItem, block.children.map(c => c.item))
+                  : 'additive';
+
+                gMax += pScore;
+                if (gType === 'rubric') {
+                  const checkedSubs = block.children.filter(c => 
+                    checkedSet.has(c.item.id) || checkedSet.has(String(c.item.id)) || checkedSet.has(c.cIdx) || checkedSet.has(String(c.cIdx))
+                  );
+                  if (checkedSubs.length > 0) {
+                    const maxSub = Math.max(...checkedSubs.map(c => parseFloat(c.item.score) || 0));
+                    gEarned += Math.min(maxSub, pScore);
+                  } else if (isPChecked) {
+                    gEarned += pScore;
+                  }
+                } else {
+                  if (isPChecked) {
+                    gEarned += pScore;
+                  } else {
+                    const checkedSubs = block.children.filter(c => 
+                      checkedSet.has(c.item.id) || checkedSet.has(String(c.item.id)) || checkedSet.has(c.cIdx) || checkedSet.has(String(c.cIdx))
+                    );
+                    const subTotal = checkedSubs.reduce((sum, c) => sum + (parseFloat(c.item.score) || 0), 0);
+                    gEarned += Math.min(subTotal, pScore);
+                  }
+                }
+              }
+            });
+
             itemsReportHtml += `
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 4px 8px; margin-bottom: 3px; font-size: 8.5pt; ${pBorder} ${pBg}">
-                <div style="flex: 1;"><strong>${pIcon} ข้อ ${pIdx + 1}:</strong> ${pText}</div>
-                <div style="flex-shrink: 0;">${pBadge}</div>
+              <div style="margin-top: 6px; margin-bottom: 3px; padding: 3px 6px; background: #f1f5f9; border-left: 3px solid #1e3a8a; border-radius: 3px; display: flex; align-items: center; justify-content: space-between; font-size: 8pt;">
+                <span style="font-weight: 700; color: #0f172a;">📂 หมวด: ${escapeHtml(gName)}</span>
+                <span style="font-weight: 600; color: #475569; background: #ffffff; padding: 1px 5px; border-radius: 3px; border: 1px solid #cbd5e1;">ทำได้ ${safeFormatScore(gEarned)} / ${safeFormatScore(gMax)} คะแนน</span>
               </div>
             `;
 
-            // Children
-            block.children.forEach(({ item: cItem, cIdx: subIdx }) => {
-              const isCChecked = checkedSet.has(cItem.id) || checkedSet.has(String(cItem.id)) || checkedSet.has(subIdx) || checkedSet.has(String(subIdx));
-              const cScore = cItem.score !== undefined ? safeFormatScore(cItem.score) : '1.0';
-              const cText = escapeHtml(cItem.text || cItem.title || cItem.textHtml || '');
+            rubricBlocks.forEach(block => {
+              const pItem = block.parent.item;
+              const pIdx = block.parent.cIdx;
+              const pScore = pItem.score !== undefined ? safeFormatScore(pItem.score) : '1.0';
+              const isPChecked = checkedSet.has(pItem.id) || checkedSet.has(String(pItem.id)) || checkedSet.has(pIdx) || checkedSet.has(String(pIdx));
+              const pText = (pItem.textHtml || pItem.text || pItem.title || '').trim();
 
-              let cBadge = '';
-              let cIcon = '';
-              let cStyle = '';
+              const hasChildren = block.children.length > 0;
+              const gType = hasChildren && (typeof getSubsetGroupType === 'function')
+                ? getSubsetGroupType(pItem, block.children.map(c => c.item))
+                : 'additive';
 
-              if (isCChecked) {
-                cIcon = '✅';
-                cBadge = `<span style="color: #15803d; font-weight: 700; background: #dcfce7; border: 1px solid #86efac; border-radius: 3px; padding: 1px 6px; font-size: 8pt;">✓ เลือกข้อนี้ (+${cScore})</span>`;
-                cStyle = 'margin-left: 1.25rem; border-left: 2px solid #22c55e; background: #f0fdf4;';
-              } else if (gType === 'rubric') {
-                cIcon = '⚪';
-                cBadge = `<span style="color: #64748b; font-weight: 500; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 3px; padding: 1px 6px; font-size: 7.5pt;">(ไม่ได้เลือก)</span>`;
-                cStyle = 'margin-left: 1.25rem; border-left: 2px dashed #94a3b8; background: #ffffff;';
+              const anyChildChecked = hasChildren && block.children.some(c => 
+                checkedSet.has(c.item.id) || checkedSet.has(String(c.item.id)) || checkedSet.has(c.cIdx) || checkedSet.has(String(c.cIdx))
+              );
+              const isParentFulfilled = isPChecked || (gType === 'rubric' ? anyChildChecked : false);
+
+              let pBadge = '';
+              let pBorder = '';
+              let pBg = '';
+
+              if (hasChildren && gType === 'rubric') {
+                if (isParentFulfilled) {
+                  pBadge = `<span style="color: #15803d; font-weight: 700; background: #dcfce7; border: 1px solid #86efac; border-radius: 3px; padding: 1px 6px; font-size: 7.5pt;">✓ ได้คะแนนเกณฑ์นี้</span>`;
+                  pBorder = 'border-left: 3px solid #22c55e;';
+                  pBg = 'background: #f0fdf4;';
+                } else {
+                  pBadge = `<span style="color: #b91c1c; font-weight: 700; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 3px; padding: 1px 6px; font-size: 7.5pt;">✗ ไม่ได้คะแนน (+0 / ${pScore})</span>`;
+                  pBorder = 'border-left: 3px solid #ef4444;';
+                  pBg = 'background: #fef2f2;';
+                }
               } else {
-                cIcon = '❌';
-                cBadge = `<span style="color: #b91c1c; font-weight: 700; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 3px; padding: 1px 6px; font-size: 8pt;">✗ ไม่ได้ทำ (+0 / ${cScore})</span>`;
-                cStyle = 'margin-left: 1.25rem; border-left: 2px dashed #ef4444; background: #fef2f2;';
+                if (isPChecked) {
+                  pBadge = `<span style="color: #15803d; font-weight: 700; background: #dcfce7; border: 1px solid #86efac; border-radius: 3px; padding: 1px 6px; font-size: 7.5pt;">✓ ได้ +${pScore} คะแนน</span>`;
+                  pBorder = 'border-left: 3px solid #22c55e;';
+                  pBg = 'background: #f0fdf4;';
+                } else {
+                  pBadge = `<span style="color: #b91c1c; font-weight: 700; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 3px; padding: 1px 6px; font-size: 7.5pt;">✗ เสีย +0 / ${pScore} คะแนน</span>`;
+                  pBorder = 'border-left: 3px solid #ef4444;';
+                  pBg = 'background: #fef2f2;';
+                }
               }
 
+              const pIcon = isParentFulfilled ? '✅' : '❌';
               itemsReportHtml += `
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 3px 8px; margin-bottom: 2px; font-size: 8pt; ${cStyle}">
-                  <div style="flex: 1;"><strong>${cIcon} ↳ ข้อย่อย ${subIdx + 1}:</strong> ${cText}</div>
-                  <div style="flex-shrink: 0;">${cBadge}</div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 3px 6px; margin-bottom: 2px; font-size: 8pt; ${pBorder} ${pBg}">
+                  <div style="flex: 1;"><strong>${pIcon} ข้อ ${pIdx + 1}:</strong> ${pText}</div>
+                  <div style="flex-shrink: 0;">${pBadge}</div>
                 </div>
               `;
+
+              // Children
+              block.children.forEach(({ item: cItem, cIdx: subIdx }) => {
+                const isCChecked = checkedSet.has(cItem.id) || checkedSet.has(String(cItem.id)) || checkedSet.has(subIdx) || checkedSet.has(String(subIdx));
+                const cScore = cItem.score !== undefined ? safeFormatScore(cItem.score) : '1.0';
+                const cText = (cItem.textHtml || cItem.text || cItem.title || '').trim();
+
+                let cBadge = '';
+                let cIcon = '';
+                let cStyle = '';
+
+                if (isCChecked) {
+                  cIcon = '✅';
+                  cBadge = `<span style="color: #15803d; font-weight: 700; background: #dcfce7; border: 1px solid #86efac; border-radius: 3px; padding: 1px 5px; font-size: 7.5pt;">✓ เลือกข้อนี้ (+${cScore})</span>`;
+                  cStyle = 'margin-left: 1.25rem; border-left: 2px solid #22c55e; background: #f0fdf4;';
+                } else if (gType === 'rubric') {
+                  cIcon = '⚪';
+                  cBadge = `<span style="color: #64748b; font-weight: 500; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 3px; padding: 1px 5px; font-size: 7pt;">(ไม่ได้เลือก)</span>`;
+                  cStyle = 'margin-left: 1.25rem; border-left: 2px dashed #94a3b8; background: #ffffff;';
+                } else {
+                  cIcon = '❌';
+                  cBadge = `<span style="color: #b91c1c; font-weight: 700; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 3px; padding: 1px 5px; font-size: 7.5pt;">✗ ไม่ได้ทำ (+0 / ${cScore})</span>`;
+                  cStyle = 'margin-left: 1.25rem; border-left: 2px dashed #ef4444; background: #fef2f2;';
+                }
+
+                itemsReportHtml += `
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 2px 6px; margin-bottom: 2px; font-size: 7.5pt; ${cStyle}">
+                    <div style="flex: 1;"><strong>${cIcon} ↳ ข้อย่อย ${subIdx + 1}:</strong> ${cText}</div>
+                    <div style="flex-shrink: 0;">${cBadge}</div>
+                  </div>
+                `;
+              });
             });
-          });
+          }
 
           // Check blanks for this station
           const c = s.caseObj;
@@ -11712,7 +11797,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
                 ${isExamPassed ? 'PASSED (ผ่านการประเมินวิชาชีพ)' : 'FAILED (ไม่ผ่านเกณฑ์การประเมิน)'}
               </div>
               <div style="font-size: 8pt; color: #64748b; margin-top: 2px;">
-                ผ่าน ${passedStations} จากทั้งหมด ${totalStationsCount} สถานีสอบ (เกณฑ์ผ่านร้อยละ 80 ต่อสถานี)
+                คะแนนเฉลี่ยถ่วงน้ำหนัก ${totalPct}% · ผ่าน ${passedStations} จากทั้งหมด ${totalStationsCount} สถานีสอบ (เกณฑ์ผ่านร้อยละ 80)
               </div>
             </div>
             <div style="text-align: right;">
@@ -11768,10 +11853,13 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
       printArea.innerHTML = printDocHtml;
 
-      // Small delay to ensure DOM and fonts settle before triggering browser print dialog
-      setTimeout(() => {
-        window.print();
-      }, 150);
+      if (typeof window.triggerNativePrint === 'function') {
+        window.triggerNativePrint('portrait', 100, 'results', 'ospe-results-print-area');
+      } else {
+        setTimeout(() => {
+          window.print();
+        }, 150);
+      }
     }
     window.generateAndPrintOspeReport = generateAndPrintOspeReport;
 
