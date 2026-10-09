@@ -320,6 +320,7 @@
       if (this._currentAudioEl) {
         try {
           this._currentAudioEl.pause();
+          this._currentAudioEl.src = '';
           this._currentAudioEl.currentTime = 0;
           this._currentAudioEl = null;
         } catch (_) {}
@@ -327,6 +328,11 @@
       try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (_) {}
       this._speakerOverride = null;
       this.setAvatarSpeaking(false);
+    },
+
+    clearAudioCache() {
+      this.cancelSpeech();
+      this._geminiAudioCache = {};
     },
 
     async fetchGeminiAudioWav(cleanText, av) {
@@ -403,6 +409,10 @@
 
           if (base64Data) {
             const dataUrl = `data:${mimeType};base64,${base64Data}`;
+            const keys = Object.keys(this._geminiAudioCache);
+            if (keys.length >= 10) {
+              delete this._geminiAudioCache[keys[0]];
+            }
             this._geminiAudioCache[cacheKey] = dataUrl;
             return dataUrl;
           }
@@ -1043,6 +1053,9 @@
         <div style="line-height:1.55;">${safeText}</div>
       `;
       container.appendChild(el);
+      while (container.children.length > 40) {
+        container.removeChild(container.firstChild);
+      }
       container.scrollTop = container.scrollHeight;
 
       // Save to solo local history
@@ -1059,6 +1072,9 @@
         stationNumber: this.currentStationNum,
         isAi: true
       });
+      if (this.soloMessages[stationKey].length > 40) {
+        this.soloMessages[stationKey].shift();
+      }
 
       if (this.aiSoundEnabled && replyText) {
         this.speakText(replyText);
@@ -1300,7 +1316,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       this.currentStationNum = caseIdOrNum || 1;
       this.activeCaseData = caseDataObj || (window.AppState && AppState.currentCase) || null;
 
-      this.cancelSpeech();
+      this.clearAudioCache();
       if (this.isListeningVoice && this.speechRecognition) {
         try { this.speechRecognition.abort(); } catch (_) {}
       }

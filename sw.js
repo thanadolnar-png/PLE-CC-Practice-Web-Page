@@ -4,9 +4,10 @@
  * ====================================================
  * จัดการ Caching ทรัพยากรระบบเพื่อเพิ่มความเร็วในการโหลด (Preloading) 
  * และสนับสนุนการเข้าใช้งานแบบออฟไลน์ (Offline Mode)
+ * Version: ple-cc2-ospe-v1.3.0 (Fast-Timeout Network-First for Navigation)
  */
 
-const CACHE_NAME = 'ple-cc2-ospe-v1.2.6';
+const CACHE_NAME = 'ple-cc2-ospe-v1.3.0';
 const ASSETS = [
   './',
   './index.html',
@@ -21,10 +22,9 @@ const ASSETS = [
 
 // 1. Install Event: บันทึก Cache ของทรัพยากรตั้งต้น
 self.addEventListener('install', event => {
-  console.log('[Service Worker] Installing & Pre-caching static assets...');
+  console.log('[Service Worker] Installing ple-cc2-ospe-v1.3.0...');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      // ใช้ Promise.allSettled เพื่อป้องกันผลกระทบหากไฟล์ใดไฟล์หนึ่งหายไป
       return Promise.allSettled(
         ASSETS.map(asset => {
           return cache.add(asset).catch(err => {
@@ -41,7 +41,7 @@ self.addEventListener('install', event => {
 
 // 2. Activate Event: ล้าง Cache เก่าที่ไม่ได้ใช้งาน
 self.addEventListener('activate', event => {
-  console.log('[Service Worker] Activating & Cleaning old caches...');
+  console.log('[Service Worker] Activating ple-cc2-ospe-v1.3.0 & Cleaning old caches...');
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
@@ -56,9 +56,8 @@ self.addEventListener('activate', event => {
   );
 });
 
-// 3. Fetch Event: Intercept และให้บริการข้อมูลแบบ Stale-While-Revalidate
+// 3. Fetch Event: Intercept และให้บริการข้อมูล
 self.addEventListener('fetch', event => {
-  // กรองเฉพาะคำสั่ง GET เท่านั้น
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
@@ -74,12 +73,37 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  const isHtmlNavigation = event.request.mode === 'navigate' || event.request.destination === 'document';
+
+  if (isHtmlNavigation) {
+    // Fast-Timeout Network-First: รอข้อมูลใหม่จากเน็ตไม่เกิน 1.2 วินาที หากเน็ตช้าหรือออฟไลน์ ให้ใช้แคชในเครื่องทันที
+    event.respondWith(
+      caches.open(CACHE_NAME).then(cache => {
+        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 1200));
+        const networkPromise = fetch(event.request).then(networkResponse => {
+          if (networkResponse && networkResponse.status === 200) {
+            cache.put(event.request, networkResponse.clone());
+          }
+          return networkResponse;
+        }).catch(() => null);
+
+        return Promise.race([networkPromise, timeoutPromise]).then(fastestResponse => {
+          if (fastestResponse) return fastestResponse;
+          return cache.match(event.request).then(cachedResponse => {
+            return cachedResponse || networkPromise;
+          });
+        });
+      })
+    );
+    return;
+  }
+
+  // ทรัพยากรไฟล์อื่น (CSS, JS, มีเดีย, เสียง) ให้ใช้ Stale-While-Revalidate เพื่อความเร็วสูงสุด (0ms)
   event.respondWith(
     caches.open(CACHE_NAME).then(cache => {
       return cache.match(event.request).then(cachedResponse => {
-        // สร้างการดึงข้อมูลจากเครือข่ายคู่ขนานกันไปเพื่ออัปเดต Cache ในเบื้องหลัง
         const fetchPromise = fetch(event.request).then(networkResponse => {
-          if (networkResponse.status === 200) {
+          if (networkResponse && networkResponse.status === 200) {
             cache.put(event.request, networkResponse.clone());
           }
           return networkResponse;
@@ -87,7 +111,6 @@ self.addEventListener('fetch', event => {
           console.warn('[Service Worker] Network request failed (serving cached/offline):', err);
         });
 
-        // ส่งคืนข้อมูลแคชทันทีหากมี (0ms) หรือดึงสดถ้ายังไม่มีในแคช
         return cachedResponse || fetchPromise;
       });
     })

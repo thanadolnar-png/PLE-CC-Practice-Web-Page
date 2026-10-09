@@ -611,16 +611,34 @@ function isCaseActive(c) {
 window.isCaseActive = isCaseActive;
 
 // Helper: คำนวณระยะเวลาของเคสเป็นวินาที (default 240 วินาที = 4 นาที)
-// รองรับ durationMin และ fallback regex จากข้อความโจทย์ เช่น "- ระยะเวลา: 8 นาที"
+// รองรับ durationMin, ข้อสอบแล็บผลิต 103A/103B (8 นาที), และ fallback regex จากข้อความโจทย์
 function parseCaseDurationSec(c) {
   if (!c) return 240;
+
+  const cId = String(c.caseId || (typeof c === 'string' ? c : '')).trim();
+  const rawId = cId.replace(/^OSPE-/i, '');
+  const ospeId = cId.startsWith('OSPE-') ? cId : ('OSPE-' + cId);
+
+  // เคสแล็บผลิต Week 1 (103A / 103B) กำหนดเวลาเป็น 8 นาที (480 วินาที) เสมอ
+  if (/OSPE-PD84M1W103[AB]/i.test(cId) || /PD84M1W103[AB]/i.test(cId)) {
+    return 480;
+  }
+
   if (c.durationMin) return Math.round(parseFloat(c.durationMin) * 60);
 
+  // Look up in SimState.unlockedCases if available
+  if (typeof SimState !== 'undefined' && SimState.unlockedCases) {
+    const unl = SimState.unlockedCases[cId] || SimState.unlockedCases[ospeId] || SimState.unlockedCases[rawId];
+    if (unl) {
+      if (unl.durationMin) return Math.round(parseFloat(unl.durationMin) * 60);
+      const unlText = (unl.content || '') + ' ' + (unl.rawHtml || '') + ' ' + (unl.scenario || '') + ' ' + (unl.patientInfoHtml || '') + ' ' + (unl.title || '');
+      const unlM = unlText.match(/(?:ระยะเวลา|เวลา)\s*[:：]?\s*(\d+)\s*นาที/);
+      if (unlM && unlM[1]) return parseInt(unlM[1], 10) * 60;
+    }
+  }
+
   // Look up by caseId in AppState.cases or OFFLINE_DATA.cases if durationMin is not on c directly
-  const cId = c.caseId || (typeof c === 'string' ? c : null);
   if (cId) {
-    const rawId = cId.replace(/^OSPE-/i, '');
-    const ospeId = cId.startsWith('OSPE-') ? cId : ('OSPE-' + cId);
     let found = null;
     if (typeof AppState !== 'undefined' && AppState.cases) {
       found = AppState.cases.find(x => x && x.caseId && (x.caseId === cId || x.caseId === ospeId || x.caseId === rawId));
@@ -728,7 +746,15 @@ async function loadCasesData() {
         if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
           fetchedCases = fetchedCases.map(apiCase => {
             const offlineMatch = OFFLINE_DATA.cases.find(o => o.caseId === apiCase.caseId);
-            return offlineMatch ? Object.assign({}, offlineMatch, apiCase) : apiCase;
+            if (!offlineMatch) return apiCase;
+            const merged = Object.assign({}, offlineMatch, apiCase);
+            if (offlineMatch.durationMin && !apiCase.durationMin) {
+              merged.durationMin = offlineMatch.durationMin;
+            }
+            if (/OSPE-PD84M1W103[AB]/i.test(apiCase.caseId || '') || /PD84M1W103[AB]/i.test(apiCase.caseId || '')) {
+              merged.durationMin = 8;
+            }
+            return merged;
           });
         }
         fetchedCases = fetchedCases.filter(isCaseActive);
@@ -1436,7 +1462,15 @@ async function forceSyncDatabase() {
         if (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
           fetchedCases = fetchedCases.map(apiCase => {
             const offlineMatch = OFFLINE_DATA.cases.find(o => o.caseId === apiCase.caseId);
-            return offlineMatch ? Object.assign({}, offlineMatch, apiCase) : apiCase;
+            if (!offlineMatch) return apiCase;
+            const merged = Object.assign({}, offlineMatch, apiCase);
+            if (offlineMatch.durationMin && !apiCase.durationMin) {
+              merged.durationMin = offlineMatch.durationMin;
+            }
+            if (/OSPE-PD84M1W103[AB]/i.test(apiCase.caseId || '') || /PD84M1W103[AB]/i.test(apiCase.caseId || '')) {
+              merged.durationMin = 8;
+            }
+            return merged;
           });
         }
         fetchedCases = fetchedCases.filter(isCaseActive);

@@ -1505,6 +1505,28 @@
            1. SETUP SCREEN
            ────────────────────────────────────────────────────────── -->
       <section class="setup-screen" id="exam-setup-view">
+        <!-- Quick Resume Banner for Online Exam Session (Supports Standard, Cohort Breakout, Carousel Rotation) -->
+        <div id="cohort-quick-resume-banner" style="display: none; background: linear-gradient(135deg, #EFF6FF, #DBEAFE); border: 1.5px solid #3B82F6; border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+              <span style="font-size: 2rem;">⚡</span>
+              <div>
+                <div style="font-weight: 700; color: #1E3A8A; font-size: 1.05rem;">ตรวจพบห้องสอบออนไลน์ที่ยังดำเนินการอยู่!</div>
+                <div style="font-size: 0.88rem; color: #1E40AF; margin-top: 0.2rem;" id="cohort-quick-resume-desc">
+                  ห้อง PIN: <span id="cohort-quick-resume-pin" style="font-weight: bold; font-family: monospace;">------</span> | รูปแบบ: <span id="cohort-quick-resume-mode" style="font-weight: 600;">มาตรฐาน</span> | ผู้ใช้: <span id="cohort-quick-resume-user" style="font-weight: 600;">-</span> (<span id="cohort-quick-resume-role">-</span>)
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <button type="button" class="btn btn-primary" id="btn-cohort-quick-resume" style="background-color: #2563EB; border-color: #2563EB; font-weight: 600; padding: 0.6rem 1.25rem;">
+                🚀 กลับเข้าห้องสอบทันที
+              </button>
+              <button type="button" class="btn btn-secondary" id="btn-cohort-dismiss-resume" style="padding: 0.6rem 1rem;">
+                ✕ ออกจากห้องนี้
+              </button>
+            </div>
+          </div>
+        </div>
         <div class="setup-panel card">
           <div class="card-icon" style="background-color: var(--primary-light); color: var(--primary); margin: 0 auto 1.5rem auto;">🎯</div>
           <h2 style="text-align: center; margin-bottom: 0.5rem; font-family: var(--font-title);">ระบบจำลองสอบ OSPE</h2>
@@ -2208,6 +2230,12 @@
               <button type="button" class="btn btn-primary" id="sh-timer-toggle-btn" onclick="toggleTimer()">⏸️ พักตัวจับเวลา</button>
               <button type="button" class="btn btn-secondary" onclick="resetTimer()">🔄 รีเซ็ตเวลา</button>
             </div>
+            <div id="sh-host-time-adjust-controls" style="margin-top: 0.85rem; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; align-items: center; border-top: 1px dashed var(--border); padding-top: 0.75rem;">
+              <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); margin-right: 0.25rem;">⏱️ ทดเวลา (Host Only):</span>
+              <button type="button" class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.35rem 0.65rem;" onclick="adjustCohortTimer(60)">+1 นาที</button>
+              <button type="button" class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.35rem 0.65rem;" onclick="adjustCohortTimer(30)">+30 วิ</button>
+              <button type="button" class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.35rem 0.65rem;" onclick="adjustCohortTimer(-30)">-30 วิ</button>
+            </div>
           </div>
           
           <!-- Large Station Title & Scenario Overview for Big Screen (Cohort Breakout Mode Only) -->
@@ -2261,6 +2289,12 @@
                   <button class="btn ghost btn-sm" id="timer-toggle-btn" onclick="toggleTimer()">⏸ พักตัวจับเวลา</button>
                   <button class="btn outline btn-sm" id="timer-reset-btn" onclick="resetTimer()">🔄 เริ่มต้นใหม่</button>
                   <button type="button" class="btn btn-sm" id="btn-sticky-abort-exam" onclick="abortExamSimulation()" style="color: var(--danger); font-weight: 600; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25);" title="ยุติการสอบและกลับสู่หน้าตั้งค่า">🛑 ยุติการสอบ</button>
+                  <div id="sticky-host-time-adjust-wrap" style="display: none; align-items: center; gap: 0.25rem; margin-left: 0.25rem;">
+                    <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">ทดเวลา:</span>
+                    <button type="button" class="btn outline btn-sm" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="adjustCohortTimer(60)" title="ทดเวลา +1 นาที">+1น</button>
+                    <button type="button" class="btn outline btn-sm" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="adjustCohortTimer(30)" title="ทดเวลา +30 วินาที">+30วิ</button>
+                    <button type="button" class="btn outline btn-sm" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="adjustCohortTimer(-30)" title="ลดเวลา 30 วินาที">-30วิ</button>
+                  </div>
                 </div>
               </div>
 
@@ -3721,10 +3755,232 @@
       initExamFilterControls();
       populateExamSetDropdown();
     });
+    const COHORT_SESSION_KEY = 'ple_cohort_session';
+    const COHORT_SESSION_TTL_MS = 9000000; // 2.5 hours in milliseconds
+
+    function saveCohortSession(data) {
+      try {
+        const payload = Object.assign({}, data, { savedAt: Date.now() });
+        const str = JSON.stringify(payload);
+        sessionStorage.setItem(COHORT_SESSION_KEY, str);
+        localStorage.setItem(COHORT_SESSION_KEY, str);
+      } catch (e) {}
+    }
+
+    function updateOnlineExamSession(patch) {
+      try {
+        const current = getCohortSession();
+        if (current && current.roomId) {
+          const updated = Object.assign({}, current, patch, { savedAt: Date.now() });
+          saveCohortSession(updated);
+        }
+      } catch (e) {}
+    }
+
+    function clearCohortSession() {
+      try {
+        sessionStorage.removeItem(COHORT_SESSION_KEY);
+        localStorage.removeItem(COHORT_SESSION_KEY);
+        sessionStorage.removeItem('ple_session_room_id');
+        sessionStorage.removeItem('ple_session_player_id');
+        localStorage.removeItem('ple_room_id');
+        localStorage.removeItem('ple_player_id');
+        const resumeBanner = document.getElementById('cohort-quick-resume-banner');
+        if (resumeBanner) resumeBanner.style.display = 'none';
+      } catch (e) {}
+    }
+
+    function getCohortSession() {
+      try {
+        const s = sessionStorage.getItem(COHORT_SESSION_KEY);
+        if (s) {
+          const parsed = JSON.parse(s);
+          if (parsed && parsed.roomId) {
+            return Object.assign({}, parsed, { fromSessionStorage: true });
+          }
+        }
+        const l = localStorage.getItem(COHORT_SESSION_KEY);
+        if (l) {
+          const parsed = JSON.parse(l);
+          if (parsed && parsed.roomId) {
+            if (!parsed.savedAt || (Date.now() - parsed.savedAt < COHORT_SESSION_TTL_MS)) {
+              return Object.assign({}, parsed, { fromSessionStorage: false });
+            } else {
+              clearCohortSession();
+            }
+          }
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    async function autoReconnectCohortSession(session) {
+      if (!session || !session.roomId || typeof _fbDb === 'undefined' || !_fbDb) return;
+      try {
+        const snap = await _fbDb.ref('rooms/' + session.roomId).once('value');
+        if (!snap.exists()) {
+          clearCohortSession();
+          return;
+        }
+        const room = snap.val();
+        if (room.status === 'completed' || room.status === 'dissolved') {
+          clearCohortSession();
+          return;
+        }
+        console.log('Auto-reconnecting to online session:', session.roomId, room.examMode || session.mode);
+        saveCohortSession(session);
+        SimState.isLobby = true;
+        SimState.roomId = session.roomId;
+        SimState.myPlayerId = session.playerId;
+        SimState.lobbyPlayerName = session.playerName;
+        SimState.isHost = Boolean(session.isHost);
+        SimState.examMode = session.mode || room.examMode || 'standard';
+        SimState.role = session.role || 'examinee';
+        SimState.lobbyRole = session.role || 'examinee';
+        SimState.roleSelectedThisSession = true;
+
+        // Restore mode-specific assignments across all online exam types
+        if (SimState.examMode === 'cohort_breakout') {
+          let tableId = session.breakoutTableId || null;
+          let role = session.breakoutRole || session.role || 'examinee';
+          if (!tableId && room.breakouts) {
+            const myId = session.playerId;
+            const myName = session.playerName;
+            const foundTable = Object.values(room.breakouts).find(b =>
+              b.participantId === myId || b.examinerId === myId ||
+              (b.participantName && b.participantName === myName) ||
+              (b.examinerName && b.examinerName === myName)
+            );
+            if (foundTable) {
+              tableId = foundTable.id;
+              const isEx = (foundTable.examinerId === myId || foundTable.examinerName === myName);
+              role = isEx ? 'examiner' : 'examinee';
+            }
+          }
+          if (tableId) {
+            SimState.myBreakoutTableId = tableId;
+            SimState.myBreakoutRole = role;
+            SimState.role = role;
+            SimState.lobbyRole = role;
+          }
+        } else if (SimState.examMode === 'carousel_rotation') {
+          let stationNum = session.carouselStation || null;
+          if (!stationNum && room.carouselPosts) {
+            const myId = session.playerId;
+            const myName = session.playerName;
+            const foundPost = Object.values(room.carouselPosts).find(p =>
+              p.examinerId === myId || p.examinerName === myName ||
+              p.startParticipantId === myId || p.startParticipantName === myName
+            );
+            if (foundPost) {
+              stationNum = foundPost.stationNumber;
+              const isEx = (foundPost.examinerId === myId || foundPost.examinerName === myName);
+              SimState.role = isEx ? 'examiner' : 'examinee';
+              SimState.lobbyRole = SimState.role;
+            }
+          }
+          if (stationNum) {
+            SimState.myCarouselStation = stationNum;
+          }
+        }
+
+        if (room.status === 'running') {
+          SimState.hasDoneCountdown = true;
+        }
+
+        setupLobbyRoomUI();
+      } catch (e) {
+        console.warn('Auto-reconnect failed:', e);
+      }
+    }
+
+    window.saveCohortSession = saveCohortSession;
+    window.saveOnlineExamSession = saveCohortSession;
+    window.updateOnlineExamSession = updateOnlineExamSession;
+    window.clearCohortSession = clearCohortSession;
+    window.clearOnlineExamSession = clearCohortSession;
+    window.getCohortSession = getCohortSession;
+    window.getOnlineExamSession = getCohortSession;
+    window.autoReconnectCohortSession = autoReconnectCohortSession;
+    window.autoReconnectOnlineSession = autoReconnectCohortSession;
+
     document.addEventListener('DOMContentLoaded', () => {
       initOtpBoxes();
       initExamFilterControls();
       populateExamSetDropdown();
+
+      // Check for online exam session recovery (Standard / Cohort Breakout / Carousel Rotation)
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('leave')) {
+          clearCohortSession();
+        } else if (!urlParams.get('room') && !urlParams.get('join')) {
+          const session = getCohortSession();
+          if (session && session.roomId) {
+            setTimeout(async () => {
+              if (session.fromSessionStorage) {
+                // Direct seamless reconnect for page refresh / F5
+                await autoReconnectCohortSession(session);
+              } else {
+                // Reopened tab or browser restart: verify room is still active
+                if (typeof _fbDb !== 'undefined' && _fbDb) {
+                  try {
+                    const snap = await _fbDb.ref('rooms/' + session.roomId).once('value');
+                    if (snap.exists()) {
+                      const room = snap.val();
+                      if (room.status === 'running' || room.status === 'waiting') {
+                        const banner = document.getElementById('cohort-quick-resume-banner');
+                        const pinEl = document.getElementById('cohort-quick-resume-pin');
+                        const modeEl = document.getElementById('cohort-quick-resume-mode');
+                        const userEl = document.getElementById('cohort-quick-resume-user');
+                        const roleEl = document.getElementById('cohort-quick-resume-role');
+                        const resumeBtn = document.getElementById('btn-cohort-quick-resume');
+                        const dismissBtn = document.getElementById('btn-cohort-dismiss-resume');
+                        if (banner && pinEl) {
+                          pinEl.textContent = session.roomId;
+                          if (userEl) userEl.textContent = session.playerName || 'ผู้ใช้';
+                          
+                          const m = room.examMode || session.mode || 'standard';
+                          let modeName = 'ซ้อมคู่มาตรฐาน (Standard)';
+                          if (m === 'cohort_breakout') modeName = 'กลุ่มใหญ่: ห้องย่อย (Cohort Breakout)';
+                          else if (m === 'carousel_rotation') modeName = 'กลุ่มใหญ่: แลปกิ๊งหมุนเวียน (Carousel Rotation)';
+                          if (modeEl) modeEl.textContent = modeName;
+
+                          const r = session.role || 'examinee';
+                          let roleName = 'ผู้เข้าสอบ';
+                          if (session.isHost) roleName = 'Host ผู้ดูแลห้อง';
+                          else if (r === 'examiner') roleName = 'ผู้ประเมิน';
+                          else if (r === 'observer') roleName = 'ผู้สังเกตการณ์';
+                          if (roleEl) roleEl.textContent = roleName;
+
+                          banner.style.display = 'block';
+                          if (resumeBtn) {
+                            resumeBtn.onclick = () => {
+                              banner.style.display = 'none';
+                              autoReconnectCohortSession(session);
+                            };
+                          }
+                          if (dismissBtn) {
+                            dismissBtn.onclick = () => {
+                              clearCohortSession();
+                            };
+                          }
+                        }
+                      } else {
+                        clearCohortSession();
+                      }
+                    } else {
+                      clearCohortSession();
+                    }
+                  } catch (errCheck) {
+                    console.warn('Cohort room check error:', errCheck);
+                  }
+                }
+              }
+            }, 300);
+          }
+        }
+      } catch (e) {}
 
       // Restore saved display name and alarm sound
       try {
@@ -3975,6 +4231,14 @@
           SimState.role = hostInitialRole;
           SimState.alarmSound = roomData.alarmSound;
           SimState.timeoutTransitionMode = roomData.timeoutTransitionMode;
+          saveCohortSession({
+            roomId: randomRoomId,
+            playerId: myPlayerId,
+            playerName: playerName,
+            isHost: true,
+            role: hostInitialRole,
+            mode: selectedExamMode
+          });
 
           // Sync any decrypted cases to Firebase now that roomId is set
           // (the passcode modal sync was skipped earlier because SimState.roomId wasn't set yet)
@@ -4155,6 +4419,14 @@
           SimState.roomId = roomIdInput;
           SimState.role = playerRole;
           SimState.lobbyRole = playerRole;
+          saveCohortSession({
+            roomId: roomIdInput,
+            playerId: myPlayerId,
+            playerName: playerName,
+            isHost: false,
+            role: playerRole,
+            mode: roomData.examMode || 'standard'
+          });
           setupLobbyRoomUI();
         }
       } catch (e) {
@@ -4263,6 +4535,12 @@
 
       // Update Role badge in profile card
       updateMyRoleBadgeUI(role);
+      updateOnlineExamSession({
+        role: role,
+        breakoutTableId: null,
+        breakoutRole: null,
+        carouselStation: null
+      });
 
       // Re-render
       if (SimState.examMode === 'carousel_rotation' && _fbRoomRef) {
@@ -4419,17 +4697,18 @@
         SimState.isHost = false;
         SimState.isLobby = false;
         SimState.role = 'solo';
+        SimState.stations = [];
+        SimState.studentScores = {};
+        SimState.cachedRoom = null;
+        SimState.currentIdx = 0;
+        SimState.currentRoomId = null;
+        SimState.currentExamSetRaw = null;
         SimState.myBreakoutTableId = null;
         SimState.myBreakoutRole = null;
         SimState.myCarouselStation = null;
         SimState.hasDoneCountdown = false;
         SimState.roleSelectedThisSession = false;
-        try {
-          sessionStorage.removeItem('ple_session_room_id');
-          sessionStorage.removeItem('ple_session_player_id');
-          localStorage.removeItem('ple_room_id');
-          localStorage.removeItem('ple_player_id');
-        } catch (e) {}
+        clearCohortSession();
         
         // Switch views back to setup
         document.getElementById('exam-running-view').style.display = 'none';
@@ -4574,6 +4853,12 @@
     window.closeRoomBlockedModal = closeRoomBlockedModal;
 
     function setupLobbyRoomUI() {
+      // Clear any stations from a previous room to prevent old cases from persisting
+      if (SimState.currentRoomId !== SimState.roomId) {
+        SimState.stations = [];
+        SimState.currentRoomId = SimState.roomId;
+        SimState.currentExamSetRaw = null;
+      }
       document.getElementById('exam-setup-view').style.display = 'none';
       document.getElementById('exam-running-view').style.display = 'block';
       document.querySelector('.exam-layout').style.display = 'none';
@@ -5181,9 +5466,22 @@
         } else if (room.status === 'running' || room.status === 'countdown') {
           document.getElementById('lobby-waiting-screen').style.display = 'none';
           
-          // Build stations if not exist or if joining late
-          if (SimState.stations.length === 0) {
+          // Build stations if not exist, or if room/examSet has changed
+          const needBuild = SimState.stations.length === 0 || 
+                            SimState.currentRoomId !== room.roomId || 
+                            (room.examSet && SimState.currentExamSetRaw !== room.examSet);
+          if (needBuild) {
+            SimState.currentRoomId = room.roomId;
+            SimState.currentExamSetRaw = room.examSet;
             await buildStationsFromRoom(room);
+          }
+
+          // If the exam is already running, bypass countdown immediately on reconnect/refresh
+          const isLateOrRejoin = room.status === 'running' && ((Date.now() - (room.timerStartedAt || 0) > 2500) || (room.currentStationIdx > 0));
+          if (isLateOrRejoin) {
+            SimState.hasDoneCountdown = true;
+            const cdEl = document.getElementById('lobby-countdown-screen');
+            if (cdEl) cdEl.style.display = 'none';
           }
 
           // Countdown synchronized for all participants & Super Host
@@ -5791,17 +6089,40 @@
             unlockedCase = room.unlockedCaseDetails[targetCaseId] || room.unlockedCaseDetails[rawId] || room.unlockedCaseDetails[ospeId];
           }
 
-          // 2. Check offline case details (0ms instant)
+          // 2. Check SimState.unlockedCases if previously unlocked by host or user
+          if (!unlockedCase && SimState.unlockedCases && (SimState.unlockedCases[targetCaseId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId])) {
+            unlockedCase = SimState.unlockedCases[targetCaseId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId];
+          }
+
+          // 3. Check offline case details (0ms instant)
           if (!unlockedCase && typeof OFFLINE_CASE_DETAILS !== 'undefined' && OFFLINE_CASE_DETAILS) {
             unlockedCase = OFFLINE_CASE_DETAILS[targetCaseId] || OFFLINE_CASE_DETAILS[ospeId] || OFFLINE_CASE_DETAILS[rawId];
           }
 
           const matchedCase = Object.assign({}, baseCase || { caseId: targetCaseId, title: 'สถานีสอบ' }, unlockedCase || {});
-          
-          SimState.stations.push({ stationNumber: stNum, isRest: false, case: matchedCase });
+          if (/OSPE-PD84M1W103[AB]/i.test(targetCaseId) || /PD84M1W103[AB]/i.test(targetCaseId)) {
+            matchedCase.durationMin = 8;
+          }
+          const stDur = parseCaseDurationSec(matchedCase);
+          SimState.stations.push({ stationNumber: stNum, isRest: false, case: matchedCase, durationSec: stDur });
         }
       }
       await unlockStationsIfProtected(SimState.stations);
+      // Hydrate any newly unlocked cases and ensure durationSec is accurate
+      SimState.stations.forEach(st => {
+        if (st && st.case && !st.isRest) {
+          const cid = st.case.caseId;
+          const raw = cid ? cid.replace(/^OSPE-/i, '') : '';
+          const ospe = cid && cid.startsWith('OSPE-') ? cid : ('OSPE-' + cid);
+          if (SimState.unlockedCases && (SimState.unlockedCases[cid] || SimState.unlockedCases[raw] || SimState.unlockedCases[ospe])) {
+            Object.assign(st.case, SimState.unlockedCases[cid] || SimState.unlockedCases[raw] || SimState.unlockedCases[ospe]);
+          }
+          if (/OSPE-PD84M1W103[AB]/i.test(cid || '') || /PD84M1W103[AB]/i.test(cid || '')) {
+            st.case.durationMin = 8;
+          }
+          st.durationSec = parseCaseDurationSec(st.case);
+        }
+      });
       showGlobalLoader(false);
     }
 
@@ -6643,6 +6964,37 @@
       }
     }
 
+    // Host-Only & Examiner Compensatory Time Adjustment
+    function adjustCohortTimer(deltaSec) {
+      if (SimState.isLobby) {
+        if (!SimState.isHost && SimState.role !== 'examiner') {
+          alert('เฉพาะ Host หรือ Examiner เท่านั้นที่สามารถปรับเวลาสอบได้');
+          return;
+        }
+        const newTimer = Math.max(5, SimState.timerValue + deltaSec);
+        SimState.timerValue = newTimer;
+        if (SimState.cachedRoom) {
+          SimState.cachedRoom.timerValue = newTimer;
+          if (SimState.timerRunning) {
+            SimState.cachedRoom.timerStartedAt = Date.now();
+          }
+        }
+        updateTimerDisplay();
+        if (typeof _fbDb !== 'undefined' && _fbDb && SimState.roomId) {
+          const payload = { timerValue: newTimer };
+          if (SimState.timerRunning) {
+            payload.timerStartedAt = Date.now();
+          }
+          _fbDb.ref('rooms/' + SimState.roomId).update(payload).catch(e => console.warn('Failed to update adjusted timer:', e));
+        }
+      } else {
+        // Solo Mode
+        SimState.timerValue = Math.max(5, SimState.timerValue + deltaSec);
+        updateTimerDisplay();
+      }
+    }
+    window.adjustCohortTimer = adjustCohortTimer;
+
     function switchControlTab(tabName) {
       document.querySelectorAll('.control-tab .tab').forEach(t => t.classList.remove('active'));
       const activeTab = document.querySelector(`.control-tab .tab[data-tab="${tabName}"]`);
@@ -6699,10 +7051,17 @@
           fuseFill.style.background = 'linear-gradient(90deg, #10b981, #06b6d4, #3b82f6)';
           fuseFill.style.boxShadow = '0 0 6px rgba(16, 185, 129, 0.5)';
         } else {
-          // High Time: Vibrant Indigo - Violet - Cyan Gradient
-          fuseFill.style.background = 'linear-gradient(90deg, #6366f1, #8b5cf6, #3b82f6, #06b6d4)';
-          fuseFill.style.boxShadow = '0 0 6px rgba(99, 102, 241, 0.4)';
         }
+      }
+
+      const hostAdjustWrap = document.getElementById('sticky-host-time-adjust-wrap');
+      if (hostAdjustWrap) {
+        const canAdjust = !SimState.isLobby || SimState.isHost || SimState.role === 'examiner';
+        hostAdjustWrap.style.display = canAdjust ? 'inline-flex' : 'none';
+      }
+      const shAdjustWrap = document.getElementById('sh-host-time-adjust-controls');
+      if (shAdjustWrap) {
+        shAdjustWrap.style.display = SimState.isHost ? 'flex' : 'none';
       }
     }
 
@@ -6777,13 +7136,31 @@
         return window.parseCaseDurationSec(c);
       }
       if (!c) return 240;
+
+      const cId = String(c.caseId || (typeof c === 'string' ? c : '')).trim();
+      const rawId = cId.replace(/^OSPE-/i, '');
+      const ospeId = cId.startsWith('OSPE-') ? cId : ('OSPE-' + cId);
+
+      // เคสแล็บผลิต Week 1 (103A / 103B) กำหนดเวลาเป็น 8 นาที (480 วินาที) เสมอ
+      if (/OSPE-PD84M1W103[AB]/i.test(cId) || /PD84M1W103[AB]/i.test(cId)) {
+        return 480;
+      }
+
       if (c.durationMin) return Math.round(parseFloat(c.durationMin) * 60);
 
+      // Look up in SimState.unlockedCases if available
+      if (typeof SimState !== 'undefined' && SimState.unlockedCases) {
+        const unl = SimState.unlockedCases[cId] || SimState.unlockedCases[ospeId] || SimState.unlockedCases[rawId];
+        if (unl) {
+          if (unl.durationMin) return Math.round(parseFloat(unl.durationMin) * 60);
+          const unlText = (unl.content || '') + ' ' + (unl.rawHtml || '') + ' ' + (unl.scenario || '') + ' ' + (unl.patientInfoHtml || '') + ' ' + (unl.title || '');
+          const unlM = unlText.match(/(?:ระยะเวลา|เวลา)\s*[:：]?\s*(\d+)\s*นาที/);
+          if (unlM && unlM[1]) return parseInt(unlM[1], 10) * 60;
+        }
+      }
+
       // Look up by caseId in AppState.cases or OFFLINE_DATA.cases if durationMin is not on c directly
-      const cId = c.caseId || (typeof c === 'string' ? c : null);
       if (cId) {
-        const rawId = cId.replace(/^OSPE-/i, '');
-        const ospeId = cId.startsWith('OSPE-') ? cId : ('OSPE-' + cId);
         let found = null;
         if (typeof AppState !== 'undefined' && AppState.cases) {
           found = AppState.cases.find(x => x && x.caseId && (x.caseId === cId || x.caseId === ospeId || x.caseId === rawId));
@@ -7674,6 +8051,17 @@
         if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
           const now = Date.now();
           const nextSt = SimState.stations[nextIdx];
+          if (nextSt && nextSt.case && !nextSt.isRest) {
+            const nId = nextSt.case.caseId || '';
+            const rawId = nId.replace(/^OSPE-/i, '');
+            const ospeId = nId.startsWith('OSPE-') ? nId : ('OSPE-' + nId);
+            if (SimState.unlockedCases && (SimState.unlockedCases[nId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId])) {
+              Object.assign(nextSt.case, SimState.unlockedCases[nId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId]);
+            }
+            if (/OSPE-PD84M1W103[AB]/i.test(nId) || /PD84M1W103[AB]/i.test(nId)) {
+              nextSt.case.durationMin = 8;
+            }
+          }
           const nextDur = parseCaseDurationSec(nextSt && nextSt.case);
           SimState.timerValue = nextDur;
           SimState.timerRunning = true;
@@ -7721,6 +8109,17 @@
         if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
           const now = Date.now();
           const prevSt = SimState.stations[prevIdx];
+          if (prevSt && prevSt.case && !prevSt.isRest) {
+            const pId = prevSt.case.caseId || '';
+            const rawId = pId.replace(/^OSPE-/i, '');
+            const ospeId = pId.startsWith('OSPE-') ? pId : ('OSPE-' + pId);
+            if (SimState.unlockedCases && (SimState.unlockedCases[pId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId])) {
+              Object.assign(prevSt.case, SimState.unlockedCases[pId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId]);
+            }
+            if (/OSPE-PD84M1W103[AB]/i.test(pId) || /PD84M1W103[AB]/i.test(pId)) {
+              prevSt.case.durationMin = 8;
+            }
+          }
           const prevDur = parseCaseDurationSec(prevSt && prevSt.case);
           SimState.timerValue = prevDur;
           SimState.timerRunning = true;
@@ -12782,6 +13181,13 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         if (txResult && txResult.committed) {
           SimState.myBreakoutTableId = tableId;
           SimState.myBreakoutRole = role;
+          SimState.role = role;
+          SimState.lobbyRole = role;
+          updateOnlineExamSession({
+            breakoutTableId: tableId,
+            breakoutRole: role,
+            role: role
+          });
         } else if (abortReason) {
           if (abortReason === 'not_found') {
             alert('ไม่พบโต๊ะสอบนี้ อาจถูกลบไปแล้ว');
@@ -12818,6 +13224,10 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         });
         SimState.myBreakoutTableId = null;
         SimState.myBreakoutRole = null;
+        updateOnlineExamSession({
+          breakoutTableId: null,
+          breakoutRole: null
+        });
       } catch (e) {
         console.error('Leave breakout table failed:', e);
       }
@@ -13096,6 +13506,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
           }
         }
         await _fbDb.ref().update(updateData);
+        updateOnlineExamSession({ carouselStation: SimState.myCarouselStation });
       } catch (e) {
         console.error('Failed to assign carousel station:', e);
       }
