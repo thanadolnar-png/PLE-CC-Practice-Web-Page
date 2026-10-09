@@ -32,8 +32,12 @@ echo.
 echo [3/3] Git add, commit, and push to GitHub...
 cd /d "%WEB_DIR%"
 git add -A
-git status
 git commit -m "Quick website update [%DATE% %TIME%]"
+echo.
+echo [INFO] Syncing with GitHub (Pull & Rebase)...
+git pull --rebase origin main
+echo.
+echo [INFO] Pushing to GitHub...
 git push origin main
 
 if %ERRORLEVEL% EQU 0 (

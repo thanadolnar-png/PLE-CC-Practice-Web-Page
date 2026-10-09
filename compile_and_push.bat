@@ -88,10 +88,18 @@ python "scripts\sync_backup.py"
 
 :: 4. Auto Git Commit and Push to GitHub & Vercel
 echo.
-echo [4/4] Auto Git Commit ^& Push to GitHub (Vercel Auto-Deploy)...
-cd /d "%~dp0Website\PLE CC Webpage"
+if exist "%~dp0Website\PLE CC Webpage" (
+    cd /d "%~dp0Website\PLE CC Webpage"
+) else (
+    cd /d "%~dp0"
+)
 git add -A
 git commit -m "Auto sync offline DB [!MODE!: !QUERY!] [%DATE% %TIME%]"
+echo.
+echo [INFO] Syncing with GitHub (Pull & Rebase)...
+git pull --rebase origin main
+echo.
+echo [INFO] Pushing to GitHub...
 git push origin main
 
 if %ERRORLEVEL% EQU 0 (
