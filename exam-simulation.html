@@ -7339,7 +7339,7 @@
         
         if (canClick) {
           cell.style.cursor = 'pointer';
-          cell.addEventListener('click', () => renderStation(idx));
+          cell.addEventListener('click', () => jumpToStation(idx));
         } else {
           cell.style.cursor = 'not-allowed';
           cell.style.opacity = isCurrent ? '1' : '0.55';
@@ -8222,21 +8222,27 @@
             updatedAt: Date.now()
           });
         } else if (SimState.examMode === 'carousel_rotation') {
-          const rotationRound = SimState.carouselCurrentRound || 1;
-          const examineeId = SimState.carouselRotationAssignments?.[`round_${rotationRound}`]?.[`station_${stationNum}`] || 'unknown';
+          const r = SimState.currentIdx || 0;
+          const N = SimState.stations.length || 1;
+          const assignedStationNum = SimState.myCarouselStation || stationNum;
+          const startNum = ((assignedStationNum - 1 - r + N) % N) + 1;
+          const partId = SimState.cachedRoom?.carouselPosts?.['st_' + startNum]?.startParticipantId;
+          const partName = SimState.cachedRoom?.carouselPosts?.['st_' + startNum]?.startParticipantName 
+            || SimState.cachedRoom?.players?.[partId]?.name 
+            || 'ผู้เข้าสอบ';
           const { currentScore, totalScore } = calculateStationScore(currentCase?.checklist || [], []);
-          _fbDb.ref(`rooms/${SimState.roomId}/carousel_scores/round_${rotationRound}/station_${stationNum}`).set({
-            stationNumber: stationNum,
-            examineeId: examineeId,
-            checkedProgress: [],
-            checkedIds: [],
-            score: currentScore,
-            earnedScore: currentScore,
-            maxScore: totalScore,
-            percent: 0,
-            examinerName: SimState.lobbyPlayerName || 'Examiner',
-            updatedAt: Date.now()
-          });
+          if (partId) {
+            _fbDb.ref(`rooms/${SimState.roomId}/participantScores/${partId}/participantId`).set(partId);
+            _fbDb.ref(`rooms/${SimState.roomId}/participantScores/${partId}/participantName`).set(partName);
+            _fbDb.ref(`rooms/${SimState.roomId}/participantScores/${partId}/stations/${assignedStationNum}`).set({
+              stationNumber: assignedStationNum,
+              checkedProgress: [],
+              score: currentScore,
+              maxScore: totalScore,
+              examinerName: SimState.lobbyPlayerName,
+              updatedAt: Date.now()
+            });
+          }
         } else {
           _fbDb.ref('rooms/' + SimState.roomId).update({
             checklistProgress: [],
@@ -8275,121 +8281,89 @@
       }
     }
 
-    function nextStation() {
+    function jumpToStation(targetIdx) {
+      if (typeof targetIdx !== 'number' || isNaN(targetIdx)) return;
+      if (targetIdx < 0 || targetIdx >= SimState.stations.length) return;
+      if (targetIdx === SimState.currentIdx) return;
+
       stopTimeoutAlarmSound();
       if (typeof closeManualTimeoutOverlay === 'function') closeManualTimeoutOverlay();
+
       // In Carousel Rotation, only Super Host can change rounds (Examiner stays fixed at their post)
       if (SimState.examMode === 'carousel_rotation' && SimState.isLobby && !SimState.isHost) return;
+      // In Standard/Breakout lobby modes, examinees cannot change stations directly
+      if (SimState.isLobby && !SimState.isHost && SimState.role !== 'examiner') return;
+
+      playStationTimeoutAlarm('bell');
+
+      const targetSt = SimState.stations[targetIdx];
+      if (targetSt && targetSt.case && !targetSt.isRest) {
+        const tId = targetSt.case.caseId || '';
+        const rawId = tId.replace(/^OSPE-/i, '');
+        const ospeId = tId.startsWith('OSPE-') ? tId : ('OSPE-' + tId);
+        if (SimState.unlockedCases && (SimState.unlockedCases[tId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId])) {
+          Object.assign(targetSt.case, SimState.unlockedCases[tId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId]);
+        }
+        if (/OSPE-PD84M1W103[AB]/i.test(tId) || /PD84M1W103[AB]/i.test(tId)) {
+          targetSt.case.durationMin = 8;
+        }
+      }
+
+      const nextDur = parseCaseDurationSec(targetSt && targetSt.case);
+      const now = getSyncedNow();
+
+      SimState.timerValue = nextDur;
+      SimState.timerRunning = true;
+      if (SimState.timerInterval) clearInterval(SimState.timerInterval);
+      updateTimerDisplay();
+
+      if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
+        if (SimState.cachedRoom) {
+          SimState.cachedRoom.currentStationIdx = targetIdx;
+          SimState.cachedRoom.timerValue = nextDur;
+          SimState.cachedRoom.timerDuration = nextDur;
+          SimState.cachedRoom.timerStartedAt = now;
+          SimState.cachedRoom.timerRunning = true;
+        }
+        startLocalCountdown();
+
+        const updatePayload = {
+          currentStationIdx: targetIdx,
+          caseId: SimState.stations[targetIdx]?.case?.caseId || SimState.stations[targetIdx]?.caseId,
+          timerValue: nextDur,
+          timerDuration: nextDur,
+          timerStartedAt: now,
+          timerRunning: true,
+          status: 'running'
+        };
+        if (!SimState.cachedRoom?.isSuperHost && SimState.examMode === 'standard') {
+          updatePayload.scoresByStation = JSON.stringify(SimState.studentScores);
+        }
+        _fbDb.ref('rooms/' + SimState.roomId).update(updatePayload);
+      }
+
+      renderStation(targetIdx);
+
+      if (SimState.cachedRoom && SimState.cachedRoom.isSuperHost && SimState.isHost) {
+        renderSuperHostMonitor(SimState.cachedRoom);
+      }
+    }
+
+    function nextStation() {
       if (SimState.currentIdx < SimState.stations.length - 1) {
-        const nextIdx = SimState.currentIdx + 1;
-        playStationTimeoutAlarm('bell');
-        if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
-          const now = getSyncedNow();
-          const nextSt = SimState.stations[nextIdx];
-          if (nextSt && nextSt.case && !nextSt.isRest) {
-            const nId = nextSt.case.caseId || '';
-            const rawId = nId.replace(/^OSPE-/i, '');
-            const ospeId = nId.startsWith('OSPE-') ? nId : ('OSPE-' + nId);
-            if (SimState.unlockedCases && (SimState.unlockedCases[nId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId])) {
-              Object.assign(nextSt.case, SimState.unlockedCases[nId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId]);
-            }
-            if (/OSPE-PD84M1W103[AB]/i.test(nId) || /PD84M1W103[AB]/i.test(nId)) {
-              nextSt.case.durationMin = 8;
-            }
-          }
-          const nextDur = parseCaseDurationSec(nextSt && nextSt.case);
-          SimState.timerValue = nextDur;
-          SimState.timerRunning = true;
-          if (SimState.timerInterval) clearInterval(SimState.timerInterval);
-          updateTimerDisplay();
-          
-          if (SimState.cachedRoom) {
-            SimState.cachedRoom.currentStationIdx = nextIdx;
-            SimState.cachedRoom.timerValue = nextDur;
-            SimState.cachedRoom.timerDuration = nextDur;
-            SimState.cachedRoom.timerStartedAt = now;
-            SimState.cachedRoom.timerRunning = true;
-          }
-          startLocalCountdown();
-          
-          const updatePayload = {
-            currentStationIdx: nextIdx,
-            caseId: SimState.stations[nextIdx]?.case?.caseId || SimState.stations[nextIdx]?.caseId,
-            timerValue: nextDur,
-            timerDuration: nextDur,
-            timerStartedAt: now,
-            timerRunning: true,
-            status: 'running'
-          };
-          if (!SimState.cachedRoom?.isSuperHost && SimState.examMode === 'standard') {
-            updatePayload.scoresByStation = JSON.stringify(SimState.studentScores);
-          }
-          _fbDb.ref('rooms/' + SimState.roomId).update(updatePayload);
-        }
-        renderStation(nextIdx);
-        if (SimState.cachedRoom && SimState.cachedRoom.isSuperHost && SimState.isHost) {
-          renderSuperHostMonitor(SimState.cachedRoom);
-        }
+        jumpToStation(SimState.currentIdx + 1);
       }
     }
 
     function prevStation() {
-      stopTimeoutAlarmSound();
-      if (typeof closeManualTimeoutOverlay === 'function') closeManualTimeoutOverlay();
-      // In Carousel Rotation, only Super Host can change rounds
-      if (SimState.examMode === 'carousel_rotation' && SimState.isLobby && !SimState.isHost) return;
       if (SimState.currentIdx > 0) {
-        const prevIdx = SimState.currentIdx - 1;
-        playStationTimeoutAlarm('bell');
-        if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
-          const now = getSyncedNow();
-          const prevSt = SimState.stations[prevIdx];
-          if (prevSt && prevSt.case && !prevSt.isRest) {
-            const pId = prevSt.case.caseId || '';
-            const rawId = pId.replace(/^OSPE-/i, '');
-            const ospeId = pId.startsWith('OSPE-') ? pId : ('OSPE-' + pId);
-            if (SimState.unlockedCases && (SimState.unlockedCases[pId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId])) {
-              Object.assign(prevSt.case, SimState.unlockedCases[pId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId]);
-            }
-            if (/OSPE-PD84M1W103[AB]/i.test(pId) || /PD84M1W103[AB]/i.test(pId)) {
-              prevSt.case.durationMin = 8;
-            }
-          }
-          const prevDur = parseCaseDurationSec(prevSt && prevSt.case);
-          SimState.timerValue = prevDur;
-          SimState.timerRunning = true;
-          if (SimState.timerInterval) clearInterval(SimState.timerInterval);
-          updateTimerDisplay();
-          
-          if (SimState.cachedRoom) {
-            SimState.cachedRoom.currentStationIdx = prevIdx;
-            SimState.cachedRoom.timerValue = prevDur;
-            SimState.cachedRoom.timerDuration = prevDur;
-            SimState.cachedRoom.timerStartedAt = now;
-            SimState.cachedRoom.timerRunning = true;
-          }
-          startLocalCountdown();
-          
-          const updatePayload = {
-            currentStationIdx: prevIdx,
-            caseId: SimState.stations[prevIdx]?.case?.caseId || SimState.stations[prevIdx]?.caseId,
-            timerValue: prevDur,
-            timerDuration: prevDur,
-            timerStartedAt: now,
-            timerRunning: true,
-            status: 'running'
-          };
-          if (!SimState.cachedRoom?.isSuperHost && SimState.examMode === 'standard') {
-            updatePayload.scoresByStation = JSON.stringify(SimState.studentScores);
-          }
-          _fbDb.ref('rooms/' + SimState.roomId).update(updatePayload);
-        }
-        renderStation(prevIdx);
-        if (SimState.cachedRoom && SimState.cachedRoom.isSuperHost && SimState.isHost) {
-          renderSuperHostMonitor(SimState.cachedRoom);
-        }
+        jumpToStation(SimState.currentIdx - 1);
       }
     }
+
+    window.jumpToStation = jumpToStation;
+    window.nextStation = nextStation;
+    window.prevStation = prevStation;
 
     // ─── Live Fill-in-the-Blank Multiplayer Synchronization ───
     let _examineeBlankDebounceTimer = null;
@@ -8422,7 +8396,7 @@
       if (SimState.examMode === 'cohort_breakout' && SimState.myBreakoutTableId) {
         return `rooms/${SimState.roomId}/breakouts/${SimState.myBreakoutTableId}/examineeAnswers/st_${stationNum}`;
       } else if (SimState.examMode === 'carousel_rotation') {
-        const myId = SimState.lobbyPlayerId || 'part';
+        const myId = SimState.myPlayerId || SimState.lobbyPlayerId || 'part';
         return `rooms/${SimState.roomId}/participantAnswers/${myId}/st_${stationNum}`;
       } else {
         return `rooms/${SimState.roomId}/examineeAnswers/st_${stationNum}`;
