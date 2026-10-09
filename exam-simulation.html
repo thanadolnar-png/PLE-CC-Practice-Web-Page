@@ -4276,11 +4276,14 @@
             scoresByStation: '{}',
             alarmSound: SimState.alarmSound || document.getElementById('solo-alarm-sound-select')?.value || document.getElementById('lobby-alarm-sound-select')?.value || localStorage.getItem('ple_ospe_alarm_sound') || 'school-bell',
             timeoutTransitionMode: document.querySelector('input[name="global-timeout-behavior"]:checked')?.value || SimState.timeoutTransitionMode || 'auto',
+            unlockedCaseDetails: SimState.unlockedCases || {},
             createdAt: Date.now()
           };
           await _fbDb.ref('rooms/' + randomRoomId).set(roomData);
           
           SimState.roomId = randomRoomId;
+          SimState.currentRoomId = randomRoomId;
+          SimState.currentExamSetRaw = examSetJson;
           SimState.role = hostInitialRole;
           SimState.alarmSound = roomData.alarmSound;
           SimState.timeoutTransitionMode = roomData.timeoutTransitionMode;
@@ -4321,7 +4324,9 @@
               if (!matchedCase && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
                 matchedCase = OFFLINE_DATA.cases.find(c => c.caseId && (c.caseId.trim() === targetCaseId || c.caseId.trim() === ospeId || c.caseId.trim() === rawId));
               }
-              SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: false, case: matchedCase || fullExamSet[i] });
+              const unlockedData = (SimState.unlockedCases && (SimState.unlockedCases[targetCaseId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId])) || {};
+              const finalCase = Object.assign({}, matchedCase || fullExamSet[i], unlockedData);
+              SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: false, case: finalCase });
             }
           }
           SimState.currentIdx = 0;
@@ -5912,10 +5917,13 @@
       for (const st of protectedStations) {
         const cleanId = (st.case.caseId || '').trim();
         const rawId = cleanId.replace(/^OSPE-/i, '');
+        const ospeId = cleanId.startsWith('OSPE-') ? cleanId : ('OSPE-' + cleanId);
         const hostDec = (SimState.cachedRoom && SimState.cachedRoom.unlockedCaseDetails) 
-          ? (SimState.cachedRoom.unlockedCaseDetails[cleanId] || SimState.cachedRoom.unlockedCaseDetails[rawId]) 
+          ? (SimState.cachedRoom.unlockedCaseDetails[cleanId] || SimState.cachedRoom.unlockedCaseDetails[rawId] || SimState.cachedRoom.unlockedCaseDetails[ospeId]) 
           : null;
-        const simCached = SimState.unlockedCases[cleanId] || sessionStorage.getItem('sim_unlocked_' + cleanId);
+        const simCached = SimState.unlockedCases[cleanId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId]
+          || sessionStorage.getItem('sim_unlocked_' + cleanId) || sessionStorage.getItem('sim_unlocked_' + rawId)
+          || sessionStorage.getItem('ple_unlocked_' + cleanId) || sessionStorage.getItem('ple_unlocked_' + rawId);
         
         let decCase = null;
         if (hostDec) {
@@ -5932,9 +5940,43 @@
         }
       }
 
-      // If in multiplayer and user is NOT Host, NEVER prompt with password modal (Host manages access)
-      if (SimState.roomId && !SimState.isHost) {
+      // In online room (Multiplayer / Cohort / Carousel), NEVER prompt ANY role (neither Host nor participants)
+      // Host enters passcode once when setting up the room, and unlocked cases are synced via room to all roles.
+      if (SimState.roomId) {
         return true;
+      }
+
+      // If exam is running or in countdown, never interrupt with passcode modal
+      if (SimState.cachedRoom && (SimState.cachedRoom.status === 'running' || SimState.cachedRoom.status === 'countdown')) {
+        return true;
+      }
+
+      // Attempt silent background decryption using saved passcode if present
+      const savedPasscode = sessionStorage.getItem('ple_saved_passcode');
+      if (savedPasscode && typeof window.decryptCaseData === 'function') {
+        for (const st of protectedStations) {
+          const c = st.case;
+          if (c && (c.isEncrypted || ((c.isProtected || c.hasPassword) && !c.scenario && !(c.checklist && c.checklist.length > 0)))) {
+            const cleanId = (c.caseId || '').trim();
+            let encObj = c;
+            if (!encObj || !encObj.ciphertext) {
+              if (typeof OFFLINE_DETAILS !== 'undefined' && OFFLINE_DETAILS) {
+                encObj = OFFLINE_DETAILS[cleanId] || OFFLINE_DETAILS[cleanId.replace(/^OSPE-/i, '')] || OFFLINE_DETAILS['OSPE-' + cleanId];
+              }
+            }
+            if (encObj && encObj.ciphertext) {
+              try {
+                const dec = await window.decryptCaseData(encObj, savedPasscode.trim());
+                if (dec) {
+                  st.case = Object.assign({}, st.case, dec);
+                  SimState.unlockedCases[cleanId] = st.case;
+                  sessionStorage.setItem('sim_unlocked_' + cleanId, JSON.stringify(st.case));
+                  sessionStorage.setItem('ple_unlocked_' + cleanId, JSON.stringify(st.case));
+                }
+              } catch (_) {}
+            }
+          }
+        }
       }
 
       // Check if any station is still encrypted / locked (i.e. lacks scenario/checklist)
@@ -6147,7 +6189,16 @@
             unlockedCase = SimState.unlockedCases[targetCaseId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId];
           }
 
-          // 3. Check offline case details (0ms instant)
+          // 3. Check sessionStorage simulation unlocked cache
+          if (!unlockedCase) {
+            const rawStored = sessionStorage.getItem('sim_unlocked_' + targetCaseId) || sessionStorage.getItem('sim_unlocked_' + rawId)
+                           || sessionStorage.getItem('ple_unlocked_' + targetCaseId) || sessionStorage.getItem('ple_unlocked_' + rawId);
+            if (rawStored) {
+              try { unlockedCase = typeof rawStored === 'string' ? JSON.parse(rawStored) : rawStored; } catch(_) {}
+            }
+          }
+
+          // 4. Check offline case details (0ms instant)
           if (!unlockedCase && typeof OFFLINE_CASE_DETAILS !== 'undefined' && OFFLINE_CASE_DETAILS) {
             unlockedCase = OFFLINE_CASE_DETAILS[targetCaseId] || OFFLINE_CASE_DETAILS[ospeId] || OFFLINE_CASE_DETAILS[rawId];
           }
@@ -14313,13 +14364,24 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       const cleanId = String(caseId).trim();
       const lowerId = cleanId.toLowerCase();
       const upperId = cleanId.toUpperCase();
+      const rawId = cleanId.replace(/^OSPE-/i, '');
+      const ospeId = cleanId.startsWith('OSPE-') ? cleanId : ('OSPE-' + cleanId);
 
       let caseObj = null;
-      const cachedUnlocked = sessionStorage.getItem('ple_unlocked_' + cleanId) || sessionStorage.getItem('ple_unlocked_' + upperId) || sessionStorage.getItem('ple_unlocked_' + lowerId);
-      if (cachedUnlocked) {
-        try {
-          caseObj = JSON.parse(cachedUnlocked);
-        } catch(err) {}
+      if (SimState.unlockedCases && (SimState.unlockedCases[cleanId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId])) {
+        caseObj = SimState.unlockedCases[cleanId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId];
+      } else if (SimState.cachedRoom && SimState.cachedRoom.unlockedCaseDetails && (SimState.cachedRoom.unlockedCaseDetails[cleanId] || SimState.cachedRoom.unlockedCaseDetails[rawId] || SimState.cachedRoom.unlockedCaseDetails[ospeId])) {
+        caseObj = SimState.cachedRoom.unlockedCaseDetails[cleanId] || SimState.cachedRoom.unlockedCaseDetails[rawId] || SimState.cachedRoom.unlockedCaseDetails[ospeId];
+      }
+
+      if (!caseObj) {
+        const cachedUnlocked = sessionStorage.getItem('ple_unlocked_' + cleanId) || sessionStorage.getItem('ple_unlocked_' + upperId) || sessionStorage.getItem('ple_unlocked_' + lowerId)
+                             || sessionStorage.getItem('sim_unlocked_' + cleanId) || sessionStorage.getItem('sim_unlocked_' + rawId);
+        if (cachedUnlocked) {
+          try {
+            caseObj = JSON.parse(cachedUnlocked);
+          } catch(err) {}
+        }
       }
 
       if (!caseObj && window.OFFLINE_CASE_DETAILS) {
@@ -14379,7 +14441,41 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
       // Check Password Protection
       const isProtected = Boolean(c.isProtected || c.hasPassword || (c.password && c.password.trim() !== ''));
-      const isUnlocked = Boolean(sessionStorage.getItem('ple_unlocked_' + cleanId) || sessionStorage.getItem('ple_unlocked_' + upperId) || sessionStorage.getItem('ple_unlocked_' + lowerId));
+      let isUnlocked = Boolean(
+        Boolean(caseObj && (caseObj.scenario || (caseObj.checklist && caseObj.checklist.length > 0))) ||
+        (SimState.unlockedCases && (SimState.unlockedCases[cleanId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId])) ||
+        (SimState.cachedRoom && SimState.cachedRoom.unlockedCaseDetails && (SimState.cachedRoom.unlockedCaseDetails[cleanId] || SimState.cachedRoom.unlockedCaseDetails[rawId] || SimState.cachedRoom.unlockedCaseDetails[ospeId])) ||
+        sessionStorage.getItem('ple_unlocked_' + cleanId) || sessionStorage.getItem('ple_unlocked_' + upperId) || sessionStorage.getItem('ple_unlocked_' + lowerId) ||
+        sessionStorage.getItem('sim_unlocked_' + cleanId) || sessionStorage.getItem('sim_unlocked_' + rawId) ||
+        (c.scenario || (c.checklist && c.checklist.length > 0)) ||
+        SimState.roomId
+      );
+
+      // Attempt silent decryption with saved passcode if needed
+      if (isProtected && !isUnlocked) {
+        const savedPasscode = sessionStorage.getItem('ple_saved_passcode');
+        if (savedPasscode && typeof window.decryptCaseData === 'function') {
+          let encObj = c;
+          if (!encObj || !encObj.ciphertext) {
+            if (typeof OFFLINE_DETAILS !== 'undefined' && OFFLINE_DETAILS) {
+              encObj = OFFLINE_DETAILS[cleanId] || OFFLINE_DETAILS[rawId] || OFFLINE_DETAILS[ospeId];
+            }
+          }
+          if (encObj && encObj.ciphertext) {
+            try {
+              const dec = await window.decryptCaseData(encObj, savedPasscode.trim());
+              if (dec) {
+                Object.assign(c, dec);
+                SimState.unlockedCases = SimState.unlockedCases || {};
+                SimState.unlockedCases[cleanId] = c;
+                sessionStorage.setItem('sim_unlocked_' + cleanId, JSON.stringify(c));
+                sessionStorage.setItem('ple_unlocked_' + cleanId, JSON.stringify(c));
+                isUnlocked = true;
+              }
+            } catch (_) {}
+          }
+        }
+      }
 
       if (isProtected && !isUnlocked) {
         if (bodyEl) {
