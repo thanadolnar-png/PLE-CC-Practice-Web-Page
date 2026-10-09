@@ -2533,6 +2533,9 @@
               <button type="button" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.88rem; font-weight: 700; border-color: var(--primary); color: var(--primary); display: inline-flex; align-items: center; gap: 0.4rem; background: var(--surface);" onclick="openOspePrintModal()">
                 <span>🖨️ พิมพ์รายงานผลการสอบ (Print Report)</span>
               </button>
+              <button type="button" class="btn btn-primary" style="padding: 0.5rem 1.15rem; font-size: 0.88rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;" onclick="restartSetup()">
+                <span>🔄 เริ่มสอบห้องใหม่</span>
+              </button>
             </div>
           </div>
           
@@ -2631,7 +2634,7 @@
             </div>
           </div>
           <div style="display: flex; gap: 1rem; margin-top: 2.25rem; flex-wrap: wrap;">
-            <button class="btn btn-primary" style="flex: 1; min-width: 200px; padding: 0.75rem 1.5rem; font-weight: 600;" onclick="restartSetup()">🔄 ทำการสอบอีกครั้ง</button>
+            <button class="btn btn-primary" style="flex: 1; min-width: 200px; padding: 0.75rem 1.5rem; font-weight: 600;" onclick="restartSetup()">🔄 ทำการสอบอีกครั้ง / สร้างห้องใหม่</button>
             <a href="index.html" class="btn btn-secondary" style="flex: 1; min-width: 200px; text-align: center; padding: 0.75rem 1.5rem; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600;">🏠 กลับหน้าหลัก Hub</a>
           </div>
         </div>
@@ -3874,7 +3877,7 @@
           return;
         }
         const room = snap.val();
-        if (room.status === 'completed' || room.status === 'dissolved') {
+        if (room.status === 'completed' || room.status === 'dissolved' || room.status === 'results') {
           clearCohortSession();
           return;
         }
@@ -3973,6 +3976,22 @@
             setTimeout(async () => {
               if (session.fromSessionStorage) {
                 // Direct seamless reconnect for page refresh / F5
+                if (typeof _fbDb !== 'undefined' && _fbDb) {
+                  try {
+                    const snap = await _fbDb.ref('rooms/' + session.roomId).once('value');
+                    if (!snap.exists()) {
+                      clearCohortSession();
+                      return;
+                    }
+                    const room = snap.val();
+                    if (room.status === 'results' || room.status === 'completed' || room.status === 'dissolved') {
+                      clearCohortSession();
+                      return;
+                    }
+                  } catch (e) {
+                    console.warn('Session check error:', e);
+                  }
+                }
                 await autoReconnectCohortSession(session);
               } else {
                 // Reopened tab or browser restart: verify room is still active
@@ -12371,21 +12390,85 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
     window.generateAndPrintOspeReport = generateAndPrintOspeReport;
 
     function restartSetup() {
+      // 1. Clear intervals
       if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
       if (SimState.timerSyncInterval) clearInterval(SimState.timerSyncInterval);
+      if (SimState.timerInterval) clearInterval(SimState.timerInterval);
+      SimState.lobbyPollInterval = null;
+      SimState.timerSyncInterval = null;
+      SimState.timerInterval = null;
+      SimState.timerRunning = false;
+
+      // 2. Detach Firebase listener
+      if (_fbRoomRef) {
+        try { _fbRoomRef.off(); } catch (e) {}
+        _fbRoomRef = null;
+      }
+
+      // 3. Clear all stored session keys completely
+      clearCohortSession();
+
+      // 4. Reset SimState properties
       SimState.isLobby = false;
       SimState.isHost = false;
       SimState.roomId = '';
       SimState.myPlayerId = '';
+      SimState.lobbyPlayerName = '';
+      SimState.role = 'solo';
+      SimState.cachedRoom = null;
       SimState.cachedPlayersList = [];
       SimState.stations = [];
-      // Detach Firebase listener on reset
-      if (_fbRoomRef) { _fbRoomRef.off(); _fbRoomRef = null; }
+      SimState.studentScores = {};
+      SimState.currentIdx = 0;
+      SimState.currentRoomId = null;
+      SimState.currentExamSetRaw = null;
+      SimState.myBreakoutTableId = null;
+      SimState.myBreakoutRole = null;
+      SimState.myCarouselStation = null;
+      SimState.hasDoneCountdown = false;
+      SimState.roleSelectedThisSession = false;
+
+      // 5. Clean URL query parameters (?room=... etc.)
+      try {
+        const url = new URL(window.location.href);
+        url.search = '';
+        window.history.replaceState({}, document.title, url.toString());
+      } catch (e) {}
+
+      // 6. Hide all other views and show setup view
       const rosterBar = document.getElementById('results-participants-bar');
       if (rosterBar) rosterBar.style.display = 'none';
-      document.getElementById('exam-results-view').style.display = 'none';
-      document.getElementById('exam-setup-view').style.display = 'block';
+      const resultsView = document.getElementById('exam-results-view');
+      if (resultsView) resultsView.style.display = 'none';
+      const runningView = document.getElementById('exam-running-view');
+      if (runningView) runningView.style.display = 'none';
+      const lobbyView = document.getElementById('exam-lobby-view');
+      if (lobbyView) lobbyView.style.display = 'none';
+      const waitingScreen = document.getElementById('lobby-waiting-screen');
+      if (waitingScreen) waitingScreen.style.display = 'none';
+      const countdownScreen = document.getElementById('lobby-countdown-screen');
+      if (countdownScreen) countdownScreen.style.display = 'none';
+      const superHostMonitor = document.getElementById('super-host-monitor-view');
+      if (superHostMonitor) superHostMonitor.style.display = 'none';
+      const stickyTimer = document.getElementById('exam-sticky-timer-bar');
+      if (stickyTimer) stickyTimer.style.display = 'none';
+      const stickyHeader = document.getElementById('exam-sticky-top-header');
+      if (stickyHeader) stickyHeader.style.display = 'none';
+      const resumeBanner = document.getElementById('cohort-quick-resume-banner');
+      if (resumeBanner) resumeBanner.style.display = 'none';
+
+      // 7. Show setup view and reset inputs
+      const setupView = document.getElementById('exam-setup-view');
+      if (setupView) setupView.style.display = 'block';
+
+      const roomInput = document.getElementById('lobby-room-id-input');
+      if (roomInput) roomInput.value = '';
+      const otpInputs = document.querySelectorAll('.otp-box');
+      otpInputs.forEach(inp => { if (inp) inp.value = ''; });
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+    window.restartSetup = restartSetup;
 
     // Helper: escape HTML
     function escapeHtml(str) {
