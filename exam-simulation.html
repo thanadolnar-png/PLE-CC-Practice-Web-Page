@@ -7234,9 +7234,13 @@
 
     // ─── Render station ───────────────────────────────────────
     function renderStation(idx) {
+      if (!SimState.stations || !SimState.stations[idx]) {
+        console.warn('renderStation: station not found at index', idx);
+        return;
+      }
       SimState.currentIdx = idx;
       const st = SimState.stations[idx];
-      const c = st.case;
+      const c = st.case || {};
 
       // Switch the station chat FIRST so chat history, AI context, avatar and voice always
       // follow the active station, even if rendering code below throws on a malformed case.
