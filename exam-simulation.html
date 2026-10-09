@@ -1497,6 +1497,9 @@
     "></span>
   </div>
 
+  <!-- Floating Network Connection Status Pill -->
+  <div id="online-connection-status-pill" style="display: none; position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 99999; padding: 0.5rem 1.25rem; border-radius: 9999px; font-weight: 600; font-size: 0.88rem; box-shadow: 0 4px 12px rgba(0,0,0,0.18); transition: all 0.3s ease;"></div>
+
   <!-- Main Container -->
   <main class="main-section" style="padding: 2rem 0;">
     <div class="container">
@@ -3755,6 +3758,54 @@
       initExamFilterControls();
       populateExamSetDropdown();
     });
+
+    let _serverTimeOffset = 0;
+    function initServerTimeOffset() {
+      if (typeof _fbDb !== 'undefined' && _fbDb) {
+        try {
+          _fbDb.ref('.info/serverTimeOffset').on('value', snap => {
+            _serverTimeOffset = snap.val() || 0;
+          });
+        } catch (e) {}
+      }
+    }
+    function getSyncedNow() {
+      return Date.now() + (_serverTimeOffset || 0);
+    }
+    window.getSyncedNow = getSyncedNow;
+
+    function initOnlineConnectionWatcher() {
+      if (typeof _fbDb === 'undefined' || !_fbDb) return;
+      const statusPill = document.getElementById('online-connection-status-pill');
+      try {
+        _fbDb.ref('.info/connected').on('value', snap => {
+          const isConnected = Boolean(snap.val());
+          if (!isConnected && SimState.isLobby) {
+            if (statusPill) {
+              statusPill.textContent = '⚠️ การเชื่อมต่อขัดข้อง กำลังเชื่อมต่อใหม่...';
+              statusPill.style.background = '#dc2626';
+              statusPill.style.color = '#ffffff';
+              statusPill.style.display = 'block';
+            }
+          } else if (isConnected && SimState.isLobby) {
+            if (statusPill && statusPill.style.display !== 'none') {
+              statusPill.textContent = '✅ เชื่อมต่อสำเร็จ ซิงค์ข้อมูลล่าสุดแล้ว';
+              statusPill.style.background = '#16a34a';
+              statusPill.style.color = '#ffffff';
+              setTimeout(() => {
+                if (statusPill) statusPill.style.display = 'none';
+              }, 2500);
+              if (SimState.roomId && _fbRoomRef) {
+                _fbRoomRef.once('value').then(rSnap => {
+                  if (rSnap.exists()) applyRoomState(rSnap.val());
+                }).catch(() => {});
+              }
+            }
+          }
+        });
+      } catch (e) {}
+    }
+
     const COHORT_SESSION_KEY = 'ple_cohort_session';
     const COHORT_SESSION_TTL_MS = 9000000; // 2.5 hours in milliseconds
 
@@ -3905,6 +3956,8 @@
     window.autoReconnectOnlineSession = autoReconnectCohortSession;
 
     document.addEventListener('DOMContentLoaded', () => {
+      initServerTimeOffset();
+      initOnlineConnectionWatcher();
       initOtpBoxes();
       initExamFilterControls();
       populateExamSetDropdown();
@@ -5586,7 +5639,7 @@
           if (room.timerRunning) {
             SimState.timerRunning = true;
             if (room.timerStartedAt) {
-              const now = Date.now();
+              const now = getSyncedNow();
               if (now < room.timerStartedAt) {
                 SimState.timerValue = room.timerDuration || fallbackDur || 240;
               } else {
@@ -5701,7 +5754,7 @@
           if (stationChanged || isFirstLoad) {
             SimState.hasRenderedFirstStation = true;
             if (typeof closeManualTimeoutOverlay === 'function') closeManualTimeoutOverlay();
-            renderStation(stationChanged ? targetIdx : 0);
+            renderStation(targetIdx);
             if (stationChanged) {
               playStationTimeoutAlarm('bell');
             }
@@ -6450,7 +6503,7 @@
           const curCase = SimState.stations && SimState.stations[SimState.currentIdx]?.case;
           const fallbackDur = parseCaseDurationSec(curCase);
           if (room.timerRunning && room.timerStartedAt) {
-            const now = Date.now();
+            const now = getSyncedNow();
             if (now < room.timerStartedAt) {
               SimState.timerValue = room.timerDuration || fallbackDur || 240;
             } else {
@@ -8049,7 +8102,7 @@
         const nextIdx = SimState.currentIdx + 1;
         playStationTimeoutAlarm('bell');
         if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
-          const now = Date.now();
+          const now = getSyncedNow();
           const nextSt = SimState.stations[nextIdx];
           if (nextSt && nextSt.case && !nextSt.isRest) {
             const nId = nextSt.case.caseId || '';
@@ -8107,7 +8160,7 @@
         const prevIdx = SimState.currentIdx - 1;
         playStationTimeoutAlarm('bell');
         if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
-          const now = Date.now();
+          const now = getSyncedNow();
           const prevSt = SimState.stations[prevIdx];
           if (prevSt && prevSt.case && !prevSt.isRest) {
             const pId = prevSt.case.caseId || '';
