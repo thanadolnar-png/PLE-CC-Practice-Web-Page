@@ -7534,7 +7534,7 @@
         nextBtn.onclick = finishExamSimulation;
       } else {
         nextBtn.textContent = 'ถัดไป →';
-        const nextCat = SimState.stations[idx + 1].case.category || 'clinic';
+        const nextCat = SimState.stations[idx + 1]?.case?.category || 'clinic';
         nextBtn.className = 'btn btn-primary btn-' + nextCat.toLowerCase();
         nextBtn.onclick = nextStation;
       }
