@@ -2517,6 +2517,28 @@
             <div class="checklist-container" id="exam-checklist-container" style="margin-bottom: 1.5rem; overflow-y: auto;">
               <!-- Checklist items populated dynamically -->
             </div>
+
+            <!-- Examiner Live Debrief Feedback Card (Under Checklist at the very bottom) -->
+            <div id="exam-live-feedback-container" class="exam-live-feedback-container" style="display: none; margin-top: 1.5rem; margin-bottom: 2rem; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 1rem 1.25rem; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem; border-bottom: 1px dashed var(--border); padding-bottom: 0.5rem;">
+                <div style="font-family: var(--font-title); font-weight: 700; color: var(--text-primary); font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
+                  <span>💬 บันทึกข้อเสนอแนะ / จุดที่ต้องปรับปรุงประจำสถานีนี้</span>
+                </div>
+                <span id="exam-live-feedback-station-label" class="badge" style="background: rgba(99, 102, 241, 0.12); color: var(--primary); font-size: 0.8rem; font-weight: 700;">สถานีที่ 1</span>
+              </div>
+              <textarea 
+                id="exam-live-feedback-textarea" 
+                class="select-filter" 
+                rows="4" 
+                style="width: 100%; min-height: 100px; resize: vertical; font-size: 0.88rem; line-height: 1.5; padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg); font-family: inherit; color: var(--text-primary);" 
+                placeholder="พิมพ์ข้อสังเกต คำแนะนำ หรือสิ่งที่ผู้เข้าสอบทำขาดตกบกพร่องในสถานีนี้ (สามารถพิมพ์ยาวๆ เป็นย่อหน้าได้ โดยระบบจะบันทึกอัตโนมัติและแสดงรายงานท้ายข้อในหน้าสรุปผลรวมถึงรายงานพิมพ์ PDF)..."
+                oninput="handleLiveStationFeedbackInput(this.value)"
+              ></textarea>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; font-size: 0.78rem; color: var(--text-secondary);">
+                <span>💾 บันทึกอัตโนมัติ (Auto-save) และซิงก์เรียลไทม์</span>
+                <span id="exam-live-feedback-saved-indicator" style="color: var(--success); font-weight: 700; display: none;">✓ บันทึกเรียบร้อย</span>
+              </div>
+            </div>
           </div>
 
         </div>
@@ -7681,6 +7703,27 @@
           if (noticeAbortBtn) noticeAbortBtn.style.display = 'inline-block';
         }
       }
+
+      // Examiner / Solo Live Debrief Feedback Card (Under Checklist at the very bottom)
+      const liveFeedbackContainer = document.getElementById('exam-live-feedback-container');
+      const liveFeedbackTextarea = document.getElementById('exam-live-feedback-textarea');
+      const liveFeedbackLabel = document.getElementById('exam-live-feedback-station-label');
+      const isExaminerOrSolo = (SimState.role === 'examiner' || SimState.role === 'solo');
+
+      if (liveFeedbackContainer) {
+        if (isExaminerOrSolo && !st.isRest) {
+          liveFeedbackContainer.style.display = 'block';
+          if (liveFeedbackLabel) {
+            liveFeedbackLabel.textContent = `สถานีที่ ${st.stationNumber}`;
+          }
+          if (liveFeedbackTextarea) {
+            const curFeedback = (SimState.stationFeedbacks && (SimState.stationFeedbacks[st.stationNumber] || SimState.stationFeedbacks[String(st.stationNumber)])) || '';
+            liveFeedbackTextarea.value = curFeedback;
+          }
+        } else {
+          liveFeedbackContainer.style.display = 'none';
+        }
+      }
       
       // Minimap — แสดงทุก mode (solo + lobby)
       const minimapCard = document.getElementById('minimap-card-el');
@@ -12035,16 +12078,19 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
                     <div style="display: flex; flex-direction: column; gap: 2px;">
                       ${itemsHtml}
                     </div>
-                    <div style="margin-top: 0.85rem; padding-top: 0.65rem; border-top: 1px dashed var(--border);">
-                      <label style="font-size: 0.82rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 6px; margin-bottom: 0.35rem;">
-                        <span>💬 บันทึกข้อเสนอแนะ / สรุปประเด็นที่ต้องปรับปรุง (Debrief Feedback สำหรับสถานีที่ ${st.stationNumber}):</span>
-                      </label>
+                    <div style="margin-top: 1rem; padding: 0.85rem 1rem; background: var(--bg-secondary); border: 1.5px solid var(--border); border-radius: var(--radius-md);">
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+                        <label style="font-size: 0.86rem; font-weight: 700; color: var(--text-primary); font-family: var(--font-title); display: flex; align-items: center; gap: 6px; margin: 0;">
+                          <span>💬 บันทึกข้อเสนอแนะ / สรุปประเด็นที่ต้องปรับปรุง (Debrief Feedback สำหรับสถานีที่ ${st.stationNumber}):</span>
+                        </label>
+                        <span style="font-size: 0.74rem; color: var(--text-muted);">รายงานท้ายข้อสถานีนี้ · บันทึกอัตโนมัติ</span>
+                      </div>
                       <textarea 
                         class="select-filter" 
                         id="station-feedback-input-${st.stationNumber}"
-                        rows="2" 
-                        style="width: 100%; resize: vertical; font-size: 0.82rem; padding: 0.45rem 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg);" 
-                        placeholder="พิมพ์คำแนะนำ หรือสิ่งที่เพื่อน/ผู้เข้าสอบทำขาดตกบกพร่องในสถานีนี้ (ข้อมูลจะแสดงในรายงานและพิมพ์ PDF)..."
+                        rows="3" 
+                        style="width: 100%; min-height: 80px; resize: vertical; font-size: 0.86rem; line-height: 1.5; padding: 0.55rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg); color: var(--text-primary); font-family: inherit;" 
+                        placeholder="พิมพ์คำแนะนำ หรือสิ่งที่เพื่อน/ผู้เข้าสอบทำขาดตกบกพร่องในสถานีนี้ (สามารถพิมพ์ยาวๆ เป็นย่อหน้าได้ โดยข้อมูลจะแสดงในรายงานพิมพ์ PDF)..."
                         oninput="handleStationFeedbackInput(${st.stationNumber}, this.value)"
                       >${escapeHtml(initFeedback)}</textarea>
                     </div>
@@ -12204,13 +12250,28 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       }
     }
 
-    // Debrief Feedback Handler for Station Accordion
+    // Debrief Feedback Handler for Station Accordion and Live Exam
     function handleStationFeedbackInput(stationNum, text) {
       if (!SimState.stationFeedbacks) SimState.stationFeedbacks = {};
       SimState.stationFeedbacks[stationNum] = text;
       try {
         sessionStorage.setItem('ospe_stationFeedbacks', JSON.stringify(SimState.stationFeedbacks));
       } catch (e) {}
+
+      // Keep results screen textarea in sync if present
+      const resInputEl = document.getElementById(`station-feedback-input-${stationNum}`);
+      if (resInputEl && document.activeElement !== resInputEl) {
+        resInputEl.value = text || '';
+      }
+
+      // Keep live feedback textarea in sync if currently viewing this station
+      const currentSt = SimState.stations && SimState.stations[SimState.currentIdx];
+      if (currentSt && currentSt.stationNumber === stationNum) {
+        const liveInputEl = document.getElementById('exam-live-feedback-textarea');
+        if (liveInputEl && document.activeElement !== liveInputEl) {
+          liveInputEl.value = text || '';
+        }
+      }
 
       if (SimState.roomId && typeof _fbDb !== 'undefined' && _fbDb) {
         try {
@@ -12221,6 +12282,23 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       }
     }
     window.handleStationFeedbackInput = handleStationFeedbackInput;
+
+    function handleLiveStationFeedbackInput(text) {
+      const st = SimState.stations && SimState.stations[SimState.currentIdx];
+      if (!st) return;
+      handleStationFeedbackInput(st.stationNumber, text);
+
+      // Visual indicator for auto-save
+      const indicator = document.getElementById('exam-live-feedback-saved-indicator');
+      if (indicator) {
+        indicator.style.display = 'inline';
+        clearTimeout(window._liveFeedbackSavedTimeout);
+        window._liveFeedbackSavedTimeout = setTimeout(() => {
+          if (indicator) indicator.style.display = 'none';
+        }, 1500);
+      }
+    }
+    window.handleLiveStationFeedbackInput = handleLiveStationFeedbackInput;
 
     // ══════════════════════════════════════════════════════════════
     // OSPE RESULTS PRINT REPORT GENERATOR
@@ -12723,6 +12801,10 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       SimState.studentScores = {};
       SimState.stationFeedbacks = {};
       try { sessionStorage.removeItem('ospe_stationFeedbacks'); } catch (e) {}
+      const liveFeedbackEl = document.getElementById('exam-live-feedback-textarea');
+      if (liveFeedbackEl) liveFeedbackEl.value = '';
+      const liveFeedbackContainer = document.getElementById('exam-live-feedback-container');
+      if (liveFeedbackContainer) liveFeedbackContainer.style.display = 'none';
       SimState.currentIdx = 0;
       SimState.currentRoomId = null;
       SimState.currentExamSetRaw = null;
