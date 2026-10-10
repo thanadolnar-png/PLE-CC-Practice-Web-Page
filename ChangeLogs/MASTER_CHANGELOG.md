@@ -10,6 +10,7 @@
 
 | วันที่ (Date) | ช่วงเวลา | ขอบเขต / โมดูล | สรุปประเด็นการแก้ไขสำคัญ | ไฟล์บันทึกฉบับเต็ม |
 |---|---|---|---|---|
+| 2026-10-10 | 11:55 น. | Exam Simulation | ถอด UI Modal และเมนู Diagnostics ออกจากหน้าเว็บ 100% เปลี่ยนเป็น Headless Logger เบื้องหลัง และจัดเก็บบันทึกบน GitHub | [2026-10-10_Headless_Logging_And_UI_Clean.md](file:///c:/Users/thana/Desktop/PLE-CC/ChangeLogs/2026-10-10_Headless_Logging_And_UI_Clean.md) |
 | 2026-10-09 | 17:30 น. | Exam Simulation, CSS | แก้ไขแถบเวลา iPad, รูปแบบคะแนน Checklist (1.1, 1.2 ไร้บวก/ลบ), เพิ่มระบบ Comment หลังสอบ | [2026-10-09_Exam_Simulation_Upgrades.md](file:///c:/Users/thana/Desktop/PLE-CC/ChangeLogs/2026-10-09_Exam_Simulation_Upgrades.md) |
 | 2026-10-09 | 16:08 น. | Exam Simulation | รวมศูนย์การข้ามสถานี, ซิงค์เวลา และแยกคำตอบโหมด Carousel Rotation | [2026-10-09_Exam_Simulation_Upgrades.md](file:///c:/Users/thana/Desktop/PLE-CC/ChangeLogs/2026-10-09_Exam_Simulation_Upgrades.md) |
 | 2026-10-09 | 15:50 น. | Exam Simulation | แก้ไข Station Adjuster, บั๊กรีเซ็ตเวลาจากการทดเวลา, เพิ่มระบบ PleDiagnostics ดักจับ Error | [2026-10-09_Exam_Simulation_Upgrades.md](file:///c:/Users/thana/Desktop/PLE-CC/ChangeLogs/2026-10-09_Exam_Simulation_Upgrades.md) |
