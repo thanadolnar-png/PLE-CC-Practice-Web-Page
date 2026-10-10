@@ -4,10 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบจำลองสอบ OSPE เสมือนจริง | RxCU</title>
+  <meta name="description" content="ระบบจำลองสอบ OSPE 16 สถานีเสมือนจริง พร้อมจับเวลา 4 นาที ติ๊ก Checklist และคำนวณผลคะแนน Leaderboard">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💊</text></svg>">
   <link rel="stylesheet" href="style.css?v=1791019915">
-  <script src="case-data-offline.js?v=v_20261005_102147"></script>
-  <script src="case-details-offline.js?v=v_20261005_102147"></script>
-  <script src="app.js?v=v_20261005_102147"></script>
+  <script src="case-data-offline.js?v=v_20261010_152701"></script>
+  <script src="case-details-offline.js?v=v_20261010_152701"></script>
+  <script src="app.js?v=v_20261010_152701"></script>
   <script src="scratchpad.js?v=20261004_201700"></script>
   <style>
     /* Simulation Source and Topic Selector */
@@ -236,12 +238,22 @@
     }
     .custom-picker-grid {
       display: grid;
-      grid-template-columns: 1.15fr 1fr;
-      gap: 1.25rem;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      gap: 1rem;
       align-items: start;
       min-width: 0;
       width: 100%;
       box-sizing: border-box;
+    }
+    .custom-picker-col-left,
+    .custom-picker-col-right {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      max-width: 100%;
+      width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
     }
     .custom-search-bar-wrap {
       display: flex;
@@ -252,12 +264,20 @@
       box-sizing: border-box;
     }
     .custom-search-input {
-      flex: 1 1 200px;
+      flex: 1 1 180px;
       min-width: 0;
       width: 100%;
       padding: 0.45rem 0.65rem;
       font-size: 0.82rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--text-primary);
       box-sizing: border-box;
+      outline: none;
+    }
+    .custom-search-input:focus {
+      border-color: var(--primary);
     }
     .custom-search-cat-group {
       display: flex;
@@ -363,6 +383,12 @@
       font-weight: 700;
       border-radius: var(--radius-sm);
       cursor: pointer;
+    }
+    @media (max-width: 960px) {
+      .custom-picker-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.85rem !important;
+      }
     }
     @media (max-width: 860px) {
       html, body {
@@ -1371,27 +1397,87 @@
       }
 
       /* Half-Screen Bottom Sheet for Station Chat */
+      .st-chat-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
+        z-index: 10001;
+        display: none;
+      }
+
       .st-chat-drawer {
         bottom: 0 !important;
         left: 0 !important;
         right: 0 !important;
+        top: auto !important;
         width: 100% !important;
-        max-width: 100% !important;
-        height: 52vh !important;
+        max-width: 100vw !important;
+        height: 72vh !important;
         max-height: 94vh !important;
-        min-height: 180px !important;
+        min-height: 200px !important;
         border-radius: 20px 20px 0 0 !important;
         border-bottom: none !important;
         border-left: none !important;
         border-right: none !important;
         box-shadow: 0 -10px 32px rgba(0, 0, 0, 0.28) !important;
         animation: mobileSheetSlideUp 0.26s cubic-bezier(0.16, 1, 0.3, 1) !important;
-        z-index: 10001 !important;
+        z-index: 10002 !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
       }
       .st-chat-drawer.maximized {
-        height: 94vh !important;
-        max-height: 94vh !important;
+        left: 0 !important;
+        right: 0 !important;
+        top: auto !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+        height: 96vh !important;
+        max-height: 100dvh !important;
         border-radius: 20px 20px 0 0 !important;
+        margin: 0 !important;
+      }
+
+      .st-chat-header {
+        padding: 0.5rem 0.85rem !important;
+      }
+      .st-chat-ai-role-bar {
+        padding: 0.3rem 0.65rem !important;
+        gap: 0.35rem !important;
+      }
+      .st-chat-ai-role-btn {
+        font-size: 0.72rem !important;
+        padding: 0.2rem 0.5rem !important;
+      }
+      .st-chat-ai-role-desc {
+        display: none !important;
+      }
+      .st-chat-avatar-spotlight {
+        padding: 0.35rem 0.75rem !important;
+      }
+      .st-chat-avatar-frame-wrap {
+        width: 32px !important;
+        height: 32px !important;
+      }
+      .st-chat-avatar-name {
+        font-size: 0.8rem !important;
+      }
+      .st-chat-avatar-sub {
+        font-size: 0.68rem !important;
+      }
+      .st-chat-input-row {
+        padding: 0.55rem 0.75rem !important;
+        padding-bottom: max(12px, env(safe-area-inset-bottom, 12px)) !important;
+      }
+      .st-chat-input {
+        font-size: 16px !important;
+        padding: 0.6rem 0.85rem !important;
+      }
+      .st-chat-btn-pair button {
+        min-width: 38px !important;
+        height: 38px !important;
       }
 
       .st-chat-mobile-drag-handle {
@@ -1403,6 +1489,21 @@
       .st-chat-drag-indicator {
         display: none !important;
       }
+
+      /* Google Drive Embed Responsive Aspect Ratio on Mobile */
+      .drive-embed-card .drive-player-wrapper {
+        padding-bottom: 68% !important;
+        min-height: 260px !important;
+      }
+    }
+    /* Google Drive Embed Default Aspect Ratio */
+    .drive-embed-card .drive-player-wrapper {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%;
+      height: 0;
+      background: #090d16;
+      overflow: hidden;
     }
   </style>
 
@@ -1488,6 +1589,9 @@
     "></span>
   </div>
 
+  <!-- Floating Network Connection Status Pill -->
+  <div id="online-connection-status-pill" style="display: none; position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 99999; padding: 0.5rem 1.25rem; border-radius: 9999px; font-weight: 600; font-size: 0.88rem; box-shadow: 0 4px 12px rgba(0,0,0,0.18); transition: all 0.3s ease;"></div>
+
   <!-- Main Container -->
   <main class="main-section" style="padding: 2rem 0;">
     <div class="container">
@@ -1496,6 +1600,28 @@
            1. SETUP SCREEN
            ────────────────────────────────────────────────────────── -->
       <section class="setup-screen" id="exam-setup-view">
+        <!-- Quick Resume Banner for Online Exam Session (Supports Standard, Cohort Breakout, Carousel Rotation) -->
+        <div id="cohort-quick-resume-banner" style="display: none; background: linear-gradient(135deg, #EFF6FF, #DBEAFE); border: 1.5px solid #3B82F6; border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+              <span style="font-size: 2rem;">⚡</span>
+              <div>
+                <div style="font-weight: 700; color: #1E3A8A; font-size: 1.05rem;">ตรวจพบห้องสอบออนไลน์ที่ยังดำเนินการอยู่!</div>
+                <div style="font-size: 0.88rem; color: #1E40AF; margin-top: 0.2rem;" id="cohort-quick-resume-desc">
+                  ห้อง PIN: <span id="cohort-quick-resume-pin" style="font-weight: bold; font-family: monospace;">------</span> | รูปแบบ: <span id="cohort-quick-resume-mode" style="font-weight: 600;">มาตรฐาน</span> | ผู้ใช้: <span id="cohort-quick-resume-user" style="font-weight: 600;">-</span> (<span id="cohort-quick-resume-role">-</span>)
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <button type="button" class="btn btn-primary" id="btn-cohort-quick-resume" style="background-color: #2563EB; border-color: #2563EB; font-weight: 600; padding: 0.6rem 1.25rem;">
+                🚀 กลับเข้าห้องสอบทันที
+              </button>
+              <button type="button" class="btn btn-secondary" id="btn-cohort-dismiss-resume" style="padding: 0.6rem 1rem;">
+                ✕ ออกจากห้องนี้
+              </button>
+            </div>
+          </div>
+        </div>
         <div class="setup-panel card">
           <div class="card-icon" style="background-color: var(--primary-light); color: var(--primary); margin: 0 auto 1.5rem auto;">🎯</div>
           <h2 style="text-align: center; margin-bottom: 0.5rem; font-family: var(--font-title);">ระบบจำลองสอบ OSPE</h2>
@@ -1751,7 +1877,7 @@
             </div>
 
             <!-- 3. Custom Station Picker Container (Shown in 'custom' mode) -->
-            <div id="config-custom-container" style="display: none; background: var(--surface); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border);">
+            <div id="config-custom-container" style="display: none; background: var(--surface); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border); width: 100%; box-sizing: border-box; overflow: hidden;">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
                 <strong style="font-size: 1rem; color: var(--text-primary);">🎯 เลือกเคสจัดชุดสอบเอง (Custom Station Picker)</strong>
                 <span id="custom-selected-counter" class="badge" style="background: rgba(99, 102, 241, 0.12); color: var(--primary); font-size: 0.82rem; font-weight: 700; padding: 0.25rem 0.6rem;">เลือกแล้ว 0 สถานี</span>
@@ -1762,9 +1888,9 @@
 
               <div class="custom-picker-grid">
                 <!-- Left: Search & Search Results -->
-                <div style="display: flex; flex-direction: column;">
+                <div class="custom-picker-col-left">
                   <div class="custom-search-bar-wrap">
-                    <input type="text" id="custom-case-search-input" class="select-filter custom-search-input" placeholder="🔍 ค้นหารหัสเคส / ชื่อโรค / ยา / Keyword ในโจทย์..." oninput="onCustomSearchInput(this.value)">
+                    <input type="text" id="custom-case-search-input" class="custom-search-input" placeholder="🔍 ค้นหารหัสเคส / ชื่อโรค / ยา / Keyword ในโจทย์..." oninput="onCustomSearchInput(this.value)">
                     <div class="custom-search-cat-group">
                       <button type="button" class="sim-btn-xs active" data-cat="all" onclick="setCustomSearchCat('all')">ทั้งหมด</button>
                       <button type="button" class="sim-btn-xs" data-cat="clinic" onclick="setCustomSearchCat('Clinic')">Clinic</button>
@@ -1773,23 +1899,23 @@
                     </div>
                   </div>
 
-                  <div id="custom-search-results" style="max-height: 380px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-primary); padding: 0.4rem;">
+                  <div id="custom-search-results" style="max-height: 380px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-primary); padding: 0.4rem; min-width: 0; width: 100%; box-sizing: border-box;">
                     <!-- Filled dynamically by JS -->
                   </div>
                 </div>
 
                 <!-- Right: Selected Stations Sequence -->
-                <div style="background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.75rem; display: flex; flex-direction: column;">
+                <div class="custom-picker-col-right" style="background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.75rem;">
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.35rem;">
-                    <strong style="font-size: 0.85rem; color: var(--text-primary);">📋 ลำดับสถานีที่จัดเตรียมไว้</strong>
-                    <div style="display: flex; gap: 0.3rem;">
+                    <strong style="font-size: 0.85rem; color: var(--text-primary); white-space: nowrap;">📋 ลำดับสถานีที่จัดเตรียมไว้</strong>
+                    <div style="display: flex; gap: 0.25rem; flex-wrap: wrap;">
                       <button type="button" class="sim-btn-xs" onclick="quickFillCustomStations(14)">🎲 สุ่มเติมครบ 14</button>
                       <button type="button" class="sim-btn-xs" onclick="insertCustomRestStation()">🥤 แทรกพัก</button>
                       <button type="button" class="sim-btn-xs" onclick="clearCustomStations()">🗑️ ล้าง</button>
                     </div>
                   </div>
 
-                  <div id="custom-selected-stations-list" style="max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.35rem; padding-right: 2px;">
+                  <div id="custom-selected-stations-list" style="max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.35rem; padding-right: 2px; min-width: 0; width: 100%; box-sizing: border-box;">
                     <!-- Filled dynamically by JS -->
                   </div>
                 </div>
@@ -2199,6 +2325,12 @@
               <button type="button" class="btn btn-primary" id="sh-timer-toggle-btn" onclick="toggleTimer()">⏸️ พักตัวจับเวลา</button>
               <button type="button" class="btn btn-secondary" onclick="resetTimer()">🔄 รีเซ็ตเวลา</button>
             </div>
+            <div id="sh-host-time-adjust-controls" style="margin-top: 0.85rem; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; align-items: center; border-top: 1px dashed var(--border); padding-top: 0.75rem;">
+              <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); margin-right: 0.25rem;">⏱️ ทดเวลา (Host Only):</span>
+              <button type="button" class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.35rem 0.65rem;" onclick="adjustCohortTimer(60)">+1 นาที</button>
+              <button type="button" class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.35rem 0.65rem;" onclick="adjustCohortTimer(30)">+30 วิ</button>
+              <button type="button" class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.35rem 0.65rem;" onclick="adjustCohortTimer(-30)">-30 วิ</button>
+            </div>
           </div>
           
           <!-- Large Station Title & Scenario Overview for Big Screen (Cohort Breakout Mode Only) -->
@@ -2252,6 +2384,12 @@
                   <button class="btn ghost btn-sm" id="timer-toggle-btn" onclick="toggleTimer()">⏸ พักตัวจับเวลา</button>
                   <button class="btn outline btn-sm" id="timer-reset-btn" onclick="resetTimer()">🔄 เริ่มต้นใหม่</button>
                   <button type="button" class="btn btn-sm" id="btn-sticky-abort-exam" onclick="abortExamSimulation()" style="color: var(--danger); font-weight: 600; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25);" title="ยุติการสอบและกลับสู่หน้าตั้งค่า">🛑 ยุติการสอบ</button>
+                  <div id="sticky-host-time-adjust-wrap" style="display: none; align-items: center; gap: 0.25rem; margin-left: 0.25rem;">
+                    <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">ทดเวลา:</span>
+                    <button type="button" class="btn outline btn-sm" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="adjustCohortTimer(60)" title="ทดเวลา +1 นาที">+1น</button>
+                    <button type="button" class="btn outline btn-sm" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="adjustCohortTimer(30)" title="ทดเวลา +30 วินาที">+30วิ</button>
+                    <button type="button" class="btn outline btn-sm" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="adjustCohortTimer(-30)" title="ลดเวลา 30 วินาที">-30วิ</button>
+                  </div>
                 </div>
               </div>
 
@@ -2471,6 +2609,28 @@
             <div class="checklist-container" id="exam-checklist-container" style="margin-bottom: 1.5rem; overflow-y: auto;">
               <!-- Checklist items populated dynamically -->
             </div>
+
+            <!-- Examiner Live Debrief Feedback Card (Under Checklist at the very bottom) -->
+            <div id="exam-live-feedback-container" class="exam-live-feedback-container" style="display: none; margin-top: 1.5rem; margin-bottom: 2rem; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 1rem 1.25rem; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem; border-bottom: 1px dashed var(--border); padding-bottom: 0.5rem;">
+                <div style="font-family: var(--font-title); font-weight: 700; color: var(--text-primary); font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
+                  <span>💬 บันทึกข้อเสนอแนะ / จุดที่ต้องปรับปรุงประจำสถานีนี้</span>
+                </div>
+                <span id="exam-live-feedback-station-label" class="badge" style="background: rgba(99, 102, 241, 0.12); color: var(--primary); font-size: 0.8rem; font-weight: 700;">สถานีที่ 1</span>
+              </div>
+              <textarea 
+                id="exam-live-feedback-textarea" 
+                class="select-filter" 
+                rows="4" 
+                style="width: 100%; min-height: 100px; resize: vertical; font-size: 0.88rem; line-height: 1.5; padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg); font-family: inherit; color: var(--text-primary);" 
+                placeholder="พิมพ์ข้อสังเกต คำแนะนำ หรือสิ่งที่ผู้เข้าสอบทำขาดตกบกพร่องในสถานีนี้ (สามารถพิมพ์ยาวๆ เป็นย่อหน้าได้ โดยระบบจะบันทึกอัตโนมัติและแสดงรายงานท้ายข้อในหน้าสรุปผลรวมถึงรายงานพิมพ์ PDF)..."
+                oninput="handleLiveStationFeedbackInput(this.value)"
+              ></textarea>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; font-size: 0.78rem; color: var(--text-secondary);">
+                <span>💾 บันทึกอัตโนมัติ (Auto-save) และซิงก์เรียลไทม์</span>
+                <span id="exam-live-feedback-saved-indicator" style="color: var(--success); font-weight: 700; display: none;">✓ บันทึกเรียบร้อย</span>
+              </div>
+            </div>
           </div>
 
         </div>
@@ -2479,7 +2639,19 @@
       <!-- 3. EXAM RESULTS SCREEN -->
       <section class="results-screen" id="exam-results-view" style="display:none;">
         <div class="results-card">
-          <h2 style="text-align: center; margin-bottom: 1.75rem; font-family: var(--font-title); font-size: 1.5rem; font-weight: 700;">📋 ผลสอบ OSPE</h2>
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+            <h2 style="margin: 0; font-family: var(--font-title); font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+              <span>📋 ผลสอบ OSPE</span>
+            </h2>
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              <button type="button" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.88rem; font-weight: 700; border-color: var(--primary); color: var(--primary); display: inline-flex; align-items: center; gap: 0.4rem; background: var(--surface);" onclick="openOspePrintModal()">
+                <span>🖨️ พิมพ์รายงานผลการสอบ (Print Report)</span>
+              </button>
+              <button type="button" class="btn btn-primary" style="padding: 0.5rem 1.15rem; font-size: 0.88rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;" onclick="restartSetup()">
+                <span>🔄 เริ่มสอบห้องใหม่</span>
+              </button>
+            </div>
+          </div>
           
           <!-- Multi-player participant banner in results -->
           <div id="results-participants-bar" style="display: none; margin-bottom: 1.5rem; padding: 1rem 1.25rem; border-radius: var(--radius-md); background: var(--bg-secondary); border: 1px solid var(--border); text-align: left;">
@@ -2576,7 +2748,7 @@
             </div>
           </div>
           <div style="display: flex; gap: 1rem; margin-top: 2.25rem; flex-wrap: wrap;">
-            <button class="btn btn-primary" style="flex: 1; min-width: 200px; padding: 0.75rem 1.5rem; font-weight: 600;" onclick="restartSetup()">🔄 ทำการสอบอีกครั้ง</button>
+            <button class="btn btn-primary" style="flex: 1; min-width: 200px; padding: 0.75rem 1.5rem; font-weight: 600;" onclick="restartSetup()">🔄 ทำการสอบอีกครั้ง / สร้างห้องใหม่</button>
             <a href="index.html" class="btn btn-secondary" style="flex: 1; min-width: 200px; text-align: center; padding: 0.75rem 1.5rem; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600;">🏠 กลับหน้าหลัก Hub</a>
           </div>
         </div>
@@ -2597,6 +2769,63 @@
 
   </div><!-- /.page-viewport -->
 </div><!-- /.app-shell -->
+
+  <!-- Dedicated Print Area for OSPE Simulation Results (Isolated in @media print) -->
+  <div id="ospe-results-print-area" class="print-only-block"></div>
+
+  <!-- OSPE Results Print Modal -->
+  <div id="ospe-print-modal" class="modal-backdrop" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.65); z-index:99999; align-items:center; justify-content:center; padding:1rem; backdrop-filter:blur(4px);">
+    <div class="modal-card" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); max-width:540px; width:100%; padding:1.75rem; box-shadow:0 20px 25px -5px rgba(0,0,0,0.3); animation:fadeIn 0.2s ease;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
+        <h3 style="margin:0; font-family:var(--font-title); font-size:1.25rem; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:0.5rem;">
+          <span>🖨️ พิมพ์รายงานผลการสอบ OSPE</span>
+        </h3>
+        <button type="button" class="btn btn-icon" style="background:transparent; border:none; font-size:1.2rem; cursor:pointer; color:var(--text-secondary);" onclick="closeOspePrintModal()">✕</button>
+      </div>
+
+      <div style="margin-bottom:1.25rem;">
+        <label style="display:block; font-size:0.86rem; font-weight:700; margin-bottom:0.4rem; color:var(--text-primary);">
+          ชื่อ-นามสกุล / รหัสนิสิต (สำหรับพิมพ์บนหัวรายงาน):
+        </label>
+        <input type="text" id="ospe-print-student-name" class="form-input" style="width:100%; padding:0.6rem 0.85rem; border-radius:var(--radius-md); border:1px solid var(--border); background:var(--bg); color:var(--text-primary); font-size:0.92rem;" placeholder="ระบุชื่อนิสิต หรือปล่อยว่าง">
+      </div>
+
+      <div style="margin-bottom:1.5rem;">
+        <div style="font-size:0.86rem; font-weight:700; margin-bottom:0.6rem; color:var(--text-primary);">
+          เลือกรูปแบบรายงานที่ต้องการพิมพ์:
+        </div>
+        <div style="display:flex; flex-direction:column; gap:0.65rem;">
+          <label style="display:flex; align-items:flex-start; gap:0.75rem; padding:0.85rem; border:1.5px solid var(--primary); border-radius:var(--radius-md); background:rgba(37,99,235,0.05); cursor:pointer;">
+            <input type="radio" name="ospe-print-type" value="full" checked style="margin-top:0.25rem;">
+            <div>
+              <div style="font-weight:700; font-size:0.95rem; color:var(--text-primary);">📄 รายงานฉบับสมบูรณ์ (Full Checklist & Rubric Report)</div>
+              <div style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.2rem; line-height:1.4;">
+                พิมพ์สรุปคะแนนภาพรวม ตารางทุกสถานี พร้อมกางรายการ Checklist, Rubric และเฉลยเติมคำทุกสถานีอย่างละเอียด
+              </div>
+            </div>
+          </label>
+          <label style="display:flex; align-items:flex-start; gap:0.75rem; padding:0.85rem; border:1px solid var(--border); border-radius:var(--radius-md); background:var(--surface); cursor:pointer;">
+            <input type="radio" name="ospe-print-type" value="summary" style="margin-top:0.25rem;">
+            <div>
+              <div style="font-weight:700; font-size:0.95rem; color:var(--text-primary);">📊 สรุปย่อเฉพาะคะแนน (Summary Overview Only)</div>
+              <div style="font-size:0.82rem; color:var(--text-secondary); margin-top:0.2rem; line-height:1.4;">
+                พิมพ์เฉพาะข้อมูลสรุปคะแนนรวม ร้อยละ และตารางผลการประเมินรายสถานี
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:0.75rem; justify-content:flex-end;">
+        <button type="button" class="btn btn-secondary" style="padding:0.6rem 1.2rem; font-size:0.9rem;" onclick="closeOspePrintModal()">
+          ยกเลิก
+        </button>
+        <button type="button" class="btn btn-primary" style="padding:0.6rem 1.4rem; font-size:0.9rem; font-weight:700;" onclick="executeOspePrint()">
+          🖨️ สั่งพิมพ์ (Print / PDF)
+        </button>
+      </div>
+    </div>
+  </div>
 
   <script>
     // ─ Fullscreen helper ─
@@ -2626,6 +2855,37 @@
     function safeFormatScore(num) {
       const rounded = Math.round((Number(num) || 0) * 100) / 100;
       return Number.isInteger(rounded) ? rounded.toString() : rounded.toFixed(2).replace(/\.?0+$/, '');
+    }
+
+    function parseDiseaseTags(str) {
+      if (typeof window.parseDiseaseTags === 'function') {
+        return window.parseDiseaseTags(str);
+      }
+      if (!str || typeof str !== 'string') return [];
+      const trimmed = str.trim();
+      if (!trimmed || trimmed === '-' || trimmed === 'undefined' || trimmed === 'null') return [];
+      const tags = [];
+      let current = '';
+      let parenDepth = 0;
+      for (let i = 0; i < trimmed.length; i++) {
+        const char = trimmed[i];
+        if (char === '(' || char === '[' || char === '{') {
+          parenDepth++;
+          current += char;
+        } else if (char === ')' || char === ']' || char === '}') {
+          if (parenDepth > 0) parenDepth--;
+          current += char;
+        } else if (char === ',' && parenDepth === 0) {
+          const item = current.trim();
+          if (item && item !== '-' && item !== 'undefined') tags.push(item);
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      const lastItem = current.trim();
+      if (lastItem && lastItem !== '-' && lastItem !== 'undefined') tags.push(lastItem);
+      return tags;
     }
 
     // State object
@@ -2813,7 +3073,9 @@
         const cat = c.category || 'Clinic';
         const grp = c.mainGroup || 'ทั่วไป';
         const groupKey = `${cat}:::${grp}`;
-        const topic = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
+        const rawTopic = c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title;
+        const topicList = parseDiseaseTags(rawTopic);
+        const effectiveTopics = topicList.length > 0 ? topicList : [(c.title || 'ทั่วไป').trim()];
         
         if (!groupsMap[groupKey]) {
           groupsMap[groupKey] = {
@@ -2825,7 +3087,9 @@
           };
         }
         groupsMap[groupKey].count++;
-        groupsMap[groupKey].topics[topic] = (groupsMap[groupKey].topics[topic] || 0) + 1;
+        effectiveTopics.forEach(t => {
+          groupsMap[groupKey].topics[t] = (groupsMap[groupKey].topics[t] || 0) + 1;
+        });
       });
 
       // Category sort order: Clinic -> Product -> SAP -> other, then Thai alphabetical
@@ -2963,9 +3227,13 @@
           const cat = c.category || 'Clinic';
           const grp = c.mainGroup || 'ทั่วไป';
           const gKey = `${cat}:::${grp}`;
-          const topic = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
+          const rawTopic = c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title;
+          const topicList = parseDiseaseTags(rawTopic);
+          const effectiveTopics = topicList.length > 0 ? topicList : [(c.title || 'ทั่วไป').trim()];
           SimState.selectedCourseGroups.add(gKey);
-          SimState.selectedTopics.add(`${gKey}::${topic}`);
+          effectiveTopics.forEach(t => {
+            SimState.selectedTopics.add(`${gKey}::${t}`);
+          });
         });
       }
       renderCourseGroupsAccordion();
@@ -2977,14 +3245,22 @@
       if (checked) {
         SimState.selectedCourseGroups.add(gKey);
         AppState.cases.filter(c => (c.category || 'Clinic') === cat && (c.mainGroup || 'ทั่วไป') === grp).forEach(c => {
-          const t = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
-          SimState.selectedTopics.add(`${gKey}::${t}`);
+          const rawTopic = c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title;
+          const topicList = parseDiseaseTags(rawTopic);
+          const effectiveTopics = topicList.length > 0 ? topicList : [(c.title || 'ทั่วไป').trim()];
+          effectiveTopics.forEach(t => {
+            SimState.selectedTopics.add(`${gKey}::${t}`);
+          });
         });
       } else {
         SimState.selectedCourseGroups.delete(gKey);
         AppState.cases.filter(c => (c.category || 'Clinic') === cat && (c.mainGroup || 'ทั่วไป') === grp).forEach(c => {
-          const t = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
-          SimState.selectedTopics.delete(`${gKey}::${t}`);
+          const rawTopic = c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title;
+          const topicList = parseDiseaseTags(rawTopic);
+          const effectiveTopics = topicList.length > 0 ? topicList : [(c.title || 'ทั่วไป').trim()];
+          effectiveTopics.forEach(t => {
+            SimState.selectedTopics.delete(`${gKey}::${t}`);
+          });
         });
       }
       renderCourseGroupsAccordion();
@@ -3082,7 +3358,10 @@
       container.innerHTML = displayResults.map(c => {
         const isAdded = selectedSet.has(c.caseId);
         const catClass = (c.category || 'Clinic').toLowerCase();
-        const diseaseText = (c.disease && c.disease !== '-' && c.disease !== 'undefined') ? c.disease : '';
+        const diseaseTags = parseDiseaseTags(c.disease);
+        const diseaseHtml = diseaseTags.length > 0 
+          ? diseaseTags.map(t => `<span class="custom-st-disease">(${escapeHtml(t)})</span>`).join(' ') 
+          : '';
         
         return `
           <div class="custom-station-item">
@@ -3090,7 +3369,7 @@
               <div class="custom-st-meta-row">
                 <span class="badge badge-${catClass}" style="font-size:0.65rem; padding:0.12rem 0.35rem; flex-shrink:0;">${c.category}</span>
                 <strong class="custom-st-id">[${escapeHtml(c.caseId)}]</strong>
-                ${diseaseText ? `<span class="custom-st-disease">(${escapeHtml(diseaseText)})</span>` : ''}
+                ${diseaseHtml}
               </div>
               <div class="custom-st-title" title="${escapeHtml(c.title)}">
                 ${escapeHtml(c.title)}
@@ -3646,7 +3925,255 @@
       initExamFilterControls();
       populateExamSetDropdown();
     });
+
+    let _serverTimeOffset = 0;
+    function initServerTimeOffset() {
+      if (typeof _fbDb !== 'undefined' && _fbDb) {
+        try {
+          _fbDb.ref('.info/serverTimeOffset').on('value', snap => {
+            _serverTimeOffset = snap.val() || 0;
+          });
+        } catch (e) {}
+      }
+    }
+    function getSyncedNow() {
+      return Date.now() + (_serverTimeOffset || 0);
+    }
+    window.getSyncedNow = getSyncedNow;
+
+    function initOnlineConnectionWatcher() {
+      if (typeof _fbDb === 'undefined' || !_fbDb) return;
+      const statusPill = document.getElementById('online-connection-status-pill');
+      try {
+        _fbDb.ref('.info/connected').on('value', snap => {
+          const isConnected = Boolean(snap.val());
+          if (!isConnected && SimState.isLobby) {
+            if (statusPill) {
+              statusPill.textContent = '⚠️ การเชื่อมต่อขัดข้อง กำลังเชื่อมต่อใหม่...';
+              statusPill.style.background = '#dc2626';
+              statusPill.style.color = '#ffffff';
+              statusPill.style.display = 'block';
+            }
+          } else if (isConnected && SimState.isLobby) {
+            if (statusPill && statusPill.style.display !== 'none') {
+              statusPill.textContent = '✅ เชื่อมต่อสำเร็จ ซิงค์ข้อมูลล่าสุดแล้ว';
+              statusPill.style.background = '#16a34a';
+              statusPill.style.color = '#ffffff';
+              setTimeout(() => {
+                if (statusPill) statusPill.style.display = 'none';
+              }, 2500);
+              if (SimState.roomId && _fbRoomRef) {
+                _fbRoomRef.once('value').then(rSnap => {
+                  if (rSnap.exists()) applyRoomState(rSnap.val());
+                }).catch(() => {});
+              }
+            }
+          }
+        });
+      } catch (e) {}
+    }
+
+    const COHORT_SESSION_KEY = 'ple_cohort_session';
+    const COHORT_SESSION_TTL_MS = 9000000; // 2.5 hours in milliseconds
+
+    function saveCohortSession(data) {
+      try {
+        const payload = Object.assign({}, data, { savedAt: Date.now() });
+        const str = JSON.stringify(payload);
+        sessionStorage.setItem(COHORT_SESSION_KEY, str);
+        localStorage.setItem(COHORT_SESSION_KEY, str);
+      } catch (e) {}
+    }
+
+    function updateOnlineExamSession(patch) {
+      try {
+        const current = getCohortSession();
+        if (current && current.roomId) {
+          const updated = Object.assign({}, current, patch, { savedAt: Date.now() });
+          saveCohortSession(updated);
+        }
+      } catch (e) {}
+    }
+
+    function clearCohortSession() {
+      try {
+        sessionStorage.removeItem(COHORT_SESSION_KEY);
+        localStorage.removeItem(COHORT_SESSION_KEY);
+        sessionStorage.removeItem('ple_session_room_id');
+        sessionStorage.removeItem('ple_session_player_id');
+        localStorage.removeItem('ple_room_id');
+        localStorage.removeItem('ple_player_id');
+        const resumeBanner = document.getElementById('cohort-quick-resume-banner');
+        if (resumeBanner) resumeBanner.style.display = 'none';
+      } catch (e) {}
+    }
+
+    function getCohortSession() {
+      try {
+        const s = sessionStorage.getItem(COHORT_SESSION_KEY);
+        if (s) {
+          const parsed = JSON.parse(s);
+          if (parsed && parsed.roomId) {
+            return Object.assign({}, parsed, { fromSessionStorage: true });
+          }
+        }
+        const l = localStorage.getItem(COHORT_SESSION_KEY);
+        if (l) {
+          const parsed = JSON.parse(l);
+          if (parsed && parsed.roomId) {
+            if (!parsed.savedAt || (Date.now() - parsed.savedAt < COHORT_SESSION_TTL_MS)) {
+              return Object.assign({}, parsed, { fromSessionStorage: false });
+            } else {
+              clearCohortSession();
+            }
+          }
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    async function autoReconnectCohortSession(session) {
+      if (!session || !session.roomId || typeof _fbDb === 'undefined' || !_fbDb) return;
+      try {
+        const snap = await _fbDb.ref('rooms/' + session.roomId).once('value');
+        if (!snap.exists()) {
+          clearCohortSession();
+          return;
+        }
+        const room = snap.val();
+        if (room.status === 'completed' || room.status === 'dissolved' || room.status === 'results') {
+          clearCohortSession();
+          return;
+        }
+        console.log('Auto-reconnecting to online session:', session.roomId, room.examMode || session.mode);
+        saveCohortSession(session);
+        SimState.isLobby = true;
+        SimState.roomId = session.roomId;
+        SimState.myPlayerId = session.playerId;
+        SimState.lobbyPlayerName = session.playerName;
+        SimState.isHost = Boolean(session.isHost);
+        SimState.examMode = session.mode || room.examMode || 'standard';
+        SimState.role = session.role || 'examinee';
+        SimState.lobbyRole = session.role || 'examinee';
+        SimState.roleSelectedThisSession = true;
+
+        // Ensure player is registered in room players list
+        if (_fbDb && session.playerId) {
+          try {
+            const pSnap = await _fbDb.ref(`rooms/${session.roomId}/players/${session.playerId}`).once('value');
+            if (!pSnap.exists()) {
+              await _fbDb.ref(`rooms/${session.roomId}/players/${session.playerId}`).set({
+                id: session.playerId,
+                name: session.playerName,
+                emoji: session.emoji || '💊',
+                role: session.role || 'examinee',
+                isHost: Boolean(session.isHost),
+                joinedAt: Date.now()
+              });
+            }
+          } catch (e) {}
+        }
+
+        // Restore mode-specific assignments across all online exam types
+        if (SimState.examMode === 'cohort_breakout') {
+          let tableId = session.breakoutTableId || null;
+          let role = session.breakoutRole || session.role || 'examinee';
+          if (!tableId && room.breakouts) {
+            const myId = session.playerId;
+            const myName = session.playerName;
+            const foundTable = Object.values(room.breakouts).find(b =>
+              b.participantId === myId || b.examinerId === myId ||
+              (b.participantName && b.participantName === myName) ||
+              (b.examinerName && b.examinerName === myName)
+            );
+            if (foundTable) {
+              tableId = foundTable.id;
+              const isEx = (foundTable.examinerId === myId || foundTable.examinerName === myName);
+              role = isEx ? 'examiner' : 'examinee';
+            }
+          }
+          if (tableId) {
+            SimState.myBreakoutTableId = tableId;
+            SimState.myBreakoutRole = role;
+            SimState.role = role;
+            SimState.lobbyRole = role;
+
+            // Re-seat on table in Firebase if not present
+            if (_fbDb) {
+              try {
+                const tSnap = await _fbDb.ref(`rooms/${session.roomId}/breakouts/${tableId}`).once('value');
+                if (tSnap.exists()) {
+                  const tData = tSnap.val();
+                  const updates = {};
+                  if (role === 'examiner' && (!tData.examinerId || tData.examinerId === session.playerId)) {
+                    updates.examinerId = session.playerId;
+                    updates.examinerName = session.playerName;
+                  } else if (role !== 'examiner' && (!tData.participantId || tData.participantId === session.playerId)) {
+                    updates.participantId = session.playerId;
+                    updates.participantName = session.playerName;
+                  }
+                  if (Object.keys(updates).length > 0) {
+                    await _fbDb.ref(`rooms/${session.roomId}/breakouts/${tableId}`).update(updates);
+                  }
+                }
+              } catch (e) {}
+            }
+          }
+        } else if (SimState.examMode === 'carousel_rotation') {
+          let stationNum = session.carouselStation || null;
+          if (!stationNum && room.carouselPosts) {
+            const myId = session.playerId;
+            const myName = session.playerName;
+            const foundPost = Object.values(room.carouselPosts).find(p =>
+              p.examinerId === myId || p.examinerName === myName ||
+              p.startParticipantId === myId || p.startParticipantName === myName
+            );
+            if (foundPost) {
+              stationNum = foundPost.stationNumber;
+              const isEx = (foundPost.examinerId === myId || foundPost.examinerName === myName);
+              SimState.role = isEx ? 'examiner' : 'examinee';
+              SimState.lobbyRole = SimState.role;
+            }
+          }
+          if (stationNum) {
+            SimState.myCarouselStation = stationNum;
+          }
+        }
+
+        if (room.status === 'running') {
+          SimState.hasDoneCountdown = true;
+          document.getElementById('exam-setup-view').style.display = 'none';
+          document.getElementById('exam-running-view').style.display = 'block';
+          const waitEl = document.getElementById('lobby-waiting-screen');
+          if (waitEl) waitEl.style.display = 'none';
+          const cdEl = document.getElementById('lobby-countdown-screen');
+          if (cdEl) cdEl.style.display = 'none';
+        }
+
+        setupLobbyRoomUI();
+
+        if (room.status === 'running') {
+          await applyRoomState(room);
+        }
+      } catch (e) {
+        console.warn('Auto-reconnect failed:', e);
+        if (typeof PleDiagnostics !== 'undefined') PleDiagnostics.log('warn', 'Auto-reconnect failed', e);
+      }
+    }
+
+    window.saveCohortSession = saveCohortSession;
+    window.saveOnlineExamSession = saveCohortSession;
+    window.updateOnlineExamSession = updateOnlineExamSession;
+    window.clearCohortSession = clearCohortSession;
+    window.clearOnlineExamSession = clearCohortSession;
+    window.getCohortSession = getCohortSession;
+    window.getOnlineExamSession = getCohortSession;
+    window.autoReconnectCohortSession = autoReconnectCohortSession;
+    window.autoReconnectOnlineSession = autoReconnectCohortSession;
+
     document.addEventListener('DOMContentLoaded', () => {
+      initServerTimeOffset();
+      initOnlineConnectionWatcher();
       initOtpBoxes();
       initExamFilterControls();
       populateExamSetDropdown();
@@ -3666,26 +4193,116 @@
         if (lobbySelect) lobbySelect.value = savedAlarm;
       } catch (e) {}
 
-      // Handle direct URL params for room joining (?room=1234 or ?join=1234)
+      // Check for online exam session recovery (Standard / Cohort Breakout / Carousel Rotation)
       try {
         const urlParams = new URLSearchParams(window.location.search);
         const roomParam = urlParams.get('room') || urlParams.get('join') || (window.location.hash.startsWith('#room-') ? window.location.hash.replace('#room-', '') : null);
-        if (roomParam) {
-          toggleSetupView('lobby');
-          const joinRadio = document.querySelector('input[name="lobby-op"][value="join"]');
-          if (joinRadio) {
-            joinRadio.checked = true;
-            toggleLobbyOp('join');
+
+        if (urlParams.get('leave')) {
+          clearCohortSession();
+        } else {
+          const session = getCohortSession();
+          // Seamless reconnect prioritized if session exists and either no roomParam or roomParam matches session.roomId
+          if (session && session.roomId && (!roomParam || roomParam === session.roomId)) {
+            setTimeout(async () => {
+              if (session.fromSessionStorage) {
+                // Direct seamless reconnect for page refresh / F5
+                if (typeof _fbDb !== 'undefined' && _fbDb) {
+                  try {
+                    const snap = await _fbDb.ref('rooms/' + session.roomId).once('value');
+                    if (!snap.exists()) {
+                      clearCohortSession();
+                      return;
+                    }
+                    const room = snap.val();
+                    if (room.status === 'results' || room.status === 'completed' || room.status === 'dissolved') {
+                      clearCohortSession();
+                      return;
+                    }
+                  } catch (e) {
+                    console.warn('Session check error:', e);
+                  }
+                }
+                await autoReconnectCohortSession(session);
+                try {
+                  if (window.history && window.history.replaceState) {
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                  }
+                } catch (e) {}
+              } else {
+                // Reopened tab or browser restart: verify room is still active
+                if (typeof _fbDb !== 'undefined' && _fbDb) {
+                  try {
+                    const snap = await _fbDb.ref('rooms/' + session.roomId).once('value');
+                    if (snap.exists()) {
+                      const room = snap.val();
+                      if (room.status === 'running' || room.status === 'waiting') {
+                        const banner = document.getElementById('cohort-quick-resume-banner');
+                        const pinEl = document.getElementById('cohort-quick-resume-pin');
+                        const modeEl = document.getElementById('cohort-quick-resume-mode');
+                        const userEl = document.getElementById('cohort-quick-resume-user');
+                        const roleEl = document.getElementById('cohort-quick-resume-role');
+                        const resumeBtn = document.getElementById('btn-cohort-quick-resume');
+                        const dismissBtn = document.getElementById('btn-cohort-dismiss-resume');
+                        if (banner && pinEl) {
+                          pinEl.textContent = session.roomId;
+                          if (userEl) userEl.textContent = session.playerName || 'ผู้ใช้';
+                          
+                          const m = room.examMode || session.mode || 'standard';
+                          let modeName = 'ซ้อมคู่มาตรฐาน (Standard)';
+                          if (m === 'cohort_breakout') modeName = 'กลุ่มใหญ่: ห้องย่อย (Cohort Breakout)';
+                          else if (m === 'carousel_rotation') modeName = 'กลุ่มใหญ่: แลปกิ๊งหมุนเวียน (Carousel Rotation)';
+                          if (modeEl) modeEl.textContent = modeName;
+
+                          const r = session.role || 'examinee';
+                          let roleName = 'ผู้เข้าสอบ';
+                          if (session.isHost) roleName = 'Host ผู้ดูแลห้อง';
+                          else if (r === 'examiner') roleName = 'ผู้ประเมิน';
+                          else if (r === 'observer') roleName = 'ผู้สังเกตการณ์';
+                          if (roleEl) roleEl.textContent = roleName;
+
+                          banner.style.display = 'block';
+                          if (resumeBtn) {
+                            resumeBtn.onclick = () => {
+                              banner.style.display = 'none';
+                              autoReconnectCohortSession(session);
+                            };
+                          }
+                          if (dismissBtn) {
+                            dismissBtn.onclick = () => {
+                              clearCohortSession();
+                            };
+                          }
+                        }
+                      } else {
+                        clearCohortSession();
+                      }
+                    } else {
+                      clearCohortSession();
+                    }
+                  } catch (errCheck) {
+                    console.warn('Cohort room check error:', errCheck);
+                  }
+                }
+              }
+            }, 250);
+          } else if (roomParam) {
+            toggleSetupView('lobby');
+            const joinRadio = document.querySelector('input[name="lobby-op"][value="join"]');
+            if (joinRadio) {
+              joinRadio.checked = true;
+              toggleLobbyOp('join');
+            }
+            const cleanRoom = roomParam.trim().slice(0, 4);
+            for (let i = 0; i < cleanRoom.length; i++) {
+              const el = document.getElementById('otp-' + i);
+              if (el) { el.value = cleanRoom[i]; el.classList.add('filled'); }
+            }
+            const hiddenRoomInput = document.getElementById('lobby-room-id-input');
+            if (hiddenRoomInput) hiddenRoomInput.value = cleanRoom;
+          } else if (window.location.hash === '#lobby') {
+            toggleSetupView('lobby');
           }
-          const cleanRoom = roomParam.trim().slice(0, 4);
-          for (let i = 0; i < cleanRoom.length; i++) {
-            const el = document.getElementById('otp-' + i);
-            if (el) { el.value = cleanRoom[i]; el.classList.add('filled'); }
-          }
-          const hiddenRoomInput = document.getElementById('lobby-room-id-input');
-          if (hiddenRoomInput) hiddenRoomInput.value = cleanRoom;
-        } else if (window.location.hash === '#lobby') {
-          toggleSetupView('lobby');
         }
       } catch (e) {}
     });
@@ -3700,6 +4317,101 @@
         noteHtml: '<p>สถานีพักไม่มีการประเมินคะแนน</p>'
       };
     }
+
+    // Helper: Determine if two cases are consecutive linked multi-part cases
+    function areCasesLinked(a, b) {
+      if (!a || !b) return false;
+      const idA = (a.caseId || a.id || '').trim();
+      const idB = (b.caseId || b.id || '').trim();
+      if (!idA || !idB || idA === 'REST' || idB === 'REST') return false;
+
+      const normIdA = idA.replace(/^OSPE-/i, '').toLowerCase();
+      const normIdB = idB.replace(/^OSPE-/i, '').toLowerCase();
+
+      // Resolve full case objects if linkedNextCase / linkedFromCase are missing
+      let fullA = (a.linkedNextCase !== undefined || a.linkedFromCase !== undefined) ? a : null;
+      let fullB = (b.linkedNextCase !== undefined || b.linkedFromCase !== undefined) ? b : null;
+
+      if (!fullA) {
+        if (typeof AppState !== 'undefined' && AppState.cases) {
+          fullA = AppState.cases.find(c => c && c.caseId && c.caseId.replace(/^OSPE-/i, '').toLowerCase() === normIdA);
+        }
+        if (!fullA && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+          fullA = OFFLINE_DATA.cases.find(c => c && c.caseId && c.caseId.replace(/^OSPE-/i, '').toLowerCase() === normIdA);
+        }
+      }
+
+      if (!fullB) {
+        if (typeof AppState !== 'undefined' && AppState.cases) {
+          fullB = AppState.cases.find(c => c && c.caseId && c.caseId.replace(/^OSPE-/i, '').toLowerCase() === normIdB);
+        }
+        if (!fullB && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+          fullB = OFFLINE_DATA.cases.find(c => c && c.caseId && c.caseId.replace(/^OSPE-/i, '').toLowerCase() === normIdB);
+        }
+      }
+
+      const nextA = (fullA && fullA.linkedNextCase ? fullA.linkedNextCase : (a.linkedNextCase || '')).trim().replace(/^OSPE-/i, '').toLowerCase();
+      const fromB = (fullB && fullB.linkedFromCase ? fullB.linkedFromCase : (b.linkedFromCase || '')).trim().replace(/^OSPE-/i, '').toLowerCase();
+      const fromA = (fullA && fullA.linkedFromCase ? fullA.linkedFromCase : (a.linkedFromCase || '')).trim().replace(/^OSPE-/i, '').toLowerCase();
+      const nextB = (fullB && fullB.linkedNextCase ? fullB.linkedNextCase : (b.linkedNextCase || '')).trim().replace(/^OSPE-/i, '').toLowerCase();
+
+      if (nextA && nextA === normIdB) return true;
+      if (fromB && fromB === normIdA) return true;
+      if (fromA && fromA === normIdB) return true;
+      if (nextB && nextB === normIdA) return true;
+
+      return false;
+    }
+    window.areCasesLinked = areCasesLinked;
+
+    // Helper: Smartly insert rest stations without ever splitting linked cases
+    function insertRestStationsSmart(items, restCount, createRestItemFn) {
+      if (!items || items.length === 0 || restCount <= 0) return [...items];
+
+      const N = items.length;
+      // Valid split points: index i means between items[i] and items[i + 1]
+      const validSplitPoints = [];
+      for (let i = 0; i < N - 1; i++) {
+        if (!areCasesLinked(items[i], items[i + 1])) {
+          validSplitPoints.push(i);
+        }
+      }
+
+      if (validSplitPoints.length === 0) {
+        return [...items];
+      }
+
+      // Pick restCount positions as evenly spaced as possible across valid split points
+      const chosenPoints = new Set();
+      const numToInsert = Math.min(restCount, validSplitPoints.length);
+
+      for (let k = 1; k <= numToInsert; k++) {
+        const idealIdx = Math.round((N * k) / (numToInsert + 1)) - 1;
+        let bestPoint = null;
+        let minDiff = Infinity;
+        for (const pt of validSplitPoints) {
+          if (chosenPoints.has(pt)) continue;
+          const diff = Math.abs(pt - idealIdx);
+          if (diff < minDiff) {
+            minDiff = diff;
+            bestPoint = pt;
+          }
+        }
+        if (bestPoint !== null) {
+          chosenPoints.add(bestPoint);
+        }
+      }
+
+      const result = [];
+      for (let i = 0; i < N; i++) {
+        result.push(items[i]);
+        if (chosenPoints.has(i)) {
+          result.push(typeof createRestItemFn === 'function' ? createRestItemFn() : { caseId: 'REST' });
+        }
+      }
+      return result;
+    }
+    window.insertRestStationsSmart = insertRestStationsSmart;
 
     // ─── Submit Lobby Form (Firebase) ────────────────────────────────────
     async function submitLobbySetup() {
@@ -3743,16 +4455,11 @@
               return;
             }
             const restCount = parseInt(document.getElementById('rest-stations-count').value) || 0;
-            const restInterval = restCount > 0 ? Math.floor(examSetRaw.length / restCount) : 999;
-            let restInserted = 0;
-            let stationNumCounter = 1;
-            for (let i = 0; i < examSetRaw.length; i++) {
-              fullExamSet.push({ stationNumber: stationNumCounter++, caseId: examSetRaw[i].caseId });
-              if (restCount > 0 && (i + 1) % restInterval === 0 && restInserted < restCount) {
-                restInserted++;
-                fullExamSet.push({ stationNumber: stationNumCounter++, caseId: 'REST' });
-              }
-            }
+            const rawSetItems = examSetRaw.map(c => ({ caseId: c.caseId }));
+            const setWithRest = insertRestStationsSmart(rawSetItems, restCount, () => ({ caseId: 'REST' }));
+            setWithRest.forEach((st, idx) => {
+              fullExamSet.push({ stationNumber: idx + 1, caseId: st.caseId });
+            });
           } else {
             const { clinic, product, sap } = getProportionValues();
             const total = clinic + product + sap;
@@ -3770,26 +4477,36 @@
             }
 
             const restCount = parseInt(document.getElementById('rest-stations-count').value) || 0;
-            const restInterval = restCount > 0 ? Math.floor(examSetRaw.length / restCount) : 999;
-            let restInserted = 0;
-            let stationNumCounter = 1;
-            for (let i = 0; i < examSetRaw.length; i++) {
-              fullExamSet.push({ stationNumber: stationNumCounter++, caseId: examSetRaw[i].caseId });
-              if (restCount > 0 && (i + 1) % restInterval === 0 && restInserted < restCount) {
-                restInserted++;
-                fullExamSet.push({ stationNumber: stationNumCounter++, caseId: 'REST' });
-              }
-            }
+            const rawRandomItems = examSetRaw.map(c => ({ caseId: c.caseId }));
+            const randomWithRest = insertRestStationsSmart(rawRandomItems, restCount, () => ({ caseId: 'REST' }));
+            randomWithRest.forEach((st, idx) => {
+              fullExamSet.push({ stationNumber: idx + 1, caseId: st.caseId });
+            });
           }
           
           SimState.totalStations = fullExamSet.length;
           
           // Verify passcode if host creates room with protected cases
-          const tempStations = fullExamSet.map((st, i) => ({
-            stationNumber: i + 1,
-            isRest: st.caseId === 'REST',
-            case: AppState.cases.find(x => x && x.caseId === st.caseId)
-          }));
+          const tempStations = fullExamSet.map((st, i) => {
+            if (st.caseId === 'REST') {
+              return { stationNumber: i + 1, isRest: true, case: getRestCaseData() };
+            }
+            const targetId = (st.caseId || '').trim();
+            const rawId = targetId.replace(/^OSPE-/i, '');
+            const ospeId = targetId.startsWith('OSPE-') ? targetId : ('OSPE-' + targetId);
+            let matchedCase = null;
+            if (typeof AppState !== 'undefined' && AppState.cases) {
+              matchedCase = AppState.cases.find(x => x && x.caseId && (x.caseId.trim() === targetId || x.caseId.trim() === ospeId || x.caseId.trim() === rawId));
+            }
+            if (!matchedCase && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+              matchedCase = OFFLINE_DATA.cases.find(x => x && x.caseId && (x.caseId.trim() === targetId || x.caseId.trim() === ospeId || x.caseId.trim() === rawId));
+            }
+            return {
+              stationNumber: i + 1,
+              isRest: false,
+              case: matchedCase
+            };
+          });
           const unlockedOk = await unlockStationsIfProtected(tempStations);
           if (!unlockedOk) {
             showGlobalLoader(false);
@@ -3863,6 +4580,8 @@
             joinedAt: Date.now()
           };
 
+          const initialCaseDur = parseCaseDurationSec(fullExamSet[0]);
+
           // Write room to Firebase
           const roomData = {
             roomId: randomRoomId,
@@ -3878,7 +4597,8 @@
             players: initialPlayers,
             currentStationIdx: 0,
             caseId: fullExamSet[0].caseId,
-            timerValue: 240,
+            timerValue: initialCaseDur,
+            timerDuration: initialCaseDur,
             timerRunning: false,
             status: 'setup',
             examSet: examSetJson,
@@ -3889,14 +4609,25 @@
             scoresByStation: '{}',
             alarmSound: SimState.alarmSound || document.getElementById('solo-alarm-sound-select')?.value || document.getElementById('lobby-alarm-sound-select')?.value || localStorage.getItem('ple_ospe_alarm_sound') || 'school-bell',
             timeoutTransitionMode: document.querySelector('input[name="global-timeout-behavior"]:checked')?.value || SimState.timeoutTransitionMode || 'auto',
+            unlockedCaseDetails: SimState.unlockedCases || {},
             createdAt: Date.now()
           };
           await _fbDb.ref('rooms/' + randomRoomId).set(roomData);
           
           SimState.roomId = randomRoomId;
+          SimState.currentRoomId = randomRoomId;
+          SimState.currentExamSetRaw = examSetJson;
           SimState.role = hostInitialRole;
           SimState.alarmSound = roomData.alarmSound;
           SimState.timeoutTransitionMode = roomData.timeoutTransitionMode;
+          saveCohortSession({
+            roomId: randomRoomId,
+            playerId: myPlayerId,
+            playerName: playerName,
+            isHost: true,
+            role: hostInitialRole,
+            mode: selectedExamMode
+          });
 
           // Sync any decrypted cases to Firebase now that roomId is set
           // (the passcode modal sync was skipped earlier because SimState.roomId wasn't set yet)
@@ -3917,8 +4648,18 @@
             if (fullExamSet[i].caseId === 'REST') {
               SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: true, case: getRestCaseData() });
             } else {
-              let matchedCase = AppState.cases.find(c => c.caseId === fullExamSet[i].caseId) || AppState.cases[0];
-              SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: false, case: matchedCase });
+              const targetCaseId = (fullExamSet[i].caseId || '').trim();
+              const rawId = targetCaseId.replace(/^OSPE-/i, '');
+              const ospeId = targetCaseId.startsWith('OSPE-') ? targetCaseId : ('OSPE-' + targetCaseId);
+              let matchedCase = (typeof AppState !== 'undefined' && AppState.cases)
+                ? AppState.cases.find(c => c.caseId && (c.caseId.trim() === targetCaseId || c.caseId.trim() === ospeId || c.caseId.trim() === rawId))
+                : null;
+              if (!matchedCase && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+                matchedCase = OFFLINE_DATA.cases.find(c => c.caseId && (c.caseId.trim() === targetCaseId || c.caseId.trim() === ospeId || c.caseId.trim() === rawId));
+              }
+              const unlockedData = (SimState.unlockedCases && (SimState.unlockedCases[targetCaseId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId])) || {};
+              const finalCase = Object.assign({}, matchedCase || fullExamSet[i], unlockedData);
+              SimState.stations.push({ stationNumber: fullExamSet[i].stationNumber, isRest: false, case: finalCase });
             }
           }
           SimState.currentIdx = 0;
@@ -4069,6 +4810,14 @@
           SimState.roomId = roomIdInput;
           SimState.role = playerRole;
           SimState.lobbyRole = playerRole;
+          saveCohortSession({
+            roomId: roomIdInput,
+            playerId: myPlayerId,
+            playerName: playerName,
+            isHost: false,
+            role: playerRole,
+            mode: roomData.examMode || 'standard'
+          });
           setupLobbyRoomUI();
         }
       } catch (e) {
@@ -4177,6 +4926,12 @@
 
       // Update Role badge in profile card
       updateMyRoleBadgeUI(role);
+      updateOnlineExamSession({
+        role: role,
+        breakoutTableId: null,
+        breakoutRole: null,
+        carouselStation: null
+      });
 
       // Re-render
       if (SimState.examMode === 'carousel_rotation' && _fbRoomRef) {
@@ -4333,17 +5088,18 @@
         SimState.isHost = false;
         SimState.isLobby = false;
         SimState.role = 'solo';
+        SimState.stations = [];
+        SimState.studentScores = {};
+        SimState.cachedRoom = null;
+        SimState.currentIdx = 0;
+        SimState.currentRoomId = null;
+        SimState.currentExamSetRaw = null;
         SimState.myBreakoutTableId = null;
         SimState.myBreakoutRole = null;
         SimState.myCarouselStation = null;
         SimState.hasDoneCountdown = false;
         SimState.roleSelectedThisSession = false;
-        try {
-          sessionStorage.removeItem('ple_session_room_id');
-          sessionStorage.removeItem('ple_session_player_id');
-          localStorage.removeItem('ple_room_id');
-          localStorage.removeItem('ple_player_id');
-        } catch (e) {}
+        clearCohortSession();
         
         // Switch views back to setup
         document.getElementById('exam-running-view').style.display = 'none';
@@ -4488,14 +5244,24 @@
     window.closeRoomBlockedModal = closeRoomBlockedModal;
 
     function setupLobbyRoomUI() {
+      // Clear any stations from a previous room to prevent old cases from persisting
+      if (SimState.currentRoomId !== SimState.roomId) {
+        SimState.stations = [];
+        SimState.currentRoomId = SimState.roomId;
+        SimState.currentExamSetRaw = null;
+      }
       document.getElementById('exam-setup-view').style.display = 'none';
       document.getElementById('exam-running-view').style.display = 'block';
-      document.querySelector('.exam-layout').style.display = 'none';
-      const stickyTimer = document.getElementById('exam-sticky-timer-bar');
-      if (stickyTimer) stickyTimer.style.display = 'none';
-      const stickyHeader = document.getElementById('exam-sticky-top-header');
-      if (stickyHeader) stickyHeader.style.display = 'none';
-      document.getElementById('lobby-waiting-screen').style.display = 'block';
+      if (!SimState.hasDoneCountdown) {
+        document.querySelector('.exam-layout').style.display = 'none';
+        const stickyTimer = document.getElementById('exam-sticky-timer-bar');
+        if (stickyTimer) stickyTimer.style.display = 'none';
+        const stickyHeader = document.getElementById('exam-sticky-top-header');
+        if (stickyHeader) stickyHeader.style.display = 'none';
+        document.getElementById('lobby-waiting-screen').style.display = 'block';
+      } else {
+        document.getElementById('lobby-waiting-screen').style.display = 'none';
+      }
       document.getElementById('exam-lobby-info-bar').style.display = 'flex';
       document.getElementById('lobby-room-id-display').textContent = SimState.roomId;
       
@@ -4635,11 +5401,11 @@
           });
         }
         if (!foundInBreakout) {
-          if (SimState.myBreakoutTableId && room.examMode === 'cohort_breakout') {
+          if (SimState.myBreakoutTableId && room.examMode === 'cohort_breakout' && room.status === 'setup') {
             alert('📢 โต๊ะสอบที่คุณนั่งอยู่ถูกปิดหรือลบแล้ว คุณกลับมาอยู่ที่รายชื่อรวมผู้เข้าร่วม (Pool)');
+            SimState.myBreakoutTableId = null;
+            SimState.myBreakoutRole = null;
           }
-          SimState.myBreakoutTableId = null;
-          SimState.myBreakoutRole = null;
         }
 
         const totalPlayers = playersList.length;
@@ -5095,9 +5861,22 @@
         } else if (room.status === 'running' || room.status === 'countdown') {
           document.getElementById('lobby-waiting-screen').style.display = 'none';
           
-          // Build stations if not exist or if joining late
-          if (SimState.stations.length === 0) {
+          // Build stations if not exist, or if room/examSet has changed
+          const needBuild = SimState.stations.length === 0 || 
+                            SimState.currentRoomId !== room.roomId || 
+                            (room.examSet && SimState.currentExamSetRaw !== room.examSet);
+          if (needBuild) {
+            SimState.currentRoomId = room.roomId;
+            SimState.currentExamSetRaw = room.examSet;
             await buildStationsFromRoom(room);
+          }
+
+          // If the exam is already running, bypass countdown immediately on reconnect/refresh
+          const isLateOrRejoin = room.status === 'running' && ((Date.now() - (room.timerStartedAt || 0) > 2500) || (room.currentStationIdx > 0));
+          if (isLateOrRejoin) {
+            SimState.hasDoneCountdown = true;
+            const cdEl = document.getElementById('lobby-countdown-screen');
+            if (cdEl) cdEl.style.display = 'none';
           }
 
           // Countdown synchronized for all participants & Super Host
@@ -5164,25 +5943,27 @@
                   
                   // Compute initial timer immediately from Super Host's timerStartedAt
                   SimState.cachedRoom = room;
+                  const curCase = SimState.stations && SimState.stations[SimState.currentIdx]?.case;
+                  const fallbackDur = parseCaseDurationSec(curCase);
                   if (room.timerRunning) {
                     SimState.timerRunning = true;
                     if (room.timerStartedAt) {
                       const now = Date.now();
                       if (now < room.timerStartedAt) {
-                        SimState.timerValue = room.timerDuration || 240;
+                        SimState.timerValue = room.timerDuration || fallbackDur || 240;
                       } else {
                         const elapsed = Math.floor((now - room.timerStartedAt) / 1000);
-                        const totalDur = room.timerDuration || 240;
+                        const totalDur = room.timerDuration || fallbackDur || 240;
                         SimState.timerValue = Math.max(0, totalDur - elapsed);
                       }
                     } else {
-                      SimState.timerValue = room.timerValue !== undefined ? room.timerValue : 240;
+                      SimState.timerValue = room.timerValue !== undefined ? room.timerValue : (fallbackDur || 240);
                     }
                     updateTimerDisplay();
                     startLocalCountdown();
                   } else {
                     SimState.timerRunning = false;
-                    SimState.timerValue = room.timerValue !== undefined ? room.timerValue : 240;
+                    SimState.timerValue = room.timerValue !== undefined ? room.timerValue : (fallbackDur || 240);
                     updateTimerDisplay();
                   }
                 }
@@ -5195,23 +5976,25 @@
 
           // ── Synchronize timer from Super Host (Absolute Source of Truth) ──
           SimState.cachedRoom = room;
+          const curCase = SimState.stations && SimState.stations[SimState.currentIdx]?.case;
+          const fallbackDur = parseCaseDurationSec(curCase);
           if (room.timerRunning) {
             SimState.timerRunning = true;
             if (room.timerStartedAt) {
-              const now = Date.now();
+              const now = getSyncedNow();
               if (now < room.timerStartedAt) {
-                SimState.timerValue = room.timerDuration || 240;
+                SimState.timerValue = room.timerDuration || fallbackDur || 240;
               } else {
                 const elapsed = Math.floor((now - room.timerStartedAt) / 1000);
-                const totalDur = room.timerDuration || 240;
+                const totalDur = room.timerDuration || fallbackDur || 240;
                 SimState.timerValue = Math.max(0, totalDur - elapsed);
               }
             } else {
-              SimState.timerValue = room.timerValue !== undefined ? room.timerValue : 240;
+              SimState.timerValue = room.timerValue !== undefined ? room.timerValue : (fallbackDur || 240);
             }
           } else {
             SimState.timerRunning = false;
-            SimState.timerValue = room.timerValue !== undefined ? room.timerValue : 240;
+            SimState.timerValue = room.timerValue !== undefined ? room.timerValue : (fallbackDur || 240);
           }
           updateTimerDisplay();
 
@@ -5313,7 +6096,7 @@
           if (stationChanged || isFirstLoad) {
             SimState.hasRenderedFirstStation = true;
             if (typeof closeManualTimeoutOverlay === 'function') closeManualTimeoutOverlay();
-            renderStation(stationChanged ? targetIdx : 0);
+            renderStation(targetIdx);
             if (stationChanged) {
               playStationTimeoutAlarm('bell');
             }
@@ -5471,10 +6254,13 @@
       for (const st of protectedStations) {
         const cleanId = (st.case.caseId || '').trim();
         const rawId = cleanId.replace(/^OSPE-/i, '');
+        const ospeId = cleanId.startsWith('OSPE-') ? cleanId : ('OSPE-' + cleanId);
         const hostDec = (SimState.cachedRoom && SimState.cachedRoom.unlockedCaseDetails) 
-          ? (SimState.cachedRoom.unlockedCaseDetails[cleanId] || SimState.cachedRoom.unlockedCaseDetails[rawId]) 
+          ? (SimState.cachedRoom.unlockedCaseDetails[cleanId] || SimState.cachedRoom.unlockedCaseDetails[rawId] || SimState.cachedRoom.unlockedCaseDetails[ospeId]) 
           : null;
-        const simCached = SimState.unlockedCases[cleanId] || sessionStorage.getItem('sim_unlocked_' + cleanId);
+        const simCached = SimState.unlockedCases[cleanId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId]
+          || sessionStorage.getItem('sim_unlocked_' + cleanId) || sessionStorage.getItem('sim_unlocked_' + rawId)
+          || sessionStorage.getItem('ple_unlocked_' + cleanId) || sessionStorage.getItem('ple_unlocked_' + rawId);
         
         let decCase = null;
         if (hostDec) {
@@ -5491,9 +6277,43 @@
         }
       }
 
-      // If in multiplayer and user is NOT Host, NEVER prompt with password modal (Host manages access)
-      if (SimState.roomId && !SimState.isHost) {
+      // In online room (Multiplayer / Cohort / Carousel), NEVER prompt ANY role (neither Host nor participants)
+      // Host enters passcode once when setting up the room, and unlocked cases are synced via room to all roles.
+      if (SimState.roomId) {
         return true;
+      }
+
+      // If exam is running or in countdown, never interrupt with passcode modal
+      if (SimState.cachedRoom && (SimState.cachedRoom.status === 'running' || SimState.cachedRoom.status === 'countdown')) {
+        return true;
+      }
+
+      // Attempt silent background decryption using saved passcode if present
+      const savedPasscode = sessionStorage.getItem('ple_saved_passcode');
+      if (savedPasscode && typeof window.decryptCaseData === 'function') {
+        for (const st of protectedStations) {
+          const c = st.case;
+          if (c && (c.isEncrypted || ((c.isProtected || c.hasPassword) && !c.scenario && !(c.checklist && c.checklist.length > 0)))) {
+            const cleanId = (c.caseId || '').trim();
+            let encObj = c;
+            if (!encObj || !encObj.ciphertext) {
+              if (typeof OFFLINE_DETAILS !== 'undefined' && OFFLINE_DETAILS) {
+                encObj = OFFLINE_DETAILS[cleanId] || OFFLINE_DETAILS[cleanId.replace(/^OSPE-/i, '')] || OFFLINE_DETAILS['OSPE-' + cleanId];
+              }
+            }
+            if (encObj && encObj.ciphertext) {
+              try {
+                const dec = await window.decryptCaseData(encObj, savedPasscode.trim());
+                if (dec) {
+                  st.case = Object.assign({}, st.case, dec);
+                  SimState.unlockedCases[cleanId] = st.case;
+                  sessionStorage.setItem('sim_unlocked_' + cleanId, JSON.stringify(st.case));
+                  sessionStorage.setItem('ple_unlocked_' + cleanId, JSON.stringify(st.case));
+                }
+              } catch (_) {}
+            }
+          }
+        }
       }
 
       // Check if any station is still encrypted / locked (i.e. lacks scenario/checklist)
@@ -5603,13 +6423,16 @@
                   const dec = await window.decryptCaseData(encObj, pwd);
                   if (dec) {
                     st.case = Object.assign({}, st.case, dec);
-                    SimState.unlockedCases[cleanId] = dec;
-                    sessionStorage.setItem('sim_unlocked_' + cleanId, JSON.stringify(dec));
-                    sessionStorage.setItem('ple_unlocked_' + cleanId, JSON.stringify(dec));
-                    if (!cleanId.startsWith('OSPE-')) {
-                      sessionStorage.setItem('ple_unlocked_OSPE-' + cleanId, JSON.stringify(dec));
+                    if (!st.case.durationMin && encObj && encObj.durationMin) {
+                      st.case.durationMin = encObj.durationMin;
                     }
-                    unlockedMap[cleanId] = dec;
+                    SimState.unlockedCases[cleanId] = st.case;
+                    sessionStorage.setItem('sim_unlocked_' + cleanId, JSON.stringify(st.case));
+                    sessionStorage.setItem('ple_unlocked_' + cleanId, JSON.stringify(st.case));
+                    if (!cleanId.startsWith('OSPE-')) {
+                      sessionStorage.setItem('ple_unlocked_OSPE-' + cleanId, JSON.stringify(st.case));
+                    }
+                    unlockedMap[cleanId] = st.case;
                   }
                 } catch(decErr) {
                   console.warn('Error decrypting case:', cleanId, decErr);
@@ -5683,37 +6506,64 @@
           const rawId = targetCaseId.replace(/^OSPE-/i, '');
           const ospeId = targetCaseId.startsWith('OSPE-') ? targetCaseId : ('OSPE-' + targetCaseId);
 
-          let matchedCase = null;
+          let baseCase = null;
+          // Find base metadata from AppState.cases or OFFLINE_DATA.cases
+          if (typeof AppState !== 'undefined' && AppState.cases) {
+            baseCase = AppState.cases.find(c => c.caseId && (c.caseId.trim() === targetCaseId || c.caseId.trim() === ospeId || c.caseId.trim() === rawId));
+          }
+          if (!baseCase && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+            baseCase = OFFLINE_DATA.cases.find(c => c.caseId && (c.caseId.trim() === targetCaseId || c.caseId.trim() === ospeId || c.caseId.trim() === rawId));
+          }
 
+          let unlockedCase = null;
           // 1. Check if unlocked payload is provided directly by Host in room state
           if (room.unlockedCaseDetails && (room.unlockedCaseDetails[targetCaseId] || room.unlockedCaseDetails[rawId] || room.unlockedCaseDetails[ospeId])) {
-            matchedCase = room.unlockedCaseDetails[targetCaseId] || room.unlockedCaseDetails[rawId] || room.unlockedCaseDetails[ospeId];
+            unlockedCase = room.unlockedCaseDetails[targetCaseId] || room.unlockedCaseDetails[rawId] || room.unlockedCaseDetails[ospeId];
           }
 
-          // 2. Check offline case details (0ms instant)
-          if (!matchedCase && typeof OFFLINE_DETAILS !== 'undefined') {
-            matchedCase = OFFLINE_DETAILS[targetCaseId] || OFFLINE_DETAILS[ospeId] || OFFLINE_DETAILS[rawId];
+          // 2. Check SimState.unlockedCases if previously unlocked by host or user
+          if (!unlockedCase && SimState.unlockedCases && (SimState.unlockedCases[targetCaseId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId])) {
+            unlockedCase = SimState.unlockedCases[targetCaseId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId];
           }
 
-          // 3. Check AppState.cases
-          if (!matchedCase && typeof AppState !== 'undefined' && AppState.cases) {
-            matchedCase = AppState.cases.find(c => c.caseId && (c.caseId.trim() === targetCaseId || c.caseId.trim() === ospeId || c.caseId.trim() === rawId));
+          // 3. Check sessionStorage simulation unlocked cache
+          if (!unlockedCase) {
+            const rawStored = sessionStorage.getItem('sim_unlocked_' + targetCaseId) || sessionStorage.getItem('sim_unlocked_' + rawId)
+                           || sessionStorage.getItem('ple_unlocked_' + targetCaseId) || sessionStorage.getItem('ple_unlocked_' + rawId);
+            if (rawStored) {
+              try { unlockedCase = typeof rawStored === 'string' ? JSON.parse(rawStored) : rawStored; } catch(_) {}
+            }
           }
-          
-          // 4. Fallback to OFFLINE_DATA
-          if (!matchedCase && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
-            matchedCase = OFFLINE_DATA.cases.find(c => c.caseId && (c.caseId.trim() === targetCaseId || c.caseId.trim() === ospeId || c.caseId.trim() === rawId));
+
+          // 4. Check offline case details (0ms instant)
+          if (!unlockedCase && typeof OFFLINE_CASE_DETAILS !== 'undefined' && OFFLINE_CASE_DETAILS) {
+            unlockedCase = OFFLINE_CASE_DETAILS[targetCaseId] || OFFLINE_CASE_DETAILS[ospeId] || OFFLINE_CASE_DETAILS[rawId];
           }
-          
-          // 5. Last resort: AppState.cases[0]
-          if (!matchedCase && typeof AppState !== 'undefined' && AppState.cases && AppState.cases.length > 0) {
-            matchedCase = AppState.cases[0];
+
+          const matchedCase = Object.assign({}, baseCase || { caseId: targetCaseId, title: 'สถานีสอบ' }, unlockedCase || {});
+          if (/OSPE-PD84M1W103[AB]/i.test(targetCaseId) || /PD84M1W103[AB]/i.test(targetCaseId)) {
+            matchedCase.durationMin = 8;
           }
-          
-          SimState.stations.push({ stationNumber: stNum, isRest: false, case: matchedCase || { caseId: targetCaseId, title: 'สถานีสอบ' } });
+          const stDur = parseCaseDurationSec(matchedCase);
+          SimState.stations.push({ stationNumber: stNum, isRest: false, case: matchedCase, durationSec: stDur });
         }
       }
       await unlockStationsIfProtected(SimState.stations);
+      // Hydrate any newly unlocked cases and ensure durationSec is accurate
+      SimState.stations.forEach(st => {
+        if (st && st.case && !st.isRest) {
+          const cid = st.case.caseId;
+          const raw = cid ? cid.replace(/^OSPE-/i, '') : '';
+          const ospe = cid && cid.startsWith('OSPE-') ? cid : ('OSPE-' + cid);
+          if (SimState.unlockedCases && (SimState.unlockedCases[cid] || SimState.unlockedCases[raw] || SimState.unlockedCases[ospe])) {
+            Object.assign(st.case, SimState.unlockedCases[cid] || SimState.unlockedCases[raw] || SimState.unlockedCases[ospe]);
+          }
+          if (/OSPE-PD84M1W103[AB]/i.test(cid || '') || /PD84M1W103[AB]/i.test(cid || '')) {
+            st.case.durationMin = 8;
+          }
+          st.durationSec = parseCaseDurationSec(st.case);
+        }
+      });
       showGlobalLoader(false);
     }
 
@@ -6038,17 +6888,19 @@
         
         if (SimState.isLobby && SimState.cachedRoom) {
           const room = SimState.cachedRoom;
+          const curCase = SimState.stations && SimState.stations[SimState.currentIdx]?.case;
+          const fallbackDur = parseCaseDurationSec(curCase);
           if (room.timerRunning && room.timerStartedAt) {
-            const now = Date.now();
+            const now = getSyncedNow();
             if (now < room.timerStartedAt) {
-              SimState.timerValue = room.timerDuration || 240;
+              SimState.timerValue = room.timerDuration || fallbackDur || 240;
             } else {
               const elapsed = Math.floor((now - room.timerStartedAt) / 1000);
-              const totalDur = room.timerDuration || 240;
+              const totalDur = room.timerDuration || fallbackDur || 240;
               SimState.timerValue = Math.max(0, totalDur - elapsed);
             }
           } else if (!room.timerRunning) {
-            SimState.timerValue = room.timerValue !== undefined ? room.timerValue : 240;
+            SimState.timerValue = room.timerValue !== undefined ? room.timerValue : (fallbackDur || 240);
           } else {
             SimState.timerValue = Math.max(0, SimState.timerValue - 1);
           }
@@ -6107,7 +6959,22 @@
           if (item.caseId === 'REST') {
             SimState.stations.push({ stationNumber: stNum, isRest: true, case: getRestCaseData() });
           } else {
-            let matchedCase = item.case || AppState.cases.find(c => c.caseId === item.caseId) || AppState.cases[0];
+            const targetId = (item.caseId || '').trim();
+            const rawId = targetId.replace(/^OSPE-/i, '');
+            const ospeId = targetId.startsWith('OSPE-') ? targetId : ('OSPE-' + targetId);
+            let matchedCase = null;
+            if (item.case && (item.case.scenario || item.case.contentHtml || (item.case.checklist && item.case.checklist.length > 0))) {
+              matchedCase = item.case;
+            }
+            if (!matchedCase && typeof AppState !== 'undefined' && AppState.cases) {
+              matchedCase = AppState.cases.find(c => c && c.caseId && (c.caseId.trim() === targetId || c.caseId.trim() === ospeId || c.caseId.trim() === rawId));
+            }
+            if (!matchedCase && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+              matchedCase = OFFLINE_DATA.cases.find(c => c && c.caseId && (c.caseId.trim() === targetId || c.caseId.trim() === ospeId || c.caseId.trim() === rawId));
+            }
+            if (!matchedCase) {
+              matchedCase = item.case || (AppState.cases && AppState.cases[0]) || (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases && OFFLINE_DATA.cases[0]);
+            }
             SimState.stations.push({ stationNumber: stNum, isRest: false, case: matchedCase });
           }
         });
@@ -6200,26 +7067,17 @@
         if (matchedCase) loadedCases.push(matchedCase);
       }
 
-      SimState.stations = [];
-      const restInterval = restCount > 0 ? Math.floor(loadedCases.length / restCount) : 999;
-      let restInserted = 0;
-      let stationNumCounter = 1;
+      const rawStations = loadedCases.map(c => ({ isRest: false, case: c }));
+      const stationsWithRest = insertRestStationsSmart(rawStations, restCount, () => ({
+        isRest: true,
+        case: getRestCaseData()
+      }));
 
-      for (let i = 0; i < loadedCases.length; i++) {
-        SimState.stations.push({ stationNumber: stationNumCounter++, isRest: false, case: loadedCases[i] });
-        
-        // Never insert a REST station between linked consecutive stations
-        const isCurrentLinkedToNext = Boolean(loadedCases[i].linkedNextCase && i + 1 < loadedCases.length && loadedCases[i + 1].caseId === loadedCases[i].linkedNextCase);
-
-        if (restCount > 0 && !isCurrentLinkedToNext && (i + 1) % restInterval === 0 && restInserted < restCount) {
-          restInserted++;
-          SimState.stations.push({
-            stationNumber: stationNumCounter++,
-            isRest: true,
-            case: getRestCaseData()
-          });
-        }
-      }
+      SimState.stations = stationsWithRest.map((st, idx) => ({
+        stationNumber: idx + 1,
+        isRest: st.isRest,
+        case: st.case
+      }));
 
       SimState.totalStations = SimState.stations.length;
       SimState.currentIdx = 0;
@@ -6302,9 +7160,13 @@
         const gKey = `${cat}:::${grp}`;
         if (SimState.selectedCourseGroups && SimState.selectedCourseGroups.size > 0 && !SimState.selectedCourseGroups.has(gKey)) return false;
         
-        const topic = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
-        const topicKey = `${gKey}::${topic}`;
-        if (SimState.selectedTopics && SimState.selectedTopics.size > 0 && !SimState.selectedTopics.has(topicKey)) return false;
+        const rawTopic = c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title;
+        const topicList = parseDiseaseTags(rawTopic);
+        const effectiveTopics = topicList.length > 0 ? topicList : [(c.title || 'ทั่วไป').trim()];
+        if (SimState.selectedTopics && SimState.selectedTopics.size > 0) {
+          const hasSelectedTopic = effectiveTopics.some(t => SimState.selectedTopics.has(`${gKey}::${t}`));
+          if (!hasSelectedTopic) return false;
+        }
 
         return true;
       });
@@ -6326,11 +7188,15 @@
         const catPool = pools[cat] || [];
         let pickedForCat = 0;
 
-        function addCaseWithChain(c, gKey, topic) {
+        function addCaseWithChain(c, gKey, topicArray) {
           selectedCases.push(c);
           addedIds.add(c.caseId);
           if (gKey) courseGroupCounts[gKey] = (courseGroupCounts[gKey] || 0) + 1;
-          if (topic) usedTopics.add(topic);
+          if (Array.isArray(topicArray)) {
+            topicArray.forEach(t => usedTopics.add(t));
+          } else if (topicArray) {
+            usedTopics.add(topicArray);
+          }
           pickedForCat++;
 
           // Handle linked chain cases (e.g. multi-part consecutive stations)
@@ -6360,11 +7226,14 @@
 
           const grp = c.mainGroup || 'ทั่วไป';
           const gKey = `${c.category || 'Clinic'}:::${grp}`;
-          const topic = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
+          const rawTopic = c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title;
+          const topicList = parseDiseaseTags(rawTopic);
+          const effectiveTopics = topicList.length > 0 ? topicList : [(c.title || 'ทั่วไป').trim()];
           const grpCount = courseGroupCounts[gKey] || 0;
+          const hasUsedTopic = effectiveTopics.some(t => usedTopics.has(t));
 
-          if (grpCount < 2 && !usedTopics.has(topic)) {
-            addCaseWithChain(c, gKey, topic);
+          if (grpCount < 2 && !hasUsedTopic) {
+            addCaseWithChain(c, gKey, effectiveTopics);
           }
         }
 
@@ -6376,10 +7245,13 @@
 
             const grp = c.mainGroup || 'ทั่วไป';
             const gKey = `${c.category || 'Clinic'}:::${grp}`;
-            const topic = (c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title).trim();
+            const rawTopic = c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title;
+            const topicList = parseDiseaseTags(rawTopic);
+            const effectiveTopics = topicList.length > 0 ? topicList : [(c.title || 'ทั่วไป').trim()];
+            const hasUsedTopic = effectiveTopics.some(t => usedTopics.has(t));
 
-            if (!usedTopics.has(topic)) {
-              addCaseWithChain(c, gKey, topic);
+            if (!hasUsedTopic) {
+              addCaseWithChain(c, gKey, effectiveTopics);
             }
           }
         }
@@ -6389,7 +7261,12 @@
           for (const c of catPool) {
             if (pickedForCat >= targetCount) break;
             if (addedIds.has(c.caseId)) continue;
-            addCaseWithChain(c, null, null);
+            const grp = c.mainGroup || 'ทั่วไป';
+            const gKey = `${c.category || 'Clinic'}:::${grp}`;
+            const rawTopic = c.disease && c.disease !== '-' && c.disease !== 'undefined' ? c.disease : c.title;
+            const topicList = parseDiseaseTags(rawTopic);
+            const effectiveTopics = topicList.length > 0 ? topicList : [(c.title || 'ทั่วไป').trim()];
+            addCaseWithChain(c, gKey, effectiveTopics);
           }
         }
       }
@@ -6553,6 +7430,52 @@
       }
     }
 
+    // Compensatory Time Adjustment (Super Host in large rooms, Examiner or non-candidate Host in standard)
+    function adjustCohortTimer(deltaSec) {
+      if (SimState.isLobby) {
+        const isCohortOrCarousel = SimState.examMode === 'cohort_breakout' || SimState.examMode === 'carousel_rotation';
+        const isCandidate = (SimState.role === 'candidate' || SimState.role === 'examinee' || SimState.role === 'participant');
+        const canAdjust = isCohortOrCarousel 
+          ? SimState.isHost 
+          : ((SimState.isHost || SimState.role === 'examiner') && !isCandidate);
+
+        if (!canAdjust) {
+          alert('คุณไม่มีสิทธิ์ปรับเวลาสอบ เฉพาะผู้ควบคุมระบบหรือผู้ประเมินเท่านั้น');
+          return;
+        }
+        const newTimer = Math.max(5, SimState.timerValue + deltaSec);
+        SimState.timerValue = newTimer;
+        const syncNow = (typeof getSyncedNow === 'function') ? getSyncedNow() : Date.now();
+
+        if (SimState.cachedRoom) {
+          SimState.cachedRoom.timerValue = newTimer;
+          SimState.cachedRoom.timerDuration = newTimer;
+          if (SimState.timerRunning) {
+            SimState.cachedRoom.timerStartedAt = syncNow;
+          }
+        }
+        updateTimerDisplay();
+        if (typeof _fbDb !== 'undefined' && _fbDb && SimState.roomId) {
+          const payload = { 
+            timerValue: newTimer,
+            timerDuration: newTimer
+          };
+          if (SimState.timerRunning) {
+            payload.timerStartedAt = syncNow;
+          }
+          _fbDb.ref('rooms/' + SimState.roomId).update(payload).catch(e => {
+            console.warn('Failed to update adjusted timer:', e);
+            if (typeof PleDiagnostics !== 'undefined') PleDiagnostics.log('warn', 'Failed to update adjusted timer', e);
+          });
+        }
+      } else {
+        // Solo Mode
+        SimState.timerValue = Math.max(5, SimState.timerValue + deltaSec);
+        updateTimerDisplay();
+      }
+    }
+    window.adjustCohortTimer = adjustCohortTimer;
+
     function switchControlTab(tabName) {
       document.querySelectorAll('.control-tab .tab').forEach(t => t.classList.remove('active'));
       const activeTab = document.querySelector(`.control-tab .tab[data-tab="${tabName}"]`);
@@ -6609,10 +7532,26 @@
           fuseFill.style.background = 'linear-gradient(90deg, #10b981, #06b6d4, #3b82f6)';
           fuseFill.style.boxShadow = '0 0 6px rgba(16, 185, 129, 0.5)';
         } else {
-          // High Time: Vibrant Indigo - Violet - Cyan Gradient
-          fuseFill.style.background = 'linear-gradient(90deg, #6366f1, #8b5cf6, #3b82f6, #06b6d4)';
-          fuseFill.style.boxShadow = '0 0 6px rgba(99, 102, 241, 0.4)';
         }
+      }
+
+      const hostAdjustWrap = document.getElementById('sticky-host-time-adjust-wrap');
+      if (hostAdjustWrap) {
+        const isCohortOrCarousel = SimState.examMode === 'cohort_breakout' || SimState.examMode === 'carousel_rotation';
+        const isCandidate = (SimState.role === 'candidate' || SimState.role === 'examinee' || SimState.role === 'participant');
+        let canAdjust = false;
+        if (!SimState.isLobby) {
+          canAdjust = true;
+        } else if (isCohortOrCarousel) {
+          canAdjust = SimState.isHost;
+        } else {
+          canAdjust = (SimState.role === 'examiner') || (SimState.isHost && !isCandidate);
+        }
+        hostAdjustWrap.style.display = canAdjust ? 'inline-flex' : 'none';
+      }
+      const shAdjustWrap = document.getElementById('sh-host-time-adjust-controls');
+      if (shAdjustWrap) {
+        shAdjustWrap.style.display = SimState.isHost ? 'flex' : 'none';
       }
     }
 
@@ -6659,7 +7598,7 @@
         
         if (canClick) {
           cell.style.cursor = 'pointer';
-          cell.addEventListener('click', () => renderStation(idx));
+          cell.addEventListener('click', () => jumpToStation(idx));
         } else {
           cell.style.cursor = 'not-allowed';
           cell.style.opacity = isCurrent ? '1' : '0.55';
@@ -6683,15 +7622,62 @@
 
     // ─── Duration Helper ─────────────────────────────────────
     function parseCaseDurationSec(c) {
-      if (c && c.durationMin) return Math.round(parseFloat(c.durationMin) * 60);
+      if (typeof window.parseCaseDurationSec === 'function' && window.parseCaseDurationSec !== parseCaseDurationSec) {
+        return window.parseCaseDurationSec(c);
+      }
+      if (!c) return 240;
+
+      const cId = String(c.caseId || (typeof c === 'string' ? c : '')).trim();
+      const rawId = cId.replace(/^OSPE-/i, '');
+      const ospeId = cId.startsWith('OSPE-') ? cId : ('OSPE-' + cId);
+
+      // เคสแล็บผลิต Week 1 (103A / 103B) กำหนดเวลาเป็น 8 นาที (480 วินาที) เสมอ
+      if (/OSPE-PD84M1W103[AB]/i.test(cId) || /PD84M1W103[AB]/i.test(cId)) {
+        return 480;
+      }
+
+      if (c.durationMin) return Math.round(parseFloat(c.durationMin) * 60);
+
+      // Look up in SimState.unlockedCases if available
+      if (typeof SimState !== 'undefined' && SimState.unlockedCases) {
+        const unl = SimState.unlockedCases[cId] || SimState.unlockedCases[ospeId] || SimState.unlockedCases[rawId];
+        if (unl) {
+          if (unl.durationMin) return Math.round(parseFloat(unl.durationMin) * 60);
+          const unlText = (unl.content || '') + ' ' + (unl.rawHtml || '') + ' ' + (unl.scenario || '') + ' ' + (unl.patientInfoHtml || '') + ' ' + (unl.title || '');
+          const unlM = unlText.match(/(?:ระยะเวลา|เวลา)\s*[:：]?\s*(\d+)\s*นาที/);
+          if (unlM && unlM[1]) return parseInt(unlM[1], 10) * 60;
+        }
+      }
+
+      // Look up by caseId in AppState.cases or OFFLINE_DATA.cases if durationMin is not on c directly
+      if (cId) {
+        let found = null;
+        if (typeof AppState !== 'undefined' && AppState.cases) {
+          found = AppState.cases.find(x => x && x.caseId && (x.caseId === cId || x.caseId === ospeId || x.caseId === rawId));
+        }
+        if (!found && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+          found = OFFLINE_DATA.cases.find(x => x && x.caseId && (x.caseId === cId || x.caseId === ospeId || x.caseId === rawId));
+        }
+        if (found && found.durationMin) {
+          return Math.round(parseFloat(found.durationMin) * 60);
+        }
+      }
+
+      const text = (c.content || '') + ' ' + (c.rawHtml || '') + ' ' + (c.scenario || '') + ' ' + (c.patientInfoHtml || '') + ' ' + (c.title || '');
+      const m = text.match(/(?:ระยะเวลา|เวลา)\s*[:：]?\s*(\d+)\s*นาที/);
+      if (m && m[1]) return parseInt(m[1], 10) * 60;
       return 240; // default 4 นาที
     }
 
     // ─── Render station ───────────────────────────────────────
     function renderStation(idx) {
+      if (!SimState.stations || !SimState.stations[idx]) {
+        console.warn('renderStation: station not found at index', idx);
+        return;
+      }
       SimState.currentIdx = idx;
       const st = SimState.stations[idx];
-      const c = st.case;
+      const c = st.case || {};
 
       // Switch the station chat FIRST so chat history, AI context, avatar and voice always
       // follow the active station, even if rendering code below throws on a malformed case.
@@ -6954,6 +7940,27 @@
           if (noticeAbortBtn) noticeAbortBtn.style.display = 'inline-block';
         }
       }
+
+      // Examiner / Solo Live Debrief Feedback Card (Under Checklist at the very bottom)
+      const liveFeedbackContainer = document.getElementById('exam-live-feedback-container');
+      const liveFeedbackTextarea = document.getElementById('exam-live-feedback-textarea');
+      const liveFeedbackLabel = document.getElementById('exam-live-feedback-station-label');
+      const isExaminerOrSolo = (SimState.role === 'examiner' || SimState.role === 'solo');
+
+      if (liveFeedbackContainer) {
+        if (isExaminerOrSolo && !st.isRest) {
+          liveFeedbackContainer.style.display = 'block';
+          if (liveFeedbackLabel) {
+            liveFeedbackLabel.textContent = `สถานีที่ ${st.stationNumber}`;
+          }
+          if (liveFeedbackTextarea) {
+            const curFeedback = (SimState.stationFeedbacks && (SimState.stationFeedbacks[st.stationNumber] || SimState.stationFeedbacks[String(st.stationNumber)])) || '';
+            liveFeedbackTextarea.value = curFeedback;
+          }
+        } else {
+          liveFeedbackContainer.style.display = 'none';
+        }
+      }
       
       // Minimap — แสดงทุก mode (solo + lobby)
       const minimapCard = document.getElementById('minimap-card-el');
@@ -6985,7 +7992,7 @@
         nextBtn.onclick = finishExamSimulation;
       } else {
         nextBtn.textContent = 'ถัดไป →';
-        const nextCat = SimState.stations[idx + 1].case.category || 'clinic';
+        const nextCat = SimState.stations[idx + 1]?.case?.category || 'clinic';
         nextBtn.className = 'btn btn-primary btn-' + nextCat.toLowerCase();
         nextBtn.onclick = nextStation;
       }
@@ -7168,7 +8175,16 @@
           el.className = `checklist-item ${isChecked ? 'checked' : ''} ${isSubset ? ('is-subset is-' + subType) : ''}`;
           el.setAttribute('data-id', item.id);
           el.setAttribute('data-score', item.score);
+          el.setAttribute('tabindex', '0');
+          el.setAttribute('role', 'checkbox');
+          el.setAttribute('aria-checked', isChecked ? 'true' : 'false');
           el.addEventListener('click', () => toggleExamChecklistItem(stationNum, item.id, item.score));
+          el.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+              e.preventDefault();
+              toggleExamChecklistItem(stationNum, item.id, item.score);
+            }
+          });
           
           const scoreDisplay = (item.score !== undefined && item.score !== null) 
             ? `<span class="checklist-item-score ${item.score === 0 ? 'zero-score' : ''}">(${item.score} คะแนน)</span>` 
@@ -7371,7 +8387,9 @@
       
       document.querySelectorAll('.checklist-item').forEach(el => {
         const id = el.getAttribute('data-id');
-        el.classList.toggle('checked', currentChecked.includes(id));
+        const isItemChecked = currentChecked.includes(id);
+        el.classList.toggle('checked', isItemChecked);
+        el.setAttribute('aria-checked', isItemChecked ? 'true' : 'false');
       });
       
       const currentCase = SimState.stations[SimState.currentIdx].case;
@@ -7484,21 +8502,27 @@
             updatedAt: Date.now()
           });
         } else if (SimState.examMode === 'carousel_rotation') {
-          const rotationRound = SimState.carouselCurrentRound || 1;
-          const examineeId = SimState.carouselRotationAssignments?.[`round_${rotationRound}`]?.[`station_${stationNum}`] || 'unknown';
+          const r = SimState.currentIdx || 0;
+          const N = SimState.stations.length || 1;
+          const assignedStationNum = SimState.myCarouselStation || stationNum;
+          const startNum = ((assignedStationNum - 1 - r + N) % N) + 1;
+          const partId = SimState.cachedRoom?.carouselPosts?.['st_' + startNum]?.startParticipantId;
+          const partName = SimState.cachedRoom?.carouselPosts?.['st_' + startNum]?.startParticipantName 
+            || SimState.cachedRoom?.players?.[partId]?.name 
+            || 'ผู้เข้าสอบ';
           const { currentScore, totalScore } = calculateStationScore(currentCase?.checklist || [], []);
-          _fbDb.ref(`rooms/${SimState.roomId}/carousel_scores/round_${rotationRound}/station_${stationNum}`).set({
-            stationNumber: stationNum,
-            examineeId: examineeId,
-            checkedProgress: [],
-            checkedIds: [],
-            score: currentScore,
-            earnedScore: currentScore,
-            maxScore: totalScore,
-            percent: 0,
-            examinerName: SimState.lobbyPlayerName || 'Examiner',
-            updatedAt: Date.now()
-          });
+          if (partId) {
+            _fbDb.ref(`rooms/${SimState.roomId}/participantScores/${partId}/participantId`).set(partId);
+            _fbDb.ref(`rooms/${SimState.roomId}/participantScores/${partId}/participantName`).set(partName);
+            _fbDb.ref(`rooms/${SimState.roomId}/participantScores/${partId}/stations/${assignedStationNum}`).set({
+              stationNumber: assignedStationNum,
+              checkedProgress: [],
+              score: currentScore,
+              maxScore: totalScore,
+              examinerName: SimState.lobbyPlayerName,
+              updatedAt: Date.now()
+            });
+          }
         } else {
           _fbDb.ref('rooms/' + SimState.roomId).update({
             checklistProgress: [],
@@ -7537,99 +8561,89 @@
       }
     }
 
-    function nextStation() {
+    function jumpToStation(targetIdx) {
+      if (typeof targetIdx !== 'number' || isNaN(targetIdx)) return;
+      if (targetIdx < 0 || targetIdx >= SimState.stations.length) return;
+      if (targetIdx === SimState.currentIdx) return;
+
       stopTimeoutAlarmSound();
       if (typeof closeManualTimeoutOverlay === 'function') closeManualTimeoutOverlay();
+
       // In Carousel Rotation, only Super Host can change rounds (Examiner stays fixed at their post)
       if (SimState.examMode === 'carousel_rotation' && SimState.isLobby && !SimState.isHost) return;
+      // In Standard/Breakout lobby modes, examinees cannot change stations directly
+      if (SimState.isLobby && !SimState.isHost && SimState.role !== 'examiner') return;
+
+      playStationTimeoutAlarm('bell');
+
+      const targetSt = SimState.stations[targetIdx];
+      if (targetSt && targetSt.case && !targetSt.isRest) {
+        const tId = targetSt.case.caseId || '';
+        const rawId = tId.replace(/^OSPE-/i, '');
+        const ospeId = tId.startsWith('OSPE-') ? tId : ('OSPE-' + tId);
+        if (SimState.unlockedCases && (SimState.unlockedCases[tId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId])) {
+          Object.assign(targetSt.case, SimState.unlockedCases[tId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId]);
+        }
+        if (/OSPE-PD84M1W103[AB]/i.test(tId) || /PD84M1W103[AB]/i.test(tId)) {
+          targetSt.case.durationMin = 8;
+        }
+      }
+
+      const nextDur = parseCaseDurationSec(targetSt && targetSt.case);
+      const now = getSyncedNow();
+
+      SimState.timerValue = nextDur;
+      SimState.timerRunning = true;
+      if (SimState.timerInterval) clearInterval(SimState.timerInterval);
+      updateTimerDisplay();
+
+      if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
+        if (SimState.cachedRoom) {
+          SimState.cachedRoom.currentStationIdx = targetIdx;
+          SimState.cachedRoom.timerValue = nextDur;
+          SimState.cachedRoom.timerDuration = nextDur;
+          SimState.cachedRoom.timerStartedAt = now;
+          SimState.cachedRoom.timerRunning = true;
+        }
+        startLocalCountdown();
+
+        const updatePayload = {
+          currentStationIdx: targetIdx,
+          caseId: SimState.stations[targetIdx]?.case?.caseId || SimState.stations[targetIdx]?.caseId,
+          timerValue: nextDur,
+          timerDuration: nextDur,
+          timerStartedAt: now,
+          timerRunning: true,
+          status: 'running'
+        };
+        if (!SimState.cachedRoom?.isSuperHost && SimState.examMode === 'standard') {
+          updatePayload.scoresByStation = JSON.stringify(SimState.studentScores);
+        }
+        _fbDb.ref('rooms/' + SimState.roomId).update(updatePayload);
+      }
+
+      renderStation(targetIdx);
+
+      if (SimState.cachedRoom && SimState.cachedRoom.isSuperHost && SimState.isHost) {
+        renderSuperHostMonitor(SimState.cachedRoom);
+      }
+    }
+
+    function nextStation() {
       if (SimState.currentIdx < SimState.stations.length - 1) {
-        const nextIdx = SimState.currentIdx + 1;
-        playStationTimeoutAlarm('bell');
-        if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
-          const now = Date.now();
-          const nextSt = SimState.stations[nextIdx];
-          const nextDur = parseCaseDurationSec(nextSt && nextSt.case);
-          SimState.timerValue = nextDur;
-          SimState.timerRunning = true;
-          if (SimState.timerInterval) clearInterval(SimState.timerInterval);
-          updateTimerDisplay();
-          
-          if (SimState.cachedRoom) {
-            SimState.cachedRoom.currentStationIdx = nextIdx;
-            SimState.cachedRoom.timerValue = nextDur;
-            SimState.cachedRoom.timerDuration = nextDur;
-            SimState.cachedRoom.timerStartedAt = now;
-            SimState.cachedRoom.timerRunning = true;
-          }
-          startLocalCountdown();
-          
-          const updatePayload = {
-            currentStationIdx: nextIdx,
-            caseId: SimState.stations[nextIdx]?.case?.caseId || SimState.stations[nextIdx]?.caseId,
-            timerValue: nextDur,
-            timerDuration: nextDur,
-            timerStartedAt: now,
-            timerRunning: true,
-            status: 'running'
-          };
-          if (!SimState.cachedRoom?.isSuperHost && SimState.examMode === 'standard') {
-            updatePayload.scoresByStation = JSON.stringify(SimState.studentScores);
-          }
-          _fbDb.ref('rooms/' + SimState.roomId).update(updatePayload);
-        }
-        renderStation(nextIdx);
-        if (SimState.cachedRoom && SimState.cachedRoom.isSuperHost && SimState.isHost) {
-          renderSuperHostMonitor(SimState.cachedRoom);
-        }
+        jumpToStation(SimState.currentIdx + 1);
       }
     }
 
     function prevStation() {
-      stopTimeoutAlarmSound();
-      if (typeof closeManualTimeoutOverlay === 'function') closeManualTimeoutOverlay();
-      // In Carousel Rotation, only Super Host can change rounds
-      if (SimState.examMode === 'carousel_rotation' && SimState.isLobby && !SimState.isHost) return;
       if (SimState.currentIdx > 0) {
-        const prevIdx = SimState.currentIdx - 1;
-        playStationTimeoutAlarm('bell');
-        if (SimState.isLobby && (SimState.isHost || SimState.role === 'examiner')) {
-          const now = Date.now();
-          const prevSt = SimState.stations[prevIdx];
-          const prevDur = parseCaseDurationSec(prevSt && prevSt.case);
-          SimState.timerValue = prevDur;
-          SimState.timerRunning = true;
-          if (SimState.timerInterval) clearInterval(SimState.timerInterval);
-          updateTimerDisplay();
-          
-          if (SimState.cachedRoom) {
-            SimState.cachedRoom.currentStationIdx = prevIdx;
-            SimState.cachedRoom.timerValue = prevDur;
-            SimState.cachedRoom.timerDuration = prevDur;
-            SimState.cachedRoom.timerStartedAt = now;
-            SimState.cachedRoom.timerRunning = true;
-          }
-          startLocalCountdown();
-          
-          const updatePayload = {
-            currentStationIdx: prevIdx,
-            caseId: SimState.stations[prevIdx]?.case?.caseId || SimState.stations[prevIdx]?.caseId,
-            timerValue: prevDur,
-            timerDuration: prevDur,
-            timerStartedAt: now,
-            timerRunning: true,
-            status: 'running'
-          };
-          if (!SimState.cachedRoom?.isSuperHost && SimState.examMode === 'standard') {
-            updatePayload.scoresByStation = JSON.stringify(SimState.studentScores);
-          }
-          _fbDb.ref('rooms/' + SimState.roomId).update(updatePayload);
-        }
-        renderStation(prevIdx);
-        if (SimState.cachedRoom && SimState.cachedRoom.isSuperHost && SimState.isHost) {
-          renderSuperHostMonitor(SimState.cachedRoom);
-        }
+        jumpToStation(SimState.currentIdx - 1);
       }
     }
+
+    window.jumpToStation = jumpToStation;
+    window.nextStation = nextStation;
+    window.prevStation = prevStation;
 
     // ─── Live Fill-in-the-Blank Multiplayer Synchronization ───
     let _examineeBlankDebounceTimer = null;
@@ -7662,7 +8676,7 @@
       if (SimState.examMode === 'cohort_breakout' && SimState.myBreakoutTableId) {
         return `rooms/${SimState.roomId}/breakouts/${SimState.myBreakoutTableId}/examineeAnswers/st_${stationNum}`;
       } else if (SimState.examMode === 'carousel_rotation') {
-        const myId = SimState.lobbyPlayerId || 'part';
+        const myId = SimState.myPlayerId || SimState.lobbyPlayerId || 'part';
         return `rooms/${SimState.roomId}/participantAnswers/${myId}/st_${stationNum}`;
       } else {
         return `rooms/${SimState.roomId}/examineeAnswers/st_${stationNum}`;
@@ -9933,14 +10947,99 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       }
     }
 
-    function openDrugLabelFromMenu() {
-      closeUnifiedExamToolsMenu();
-      const stKey = `station-${(SimState.currentIdx || 0) + 1}`;
-      const stLabel = `สถานีที่ ${(SimState.currentIdx || 0) + 1}`;
-      if (window.Scratchpad && typeof window.Scratchpad.open === 'function') {
-        window.Scratchpad.open(stKey, stLabel, 'label');
+    // ───────────────────────────────────────────────────────────
+    // HEADLESS BACKGROUND SYSTEM LOGGER (NO UI / ZERO IMPACT)
+    // Silently records system events & errors in memory for DevTools inspection
+    // ───────────────────────────────────────────────────────────
+    const PleDiagnostics = {
+      logs: [],
+      maxLogs: 100,
+
+      init() {
+        try {
+          window.addEventListener('error', (event) => {
+            try {
+              this.log('error', event.message, {
+                filename: event.filename,
+                lineno: event.lineno,
+                colno: event.colno,
+                stack: event.error ? event.error.stack : null
+              });
+            } catch (e) {}
+          });
+
+          window.addEventListener('unhandledrejection', (event) => {
+            try {
+              const reason = event.reason;
+              this.log('error', 'Unhandled Promise Rejection: ' + (reason?.message || String(reason)), {
+                stack: reason?.stack || null
+              });
+            } catch (e) {}
+          });
+
+          const origConsoleError = console.error;
+          console.error = (...args) => {
+            try {
+              this.log('error', args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '));
+            } catch (e) {}
+            origConsoleError.apply(console, args);
+          };
+
+          const origConsoleWarn = console.warn;
+          console.warn = (...args) => {
+            try {
+              this.log('warn', args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '));
+            } catch (e) {}
+            origConsoleWarn.apply(console, args);
+          };
+
+          this.log('info', 'PleDiagnostics background watcher active.');
+        } catch (e) {}
+      },
+
+      log(level, message, detail = null) {
+        try {
+          const item = {
+            time: new Date().toLocaleTimeString('th-TH'),
+            timestamp: Date.now(),
+            level: level || 'info',
+            message: String(message || ''),
+            detail: detail ? (typeof detail === 'object' ? JSON.stringify(detail, null, 2) : String(detail)) : null
+          };
+          this.logs.unshift(item);
+          if (this.logs.length > this.maxLogs) {
+            this.logs.pop();
+          }
+          window.__PLE_LOGS__ = this.logs;
+        } catch (e) {}
+      },
+
+      clear() {
+        this.logs = [];
+        window.__PLE_LOGS__ = [];
+      },
+
+      copyAll() {
+        try {
+          const text = JSON.stringify(this.logs, null, 2);
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text);
+          }
+          return text;
+        } catch (e) {
+          return '';
+        }
       }
-    }
+    };
+
+    window.PleDiagnostics = PleDiagnostics;
+    window.getPleLogs = () => PleDiagnostics.logs;
+    window.openDiagnosticsModal = () => {};
+    window.closeDiagnosticsModal = () => {};
+    window.copyAllDiagnosticsLogs = () => PleDiagnostics.copyAll();
+    window.clearDiagnosticsLogs = () => PleDiagnostics.clear();
+    window.openDiagnosticsFromMenu = () => {};
+    PleDiagnostics.init();
 
     function toggleMaximizeStationChat() {
       const drawer = document.getElementById('station-chat-drawer');
@@ -10348,6 +11447,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
           // Equal-weight average percentage across active stations
           const overallPct = activeStationCount > 0 ? Math.round(sumStationPct / activeStationCount) : (totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0);
+          const isAllPassed = overallPct >= 80;
           leaderboard.push({
             id: partId || tableId,
             name: partName || 'ผู้เข้าสอบ',
@@ -10358,7 +11458,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             percent: overallPct,
             passedStations: passedStations,
             totalStations: stationsList.length,
-            isPassed: overallPct >= 80
+            isPassed: isAllPassed
           });
         });
       } else if (examMode === 'carousel_rotation') {
@@ -10438,6 +11538,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
           // Equal-weight average percentage across active stations
           const overallPct = activeStationCount > 0 ? Math.round(sumStationPct / activeStationCount) : (totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0);
+          const isAllPassed = overallPct >= 80;
           leaderboard.push({
             id: pId,
             name: pData.name || 'ผู้เข้าสอบ',
@@ -10448,7 +11549,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             percent: overallPct,
             passedStations: passedStations,
             totalStations: stationsList.length,
-            isPassed: overallPct >= 80
+            isPassed: isAllPassed
           });
         });
       } else {
@@ -10491,6 +11592,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
           });
           // Equal-weight average percentage across active stations
           const overallPct = activeStationCount > 0 ? Math.round(sumStationPct / activeStationCount) : (totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0);
+          const isAllPassed = overallPct >= 80;
           leaderboard.push({
             id: p.id || p.name,
             name: p.name || 'ผู้เข้าสอบ',
@@ -10501,7 +11603,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             percent: overallPct,
             passedStations: passedStations,
             totalStations: stationsList.length,
-            isPassed: overallPct >= 80
+            isPassed: isAllPassed
           });
         });
       }
@@ -10611,11 +11713,13 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
     async function abortExamSimulation() {
       if (SimState.isLobby && SimState.roomId) {
         const isStandardMode = (SimState.examMode === 'standard' || !SimState.examMode);
+        const isCandidateRole = (SimState.role === 'candidate' || SimState.role === 'examinee' || SimState.role === 'participant');
         
         // In Multi-station modes (Carousel Rotation / Cohort Breakout)
         if (!isStandardMode) {
-          if (!SimState.isHost) {
-            // Non-host: can leave the room individually (not dissolve)
+          const isSuperHost = SimState.isHost && !isCandidateRole;
+          if (!isSuperHost) {
+            // Non-host or Candidate: can leave the room individually (not dissolve)
             const opt = confirm('⚠️ คุณต้องการออกจากห้องสอบและกลับสู่หน้าหลักหรือไม่?\n\n(ผู้เข้าสอบและผู้ประเมินคนอื่นยังคงสอบต่อไปได้ ห้องสอบจะยังเปิดอยู่)');
             if (!opt) return;
             await leaveExamRoom(false);
@@ -10629,12 +11733,13 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         }
 
         // In 1-on-1 Standard Room
-        if (SimState.isHost) {
-          const opt = confirm('⚠️ คุณเป็น Host ของห้องสอบนี้\n\nกด "ตกลง (OK)" เพื่อยุบห้องสอบ (Dissolve) และพาผู้เข้าสอบทุกคนกลับสู่หน้าแรก\nหรือกด "ยกเลิก (Cancel)" หากไม่ต้องการออก');
+        // Candidate must NEVER dissolve room even if they created it
+        if (SimState.isHost && !isCandidateRole) {
+          const opt = confirm('⚠️ คุณเป็น Host ผู้คุมสอบของห้องนี้\n\nกด "ตกลง (OK)" เพื่อยุบห้องสอบ (Dissolve) และพาผู้เข้าสอบทุกคนกลับสู่หน้าแรก\nหรือกด "ยกเลิก (Cancel)" หากไม่ต้องการออก');
           if (!opt) return;
           await dissolveExamRoom();
         } else {
-          const opt = confirm('⚠️ คุณต้องการออกจากการสอบจำลองและกลับสู่หน้าหลักหรือไม่?');
+          const opt = confirm('⚠️ คุณต้องการออกจากการสอบจำลองและกลับสู่หน้าหลักหรือไม่?\n\n(ผู้ประเมินยังคงอยู่ในห้องสอบ)');
           if (!opt) return;
           await leaveExamRoom(false);
         }
@@ -10801,6 +11906,47 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         try { _fbRoomRef.off(); } catch (e) {}
         _fbRoomRef = null;
       }
+
+      if (!SimState.stationFeedbacks) {
+        try {
+          SimState.stationFeedbacks = JSON.parse(sessionStorage.getItem('ospe_stationFeedbacks') || '{}');
+        } catch (e) {
+          SimState.stationFeedbacks = {};
+        }
+      }
+
+      // If multiplayer room, sync and listen for debrief feedbacks
+      if (SimState.roomId && typeof _fbDb !== 'undefined' && _fbDb) {
+        try {
+          const fbFeedbacksRef = _fbDb.ref('rooms/' + SimState.roomId + '/stationFeedbacks');
+          fbFeedbacksRef.once('value').then(snap => {
+            const val = snap.val();
+            if (val && typeof val === 'object') {
+              if (!SimState.stationFeedbacks) SimState.stationFeedbacks = {};
+              Object.assign(SimState.stationFeedbacks, val);
+              Object.keys(val).forEach(sNum => {
+                const inputEl = document.getElementById(`station-feedback-input-${sNum}`);
+                if (inputEl && document.activeElement !== inputEl) {
+                  inputEl.value = val[sNum] || '';
+                }
+              });
+            }
+          }).catch(e => console.warn('Error fetching stationFeedbacks from Firebase:', e));
+
+          fbFeedbacksRef.on('child_changed', snap => {
+            const sNum = snap.key;
+            const text = snap.val();
+            if (!SimState.stationFeedbacks) SimState.stationFeedbacks = {};
+            SimState.stationFeedbacks[sNum] = text;
+            const inputEl = document.getElementById(`station-feedback-input-${sNum}`);
+            if (inputEl && document.activeElement !== inputEl) {
+              inputEl.value = text || '';
+            }
+          });
+        } catch (e) {
+          console.warn('Firebase feedbacks attach error:', e);
+        }
+      }
       
       try {
         let passedStations = 0, totalMaxScore = 0, totalEarnedScore = 0;
@@ -10818,6 +11964,8 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
           const checked = SimState.studentScores[st.stationNumber] || SimState.studentScores[String(st.stationNumber)] || [];
           const checklist = Array.isArray(c.checklist) ? c.checklist : [];
           const { currentScore: earned, totalScore: max } = calculateStationScore(checklist, checked);
+          
+          const detailRowId = `res-chk-detail-${st.stationNumber}`;
           
           totalMaxScore += max;
           totalEarnedScore += earned;
@@ -10949,26 +12097,211 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
               const checkedSet = new Set(Array.isArray(checked) ? checked : []);
 
-              const itemsHtml = checklist.map((item, cIdx) => {
-                const isItemChecked = checkedSet.has(item.id) || checkedSet.has(String(item.id)) || checkedSet.has(cIdx) || checkedSet.has(String(cIdx));
-                const itemScore = item.score !== undefined ? safeFormatScore(item.score) : '1.0';
-                const itemText = (item.textHtml || item.text || item.title || '').trim();
-                const icon = isItemChecked ? '✅' : '❌';
-                const statusBadge = isItemChecked 
-                  ? `<span style="display: inline-flex; align-items: center; gap: 3px; color: #15803d; font-weight: 700; background: #dcfce7; border: 1px solid #86efac; border-radius: 4px; padding: 2px 7px; font-size: 0.76rem;">✓ ได้ +${itemScore} คะแนน</span>`
-                  : `<span style="display: inline-flex; align-items: center; gap: 3px; color: #b91c1c; font-weight: 700; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 4px; padding: 2px 7px; font-size: 0.76rem;">✗ เสีย +0 / ${itemScore} คะแนน</span>`;
-                
-                return `
-                  <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; padding: 0.55rem 0.75rem; background: ${isItemChecked ? 'rgba(34, 197, 94, 0.04)' : 'rgba(239, 68, 68, 0.04)'}; border-left: 3.5px solid ${isItemChecked ? '#22c55e' : '#ef4444'}; border-radius: 4px; margin-bottom: 0.35rem;">
-                    <div style="flex: 1; min-width: 0; font-size: 0.86rem; line-height: 1.5; color: var(--text-primary);">
-                      <strong style="margin-right: 4px;">${icon} ข้อ ${cIdx + 1}:</strong> ${itemText}
-                    </div>
-                    <div style="flex-shrink: 0;">
-                      ${statusBadge}
-                    </div>
+              // จัดกลุ่มรายการ Checklist ตามหมวดหมู่ (item.group)
+              const groupMap = new Map();
+              checklist.forEach((item, cIdx) => {
+                const gName = (item.group || 'ทั่วไป').trim();
+                if (!groupMap.has(gName)) groupMap.set(gName, []);
+                groupMap.get(gName).push({ item, cIdx });
+              });
+
+              let itemsHtml = '';
+              let parentCounter = 0;
+              for (const [gName, gItems] of groupMap.entries()) {
+                // วิเคราะห์ parent/rubric structure ภายในกลุ่มหมวดหมู่นี้
+                // ก้อนย่อยที่มี parent ตามด้วย subsets
+                const rubricBlocks = [];
+                let curBlock = null;
+
+                gItems.forEach(({ item, cIdx }) => {
+                  const isSub = Boolean(item.isSubset);
+                  if (!isSub) {
+                    if (curBlock) rubricBlocks.push(curBlock);
+                    curBlock = { parent: { item, cIdx }, children: [] };
+                  } else {
+                    if (curBlock) {
+                      curBlock.children.push({ item, cIdx });
+                    } else {
+                      rubricBlocks.push({ parent: { item, cIdx }, children: [] });
+                    }
+                  }
+                });
+                if (curBlock) rubricBlocks.push(curBlock);
+
+                let gEarned = 0;
+                let gMax = 0;
+
+                // คำนวณคะแนนรวมหมวดตาม rubric / additive logic
+                rubricBlocks.forEach(block => {
+                  const pItem = block.parent.item;
+                  const pIdx = block.parent.cIdx;
+                  const pScore = pItem.score !== undefined ? parseFloat(pItem.score) : 1.0;
+                  const isPChecked = checkedSet.has(pItem.id) || checkedSet.has(String(pItem.id)) || checkedSet.has(pIdx) || checkedSet.has(String(pIdx));
+                  
+                  if (block.children.length === 0) {
+                    gMax += pScore;
+                    if (isPChecked) gEarned += pScore;
+                  } else {
+                    const gType = typeof getSubsetGroupType === 'function'
+                      ? getSubsetGroupType(pItem, block.children.map(c => c.item))
+                      : 'additive';
+
+                    gMax += pScore;
+                    if (gType === 'rubric') {
+                      const checkedSubs = block.children.filter(c => 
+                        checkedSet.has(c.item.id) || checkedSet.has(String(c.item.id)) || checkedSet.has(c.cIdx) || checkedSet.has(String(c.cIdx))
+                      );
+                      if (checkedSubs.length > 0) {
+                        const maxSub = Math.max(...checkedSubs.map(c => parseFloat(c.item.score) || 0));
+                        gEarned += Math.min(maxSub, pScore);
+                      } else if (isPChecked) {
+                        gEarned += pScore;
+                      }
+                    } else {
+                      if (isPChecked) {
+                        gEarned += pScore;
+                      } else {
+                        const checkedSubs = block.children.filter(c => 
+                          checkedSet.has(c.item.id) || checkedSet.has(String(c.item.id)) || checkedSet.has(c.cIdx) || checkedSet.has(String(c.cIdx))
+                        );
+                        const subTotal = checkedSubs.reduce((sum, c) => sum + (parseFloat(c.item.score) || 0), 0);
+                        gEarned += Math.min(subTotal, pScore);
+                      }
+                    }
+                  }
+                });
+
+                itemsHtml += `
+                  <div style="margin-top: 0.65rem; margin-bottom: 0.35rem; padding: 0.35rem 0.65rem; background: var(--bg-secondary); border-left: 3.5px solid var(--primary); border-radius: 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                    <span style="font-size: 0.84rem; font-weight: 700; color: var(--text-primary); font-family: var(--font-title);">📂 หมวด: ${escapeHtml(gName)}</span>
+                    <span style="font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); background: var(--surface); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--border);">ทำได้ ${safeFormatScore(gEarned)} / ${safeFormatScore(gMax)} คะแนน</span>
                   </div>
                 `;
-              }).join('');
+
+                // เรนเดอร์แต่ละบล็อก
+                rubricBlocks.forEach(block => {
+                  parentCounter++;
+                  const displayParentNum = parentCounter;
+                  const pItem = block.parent.item;
+                  const pIdx = block.parent.cIdx;
+                  const pScoreNum = parseFloat(pItem.score !== undefined ? pItem.score : 1.0) || 0;
+                  const isPChecked = checkedSet.has(pItem.id) || checkedSet.has(String(pItem.id)) || checkedSet.has(pIdx) || checkedSet.has(String(pIdx));
+                  const pText = (pItem.textHtml || pItem.text || pItem.title || '').trim();
+
+                  const hasChildren = block.children.length > 0;
+                  const gType = hasChildren && (typeof getSubsetGroupType === 'function')
+                    ? getSubsetGroupType(pItem, block.children.map(c => c.item))
+                    : 'additive';
+
+                  const blockMax = pScoreNum;
+                  let blockEarned = 0;
+
+                  if (!hasChildren) {
+                    blockEarned = isPChecked ? blockMax : 0;
+                  } else if (gType === 'rubric') {
+                    const checkedSubs = block.children.filter(c => 
+                      checkedSet.has(c.item.id) || checkedSet.has(String(c.item.id)) || checkedSet.has(c.cIdx) || checkedSet.has(String(c.cIdx))
+                    );
+                    if (checkedSubs.length > 0) {
+                      const maxSub = Math.max(...checkedSubs.map(c => parseFloat(c.item.score) || 0));
+                      blockEarned = Math.min(maxSub, blockMax);
+                    } else if (isPChecked) {
+                      blockEarned = blockMax;
+                    }
+                  } else {
+                    if (isPChecked) {
+                      blockEarned = blockMax;
+                    } else {
+                      const checkedSubs = block.children.filter(c => 
+                        checkedSet.has(c.item.id) || checkedSet.has(String(c.item.id)) || checkedSet.has(c.cIdx) || checkedSet.has(String(c.cIdx))
+                      );
+                      const subTotal = checkedSubs.reduce((sum, c) => sum + (parseFloat(c.item.score) || 0), 0);
+                      blockEarned = Math.min(subTotal, blockMax);
+                    }
+                  }
+
+                  let pBadge = '';
+                  let pBorder = '';
+                  let pBg = '';
+                  let pIcon = '';
+
+                  const earnedStr = safeFormatScore(blockEarned);
+                  const maxStr = safeFormatScore(blockMax);
+
+                  if (blockEarned >= blockMax && blockMax > 0) {
+                    pIcon = '✅';
+                    pBadge = `<span style="display: inline-flex; align-items: center; gap: 3px; color: #15803d; font-weight: 700; background: #dcfce7; border: 1px solid #86efac; border-radius: 4px; padding: 2px 7px; font-size: 0.76rem; flex-shrink: 0;">✓ ได้เต็ม (${earnedStr} / ${maxStr} คะแนน)</span>`;
+                    pBorder = 'border-left: 3.5px solid #22c55e;';
+                    pBg = 'background: rgba(34, 197, 94, 0.04);';
+                  } else if (blockEarned > 0 && blockEarned < blockMax) {
+                    pIcon = '⚠️';
+                    pBadge = `<span style="display: inline-flex; align-items: center; gap: 3px; color: #b45309; font-weight: 700; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 4px; padding: 2px 7px; font-size: 0.76rem; flex-shrink: 0;">⚠️ ได้บางส่วน (${earnedStr} / ${maxStr} คะแนน)</span>`;
+                    pBorder = 'border-left: 3.5px solid #f59e0b;';
+                    pBg = 'background: rgba(245, 158, 11, 0.05);';
+                  } else {
+                    pIcon = '❌';
+                    pBadge = `<span style="display: inline-flex; align-items: center; gap: 3px; color: #b91c1c; font-weight: 700; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 4px; padding: 2px 7px; font-size: 0.76rem; flex-shrink: 0;">❌ ไม่ได้คะแนน (${earnedStr} / ${maxStr} คะแนน)</span>`;
+                    pBorder = 'border-left: 3.5px solid #ef4444;';
+                    pBg = 'background: rgba(239, 68, 68, 0.04);';
+                  }
+
+                  itemsHtml += `
+                    <div class="results-checklist-item-wrap" style="${pBorder} ${pBg}">
+                      <div class="results-checklist-text">
+                        <strong style="margin-right: 4px;">${pIcon} ข้อ ${displayParentNum}:</strong> ${pText}
+                      </div>
+                      <div style="flex-shrink: 0;">
+                        ${pBadge}
+                      </div>
+                    </div>
+                  `;
+
+                  // เรนเดอร์ Children (ลำดับ 1.1, 1.2 เป็นต้น)
+                  block.children.forEach(({ item: cItem, cIdx: subIdx }, childIdx) => {
+                    const isCChecked = checkedSet.has(cItem.id) || checkedSet.has(String(cItem.id)) || checkedSet.has(subIdx) || checkedSet.has(String(subIdx));
+                    const cScoreNum = parseFloat(cItem.score !== undefined ? cItem.score : 1.0) || 0;
+                    const cScoreStr = safeFormatScore(cScoreNum);
+                    const cText = (cItem.textHtml || cItem.text || cItem.title || '').trim();
+
+                    let cBadge = '';
+                    let cIcon = '';
+                    let cStyle = '';
+
+                    if (isCChecked) {
+                      if (cScoreNum <= 0) {
+                        cIcon = '❌';
+                        cBadge = `<span style="display: inline-flex; align-items: center; gap: 3px; color: #b91c1c; font-weight: 700; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 4px; padding: 2px 7px; font-size: 0.76rem; flex-shrink: 0;">❌ เลือกข้อนี้ (${cScoreStr} คะแนน)</span>`;
+                        cStyle = 'margin-left: 1.25rem; border-left: 2.5px solid #ef4444; background: rgba(239, 68, 68, 0.05);';
+                      } else if (cScoreNum < blockMax) {
+                        cIcon = '⚠️';
+                        cBadge = `<span style="display: inline-flex; align-items: center; gap: 3px; color: #b45309; font-weight: 700; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 4px; padding: 2px 7px; font-size: 0.76rem; flex-shrink: 0;">⚠️ เลือกข้อนี้ (${cScoreStr} คะแนน)</span>`;
+                        cStyle = 'margin-left: 1.25rem; border-left: 2.5px solid #f59e0b; background: rgba(245, 158, 11, 0.05);';
+                      } else {
+                        cIcon = '✅';
+                        cBadge = `<span style="display: inline-flex; align-items: center; gap: 3px; color: #15803d; font-weight: 700; background: #dcfce7; border: 1px solid #86efac; border-radius: 4px; padding: 2px 7px; font-size: 0.76rem; flex-shrink: 0;">✓ เลือกข้อนี้ (${cScoreStr} คะแนน)</span>`;
+                        cStyle = 'margin-left: 1.25rem; border-left: 2.5px solid #22c55e; background: rgba(34, 197, 94, 0.05);';
+                      }
+                    } else {
+                      cIcon = '⚪';
+                      cBadge = `<span style="display: inline-flex; align-items: center; gap: 3px; color: var(--text-muted); font-weight: 500; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; font-size: 0.74rem; flex-shrink: 0;">(ไม่ได้เลือก)</span>`;
+                      cStyle = 'margin-left: 1.25rem; border-left: 2px dashed #94a3b8; background: transparent; opacity: 0.85;';
+                    }
+
+                    itemsHtml += `
+                      <div class="results-checklist-item-wrap" style="${cStyle}">
+                        <div class="results-checklist-text">
+                          <strong style="margin-right: 4px;">${cIcon} ↳ ${displayParentNum}.${childIdx + 1}:</strong> ${cText}
+                        </div>
+                        <div style="flex-shrink: 0;">
+                          ${cBadge}
+                        </div>
+                      </div>
+                    `;
+                  });
+                });
+              }
+
+              const initFeedback = (SimState.stationFeedbacks && (SimState.stationFeedbacks[st.stationNumber] || SimState.stationFeedbacks[String(st.stationNumber)])) || '';
 
               detailTr.innerHTML = `
                 <td colspan="7" style="padding: 0.75rem 1rem; background: var(--bg-secondary); border-bottom: 1.5px solid var(--border);">
@@ -10984,6 +12317,22 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
                     ${blanksReviewHtml}
                     <div style="display: flex; flex-direction: column; gap: 2px;">
                       ${itemsHtml}
+                    </div>
+                    <div style="margin-top: 1rem; padding: 0.85rem 1rem; background: var(--bg-secondary); border: 1.5px solid var(--border); border-radius: var(--radius-md);">
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+                        <label style="font-size: 0.86rem; font-weight: 700; color: var(--text-primary); font-family: var(--font-title); display: flex; align-items: center; gap: 6px; margin: 0;">
+                          <span>💬 บันทึกข้อเสนอแนะ / สรุปประเด็นที่ต้องปรับปรุง (Debrief Feedback สำหรับสถานีที่ ${st.stationNumber}):</span>
+                        </label>
+                        <span style="font-size: 0.74rem; color: var(--text-muted);">รายงานท้ายข้อสถานีนี้ · บันทึกอัตโนมัติ</span>
+                      </div>
+                      <textarea 
+                        class="select-filter" 
+                        id="station-feedback-input-${st.stationNumber}"
+                        rows="3" 
+                        style="width: 100%; min-height: 80px; resize: vertical; font-size: 0.86rem; line-height: 1.5; padding: 0.55rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg); color: var(--text-primary); font-family: inherit;" 
+                        placeholder="พิมพ์คำแนะนำ หรือสิ่งที่เพื่อน/ผู้เข้าสอบทำขาดตกบกพร่องในสถานีนี้ (สามารถพิมพ์ยาวๆ เป็นย่อหน้าได้ โดยข้อมูลจะแสดงในรายงานพิมพ์ PDF)..."
+                        oninput="handleStationFeedbackInput(${st.stationNumber}, this.value)"
+                      >${escapeHtml(initFeedback)}</textarea>
                     </div>
                   </div>
                 </td>
@@ -11003,14 +12352,14 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         
         const statusText = document.getElementById('results-status-text');
         if (statusText) {
-          const allPassed = passedStations >= totalStationsCount && totalStationsCount > 0;
+          const allPassed = totalPct >= 80;
           statusText.textContent = allPassed ? 'PASSED (ผ่านการประเมิน)' : 'FAILED (ไม่ผ่านเกณฑ์)';
           statusText.style.color = allPassed ? 'var(--success)' : 'var(--danger)';
         }
         
         const summaryDescEl = document.getElementById('results-summary-desc');
         if (summaryDescEl) {
-          summaryDescEl.textContent = `ผ่านการประเมินวิชาชีพทั้งหมด ${passedStations} จาก ${totalStationsCount} สถานีสอบ (คิดน้ำหนักแต่ละสถานีเท่ากัน • เกณฑ์ผ่านร้อยละ 80 ต่อสถานี)`;
+          summaryDescEl.textContent = `คะแนนเฉลี่ยถ่วงน้ำหนักทุกสถานี: ${totalPct}% · ทำได้ ${formatScore(totalEarnedScore)} จาก ${formatScore(totalMaxScore)} คะแนนดิบสะสม (คิดสัดส่วนน้ำหนักแต่ละสถานีเท่ากัน • เกณฑ์ผ่านร้อยละ 80)`;
         }
 
         // Render Podium & Leaderboard if multiplayer room
@@ -11141,22 +12490,614 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       }
     }
 
+    // Debrief Feedback Handler for Station Accordion and Live Exam
+    function handleStationFeedbackInput(stationNum, text) {
+      if (!SimState.stationFeedbacks) SimState.stationFeedbacks = {};
+      SimState.stationFeedbacks[stationNum] = text;
+      try {
+        sessionStorage.setItem('ospe_stationFeedbacks', JSON.stringify(SimState.stationFeedbacks));
+      } catch (e) {}
+
+      // Keep results screen textarea in sync if present
+      const resInputEl = document.getElementById(`station-feedback-input-${stationNum}`);
+      if (resInputEl && document.activeElement !== resInputEl) {
+        resInputEl.value = text || '';
+      }
+
+      // Keep live feedback textarea in sync if currently viewing this station
+      const currentSt = SimState.stations && SimState.stations[SimState.currentIdx];
+      if (currentSt && currentSt.stationNumber === stationNum) {
+        const liveInputEl = document.getElementById('exam-live-feedback-textarea');
+        if (liveInputEl && document.activeElement !== liveInputEl) {
+          liveInputEl.value = text || '';
+        }
+      }
+
+      if (SimState.roomId && typeof _fbDb !== 'undefined' && _fbDb) {
+        try {
+          _fbDb.ref('rooms/' + SimState.roomId + '/stationFeedbacks/' + stationNum).set(text);
+        } catch (e) {
+          console.warn('Error syncing debrief feedback to Firebase:', e);
+        }
+      }
+    }
+    window.handleStationFeedbackInput = handleStationFeedbackInput;
+
+    function handleLiveStationFeedbackInput(text) {
+      const st = SimState.stations && SimState.stations[SimState.currentIdx];
+      if (!st) return;
+      handleStationFeedbackInput(st.stationNumber, text);
+
+      // Visual indicator for auto-save
+      const indicator = document.getElementById('exam-live-feedback-saved-indicator');
+      if (indicator) {
+        indicator.style.display = 'inline';
+        clearTimeout(window._liveFeedbackSavedTimeout);
+        window._liveFeedbackSavedTimeout = setTimeout(() => {
+          if (indicator) indicator.style.display = 'none';
+        }, 1500);
+      }
+    }
+    window.handleLiveStationFeedbackInput = handleLiveStationFeedbackInput;
+
+    // ══════════════════════════════════════════════════════════════
+    // OSPE RESULTS PRINT REPORT GENERATOR
+    // ══════════════════════════════════════════════════════════════
+    function openOspePrintModal() {
+      const modal = document.getElementById('ospe-print-modal');
+      if (!modal) return;
+      const nameInput = document.getElementById('ospe-print-student-name');
+      if (nameInput) {
+        const defaultName = SimState.lobbyPlayerName || SimState.myPlayerId || '';
+        nameInput.value = defaultName;
+      }
+      modal.style.display = 'flex';
+    }
+    window.openOspePrintModal = openOspePrintModal;
+
+    function closeOspePrintModal() {
+      const modal = document.getElementById('ospe-print-modal');
+      if (modal) modal.style.display = 'none';
+    }
+    window.closeOspePrintModal = closeOspePrintModal;
+
+    function executeOspePrint() {
+      const modal = document.getElementById('ospe-print-modal');
+      const nameInput = document.getElementById('ospe-print-student-name');
+      const studentName = (nameInput && nameInput.value.trim()) ? escapeHtml(nameInput.value.trim()) : 'นิสิตผู้เข้าสอบ';
+      
+      const printTypeRadio = document.querySelector('input[name="ospe-print-type"]:checked');
+      const printType = printTypeRadio ? printTypeRadio.value : 'full';
+
+      if (modal) modal.style.display = 'none';
+
+      generateAndPrintOspeReport(printType, studentName);
+    }
+    window.executeOspePrint = executeOspePrint;
+
+    function generateAndPrintOspeReport(printType, studentName) {
+      const printArea = document.getElementById('ospe-results-print-area');
+      if (!printArea) {
+        alert('ไม่พบคอนเทนเนอร์สำหรับพิมพ์รายงาน');
+        return;
+      }
+
+      const stationsList = SimState.stations || [];
+      const totalStationsCount = stationsList.length || SimState.totalStations || 0;
+      let totalEarnedScore = 0;
+      let totalMaxScore = 0;
+      let passedStations = 0;
+      let sumStationPct = 0;
+      let activeStationCount = 0;
+
+      const stationData = stationsList.map((st) => {
+        const c = st.case || {};
+        const checked = SimState.studentScores[st.stationNumber] || SimState.studentScores[String(st.stationNumber)] || [];
+        const checklist = Array.isArray(c.checklist) ? c.checklist : [];
+        const { currentScore: earned, totalScore: max } = calculateStationScore(checklist, checked);
+        const isRest = st.isRest || ((c.category || '').toUpperCase() === 'REST');
+        const pct = max > 0 ? Math.round((earned / max) * 100) : 0;
+        
+        totalMaxScore += max;
+        totalEarnedScore += earned;
+        if (!isRest && max > 0) {
+          sumStationPct += pct;
+          activeStationCount++;
+        }
+        const isPassed = isRest ? true : (pct >= 80);
+        if (isPassed) passedStations++;
+
+        return {
+          stationNumber: st.stationNumber,
+          title: c.title || ('สถานีที่ ' + st.stationNumber),
+          caseId: c.caseId || '',
+          category: c.category || (isRest ? 'REST' : 'CLINIC'),
+          earned,
+          max,
+          pct,
+          isPassed,
+          isRest,
+          checklist,
+          checked,
+          caseObj: c
+        };
+      });
+
+      const totalPct = activeStationCount > 0 ? Math.round(sumStationPct / activeStationCount) : (totalMaxScore > 0 ? Math.round((totalEarnedScore / totalMaxScore) * 100) : 0);
+      const isExamPassed = totalPct >= 80;
+      const now = new Date();
+      const printDateThai = now.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+      // Generate Station Summary Table HTML
+      let stationRowsHtml = '';
+      stationData.forEach(s => {
+        const statusText = s.isRest ? 'ผ่าน (พัก)' : (s.isPassed ? 'ผ่าน' : 'ไม่ผ่าน');
+        const statusColor = s.isRest ? '#475569' : (s.isPassed ? '#15803d' : '#b91c1c');
+        stationRowsHtml += `
+          <tr style="border-bottom: 1px solid #cbd5e1;">
+            <td style="padding: 6px 8px; text-align: center; font-weight: 700;">สถานีที่ ${s.stationNumber}</td>
+            <td style="padding: 6px 8px;">
+              <div style="font-weight: 600; color: #0f172a;">${escapeHtml(s.title)}</div>
+              ${s.caseId ? `<div style="font-size: 8pt; color: #64748b;">รหัสเคส: ${escapeHtml(s.caseId)}</div>` : ''}
+            </td>
+            <td style="padding: 6px 8px; text-align: center; font-size: 8.5pt;">${escapeHtml(s.category)}</td>
+            <td style="padding: 6px 8px; text-align: center;">${safeFormatScore(s.max)}</td>
+            <td style="padding: 6px 8px; text-align: center; font-weight: 700;">${safeFormatScore(s.earned)} (${s.pct}%)</td>
+            <td style="padding: 6px 8px; text-align: center; font-weight: 700; color: ${statusColor};">${statusText}</td>
+          </tr>
+        `;
+      });
+
+      // Generate Full Checklist & Rubric Detail Section (if printType === 'full')
+      let checklistSectionsHtml = '';
+      if (printType === 'full') {
+        stationData.forEach(s => {
+          if (s.isRest) return;
+          const checkedSet = new Set(Array.isArray(s.checked) ? s.checked : []);
+          const rawItems = Array.isArray(s.checklist) ? s.checklist : [];
+
+          if (typeof resolveChecklistSubsets === 'function') {
+            resolveChecklistSubsets(rawItems);
+          }
+
+          // จัดกลุ่มตามหมวดหมู่ (item.group)
+          const groupMap = new Map();
+          rawItems.forEach((item, cIdx) => {
+            const gName = (item.group || 'ทั่วไป').trim();
+            if (!groupMap.has(gName)) groupMap.set(gName, []);
+            groupMap.get(gName).push({ item, cIdx });
+          });
+
+          let itemsReportHtml = '';
+          let parentReportCounter = 0;
+          for (const [gName, gItems] of groupMap.entries()) {
+            const rubricBlocks = [];
+            let curBlock = null;
+
+            gItems.forEach(({ item, cIdx }) => {
+              const isSub = Boolean(item.isSubset);
+              if (!isSub) {
+                if (curBlock) rubricBlocks.push(curBlock);
+                curBlock = { parent: { item, cIdx }, children: [] };
+              } else {
+                if (curBlock) {
+                  curBlock.children.push({ item, cIdx });
+                } else {
+                  rubricBlocks.push({ parent: { item, cIdx }, children: [] });
+                }
+              }
+            });
+            if (curBlock) rubricBlocks.push(curBlock);
+
+            let gEarned = 0;
+            let gMax = 0;
+
+            rubricBlocks.forEach(block => {
+              const pItem = block.parent.item;
+              const pIdx = block.parent.cIdx;
+              const pScore = pItem.score !== undefined ? parseFloat(pItem.score) : 1.0;
+              const isPChecked = checkedSet.has(pItem.id) || checkedSet.has(String(pItem.id)) || checkedSet.has(pIdx) || checkedSet.has(String(pIdx));
+              
+              if (block.children.length === 0) {
+                gMax += pScore;
+                if (isPChecked) gEarned += pScore;
+              } else {
+                const gType = typeof getSubsetGroupType === 'function'
+                  ? getSubsetGroupType(pItem, block.children.map(c => c.item))
+                  : 'additive';
+
+                gMax += pScore;
+                if (gType === 'rubric') {
+                  const checkedSubs = block.children.filter(c => 
+                    checkedSet.has(c.item.id) || checkedSet.has(String(c.item.id)) || checkedSet.has(c.cIdx) || checkedSet.has(String(c.cIdx))
+                  );
+                  if (checkedSubs.length > 0) {
+                    const maxSub = Math.max(...checkedSubs.map(c => parseFloat(c.item.score) || 0));
+                    gEarned += Math.min(maxSub, pScore);
+                  } else if (isPChecked) {
+                    gEarned += pScore;
+                  }
+                } else {
+                  if (isPChecked) {
+                    gEarned += pScore;
+                  } else {
+                    const checkedSubs = block.children.filter(c => 
+                      checkedSet.has(c.item.id) || checkedSet.has(String(c.item.id)) || checkedSet.has(c.cIdx) || checkedSet.has(String(c.cIdx))
+                    );
+                    const subTotal = checkedSubs.reduce((sum, c) => sum + (parseFloat(c.item.score) || 0), 0);
+                    gEarned += Math.min(subTotal, pScore);
+                  }
+                }
+              }
+            });
+
+            itemsReportHtml += `
+              <div style="margin-top: 6px; margin-bottom: 3px; padding: 3px 6px; background: #f1f5f9; border-left: 3px solid #1e3a8a; border-radius: 3px; display: flex; align-items: center; justify-content: space-between; font-size: 8pt;">
+                <span style="font-weight: 700; color: #0f172a;">📂 หมวด: ${escapeHtml(gName)}</span>
+                <span style="font-weight: 600; color: #475569; background: #ffffff; padding: 1px 5px; border-radius: 3px; border: 1px solid #cbd5e1;">ทำได้ ${safeFormatScore(gEarned)} / ${safeFormatScore(gMax)} คะแนน</span>
+              </div>
+            `;
+
+            rubricBlocks.forEach(block => {
+              parentReportCounter++;
+              const displayParentNum = parentReportCounter;
+              const pItem = block.parent.item;
+              const pIdx = block.parent.cIdx;
+              const pScoreNum = parseFloat(pItem.score !== undefined ? pItem.score : 1.0) || 0;
+              const isPChecked = checkedSet.has(pItem.id) || checkedSet.has(String(pItem.id)) || checkedSet.has(pIdx) || checkedSet.has(String(pIdx));
+              const pText = (pItem.textHtml || pItem.text || pItem.title || '').trim();
+
+              const hasChildren = block.children.length > 0;
+              const gType = hasChildren && (typeof getSubsetGroupType === 'function')
+                ? getSubsetGroupType(pItem, block.children.map(c => c.item))
+                : 'additive';
+
+              const blockMax = pScoreNum;
+              let blockEarned = 0;
+
+              if (!hasChildren) {
+                blockEarned = isPChecked ? blockMax : 0;
+              } else if (gType === 'rubric') {
+                const checkedSubs = block.children.filter(c => 
+                  checkedSet.has(c.item.id) || checkedSet.has(String(c.item.id)) || checkedSet.has(c.cIdx) || checkedSet.has(String(c.cIdx))
+                );
+                if (checkedSubs.length > 0) {
+                  const maxSub = Math.max(...checkedSubs.map(c => parseFloat(c.item.score) || 0));
+                  blockEarned = Math.min(maxSub, blockMax);
+                } else if (isPChecked) {
+                  blockEarned = blockMax;
+                }
+              } else {
+                if (isPChecked) {
+                  blockEarned = blockMax;
+                } else {
+                  const checkedSubs = block.children.filter(c => 
+                    checkedSet.has(c.item.id) || checkedSet.has(String(c.item.id)) || checkedSet.has(c.cIdx) || checkedSet.has(String(c.cIdx))
+                  );
+                  const subTotal = checkedSubs.reduce((sum, c) => sum + (parseFloat(c.item.score) || 0), 0);
+                  blockEarned = Math.min(subTotal, blockMax);
+                }
+              }
+
+              let pBadge = '';
+              let pBorder = '';
+              let pBg = '';
+              let pIcon = '';
+
+              const earnedStr = safeFormatScore(blockEarned);
+              const maxStr = safeFormatScore(blockMax);
+
+              if (blockEarned >= blockMax && blockMax > 0) {
+                pIcon = '✅';
+                pBadge = `<span style="color: #15803d; font-weight: 700; background: #dcfce7; border: 1px solid #86efac; border-radius: 3px; padding: 1px 6px; font-size: 7.5pt;">✓ ได้เต็ม (${earnedStr} / ${maxStr} คะแนน)</span>`;
+                pBorder = 'border-left: 3px solid #22c55e;';
+                pBg = 'background: #f0fdf4;';
+              } else if (blockEarned > 0 && blockEarned < blockMax) {
+                pIcon = '⚠️';
+                pBadge = `<span style="color: #b45309; font-weight: 700; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 3px; padding: 1px 6px; font-size: 7.5pt;">⚠️ ได้บางส่วน (${earnedStr} / ${maxStr} คะแนน)</span>`;
+                pBorder = 'border-left: 3px solid #f59e0b;';
+                pBg = 'background: #fffbeb;';
+              } else {
+                pIcon = '❌';
+                pBadge = `<span style="color: #b91c1c; font-weight: 700; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 3px; padding: 1px 6px; font-size: 7.5pt;">❌ ไม่ได้คะแนน (${earnedStr} / ${maxStr} คะแนน)</span>`;
+                pBorder = 'border-left: 3px solid #ef4444;';
+                pBg = 'background: #fef2f2;';
+              }
+
+              itemsReportHtml += `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 3px 6px; margin-bottom: 2px; font-size: 8pt; ${pBorder} ${pBg}">
+                  <div style="flex: 1;"><strong>${pIcon} ข้อ ${displayParentNum}:</strong> ${pText}</div>
+                  <div style="flex-shrink: 0;">${pBadge}</div>
+                </div>
+              `;
+
+              // Children (1.1, 1.2 เป็นต้น)
+              block.children.forEach(({ item: cItem, cIdx: subIdx }, childIdx) => {
+                const isCChecked = checkedSet.has(cItem.id) || checkedSet.has(String(cItem.id)) || checkedSet.has(subIdx) || checkedSet.has(String(subIdx));
+                const cScoreNum = parseFloat(cItem.score !== undefined ? cItem.score : 1.0) || 0;
+                const cScoreStr = safeFormatScore(cScoreNum);
+                const cText = (cItem.textHtml || cItem.text || cItem.title || '').trim();
+
+                let cBadge = '';
+                let cIcon = '';
+                let cStyle = '';
+
+                if (isCChecked) {
+                  if (cScoreNum <= 0) {
+                    cIcon = '❌';
+                    cBadge = `<span style="color: #b91c1c; font-weight: 700; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 3px; padding: 1px 5px; font-size: 7.5pt;">❌ เลือกข้อนี้ (${cScoreStr} คะแนน)</span>`;
+                    cStyle = 'margin-left: 1.25rem; border-left: 2px solid #ef4444; background: #fef2f2;';
+                  } else if (cScoreNum < blockMax) {
+                    cIcon = '⚠️';
+                    cBadge = `<span style="color: #b45309; font-weight: 700; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 3px; padding: 1px 5px; font-size: 7.5pt;">⚠️ เลือกข้อนี้ (${cScoreStr} คะแนน)</span>`;
+                    cStyle = 'margin-left: 1.25rem; border-left: 2px solid #f59e0b; background: #fffbeb;';
+                  } else {
+                    cIcon = '✅';
+                    cBadge = `<span style="color: #15803d; font-weight: 700; background: #dcfce7; border: 1px solid #86efac; border-radius: 3px; padding: 1px 5px; font-size: 7.5pt;">✓ เลือกข้อนี้ (${cScoreStr} คะแนน)</span>`;
+                    cStyle = 'margin-left: 1.25rem; border-left: 2px solid #22c55e; background: #f0fdf4;';
+                  }
+                } else {
+                  cIcon = '⚪';
+                  cBadge = `<span style="color: #64748b; font-weight: 500; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 3px; padding: 1px 5px; font-size: 7pt;">(ไม่ได้เลือก)</span>`;
+                  cStyle = 'margin-left: 1.25rem; border-left: 2px dashed #94a3b8; background: #ffffff;';
+                }
+
+                itemsReportHtml += `
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 2px 6px; margin-bottom: 2px; font-size: 7.5pt; ${cStyle}">
+                    <div style="flex: 1;"><strong>${cIcon} ↳ ${displayParentNum}.${childIdx + 1}:</strong> ${cText}</div>
+                    <div style="flex-shrink: 0;">${cBadge}</div>
+                  </div>
+                `;
+              });
+            });
+          }
+
+          // Check blanks for this station
+          const c = s.caseObj;
+          const rawScenarioContent = (c.scenario || '') + ' ' + (c.contentHtml || '') + ' ' + (c.scenarioHtml || '');
+          const hasBlanks = rawScenarioContent.includes('[BLANK:');
+          const stationWrittenAnswers = (SimState.writtenAnswers && SimState.writtenAnswers[s.stationNumber]) || {};
+          let blanksReportHtml = '';
+
+          if (hasBlanks) {
+            const blankRegex = /\[BLANK:\s*([^|\]]+)(?:\s*\|\s*([^|\]]+))?(?:\s*\|\s*([^|\]]+))?(?:\s*\|\s*([^\]]+))?\]/gi;
+            let m;
+            let bIdx = 0;
+            let blanksRows = '';
+            while ((m = blankRegex.exec(rawScenarioContent)) !== null) {
+              bIdx++;
+              const bId = (m[1] || '').trim();
+              const bAns = (m[2] || '').trim();
+              const userAns = (stationWrittenAnswers[bId] != null ? String(stationWrittenAnswers[bId]) : '').trim();
+              const isFilled = userAns !== '';
+              blanksRows += `
+                <div style="display: flex; justify-content: space-between; font-size: 8pt; padding: 3px 6px; border-bottom: 1px dotted #e2e8f0;">
+                  <span><strong>ช่องที่ ${bIdx} (${escapeHtml(bId)}):</strong> ${escapeHtml(userAns || '(ไม่ได้ตอบ)')}</span>
+                  <span style="color: #1e3a8a;"><strong>เฉลย:</strong> ${escapeHtml(bAns)}</span>
+                </div>
+              `;
+            }
+            if (blanksRows) {
+              blanksReportHtml = `
+                <div style="margin-bottom: 6px; padding: 6px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px;">
+                  <div style="font-weight: 700; font-size: 8pt; color: #1e3a8a; margin-bottom: 3px;">✍️ รายงานคำตอบส่วนเติมคำ (Blanks & Answers):</div>
+                  ${blanksRows}
+                </div>
+              `;
+            }
+          }
+
+          const sFeedback = (SimState.stationFeedbacks && (SimState.stationFeedbacks[s.stationNumber] || SimState.stationFeedbacks[String(s.stationNumber)])) || '';
+          const sFeedbackPrintHtml = sFeedback ? `
+            <div style="margin-top: 6px; padding: 5px 8px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 8pt;">
+              <div style="font-weight: 700; color: #1e3a8a; margin-bottom: 2px;">💬 บันทึกข้อเสนอแนะ / ความเห็นเพิ่มเติม (Debrief Feedback):</div>
+              <div style="color: #1e293b; white-space: pre-wrap;">${escapeHtml(sFeedback)}</div>
+            </div>
+          ` : '';
+
+          checklistSectionsHtml += `
+            <div style="page-break-inside: avoid; break-inside: avoid; margin-top: 14px; border: 1px solid #94a3b8; border-radius: 4px; padding: 8px 10px; background: #ffffff;">
+              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #0f172a; padding-bottom: 4px; margin-bottom: 6px;">
+                <div style="font-size: 9.5pt; font-weight: 800; color: #0f172a;">
+                  สถานีที่ ${s.stationNumber}: ${escapeHtml(s.title)} (${escapeHtml(s.category)})
+                </div>
+                <div style="font-size: 8.5pt; font-weight: 700; color: ${s.isPassed ? '#15803d' : '#b91c1c'};">
+                  คะแนนที่ได้ ${safeFormatScore(s.earned)} / ${safeFormatScore(s.max)} (${s.pct}%) · ${s.isPassed ? 'ผ่าน' : 'ไม่ผ่าน'}
+                </div>
+              </div>
+              ${blanksReportHtml}
+              <div style="margin-top: 4px;">
+                ${itemsReportHtml || '<div style="font-size: 8pt; color: #64748b;">(ไม่มีรายการ Checklist ในสถานีนี้)</div>'}
+              </div>
+              ${sFeedbackPrintHtml}
+            </div>
+          `;
+        });
+      }
+
+      // Final Full Print Document HTML
+      const printDocHtml = `
+        <div style="font-family: 'Bai Jamjuree', 'Sarabun', sans-serif; color: #000000; line-height: 1.4; padding: 10px;">
+          <!-- Formal Header -->
+          <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2.5px solid #1e3a8a; padding-bottom: 8px; margin-bottom: 12px;">
+            <div>
+              <div style="font-size: 13pt; font-weight: 800; color: #1e3a8a; letter-spacing: -0.01em;">
+                โครงการเตรียมสอบใบประกอบวิชาชีพเภสัชกรรม (PLE-CC) ปีการศึกษา 2569
+              </div>
+              <div style="font-size: 10.5pt; font-weight: 700; color: #0f172a; margin-top: 2px;">
+                รายงานผลการทดสอบทักษะทางวิชาชีพ OSPE (OSPE Simulation Score & Checklist Report)
+              </div>
+              <div style="font-size: 8.5pt; color: #475569; margin-top: 2px;">
+                คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย (RxCU OSPE Simulation System)
+              </div>
+            </div>
+            <div style="text-align: right; font-size: 8.5pt; color: #334155;">
+              <div><strong>วันที่สอบ:</strong> ${printDateThai}</div>
+              <div><strong>ผู้เข้าสอบ:</strong> ${studentName}</div>
+              ${SimState.roomId ? `<div><strong>รหัสห้องสอบ:</strong> ${escapeHtml(SimState.roomId)}</div>` : ''}
+            </div>
+          </div>
+
+          <!-- Score Executive Banner -->
+          <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 8px 14px; margin-bottom: 14px; page-break-inside: avoid;">
+            <div>
+              <div style="font-size: 8.5pt; color: #475569; text-transform: uppercase; font-weight: 700;">ผลการประเมินภาพรวม (Overall Result)</div>
+              <div style="font-size: 13pt; font-weight: 900; color: ${isExamPassed ? '#15803d' : '#b91c1c'}; margin-top: 1px;">
+                ${isExamPassed ? 'PASSED (ผ่านการประเมินวิชาชีพ)' : 'FAILED (ไม่ผ่านเกณฑ์การประเมิน)'}
+              </div>
+              <div style="font-size: 8pt; color: #64748b; margin-top: 2px;">
+                คะแนนเฉลี่ยถ่วงน้ำหนัก ${totalPct}% · ผ่าน ${passedStations} จากทั้งหมด ${totalStationsCount} สถานีสอบ (เกณฑ์ผ่านร้อยละ 80)
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 8.5pt; color: #475569; font-weight: 700;">คะแนนเฉลี่ยรวม</div>
+              <div style="font-size: 16pt; font-weight: 900; color: #0f172a; line-height: 1.1;">
+                ${totalPct}%
+              </div>
+              <div style="font-size: 8pt; color: #64748b;">
+                ${safeFormatScore(totalEarnedScore)} / ${safeFormatScore(totalMaxScore)} คะแนนดิบ
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Station Summary Table -->
+          <div style="margin-bottom: 12px; page-break-inside: avoid;">
+            <div style="font-size: 10pt; font-weight: 800; color: #0f172a; margin-bottom: 6px; border-left: 3.5px solid #1e3a8a; padding-left: 6px;">
+              ตารางสรุปผลคะแนนแต่ละสถานี (Station Breakdown Table)
+            </div>
+            <table style="width: 100%; border-collapse: collapse; font-size: 8.5pt;">
+              <thead>
+                <tr style="background: #f1f5f9; border-top: 1.5px solid #0f172a; border-bottom: 1.5px solid #0f172a;">
+                  <th style="padding: 6px 8px; text-align: center; width: 12%;">สถานี</th>
+                  <th style="padding: 6px 8px; text-align: left; width: 44%;">ชื่อสถานีสอบ</th>
+                  <th style="padding: 6px 8px; text-align: center; width: 12%;">หมวดวิชา</th>
+                  <th style="padding: 6px 8px; text-align: center; width: 10%;">เต็ม</th>
+                  <th style="padding: 6px 8px; text-align: center; width: 12%;">ได้ (%)</th>
+                  <th style="padding: 6px 8px; text-align: center; width: 10%;">ผลประเมิน</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${stationRowsHtml}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Section: Full Detailed Checklist (If Selected) -->
+          ${printType === 'full' ? `
+            <div style="margin-top: 18px;">
+              <div style="font-size: 10pt; font-weight: 800; color: #0f172a; margin-bottom: 6px; border-left: 3.5px solid #1e3a8a; padding-left: 6px;">
+                รายละเอียดเกณฑ์การตรวจประเมิน Checklist & Rubric รายสถานี (Detailed Evaluation Report)
+              </div>
+              ${checklistSectionsHtml}
+            </div>
+          ` : ''}
+
+          <!-- Footer Stamp -->
+          <div style="margin-top: 20px; padding-top: 8px; border-top: 1px solid #cbd5e1; font-size: 7.5pt; color: #64748b; display: flex; justify-content: space-between; page-break-inside: avoid;">
+            <span>เอกสารรายงานผลการสอบอย่างเป็นทางการ · โครงการเตรียมสอบใบประกอบวิชาชีพฯ นิสิตเภสัชฯ จุฬาฯ (RxCU84/85)</span>
+            <span>พิมพ์เมื่อ: ${printDateThai}</span>
+          </div>
+        </div>
+      `;
+
+      printArea.innerHTML = printDocHtml;
+
+      if (typeof window.triggerNativePrint === 'function') {
+        window.triggerNativePrint('portrait', 100, 'results', 'ospe-results-print-area');
+      } else {
+        setTimeout(() => {
+          window.print();
+        }, 150);
+      }
+    }
+    window.generateAndPrintOspeReport = generateAndPrintOspeReport;
+
     function restartSetup() {
+      // 1. Clear intervals
       if (SimState.lobbyPollInterval) clearInterval(SimState.lobbyPollInterval);
       if (SimState.timerSyncInterval) clearInterval(SimState.timerSyncInterval);
+      if (SimState.timerInterval) clearInterval(SimState.timerInterval);
+      SimState.lobbyPollInterval = null;
+      SimState.timerSyncInterval = null;
+      SimState.timerInterval = null;
+      SimState.timerRunning = false;
+
+      // 2. Detach Firebase listener
+      if (_fbRoomRef) {
+        try { _fbRoomRef.off(); } catch (e) {}
+        _fbRoomRef = null;
+      }
+
+      // 3. Clear all stored session keys completely
+      clearCohortSession();
+
+      // 4. Reset SimState properties
       SimState.isLobby = false;
       SimState.isHost = false;
       SimState.roomId = '';
       SimState.myPlayerId = '';
+      SimState.lobbyPlayerName = '';
+      SimState.role = 'solo';
+      SimState.cachedRoom = null;
       SimState.cachedPlayersList = [];
       SimState.stations = [];
-      // Detach Firebase listener on reset
-      if (_fbRoomRef) { _fbRoomRef.off(); _fbRoomRef = null; }
+      SimState.studentScores = {};
+      SimState.stationFeedbacks = {};
+      try { sessionStorage.removeItem('ospe_stationFeedbacks'); } catch (e) {}
+      const liveFeedbackEl = document.getElementById('exam-live-feedback-textarea');
+      if (liveFeedbackEl) liveFeedbackEl.value = '';
+      const liveFeedbackContainer = document.getElementById('exam-live-feedback-container');
+      if (liveFeedbackContainer) liveFeedbackContainer.style.display = 'none';
+      SimState.currentIdx = 0;
+      SimState.currentRoomId = null;
+      SimState.currentExamSetRaw = null;
+      SimState.myBreakoutTableId = null;
+      SimState.myBreakoutRole = null;
+      SimState.myCarouselStation = null;
+      SimState.hasDoneCountdown = false;
+      SimState.roleSelectedThisSession = false;
+
+      // 5. Clean URL query parameters (?room=... etc.)
+      try {
+        const url = new URL(window.location.href);
+        url.search = '';
+        window.history.replaceState({}, document.title, url.toString());
+      } catch (e) {}
+
+      // 6. Hide all other views and show setup view
       const rosterBar = document.getElementById('results-participants-bar');
       if (rosterBar) rosterBar.style.display = 'none';
-      document.getElementById('exam-results-view').style.display = 'none';
-      document.getElementById('exam-setup-view').style.display = 'block';
+      const resultsView = document.getElementById('exam-results-view');
+      if (resultsView) resultsView.style.display = 'none';
+      const runningView = document.getElementById('exam-running-view');
+      if (runningView) runningView.style.display = 'none';
+      const lobbyView = document.getElementById('exam-lobby-view');
+      if (lobbyView) lobbyView.style.display = 'none';
+      const waitingScreen = document.getElementById('lobby-waiting-screen');
+      if (waitingScreen) waitingScreen.style.display = 'none';
+      const countdownScreen = document.getElementById('lobby-countdown-screen');
+      if (countdownScreen) countdownScreen.style.display = 'none';
+      const superHostMonitor = document.getElementById('super-host-monitor-view');
+      if (superHostMonitor) superHostMonitor.style.display = 'none';
+      const stickyTimer = document.getElementById('exam-sticky-timer-bar');
+      if (stickyTimer) stickyTimer.style.display = 'none';
+      const stickyHeader = document.getElementById('exam-sticky-top-header');
+      if (stickyHeader) stickyHeader.style.display = 'none';
+      const resumeBanner = document.getElementById('cohort-quick-resume-banner');
+      if (resumeBanner) resumeBanner.style.display = 'none';
+
+      // 7. Show setup view and reset inputs
+      const setupView = document.getElementById('exam-setup-view');
+      if (setupView) setupView.style.display = 'block';
+
+      const roomInput = document.getElementById('lobby-room-id-input');
+      if (roomInput) roomInput.value = '';
+      const otpInputs = document.querySelectorAll('.otp-box');
+      otpInputs.forEach(inp => { if (inp) inp.value = ''; });
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+    window.restartSetup = restartSetup;
 
     // Helper: escape HTML
     function escapeHtml(str) {
@@ -11652,24 +13593,75 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
     function openExamSetAdjuster() {
       let stations = [];
+      const restCountInput = parseInt(document.getElementById('exam-set-rest-count')?.value || document.getElementById('rest-stations-count')?.value) || 0;
+      
+      function hydrateCase(cid) {
+        if (!cid || cid === 'REST') {
+          return { caseId: 'REST', isRest: true, case: getRestCaseData() };
+        }
+        const rawId = cid.replace(/^OSPE-/i, '');
+        const ospeId = cid.startsWith('OSPE-') ? cid : ('OSPE-' + cid);
+        let found = (typeof AppState !== 'undefined' && AppState.cases)
+          ? AppState.cases.find(x => x && x.caseId && (x.caseId === cid || x.caseId === ospeId || x.caseId === rawId))
+          : null;
+        if (!found && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+          found = OFFLINE_DATA.cases.find(x => x && x.caseId && (x.caseId === cid || x.caseId === ospeId || x.caseId === rawId));
+        }
+        const finalObj = found || { caseId: cid, title: cid, category: 'Product' };
+        return { caseId: cid, isRest: false, case: Object.assign({}, finalObj) };
+      }
+
       if (SimState.customExamSet && SimState.customExamSet.length > 0) {
-        stations = JSON.parse(JSON.stringify(SimState.customExamSet));
+        stations = SimState.customExamSet.map((s, i) => {
+          const h = hydrateCase(s.caseId);
+          return {
+            stationNumber: i + 1,
+            caseId: s.caseId,
+            isRest: Boolean(s.isRest || s.caseId === 'REST'),
+            case: (s.case && s.case.title && (s.case.scenario || s.case.contentHtml)) ? s.case : h.case
+          };
+        });
       } else if (SimState.examGenMode === 'set') {
         const selectedSource = document.getElementById('exam-set-select').value;
         const stationCount = parseInt(document.getElementById('exam-set-station-count').value) || 14;
         const orderMode = document.getElementById('exam-set-order').value;
         const raw = generateExamSetBySource(selectedSource, stationCount, orderMode);
-        stations = raw.map((c, i) => ({ stationNumber: i + 1, caseId: c.caseId, case: c }));
+        
+        const rawSetItems = raw.map(c => ({ caseId: c.caseId, isRest: false }));
+        const combined = insertRestStationsSmart(rawSetItems, restCountInput, () => ({ caseId: 'REST', isRest: true }));
+        stations = combined.map((s, i) => {
+          const h = hydrateCase(s.caseId);
+          return {
+            stationNumber: i + 1,
+            caseId: s.caseId,
+            isRest: s.isRest,
+            case: h.case
+          };
+        });
       } else if (SimState.examGenMode === 'custom' && SimState.customSelectedCases) {
         stations = SimState.customSelectedCases.map((cid, i) => {
-          if (cid === 'REST') return { stationNumber: i + 1, caseId: 'REST', isRest: true, case: getRestCaseData() };
-          const c = AppState.cases.find(x => x.caseId === cid) || { caseId: cid, title: cid, category: 'Product' };
-          return { stationNumber: i + 1, caseId: cid, case: c };
+          const h = hydrateCase(cid);
+          return {
+            stationNumber: i + 1,
+            caseId: cid,
+            isRest: h.isRest,
+            case: h.case
+          };
         });
       } else {
         const { clinic, product, sap } = getProportionValues();
         const raw = generateLocalExamSet(clinic, product, sap);
-        stations = raw.map((c, i) => ({ stationNumber: i + 1, caseId: c.caseId, case: c }));
+        const rawRandomItems = raw.map(c => ({ caseId: c.caseId, isRest: false }));
+        const combined = insertRestStationsSmart(rawRandomItems, restCountInput, () => ({ caseId: 'REST', isRest: true }));
+        stations = combined.map((s, i) => {
+          const h = hydrateCase(s.caseId);
+          return {
+            stationNumber: i + 1,
+            caseId: s.caseId,
+            isRest: s.isRest,
+            case: h.case
+          };
+        });
       }
 
       SimState.tempAdjusterStations = stations;
@@ -11707,7 +13699,9 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
       stations.forEach((st, idx) => {
         const isRest = st.caseId === 'REST';
-        const c = st.case || AppState.cases.find(x => x.caseId === st.caseId) || { title: st.caseId, category: 'Product' };
+        const rawId = (st.caseId || '').replace(/^OSPE-/i, '');
+        const ospeId = (st.caseId || '').startsWith('OSPE-') ? st.caseId : ('OSPE-' + st.caseId);
+        const c = st.case || AppState.cases.find(x => x && x.caseId && (x.caseId === st.caseId || x.caseId === ospeId || x.caseId === rawId)) || { title: st.caseId, category: 'Product' };
         const cat = isRest ? 'REST' : (c.category || 'Product');
         const badgeColor = cat === 'Clinic' ? 'var(--primary)' : (cat === 'Product' ? '#16a34a' : (cat === 'SAP' ? '#ea580c' : '#64748b'));
         const badgeBg = cat === 'Clinic' ? 'rgba(99, 102, 241, 0.12)' : (cat === 'Product' ? 'rgba(22, 163, 74, 0.12)' : (cat === 'SAP' ? 'rgba(234, 88, 12, 0.12)' : 'rgba(100, 116, 139, 0.12)'));
@@ -11828,18 +13822,24 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
     }
 
     function selectCaseForAdjuster(caseId) {
-      const matched = AppState.cases.find(c => c.caseId === caseId) || { caseId: caseId, title: caseId, category: 'Product' };
+      const rawId = (caseId || '').replace(/^OSPE-/i, '');
+      const ospeId = (caseId || '').startsWith('OSPE-') ? caseId : ('OSPE-' + caseId);
+      const matched = AppState.cases.find(c => c && c.caseId && (c.caseId === caseId || c.caseId === ospeId || c.caseId === rawId))
+                   || (typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases && OFFLINE_DATA.cases.find(c => c && c.caseId && (c.caseId === caseId || c.caseId === ospeId || c.caseId === rawId)))
+                   || { caseId: caseId, title: caseId, category: 'Product' };
       if (adjusterTargetSwapIdx !== null && adjusterTargetSwapIdx >= 0 && adjusterTargetSwapIdx < SimState.tempAdjusterStations.length) {
         SimState.tempAdjusterStations[adjusterTargetSwapIdx] = {
           stationNumber: adjusterTargetSwapIdx + 1,
           caseId: caseId,
-          case: matched
+          isRest: false,
+          case: Object.assign({}, matched)
         };
       } else {
         SimState.tempAdjusterStations.push({
           stationNumber: SimState.tempAdjusterStations.length + 1,
           caseId: caseId,
-          case: matched
+          isRest: false,
+          case: Object.assign({}, matched)
         });
       }
       closeCasePickerForAdjuster();
@@ -11854,9 +13854,19 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       SimState.customExamSet = JSON.parse(JSON.stringify(SimState.tempAdjusterStations));
       closeExamSetAdjuster();
       
+      const realExamCount = SimState.customExamSet.filter(s => s.caseId !== 'REST').length;
+      const restCount = SimState.customExamSet.filter(s => s.caseId === 'REST').length;
+      
+      const countInput = document.getElementById('exam-set-station-count');
+      if (countInput) countInput.value = realExamCount;
+      const restInput = document.getElementById('exam-set-rest-count');
+      if (restInput) restInput.value = restCount;
+      const numRestInput = document.getElementById('rest-stations-count');
+      if (numRestInput) numRestInput.value = restCount;
+
       const btnAdjust = document.getElementById('btn-adjust-stations');
       if (btnAdjust) {
-        btnAdjust.innerHTML = `✅ ปรับแต่งแล้ว (${SimState.customExamSet.length} ฐาน)`;
+        btnAdjust.innerHTML = `✅ ปรับแต่งแล้ว (${SimState.customExamSet.length} ฐาน · พัก ${restCount})`;
         btnAdjust.classList.add('active');
         btnAdjust.style.background = 'var(--primary)';
         btnAdjust.style.color = '#FFFFFF';
@@ -12060,6 +14070,13 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         if (txResult && txResult.committed) {
           SimState.myBreakoutTableId = tableId;
           SimState.myBreakoutRole = role;
+          SimState.role = role;
+          SimState.lobbyRole = role;
+          updateOnlineExamSession({
+            breakoutTableId: tableId,
+            breakoutRole: role,
+            role: role
+          });
         } else if (abortReason) {
           if (abortReason === 'not_found') {
             alert('ไม่พบโต๊ะสอบนี้ อาจถูกลบไปแล้ว');
@@ -12096,6 +14113,10 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         });
         SimState.myBreakoutTableId = null;
         SimState.myBreakoutRole = null;
+        updateOnlineExamSession({
+          breakoutTableId: null,
+          breakoutRole: null
+        });
       } catch (e) {
         console.error('Leave breakout table failed:', e);
       }
@@ -12374,6 +14395,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
           }
         }
         await _fbDb.ref().update(updateData);
+        updateOnlineExamSession({ carouselStation: SimState.myCarouselStation });
       } catch (e) {
         console.error('Failed to assign carousel station:', e);
       }
@@ -12776,7 +14798,12 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             if (groupText) {
               metaHtml += `<span class="case-card-tag" style="background-color: var(--primary-light); color: var(--primary); font-size:0.82rem; padding:0.2rem 0.6rem; border-radius:4px; font-weight:600;">${escapeHtml(groupText)}</span>`;
             }
-            if (currCase.disease && currCase.disease !== '-' && currCase.disease !== 'undefined') {
+            const dTags = parseDiseaseTags(currCase.disease);
+            if (dTags.length > 0) {
+              dTags.forEach(t => {
+                metaHtml += `<span class="case-card-tag" style="background: rgba(14, 165, 233, 0.08); color: #0284c7; border: 1px solid rgba(14, 165, 233, 0.25); font-size:0.82rem; padding:0.2rem 0.6rem; border-radius:4px;">🩺 ${escapeHtml(t)}</span>`;
+              });
+            } else if (currCase.disease && currCase.disease !== '-' && currCase.disease !== 'undefined') {
               metaHtml += `<span class="case-card-tag" style="background:var(--bg); border:1px solid var(--border); font-size:0.82rem; padding:0.2rem 0.6rem; border-radius:4px;">โรค/หัวข้อ: ${escapeHtml(currCase.disease)}</span>`;
             }
             if (currCase.source) {
@@ -13123,13 +15150,24 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       const cleanId = String(caseId).trim();
       const lowerId = cleanId.toLowerCase();
       const upperId = cleanId.toUpperCase();
+      const rawId = cleanId.replace(/^OSPE-/i, '');
+      const ospeId = cleanId.startsWith('OSPE-') ? cleanId : ('OSPE-' + cleanId);
 
       let caseObj = null;
-      const cachedUnlocked = sessionStorage.getItem('ple_unlocked_' + cleanId) || sessionStorage.getItem('ple_unlocked_' + upperId) || sessionStorage.getItem('ple_unlocked_' + lowerId);
-      if (cachedUnlocked) {
-        try {
-          caseObj = JSON.parse(cachedUnlocked);
-        } catch(err) {}
+      if (SimState.unlockedCases && (SimState.unlockedCases[cleanId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId])) {
+        caseObj = SimState.unlockedCases[cleanId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId];
+      } else if (SimState.cachedRoom && SimState.cachedRoom.unlockedCaseDetails && (SimState.cachedRoom.unlockedCaseDetails[cleanId] || SimState.cachedRoom.unlockedCaseDetails[rawId] || SimState.cachedRoom.unlockedCaseDetails[ospeId])) {
+        caseObj = SimState.cachedRoom.unlockedCaseDetails[cleanId] || SimState.cachedRoom.unlockedCaseDetails[rawId] || SimState.cachedRoom.unlockedCaseDetails[ospeId];
+      }
+
+      if (!caseObj) {
+        const cachedUnlocked = sessionStorage.getItem('ple_unlocked_' + cleanId) || sessionStorage.getItem('ple_unlocked_' + upperId) || sessionStorage.getItem('ple_unlocked_' + lowerId)
+                             || sessionStorage.getItem('sim_unlocked_' + cleanId) || sessionStorage.getItem('sim_unlocked_' + rawId);
+        if (cachedUnlocked) {
+          try {
+            caseObj = JSON.parse(cachedUnlocked);
+          } catch(err) {}
+        }
       }
 
       if (!caseObj && window.OFFLINE_CASE_DETAILS) {
@@ -13166,15 +15204,17 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       if (titleEl) titleEl.textContent = rawTitle;
 
       if (metaEl) {
-        const diseaseVal = (c.disease && c.disease !== '-' && c.disease !== 'undefined') ? c.disease : (c.mainGroup || 'ทั่วไป');
+        const dTags = parseDiseaseTags(c.disease || c.subTopic);
+        const diseaseVal = dTags.length > 0 
+          ? dTags.map(t => `<span class="badge" style="background:rgba(14,165,233,0.1); color:#0284c7; font-size:0.75rem; margin-right:3px; display:inline-block;">🩺 ${escapeHtml(t)}</span>`).join('') 
+          : escapeHtml(c.mainGroup || 'ทั่วไป');
         const authorVal = (c.author && c.author !== 'undefined') ? c.author : 'ไม่ระบุ';
         const previewDurSec = parseCaseDurationSec(c);
         const previewDurMin = Math.round(previewDurSec / 60);
         metaEl.innerHTML = `
-          <span>🏷️ <strong>โรค/หัวข้อ:</strong> ${escapeHtml(diseaseVal)}</span>
+          <span>🏷️ <strong>โรค/หัวข้อ:</strong> ${diseaseVal}</span>
           <span>⏱ <strong>ระยะเวลา:</strong> ${previewDurMin} นาที</span>
           <span>✍️ <strong>ผู้เขียน:</strong> ${escapeHtml(authorVal)}</span>
-          ${c.subTopic ? `<span>📂 <strong>ประเภทย่อย:</strong> ${escapeHtml(c.subTopic)}</span>` : ''}
         `;
       }
 
@@ -13189,7 +15229,41 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
       // Check Password Protection
       const isProtected = Boolean(c.isProtected || c.hasPassword || (c.password && c.password.trim() !== ''));
-      const isUnlocked = Boolean(sessionStorage.getItem('ple_unlocked_' + cleanId) || sessionStorage.getItem('ple_unlocked_' + upperId) || sessionStorage.getItem('ple_unlocked_' + lowerId));
+      let isUnlocked = Boolean(
+        Boolean(caseObj && (caseObj.scenario || (caseObj.checklist && caseObj.checklist.length > 0))) ||
+        (SimState.unlockedCases && (SimState.unlockedCases[cleanId] || SimState.unlockedCases[rawId] || SimState.unlockedCases[ospeId])) ||
+        (SimState.cachedRoom && SimState.cachedRoom.unlockedCaseDetails && (SimState.cachedRoom.unlockedCaseDetails[cleanId] || SimState.cachedRoom.unlockedCaseDetails[rawId] || SimState.cachedRoom.unlockedCaseDetails[ospeId])) ||
+        sessionStorage.getItem('ple_unlocked_' + cleanId) || sessionStorage.getItem('ple_unlocked_' + upperId) || sessionStorage.getItem('ple_unlocked_' + lowerId) ||
+        sessionStorage.getItem('sim_unlocked_' + cleanId) || sessionStorage.getItem('sim_unlocked_' + rawId) ||
+        (c.scenario || (c.checklist && c.checklist.length > 0)) ||
+        SimState.roomId
+      );
+
+      // Attempt silent decryption with saved passcode if needed
+      if (isProtected && !isUnlocked) {
+        const savedPasscode = sessionStorage.getItem('ple_saved_passcode');
+        if (savedPasscode && typeof window.decryptCaseData === 'function') {
+          let encObj = c;
+          if (!encObj || !encObj.ciphertext) {
+            if (typeof OFFLINE_DETAILS !== 'undefined' && OFFLINE_DETAILS) {
+              encObj = OFFLINE_DETAILS[cleanId] || OFFLINE_DETAILS[rawId] || OFFLINE_DETAILS[ospeId];
+            }
+          }
+          if (encObj && encObj.ciphertext) {
+            try {
+              const dec = await window.decryptCaseData(encObj, savedPasscode.trim());
+              if (dec) {
+                Object.assign(c, dec);
+                SimState.unlockedCases = SimState.unlockedCases || {};
+                SimState.unlockedCases[cleanId] = c;
+                sessionStorage.setItem('sim_unlocked_' + cleanId, JSON.stringify(c));
+                sessionStorage.setItem('ple_unlocked_' + cleanId, JSON.stringify(c));
+                isUnlocked = true;
+              }
+            } catch (_) {}
+          }
+        }
+      }
 
       if (isProtected && !isUnlocked) {
         if (bodyEl) {
@@ -13601,6 +15675,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
     </div>
   </div>
 
+
   <!-- ═══════════════════════════════════════════
        UNIFIED EXAM ACTION HUB & LIVE DIALOGUE SYSTEM
        ═══════════════════════════════════════════ -->
@@ -13631,9 +15706,11 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       <div style="flex: 1;">
         <div style="font-weight: 700; font-size: 0.88rem; color: var(--text-primary);">กระดาษทด (Scratchpad)</div>
         <div style="font-size: 0.73rem; color: var(--text-secondary); margin-top: 1px;">วาดรูป เขียนสูตรคำนวณ จดบันทึก และฉลากยา</div>
-      </div>
     </div>
   </div>
+
+  <!-- Mobile Backdrop Overlay -->
+  <div id="st-chat-backdrop" class="st-chat-backdrop" onclick="toggleStationChatDrawer()"></div>
 
   <!-- Floating Chat Drawer -->
   <div id="station-chat-drawer" class="st-chat-drawer">

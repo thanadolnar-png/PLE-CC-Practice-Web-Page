@@ -1565,11 +1565,26 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
     toggleDrawer() {
       this.isOpen = !this.isOpen;
       const drawer = document.getElementById('station-chat-drawer');
+      const backdrop = document.getElementById('st-chat-backdrop');
       if (drawer) {
         drawer.style.display = this.isOpen ? 'flex' : 'none';
+        if (backdrop) {
+          backdrop.style.display = (this.isOpen && window.innerWidth <= 768) ? 'block' : 'none';
+        }
         if (this.isOpen) {
-          initStationChatDragAndResize();
-          applyStoredStationChatLayout();
+          if (window.innerWidth <= 768) {
+            drawer.style.left = '';
+            drawer.style.top = '';
+            drawer.style.right = '';
+            drawer.style.bottom = '';
+            drawer.style.width = '';
+            drawer.style.height = '';
+            drawer.classList.remove('dragging', 'resizing');
+            setupMobileChatDrag();
+          } else {
+            initStationChatDragAndResize();
+            applyStoredStationChatLayout();
+          }
           this.resetUnread();
           this.setAIRole(this.aiRole);
           this.updateAIToggleUI();
@@ -1577,6 +1592,8 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
           if (input) input.focus();
           const container = document.getElementById('station-chat-messages');
           if (container) container.scrollTop = container.scrollHeight;
+        } else {
+          if (backdrop) backdrop.style.display = 'none';
         }
       }
     },
@@ -1674,6 +1691,14 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
     const menu = document.getElementById('unified-exam-tools-menu');
     const fab = document.getElementById('btn-unified-exam-tools');
     if (!menu) return;
+
+    if (StationChatController && StationChatController.isOpen) {
+      StationChatController.toggleDrawer();
+      if (menu) menu.style.display = 'none';
+      if (fab) fab.classList.remove('active');
+      return;
+    }
+
     const isOpen = menu.style.display === 'flex';
     menu.style.display = isOpen ? 'none' : 'flex';
     if (fab) {
@@ -1711,7 +1736,15 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
     if (!drawer) return;
     const isMax = drawer.classList.toggle('maximized');
     if (btn) btn.textContent = isMax ? '🗗' : '⛶';
-    if (!isMax) {
+
+    drawer.style.left = '';
+    drawer.style.top = '';
+    drawer.style.right = '';
+    drawer.style.bottom = '';
+    drawer.style.width = '';
+    drawer.style.height = '';
+
+    if (!isMax && window.innerWidth > 768) {
       applyStoredStationChatLayout();
     }
     const container = document.getElementById('station-chat-messages');
@@ -1993,6 +2026,20 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       setupMobileChatDrag();
     }, 200);
   }
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth <= 768) {
+      const drawer = document.getElementById('station-chat-drawer');
+      if (drawer) {
+        drawer.style.left = '';
+        drawer.style.top = '';
+        drawer.style.right = '';
+        drawer.style.bottom = '';
+        drawer.style.width = '';
+        drawer.classList.remove('dragging', 'resizing');
+      }
+    }
+  });
 
   document.addEventListener('click', (e) => {
     const menu = document.getElementById('unified-exam-tools-menu');

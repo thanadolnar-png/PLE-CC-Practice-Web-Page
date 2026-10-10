@@ -224,7 +224,7 @@ function renderRichNoteContent(rawHtml) {
       const previewUrl = `https://drive.google.com/file/d/${driveId}/preview`;
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&margin=2&data=${encodeURIComponent(cleanDriveUrl)}`;
 
-      return `<div class="youtube-embed-card vdo-embed-card drive-embed-card no-print" style="white-space:normal;margin:1rem 0;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;max-width:620px;"><div class="youtube-card-header drive-card-header" style="display:flex;justify-content:space-between;align-items:center;padding:0.45rem 0.75rem;background:rgba(0,0,0,0.02);border-bottom:1px solid var(--border);gap:0.5rem;"><div class="youtube-card-title" style="display:flex;align-items:center;gap:0.4rem;font-weight:600;font-size:0.84rem;color:var(--text-secondary);"><span style="font-size:0.9rem;">📁</span><span>วิดีโอสาธิตเทคนิค (Google Drive)</span></div><a href="${cleanDriveUrl}" target="_blank" rel="noopener noreferrer" class="youtube-ext-btn drive-ext-btn" style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);text-decoration:none;padding:0.2rem 0.55rem;border-radius:4px;background:var(--bg-primary);border:1px solid var(--border);display:inline-flex;align-items:center;white-space:nowrap;" title="เปิดดูใน Google Drive (แท็บใหม่)">เปิดใน Google Drive ↗</a></div><div class="youtube-player-wrapper" style="position:relative;width:100%;padding-bottom:56.25%;height:0;background:#090d16;overflow:hidden;"><iframe src="${previewUrl}" title="วิดีโอสาธิตเทคนิค / เฉลยสถานี (Google Drive)" frameborder="0" allow="autoplay; fullscreen" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" loading="lazy" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"></iframe></div></div><div class="youtube-print-card vdo-print-card print-only" style="white-space:normal;display:none;margin:1rem 0;"><div class="youtube-print-box"><div class="youtube-print-header"><strong>📁 วิดีโอสาธิตและเฉลยเทคนิค (Google Drive Reference)</strong></div><div class="youtube-print-body"><div class="youtube-print-qr-wrap"><img src="${qrUrl}" class="youtube-print-qr" alt="QR Code"></div><div class="vdo-print-link-wrap"><div class="vdo-print-link-title">🔗 สแกน QR Code หรือเข้าดูผ่านลิงก์:</div><div class="youtube-print-url">${cleanDriveUrl}</div><div class="youtube-print-scan-hint">📲 สามารถสแกน QR Code ด้วยกล้องมือถือเพื่อเปิดรับชมบน Google Drive ได้ทันที</div></div></div></div></div>`;
+      return `<div class="youtube-embed-card vdo-embed-card drive-embed-card no-print" style="white-space:normal;margin:1rem 0;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;max-width:620px;"><div class="youtube-card-header drive-card-header" style="display:flex;justify-content:space-between;align-items:center;padding:0.45rem 0.75rem;background:rgba(0,0,0,0.02);border-bottom:1px solid var(--border);gap:0.5rem;flex-wrap:wrap;"><div class="youtube-card-title" style="display:flex;align-items:center;gap:0.4rem;font-weight:600;font-size:0.84rem;color:var(--text-secondary);"><span style="font-size:0.9rem;">📁</span><span>วิดีโอสาธิตเทคนิค (Google Drive)</span></div><div style="display:flex;align-items:center;gap:0.35rem;flex-shrink:0;"><button type="button" class="drive-fs-btn" onclick="openDriveVideoFullscreen('${previewUrl}', '${cleanDriveUrl}')" style="font-size:0.75rem;font-weight:600;color:var(--primary);text-decoration:none;padding:0.2rem 0.55rem;border-radius:4px;background:var(--bg-primary);border:1px solid var(--border);display:inline-flex;align-items:center;gap:3px;cursor:pointer;white-space:nowrap;" title="ดูแบบเต็มจอ (Fullscreen)">⛶ ดูเต็มจอ</button><a href="${cleanDriveUrl}" target="_blank" rel="noopener noreferrer" class="youtube-ext-btn drive-ext-btn" style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);text-decoration:none;padding:0.2rem 0.55rem;border-radius:4px;background:var(--bg-primary);border:1px solid var(--border);display:inline-flex;align-items:center;white-space:nowrap;" title="เปิดดูใน Google Drive (แท็บใหม่)">เปิดใน Drive ↗</a></div></div><div class="youtube-player-wrapper drive-player-wrapper" style="position:relative;width:100%;height:0;background:#090d16;overflow:hidden;"><iframe src="${previewUrl}" title="วิดีโอสาธิตเทคนิค / เฉลยสถานี (Google Drive)" frameborder="0" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" loading="lazy" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"></iframe></div></div><div class="youtube-print-card vdo-print-card print-only" style="white-space:normal;display:none;margin:1rem 0;"><div class="youtube-print-box"><div class="youtube-print-header"><strong>📁 วิดีโอสาธิตและเฉลยเทคนิค (Google Drive Reference)</strong></div><div class="youtube-print-body"><div class="youtube-print-qr-wrap"><img src="${qrUrl}" class="youtube-print-qr" alt="QR Code"></div><div class="vdo-print-link-wrap"><div class="vdo-print-link-title">🔗 สแกน QR Code หรือเข้าดูผ่านลิงก์:</div><div class="youtube-print-url">${cleanDriveUrl}</div><div class="youtube-print-scan-hint">📲 สามารถสแกน QR Code ด้วยกล้องมือถือเพื่อเปิดรับชมบน Google Drive ได้ทันที</div></div></div></div></div>`;
     }
 
     // 3. Fallback General Link
@@ -235,6 +235,42 @@ function renderRichNoteContent(rawHtml) {
   });
 }
 
+function openDriveVideoFullscreen(previewUrl, cleanDriveUrl) {
+  let modal = document.getElementById('drive-fullscreen-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'drive-fullscreen-modal';
+    modal.style.position = 'fixed';
+    modal.style.inset = '0';
+    modal.style.background = 'rgba(0, 0, 0, 0.96)';
+    modal.style.zIndex = '999999';
+    modal.style.display = 'flex';
+    modal.style.flexDirection = 'column';
+    modal.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1rem;background:#090d16;border-bottom:1px solid rgba(255,255,255,0.1);color:#fff;gap:0.75rem;z-index:2;">
+        <div style="font-weight:600;font-size:0.88rem;display:flex;align-items:center;gap:0.5rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          <span>📁</span>
+          <span>วิดีโอสาธิตเทคนิค (Google Drive)</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0;">
+          <a id="drive-modal-ext-link" href="#" target="_blank" rel="noopener noreferrer" style="color:#38bdf8;text-decoration:none;font-size:0.8rem;font-weight:600;padding:0.3rem 0.65rem;border-radius:6px;border:1px solid rgba(56,189,248,0.3);background:rgba(56,189,248,0.1);">เปิดใน Drive ↗</a>
+          <button type="button" onclick="document.getElementById('drive-fullscreen-modal').style.display='none'" style="background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:1.1rem;padding:0.3rem 0.75rem;border-radius:6px;cursor:pointer;line-height:1;">✕ ปิด</button>
+        </div>
+      </div>
+      <div style="flex:1;position:relative;width:100%;height:100%;background:#000;">
+        <iframe id="drive-modal-iframe" src="" frameborder="0" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" style="width:100%;height:100%;border:0;"></iframe>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+  const iframe = document.getElementById('drive-modal-iframe');
+  const extLink = document.getElementById('drive-modal-ext-link');
+  if (iframe) iframe.src = previewUrl;
+  if (extLink) extLink.href = cleanDriveUrl || previewUrl;
+  modal.style.display = 'flex';
+}
+
+window.openDriveVideoFullscreen = openDriveVideoFullscreen;
 window.extractYouTubeVideoId = extractYouTubeVideoId;
 window.renderRichNoteContent = renderRichNoteContent;
 
