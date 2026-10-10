@@ -49,6 +49,7 @@ const AppState = {
   dataReady: false,      // true = API sync done (full content available)
   dataReadyCount: 0      // number of cases with full content confirmed
 };
+window.AppState = AppState;
 
 // ──────────────────────────────────────────────────────────────
 // 0. AUTHENTICATION & LOCK SYSTEM (Password: rxcu)
@@ -1603,6 +1604,43 @@ function resetAllFilters() {
 }
 window.resetAllFilters = resetAllFilters;
 
+function parseDiseaseTags(str) {
+  if (!str || typeof str !== 'string') return [];
+  const trimmed = str.trim();
+  if (!trimmed || trimmed === '-' || trimmed === 'undefined' || trimmed === 'null') return [];
+
+  const tags = [];
+  let current = '';
+  let parenDepth = 0;
+
+  for (let i = 0; i < trimmed.length; i++) {
+    const char = trimmed[i];
+    if (char === '(' || char === '[' || char === '{') {
+      parenDepth++;
+      current += char;
+    } else if (char === ')' || char === ']' || char === '}') {
+      if (parenDepth > 0) parenDepth--;
+      current += char;
+    } else if (char === ',' && parenDepth === 0) {
+      const item = current.trim();
+      if (item && item !== '-' && item !== 'undefined') {
+        tags.push(item);
+      }
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+
+  const lastItem = current.trim();
+  if (lastItem && lastItem !== '-' && lastItem !== 'undefined') {
+    tags.push(lastItem);
+  }
+
+  return tags;
+}
+window.parseDiseaseTags = parseDiseaseTags;
+
 function applyFilters() {
   let list = Array.isArray(AppState.cases) ? [...AppState.cases] : [];
   const { category, mainGroup, disease, source, search } = AppState.activeFilters;
@@ -1616,7 +1654,14 @@ function applyFilters() {
   }
 
   if (disease && disease !== 'All') {
-    list = list.filter(c => c && (c.disease === disease || c.subTopic === disease));
+    list = list.filter(c => {
+      if (!c) return false;
+      const tags = parseDiseaseTags(c.disease || c.subTopic);
+      if (tags.length > 0) {
+        return tags.includes(disease);
+      }
+      return c.disease === disease || c.subTopic === disease;
+    });
   }
 
   if (source && source !== 'All') {
@@ -1694,16 +1739,19 @@ function renderFilterSelectOptions() {
 
     const diseases = new Set();
     availableCasesForDisease.forEach(c => {
-      if (c && c.disease) diseases.add(c.disease);
-      else if (c && c.subTopic) diseases.add(c.subTopic);
+      if (!c) return;
+      const tags = parseDiseaseTags(c.disease || c.subTopic);
+      tags.forEach(t => diseases.add(t));
     });
 
     const currentDisease = AppState.activeFilters.disease;
     const preservedDisease = diseases.has(currentDisease) ? currentDisease : 'All';
     AppState.activeFilters.disease = preservedDisease;
 
+    const sortedDiseases = Array.from(diseases).sort((a, b) => a.localeCompare(b, 'th'));
+
     selectDisease.innerHTML = '<option value="All">ทุกโรค / หัวข้อสอบ</option>';
-    diseases.forEach(d => {
+    sortedDiseases.forEach(d => {
       const opt = document.createElement('option');
       opt.value = d;
       opt.textContent = d;
@@ -1790,6 +1838,19 @@ function renderCaseList() {
       }
     });
 
+    let topicBadges = '';
+    if (isProtected) {
+      topicBadges = '<span class="case-card-tag">🔒 ล็อกด้วยรหัสผ่าน</span>';
+    } else {
+      const mainGroupTag = c.mainGroup ? `<span class="case-card-tag">${escapeHtml(c.mainGroup)}</span>` : '';
+      const tags = parseDiseaseTags(c.disease || c.subTopic);
+      const diseaseBadges = tags.map(t => `<span class="case-card-tag" style="background: rgba(14, 165, 233, 0.08); color: #0284c7; border: 1px solid rgba(14, 165, 233, 0.25);">🩺 ${escapeHtml(t)}</span>`).join('');
+      topicBadges = mainGroupTag + diseaseBadges;
+      if (!topicBadges) {
+        topicBadges = '<span class="case-card-tag">ทั่วไป</span>';
+      }
+    }
+
     card.innerHTML = `
       <div class="case-card-header">
         <span class="badge badge-${c.category.toLowerCase()}">${c.category}</span>
@@ -1798,7 +1859,7 @@ function renderCaseList() {
       <h3 class="case-card-title">${escapeHtml(displayTitle)}</h3>
       <div style="margin-bottom: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.35rem;">
         ${lockBadge}
-        <span class="case-card-tag">${escapeHtml(isProtected ? "🔒 ล็อกด้วยรหัสผ่าน" : (c.mainGroup || "") + (c.subTopic ? " · " + c.subTopic : ""))}</span>
+        ${topicBadges}
         ${sourceBadge}
         ${durationBadge}
       </div>
