@@ -4176,6 +4176,101 @@
       };
     }
 
+    // Helper: Determine if two cases are consecutive linked multi-part cases
+    function areCasesLinked(a, b) {
+      if (!a || !b) return false;
+      const idA = (a.caseId || a.id || '').trim();
+      const idB = (b.caseId || b.id || '').trim();
+      if (!idA || !idB || idA === 'REST' || idB === 'REST') return false;
+
+      const normIdA = idA.replace(/^OSPE-/i, '').toLowerCase();
+      const normIdB = idB.replace(/^OSPE-/i, '').toLowerCase();
+
+      // Resolve full case objects if linkedNextCase / linkedFromCase are missing
+      let fullA = (a.linkedNextCase !== undefined || a.linkedFromCase !== undefined) ? a : null;
+      let fullB = (b.linkedNextCase !== undefined || b.linkedFromCase !== undefined) ? b : null;
+
+      if (!fullA) {
+        if (typeof AppState !== 'undefined' && AppState.cases) {
+          fullA = AppState.cases.find(c => c && c.caseId && c.caseId.replace(/^OSPE-/i, '').toLowerCase() === normIdA);
+        }
+        if (!fullA && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+          fullA = OFFLINE_DATA.cases.find(c => c && c.caseId && c.caseId.replace(/^OSPE-/i, '').toLowerCase() === normIdA);
+        }
+      }
+
+      if (!fullB) {
+        if (typeof AppState !== 'undefined' && AppState.cases) {
+          fullB = AppState.cases.find(c => c && c.caseId && c.caseId.replace(/^OSPE-/i, '').toLowerCase() === normIdB);
+        }
+        if (!fullB && typeof OFFLINE_DATA !== 'undefined' && OFFLINE_DATA.cases) {
+          fullB = OFFLINE_DATA.cases.find(c => c && c.caseId && c.caseId.replace(/^OSPE-/i, '').toLowerCase() === normIdB);
+        }
+      }
+
+      const nextA = (fullA && fullA.linkedNextCase ? fullA.linkedNextCase : (a.linkedNextCase || '')).trim().replace(/^OSPE-/i, '').toLowerCase();
+      const fromB = (fullB && fullB.linkedFromCase ? fullB.linkedFromCase : (b.linkedFromCase || '')).trim().replace(/^OSPE-/i, '').toLowerCase();
+      const fromA = (fullA && fullA.linkedFromCase ? fullA.linkedFromCase : (a.linkedFromCase || '')).trim().replace(/^OSPE-/i, '').toLowerCase();
+      const nextB = (fullB && fullB.linkedNextCase ? fullB.linkedNextCase : (b.linkedNextCase || '')).trim().replace(/^OSPE-/i, '').toLowerCase();
+
+      if (nextA && nextA === normIdB) return true;
+      if (fromB && fromB === normIdA) return true;
+      if (fromA && fromA === normIdB) return true;
+      if (nextB && nextB === normIdA) return true;
+
+      return false;
+    }
+    window.areCasesLinked = areCasesLinked;
+
+    // Helper: Smartly insert rest stations without ever splitting linked cases
+    function insertRestStationsSmart(items, restCount, createRestItemFn) {
+      if (!items || items.length === 0 || restCount <= 0) return [...items];
+
+      const N = items.length;
+      // Valid split points: index i means between items[i] and items[i + 1]
+      const validSplitPoints = [];
+      for (let i = 0; i < N - 1; i++) {
+        if (!areCasesLinked(items[i], items[i + 1])) {
+          validSplitPoints.push(i);
+        }
+      }
+
+      if (validSplitPoints.length === 0) {
+        return [...items];
+      }
+
+      // Pick restCount positions as evenly spaced as possible across valid split points
+      const chosenPoints = new Set();
+      const numToInsert = Math.min(restCount, validSplitPoints.length);
+
+      for (let k = 1; k <= numToInsert; k++) {
+        const idealIdx = Math.round((N * k) / (numToInsert + 1)) - 1;
+        let bestPoint = null;
+        let minDiff = Infinity;
+        for (const pt of validSplitPoints) {
+          if (chosenPoints.has(pt)) continue;
+          const diff = Math.abs(pt - idealIdx);
+          if (diff < minDiff) {
+            minDiff = diff;
+            bestPoint = pt;
+          }
+        }
+        if (bestPoint !== null) {
+          chosenPoints.add(bestPoint);
+        }
+      }
+
+      const result = [];
+      for (let i = 0; i < N; i++) {
+        result.push(items[i]);
+        if (chosenPoints.has(i)) {
+          result.push(typeof createRestItemFn === 'function' ? createRestItemFn() : { caseId: 'REST' });
+        }
+      }
+      return result;
+    }
+    window.insertRestStationsSmart = insertRestStationsSmart;
+
     // ─── Submit Lobby Form (Firebase) ────────────────────────────────────
     async function submitLobbySetup() {
       const playerName = document.getElementById('lobby-player-name').value.trim();
@@ -4218,16 +4313,11 @@
               return;
             }
             const restCount = parseInt(document.getElementById('rest-stations-count').value) || 0;
-            const restInterval = restCount > 0 ? Math.floor(examSetRaw.length / restCount) : 999;
-            let restInserted = 0;
-            let stationNumCounter = 1;
-            for (let i = 0; i < examSetRaw.length; i++) {
-              fullExamSet.push({ stationNumber: stationNumCounter++, caseId: examSetRaw[i].caseId });
-              if (restCount > 0 && (i + 1) % restInterval === 0 && restInserted < restCount) {
-                restInserted++;
-                fullExamSet.push({ stationNumber: stationNumCounter++, caseId: 'REST' });
-              }
-            }
+            const rawSetItems = examSetRaw.map(c => ({ caseId: c.caseId }));
+            const setWithRest = insertRestStationsSmart(rawSetItems, restCount, () => ({ caseId: 'REST' }));
+            setWithRest.forEach((st, idx) => {
+              fullExamSet.push({ stationNumber: idx + 1, caseId: st.caseId });
+            });
           } else {
             const { clinic, product, sap } = getProportionValues();
             const total = clinic + product + sap;
@@ -4245,16 +4335,11 @@
             }
 
             const restCount = parseInt(document.getElementById('rest-stations-count').value) || 0;
-            const restInterval = restCount > 0 ? Math.floor(examSetRaw.length / restCount) : 999;
-            let restInserted = 0;
-            let stationNumCounter = 1;
-            for (let i = 0; i < examSetRaw.length; i++) {
-              fullExamSet.push({ stationNumber: stationNumCounter++, caseId: examSetRaw[i].caseId });
-              if (restCount > 0 && (i + 1) % restInterval === 0 && restInserted < restCount) {
-                restInserted++;
-                fullExamSet.push({ stationNumber: stationNumCounter++, caseId: 'REST' });
-              }
-            }
+            const rawRandomItems = examSetRaw.map(c => ({ caseId: c.caseId }));
+            const randomWithRest = insertRestStationsSmart(rawRandomItems, restCount, () => ({ caseId: 'REST' }));
+            randomWithRest.forEach((st, idx) => {
+              fullExamSet.push({ stationNumber: idx + 1, caseId: st.caseId });
+            });
           }
           
           SimState.totalStations = fullExamSet.length;
@@ -6840,26 +6925,17 @@
         if (matchedCase) loadedCases.push(matchedCase);
       }
 
-      SimState.stations = [];
-      const restInterval = restCount > 0 ? Math.floor(loadedCases.length / restCount) : 999;
-      let restInserted = 0;
-      let stationNumCounter = 1;
+      const rawStations = loadedCases.map(c => ({ isRest: false, case: c }));
+      const stationsWithRest = insertRestStationsSmart(rawStations, restCount, () => ({
+        isRest: true,
+        case: getRestCaseData()
+      }));
 
-      for (let i = 0; i < loadedCases.length; i++) {
-        SimState.stations.push({ stationNumber: stationNumCounter++, isRest: false, case: loadedCases[i] });
-        
-        // Never insert a REST station between linked consecutive stations
-        const isCurrentLinkedToNext = Boolean(loadedCases[i].linkedNextCase && i + 1 < loadedCases.length && loadedCases[i + 1].caseId === loadedCases[i].linkedNextCase);
-
-        if (restCount > 0 && !isCurrentLinkedToNext && (i + 1) % restInterval === 0 && restInserted < restCount) {
-          restInserted++;
-          SimState.stations.push({
-            stationNumber: stationNumCounter++,
-            isRest: true,
-            case: getRestCaseData()
-          });
-        }
-      }
+      SimState.stations = stationsWithRest.map((st, idx) => ({
+        stationNumber: idx + 1,
+        isRest: st.isRest,
+        case: st.case
+      }));
 
       SimState.totalStations = SimState.stations.length;
       SimState.currentIdx = 0;
@@ -13384,17 +13460,8 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         const orderMode = document.getElementById('exam-set-order').value;
         const raw = generateExamSetBySource(selectedSource, stationCount, orderMode);
         
-        const restInterval = restCountInput > 0 ? Math.floor(raw.length / restCountInput) : 999;
-        let restInserted = 0;
-        let stCounter = 1;
-        const combined = [];
-        for (let i = 0; i < raw.length; i++) {
-          combined.push({ stationNumber: stCounter++, caseId: raw[i].caseId, isRest: false });
-          if (restCountInput > 0 && (i + 1) % restInterval === 0 && restInserted < restCountInput) {
-            restInserted++;
-            combined.push({ stationNumber: stCounter++, caseId: 'REST', isRest: true });
-          }
-        }
+        const rawSetItems = raw.map(c => ({ caseId: c.caseId, isRest: false }));
+        const combined = insertRestStationsSmart(rawSetItems, restCountInput, () => ({ caseId: 'REST', isRest: true }));
         stations = combined.map((s, i) => {
           const h = hydrateCase(s.caseId);
           return {
@@ -13417,17 +13484,8 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
       } else {
         const { clinic, product, sap } = getProportionValues();
         const raw = generateLocalExamSet(clinic, product, sap);
-        const restInterval = restCountInput > 0 ? Math.floor(raw.length / restCountInput) : 999;
-        let restInserted = 0;
-        let stCounter = 1;
-        const combined = [];
-        for (let i = 0; i < raw.length; i++) {
-          combined.push({ stationNumber: stCounter++, caseId: raw[i].caseId, isRest: false });
-          if (restCountInput > 0 && (i + 1) % restInterval === 0 && restInserted < restCountInput) {
-            restInserted++;
-            combined.push({ stationNumber: stCounter++, caseId: 'REST', isRest: true });
-          }
-        }
+        const rawRandomItems = raw.map(c => ({ caseId: c.caseId, isRest: false }));
+        const combined = insertRestStationsSmart(rawRandomItems, restCountInput, () => ({ caseId: 'REST', isRest: true }));
         stations = combined.map((s, i) => {
           const h = hydrateCase(s.caseId);
           return {
