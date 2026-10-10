@@ -1,13 +1,13 @@
 /**
  * PLE-CC2 OSPE Practice System — Offline Case List Metadata (Auto-Generated)
- * Version: v_20261010_151852
- * Generated on 2026-10-10 15:18:52
+ * Version: v_20261010_151944
+ * Generated on 2026-10-10 15:19:44
  */
 
 const OFFLINE_DATA = {
-  "version": "v_20261010_151852",
-  "generatedAt": "2026-10-10 15:18:52",
-  "totalCases": 386,
+  "version": "v_20261010_151944",
+  "generatedAt": "2026-10-10 15:19:44",
+  "totalCases": 387,
   "cases": [
     {
       "caseId": "OSPE-CL4801",
@@ -4251,11 +4251,11 @@ const OFFLINE_DATA = {
     },
     {
       "caseId": "OSPE-PD84M1W201A",
-      "title": "OSPE-PD84M1W201A",
+      "title": "Pulverization by Intervention 1A",
       "category": "Product",
-      "mainGroup": "Mock Exam 2569",
-      "subTopic": "🔒 ข้อสอบลับ (ต้องใช้รหัสผ่าน)",
-      "disease": "🔒 ล็อกด้วยรหัสผ่าน (Secret Mock)",
+      "mainGroup": "เทคนิคพิเศษ",
+      "subTopic": "",
+      "disease": "Pulverization by Intervention",
       "difficulty": 2,
       "docId": "1Bjdz8c6-Gr5GIHGllXIvt0FLPeWTAdZy586vtVDOr24",
       "author": "RxCU84",
@@ -4263,11 +4263,7 @@ const OFFLINE_DATA = {
       "source": "Mock Exam 2569 (Week 2) ชุด A",
       "isActive": true,
       "linkedNextCase": "",
-      "linkedFromCase": "",
-      "caseStatus": "Active",
-      "durationMin": 4,
-      "isProtected": true,
-      "hasPassword": true
+      "linkedFromCase": ""
     },
     {
       "caseId": "OSPE-PD84M1W201B",
@@ -6188,6 +6184,23 @@ const OFFLINE_DATA = {
       "isActive": true,
       "linkedNextCase": "",
       "linkedFromCase": ""
+    },
+    {
+      "caseId": "OSPE-PD84M1W201A]",
+      "title": "เคส PD84M1W201A]",
+      "category": "SAP",
+      "mainGroup": "",
+      "subTopic": "",
+      "disease": "",
+      "difficulty": 2,
+      "docId": "",
+      "author": "Auto-Discovered",
+      "createdDate": "2026-10-10",
+      "source": "ไม่ระบุ",
+      "isActive": true,
+      "linkedNextCase": "",
+      "linkedFromCase": "",
+      "_isNewCase": true
     }
   ]
 };
