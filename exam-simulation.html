@@ -2021,7 +2021,7 @@
                ═══════════════════════════════════════════ -->
           <div id="setup-lobby-host-actions" style="display: none; margin-top: 1rem;">
             <button type="button" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 1rem;" id="lobby-submit-btn" onclick="submitLobbySetup();">
-              📡 สร้างห้องซ้อมสอบใหม่ (Host)
+              📡 สร้างห้องซ้อมสอบใหม่
             </button>
           </div>
         </div>
@@ -2293,8 +2293,11 @@
           
           <!-- Ready / Start Buttons -->
           <div id="lobby-ready-toggle-container" style="display: none; margin: 1.5rem auto 0; text-align: center;">
-            <button type="button" id="btn-lobby-toggle-ready" class="btn btn-primary" style="min-width: 220px; font-size: 0.95rem; padding: 0.65rem 1.75rem; font-weight: 600; border-radius: var(--radius-sm); cursor: pointer;" onclick="toggleMyReadyStatus()">
-              Ready
+            <button type="button" id="btn-lobby-toggle-ready" class="btn btn-secondary" style="min-width: 220px; padding: 0.55rem 1.75rem; font-weight: 600; border-radius: var(--radius-sm); cursor: pointer; background: #ef4444; border-color: #ef4444; color: #ffffff;" onclick="toggleMyReadyStatus()">
+              <div style="display:flex;flex-direction:column;align-items:center;line-height:1.2;">
+                <span style="font-weight:700;font-size:0.95rem;display:flex;align-items:center;gap:0.35rem;">🔴 UNREADY</span>
+                <span style="font-size:0.68rem;opacity:0.9;font-weight:500;">Current Status</span>
+              </div>
             </button>
           </div>
           
@@ -2313,7 +2316,7 @@
             <div style="display: flex; gap: 0.5rem; align-items: center;">
               <button type="button" class="btn btn-secondary" style="font-size: 1rem; padding: 0.35rem 0.65rem;" onclick="broadcastBellSignal()" title="สั่นกริ่งเตือนทุกคนในห้อง">🔔</button>
               <button type="button" class="btn btn-outline" style="font-size: 1rem; padding: 0.35rem 0.65rem;" onclick="toggleSuperHostFullscreen()" title="เต็มจอ Projector">🖥️</button>
-              <button type="button" class="btn btn-sm" onclick="abortExamSimulation()" style="color: #ffffff; font-weight: 700; background: #dc2626; border: 1px solid #b91c1c; padding: 0.35rem 0.75rem; border-radius: var(--radius-sm);" title="ยุบห้องสอบและพาผู้เข้าสอบทุกคนกลับหน้าแรก">🛑 ยุติห้องสอบ (Super Host)</button>
+              <button type="button" class="btn btn-sm" onclick="abortExamSimulation()" style="color: #ffffff; font-weight: 700; background: #dc2626; border: 1px solid #b91c1c; padding: 0.35rem 0.65rem; border-radius: var(--radius-sm); font-size: 1.1rem; line-height: 1;" title="ยุบห้องสอบและพาผู้เข้าสอบทุกคนกลับหน้าแรก">🛑</button>
             </div>
           </div>
           
@@ -2322,8 +2325,8 @@
             <div id="sh-round-indicator" style="font-size: 1.15rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem; letter-spacing: 0.05em;">รอบที่ 1 / 14</div>
             <div id="sh-timer-display" style="font-size: 5.5rem; font-weight: 900; color: var(--primary); font-family: var(--font-mono, monospace); line-height: 1; letter-spacing: 2px;">04:00</div>
             <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
-              <button type="button" class="btn btn-primary" id="sh-timer-toggle-btn" onclick="toggleTimer()">⏸️ พักตัวจับเวลา</button>
-              <button type="button" class="btn btn-secondary" onclick="resetTimer()">🔄 รีเซ็ตเวลา</button>
+              <button type="button" class="btn btn-primary" id="sh-timer-toggle-btn" onclick="toggleTimer()" style="font-size: 1.15rem; padding: 0.4rem 1rem;" title="พัก / เล่นตัวจับเวลาต่อ">⏸️</button>
+              <button type="button" class="btn btn-secondary" onclick="resetTimer()" style="font-size: 1.15rem; padding: 0.4rem 1rem;" title="รีเซ็ตเวลา">🔄</button>
             </div>
             <div id="sh-host-time-adjust-controls" style="margin-top: 0.85rem; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; align-items: center; border-top: 1px dashed var(--border); padding-top: 0.75rem;">
               <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); margin-right: 0.25rem;">⏱️ ทดเวลา (Host Only):</span>
@@ -2381,9 +2384,9 @@
 
                 <!-- Attached controls right next to timer -->
                 <div class="timer-action-btns">
-                  <button class="btn ghost btn-sm" id="timer-toggle-btn" onclick="toggleTimer()">⏸ พักตัวจับเวลา</button>
-                  <button class="btn outline btn-sm" id="timer-reset-btn" onclick="resetTimer()">🔄 เริ่มต้นใหม่</button>
-                  <button type="button" class="btn btn-sm" id="btn-sticky-abort-exam" onclick="abortExamSimulation()" style="color: var(--danger); font-weight: 600; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25);" title="ยุติการสอบและกลับสู่หน้าตั้งค่า">🛑 ยุติการสอบ</button>
+                  <button class="btn ghost btn-sm" id="timer-toggle-btn" onclick="toggleTimer()" style="font-size: 1.05rem; padding: 0.25rem 0.5rem;" title="พัก / เล่นตัวจับเวลาต่อ">⏸️</button>
+                  <button class="btn outline btn-sm" id="timer-reset-btn" onclick="resetTimer()" style="font-size: 1.05rem; padding: 0.25rem 0.5rem;" title="เริ่มต้นใหม่">🔄</button>
+                  <button type="button" class="btn btn-sm" id="btn-sticky-abort-exam" onclick="abortExamSimulation()" style="color: var(--danger); font-weight: 600; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); font-size: 1.05rem; padding: 0.25rem 0.5rem;" title="ยุติการสอบและกลับสู่หน้าตั้งค่า">🛑</button>
                   <div id="sticky-host-time-adjust-wrap" style="display: none; align-items: center; gap: 0.25rem; margin-left: 0.25rem;">
                     <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">ทดเวลา:</span>
                     <button type="button" class="btn outline btn-sm" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="adjustCohortTimer(60)" title="ทดเวลา +1 นาที">+1น</button>
@@ -2614,7 +2617,7 @@
             <div id="exam-live-feedback-container" class="exam-live-feedback-container" style="display: none; margin-top: 1.5rem; margin-bottom: 2rem; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 1rem 1.25rem; box-shadow: var(--shadow-sm);">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem; border-bottom: 1px dashed var(--border); padding-bottom: 0.5rem;">
                 <div style="font-family: var(--font-title); font-weight: 700; color: var(--text-primary); font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
-                  <span>💬 บันทึกข้อเสนอแนะ / จุดที่ต้องปรับปรุงประจำสถานีนี้</span>
+                  <span>💬 Comment and Feedback</span>
                 </div>
                 <span id="exam-live-feedback-station-label" class="badge" style="background: rgba(99, 102, 241, 0.12); color: var(--primary); font-size: 0.8rem; font-weight: 700;">สถานีที่ 1</span>
               </div>
@@ -2623,7 +2626,7 @@
                 class="select-filter" 
                 rows="4" 
                 style="width: 100%; min-height: 100px; resize: vertical; font-size: 0.88rem; line-height: 1.5; padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg); font-family: inherit; color: var(--text-primary);" 
-                placeholder="พิมพ์ข้อสังเกต คำแนะนำ หรือสิ่งที่ผู้เข้าสอบทำขาดตกบกพร่องในสถานีนี้ (สามารถพิมพ์ยาวๆ เป็นย่อหน้าได้ โดยระบบจะบันทึกอัตโนมัติและแสดงรายงานท้ายข้อในหน้าสรุปผลรวมถึงรายงานพิมพ์ PDF)..."
+                placeholder="พิมพ์ข้อสังเกต คำแนะนำ หรือสิ่งที่ผู้เข้าสอบทำขาดตกบกพร่องในสถานีนี้ (สามารถพิมพ์ยาวๆ เป็นย่อหน้าได้ โดยระบบจะบันทึกอัตโนมัติและแสดงรายงานท้ายข้อในหน้าสรุปผลรวมถึงรายงานพิมพ์ PDF)..." 
                 oninput="handleLiveStationFeedbackInput(this.value)"
               ></textarea>
               <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; font-size: 0.78rem; color: var(--text-secondary);">
@@ -2645,10 +2648,10 @@
             </h2>
             <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
               <button type="button" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.88rem; font-weight: 700; border-color: var(--primary); color: var(--primary); display: inline-flex; align-items: center; gap: 0.4rem; background: var(--surface);" onclick="openOspePrintModal()">
-                <span>🖨️ พิมพ์รายงานผลการสอบ (Print Report)</span>
+                <span>🖨️ Print Report</span>
               </button>
               <button type="button" class="btn btn-primary" style="padding: 0.5rem 1.15rem; font-size: 0.88rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;" onclick="restartSetup()">
-                <span>🔄 เริ่มสอบห้องใหม่</span>
+                <span>🔄 ทำการสอบอีกครั้ง</span>
               </button>
             </div>
           </div>
@@ -2748,7 +2751,7 @@
             </div>
           </div>
           <div style="display: flex; gap: 1rem; margin-top: 2.25rem; flex-wrap: wrap;">
-            <button class="btn btn-primary" style="flex: 1; min-width: 200px; padding: 0.75rem 1.5rem; font-weight: 600;" onclick="restartSetup()">🔄 ทำการสอบอีกครั้ง / สร้างห้องใหม่</button>
+            <button class="btn btn-primary" style="flex: 1; min-width: 200px; padding: 0.75rem 1.5rem; font-weight: 600;" onclick="restartSetup()">🔄 ทำการสอบอีกครั้ง</button>
             <a href="index.html" class="btn btn-secondary" style="flex: 1; min-width: 200px; text-align: center; padding: 0.75rem 1.5rem; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600;">🏠 กลับหน้าหลัก Hub</a>
           </div>
         </div>
@@ -2778,7 +2781,7 @@
     <div class="modal-card" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); max-width:540px; width:100%; padding:1.75rem; box-shadow:0 20px 25px -5px rgba(0,0,0,0.3); animation:fadeIn 0.2s ease;">
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
         <h3 style="margin:0; font-family:var(--font-title); font-size:1.25rem; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:0.5rem;">
-          <span>🖨️ พิมพ์รายงานผลการสอบ OSPE</span>
+          <span>🖨️ Print Report</span>
         </h3>
         <button type="button" class="btn btn-icon" style="background:transparent; border:none; font-size:1.2rem; cursor:pointer; color:var(--text-secondary);" onclick="closeOspePrintModal()">✕</button>
       </div>
@@ -2858,9 +2861,6 @@
     }
 
     function parseDiseaseTags(str) {
-      if (typeof window.parseDiseaseTags === 'function') {
-        return window.parseDiseaseTags(str);
-      }
       if (!str || typeof str !== 'string') return [];
       const trimmed = str.trim();
       if (!trimmed || trimmed === '-' || trimmed === 'undefined' || trimmed === 'null') return [];
@@ -2887,6 +2887,7 @@
       if (lastItem && lastItem !== '-' && lastItem !== 'undefined') tags.push(lastItem);
       return tags;
     }
+    window.parseDiseaseTags = parseDiseaseTags;
 
     // State object
     const SimState = {
@@ -3782,10 +3783,10 @@
     window.updateMyRoleBadgeUI = updateMyRoleBadgeUI;
 
     function updateStandardRoleSelectorUI() {
-      const isStandard = SimState.examMode === 'standard' || !SimState.examMode;
+      const shouldShow = Boolean(SimState.isLobby);
       const roleSelectorEl = document.getElementById('standard-mode-role-selector');
       if (roleSelectorEl) {
-        roleSelectorEl.style.display = isStandard ? 'block' : 'none';
+        roleSelectorEl.style.display = shouldShow ? 'block' : 'none';
       }
       const btnExaminer = document.getElementById('btn-set-role-examiner');
       const btnExaminee = document.getElementById('btn-set-role-examinee');
@@ -3843,7 +3844,7 @@
         if (sharedConfig && SimState.isLobby) sharedConfig.style.display = 'block';
         if (hostActions && SimState.isLobby) hostActions.style.display = 'block';
         if (modeSelector) modeSelector.style.display = 'block';
-        if (submitBtn) submitBtn.textContent = '📡 สร้างห้องซ้อมสอบใหม่ (Host)';
+        if (submitBtn) submitBtn.textContent = '📡 สร้างห้องซ้อมสอบใหม่';
       } else {
         if (radioJoin) radioJoin.checked = true;
         if (cardJoin) {
@@ -5336,7 +5337,10 @@
     // Kept as no-op to avoid reference errors from old code paths
     function syncLobbyStatus() {}
 
+    let _isApplyingRoomState = false;
     async function applyRoomState(room) {
+      if (!room || _isApplyingRoomState) return;
+      _isApplyingRoomState = true;
       try {
         SimState.cachedRoom = room;
         // Parse all connected players
@@ -5621,11 +5625,6 @@
                   item.style.background = 'var(--primary-light)';
                 }
 
-                // 1-click role switch button for current player
-                const roleSwitchBtnHtml = isMe
-                  ? `<button type="button" class="sim-btn-xs" style="font-size: 0.72rem; padding: 0.18rem 0.5rem; background: ${p.role === 'examiner' ? '#dcfce7' : '#e0f2fe'}; color: ${p.role === 'examiner' ? '#15803d' : '#0369a1'}; border: 1px solid ${p.role === 'examiner' ? '#bbf7d0' : '#bae6fd'}; cursor: pointer; border-radius: 4px; font-weight: 600;" onclick="confirmLobbyRole('${p.role === 'examiner' ? 'examinee' : 'examiner'}')" title="คลิกเพื่อสลับบทบาท">${p.role === 'examiner' ? '🔄 เป็นผู้เข้าสอบ' : '🔄 เป็นผู้ประเมิน'}</button>`
-                  : '';
-
                 item.innerHTML = `
                   <div style="display: flex; align-items: center; gap: 0.5rem; min-width: 0;">
                     <span style="font-size: 1.15rem; line-height: 1;">${escapeHtml(pEmoji)}</span>
@@ -5642,7 +5641,6 @@
                     </div>
                   </div>
                   <div style="display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0;">
-                    ${roleSwitchBtnHtml}
                     ${statusTagHtml}
                     ${kickBtnHtml}
                   </div>
@@ -5660,12 +5658,12 @@
           if (room.examMode === 'cohort_breakout') {
             if (breakoutPanel) breakoutPanel.style.display = 'block';
             if (carouselPanel) carouselPanel.style.display = 'none';
-            if (standardRoleSelector) standardRoleSelector.style.display = 'none';
+            if (standardRoleSelector) standardRoleSelector.style.display = 'block';
             renderBreakoutTables(room);
           } else if (room.examMode === 'carousel_rotation') {
             if (breakoutPanel) breakoutPanel.style.display = 'none';
             if (carouselPanel) carouselPanel.style.display = 'block';
-            if (standardRoleSelector) standardRoleSelector.style.display = 'none';
+            if (standardRoleSelector) standardRoleSelector.style.display = 'block';
             renderCarouselDiagram(room);
           } else {
             // Standard Mode
@@ -5770,19 +5768,7 @@
                 SimState.isReady = !!meP.isReady;
               }
               if (readyBtn) {
-                if (SimState.isReady) {
-                  readyBtn.className = 'btn btn-secondary';
-                  readyBtn.style.background = 'var(--surface)';
-                  readyBtn.style.borderColor = 'var(--border)';
-                  readyBtn.style.color = 'var(--text-secondary)';
-                  readyBtn.innerHTML = 'ยกเลิกความพร้อม';
-                } else {
-                  readyBtn.className = 'btn btn-primary';
-                  readyBtn.style.background = '#10b981';
-                  readyBtn.style.borderColor = '#10b981';
-                  readyBtn.style.color = '#ffffff';
-                  readyBtn.innerHTML = 'พร้อมสอบ (Ready)';
-                }
+                updateReadyButtonState(SimState.isReady);
               }
 
               if (waitingTitle) waitingTitle.textContent = 'ห้องซ้อมสอบออนไลน์ (Standard Practice Room)';
@@ -5837,19 +5823,7 @@
                 SimState.isReady = !!mePlayer.isReady;
               }
               if (readyBtn) {
-                if (SimState.isReady) {
-                  readyBtn.className = 'btn btn-secondary';
-                  readyBtn.style.background = 'var(--surface)';
-                  readyBtn.style.borderColor = 'var(--border)';
-                  readyBtn.style.color = 'var(--text-secondary)';
-                  readyBtn.innerHTML = '⚪ ยกเลิกความพร้อม (Not Ready)';
-                } else {
-                  readyBtn.className = 'btn btn-primary';
-                  readyBtn.style.background = '#10b981';
-                  readyBtn.style.borderColor = '#10b981';
-                  readyBtn.style.color = '#ffffff';
-                  readyBtn.innerHTML = '🟢 กดเพื่อแจ้งว่าพร้อม (Ready)';
-                }
+                updateReadyButtonState(SimState.isReady);
               }
 
               const hostPlayer = playersList.find(p => p.isHost) || { name: 'Host' };
@@ -6220,7 +6194,12 @@
             let matchedCase = room.caseDetail || AppState.cases.find(c => c.caseId === room.caseId) || AppState.cases[0];
             SimState.stations = [{ stationNumber: 1, case: matchedCase }];
           }
-          finishExamSimulation();
+          if (room.status === 'results') {
+            if (SimState.isFinishingExam || SimState.isExamFinished) {
+              return;
+            }
+            await finishExamSimulation();
+          }
         }
       } catch (err) {
         console.error('Error in applyRoomState:', err);
@@ -6229,6 +6208,8 @@
           alert('เกิดข้อผิดพลาดในการซิงก์หน้าจอ: ' + err.message);
           window.hasAlertedApplyError = true;
         }
+      } finally {
+        _isApplyingRoomState = false;
       }
     }
 
@@ -6634,25 +6615,39 @@
     }
     window.applyCustomEmoji = applyCustomEmoji;
 
+    function updateReadyButtonState(isReady) {
+      const readyBtn = document.getElementById('btn-lobby-toggle-ready');
+      if (!readyBtn) return;
+      if (isReady) {
+        readyBtn.className = 'btn btn-primary';
+        readyBtn.style.background = '#10b981';
+        readyBtn.style.borderColor = '#10b981';
+        readyBtn.style.color = '#ffffff';
+        readyBtn.innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;line-height:1.2;">
+            <span style="font-weight:700;font-size:0.95rem;display:flex;align-items:center;gap:0.35rem;">🟢 READY</span>
+            <span style="font-size:0.68rem;opacity:0.9;font-weight:500;">Current Status</span>
+          </div>
+        `;
+      } else {
+        readyBtn.className = 'btn btn-secondary';
+        readyBtn.style.background = '#ef4444';
+        readyBtn.style.borderColor = '#ef4444';
+        readyBtn.style.color = '#ffffff';
+        readyBtn.innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;line-height:1.2;">
+            <span style="font-weight:700;font-size:0.95rem;display:flex;align-items:center;gap:0.35rem;">🔴 UNREADY</span>
+            <span style="font-size:0.68rem;opacity:0.9;font-weight:500;">Current Status</span>
+          </div>
+        `;
+      }
+    }
+    window.updateReadyButtonState = updateReadyButtonState;
+
     // Participant / Examiner toggles ready status in lobby
     async function toggleMyReadyStatus() {
       SimState.isReady = !SimState.isReady;
-      const readyBtn = document.getElementById('btn-lobby-toggle-ready');
-      if (readyBtn) {
-        if (SimState.isReady) {
-          readyBtn.className = 'btn btn-secondary';
-          readyBtn.style.background = 'var(--surface)';
-          readyBtn.style.borderColor = 'var(--border)';
-          readyBtn.style.color = 'var(--text-secondary)';
-          readyBtn.innerHTML = '⚪ ยกเลิกความพร้อม (Not Ready)';
-        } else {
-          readyBtn.className = 'btn btn-primary';
-          readyBtn.style.background = '#10b981';
-          readyBtn.style.borderColor = '#10b981';
-          readyBtn.style.color = '#ffffff';
-          readyBtn.innerHTML = '🟢 กดเพื่อแจ้งว่าพร้อม (Ready)';
-        }
-      }
+      updateReadyButtonState(SimState.isReady);
       if (SimState.isLobby && SimState.roomId && typeof _fbDb !== 'undefined' && SimState.myPlayerId) {
         try {
           await _fbDb.ref(`rooms/${SimState.roomId}/players/${SimState.myPlayerId}`).update({
@@ -6938,16 +6933,17 @@
     // SOLO EXAM START
     // ═══════════════════════════════════════════
     async function startExamSimulation() {
-      SimState.role = 'solo';
-      SimState.isLobby = false;
-      const soloTimeoutMode = document.querySelector('input[name="global-timeout-behavior"]:checked')?.value || SimState.timeoutTransitionMode || 'auto';
-      SimState.timeoutTransitionMode = soloTimeoutMode;
-      const soloAlarm = document.getElementById('solo-alarm-sound-select')?.value || SimState.alarmSound || localStorage.getItem('ple_ospe_alarm_sound') || 'school-bell';
-      SimState.alarmSound = soloAlarm;
-      localStorage.setItem('ple_ospe_alarm_sound', soloAlarm);
-      if (typeof unlockAudioContext === 'function') unlockAudioContext();
-      if (window.Scratchpad) Scratchpad.resetAll();
-      showGlobalLoader(true);
+      try {
+        SimState.role = 'solo';
+        SimState.isLobby = false;
+        const soloTimeoutMode = document.querySelector('input[name="global-timeout-behavior"]:checked')?.value || SimState.timeoutTransitionMode || 'auto';
+        SimState.timeoutTransitionMode = soloTimeoutMode;
+        const soloAlarm = document.getElementById('solo-alarm-sound-select')?.value || SimState.alarmSound || localStorage.getItem('ple_ospe_alarm_sound') || 'school-bell';
+        SimState.alarmSound = soloAlarm;
+        localStorage.setItem('ple_ospe_alarm_sound', soloAlarm);
+        if (typeof unlockAudioContext === 'function') unlockAudioContext();
+        if (window.Scratchpad) Scratchpad.resetAll();
+        showGlobalLoader(true);
       
       if (SimState.customExamSet && SimState.customExamSet.length > 0) {
         SimState.stations = [];
@@ -7090,7 +7086,12 @@
         return;
       }
 
-      launchSoloExamWithCountdown(0);
+        launchSoloExamWithCountdown(0);
+      } catch (err) {
+        showGlobalLoader(false);
+        console.error('Solo exam start error:', err);
+        alert('เกิดข้อผิดพลาดในการเริ่มทำข้อสอบ: ' + (err && err.message ? err.message : String(err)));
+      }
     }
 
     function launchSoloExamWithCountdown(initialIdx = 0) {
@@ -7326,7 +7327,7 @@
       const dur = parseCaseDurationSec(curSt && curSt.case);
       SimState.timerValue = dur;
       SimState.timerRunning = true;
-      document.getElementById('timer-toggle-btn').textContent = '⏸️ พักตัวจับเวลา';
+      document.getElementById('timer-toggle-btn').textContent = '⏸️';
       updateTimerDisplay();
       
       if (SimState.isLobby) {
@@ -7365,9 +7366,9 @@
       }
       SimState.timerRunning = !SimState.timerRunning;
       const toggleBtn = document.getElementById('timer-toggle-btn');
-      if (toggleBtn) toggleBtn.textContent = SimState.timerRunning ? '⏸️ พักตัวจับเวลา' : '▶️ เล่นตัวจับเวลาต่อ';
+      if (toggleBtn) toggleBtn.textContent = SimState.timerRunning ? '⏸️' : '▶️';
       const shToggleBtn = document.getElementById('sh-timer-toggle-btn');
-      if (shToggleBtn) shToggleBtn.textContent = SimState.timerRunning ? '⏸️ พักตัวจับเวลา' : '▶️ เล่นตัวจับเวลาต่อ';
+      if (shToggleBtn) shToggleBtn.textContent = SimState.timerRunning ? '⏸️' : '▶️';
 
       if (SimState.isLobby && SimState.isHost) {
         if (SimState.timerRunning) {
@@ -7892,12 +7893,12 @@
             if (stickyAbortBtn) {
               stickyAbortBtn.style.display = canAbortRoom ? 'inline-flex' : 'none';
               stickyAbortBtn.title = 'ยุติการสอบและกลับสู่หน้าตั้งค่า';
-              stickyAbortBtn.innerHTML = '🛑 ยุติการสอบ';
+              stickyAbortBtn.innerHTML = '🛑';
             }
             if (headerAbortBtn) {
               headerAbortBtn.style.display = canAbortRoom ? 'inline-flex' : 'none';
               headerAbortBtn.title = 'ยุติการสอบและกลับสู่หน้าตั้งค่า';
-              headerAbortBtn.innerHTML = '🛑 ยุติการสอบ';
+              headerAbortBtn.innerHTML = '🛑';
             }
           }
         } else {
@@ -7905,7 +7906,7 @@
           const stickyAbortBtn = document.getElementById('btn-sticky-abort-exam');
           if (stickyAbortBtn) {
             stickyAbortBtn.style.display = 'inline-flex';
-            stickyAbortBtn.innerHTML = '🛑 ยุติการสอบ';
+            stickyAbortBtn.innerHTML = '🛑';
           }
         }
 
@@ -10977,10 +10978,18 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             } catch (e) {}
           });
 
+          const safeStringifyArg = (a) => {
+            if (a instanceof Error) return a.stack || a.message;
+            if (typeof a === 'object' && a !== null) {
+              try { return JSON.stringify(a); } catch (_) { return String(a); }
+            }
+            return String(a);
+          };
+
           const origConsoleError = console.error;
           console.error = (...args) => {
             try {
-              this.log('error', args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '));
+              this.log('error', args.map(safeStringifyArg).join(' '));
             } catch (e) {}
             origConsoleError.apply(console, args);
           };
@@ -10988,7 +10997,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
           const origConsoleWarn = console.warn;
           console.warn = (...args) => {
             try {
-              this.log('warn', args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '));
+              this.log('warn', args.map(safeStringifyArg).join(' '));
             } catch (e) {}
             origConsoleWarn.apply(console, args);
           };
@@ -11801,6 +11810,9 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
     // ─── Finish exam ──────────────────────────────────────────
     async function finishExamSimulation() {
+      if (SimState.isFinishingExam || SimState.isExamFinished) return;
+      SimState.isFinishingExam = true;
+
       stopTimeoutAlarmSound();
       if (typeof closeManualTimeoutOverlay === 'function') closeManualTimeoutOverlay();
       if (window.Scratchpad) Scratchpad.close();
@@ -11825,6 +11837,12 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
       showGlobalLoader(true, 'กำลังสรุปผลคะแนนการสอบร่วมกัน...');
       
+      // Detach old Firebase listener early to eliminate re-entrant event loops
+      if (typeof _fbRoomRef !== 'undefined' && _fbRoomRef) {
+        try { _fbRoomRef.off(); } catch (e) {}
+        _fbRoomRef = null;
+      }
+
       let latestRoom = null;
       if (typeof _fbDb !== 'undefined' && _fbDb && SimState.isLobby && SimState.roomId) {
         try {
@@ -12068,7 +12086,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             const canViewDetail = (!isRest && (checklist.length > 0 || hasBlanks));
             const detailBtnHtml = canViewDetail
               ? `<button type="button" class="btn btn-outline btn-sm" onclick="toggleResultChecklistDetail('${detailRowId}')" style="padding: 0.25rem 0.55rem; font-size: 0.78rem; font-weight: 600; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 4px;">
-                   🔍 <span>ตรวจข้อได้/เสีย</span>
+                   🔍 <span>Checklist</span>
                  </button>`
               : `<span style="color: var(--text-muted); font-size: 0.78rem;">-</span>`;
 
@@ -12321,7 +12339,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
                     <div style="margin-top: 1rem; padding: 0.85rem 1rem; background: var(--bg-secondary); border: 1.5px solid var(--border); border-radius: var(--radius-md);">
                       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
                         <label style="font-size: 0.86rem; font-weight: 700; color: var(--text-primary); font-family: var(--font-title); display: flex; align-items: center; gap: 6px; margin: 0;">
-                          <span>💬 บันทึกข้อเสนอแนะ / สรุปประเด็นที่ต้องปรับปรุง (Debrief Feedback สำหรับสถานีที่ ${st.stationNumber}):</span>
+                          <span>💬 Comment and Feedback (สถานีที่ ${st.stationNumber}):</span>
                         </label>
                         <span style="font-size: 0.74rem; color: var(--text-muted);">รายงานท้ายข้อสถานีนี้ · บันทึกอัตโนมัติ</span>
                       </div>
@@ -12330,7 +12348,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
                         id="station-feedback-input-${st.stationNumber}"
                         rows="3" 
                         style="width: 100%; min-height: 80px; resize: vertical; font-size: 0.86rem; line-height: 1.5; padding: 0.55rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg); color: var(--text-primary); font-family: inherit;" 
-                        placeholder="พิมพ์คำแนะนำ หรือสิ่งที่เพื่อน/ผู้เข้าสอบทำขาดตกบกพร่องในสถานีนี้ (สามารถพิมพ์ยาวๆ เป็นย่อหน้าได้ โดยข้อมูลจะแสดงในรายงานพิมพ์ PDF)..."
+                        placeholder="พิมพ์คำแนะนำ หรือสิ่งที่เพื่อน/ผู้เข้าสอบทำขาดตกบกพร่องในสถานีนี้ (สามารถพิมพ์ยาวๆ เป็นย่อหน้าได้ โดยข้อมูลจะแสดงในรายงานพิมพ์ PDF)..." 
                         oninput="handleStationFeedbackInput(${st.stationNumber}, this.value)"
                       >${escapeHtml(initFeedback)}</textarea>
                     </div>
@@ -12353,7 +12371,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         const statusText = document.getElementById('results-status-text');
         if (statusText) {
           const allPassed = totalPct >= 80;
-          statusText.textContent = allPassed ? 'PASSED (ผ่านการประเมิน)' : 'FAILED (ไม่ผ่านเกณฑ์)';
+          statusText.textContent = allPassed ? 'PASSED' : 'FAILED';
           statusText.style.color = allPassed ? 'var(--success)' : 'var(--danger)';
         }
         
@@ -12468,6 +12486,8 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         if (resultsView) resultsView.style.display = 'block';
         
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        SimState.isExamFinished = true;
+        SimState.isFinishingExam = false;
       }
     }
 
@@ -12890,7 +12910,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
           const sFeedback = (SimState.stationFeedbacks && (SimState.stationFeedbacks[s.stationNumber] || SimState.stationFeedbacks[String(s.stationNumber)])) || '';
           const sFeedbackPrintHtml = sFeedback ? `
             <div style="margin-top: 6px; padding: 5px 8px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 8pt;">
-              <div style="font-weight: 700; color: #1e3a8a; margin-bottom: 2px;">💬 บันทึกข้อเสนอแนะ / ความเห็นเพิ่มเติม (Debrief Feedback):</div>
+              <div style="font-weight: 700; color: #1e3a8a; margin-bottom: 2px;">💬 Comment and Feedback:</div>
               <div style="color: #1e293b; white-space: pre-wrap;">${escapeHtml(sFeedback)}</div>
             </div>
           ` : '';
@@ -12943,7 +12963,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             <div>
               <div style="font-size: 8.5pt; color: #475569; text-transform: uppercase; font-weight: 700;">ผลการประเมินภาพรวม (Overall Result)</div>
               <div style="font-size: 13pt; font-weight: 900; color: ${isExamPassed ? '#15803d' : '#b91c1c'}; margin-top: 1px;">
-                ${isExamPassed ? 'PASSED (ผ่านการประเมินวิชาชีพ)' : 'FAILED (ไม่ผ่านเกณฑ์การประเมิน)'}
+                ${isExamPassed ? 'PASSED' : 'FAILED'}
               </div>
               <div style="font-size: 8pt; color: #64748b; margin-top: 2px;">
                 คะแนนเฉลี่ยถ่วงน้ำหนัก ${totalPct}% · ผ่าน ${passedStations} จากทั้งหมด ${totalStationsCount} สถานีสอบ (เกณฑ์ผ่านร้อยละ 80)
@@ -13881,7 +13901,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
     // ═════════════════════════════════════════════════════════════════
     async function promptBatchCreateBreakoutTables() {
       if (!SimState.roomId || typeof _fbDb === 'undefined' || !_fbDb) return;
-      const input = prompt('ระบุจำนวนโต๊ะสอบย่อยที่ต้องการตั้งพร้อมกัน (เช่น 50 โต๊ะ สำหรับ 100 คน):', '50');
+      const input = prompt('ระบุจำนวนโต๊ะสอบย่อยที่ต้องการตั้งพร้อมกัน (เช่น 50 โต๊ะ สำหรับ 100 คน):', '0');
       if (input === null) return;
       const count = parseInt(input, 10);
       if (isNaN(count) || count < 1 || count > 50) {
@@ -14181,7 +14201,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             if (myCurrentBreakoutTable && myCurrentBreakoutTable !== tKey) {
               examinerSlotHtml = `<button type="button" class="sim-btn-xs" style="border-radius:4px;" onclick="joinBreakoutTable('${tKey}', 'examiner')">ย้ายมาโต๊ะนี้</button>`;
             } else {
-              examinerSlotHtml = `<button type="button" class="sim-btn-xs" style="border-radius:4px;" onclick="joinBreakoutTable('${tKey}', 'examiner')">+ เป็น Examiner</button>`;
+              examinerSlotHtml = `<button type="button" class="sim-btn-xs" style="border-radius:4px;" onclick="joinBreakoutTable('${tKey}', 'examiner')">+ เป็นผู้ประเมิน</button>`;
             }
           }
         }
@@ -14200,7 +14220,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             if (myCurrentBreakoutTable && myCurrentBreakoutTable !== tKey) {
               participantSlotHtml = `<button type="button" class="sim-btn-xs" style="border-radius:4px;" onclick="joinBreakoutTable('${tKey}', 'participant')">ย้ายมาโต๊ะนี้</button>`;
             } else {
-              participantSlotHtml = `<button type="button" class="sim-btn-xs" style="border-radius:4px;" onclick="joinBreakoutTable('${tKey}', 'participant')">+ เป็น Candidate</button>`;
+              participantSlotHtml = `<button type="button" class="sim-btn-xs" style="border-radius:4px;" onclick="joinBreakoutTable('${tKey}', 'participant')">+ เป็นผู้เข้าสอบ</button>`;
             }
           }
         }
@@ -14730,11 +14750,12 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
               }
             }
 
-            if (!fullDetail && window.OFFLINE_CASE_DETAILS) {
-              fullDetail = window.OFFLINE_CASE_DETAILS[cleanId]
-                     || window.OFFLINE_CASE_DETAILS[upperId]
-                     || window.OFFLINE_CASE_DETAILS[lowerId]
-                     || window.OFFLINE_CASE_DETAILS[rawId];
+            const offlineDict = (typeof OFFLINE_CASE_DETAILS !== 'undefined' ? OFFLINE_CASE_DETAILS : (window.OFFLINE_CASE_DETAILS || null));
+            if (!fullDetail && offlineDict) {
+              fullDetail = offlineDict[cleanId]
+                     || offlineDict[upperId]
+                     || offlineDict[lowerId]
+                     || offlineDict[rawId];
             }
 
             if (fullDetail) {
@@ -15549,21 +15570,19 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
         โปรดเลือกหน้าที่ของคุณก่อนเข้าห้อง เพื่อเปิดใช้งานหน้าจอและเครื่องมือที่ถูกต้อง
       </p>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 1rem;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
         <!-- Examinee Card -->
-        <div onclick="confirmLobbyRole('examinee')" style="cursor: pointer; border: 2px solid var(--border); border-radius: var(--radius-md); padding: 1.15rem 0.85rem; background: var(--bg); transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.35rem;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
-          <span style="font-size: 2.2rem; line-height: 1;">✍️</span>
-          <strong style="font-size: 1rem; color: var(--text-primary);">ผู้เข้าสอบ</strong>
-          <span style="font-size: 0.76rem; color: var(--text-muted);">(Participant)</span>
-          <button type="button" class="btn btn-primary" style="margin-top: 0.5rem; width: 100%; font-size: 0.84rem; padding: 0.4rem;">เลือกเป็นคนสอบ</button>
+        <div onclick="confirmLobbyRole('examinee')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')confirmLobbyRole('examinee')" style="cursor: pointer; border: 2px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem 1rem; background: var(--bg); transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem; box-shadow: var(--shadow-sm); aspect-ratio: 1 / 1;" onmouseover="this.style.borderColor='var(--primary)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='var(--border)'; this.style.transform='none';">
+          <span style="font-size: 2.6rem; line-height: 1;">✍️</span>
+          <div style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-top: 0.2rem;">ผู้เข้าสอบ (Participant)</div>
+          <span style="font-size: 0.76rem; color: var(--text-muted); text-align: center;">ลงมือทำหัตถการ / ตอบคำถาม</span>
         </div>
 
         <!-- Examiner Card -->
-        <div onclick="confirmLobbyRole('examiner')" style="cursor: pointer; border: 2px solid var(--border); border-radius: var(--radius-md); padding: 1.15rem 0.85rem; background: var(--bg); transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.35rem;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
-          <span style="font-size: 2.2rem; line-height: 1;">👨‍⚖️</span>
-          <strong style="font-size: 1rem; color: var(--text-primary);">ผู้ประเมิน</strong>
-          <span style="font-size: 0.76rem; color: var(--text-muted);">(Examiner)</span>
-          <button type="button" class="btn btn-secondary" style="margin-top: 0.5rem; width: 100%; font-size: 0.84rem; padding: 0.4rem; border-color: var(--primary); color: var(--primary);">เลือกเป็นคนประเมิน</button>
+        <div onclick="confirmLobbyRole('examiner')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')confirmLobbyRole('examiner')" style="cursor: pointer; border: 2px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem 1rem; background: var(--bg); transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem; box-shadow: var(--shadow-sm); aspect-ratio: 1 / 1;" onmouseover="this.style.borderColor='var(--primary)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='var(--border)'; this.style.transform='none';">
+          <span style="font-size: 2.6rem; line-height: 1;">👨‍⚖️</span>
+          <div style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-top: 0.2rem;">ผู้ประเมิน (Examiner)</div>
+          <span style="font-size: 0.76rem; color: var(--text-muted); text-align: center;">ตรวจประเมินตาม Checklist & Rubric</span>
         </div>
       </div>
 

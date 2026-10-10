@@ -240,25 +240,6 @@ const COMPOUNDING_VIDEOS = [
     ]
   },
   {
-    "id": "T11-1",
-    "domain": "Product",
-    "majorGroup": "หมวด 1: เทคนิคพื้นฐานสำคัญในการเตรียมยา",
-    "dosageForm": "การกรอง & พับกระดาษกรอง",
-    "title": "11. การกรองของเหลว",
-    "chapter": "เทคนิคที่ 11-1",
-    "url": "https://drive.google.com/file/d/1-SDjp1L9XtiUyJ7zH-wdB3CO42qJmXH_/view?usp=sharing",
-    "type": "drive",
-    "videoId": "",
-    "driveId": "1-SDjp1L9XtiUyJ7zH-wdB3CO42qJmXH_",
-    "faculty": "ภาควิชาวิทยาการเภสัชกรรมและเภสัชอุตสาหกรรม คณะเภสัชศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย",
-    "tags": [
-      "การกรอง & พับกระดาษกรอง",
-      "Product",
-      "Compounding",
-      "OSPE"
-    ]
-  },
-  {
     "id": "T11-2",
     "domain": "Product",
     "majorGroup": "หมวด 1: เทคนิคพื้นฐานสำคัญในการเตรียมยา",
