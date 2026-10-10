@@ -12038,6 +12038,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
               });
 
               let itemsHtml = '';
+              let parentCounter = 0;
               for (const [gName, gItems] of groupMap.entries()) {
                 // วิเคราะห์ parent/rubric structure ภายในกลุ่มหมวดหมู่นี้
                 // ก้อนย่อยที่มี parent ตามด้วย subsets
@@ -12111,6 +12112,8 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
                 // เรนเดอร์แต่ละบล็อก
                 rubricBlocks.forEach(block => {
+                  parentCounter++;
+                  const displayParentNum = parentCounter;
                   const pItem = block.parent.item;
                   const pIdx = block.parent.cIdx;
                   const pScoreNum = parseFloat(pItem.score !== undefined ? pItem.score : 1.0) || 0;
@@ -12177,7 +12180,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
                   itemsHtml += `
                     <div class="results-checklist-item-wrap" style="${pBorder} ${pBg}">
                       <div class="results-checklist-text">
-                        <strong style="margin-right: 4px;">${pIcon} ข้อ ${pIdx + 1}:</strong> ${pText}
+                        <strong style="margin-right: 4px;">${pIcon} ข้อ ${displayParentNum}:</strong> ${pText}
                       </div>
                       <div style="flex-shrink: 0;">
                         ${pBadge}
@@ -12219,7 +12222,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
                     itemsHtml += `
                       <div class="results-checklist-item-wrap" style="${cStyle}">
                         <div class="results-checklist-text">
-                          <strong style="margin-right: 4px;">${cIcon} ↳ ${pIdx + 1}.${childIdx + 1}:</strong> ${cText}
+                          <strong style="margin-right: 4px;">${cIcon} ↳ ${displayParentNum}.${childIdx + 1}:</strong> ${cText}
                         </div>
                         <div style="flex-shrink: 0;">
                           ${cBadge}
@@ -12598,6 +12601,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
           });
 
           let itemsReportHtml = '';
+          let parentReportCounter = 0;
           for (const [gName, gItems] of groupMap.entries()) {
             const rubricBlocks = [];
             let curBlock = null;
@@ -12667,6 +12671,8 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
             `;
 
             rubricBlocks.forEach(block => {
+              parentReportCounter++;
+              const displayParentNum = parentReportCounter;
               const pItem = block.parent.item;
               const pIdx = block.parent.cIdx;
               const pScoreNum = parseFloat(pItem.score !== undefined ? pItem.score : 1.0) || 0;
@@ -12732,7 +12738,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
               itemsReportHtml += `
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 3px 6px; margin-bottom: 2px; font-size: 8pt; ${pBorder} ${pBg}">
-                  <div style="flex: 1;"><strong>${pIcon} ข้อ ${pIdx + 1}:</strong> ${pText}</div>
+                  <div style="flex: 1;"><strong>${pIcon} ข้อ ${displayParentNum}:</strong> ${pText}</div>
                   <div style="flex-shrink: 0;">${pBadge}</div>
                 </div>
               `;
@@ -12770,7 +12776,7 @@ ${caseContext || '(ยังไม่มีข้อมูลเคส)'}
 
                 itemsReportHtml += `
                   <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 2px 6px; margin-bottom: 2px; font-size: 7.5pt; ${cStyle}">
-                    <div style="flex: 1;"><strong>${cIcon} ↳ ${pIdx + 1}.${childIdx + 1}:</strong> ${cText}</div>
+                    <div style="flex: 1;"><strong>${cIcon} ↳ ${displayParentNum}.${childIdx + 1}:</strong> ${cText}</div>
                     <div style="flex-shrink: 0;">${cBadge}</div>
                   </div>
                 `;
